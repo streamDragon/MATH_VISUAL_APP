@@ -1,9 +1,9 @@
-/* script.js - גרסה מתוקנת (נגזרות, נורמל, ציר Y) */
+/* script.js - גרסה סופית עם זום ומספרים דינמיים */
 
-/* --- שאלות ברירת מחדל --- */
+/* --- שאלות --- */
 const defaultQuestions = [
     { cat: "חקירה", t: "מינימום", d: "מצאו את נקודת המינימום.", p: [0, 1, -4, 4], goal: 'm0' },
-    { cat: "חקירה", t: "חיתוך ציר Y", d: "מצאו את נקודת החיתוך עם ציר ה-Y.", p: [0, 1, -2, -3], goal: 'x0' } // הוספתי דוגמה לחיתוך Y
+    { cat: "חקירה", t: "חיתוך ציר Y", d: "מצאו את נקודת החיתוך עם ציר ה-Y.", p: [0, 1, -2, -3], goal: 'x0' }
 ];
 
 let questions = [];
@@ -12,7 +12,9 @@ else questions = defaultQuestions;
 
 /* --- משתנים --- */
 let cvs, ctx, W, H, mainArea;
-let scale = 45, ox, oy;
+let baseScale = 45;
+let scale = 45; // משתנה זום
+let ox, oy;
 let px = 0, cf = [0,1,0,0], goal = '';
 let isDrag = false;
 let audioCtx = null, isMuted = true, lastClickTime = 0;
@@ -35,7 +37,28 @@ window.onload = () => {
     loadQ(0);
 };
 
-/* --- סאונד (ללא שינוי) --- */
+/* --- מערכת זום --- */
+function zoomIn() {
+    scale *= 1.2;
+    if(scale > 150) scale = 150;
+    draw();
+}
+
+function zoomOut() {
+    scale /= 1.2;
+    if(scale < 10) scale = 10;
+    draw();
+}
+
+function resetZoom() {
+    scale = baseScale;
+    // איפוס מיקום צירים למרכז
+    ox = W/2; 
+    oy = H/2 + H*0.1;
+    draw();
+}
+
+/* --- סאונד --- */
 function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
 function toggleMute() { initAudio(); isMuted = !isMuted; document.getElementById('btnSound').innerText = isMuted ? "🔇" : "🔊"; if(!isMuted) playUiClick(); }
 function playUiClick() { if(isMuted || !audioCtx) return; let o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.type='sine'; o.frequency.setValueAtTime(800, audioCtx.currentTime); g.gain.setValueAtTime(0.1, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+0.1); o.start(); o.stop(audioCtx.currentTime+0.1); }
@@ -55,9 +78,7 @@ function move(e) {
     let rect = cvs.getBoundingClientRect();
     px = (e.clientX - rect.left - ox) / scale;
     if(px < -10) px = -10; if(px > 10) px = 10;
-    // מגנט לאפס אם קרוב (עוזר לחיתוך ציר Y)
     if(Math.abs(px) < 0.1) px = 0;
-    
     document.getElementById('mainX').value = px;
     update();
 }
@@ -75,27 +96,21 @@ function update() {
 function calculateDistance(y, m) {
     if(!goal) return 100;
     let q = questions[document.getElementById('qSelect').value];
-    
-    if(goal === 'm0') return Math.abs(m); // קיצון
-    if(goal === 'y0') return Math.abs(y); // חיתוך ציר X (שורש)
-    if(goal === 'x0') return Math.abs(px); // חיתוך ציר Y (חדש!)
+    if(goal === 'm0') return Math.abs(m); 
+    if(goal === 'y0') return Math.abs(y); 
+    if(goal === 'x0') return Math.abs(px); 
     if(goal === 'm1') return Math.abs(m - 1);
     if(goal === 'slope_val') return Math.abs(m - q.targetVal);
     
-    // משיק עובר דרך נקודה
     if(goal === 'tan_pass') {
         let t = q.target; 
         let predictedY = m * (t[0] - px) + y;
         return Math.abs(predictedY - t[1]) / 5;
     }
-    // נורמל עובר דרך נקודה
     if(goal === 'norm_pass') {
         let t = q.target;
-        // חישוב מרחק הנורמל מהנקודה
-        // משוואת נורמל: Y - y0 = (-1/m)(X - x0)
-        let nm = (Math.abs(m) < 0.001) ? 1000 : -1/m; // מניעת חלוקה באפס
+        let nm = (Math.abs(m) < 0.001) ? 1000 : -1/m;
         let val = (t[1] - y) - nm * (t[0] - px);
-        // אם השיפוע 0, הנורמל הוא אנך (x=const)
         if(Math.abs(m) < 0.001) return Math.abs(px - t[0]);
         return Math.abs(val) / 10;
     }
@@ -104,8 +119,7 @@ function calculateDistance(y, m) {
 
 function checkWin(dist) {
     let win = dist < 0.15;
-    if(goal === 'x0' && Math.abs(px) < 0.05) win = true; // רגישות מיוחדת לציר Y
-    
+    if(goal === 'x0' && Math.abs(px) < 0.05) win = true;
     let badge = document.getElementById('successBanner');
     if(win && !badge.classList.contains('show')) {
         playWinSound();
@@ -122,13 +136,14 @@ function draw() {
     // רשת
     ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=ox%scale; x<W; x+=scale) { ctx.moveTo(x,0); ctx.lineTo(x,H); }
+    for(let x=ox%scale; x>0; x-=scale) { ctx.moveTo(x,0); ctx.lineTo(x,H); } // גם לצד השני
     for(let y=oy%scale; y<H; y+=scale) { ctx.moveTo(0,y); ctx.lineTo(W,y); }
+    for(let y=oy%scale; y>0; y-=scale) { ctx.moveTo(0,y); ctx.lineTo(W,y); }
     ctx.stroke();
     
     ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 2; ctx.beginPath();
     ctx.moveTo(0,oy); ctx.lineTo(W,oy); ctx.moveTo(ox,0); ctx.lineTo(ox,H); ctx.stroke();
     
-    // ציור נקודת מטרה חיצונית
     let q = questions[document.getElementById('qSelect').value];
     if(q && q.target) {
         let tx = ox + q.target[0] * scale;
@@ -139,44 +154,35 @@ function draw() {
         ctx.beginPath(); ctx.fillStyle = "#ef4444";
         ctx.arc(tx, ty, 5, 0, Math.PI*2); ctx.fill();
         
-        // כיתוב ברור וגדול לנקודה החיצונית
         ctx.fillStyle = "#b91c1c"; 
         ctx.font = "bold 16px Consolas, monospace";
         ctx.fillText(`(${q.target[0]}, ${q.target[1]})`, tx + 12, ty - 12);
     }
 
-    // גרף הפונקציה
     ctx.strokeStyle = "#2563eb"; ctx.lineWidth = 4; ctx.beginPath();
     let sx = -ox/scale, ex = (W-ox)/scale;
-    for(let x=sx; x<=ex; x+=0.05) {
+    // רזולוציה גבוהה יותר בציור (0.02) למניעת שבירה בזום
+    for(let x=sx; x<=ex; x+=0.02) {
         let cx=ox+x*scale, cy=oy-f(x)*scale;
         if(x===sx) ctx.moveTo(cx,cy); else ctx.lineTo(cx,cy);
     }
     ctx.stroke();
     
-    // חישובים לנקודה הנוכחית
     let cx=ox+px*scale, cy=oy-f(px)*scale, m=df(px);
     let yVal = f(px);
     
-    // ציור משיק / נורמל
     if(goal === 'norm_pass') {
-        // מצב נורמל - קו סגול
         ctx.strokeStyle="#a855f7"; ctx.lineWidth=2; ctx.setLineDash([5,5]); ctx.beginPath();
         let nm = (Math.abs(m) < 0.001) ? 1000 : -1/m;
-        if(Math.abs(nm) > 500) { // קו אנכי
-             ctx.moveTo(cx, 0); ctx.lineTo(cx, H);
-        } else {
-             ctx.moveTo(cx-1000, cy+1000*nm); ctx.lineTo(cx+1000, cy-1000*nm);
-        }
+        if(Math.abs(nm) > 500) { ctx.moveTo(cx, 0); ctx.lineTo(cx, H); }
+        else { ctx.moveTo(cx-1000, cy+1000*nm); ctx.lineTo(cx+1000, cy-1000*nm); }
         ctx.stroke(); ctx.setLineDash([]);
     } else {
-        // מצב משיק רגיל - קו כתום
         ctx.strokeStyle="#f97316"; ctx.lineWidth=2; ctx.beginPath();
         ctx.moveTo(cx-1000, cy+1000*m); ctx.lineTo(cx+1000, cy-1000*m);
         ctx.stroke();
     }
     
-    // נקודה על הגרף
     ctx.fillStyle="#2563eb"; ctx.beginPath(); ctx.arc(cx,cy,8,0,6.28); ctx.fill();
     ctx.strokeStyle="white"; ctx.lineWidth=2; ctx.stroke();
 
@@ -184,12 +190,13 @@ function draw() {
 }
 
 function drawDataBox(cx, cy, x, y, m) {
-    let boxW = 180, boxH = 110;
-    let bx = cx + 20, by = cy - 120;
+    let boxW = 190, boxH = 120;
+    let bx = cx + 20, by = cy - 130;
+    
+    // מניעת יציאה מהמסך
     if (bx + boxW > W) bx = cx - boxW - 20;
     if (by < 10) by = cy + 20;
 
-    // רקע לקופסה
     ctx.save();
     ctx.shadowColor = "rgba(0,0,0,0.15)"; ctx.shadowBlur = 10;
     ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
@@ -197,27 +204,28 @@ function drawDataBox(cx, cy, x, y, m) {
     ctx.beginPath(); ctx.rect(bx, by, boxW, boxH);
     ctx.fill(); ctx.stroke(); ctx.restore();
 
-    // טקסטים בקופסה
-    ctx.font = "14px Consolas, monospace"; ctx.textAlign = "left"; 
+    ctx.font = "15px Consolas, monospace"; ctx.textAlign = "left"; 
     let pad = bx + 15, ty = by + 25;
     
-    ctx.fillStyle = "#334155"; ctx.fillText(`x    : ${x.toFixed(2)}`, pad, ty);
-    ctx.fillStyle = "#2563eb"; ctx.fillText(`f(x) : ${y.toFixed(2)}`, pad, ty+20);
-    ctx.fillStyle = "#ea580c"; ctx.fillText(`f'(x): ${m.toFixed(2)}`, pad, ty+40);
+    // הצגת המספרים בצורה ברורה
+    ctx.fillStyle = "#334155"; 
+    ctx.fillText(`x     = ${x.toFixed(2)}`, pad, ty);
+    
+    ctx.fillStyle = "#2563eb"; 
+    ctx.fillText(`f(x)  = ${y.toFixed(2)}`, pad, ty+25);
+    
+    ctx.fillStyle = "#ea580c"; 
+    ctx.fillText(`f'(x) = ${m.toFixed(2)}`, pad, ty+50);
 
-    // קו הפרדה
-    ctx.beginPath(); ctx.moveTo(pad, ty+50); ctx.lineTo(bx+boxW-15, ty+50);
+    ctx.beginPath(); ctx.moveTo(pad, ty+65); ctx.lineTo(bx+boxW-15, ty+65);
     ctx.strokeStyle="#e2e8f0"; ctx.stroke();
 
-    // משוואת הישר (משיק או נורמל)
     let displayM = m;
-    let title = "Tangent";
     let color = "#334155";
 
     if (goal === 'norm_pass') {
-        title = "Normal";
-        color = "#a855f7"; // סגול לנורמל
-        if (Math.abs(m) < 0.001) displayM = null; // אנכי
+        color = "#a855f7";
+        if (Math.abs(m) < 0.001) displayM = null;
         else displayM = -1/m;
     }
 
@@ -230,11 +238,11 @@ function drawDataBox(cx, cy, x, y, m) {
         eqStr = `y = ${displayM.toFixed(2)}x ${sign} ${Math.abs(b).toFixed(2)}`;
     }
 
-    ctx.font = "bold 13px sans-serif"; ctx.fillStyle = color;
-    ctx.fillText(eqStr, pad, ty+70);
+    ctx.font = "bold 14px sans-serif"; ctx.fillStyle = color;
+    ctx.fillText(eqStr, pad, ty+85);
 }
 
-/* --- ניהול תפריט ועדכון טקסטים --- */
+/* --- תפריט --- */
 function initMenu() {
     let s = document.getElementById('qSelect'); s.innerHTML = "";
     let cats = {};
@@ -249,15 +257,14 @@ function loadQ(i) {
     let q = questions[i];
     cf = [...q.p]; goal = q.goal;
     document.getElementById('qText').innerText = q.d;
-    
     ['mA','mB','mC','mD'].forEach((id,k)=> { 
         let el = document.getElementById(id);
         let valSpan = document.getElementById(id.replace('m', 'val'));
         if(el) { el.value = cf[k]; if(valSpan) valSpan.innerText = cf[k]; }
     });
-    
     px = -2; document.getElementById('mainX').value=px;
     document.getElementById('successBanner').classList.remove('show');
+    resetZoom(); // איפוס זום בכל שאלה
     updateEqText();
     update();
 }
@@ -274,26 +281,17 @@ function manual() {
     update();
 }
 
-// עדכון טקסט הפונקציה והנגזרת למעלה
 function updateEqText() {
-    // 1. הפונקציה
     let txt = `y = ${cf[0]?cf[0]+"x³ ":""}${cf[1]?cf[1]+"x² ":""}${cf[2]?cf[2]+"x ":""}${cf[3]||""}`;
     txt = txt.replace(/\+ -/g, "- ").replace(/ 1x/g," x").replace(/ 0x./g,"");
     if(txt.endsWith("= ")) txt += "0";
     if(txt === "y = ") txt = "y = 0";
     document.getElementById('eqn').innerText = txt;
 
-    // 2. הנגזרת (חישוב המקדמים לנגזרת)
-    let da = 3 * cf[0];
-    let db = 2 * cf[1];
-    let dc = cf[2];
-
+    let da = 3 * cf[0]; let db = 2 * cf[1]; let dc = cf[2];
     let dTxt = `f'(x) = ${da?da+"x² ":""}${db?db+"x ":""}${dc||""}`;
     dTxt = dTxt.replace(/\+ -/g, "- ").replace(/ 1x/g," x").replace(/ 0x./g,"");
     if (dTxt.endsWith("= ")) dTxt += "0";
-    
-    // ניקוי מקרים של נגזרת ריקה
     if (da===0 && db===0 && dc===0) dTxt = "f'(x) = 0";
-    
     document.getElementById('derivEqn').innerText = dTxt;
 }
