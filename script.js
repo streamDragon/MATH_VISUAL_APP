@@ -1,4 +1,4 @@
-/* script.js - גרסה משופרת: נתונים עם '=', באנר עליון, ומאגר שאלות מורחב */
+/* script.js - גרסה סופית עם 'המשולש הקדוש', מד התקדמות ושאלות מורחבות */
 
 /* --- מאגר שאלות מורחב --- */
 const bagrutData = [
@@ -18,7 +18,7 @@ let questions = bagrutData;
 let cvs, ctx, W, H, mainArea;
 let baseScale = 45, scale = 45;
 let ox, oy, px = 0, cf = [0,1,0,0], goal = '';
-let isDrag = false, audioCtx = null, isMuted = true, lastClickTime = 0;
+let isDrag = false, audioCtx = null, isMuted = true;
 
 window.onload = () => {
     cvs = document.getElementById('cvs');
@@ -54,7 +54,7 @@ function resize() {
 function f(x) { return cf[0]*x**3 + cf[1]*x**2 + cf[2]*x + cf[3]; }
 function df(x) { return 3*cf[0]*x**2 + 2*cf[1]*x + cf[2]; }
 
-/* --- טיפול באירועים --- */
+/* --- אינטראקציה --- */
 function start(e) { isDrag = true; initAudio(); move(e); }
 function end() { isDrag = false; }
 function move(e) {
@@ -67,16 +67,21 @@ function move(e) {
     update();
 }
 
+function updateFromSlider() { if(!isDrag) { px = parseFloat(document.getElementById('mainX').value); update(); } }
+
 function update() {
     let y = f(px), m = df(px);
     let dist = calculateDistance(y, m);
+    updateProximityBar(dist); // עדכון מד חם/קר
     checkWin(dist);
     draw();
 }
 
+/* חישוב מרחק והתקדמות */
 function calculateDistance(y, m) {
     if(!goal) return 100;
     let q = questions[document.getElementById('qSelect').value];
+    
     if(goal === 'm0') return Math.abs(m); 
     if(goal === 'y0') return Math.abs(y); 
     if(goal === 'x0') return Math.abs(px); 
@@ -91,6 +96,16 @@ function calculateDistance(y, m) {
         return Math.abs(val);
     }
     return 100;
+}
+
+function updateProximityBar(dist) {
+    let bar = document.getElementById('proximityBar');
+    // המרת המרחק לאחוזים (0 עד 100). ככל שהמרחק קטן (קרוב ל-0), האחוז גבוה.
+    let percentage = Math.max(0, Math.min(100, (1 - dist / 5) * 100));
+    
+    if (dist < 0.15) percentage = 100; // ניצחון = מלא
+    
+    bar.style.width = percentage + "%";
 }
 
 function checkWin(dist) {
@@ -119,7 +134,7 @@ function draw() {
     ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 2; ctx.beginPath();
     ctx.moveTo(0,oy); ctx.lineTo(W,oy); ctx.moveTo(ox,0); ctx.lineTo(ox,H); ctx.stroke();
     
-    // ציור הפונקציה
+    // ציור פונקציה
     ctx.strokeStyle = "#2563eb"; ctx.lineWidth = 4; ctx.beginPath();
     for(let x=( -ox/scale ); x<=( (W-ox)/scale ); x+=0.02) {
         let cx=ox+x*scale, cy=oy-f(x)*scale;
@@ -141,41 +156,56 @@ function draw() {
         ctx.moveTo(cx-1000, cy+1000*m); ctx.lineTo(cx+1000, cy-1000*m); ctx.stroke();
     }
     
-    // הנקודה עצמה
+    // הנקודה
     ctx.fillStyle="#2563eb"; ctx.beginPath(); ctx.arc(cx,cy,8,0,7); ctx.fill();
     ctx.strokeStyle="white"; ctx.stroke();
 
     drawDataBox(cx, cy, px, f(px), m);
 }
 
-/* התיקון שחיפשת - תצוגת נתונים עם '=' */
+/* ציור 'המשולש הקדוש' עם כותרת */
 function drawDataBox(cx, cy, x, y, m) {
-    let boxW = 180, boxH = 110;
-    let bx = cx + 20, by = cy - 120;
+    let boxW = 200, boxH = 140; // הוגדל קצת בשביל הכותרת
+    let bx = cx + 20, by = cy - 150;
     if (bx + boxW > W) bx = cx - boxW - 20;
     if (by < 10) by = cy + 20;
 
     ctx.save();
     ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
     ctx.shadowBlur = 10; ctx.shadowColor = "rgba(0,0,0,0.1)";
-    ctx.beginPath(); ctx.roundRect(bx, by, boxW, boxH, 10); ctx.fill();
-    ctx.strokeStyle = "#cbd5e1"; ctx.stroke();
+    ctx.beginPath(); ctx.roundRect(bx, by, boxW, boxH, 12); ctx.fill();
+    ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 1; ctx.stroke();
     ctx.restore();
 
-    ctx.font = "bold 14px Consolas, monospace"; ctx.textAlign = "left";
-    ctx.fillStyle = "#334155";
-    ctx.fillText(`x     = ${x.toFixed(2)}`, bx+15, by+25);
-    ctx.fillStyle = "#2563eb";
-    ctx.fillText(`f(x)  = ${y.toFixed(2)}`, bx+15, by+50);
-    ctx.fillStyle = "#ea580c";
-    ctx.fillText(`f'(x) = ${m.toFixed(2)}`, bx+15, by+75);
+    // כותרת המשולש הקדוש
+    ctx.font = "bold 14px 'Rubik', sans-serif"; ctx.textAlign = "center";
+    ctx.fillStyle = "#64748b";
+    ctx.fillText("✨ המשולש הקדוש ✨", bx + boxW/2, by + 20);
     
-    ctx.font = "11px sans-serif"; ctx.fillStyle = "#94a3b8";
+    // קו הפרדה
+    ctx.beginPath(); ctx.moveTo(bx+10, by+28); ctx.lineTo(bx+boxW-10, by+28);
+    ctx.strokeStyle = "#e2e8f0"; ctx.stroke();
+
+    // נתונים
+    ctx.font = "bold 15px Consolas, monospace"; ctx.textAlign = "left";
+    let pad = bx + 20, ty = by + 50;
+    
+    ctx.fillStyle = "#334155";
+    ctx.fillText(`x     = ${x.toFixed(2)}`, pad, ty);
+    ctx.fillStyle = "#2563eb";
+    ctx.fillText(`f(x)  = ${y.toFixed(2)}`, pad, ty+25);
+    ctx.fillStyle = "#ea580c";
+    ctx.fillText(`f'(x) = ${m.toFixed(2)}`, pad, ty+50);
+    
+    // משוואת משיק למטה
+    ctx.font = "12px sans-serif"; ctx.fillStyle = "#94a3b8";
     let b = y - m*x;
-    ctx.fillText(`Tang: y=${m.toFixed(1)}x${b>=0?'+':''}${b.toFixed(1)}`, bx+15, by+95);
+    let eqStr = `y = ${m.toFixed(1)}x ${b>=0?'+':''}${b.toFixed(1)}`;
+    if(Math.abs(m) < 0.01) eqStr = `y = ${y.toFixed(1)}`; // ישר אופקי
+    ctx.fillText(eqStr, pad, ty+75);
 }
 
-/* --- ניהול שאלות ותפריטים --- */
+/* --- ניהול --- */
 function initMenu() {
     let s = document.getElementById('qSelect');
     questions.forEach((q, i) => {
@@ -189,6 +219,8 @@ function loadQ(i) {
     let q = questions[i];
     cf = [...q.p]; goal = q.goal;
     document.getElementById('qText').innerText = q.d;
+    document.getElementById('qCounter').innerText = `שאלה ${parseInt(i)+1} / ${questions.length}`;
+    
     ['mA','mB','mC','mD'].forEach((id,k)=> {
         document.getElementById(id).value = cf[k];
         document.getElementById(id.replace('m','val')).innerText = cf[k];
