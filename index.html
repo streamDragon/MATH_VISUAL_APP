@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>חקר פונקציות ומשיקים</title>
+    <title>מעבדה לחקירת פונקציות</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
@@ -18,52 +18,56 @@
                 <button class="btn-nav" onclick="nextQuestion()">הבא &larr;</button>
             </div>
         </div>
-        <div id="qText" class="instruction-box">טוען שאלה...</div>
-        <div id="eqn" class="equation-display">y = ...</div>
+        
+        <div id="qText" class="instruction-box">טוען...</div>
+        
+        <div class="math-display-row">
+            <div id="eqn" class="equation-display">y = ...</div>
+            <div class="separator">|</div>
+            <div id="derivEqn" class="equation-display deriv">f'(x) = ...</div>
+        </div>
     </header>
 
     <main id="mainArea">
         <canvas id="cvs"></canvas>
         
         <div class="formula-overlay">
-            <div class="formula-row"><strong>הגדרות יסוד:</strong></div>
-            <div class="formula-row"><span>ערך הפונקציה:</span> <span class="math">f(x) = y</span></div>
-            <div class="formula-row"><span>שיפוע המשיק:</span> <span class="math">f'(x) = m</span></div>
-            <div class="formula-row" style="margin-top:5px; border-top:1px solid #ccc; padding-top:2px;">
-                <strong>משוואת המשיק:</strong>
-            </div>
-            <div class="formula-row"><span class="math">y - y₁ = m(x - x₁)</span></div>
+            <div class="formula-title">📚 נוסחאות עזר</div>
+            <div class="formula-row"><span>פונקציה:</span> <span class="math">f(x) = y</span></div>
+            <div class="formula-row"><span>שיפוע:</span> <span class="math">f'(x) = m</span></div>
+            <div class="formula-row"><span>משיק:</span> <span class="math">y-y₁=m(x-x₁)</span></div>
+            <div class="formula-row"><span>נורמל:</span> <span class="math">m₂ = -1/m₁</span></div>
         </div>
 
-        <div id="successBanner">🎉 כל הכבוד! פיצחתם את האתגר 🎉</div>
+        <div id="successBanner">🎉 כל הכבוד! 🎉</div>
     </main>
 
     <footer>
         <div class="slider-container main-x-row">
-            <span class="lbl">הזיזו את ה-X:</span>
+            <span class="lbl">הזזת ה-X:</span>
             <input type="range" id="mainX" min="-10" max="10" step="0.01" oninput="updateFromSlider()">
         </div>
         
         <div class="function-editor">
-            <div class="editor-title">שינוי הפונקציה (משוך את הזחלנים)</div>
+            <div class="editor-title">עריכת פונקציה (משוך את הזחלנים)</div>
             <div class="coef-control-panel">
                 <div class="coef-group">
-                    <label>a (מקדם x³)</label>
+                    <label>a (x³)</label>
                     <input type="range" id="mA" min="-5" max="5" step="0.1" oninput="manual()">
                     <span id="valA" class="val-display">0</span>
                 </div>
                 <div class="coef-group">
-                    <label>b (מקדם x²)</label>
+                    <label>b (x²)</label>
                     <input type="range" id="mB" min="-5" max="5" step="0.1" oninput="manual()">
                     <span id="valB" class="val-display">0</span>
                 </div>
                 <div class="coef-group">
-                    <label>c (מקדם x)</label>
+                    <label>c (x)</label>
                     <input type="range" id="mC" min="-10" max="10" step="0.5" oninput="manual()">
                     <span id="valC" class="val-display">0</span>
                 </div>
                 <div class="coef-group">
-                    <label>d (מספר חופשי)</label>
+                    <label>d (חופשי)</label>
                     <input type="range" id="mD" min="-10" max="10" step="0.5" oninput="manual()">
                     <span id="valD" class="val-display">0</span>
                 </div>
