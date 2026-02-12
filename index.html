@@ -8,25 +8,23 @@
 </head>
 <body>
 
-<div class="app-layout">
+<div class="app-container">
     
-    <header class="header-section">
-        <div class="top-row">
-            <select id="qSelect" onchange="loadQuestionFromSelect()"></select>
-            <button class="btn-next" onclick="nextQuestion()">הבא &larr;</button>
-        </div>
-
-        <div class="instruction-box">
-            <span id="qIcon">🎯</span>
-            <span id="qText">טוען...</span>
-        </div>
+    <header>
+        <select id="qSelect" onchange="loadQuestionFromSelect()"></select>
+        <button class="btn-nav" onclick="nextQuestion()">הבא &larr;</button>
     </header>
 
-    <main class="canvas-wrapper" id="cWrap">
+    <main id="mainArea">
+        <div class="overlay-info">
+            <div class="eq-text" id="eqn">y = ...</div>
+            <div class="instr-text">
+                <span id="qIcon">🎯</span> <span id="qText">טוען...</span>
+            </div>
+        </div>
+
         <div id="successBanner" class="success-badge">✨ הצלחה! ✨</div>
 
-        <div class="equation-display" id="eqn">y = ...</div>
-        
         <canvas id="cvs"></canvas>
 
         <div class="hud">
@@ -35,21 +33,22 @@
             <div>m: <b id="hM">0</b></div>
         </div>
 
-        <div class="fab-controls">
-            <button onclick="resetView()">⟲</button>
+        <div class="zoom-bar">
             <button onclick="changeZoom(1.1)">+</button>
             <button onclick="changeZoom(0.9)">-</button>
+            <button onclick="resetView()">⟲</button>
         </div>
     </main>
 
-    <footer class="footer-section">
-        <div class="slider-container">
+    <footer>
+        <div class="slider-row">
+            <span class="lbl">X</span>
             <input type="range" id="mainX" min="-10" max="10" step="0.01" oninput="updateFromSlider()">
         </div>
         
         <details>
-            <summary>מקדמים (a, b, c)</summary>
-            <div class="inputs-row">
+            <summary>⚙️ עריכה ידנית (a,b,c)</summary>
+            <div class="manual-edit">
                 <input type="number" id="mA" placeholder="x³" oninput="manual()">
                 <input type="number" id="mB" placeholder="x²" oninput="manual()">
                 <input type="number" id="mC" placeholder="x" oninput="manual()">
