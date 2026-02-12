@@ -1,192 +1,97 @@
-/* --- נתונים --- */
+/* נתונים */
 const questions = [
-    { cat: "⭐ התחלה", t: "מינימום", d: "הזיזו את הנקודה הכחולה לתחתית העמק.", p: [0, 1, -4, 4], goal: 'm0' },
-    { cat: "⭐ התחלה", t: "חיתוך X", d: "מצאו איפה הקו הכחול חוצה את הקו האפור (גובה 0).", p: [0, 1, -2, -3], goal: 'y0' },
-    { cat: "📈 שיפוע", t: "שיפוע 2", d: "חפשו עליה חדה בגרף (שיפוע = 2).", p: [0, 0.5, 0, -2], goal: 'm2' },
-    { cat: "📈 שיפוע", t: "משיק שטוח", d: "מצאו נקודה שבה המשיק הכתום מאוזן לגמרי.", p: [0.3, 0, -3, 0], goal: 'm0' },
-    { cat: "🧠 אתגר", t: "נורמל לראשית", d: "כוון שהקו הסגול (האנך) יעבור בנקודה 0,0.", p: [0, 1, 0, 2], goal: 'normal0' }
+    { cat: "התחלה", t: "מינימום", d: "מצאו את הנקודה הכי נמוכה בעמק.", p: [0, 1, -4, 0], goal: 'm0' },
+    { cat: "התחלה", t: "חיתוך X", d: "איפה הגרף חותך את ציר ה-X?", p: [0, 0.5, -2, -2], goal: 'y0' },
+    { cat: "שיפוע", t: "שיפוע 1", d: "מצאו שיפוע של 45 מעלות (m=1).", p: [0, 0.2, 0, 0], goal: 'm1' },
+    { cat: "שיפוע", t: "שיפוע 0", d: "מצאו נקודה שבה המשיק אופקי.", p: [0.3, 0, -3, 0], goal: 'm0' },
+    { cat: "מתקדם", t: "נורמל לראשית", d: "כוון שהאנך (סגול) יעבור ב-0,0.", p: [0, 1, 0, 1], goal: 'normal0' }
 ];
 
-/* --- משתנים --- */
 let cvs, ctx, W, H, wrapper;
-let scale = 40; // זום ברירת מחדל
-let ox, oy;
-let px = 0;
-let cf = [0, 1, 0, 0];
-let curGoal = '';
-let isDragging = false;
-let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let scale = 40, ox, oy;
+let px = 0, cf = [0,1,0,0], goal = '';
+let isDrag = false;
 
-/* --- אתחול --- */
-window.onload = function() {
+window.onload = () => {
     cvs = document.getElementById('cvs');
     ctx = cvs.getContext('2d');
     wrapper = document.getElementById('cWrap');
-
-    initSelect();
     
-    // ניהול גודל ורספונסיביות
+    // ניהול גודל
     window.addEventListener('resize', resize);
-    resize(); // קריאה ראשונית
     
-    // אירועי מגע ועכבר
-    cvs.addEventListener('mousedown', startDrag);
-    window.addEventListener('mousemove', doDrag);
-    window.addEventListener('mouseup', endDrag);
-    
-    cvs.addEventListener('touchstart', (e) => startDrag(e.touches[0]), {passive: false});
-    cvs.addEventListener('touchmove', (e) => doDrag(e.touches[0]), {passive: false});
-    cvs.addEventListener('touchend', endDrag);
+    // אירועי מגע
+    cvs.addEventListener('touchstart', e => start(e.touches[0]), {passive: false});
+    cvs.addEventListener('touchmove', e => move(e.touches[0]), {passive: false});
+    cvs.addEventListener('touchend', end);
+    cvs.addEventListener('mousedown', start);
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', end);
 
-    loadQuestion(0);
+    initMenu();
+    resize();
+    loadQ(0);
 };
 
-/* --- ליבה --- */
 function resize() {
-    // לוקח את הגודל האמיתי של הקונטיינר הגמיש
+    // לוקח גודל מדויק מהאלמנט העוטף
     W = cvs.width = wrapper.clientWidth;
     H = cvs.height = wrapper.clientHeight;
-    
-    ox = W / 2;
-    oy = H / 2 + (H * 0.1); // קצת מתחת לאמצע
+    ox = W/2; 
+    oy = H/2 + H*0.1;
     draw();
 }
 
+/* לוגיקה מתמטית */
 function f(x) { return cf[0]*x**3 + cf[1]*x**2 + cf[2]*x + cf[3]; }
 function df(x) { return 3*cf[0]*x**2 + 2*cf[1]*x + cf[2]; }
 
 function updateFromSlider() {
-    if(!isDragging) {
+    if(!isDrag) {
         px = parseFloat(document.getElementById('mainX').value);
-        updateUI();
+        update();
     }
 }
 
-function startDrag(e) { isDragging = true; doDrag(e); }
-function endDrag() { isDragging = false; }
-function doDrag(e) {
-    if (!isDragging) return;
+function start(e) { isDrag = true; move(e); }
+function end() { isDrag = false; }
+function move(e) {
+    if(!isDrag) return;
     if(e.preventDefault) e.preventDefault();
-    
     let rect = cvs.getBoundingClientRect();
-    // חישוב מיקום עכבר ביחס לקנבס
-    let x = (e.clientX - rect.left - ox) / scale;
-    px = x;
+    px = (e.clientX - rect.left - ox) / scale;
     
-    // עדכון סליידר רק אם בטווח
+    // עדכון סליידר
     let sld = document.getElementById('mainX');
     if(px >= sld.min && px <= sld.max) sld.value = px;
     
-    updateUI();
+    update();
 }
 
-function changeZoom(factor) {
-    scale *= factor;
-    scale = Math.max(10, Math.min(200, scale)); // גבולות זום
+function update() {
+    let y = f(px), m = df(px);
+    document.getElementById('hX').innerText = px.toFixed(1);
+    document.getElementById('hY').innerText = y.toFixed(1);
+    document.getElementById('hM').innerText = m.toFixed(1);
+    
+    checkWin(y, m);
     draw();
 }
 
-/* --- ממשק --- */
-function initSelect() {
-    let s = document.getElementById('qSelect');
-    let cats = {};
-    questions.forEach((q, i) => {
-        if(!cats[q.cat]) cats[q.cat] = [];
-        cats[q.cat].push({i, t: q.t});
-    });
+function checkWin(y, m) {
+    if(!goal) return;
+    let d = 99;
+    if(goal==='m0') d=Math.abs(m);
+    else if(goal==='m1') d=Math.abs(m-1);
+    else if(goal==='y0') d=Math.abs(y);
+    else if(goal==='normal0') d=Math.abs(px + m*y);
     
-    for(let c in cats) {
-        let g = document.createElement('optgroup'); g.label = c;
-        cats[c].forEach(o => {
-            let op = document.createElement('option');
-            op.value = o.i; op.innerText = o.t;
-            g.appendChild(op);
-        });
-        s.appendChild(g);
-    }
+    let badge = document.getElementById('successBanner');
+    if(d < 0.1) badge.classList.add('show');
+    else badge.classList.remove('show');
 }
 
-function loadQuestionFromSelect() {
-    loadQuestion(document.getElementById('qSelect').value);
-}
-function nextQuestion() {
-    let s = document.getElementById('qSelect');
-    let idx = parseInt(s.value) + 1;
-    if(idx < questions.length) {
-        s.value = idx;
-        loadQuestion(idx);
-    }
-}
-
-function loadQuestion(idx) {
-    let q = questions[idx];
-    cf = [...q.p];
-    curGoal = q.goal;
-    
-    document.getElementById('qTitle').innerText = q.cat + ": " + q.t;
-    document.getElementById('qDesc').innerText = q.d;
-    document.getElementById('win').classList.remove('show');
-    
-    // איפוס סליידרים ידניים
-    ['mA','mB','mC','mD'].forEach((id, i) => document.getElementById(id).value = cf[i] || 0);
-
-    px = (curGoal === 'x0') ? -3 : 2; 
-    document.getElementById('mainX').value = px;
-    
-    updateUI();
-}
-
-function manual() {
-    cf = [
-        parseFloat(document.getElementById('mA').value)||0,
-        parseFloat(document.getElementById('mB').value)||0,
-        parseFloat(document.getElementById('mC').value)||0,
-        parseFloat(document.getElementById('mD').value)||0
-    ];
-    curGoal = '';
-    document.getElementById('qTitle').innerText = "עריכה חופשית";
-    renderEquation();
-    draw();
-}
-
-function updateUI() {
-    document.getElementById('hX').innerText = px.toFixed(2);
-    document.getElementById('hY').innerText = f(px).toFixed(2);
-    document.getElementById('hM').innerText = df(px).toFixed(2);
-    
-    checkWin();
-    renderEquation();
-    draw();
-}
-
-function renderEquation() {
-    // בניית מחרוזת פונקציה יפה
-    const term = (v, x) => v===0?"": (v>0?" + ":" - ") + (Math.abs(v)===1 && x?"":Math.abs(v)) + x;
-    let s = (term(cf[0],"x³") + term(cf[1],"x²") + term(cf[2],"x") + term(cf[3],"")).trim();
-    if(s.startsWith("+")) s = s.substring(1);
-    document.getElementById('eqn').innerText = "y = " + (s || "0");
-}
-
-function checkWin() {
-    if(!curGoal) return;
-    let y = f(px), m = df(px), d = 99;
-    
-    if(curGoal === 'm0') d = Math.abs(m);
-    else if(curGoal === 'm2') d = Math.abs(m-2);
-    else if(curGoal === 'y0') d = Math.abs(y);
-    else if(curGoal === 'normal0') d = Math.abs(px + m*y);
-    
-    let fb = document.getElementById('prox');
-    if(d < 0.1) {
-        document.getElementById('win').classList.add('show');
-        fb.style.opacity = 0;
-    } else {
-        fb.style.opacity = (d<2)?1:0;
-        fb.innerText = d<0.5 ? "קרוב מאוד! 🔥" : "מתקרב...";
-    }
-}
-
-/* --- ציור --- */
+/* ציור */
 function draw() {
     ctx.clearRect(0,0,W,H);
     
@@ -203,38 +108,75 @@ function draw() {
     ctx.stroke();
     
     // פונקציה
-    ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 3; ctx.beginPath();
-    let startX = -ox/scale, endX = (W-ox)/scale;
-    for(let x=startX; x<=endX; x+=0.05) {
-        let cx = ox + x*scale, cy = oy - f(x)*scale;
-        if(x===startX) ctx.moveTo(cx,cy); else ctx.lineTo(cx,cy);
+    ctx.strokeStyle = "#2563eb"; ctx.lineWidth = 3; ctx.beginPath();
+    let sx = -ox/scale, ex = (W-ox)/scale;
+    for(let x=sx; x<=ex; x+=0.05) {
+        let cx=ox+x*scale, cy=oy-f(x)*scale;
+        if(x===sx) ctx.moveTo(cx,cy); else ctx.lineTo(cx,cy);
     }
     ctx.stroke();
     
-    // משיק ונקודה
-    let cx = ox + px*scale, cy = oy - f(px)*scale;
-    let m = df(px);
-    ctx.strokeStyle = "#f97316"; ctx.lineWidth = 2; ctx.beginPath(); // משיק כתום
-    ctx.moveTo(cx - 1000, cy + 1000*m); ctx.lineTo(cx + 1000, cy - 1000*m);
+    // משיק
+    let cx=ox+px*scale, cy=oy-f(px)*scale, m=df(px);
+    ctx.strokeStyle="#f97316"; ctx.lineWidth=2; ctx.beginPath();
+    ctx.moveTo(cx-1000, cy+1000*m); ctx.lineTo(cx+1000, cy-1000*m);
     ctx.stroke();
-    
-    // אנך (אם צריך)
-    if(curGoal === 'normal0') {
-        ctx.strokeStyle = "#a855f7"; ctx.setLineDash([5,5]); ctx.beginPath();
-        let nm = -1/m;
-        ctx.moveTo(cx - 1000, cy + 1000*nm); ctx.lineTo(cx + 1000, cy - 1000*nm);
-        ctx.stroke();
-        ctx.setLineDash([]);
-    }
 
-    // נקודה כחולה
-    ctx.fillStyle = "#2563eb"; ctx.beginPath(); 
-    ctx.arc(cx, cy, 8, 0, Math.PI*2); 
-    ctx.fill(); ctx.stroke();
+    if(goal==='normal0') { // אנך
+        ctx.strokeStyle="#a855f7"; ctx.setLineDash([5,5]); ctx.beginPath();
+        let nm = -1/m;
+        ctx.moveTo(cx-1000, cy+1000*nm); ctx.lineTo(cx+1000, cy-1000*nm);
+        ctx.stroke(); ctx.setLineDash([]);
+    }
+    
+    // נקודה
+    ctx.fillStyle="#2563eb"; ctx.beginPath(); ctx.arc(cx,cy,8,0,6.28); ctx.fill();
+    ctx.fillStyle="white"; ctx.beginPath(); ctx.arc(cx,cy,3,0,6.28); ctx.fill();
 }
 
-function toggleSound() {
-    // פונקציית סאונד פשוטה
-    let btn = document.getElementById('soundBtn');
-    btn.innerText = btn.innerText === '🔊' ? '🔇' : '🔊';
+/* ניהול */
+function changeZoom(v) { scale *= v; scale=Math.max(10, Math.min(150, scale)); draw(); }
+function resetView() { scale=40; ox=W/2; oy=H/2+H*0.1; draw(); }
+
+function initMenu() {
+    let s = document.getElementById('qSelect');
+    let cats = {};
+    questions.forEach((q,i) => {
+        if(!cats[q.cat]) cats[q.cat]=[];
+        cats[q.cat].push({i, t:q.t});
+    });
+    for(let c in cats) {
+        let g = document.createElement('optgroup'); g.label=c;
+        cats[c].forEach(o=>{
+            let op=document.createElement('option');
+            op.value=o.i; op.innerText=o.t;
+            g.appendChild(op);
+        });
+        s.appendChild(g);
+    }
+}
+function loadQuestionFromSelect() { loadQ(document.getElementById('qSelect').value); }
+function nextQuestion() {
+    let s = document.getElementById('qSelect');
+    let i = parseInt(s.value) + 1;
+    if(i < questions.length) { s.value = i; loadQ(i); }
+}
+function loadQ(i) {
+    let q = questions[i];
+    cf = [...q.p]; goal = q.goal;
+    document.getElementById('qText').innerText = q.t + " - " + q.d;
+    ['mA','mB','mC','mD'].forEach((id,k)=>document.getElementById(id).value=cf[k]);
+    px = (goal==='x0')?-3:2;
+    document.getElementById('mainX').value=px;
+    
+    // רענון משוואה
+    let txt = `y = ${cf[0]?cf[0]+"x³ ":""}${cf[1]?cf[1]+"x² ":""}${cf[2]?cf[2]+"x ":""}${cf[3]||""}`;
+    document.getElementById('eqn').innerText = txt.replace(/ 0/g,"").replace(/ 1x/g," x");
+    
+    update();
+}
+function manual() {
+    cf = ['mA','mB','mC','mD'].map(id=>parseFloat(document.getElementById(id).value)||0);
+    goal=''; document.getElementById('qText').innerText="חופשי";
+    update();
 }
