@@ -2,6 +2,7 @@
     --primary: #2563eb;
     --bg: #f8fafc;
     --text: #1e293b;
+    --danger: #ef4444;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -10,89 +11,93 @@ body {
     margin: 0; padding: 0;
     font-family: system-ui, -apple-system, sans-serif;
     background: var(--bg);
-    overflow: hidden; /* מונע גלילה כפולה */
+    overflow-y: auto; /* מאפשר גלילה במקום למעוך */
 }
 
 .app-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;       /* תופס גובה מלא */
-    min-height: 500px;   /* התיקון החשוב: גובה מינימלי שלא ימעך בטלפון */
-    width: 100%;
+    /* גובה מינימלי חזק - מונע קריסה בגוגל סייטס */
+    min-height: 600px; 
+    height: 100vh;
 }
 
 /* --- Header --- */
 header {
     flex: 0 0 auto;
-    padding: 10px;
+    padding: 12px;
     background: white;
     border-bottom: 1px solid #cbd5e1;
-    display: flex; gap: 8px;
+    display: flex; gap: 10px;
     z-index: 10;
 }
-select { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #94a3b8; font-size: 16px; background: white;}
-.btn-nav { background: var(--primary); color: white; border: none; padding: 0 16px; border-radius: 8px; font-weight: bold; }
+select { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #94a3b8; font-size: 16px; background: white;}
+.btn-nav { background: var(--primary); color: white; border: none; padding: 0 16px; border-radius: 6px; font-weight: bold; font-size: 14px;}
 
-/* --- Main (Graph) --- */
+/* --- Main --- */
 main {
-    flex: 1 1 auto;      /* גדל למלא מקום */
-    position: relative;  /* כדי למקם דברים מעל */
+    flex: 1; 
+    position: relative;
     background: white;
     overflow: hidden;
-    min-height: 300px;   /* קריטי: הגרף לא ירד מגובה זה! */
+    /* הגרף עצמו שומר על גובה */
+    min-height: 400px; 
 }
 
 canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
 
-/* טקסטים על הגרף */
+/* שכבות מידע */
 .overlay-info {
-    position: absolute; top: 10px; width: 100%; text-align: center; pointer-events: none;
+    position: absolute; top: 15px; width: 100%; text-align: center; pointer-events: none;
 }
-.eq-text { font-size: 24px; font-weight: 800; color: var(--text); text-shadow: 0 0 5px white; margin-bottom: 4px; }
-.instr-text { display: inline-block; background: rgba(255,247,237, 0.95); border: 1px solid #fdba74; padding: 4px 12px; border-radius: 20px; font-size: 14px; color: #9a3412; }
+.eq-text { font-size: 26px; font-weight: 800; color: var(--text); text-shadow: 0 0 8px white; margin-bottom: 8px; }
+.instr-text { display: inline-block; background: rgba(255,255,255, 0.95); border: 1px solid #cbd5e1; padding: 6px 16px; border-radius: 20px; font-size: 15px; color: #475569; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-/* בועת הצלחה */
+/* חותמת הצלחה */
 .success-badge {
-    position: absolute; top: 80px; left: 50%; transform: translateX(-50%) scale(0);
-    background: #22c55e; color: white; padding: 8px 24px; border-radius: 50px;
-    font-weight: bold; font-size: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    position: absolute; top: 100px; left: 50%; transform: translateX(-50%) scale(0);
+    background: #22c55e; color: white; padding: 10px 30px; border-radius: 50px;
+    font-weight: bold; font-size: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     pointer-events: none; z-index: 20;
 }
 .success-badge.show { transform: translateX(-50%) scale(1); }
 
-/* נתונים טכניים בצד */
-.hud {
-    position: absolute; top: 10px; left: 10px;
-    font-size: 11px; font-family: monospace;
-    background: rgba(255,255,255,0.8); padding: 5px; border-radius: 4px;
-    pointer-events: none;
-}
-
 /* כפתורי זום */
 .zoom-bar {
-    position: absolute; bottom: 15px; left: 15px;
-    display: flex; flex-direction: column; gap: 8px;
+    position: absolute; bottom: 20px; left: 20px;
+    display: flex; flex-direction: column; gap: 10px;
 }
 .zoom-bar button {
-    width: 40px; height: 40px; border-radius: 50%;
+    width: 44px; height: 44px; border-radius: 50%;
     background: white; border: 1px solid #cbd5e1;
-    font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    font-size: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    color: #475569; cursor: pointer;
 }
 
 /* --- Footer --- */
 footer {
     flex: 0 0 auto;
-    padding: 12px;
+    padding: 15px;
     background: #f1f5f9;
     border-top: 1px solid #cbd5e1;
     z-index: 10;
+    display: flex; flex-direction: column; gap: 12px;
 }
-.slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
-.lbl { font-weight: bold; }
-input[type=range] { flex: 1; height: 40px; }
 
-details { margin-top: 5px; }
-summary { font-size: 12px; color: #64748b; text-align: center; padding: 5px; }
-.manual-edit { display: flex; gap: 5px; }
-.manual-edit input { flex: 1; padding: 5px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px; }
+.slider-container { display: flex; align-items: center; gap: 12px; height: 40px; }
+.lbl { font-weight: bold; font-size: 18px; width: 20px; text-align: center; }
+input[type=range] { flex: 1; height: 100%; cursor: pointer; accent-color: var(--primary); }
+
+/* עריכה ידנית */
+.manual-edit-row {
+    display: flex; align-items: center; gap: 8px;
+    background: white; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;
+}
+.edit-icon { font-size: 18px; color: #94a3b8; }
+.manual-edit-row input {
+    flex: 1; min-width: 0; padding: 8px 4px; text-align: center;
+    border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px;
+    -moz-appearance: textfield; 
+}
+.manual-edit-row input:focus { outline: 2px solid var(--primary); border-color: transparent; }
