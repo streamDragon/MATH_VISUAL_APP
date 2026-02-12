@@ -1,6 +1,6 @@
-/* script.js - גרסה סופית: ויזואליזציה + סאונד חם/קר + סינתיסייזר */
+/* script.js - גרסה סופית ומהודקת */
 
-/* --- הגדרות שאלות (ברירת מחדל + מיזוג) --- */
+/* --- הגדרות שאלות --- */
 const defaultQuestions = [
     { cat: "תרגול בסיסי", t: "חימום: מינימום", d: "מצאו את תחתית העמק (מינימום).", p: [0, 1, -4, 4], goal: 'm0' },
     { cat: "תרגול בסיסי", t: "חיתוך צירים", d: "מצאו את נקודת החיתוך עם ציר ה-X הימני.", p: [0, 0.5, 0, -2], goal: 'y0' }
@@ -16,11 +16,10 @@ let scale = 45, ox, oy;
 let px = 0, cf = [0,1,0,0], goal = '';
 let isDrag = false;
 
-/* --- מערכת סאונד (Audio Context) --- */
+/* --- אודיו --- */
 let audioCtx = null;
 let isMuted = true;
-let osc = null; // אוסילטור לצליל רציף
-let lastClickTime = 0; // תזמון קליקים של חם/קר
+let lastClickTime = 0;
 
 window.onload = () => {
     cvs = document.getElementById('cvs');
@@ -29,7 +28,7 @@ window.onload = () => {
     
     window.addEventListener('resize', resize);
     
-    // אירועי מגע/עכבר
+    // אירועי מגע ועכבר (תומך מובייל)
     cvs.addEventListener('touchstart', e => start(e.touches[0]), {passive: false});
     cvs.addEventListener('touchmove', e => move(e.touches[0]), {passive: false});
     cvs.addEventListener('touchend', end);
@@ -42,7 +41,7 @@ window.onload = () => {
     loadQ(0);
 };
 
-/* --- ניהול סאונד --- */
+/* --- מערכת סאונד --- */
 function initAudio() {
     if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -53,17 +52,13 @@ function initAudio() {
 }
 
 function toggleMute() {
+    initAudio(); // חובה לחיצה ראשונה כדי להפעיל סאונד בטלפון
     isMuted = !isMuted;
     let btn = document.getElementById('btnSound');
     btn.innerText = isMuted ? "🔇" : "🔊";
-    
-    if (!isMuted) {
-        initAudio();
-        playUiClick();
-    }
+    if(!isMuted) playUiClick();
 }
 
-// צליל "קליק" לממשק
 function playUiClick() {
     if(isMuted || !audioCtx) return;
     let o = audioCtx.createOscillator();
@@ -77,12 +72,10 @@ function playUiClick() {
     o.start(); o.stop(audioCtx.currentTime + 0.1);
 }
 
-// צליל ניצחון (ארפג'יו עולה)
 function playWinSound() {
     if(isMuted || !audioCtx) return;
     let now = audioCtx.currentTime;
-    let notes = [523.25, 659.25, 783.99, 1046.50]; // C Major
-    
+    let notes = [523.25, 659.25, 783.99, 1046.50]; 
     notes.forEach((freq, i) => {
         let o = audioCtx.createOscillator();
         let g = audioCtx.createGain();
@@ -92,45 +85,35 @@ function playWinSound() {
         g.gain.setValueAtTime(0, now + i*0.1);
         g.gain.linearRampToValueAtTime(0.1, now + i*0.1 + 0.05);
         g.gain.exponentialRampToValueAtTime(0.001, now + i*0.1 + 0.4);
-        o.start(now + i*0.1);
-        o.stop(now + i*0.1 + 0.5);
+        o.start(now + i*0.1); o.stop(now + i*0.1 + 0.5);
     });
 }
 
-// מנגנון חם/קר (Geiger Counter Effect)
 function updateHotColdSound(distance) {
     if(isMuted || !audioCtx || !isDrag) return;
-    
-    // אם רחוק מדי - שקט
     if(distance > 8) return;
-
-    // ככל שהמרחק קטן, המרווח בין הקליקים קטן
-    // מיפוי: מרחק 5 -> 500ms, מרחק 0.1 -> 50ms
-    let interval = Math.max(50, distance * 100); 
     
+    let interval = Math.max(60, distance * 120); 
     let now = Date.now();
+    
     if(now - lastClickTime > interval) {
-        // יצירת קליק קצר
         let o = audioCtx.createOscillator();
         let g = audioCtx.createGain();
         o.connect(g); g.connect(audioCtx.destination);
         
-        // ככל שקרובים יותר, הצליל גם נהיה גבוה יותר טיפה
         let pitch = 600 - (distance * 50); 
         o.type = 'square';
         o.frequency.value = pitch;
         
-        g.gain.setValueAtTime(0.05, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+        g.gain.setValueAtTime(0.03, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
         
-        o.start();
-        o.stop(audioCtx.currentTime + 0.05);
-        
+        o.start(); o.stop(audioCtx.currentTime + 0.04);
         lastClickTime = now;
     }
 }
 
-/* --- לוגיקה גרפית ומתמטית --- */
+/* --- לוגיקה --- */
 function resize() {
     W = cvs.width = mainArea.clientWidth;
     H = cvs.height = mainArea.clientHeight;
@@ -143,7 +126,7 @@ function df(x) { return 3*cf[0]*x**2 + 2*cf[1]*x + cf[2]; }
 
 function start(e) { 
     isDrag = true; 
-    initAudio(); // הפעלת סאונד באינטראקציה ראשונה
+    initAudio(); // וידוא נוסף להפעלת אודיו במובייל
     move(e); 
 }
 function end() { isDrag = false; }
@@ -168,15 +151,11 @@ function updateFromSlider() {
 function update() {
     let y = f(px), m = df(px);
     let dist = calculateDistance(y, m);
-    
-    // הפעלת סאונד חם/קר
     updateHotColdSound(dist);
-    
     checkWin(dist);
     draw();
 }
 
-// פונקציית עזר לחישוב המרחק מהפתרון (עבור הסאונד)
 function calculateDistance(y, m) {
     if(!goal) return 100;
     let q = questions[document.getElementById('qSelect').value];
@@ -189,7 +168,7 @@ function calculateDistance(y, m) {
     if(goal === 'tan_pass') {
         let t = q.target; 
         let predictedY = m * (t[0] - px) + y;
-        return Math.abs(predictedY - t[1]) / 5; // נרמול כדי שהסאונד יהיה הגיוני
+        return Math.abs(predictedY - t[1]) / 5;
     }
     if(goal === 'norm_pass') {
         let t = q.target;
@@ -200,16 +179,10 @@ function calculateDistance(y, m) {
 }
 
 function checkWin(dist) {
-    // סף הניצחון הוא מרחק קטן מ-0.2
-    // שיפרתי כאן את הלוגיקה שתהיה אחידה לכל הסוגים
     let win = dist < 0.2; 
-    
-    // תיקון מיוחד למשיק ונורמל שדורשים דיוק אחר
     if(goal.includes('pass')) win = dist < 0.15;
 
     let badge = document.getElementById('successBanner');
-    
-    // זיהוי רגע הזכייה כדי לנגן סאונד פעם אחת
     if(win && !badge.classList.contains('show')) {
         playWinSound();
         badge.classList.add('show');
@@ -218,11 +191,11 @@ function checkWin(dist) {
     }
 }
 
-/* --- ציור --- */
+/* --- ציור וויזואליזציה --- */
 function draw() {
     ctx.clearRect(0,0,W,H);
     
-    // רשת וצירים
+    // רשת
     ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=ox%scale; x<W; x+=scale) { ctx.moveTo(x,0); ctx.lineTo(x,H); }
     for(let y=oy%scale; y<H; y+=scale) { ctx.moveTo(0,y); ctx.lineTo(W,y); }
@@ -231,17 +204,21 @@ function draw() {
     ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 2; ctx.beginPath();
     ctx.moveTo(0,oy); ctx.lineTo(W,oy); ctx.moveTo(ox,0); ctx.lineTo(ox,H); ctx.stroke();
     
-    // נקודת מטרה
+    // ציור נקודת מטרה חיצונית + כיתוב הקואורדינטות
     let q = questions[document.getElementById('qSelect').value];
     if(q && q.target) {
         let tx = ox + q.target[0] * scale;
         let ty = oy - q.target[1] * scale;
+        
         ctx.beginPath(); ctx.fillStyle = "rgba(239, 68, 68, 0.2)";
         ctx.arc(tx, ty, 15, 0, Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.fillStyle = "#ef4444";
         ctx.arc(tx, ty, 5, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = "#ef4444"; ctx.font = "bold 12px sans-serif";
-        ctx.fillText("מטרה", tx + 10, ty);
+        
+        // כיתוב ליד הנקודה החיצונית
+        ctx.fillStyle = "#ef4444"; 
+        ctx.font = "bold 13px Consolas, monospace";
+        ctx.fillText(`(${q.target[0]}, ${q.target[1]})`, tx + 10, ty - 10);
     }
 
     // הפונקציה
@@ -253,7 +230,7 @@ function draw() {
     }
     ctx.stroke();
     
-    // משיק ונקודה
+    // משיק
     let cx=ox+px*scale, cy=oy-f(px)*scale, m=df(px);
     let yVal = f(px);
     
@@ -261,6 +238,7 @@ function draw() {
     ctx.moveTo(cx-1000, cy+1000*m); ctx.lineTo(cx+1000, cy-1000*m);
     ctx.stroke();
 
+    // נורמל
     if(q && q.goal === 'norm_pass') { 
         ctx.strokeStyle="#a855f7"; ctx.setLineDash([5,5]); ctx.beginPath();
         let nm = -1/m;
@@ -269,15 +247,17 @@ function draw() {
         ctx.stroke(); ctx.setLineDash([]);
     }
     
+    // הנקודה על הגרף
     ctx.fillStyle="#2563eb"; ctx.beginPath(); ctx.arc(cx,cy,8,0,6.28); ctx.fill();
     ctx.strokeStyle="white"; ctx.lineWidth=2; ctx.stroke();
 
     drawDataBox(cx, cy, px, yVal, m);
 }
 
+// קופסת המידע עם הכיתובים החדשים f(x)
 function drawDataBox(cx, cy, x, y, m) {
     let b = y - (m * x);
-    let boxWidth = 140, boxHeight = 90;
+    let boxWidth = 160, boxHeight = 90; // הרחבתי קצת
     let bx = cx + 20, by = cy - 100;
     
     if (bx + boxWidth > W) bx = cx - boxWidth - 20;
@@ -294,10 +274,11 @@ function drawDataBox(cx, cy, x, y, m) {
     ctx.font = "14px Consolas, monospace"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
     let startY = by + 20, pad = bx + 15;
 
-    ctx.fillStyle = "#475569"; ctx.fillText(`x : ${x.toFixed(2)}`, pad, startY);
-    ctx.fillStyle = "#2563eb"; ctx.fillText(`y : ${y.toFixed(2)}`, pad, startY + 20);
+    // כיתובים חדשים
+    ctx.fillStyle = "#475569"; ctx.fillText(`x     : ${x.toFixed(2)}`, pad, startY);
+    ctx.fillStyle = "#2563eb"; ctx.fillText(`f(x)  : ${y.toFixed(2)}`, pad, startY + 20);
     ctx.font = "bold 14px Consolas, monospace";
-    ctx.fillStyle = "#ea580c"; ctx.fillText(`m : ${m.toFixed(2)}`, pad, startY + 40);
+    ctx.fillStyle = "#ea580c"; ctx.fillText(`f'(x)=m: ${m.toFixed(2)}`, pad, startY + 40);
 
     ctx.beginPath(); ctx.moveTo(pad, startY + 56); ctx.lineTo(bx + boxWidth - 15, startY + 56);
     ctx.strokeStyle = "#cbd5e1"; ctx.lineWidth = 1; ctx.stroke();
@@ -308,7 +289,7 @@ function drawDataBox(cx, cy, x, y, m) {
     ctx.fillText(eqStr, pad, startY + 76);
 }
 
-/* --- ממשק --- */
+/* --- ניהול תפריטים --- */
 function initMenu() {
     let s = document.getElementById('qSelect');
     s.innerHTML = "";
@@ -335,25 +316,46 @@ function nextQuestion() {
     let i = parseInt(s.value) + 1;
     if(i < questions.length) { s.value = i; loadQ(i); }
 }
+
+// טעינת שאלה ועדכון סליידרים
 function loadQ(i) {
     let q = questions[i];
     cf = [...q.p]; goal = q.goal;
     document.getElementById('qText').innerText = q.d;
-    ['mA','mB','mC','mD'].forEach((id,k)=> { let el=document.getElementById(id); if(el) el.value=cf[k]; });
     
-    px = -3; 
-    document.getElementById('mainX').value=px;
+    ['mA','mB','mC','mD'].forEach((id,k)=> { 
+        let el = document.getElementById(id);
+        let valSpan = document.getElementById(id.replace('m', 'val'));
+        if(el) {
+            el.value = cf[k];
+            if(valSpan) valSpan.innerText = cf[k];
+        }
+    });
+    
+    px = -2; document.getElementById('mainX').value=px;
     document.getElementById('successBanner').classList.remove('show');
-    
+    updateEqText();
+    update();
+}
+
+function manual() {
+    cf = ['mA','mB','mC','mD'].map(id => {
+        let el = document.getElementById(id);
+        let val = parseFloat(el.value) || 0;
+        let valSpan = document.getElementById(id.replace('m', 'val'));
+        if(valSpan) valSpan.innerText = val;
+        return val;
+    });
+
+    goal=''; document.getElementById('qText').innerText="מצב חופשי - חקירה עצמאית";
+    updateEqText();
+    update();
+}
+
+function updateEqText() {
     let txt = `y = ${cf[0]?cf[0]+"x³ ":""}${cf[1]?cf[1]+"x² ":""}${cf[2]?cf[2]+"x ":""}${cf[3]||""}`;
     txt = txt.replace(/\+ -/g, "- ").replace(/ 1x/g," x").replace(/ 0x./g,"");
     if(txt.endsWith("= ")) txt += "0";
+    if(txt === "y = ") txt = "y = 0";
     document.getElementById('eqn').innerText = txt;
-    
-    update();
-}
-function manual() {
-    cf = ['mA','mB','mC','mD'].map(id=>parseFloat(document.getElementById(id).value)||0);
-    goal=''; document.getElementById('qText').innerText="מצב חופשי";
-    update();
 }
