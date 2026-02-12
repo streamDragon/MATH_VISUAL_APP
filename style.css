@@ -1,7 +1,7 @@
 :root {
     --primary: #2563eb;
     --bg: #f8fafc;
-    --success: #22c55e;
+    --text: #1e293b;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -9,95 +9,90 @@
 body {
     margin: 0; padding: 0;
     font-family: system-ui, -apple-system, sans-serif;
-    background: #e2e8f0;
-    /* נועל את המסך בדיוק לגודל החלון - קריטי למובייל */
-    position: fixed;
-    inset: 0;
-    overflow: hidden;
+    background: var(--bg);
+    overflow: hidden; /* מונע גלילה כפולה */
 }
 
-.app-layout {
+.app-container {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: 100vh;       /* תופס גובה מלא */
+    min-height: 500px;   /* התיקון החשוב: גובה מינימלי שלא ימעך בטלפון */
     width: 100%;
-    background: white;
 }
 
 /* --- Header --- */
-.header-section {
-    padding: 8px;
+header {
+    flex: 0 0 auto;
+    padding: 10px;
     background: white;
     border-bottom: 1px solid #cbd5e1;
-    flex-shrink: 0;
+    display: flex; gap: 8px;
+    z-index: 10;
 }
+select { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #94a3b8; font-size: 16px; background: white;}
+.btn-nav { background: var(--primary); color: white; border: none; padding: 0 16px; border-radius: 8px; font-weight: bold; }
 
-.top-row { display: flex; gap: 8px; margin-bottom: 5px; height: 36px; }
-select { flex: 1; border-radius: 6px; border: 1px solid #94a3b8; font-size: 16px; background: #fff; }
-.btn-next { background: var(--primary); color: white; border: none; padding: 0 12px; border-radius: 6px; font-weight: bold; }
-
-.instruction-box {
-    background: #fff7ed; border: 1px solid #fdba74;
-    padding: 8px; border-radius: 6px;
-    display: flex; align-items: center; gap: 8px;
-    font-size: 14px; color: #7c2d12;
-}
-
-/* --- Canvas (החלק הגמיש) --- */
-.canvas-wrapper {
-    flex-grow: 1; /* תופס את כל שאר המקום */
-    position: relative;
-    background: #fff;
+/* --- Main (Graph) --- */
+main {
+    flex: 1 1 auto;      /* גדל למלא מקום */
+    position: relative;  /* כדי למקם דברים מעל */
+    background: white;
     overflow: hidden;
-    cursor: crosshair;
-}
-canvas { display: block; width: 100%; height: 100%; }
-
-.equation-display {
-    position: absolute; top: 10px; width: 100%; text-align: center;
-    font-weight: bold; color: #1e293b; font-size: 18px; pointer-events: none;
-    text-shadow: 0 0 5px white;
+    min-height: 300px;   /* קריטי: הגרף לא ירד מגובה זה! */
 }
 
-.hud {
-    position: absolute; top: 5px; left: 5px;
-    font-size: 11px; font-family: monospace;
-    background: rgba(255,255,255,0.8); padding: 4px; border-radius: 4px;
-    pointer-events: none;
-}
+canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
 
-/* חותמת הצלחה (במקום חלון קופץ) */
+/* טקסטים על הגרף */
+.overlay-info {
+    position: absolute; top: 10px; width: 100%; text-align: center; pointer-events: none;
+}
+.eq-text { font-size: 24px; font-weight: 800; color: var(--text); text-shadow: 0 0 5px white; margin-bottom: 4px; }
+.instr-text { display: inline-block; background: rgba(255,247,237, 0.95); border: 1px solid #fdba74; padding: 4px 12px; border-radius: 20px; font-size: 14px; color: #9a3412; }
+
+/* בועת הצלחה */
 .success-badge {
-    position: absolute; top: 40px; left: 50%; transform: translateX(-50%) scale(0);
-    background: var(--success); color: white;
-    padding: 5px 20px; border-radius: 20px;
-    font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    pointer-events: none; z-index: 10;
+    position: absolute; top: 80px; left: 50%; transform: translateX(-50%) scale(0);
+    background: #22c55e; color: white; padding: 8px 24px; border-radius: 50px;
+    font-weight: bold; font-size: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none; z-index: 20;
 }
 .success-badge.show { transform: translateX(-50%) scale(1); }
 
-/* כפתורי צד (זום) */
-.fab-controls {
-    position: absolute; bottom: 15px; right: 15px;
+/* נתונים טכניים בצד */
+.hud {
+    position: absolute; top: 10px; left: 10px;
+    font-size: 11px; font-family: monospace;
+    background: rgba(255,255,255,0.8); padding: 5px; border-radius: 4px;
+    pointer-events: none;
+}
+
+/* כפתורי זום */
+.zoom-bar {
+    position: absolute; bottom: 15px; left: 15px;
     display: flex; flex-direction: column; gap: 8px;
 }
-.fab-controls button {
+.zoom-bar button {
     width: 40px; height: 40px; border-radius: 50%;
     background: white; border: 1px solid #cbd5e1;
-    font-size: 20px; color: #333;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 /* --- Footer --- */
-.footer-section {
-    padding: 10px;
+footer {
+    flex: 0 0 auto;
+    padding: 12px;
     background: #f1f5f9;
     border-top: 1px solid #cbd5e1;
-    flex-shrink: 0;
+    z-index: 10;
 }
-.slider-container input { width: 100%; height: 40px; margin: 0; }
+.slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+.lbl { font-weight: bold; }
+input[type=range] { flex: 1; height: 40px; }
+
 details { margin-top: 5px; }
 summary { font-size: 12px; color: #64748b; text-align: center; padding: 5px; }
-.inputs-row { display: flex; gap: 5px; }
-.inputs-row input { flex: 1; padding: 5px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px; }
+.manual-edit { display: flex; gap: 5px; }
+.manual-edit input { flex: 1; padding: 5px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px; }
