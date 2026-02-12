@@ -1,13 +1,13 @@
-/* נתונים */
+/* נתונים ושאלות */
 const questions = [
-    { cat: "התחלה", t: "מינימום", d: "מצאו את הנקודה הכי נמוכה בעמק.", p: [0, 1, -4, 0], goal: 'm0' },
+    { cat: "התחלה", t: "מינימום", d: "גררו את הנקודה לתחתית העמק.", p: [0, 1, -4, 0], goal: 'm0' },
     { cat: "התחלה", t: "חיתוך X", d: "איפה הגרף חותך את ציר ה-X?", p: [0, 0.5, -2, -2], goal: 'y0' },
-    { cat: "שיפוע", t: "שיפוע 1", d: "מצאו שיפוע של 45 מעלות (m=1).", p: [0, 0.2, 0, 0], goal: 'm1' },
+    { cat: "שיפוע", t: "שיפוע 1", d: "מצאו נקודה שהשיפוע הוא 1 (45°).", p: [0, 0.2, 0, 0], goal: 'm1' },
     { cat: "שיפוע", t: "שיפוע 0", d: "מצאו נקודה שבה המשיק אופקי.", p: [0.3, 0, -3, 0], goal: 'm0' },
-    { cat: "מתקדם", t: "נורמל לראשית", d: "כוון שהאנך (סגול) יעבור ב-0,0.", p: [0, 1, 0, 1], goal: 'normal0' }
+    { cat: "מתקדם", t: "נורמל לראשית", d: "כוון שהאנך (הקו הסגול) יעבור ב-0,0.", p: [0, 1, 0, 1], goal: 'normal0' }
 ];
 
-let cvs, ctx, W, H, wrapper;
+let cvs, ctx, W, H, mainArea;
 let scale = 40, ox, oy;
 let px = 0, cf = [0,1,0,0], goal = '';
 let isDrag = false;
@@ -15,12 +15,12 @@ let isDrag = false;
 window.onload = () => {
     cvs = document.getElementById('cvs');
     ctx = cvs.getContext('2d');
-    wrapper = document.getElementById('cWrap');
+    mainArea = document.getElementById('mainArea');
     
     // ניהול גודל
     window.addEventListener('resize', resize);
     
-    // אירועי מגע
+    // אירועי מגע ועכבר
     cvs.addEventListener('touchstart', e => start(e.touches[0]), {passive: false});
     cvs.addEventListener('touchmove', e => move(e.touches[0]), {passive: false});
     cvs.addEventListener('touchend', end);
@@ -34,9 +34,9 @@ window.onload = () => {
 };
 
 function resize() {
-    // לוקח גודל מדויק מהאלמנט העוטף
-    W = cvs.width = wrapper.clientWidth;
-    H = cvs.height = wrapper.clientHeight;
+    // לוקח גודל מהאלמנט העוטף (mainArea)
+    W = cvs.width = mainArea.clientWidth;
+    H = cvs.height = mainArea.clientHeight;
     ox = W/2; 
     oy = H/2 + H*0.1;
     draw();
@@ -58,12 +58,17 @@ function end() { isDrag = false; }
 function move(e) {
     if(!isDrag) return;
     if(e.preventDefault) e.preventDefault();
+    
     let rect = cvs.getBoundingClientRect();
+    // חישוב מיקום X לפי העכבר/אצבע
     px = (e.clientX - rect.left - ox) / scale;
     
-    // עדכון סליידר
+    // עדכון סליידר שיתאים לגרף
     let sld = document.getElementById('mainX');
-    if(px >= sld.min && px <= sld.max) sld.value = px;
+    // הגבלה לתחום הסליידר
+    if(px < -10) px = -10;
+    if(px > 10) px = 10;
+    sld.value = px;
     
     update();
 }
@@ -87,7 +92,7 @@ function checkWin(y, m) {
     else if(goal==='normal0') d=Math.abs(px + m*y);
     
     let badge = document.getElementById('successBanner');
-    if(d < 0.1) badge.classList.add('show');
+    if(d < 0.15) badge.classList.add('show');
     else badge.classList.remove('show');
 }
 
@@ -110,6 +115,7 @@ function draw() {
     // פונקציה
     ctx.strokeStyle = "#2563eb"; ctx.lineWidth = 3; ctx.beginPath();
     let sx = -ox/scale, ex = (W-ox)/scale;
+    // רזולוציה עדינה לציור חלק
     for(let x=sx; x<=ex; x+=0.05) {
         let cx=ox+x*scale, cy=oy-f(x)*scale;
         if(x===sx) ctx.moveTo(cx,cy); else ctx.lineTo(cx,cy);
@@ -134,12 +140,13 @@ function draw() {
     ctx.fillStyle="white"; ctx.beginPath(); ctx.arc(cx,cy,3,0,6.28); ctx.fill();
 }
 
-/* ניהול */
+/* ניהול ממשק */
 function changeZoom(v) { scale *= v; scale=Math.max(10, Math.min(150, scale)); draw(); }
 function resetView() { scale=40; ox=W/2; oy=H/2+H*0.1; draw(); }
 
 function initMenu() {
     let s = document.getElementById('qSelect');
+    s.innerHTML = ""; // ניקוי
     let cats = {};
     questions.forEach((q,i) => {
         if(!cats[q.cat]) cats[q.cat]=[];
@@ -164,19 +171,25 @@ function nextQuestion() {
 function loadQ(i) {
     let q = questions[i];
     cf = [...q.p]; goal = q.goal;
-    document.getElementById('qText').innerText = q.t + " - " + q.d;
+    document.getElementById('qText').innerText = q.d;
     ['mA','mB','mC','mD'].forEach((id,k)=>document.getElementById(id).value=cf[k]);
-    px = (goal==='x0')?-3:2;
-    document.getElementById('mainX').value=px;
     
-    // רענון משוואה
+    // איפוס מיקום התחלתי
+    px = -3;
+    document.getElementById('mainX').value=px;
+    document.getElementById('successBanner').classList.remove('show');
+    
+    // רענון טקסט משוואה יפה
     let txt = `y = ${cf[0]?cf[0]+"x³ ":""}${cf[1]?cf[1]+"x² ":""}${cf[2]?cf[2]+"x ":""}${cf[3]||""}`;
-    document.getElementById('eqn').innerText = txt.replace(/ 0/g,"").replace(/ 1x/g," x");
+    txt = txt.replace(/\+ -/g, "- ").replace(/ 1x/g," x").replace(/ 0x./g,""); // ניקויים
+    if(txt === "y = ") txt = "y = 0";
+    document.getElementById('eqn').innerText = txt;
     
     update();
 }
 function manual() {
     cf = ['mA','mB','mC','mD'].map(id=>parseFloat(document.getElementById(id).value)||0);
-    goal=''; document.getElementById('qText').innerText="חופשי";
+    goal=''; 
+    document.getElementById('qText').innerText="מצב חופשי";
     update();
 }
