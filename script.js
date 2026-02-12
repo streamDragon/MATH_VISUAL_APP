@@ -1,31 +1,32 @@
-/* script.js - גרסה סופית עם 'המשולש הקדוש', מד התקדמות ושאלות מורחבות */
+/* script.js - לוגיקה, מתמטיקה וגרפיקה */
 
-/* --- מאגר שאלות מורחב --- */
+/* מאגר שאלות מורחב */
 const bagrutData = [
-    { cat: "חקירה", t: "מינימום", d: "מצאו את נקודת המינימום של הפונקציה.", p: [0, 1, -4, 4], goal: 'm0' },
+    { cat: "חקירה", t: "מינימום", d: "מצאו את נקודת המינימום של הפונקציה.", p: [0, 1, -4, 4], goal: 'm0_min' },
     { cat: "חקירה", t: "חיתוך ציר Y", d: "מצאו את נקודת החיתוך עם ציר ה-Y.", p: [0, 1, -2, -3], goal: 'x0' },
-    { cat: "נקודות קיצון", t: "מקסימום מקומי", d: "הביאו את הנקודה הכחולה לנקודת המקסימום.", p: [-1, 0, 12, 0], goal: 'm0' },
-    { cat: "נקודות קיצון", t: "קודקוד פרבולה", d: "מצאו את קודקוד הפרבולה (נקודת המינימום).", p: [0, 1, -6, 5], goal: 'm0' },
+    { cat: "נקודות קיצון", t: "מקסימום מקומי", d: "הביאו את הנקודה הכחולה לנקודת המקסימום.", p: [-1, 0, 12, 0], goal: 'm0_max' },
+    { cat: "נקודות קיצון", t: "קודקוד פרבולה", d: "מצאו את קודקוד הפרבולה (נקודת המינימום).", p: [0, 1, -6, 5], goal: 'm0_min' },
     { cat: "צירים", t: "חיתוך ציר X", d: "מצאו נקודה בה הפונקציה חוצה את ציר ה-X.", p: [0, 1, 0, -9], goal: 'y0' },
     { cat: "משיקים", t: "שיפוע ספציפי", d: "הזיזו את הנקודה עד ששיפוע המשיק יהיה בדיוק 4.", p: [0, 1, 0, 0], goal: 'slope_val', targetVal: 4 },
     { cat: "משיקים", t: "משיק לראשית", d: "מצאו נקודה שהמשיק דרכה עובר ב-(0,0).", p: [0, -1, 4, 0], goal: 'tan_pass', target: [0,0] },
     { cat: "נורמל", t: "נורמל לראשית", d: "מצאו נקודה שהנורמל (המקווקו) עובר בראשית (0,0).", p: [0, 1, -4, 4], goal: 'norm_pass', target: [0,0] }
 ];
 
-let questions = bagrutData;
-
-/* --- משתנים גלובליים --- */
+/* משתנים גלובליים */
 let cvs, ctx, W, H, mainArea;
 let baseScale = 45, scale = 45;
 let ox, oy, px = 0, cf = [0,1,0,0], goal = '';
 let isDrag = false, audioCtx = null, isMuted = true;
+let currentQIndex = 0;
 
 window.onload = () => {
     cvs = document.getElementById('cvs');
     ctx = cvs.getContext('2d');
     mainArea = document.getElementById('mainArea');
+    
     window.addEventListener('resize', resize);
     
+    // מאזינים לאירועי מגע ועכבר
     cvs.addEventListener('touchstart', e => start(e.touches[0]), {passive: false});
     cvs.addEventListener('touchmove', e => move(e.touches[0]), {passive: false});
     cvs.addEventListener('touchend', end);
@@ -38,36 +39,135 @@ window.onload = () => {
     loadQ(0);
 };
 
-/* --- זום ומיקום --- */
+/* ניהול השאלות */
+function initMenu() {
+    let sel = document.getElementById('qSelect');
+    sel.innerHTML = "";
+    bagrutData.forEach((q, i) => {
+        let opt = document.createElement('option');
+        opt.value = i;
+        opt.text = `${i+1}. ${q.t}`;
+        sel.appendChild(opt);
+    });
+}
+
+function loadQuestionFromSelect() {
+    let idx = parseInt(document.getElementById('qSelect').value);
+    loadQ(idx);
+}
+
+function nextQuestion() {
+    let idx = parseInt(document.getElementById('qSelect').value);
+    if(idx < bagrutData.length - 1) {
+        document.getElementById('qSelect').value = idx + 1;
+        loadQ(idx + 1);
+    }
+}
+
+function loadQ(idx) {
+    currentQIndex = idx;
+    let q = bagrutData[idx];
+    document.getElementById('qText').innerHTML = q.d;
+    document.getElementById('qCounter').innerText = `שאלה ${idx+1} מתוך ${bagrutData.length}`;
+    
+    // איפוס באנר הצלחה
+    document.getElementById('successBanner').classList.remove('show');
+
+    // טעינת המקדמים
+    cf = [...q.p];
+    document.getElementById('mA').value = cf[0];
+    document.getElementById('mB').value = cf[1];
+    document.getElementById('mC').value = cf[2];
+    document.getElementById('mD').value = cf[3];
+    
+    goal = q.goal;
+    px = 0.5; // התחלה במקום ניטרלי
+    document.getElementById('mainX').value = px;
+    
+    manual(); // עדכון התצוגה
+}
+
+/* עדכון מקדמים ידני */
+function manual() {
+    cf[0] = parseFloat(document.getElementById('mA').value);
+    cf[1] = parseFloat(document.getElementById('mB').value);
+    cf[2] = parseFloat(document.getElementById('mC').value);
+    cf[3] = parseFloat(document.getElementById('mD').value);
+    
+    document.getElementById('valA').innerText = cf[0];
+    document.getElementById('valB').innerText = cf[1];
+    document.getElementById('valC').innerText = cf[2];
+    document.getElementById('valD').innerText = cf[3];
+    
+    updateEquationString();
+    update();
+}
+
+function updateEquationString() {
+    // יצירת מחרוזת יפה של הפונקציה
+    let s = "y = ";
+    if(cf[0] !== 0) s += `${cf[0]}x³ `;
+    if(cf[1] !== 0) s += `${cf[1]>0?'+':''}${cf[1]}x² `;
+    if(cf[2] !== 0) s += `${cf[2]>0?'+':''}${cf[2]}x `;
+    if(cf[3] !== 0) s += `${cf[3]>0?'+':''}${cf[3]}`;
+    if(s === "y = ") s += "0";
+    document.getElementById('eqn').innerText = s;
+
+    // יצירת מחרוזת נגזרת
+    let d0 = 3*cf[0], d1 = 2*cf[1], d2 = cf[2];
+    let sd = "f'(x) = ";
+    if(d0 !== 0) sd += `${d0.toFixed(1)}x² `;
+    if(d1 !== 0) sd += `${d1>0?'+':''}${d1.toFixed(1)}x `;
+    if(d2 !== 0) sd += `${d2>0?'+':''}${d2}`;
+    if(sd === "f'(x) = ") sd += "0";
+    document.getElementById('derivEqn').innerText = sd;
+}
+
+/* זום ומיקום */
 function zoomIn() { scale = Math.min(scale * 1.2, 150); draw(); }
 function zoomOut() { scale = Math.max(scale / 1.2, 10); draw(); }
 function resetZoom() { scale = baseScale; ox = W/2; oy = H/2 + H*0.1; draw(); }
 
 function resize() { 
+    if(!mainArea) return;
     W = cvs.width = mainArea.clientWidth; 
     H = cvs.height = mainArea.clientHeight; 
     ox = W/2; oy = H/2 + H*0.1; 
     draw(); 
 }
 
-/* --- פונקציות מתמטיות --- */
+/* פונקציות מתמטיות */
 function f(x) { return cf[0]*x**3 + cf[1]*x**2 + cf[2]*x + cf[3]; }
 function df(x) { return 3*cf[0]*x**2 + 2*cf[1]*x + cf[2]; }
 
-/* --- אינטראקציה --- */
-function start(e) { isDrag = true; initAudio(); move(e); }
+/* אינטראקציה */
+function start(e) { 
+    isDrag = true; 
+    initAudio(); 
+    move(e); 
+}
 function end() { isDrag = false; }
 function move(e) {
     if(!isDrag) return;
     let rect = cvs.getBoundingClientRect();
-    px = (e.clientX - rect.left - ox) / scale;
+    let clientX = e.clientX || e.touches[0].clientX;
+    
+    px = (clientX - rect.left - ox) / scale;
     px = Math.max(-10, Math.min(10, px));
+    
+    // מגנט לאפס
     if(Math.abs(px) < 0.05) px = 0;
+    
     document.getElementById('mainX').value = px;
     update();
 }
 
-function updateFromSlider() { if(!isDrag) { px = parseFloat(document.getElementById('mainX').value); update(); } }
+function updateFromSlider() { 
+    if(!isDrag) { 
+        px = parseFloat(document.getElementById('mainX').value); 
+        update(); 
+    } 
+}
 
 function update() {
     let y = f(px), m = df(px);
@@ -80,16 +180,30 @@ function update() {
 /* חישוב מרחק והתקדמות */
 function calculateDistance(y, m) {
     if(!goal) return 100;
-    let q = questions[document.getElementById('qSelect').value];
+    let q = bagrutData[document.getElementById('qSelect').value];
     
-    if(goal === 'm0') return Math.abs(m); 
+    if(goal === 'm0_min') {
+        // בודק אם שיפוע 0 וגם אם הנגזרת השנייה חיובית (מינימום)
+        let f2 = 6*cf[0]*px + 2*cf[1];
+        if (Math.abs(m) < 0.1 && f2 > 0) return 0; // בינגו
+        return Math.abs(m) + (f2 < 0 ? 5 : 0); // עונש אם זה מקסימום
+    }
+
+    if(goal === 'm0_max') {
+        let f2 = 6*cf[0]*px + 2*cf[1];
+        if (Math.abs(m) < 0.1 && f2 < 0) return 0;
+        return Math.abs(m) + (f2 > 0 ? 5 : 0);
+    }
+    
     if(goal === 'y0') return Math.abs(y); 
     if(goal === 'x0') return Math.abs(px); 
     if(goal === 'slope_val') return Math.abs(m - q.targetVal);
+    
     if(goal === 'tan_pass') {
         let predictedY = m * (q.target[0] - px) + y;
         return Math.abs(predictedY - q.target[1]);
     }
+    
     if(goal === 'norm_pass') {
         let nm = (Math.abs(m) < 0.01) ? 1000 : -1/m;
         let val = (q.target[1] - y) - nm * (q.target[0] - px);
@@ -100,11 +214,10 @@ function calculateDistance(y, m) {
 
 function updateProximityBar(dist) {
     let bar = document.getElementById('proximityBar');
-    // המרת המרחק לאחוזים (0 עד 100). ככל שהמרחק קטן (קרוב ל-0), האחוז גבוה.
+    // לוגיקה פשוטה לאחוזים - ככל שהמרחק קטן מ-5, האחוז עולה
     let percentage = Math.max(0, Math.min(100, (1 - dist / 5) * 100));
     
-    if (dist < 0.15) percentage = 100; // ניצחון = מלא
-    
+    if (dist < 0.15) percentage = 100;
     bar.style.width = percentage + "%";
 }
 
@@ -119,7 +232,7 @@ function checkWin(dist) {
     }
 }
 
-/* --- ציור --- */
+/* ציור */
 function draw() {
     ctx.clearRect(0,0,W,H);
     
@@ -131,142 +244,72 @@ function draw() {
     for(let y=oy%scale; y>0; y-=scale) { ctx.moveTo(0,y); ctx.lineTo(W,y); }
     ctx.stroke();
     
+    // צירים ראשיים
     ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 2; ctx.beginPath();
-    ctx.moveTo(0,oy); ctx.lineTo(W,oy); ctx.moveTo(ox,0); ctx.lineTo(ox,H); ctx.stroke();
-    
-    // ציור פונקציה
-    ctx.strokeStyle = "#2563eb"; ctx.lineWidth = 4; ctx.beginPath();
-    for(let x=( -ox/scale ); x<=( (W-ox)/scale ); x+=0.02) {
-        let cx=ox+x*scale, cy=oy-f(x)*scale;
-        if(x === -ox/scale) ctx.moveTo(cx,cy); else ctx.lineTo(cx,cy);
+    ctx.moveTo(0, oy); ctx.lineTo(W, oy); // X axis
+    ctx.moveTo(ox, 0); ctx.lineTo(ox, H); // Y axis
+    ctx.stroke();
+
+    // ציור הפונקציה
+    ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 3; ctx.beginPath();
+    for(let i=0; i<=W; i+=2) {
+        let xx = (i - ox) / scale;
+        let yy = oy - f(xx) * scale;
+        if(i===0) ctx.moveTo(i, yy); else ctx.lineTo(i, yy);
     }
     ctx.stroke();
-    
-    let cx=ox+px*scale, cy=oy-f(px)*scale, m=df(px);
-    
-    // משיק / נורמל
-    ctx.lineWidth = 2;
-    if(goal === 'norm_pass') {
-        ctx.strokeStyle="#a855f7"; ctx.setLineDash([5,5]);
-        let nm = (Math.abs(m) < 0.01) ? 1000 : -1/m;
-        ctx.beginPath(); ctx.moveTo(cx-1000, cy+1000*nm); ctx.lineTo(cx+1000, cy-1000*nm); ctx.stroke();
+
+    // הנקודה הנוכחית
+    let cx = ox + px * scale;
+    let cy = oy - f(px) * scale;
+    let m = df(px);
+
+    // משיק (כתום)
+    ctx.strokeStyle = "#f97316"; ctx.lineWidth = 2; ctx.beginPath();
+    let tLen = W; 
+    ctx.moveTo(cx - tLen, cy + tLen*m);
+    ctx.lineTo(cx + tLen, cy - tLen*m);
+    ctx.stroke();
+
+    // נורמל (סגול מקווקו)
+    if(Math.abs(m) > 0.01) {
+        ctx.strokeStyle = "#8b5cf6"; ctx.lineWidth = 1; ctx.setLineDash([5, 5]); ctx.beginPath();
+        let nm = -1/m;
+        ctx.moveTo(cx - tLen, cy + tLen*nm);
+        ctx.lineTo(cx + tLen, cy - tLen*nm);
+        ctx.stroke();
         ctx.setLineDash([]);
-    } else {
-        ctx.strokeStyle="#f97316"; ctx.beginPath();
-        ctx.moveTo(cx-1000, cy+1000*m); ctx.lineTo(cx+1000, cy-1000*m); ctx.stroke();
     }
-    
-    // הנקודה
-    ctx.fillStyle="#2563eb"; ctx.beginPath(); ctx.arc(cx,cy,8,0,7); ctx.fill();
-    ctx.strokeStyle="white"; ctx.stroke();
 
-    drawDataBox(cx, cy, px, f(px), m);
+    // הנקודה עצמה
+    ctx.fillStyle = "#2563eb"; ctx.beginPath();
+    ctx.arc(cx, cy, 6, 0, Math.PI*2);
+    ctx.fill(); ctx.stroke();
+
+    // טקסטים על גבי הקנבס
+    ctx.font = "14px Rubik"; ctx.fillStyle = "#475569"; ctx.textAlign = "left";
+    ctx.fillText(`x: ${px.toFixed(2)}`, 10, H-50);
+    ctx.fillText(`y: ${f(px).toFixed(2)}`, 10, H-30);
+    ctx.fillText(`m: ${m.toFixed(2)}`, 10, H-10);
 }
 
-/* ציור 'המשולש הקדוש' עם כותרת */
-function drawDataBox(cx, cy, x, y, m) {
-    let boxW = 200, boxH = 140; // הוגדל קצת בשביל הכותרת
-    let bx = cx + 20, by = cy - 150;
-    if (bx + boxW > W) bx = cx - boxW - 20;
-    if (by < 10) by = cy + 20;
-
-    ctx.save();
-    ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
-    ctx.shadowBlur = 10; ctx.shadowColor = "rgba(0,0,0,0.1)";
-    ctx.beginPath(); ctx.roundRect(bx, by, boxW, boxH, 12); ctx.fill();
-    ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 1; ctx.stroke();
-    ctx.restore();
-
-    // כותרת המשולש הקדוש
-    ctx.font = "bold 14px 'Rubik', sans-serif"; ctx.textAlign = "center";
-    ctx.fillStyle = "#64748b";
-    ctx.fillText("✨ המשולש הקדוש ✨", bx + boxW/2, by + 20);
-    
-    // קו הפרדה
-    ctx.beginPath(); ctx.moveTo(bx+10, by+28); ctx.lineTo(bx+boxW-10, by+28);
-    ctx.strokeStyle = "#e2e8f0"; ctx.stroke();
-
-    // נתונים
-    ctx.font = "bold 15px Consolas, monospace"; ctx.textAlign = "left";
-    let pad = bx + 20, ty = by + 50;
-    
-    ctx.fillStyle = "#334155";
-    ctx.fillText(`x     = ${x.toFixed(2)}`, pad, ty);
-    ctx.fillStyle = "#2563eb";
-    ctx.fillText(`f(x)  = ${y.toFixed(2)}`, pad, ty+25);
-    ctx.fillStyle = "#ea580c";
-    ctx.fillText(`f'(x) = ${m.toFixed(2)}`, pad, ty+50);
-    
-    // משוואת משיק למטה
-    ctx.font = "12px sans-serif"; ctx.fillStyle = "#94a3b8";
-    let b = y - m*x;
-    let eqStr = `y = ${m.toFixed(1)}x ${b>=0?'+':''}${b.toFixed(1)}`;
-    if(Math.abs(m) < 0.01) eqStr = `y = ${y.toFixed(1)}`; // ישר אופקי
-    ctx.fillText(eqStr, pad, ty+75);
+/* סאונד פשוט */
+function initAudio() {
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 }
-
-/* --- ניהול --- */
-function initMenu() {
-    let s = document.getElementById('qSelect');
-    questions.forEach((q, i) => {
-        let opt = document.createElement('option');
-        opt.value = i; opt.innerText = `${q.cat}: ${q.t}`;
-        s.appendChild(opt);
-    });
+function toggleMute() {
+    isMuted = !isMuted;
+    document.getElementById('btnSound').innerText = isMuted ? "🔇" : "🔊";
 }
-
-function loadQ(i) {
-    let q = questions[i];
-    cf = [...q.p]; goal = q.goal;
-    document.getElementById('qText').innerText = q.d;
-    document.getElementById('qCounter').innerText = `שאלה ${parseInt(i)+1} / ${questions.length}`;
-    
-    ['mA','mB','mC','mD'].forEach((id,k)=> {
-        document.getElementById(id).value = cf[k];
-        document.getElementById(id.replace('m','val')).innerText = cf[k];
-    });
-    px = -2; update();
-    updateEqText();
-}
-
-function loadQuestionFromSelect() { loadQ(document.getElementById('qSelect').value); }
-function nextQuestion() { 
-    let s = document.getElementById('qSelect');
-    if(s.selectedIndex < questions.length - 1) {
-        s.selectedIndex++;
-        loadQ(s.selectedIndex);
-    }
-}
-
-function manual() {
-    cf = ['mA','mB','mC','mD'].map(id => {
-        let v = parseFloat(document.getElementById(id).value);
-        document.getElementById(id.replace('m','val')).innerText = v;
-        return v;
-    });
-    goal = ''; document.getElementById('qText').innerText = "מצב חקירה חופשית";
-    updateEqText(); update();
-}
-
-function updateEqText() {
-    let txt = `y = ${cf[0]?cf[0]+"x³ ":""}${cf[1]?cf[1]+"x² ":""}${cf[2]?cf[2]+"x ":""}${cf[3]||"0"}`;
-    document.getElementById('eqn').innerText = txt.replace(/\+ -/g, "- ");
-    
-    let da=3*cf[0], db=2*cf[1], dc=cf[2];
-    let dTxt = `f'(x) = ${da?da+"x² ":""}${db?db+"x ":""}${dc||"0"}`;
-    document.getElementById('derivEqn').innerText = dTxt.replace(/\+ -/g, "- ");
-}
-
-/* --- סאונד --- */
-function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
 function playWinSound() {
     if(isMuted || !audioCtx) return;
-    let n = [523, 659, 783, 1046];
-    n.forEach((f, i) => {
-        let o = audioCtx.createOscillator(), g = audioCtx.createGain();
-        o.connect(g); g.connect(audioCtx.destination);
-        o.frequency.value = f; g.gain.setValueAtTime(0.1, audioCtx.currentTime + i*0.1);
-        o.start(audioCtx.currentTime + i*0.1); o.stop(audioCtx.currentTime + i*0.1 + 0.3);
-    });
+    let o = audioCtx.createOscillator();
+    let g = audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    o.type = 'sine';
+    o.frequency.setValueAtTime(440, audioCtx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
+    g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    o.start(); o.stop(audioCtx.currentTime + 0.3);
 }
-function toggleMute() { isMuted = !isMuted; document.getElementById('btnSound').innerText = isMuted ? "🔇" : "🔊"; }
