@@ -3,55 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>חקר פונקציות מתקדם</title>
+    <title>חקר פונקציות ומשיקים</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div class="app-container">
-    
     <header>
-        <select id="qSelect" onchange="loadQuestionFromSelect()"></select>
-        <button class="btn-nav" onclick="nextQuestion()">הבא &larr;</button>
-        <button class="btn-nav" id="btnSound" onclick="toggleMute()">🔇</button>
+        <div class="header-top">
+            <h1>מעבדה לחקירת פונקציות</h1>
+            <div class="controls">
+                <button class="btn-nav" id="btnSound" onclick="toggleMute()">🔇</button>
+                <select id="qSelect" onchange="loadQuestionFromSelect()"></select>
+                <button class="btn-nav" onclick="nextQuestion()">הבא &larr;</button>
+            </div>
+        </div>
+        <div id="qText" class="instruction-box">טוען שאלה...</div>
+        <div id="eqn" class="equation-display">y = ...</div>
     </header>
 
     <main id="mainArea">
-        <div class="overlay-info">
-            <div class="eq-text" id="eqn">y = ...</div>
-            <div class="instr-text">
-                <span id="qIcon">🎯</span> <span id="qText">טוען...</span>
-            </div>
-        </div>
-
-        <div id="successBanner" class="success-badge">✨ בול בפוני! ✨</div>
-
         <canvas id="cvs"></canvas>
-
-        <div class="zoom-bar">
-            <button onclick="changeZoom(1.1)">+</button>
-            <button onclick="changeZoom(0.9)">-</button>
-            <button onclick="resetView()">⟲</button>
+        
+        <div class="formula-overlay">
+            <div class="formula-row"><strong>הגדרות יסוד:</strong></div>
+            <div class="formula-row"><span>ערך הפונקציה:</span> <span class="math">f(x) = y</span></div>
+            <div class="formula-row"><span>שיפוע המשיק:</span> <span class="math">f'(x) = m</span></div>
+            <div class="formula-row" style="margin-top:5px; border-top:1px solid #ccc; padding-top:2px;">
+                <strong>משוואת המשיק:</strong>
+            </div>
+            <div class="formula-row"><span class="math">y - y₁ = m(x - x₁)</span></div>
         </div>
+
+        <div id="successBanner">🎉 כל הכבוד! פיצחתם את האתגר 🎉</div>
     </main>
 
     <footer>
-        <div class="slider-container">
-            <span class="lbl">X</span>
+        <div class="slider-container main-x-row">
+            <span class="lbl">הזיזו את ה-X:</span>
             <input type="range" id="mainX" min="-10" max="10" step="0.01" oninput="updateFromSlider()">
         </div>
         
-        <div class="manual-edit-row">
-            <span class="edit-icon">✎</span>
-            <input type="number" id="mA" placeholder="a" oninput="manual()">
-            <input type="number" id="mB" placeholder="b" oninput="manual()">
-            <input type="number" id="mC" placeholder="c" oninput="manual()">
-            <input type="number" id="mD" placeholder="d" oninput="manual()">
+        <div class="function-editor">
+            <div class="editor-title">שינוי הפונקציה (משוך את הזחלנים)</div>
+            <div class="coef-control-panel">
+                <div class="coef-group">
+                    <label>a (מקדם x³)</label>
+                    <input type="range" id="mA" min="-5" max="5" step="0.1" oninput="manual()">
+                    <span id="valA" class="val-display">0</span>
+                </div>
+                <div class="coef-group">
+                    <label>b (מקדם x²)</label>
+                    <input type="range" id="mB" min="-5" max="5" step="0.1" oninput="manual()">
+                    <span id="valB" class="val-display">0</span>
+                </div>
+                <div class="coef-group">
+                    <label>c (מקדם x)</label>
+                    <input type="range" id="mC" min="-10" max="10" step="0.5" oninput="manual()">
+                    <span id="valC" class="val-display">0</span>
+                </div>
+                <div class="coef-group">
+                    <label>d (מספר חופשי)</label>
+                    <input type="range" id="mD" min="-10" max="10" step="0.5" oninput="manual()">
+                    <span id="valD" class="val-display">0</span>
+                </div>
+            </div>
         </div>
     </footer>
 
-</div>
-<script src="bagrut_questions.js"></script> 
-<script src="script.js"></script>
+    <script src="bagrut_questions.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
