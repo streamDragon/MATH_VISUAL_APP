@@ -3,300 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <style>
-        /* --- CSS --- */
-        /* איפוס */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        html, body {
-            margin: 0; padding: 0;
-            width: 100%;
-            /* שינוי: מאפשר גלילה לגובה אם התוכן גבוה */
-            height: auto; 
-            min-height: 100%;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: #f8fafc;
-            /* שינוי: גלילה אנכית אוטומטית */
-            overflow-y: auto; 
-        }
-
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            /* שינוי: מבטיח שתמיד יתפוס לפחות את גובה המסך, אבל יכול לגדול */
-            min-height: 100vh; 
-        }
-
-        /* --- Header --- */
-        header {
-            flex: 0 0 auto;
-            padding: 10px; background: white; border-bottom: 1px solid #e2e8f0;
-            display: flex; align-items: center; gap: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index: 10;
-        }
-        select { flex: 1; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; background: #fff; }
-        .btn-nav { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 14px; }
-
-        /* --- Main Canvas Area (השינוי הגדול) --- */
-        main {
-            flex: 1 1 auto;
-            position: relative;
-            background: #fff;
-            overflow: hidden;
-            /* --- תיקון קריטי: גובה מינימלי אגרסיבי לגרף --- */
-            /* זה מבטיח שהגרף תמיד יהיה גבוה, גם אם זה יוצר גלילה */
-            min-height: 450px; 
-            /* -------------------------------------------------- */
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        canvas { display: block; width: 100%; height: 100%; }
-
-        /* שכבות מידע */
-        .overlay-info { position: absolute; top: 10px; width: 100%; text-align: center; pointer-events: none; }
-        .eq-text { font-size: 22px; font-weight: 800; color: #1e293b; text-shadow: 0 0 4px white; margin-bottom: 4px; }
-        .instr-text { background: rgba(255,255,255,0.95); padding: 4px 12px; border-radius: 15px; border: 1px solid #cbd5e1; font-size: 14px; color: #475569; display: inline-block; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
-
-        /* חותמת הצלחה */
-        .success-badge {
-            position: absolute; top: 80px; left: 50%; transform: translate(-50%, -50%) scale(0);
-            background: #22c55e; color: white; padding: 10px 24px; border-radius: 50px;
-            font-size: 18px; font-weight: bold; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; z-index: 20;
-        }
-        .success-badge.show { transform: translate(-50%, -50%) scale(1); }
-
-        /* כפתורי זום */
-        .zoom-controls { position: absolute; bottom: 15px; left: 15px; display: flex; flex-direction: column; gap: 10px; z-index: 5; }
-        .btn-circle { width: 42px; height: 42px; border-radius: 50%; background: white; border: 1px solid #cbd5e1; font-size: 22px; display: grid; place-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; color: #334155;}
-        .btn-circle:active { transform: scale(0.95); background: #f1f5f9; }
-
-        /* --- Footer --- */
-        footer {
-            flex: 0 0 auto;
-            padding: 15px 15px 25px 15px; /* קצת יותר מרווח למטה */
-            background: #f8fafc;
-            z-index: 10;
-        }
-        .slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
-        .lbl { font-weight: bold; font-size: 18px; color: #334155; }
-        input[type=range] { flex: 1; height: 40px; cursor: pointer; accent-color: #2563eb; }
-        
-        details { margin-top: 10px; background: #fff; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0;}
-        summary { font-size: 13px; font-weight: 600; color: #64748b; text-align: center; list-style: none; cursor: pointer; padding: 4px; }
-        .manual-edit { display: flex; gap: 8px; margin-top: 8px; }
-        .manual-edit input { flex: 1; padding: 8px; text-align: center; border: 1px solid #ccc; border-radius: 6px; font-size: 14px;}
-    </style>
+    <title>חקר פונקציות מתקדם</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="app-container">
+    
     <header>
-        <select id="qSelect" onchange="loadQ(this.value)"></select>
-        <button class="btn-nav" onclick="nextQ()">הבא &larr;</button>
+        <select id="qSelect" onchange="loadQuestionFromSelect()"></select>
+        <button class="btn-nav" onclick="nextQuestion()">הבא &larr;</button>
     </header>
 
     <main id="mainArea">
         <div class="overlay-info">
-            <div class="eq-text" id="eqDisplay">y = ...</div>
-            <div class="instr-text" id="instrDisplay">הוראה...</div>
+            <div class="eq-text" id="eqn">y = ...</div>
+            <div class="instr-text">
+                <span id="qIcon">🎯</span> <span id="qText">טוען...</span>
+            </div>
         </div>
-        <div id="winBadge" class="success-badge">✨ בול! כל הכבוד ✨</div>
+
+        <div id="successBanner" class="success-badge">✨ בול בפוני! ✨</div>
+
         <canvas id="cvs"></canvas>
-        <div class="zoom-controls">
-            <button class="btn-circle" onclick="doZoom(1.1)">+</button>
-            <button class="btn-circle" onclick="doZoom(0.9)">-</button>
-            <button class="btn-circle" onclick="resetView()">⟲</button>
+
+        <div class="zoom-bar">
+            <button onclick="changeZoom(1.1)">+</button>
+            <button onclick="changeZoom(0.9)">-</button>
+            <button onclick="resetView()">⟲</button>
         </div>
     </main>
 
     <footer>
-        <div class="slider-row">
+        <div class="slider-container">
             <span class="lbl">X</span>
-            <input type="range" id="xSlider" min="-10" max="10" step="0.01" oninput="onSlide()">
+            <input type="range" id="mainX" min="-10" max="10" step="0.01" oninput="updateFromSlider()">
         </div>
-        <details>
-            <summary>⚙️ עריכה ידנית (מתקדם)</summary>
-            <div class="manual-edit">
-                <input type="number" id="mA" placeholder="x³" oninput="manual()">
-                <input type="number" id="mB" placeholder="x²" oninput="manual()">
-                <input type="number" id="mC" placeholder="x" oninput="manual()">
-                <input type="number" id="mD" placeholder="#" oninput="manual()">
-            </div>
-        </details>
+        
+        <div class="manual-edit-row">
+            <span class="edit-icon">✎</span>
+            <input type="number" id="mA" placeholder="a" oninput="manual()">
+            <input type="number" id="mB" placeholder="b" oninput="manual()">
+            <input type="number" id="mC" placeholder="c" oninput="manual()">
+            <input type="number" id="mD" placeholder="d" oninput="manual()">
+        </div>
     </footer>
+
 </div>
 
-<script>
-    // --- JS --- (ללא שינוי מהותי, רק התאמות קטנות)
-    const questions = [
-        { t: "התחלה: מינימום", d: "גררו את הנקודה לתחתית העמק", p: [1, -4, 4], goal: 'm0' },
-        { t: "התחלה: חיתוך X", d: "מצאו את נקודת החיתוך עם ציר ה-X", p: [0.5, 0, -2], goal: 'y0' },
-        { t: "שיפוע: עליה חדה", d: "מצאו שיפוע תלול (m=2)", p: [0.2, 0, 0], goal: 'm2' },
-        { t: "שיפוע: פסגה", d: "מצאו את קודקוד הפרבולה", p: [-0.5, 2, 0], goal: 'm0' },
-        { t: "אתגר: נורמל", d: "כוון שהאנך (סגול) יעבור ב-0,0", p: [0.5, 0, 1], goal: 'norm0' }
-    ];
-
-    let cvs, ctx, W, H, mainArea;
-    let scale = 45, ox, oy; // זום התחלתי קצת יותר גדול
-    let px = 0, cf = [0,0,0,0], goal = '';
-    let isDragging = false;
-
-    window.onload = () => {
-        cvs = document.getElementById('cvs');
-        ctx = cvs.getContext('2d');
-        mainArea = document.getElementById('mainArea');
-        
-        let sel = document.getElementById('qSelect');
-        questions.forEach((q, i) => {
-            let op = document.createElement('option');
-            op.value = i; op.innerText = q.t;
-            sel.appendChild(opt);
-        });
-
-        window.addEventListener('resize', resize);
-        
-        cvs.addEventListener('mousedown', startDrag);
-        window.addEventListener('mousemove', moveDrag);
-        window.addEventListener('mouseup', endDrag);
-        cvs.addEventListener('touchstart', (e)=>startDrag(e.touches[0]), {passive:false});
-        cvs.addEventListener('touchmove', (e)=>moveDrag(e.touches[0]), {passive:false});
-        cvs.addEventListener('touchend', endDrag);
-
-        resize();
-        loadQ(0);
-    };
-
-    function resize() {
-        // לוקח את הגובה של האלמנט שעכשיו הוא גבוה בכוח
-        W = cvs.width = mainArea.clientWidth;
-        H = cvs.height = mainArea.clientHeight;
-        ox = W / 2;
-        oy = H / 2 + H * 0.1;
-        draw();
-    }
-
-    function f(x) { return cf[0]*x**3 + cf[1]*x**2 + cf[2]*x + cf[3]; }
-    function df(x) { return 3*cf[0]*x**2 + 2*cf[1]*x + cf[2]; }
-
-    function loadQ(idx) {
-        let q = questions[idx];
-        cf = [0,0,0,0]; 
-        for(let i=0; i<q.p.length; i++) cf[i+1] = q.p[i]; // התאמה למבנה החדש (תומך ב-x^3)
-        goal = q.goal;
-        
-        document.getElementById('qSelect').value = idx;
-        document.getElementById('instrDisplay').innerText = q.d;
-        
-        let eqStr = `y = ${cf[0]?cf[0]+"x³ ":""}${cf[1]?(cf[1]>0?"+":"")+cf[1]+"x² ":""}${cf[2]?(cf[2]>0?"+":"")+cf[2]+"x ":""}${cf[3]?(cf[3]>0?"+":"")+cf[3]:""}`;
-        eqStr = eqStr.replace(/ 0x.| \+ 0/g, "").replace(/\+ -/g, "- ").replace("0.5", "½");
-        if(eqStr == "y = ") eqStr = "y = 0";
-        document.getElementById('eqDisplay').innerText = eqStr;
-
-        px = -3;
-        document.getElementById('xSlider').value = px;
-        document.getElementById('winBadge').classList.remove('show');
-        updateInputs();
-        draw();
-    }
-
-    function nextQ() {
-        let curr = parseInt(document.getElementById('qSelect').value);
-        if(curr < questions.length - 1) loadQ(curr + 1);
-    }
-
-    function onSlide() {
-        px = parseFloat(document.getElementById('xSlider').value);
-        update();
-    }
-
-    function manual() {
-        cf = [
-            parseFloat(document.getElementById('mA').value)||0,
-            parseFloat(document.getElementById('mB').value)||0,
-            parseFloat(document.getElementById('mC').value)||0,
-            parseFloat(document.getElementById('mD').value)||0
-        ];
-        goal = '';
-        document.getElementById('instrDisplay').innerText = "מצב חופשי";
-        let eqStr = `y = ${cf[0]}x³ + ${cf[1]}x² + ${cf[2]}x + ${cf[3]}`.replace(/\+ -/g, "- ");
-        document.getElementById('eqDisplay').innerText = eqStr;
-        update();
-    }
-
-    function updateInputs() {
-        document.getElementById('mA').value = cf[0];
-        document.getElementById('mB').value = cf[1];
-        document.getElementById('mC').value = cf[2];
-        document.getElementById('mD').value = cf[3];
-    }
-
-    function startDrag(e) { isDragging = true; moveDrag(e); }
-    function endDrag() { isDragging = false; }
-    function moveDrag(e) {
-        if(!isDragging) return;
-        if(e.preventDefault) e.preventDefault();
-        let rect = cvs.getBoundingClientRect();
-        px = (e.clientX - rect.left - ox) / scale;
-        px = Math.max(-10, Math.min(10, px));
-        document.getElementById('xSlider').value = px;
-        update();
-    }
-
-    function update() { draw(); checkWin(); }
-
-    function checkWin() {
-        if(!goal) return;
-        let y = f(px), m = df(px), win = false;
-        if (goal === 'm0') win = Math.abs(m) < 0.25;
-        if (goal === 'm2') win = Math.abs(m - 2) < 0.25;
-        if (goal === 'y0') win = Math.abs(y) < 0.25;
-        if (goal === 'norm0') win = Math.abs(px + m*y) < 0.6;
-
-        let badge = document.getElementById('winBadge');
-        if(win) badge.classList.add('show');
-        else badge.classList.remove('show');
-    }
-
-    function draw() {
-        ctx.clearRect(0, 0, W, H);
-        
-        // Grid
-        ctx.beginPath(); ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 1;
-        for(let x=ox%scale; x<W; x+=scale) { ctx.moveTo(x,0); ctx.lineTo(x,H); }
-        for(let y=oy%scale; y<H; y+=scale) { ctx.moveTo(0,y); ctx.lineTo(W,y); }
-        ctx.stroke();
-
-        // Axes
-        ctx.beginPath(); ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 2;
-        ctx.moveTo(0, oy); ctx.lineTo(W, oy); ctx.moveTo(ox, 0); ctx.lineTo(ox, H); ctx.stroke();
-
-        // Function
-        ctx.beginPath(); ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 4;
-        let sx = -ox / scale, ex = (W - ox) / scale;
-        for(let x = sx; x <= ex; x += 0.05) {
-            let cx = ox + x * scale, cy = oy - f(x) * scale;
-            if (x === sx) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
-        }
-        ctx.stroke();
-
-        // Point & Tangent
-        let cx = ox + px * scale, cy = oy - f(px) * scale, m = df(px);
-        ctx.beginPath(); ctx.strokeStyle = "#f97316"; ctx.lineWidth = 2;
-        ctx.moveTo(cx - 1000, cy + 1000 * m); ctx.lineTo(cx + 1000, cy - 1000 * m); ctx.stroke();
-
-        if (goal === 'norm0') {
-            ctx.beginPath(); ctx.strokeStyle = "#a855f7"; ctx.setLineDash([5, 5]);
-            let nm = -1/m; ctx.moveTo(cx - 1000, cy + 1000 * nm); ctx.lineTo(cx + 1000, cy - 1000 * nm);
-            ctx.stroke(); ctx.setLineDash([]);
-        }
-
-        ctx.beginPath(); ctx.fillStyle = "#2563eb"; ctx.arc(cx, cy, 9, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = "white"; ctx.lineWidth = 3; ctx.stroke();
-    }
-
-    function doZoom(factor) { scale *= factor; scale = Math.max(15, Math.min(120, scale)); draw(); }
-    function resetView() { scale = 45; resize(); }
-</script>
+<script src="script.js"></script>
 </body>
 </html>
