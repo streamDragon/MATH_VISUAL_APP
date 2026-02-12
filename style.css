@@ -1,79 +1,140 @@
-/* style.css - תוספות */
+/* style.css - גרסה סופית ונקייה */
 
-/* עיצוב שורת המשוואות בראש הדף */
-.math-display-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    background: #f8fafc;
-    padding: 8px;
-    border-bottom: 1px solid #e2e8f0;
+body {
+    margin: 0; padding: 0;
+    height: 100vh; display: flex; flex-direction: column;
+    font-family: 'Rubik', sans-serif;
+    background-color: #f8fafc; color: #334155;
+    overflow: hidden;
 }
 
+/* --- Header --- */
+header {
+    background: white; z-index: 10;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+.header-top {
+    padding: 8px 12px;
+    display: flex; justify-content: space-between; align-items: center;
+    background: #f1f5f9; border-bottom: 1px solid #e2e8f0;
+}
+h1 { margin: 0; font-size: 1.1rem; color: #1e293b; }
+.controls { display: flex; gap: 6px; }
+.btn-nav {
+    background: #3b82f6; color: white; border: none; padding: 6px 12px;
+    border-radius: 6px; font-size: 0.9rem; cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-nav:hover { background: #2563eb; }
+
+.instruction-box {
+    padding: 10px; text-align: center;
+    background: #e0f2fe; color: #0369a1;
+    font-weight: 500; font-size: 1rem;
+    border-bottom: 1px solid #bfdbfe;
+}
+
+/* תצוגת המשוואות - גדולה ויפה */
+.math-display-row {
+    display: flex; justify-content: center; align-items: center; gap: 20px;
+    padding: 15px 0; background: white;
+}
 .equation-display {
     font-family: 'Courier New', monospace;
-    font-weight: bold;
-    font-size: 1.1rem;
+    font-weight: 700; font-size: 1.6rem; /* הוגדל משמעותית */
     color: #2563eb;
     direction: ltr;
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.05);
 }
+.equation-display.deriv { color: #ea580c; } /* כתום */
+.separator { color: #cbd5e1; font-size: 1.5rem; font-weight: 300; }
 
-.equation-display.deriv {
-    color: #ea580c; /* כתום לנגזרת */
-}
+/* --- Main Area --- */
+main { flex: 1; position: relative; width: 100%; height: 100%; overflow: hidden; }
+canvas { display: block; width: 100%; height: 100%; cursor: crosshair; touch-action: none; }
 
-.separator { color: #cbd5e1; font-weight: bold; }
-
-/* עיצוב משופר ללוח הנוסחאות */
+/* לוח נוסחאות - צד ימין למעלה */
 .formula-overlay {
     position: absolute;
-    top: 10px; left: 10px;
+    top: 15px; right: 15px; /* שינוי לימין */
     background: rgba(255, 255, 255, 0.95);
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #94a3b8;
-    box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+    padding: 12px; width: 160px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     font-size: 0.85rem;
     pointer-events: none;
-    z-index: 100; /* שלא ייעלם מאחור */
-    text-align: left;
-    direction: ltr;
+    z-index: 100;
+    text-align: left; direction: ltr;
 }
 .formula-title {
-    font-weight: bold; text-align: right;
-    margin-bottom: 5px; border-bottom: 1px solid #e2e8f0;
-    color: #475569; padding-bottom: 2px;
+    font-weight: bold; text-align: right; color: #64748b;
+    margin-bottom: 8px; border-bottom: 2px solid #f1f5f9; padding-bottom: 4px;
 }
-.formula-row { margin-bottom: 4px; display: flex; justify-content: space-between; gap: 10px; }
-.formula-row span:first-child { color: #64748b; font-size: 0.8rem; } /* תיאור בעברית */
-.math { font-weight: bold; color: #1e293b; }
+.formula-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 5px;
+}
+.formula-row span:first-child { font-size: 0.75rem; color: #94a3b8; margin-right: 5px; }
+.math { font-weight: bold; color: #334155; font-family: 'Courier New', monospace; }
 
-/* שאר ה-CSS נשאר דומה למה שהיה */
-body { margin:0; height:100vh; display:flex; flex-direction:column; font-family:'Rubik', sans-serif; overflow:hidden; background:#f1f5f9; }
-header { background:white; z-index:10; }
-.header-top { padding:10px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 5px rgba(0,0,0,0.05); }
-h1 { margin:0; font-size:1.1rem; color:#1e293b; }
-.controls { display:flex; gap:5px; }
-.btn-nav { background:#3b82f6; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; }
-.instruction-box { background:#e0f2fe; padding:8px; text-align:center; font-size:0.95rem; border-bottom:1px solid #bfdbfe; }
-main { flex:1; position:relative; width:100%; }
-canvas { display:block; width:100%; height:100%; cursor:crosshair; touch-action:none; }
-#successBanner { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(34,197,94,0.95); color:white; padding:20px 40px; border-radius:12px; font-size:1.5rem; display:none; pointer-events:none; }
-#successBanner.show { display:block; }
+/* כפתורי זום - צד שמאל למעלה */
+.zoom-controls {
+    position: absolute; top: 15px; left: 15px;
+    display: flex; flex-direction: column; gap: 5px;
+    z-index: 100;
+}
+.zoom-controls button {
+    width: 36px; height: 36px;
+    background: white; border: 1px solid #cbd5e1;
+    border-radius: 8px; font-size: 1.2rem; color: #475569;
+    cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.zoom-controls button:active { background: #f1f5f9; transform: translateY(1px); }
 
-footer { flex:0 0 auto; background:#f8fafc; border-top:1px solid #cbd5e1; padding:5px; z-index:10; display:flex; flex-direction:column; gap:5px; }
-.slider-container { background:white; padding:5px; border-radius:6px; border:1px solid #e2e8f0; display:flex; align-items:center; gap:8px; }
-.slider-container input { flex:1; }
-.lbl { font-size:0.9rem; font-weight:500; }
-.function-editor { background:#f1f5f9; border-radius:6px; padding:2px; }
-.editor-title { font-size:0.7rem; text-align:center; color:#64748b; }
-.coef-control-panel { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:4px; }
-.coef-group { background:white; border:1px solid #cbd5e1; border-radius:4px; padding:2px; display:flex; flex-direction:column; align-items:center; }
-.coef-group label { font-size:0.65rem; color:#64748b; }
-.coef-group input { width:100%; height:12px; cursor:pointer; }
-.val-display { font-size:0.7rem; font-weight:bold; color:#2563eb; }
+/* באנר הצלחה */
+#successBanner {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white; padding: 25px 50px; border-radius: 16px;
+    font-size: 1.8rem; font-weight: bold;
+    display: none; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    pointer-events: none; z-index: 200;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+#successBanner.show { display: block; }
+@keyframes popIn { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+
+/* --- Footer --- */
+footer {
+    flex: 0 0 auto; background: #fff;
+    border-top: 1px solid #e2e8f0; padding: 8px; z-index: 10;
+    display: flex; flex-direction: column; gap: 8px;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.03);
+}
+
+.slider-container {
+    background: #f8fafc; padding: 8px 15px; border-radius: 8px;
+    border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 15px;
+}
+.slider-container input { flex: 1; height: 6px; cursor: pointer; }
+.lbl { font-weight: bold; color: #475569; }
+
+.function-editor { background: #f8fafc; border-radius: 8px; padding: 6px; border: 1px solid #f1f5f9; }
+.editor-title { font-size: 0.75rem; text-align: center; color: #94a3b8; margin-bottom: 5px; }
+
+.coef-control-panel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.coef-group {
+    background: white; border: 1px solid #cbd5e1; border-radius: 6px;
+    padding: 4px; display: flex; flex-direction: column; align-items: center;
+}
+.coef-group label { font-size: 0.7rem; color: #64748b; margin-bottom: 3px; }
+.coef-group input { width: 100%; margin: 0; }
+.val-display { font-size: 0.8rem; font-weight: bold; color: #2563eb; margin-top: 2px; }
 
 @media (max-width: 600px) {
-    .coef-control-panel { grid-template-columns: 1fr 1fr; } 
+    .coef-control-panel { grid-template-columns: 1fr 1fr; }
+    .equation-display { font-size: 1.2rem; }
+    .header-top h1 { font-size: 0.9rem; }
+    .formula-overlay { display: none; } /* בטלפון אולי נסתיר את הנוסחאות כדי לא להסתיר את המסך? או שנקטין */
 }
