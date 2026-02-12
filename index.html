@@ -3,254 +3,205 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>מעבדת חקירה V35 - תיקון אנדרואיד/Google Sites</title>
+  <meta name="theme-color" content="#ffffff">
+  <title>מעבדת חקירה - מתמטיקה</title>
 
   <style>
-    :root { --p:#2563eb; --s:#f59e0b; --a:#9333ea; --bg:#f1f5f9; --win:#16a34a; --vh: 1vh; }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    :root { --p:#2563eb; --s:#f59e0b; --a:#9333ea; --bg:#f8fafc; --win:#16a34a; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
 
-    html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:#cbd5e1; font-family: system-ui, sans-serif; }
-
-    /* ✅ הכי חשוב: גובה אמיתי לפי JS (visualViewport) ולא לפי 100vh */
-    .app-container{
-      width:100%;
-      height: calc(var(--vh) * 100);
-      background:white;
-      display:flex;
-      flex-direction:column;
-      position:relative;
+    html, body { 
+      margin: 0; padding: 0; width: 100%; height: 100%; 
+      overflow: hidden; background: #cbd5e1; 
+      font-family: system-ui, -apple-system, sans-serif; 
     }
 
-    @media (min-width: 600px){
-      body{ display:flex; justify-content:center; align-items:center; }
-      .app-container{
-        max-width: 480px;
-        border-radius:20px;
-        box-shadow:0 20px 50px rgba(0,0,0,0.2);
-        overflow:hidden;
-        height: 95vh; /* בדסקטופ רגיל זה בסדר */
+    body { display: flex; justify-content: center; align-items: center; }
+
+    .app-container {
+      width: 100%; height: 100%; background: white;
+      display: flex; flex-direction: column; position: relative;
+    }
+
+    @media (min-width: 600px) {
+      .app-container { 
+        max-width: 500px; height: 90vh; max-height: 900px;
+        border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); 
+        overflow: hidden; border: 1px solid #e2e8f0;
       }
     }
 
-    .header{
-      padding: 12px;
-      border-bottom: 1px solid #e2e8f0;
-      flex: 0 0 auto;
-      background: #fff;
-      position: relative;
+    /* Header */
+    .header {
+      padding: 12px 16px; border-bottom: 1px solid #e2e8f0;
+      flex: 0 0 auto; background: #fff; position: relative; z-index: 10;
+      display: flex; align-items: center; gap: 10px;
     }
 
-    .sound-toggle{
-      position:absolute; left:12px; top:18px;
-      background:var(--bg); border:1px solid #ddd;
-      border-radius:50%;
-      width:35px; height:35px;
-      cursor:pointer;
-      display:flex; align-items:center; justify-content:center;
-      font-size:18px;
-      z-index:50;
+    .sound-toggle {
+      background: var(--bg); border: 1px solid #cbd5e1;
+      border-radius: 50%; width: 40px; height: 40px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0; transition: 0.2s;
+    }
+    .sound-toggle:active { transform: scale(0.9); }
+
+    select {
+      flex-grow: 1; padding: 10px; border-radius: 12px;
+      font-size: 16px; font-weight: bold; background: var(--bg);
+      border: 1px solid #cbd5e1; outline: none;
     }
 
-    select{
-      width: calc(100% - 45px);
-      margin-right:45px;
-      padding:10px;
-      border-radius:10px;
-      font-size:16px;
-      font-weight:bold;
-      background:var(--bg);
-      border:1px solid #ddd;
-      margin-bottom:8px;
+    .equation-display {
+      position: absolute; bottom: -45px; left: 0; right: 0;
+      text-align: center; font-family: "Times New Roman", serif;
+      font-size: 24px; font-weight: bold; color: var(--p);
+      pointer-events: none; text-shadow: 0 2px 10px rgba(255,255,255,0.8);
+      z-index: 5;
     }
 
-    .equation-display{
-      font-family:"Times New Roman", serif;
-      font-size:26px;
-      color:var(--p);
-      text-align:center;
-      direction:ltr;
-      min-height:40px;
-      font-weight:bold;
+    /* Canvas Area */
+    .canvas-area {
+      flex: 1; position: relative; background: #fff; 
+      overflow: hidden; cursor: crosshair;
+    }
+    canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+
+    /* HUD */
+    .hud {
+      position: absolute; top: 10px; left: 10px; right: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 8px 12px; border-radius: 16px;
+      display: flex; justify-content: space-around;
+      border: 1px solid #e2e8f0; pointer-events: none;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+    .hud div { text-align: center; }
+    .hud b { font-family: monospace; font-size: 15px; color: #0f172a; }
+    .hud span { font-size: 11px; color: #64748b; display: block; font-weight: 600; }
+
+    /* Feedback UI */
+    .proximity-bar {
+      position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
+      padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: bold;
+      background: rgba(15, 23, 42, 0.8); color: white;
+      transition: opacity 0.3s, transform 0.3s; opacity: 0; pointer-events: none;
+      backdrop-filter: blur(4px);
     }
 
-    .canvas-area{
-      flex: 1 1 auto;
-      min-height: 0;           /* ✅ חשוב ל-flex כדי שהקנבס יוכל להתמתח */
-      position: relative;
-      background:white;
-      overflow:hidden;
+    .win-toast {
+      position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
+      background: var(--win); color: white; padding: 16px 24px;
+      border-radius: 50px; font-weight: 800; font-size: 18px;
+      opacity: 0; pointer-events: none; transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 100; box-shadow: 0 20px 25px -5px rgba(22, 163, 74, 0.4);
+      text-align: center; white-space: nowrap;
+    }
+    .win-toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+    /* Controls */
+    .controls {
+      padding: 16px; background: #fff; flex: 0 0 auto;
+      border-top: 1px solid #e2e8f0; z-index: 20;
     }
 
-    canvas{
-      width:100%;
-      height:100%;
-      display:block;
-      touch-action:none;
+    .q-desc {
+      font-size: 15px; text-align: center; color: #334155;
+      margin-bottom: 12px; min-height: 2.8em; font-weight: 600;
+      line-height: 1.4; background: #f1f5f9; padding: 10px;
+      border-radius: 12px; border: 1px solid #e2e8f0;
     }
 
-    .hud{
-      position:absolute;
-      top:10px; left:10px; right:10px;
-      background: rgba(255,255,255,0.92);
-      padding:8px;
-      border-radius:12px;
-      display:flex;
-      justify-content:space-around;
-      border:1px solid #e2e8f0;
-      pointer-events:none;
-    }
-    .hud b{ font-family: monospace; font-size:14px; }
-    .hud span{ font-size:10px; color:#64748b; display:block; text-align:center; }
-
-    .proximity-bar{
-      position:absolute;
-      bottom:10px;
-      left:50%;
-      transform:translateX(-50%);
-      padding:5px 15px;
-      border-radius:15px;
-      font-size:12px;
-      font-weight:bold;
-      background: rgba(0,0,0,0.7);
-      color:white;
-      transition:0.2s;
-      opacity:0;
-      pointer-events:none;
+    input[type=range] {
+      width: 100%; height: 24px; margin: 5px 0 15px; cursor: pointer;
+      accent-color: var(--p);
     }
 
-    .controls{
-      padding: 12px 15px;
-      background:#fff;
-      flex: 0 0 auto;
-      border-top: 1px solid #eee;
+    details { background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
+    summary {
+      font-size: 13px; cursor: pointer; text-align: center;
+      color: #64748b; padding: 10px; font-weight: 700;
+      transition: background 0.2s;
     }
-
-    .q-desc{
-      font-size:15px;
-      text-align:center;
-      color:#1e293b;
-      margin-bottom:8px;
-      min-height:2.2em;
-      font-weight:bold;
-      line-height:1.35;
-    }
-
-    input[type=range]{ width:100%; margin:10px 0 6px; cursor:pointer; }
-
-    details{ background:var(--bg); border-radius:8px; padding:5px; }
-    summary{ font-size:12px; cursor:pointer; text-align:center; color:#64748b; padding:5px; font-weight:bold; }
-    .manual-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:10px; }
-
-    /* ✅ "בול פגיעה" לא תופס מקום ולא מסתיר כשהוא לא פעיל */
-    .win-toast{
-      position:absolute;
-      top:50%;
-      left:50%;
-      transform:translate(-50%,-50%);
-      background:var(--win);
-      color:white;
-      padding:14px 18px;
-      border-radius:999px;
-      font-weight:800;
-      opacity:0;
-      pointer-events:none;
-      transition:0.15s;
-      z-index:100;
-      box-shadow:0 10px 30px rgba(22,163,74,0.35);
-      display:none;
-      white-space:nowrap;
-      max-width: 92%;
-      text-align:center;
-    }
-    .win-toast.show{
-      display:block;
-      opacity:1;
-      transform:translate(-50%,-50%) scale(1.03);
-    }
+    summary:hover { background: #f1f5f9; }
+    .manual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; background: white; border-top: 1px solid #e2e8f0; }
   </style>
 </head>
 
 <body>
-  <div class="app-container">
-    <div class="header">
-      <button class="sound-toggle" onclick="toggleSound(); playClick();" id="soundBtn">🔊</button>
-      <select id="qSelect" onchange="initQuestion(); playClick();"></select>
-      <div id="eqn" class="equation-display">y = x²</div>
-    </div>
 
-    <div class="canvas-area" id="cWrap">
-      <canvas id="cvs"></canvas>
-
-      <div class="hud">
-        <div><span>X</span><b id="hX">0</b></div>
-        <div><span>Y</span><b id="hY">0</b></div>
-        <div><span>שיפוע m</span><b id="hM">0</b></div>
-      </div>
-
-      <div id="prox" class="proximity-bar">חם... 🔥</div>
-      <div id="win" class="win-toast">✨ בול פגיעה! ישר 90+ מעולה! ✨</div>
-    </div>
-
-    <div class="controls">
-      <div id="qDesc" class="q-desc">טוען שאלה...</div>
-      <input type="range" id="mainX" min="-6" max="6" step="0.01" oninput="updateAll()">
-
-      <details onclick="playClick()">
-        <summary>⚙️ עריכה ידנית</summary>
-        <div class="manual-grid">
-          <input type="range" id="mA" min="-1" max="1" step="0.1" value="0" oninput="manual()">
-          <input type="range" id="mB" min="-2" max="2" step="0.1" value="1" oninput="manual()">
-          <input type="range" id="mC" min="-4" max="4" step="0.1" value="0" oninput="manual()">
-          <input type="range" id="mD" min="-4" max="4" step="0.1" value="0" oninput="manual()">
-        </div>
-      </details>
-    </div>
+<div class="app-container">
+  <div class="header">
+    <button class="sound-toggle" onclick="toggleSound(); playClick();" id="soundBtn" aria-label="הפעל שמע">🔊</button>
+    <select id="qSelect" onchange="initQuestion(); playClick();"></select>
   </div>
 
-<script>
-  /* =========================
-     ✅ FIX אנדרואיד/Google Sites:
-     מחשבים גובה אמיתי עם visualViewport
-     ומעדכנים CSS var(--vh)
-  ========================= */
-  function setRealVh(){
-    const h = (window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight;
-    document.documentElement.style.setProperty('--vh', (h * 0.01) + 'px');
-  }
-  window.addEventListener('resize', setRealVh);
-  if (window.visualViewport) window.visualViewport.addEventListener('resize', setRealVh);
-  setRealVh();
+  <div class="canvas-area" id="cWrap">
+    <div id="eqn" class="equation-display">y = x²</div>
+    <canvas id="cvs"></canvas>
+    
+    <div class="hud">
+      <div><span>X</span><b id="hX">0</b></div>
+      <div><span>Y</span><b id="hY">0</b></div>
+      <div><span>שיפוע m</span><b id="hM">0</b></div>
+    </div>
 
-  // ===== Sound =====
+    <div id="prox" class="proximity-bar">חם... 🔥</div>
+    <div id="win" class="win-toast">✨ בול פגיעה! ✨</div>
+  </div>
+
+  <div class="controls">
+    <div id="qDesc" class="q-desc">טוען שאלה...</div>
+    <input type="range" id="mainX" min="-6" max="6" step="0.01" oninput="updateAll()">
+
+    <details onclick="playClick()">
+      <summary>⚙️ עריכה ידנית (מתקדם)</summary>
+      <div class="manual-grid">
+        <input type="range" id="mA" min="-1" max="1" step="0.1" value="0" oninput="manual()" title="מקדם x³">
+        <input type="range" id="mB" min="-2" max="2" step="0.1" value="1" oninput="manual()" title="מקדם x²">
+        <input type="range" id="mC" min="-4" max="4" step="0.1" value="0" oninput="manual()" title="מקדם x">
+        <input type="range" id="mD" min="-4" max="4" step="0.1" value="0" oninput="manual()" title="מספר חופשי">
+      </div>
+    </details>
+  </div>
+</div>
+
+<script>
+  // ===== Sound Engine (Optimized) =====
   let soundEnabled = true;
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
+  
   function playNote(freq, type, duration, vol) {
     if (!soundEnabled) return;
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = type;
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    osc.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.02); // Smooth transition
     gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
     osc.connect(gain); gain.connect(audioCtx.destination);
     osc.start(); osc.stop(audioCtx.currentTime + duration);
   }
+
   function playClick() { playNote(400, 'triangle', 0.05, 0.05); }
+  function playWin() { [523, 659, 783, 1046].forEach((f, i) => setTimeout(() => playNote(f, 'sine', 0.3, 0.1), i * 100)); }
+  
+  let lastTick = 0;
   function playTick(dist) {
-    let freq = 120 + (1 - Math.min(dist, 1)) * 700;
-    playNote(freq, 'sine', 0.035, 0.04);
+    const now = performance.now();
+    if (now - lastTick < 90) return; // Prevent spamming
+    lastTick = now;
+    let freq = 120 + (1 - Math.min(dist, 1)) * 600;
+    playNote(freq, 'sine', 0.08, 0.03);
   }
-  function playWin() {
-    [523, 659, 783, 1046].forEach((f, i) => setTimeout(() => playNote(f, 'sine', 0.25, 0.09), i * 90));
-  }
+
   function toggleSound() {
     soundEnabled = !soundEnabled;
     document.getElementById('soundBtn').innerText = soundEnabled ? "🔊" : "🔈";
   }
 
-  // ===== Questions =====
+  // ===== Game Logic =====
   const questions = [
     { t: "1. קודקוד הפרבולה", d: "מצא את הנקודה שבה השיפוע הוא 0.", p: [0, 1, -4, 4], goal: 'm0' },
     { t: "2. משיק בראשית", d: "הזז את X כך שהמשיק יעבור ב-(0,0).", p: [0, 0.5, 0, 2], goal: 'tangent0' },
@@ -260,28 +211,16 @@
     { t: "6. קיצון מקומי", d: "מצא נקודת מקסימום מקומית (שיפוע 0).", p: [-0.3, 0, 1.5, 0], goal: 'm0' },
     { t: "7. נורמל לראשית", d: "הזז את X כך שהאנך הסגול יעבור ב-(0,0).", p: [0, 1, 0, 2], goal: 'normal0' },
     { t: "8. Y שווה לשיפוע", d: "מצא נקודה שבה ערך הפונקציה (y) שווה לשיפוע (m).", p: [0, 0.5, 1, 0], goal: 'ym' },
-    { t: "9. נקודת פיתול (מעבר)", d: "מצא את הנקודה שבה הגרף משנה את כיוון הקעירות שלו (x=0).", p: [0.5, 0, 0, 0], goal: 'x0' },
+    { t: "9. נקודת פיתול", d: "מצא את הנקודה שבה הגרף משנה את כיוון הקעירות שלו (x=0).", p: [0.5, 0, 0, 0], goal: 'x0' },
     { t: "10. אתגר (Y=3)", d: "הזז את X עד שערך ה-Y יהיה בדיוק 3.", p: [0, 0.2, 0, 0], goal: 'y3' },
     { t: "11. שיפוע 2", d: "מצא נקודה שבה השיפוע שווה ל-2.", p: [0, 0.6, -1, 0], goal: 'm2' },
     { t: "12. אתגר (Y=-2)", d: "הזז את X עד שערך ה-Y יהיה בדיוק ‎-2.", p: [0, 0.3, 0, -3], goal: 'y-2' }
   ];
 
-  // ===== Canvas & State =====
-  let cnv = document.getElementById('cvs'),
-      ctx = cnv.getContext('2d'),
-      W, H,
-      scale = 45,
-      ox, oy,
-      px = 1;
-
+  let cnv = document.getElementById('cvs'), ctx = cnv.getContext('2d');
+  let W, H, scale = 45, ox, oy, px = 1;
   let cf = [0, 1, 0, 0], curGoal = '', won = false;
-
-  // smooth move
-  let pendingClientX = null;
-  let moveRaf = false;
-
-  // throttle tick sound
-  let lastTickAt = 0;
+  let isDragging = false; // Mouse drag state
 
   function f(x) { return cf[0]*x**3 + cf[1]*x**2 + cf[2]*x + cf[3]; }
   function df(x) { return 3*cf[0]*x**2 + 2*cf[1]*x + cf[2]; }
@@ -289,11 +228,18 @@
   function init() {
     let s = document.getElementById('qSelect');
     questions.forEach((q, i) => s.add(new Option(q.t, i)));
-
+    
+    // Listeners for Resize
     window.addEventListener('resize', resize);
-
-    cnv.addEventListener('touchstart', (e) => { handleMove(e.touches[0].clientX); e.preventDefault(); }, { passive:false });
-    cnv.addEventListener('touchmove',  (e) => { handleMove(e.touches[0].clientX); e.preventDefault(); }, { passive:false });
+    
+    // Listeners for Touch
+    cnv.addEventListener('touchstart', e => handleStart(e.touches[0].clientX), {passive:false});
+    cnv.addEventListener('touchmove', e => handleMove(e.touches[0].clientX), {passive:false});
+    
+    // Listeners for Mouse (Desktop Support!)
+    cnv.addEventListener('mousedown', e => { isDragging = true; handleStart(e.clientX); });
+    window.addEventListener('mousemove', e => { if(isDragging) handleMove(e.clientX); });
+    window.addEventListener('mouseup', () => { isDragging = false; });
 
     resize();
     initQuestion();
@@ -302,228 +248,167 @@
   function resize() {
     const r = document.getElementById('cWrap').getBoundingClientRect();
     W = r.width; H = r.height;
-
     const dpr = window.devicePixelRatio || 1;
-    cnv.width = Math.floor(W * dpr);
-    cnv.height = Math.floor(H * dpr);
-
-    // ✅ לא לצבור scale
+    cnv.width = Math.floor(W * dpr); cnv.height = Math.floor(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    ox = W/2;
-    oy = H/2 + 50;
-
+    ox = W/2; oy = H/2 + 50;
     updateAll();
   }
 
-  function handleMove(clientX) {
-    pendingClientX = clientX;
-    if (moveRaf) return;
-    moveRaf = true;
+  function handleStart(clientX) { handleMove(clientX); }
 
-    requestAnimationFrame(() => {
-      moveRaf = false;
-      let r = cnv.getBoundingClientRect();
-      px = Math.max(-6, Math.min(6, (pendingClientX - r.left - ox) / scale));
-      document.getElementById('mainX').value = px;
-      updateAll();
-    });
+  function handleMove(clientX) {
+    const r = cnv.getBoundingClientRect();
+    let val = (clientX - r.left - ox) / scale;
+    // הגבלה לגבולות המסך בערך, כדי לא לצאת משליטה
+    px = Math.max(-10, Math.min(10, val));
+    
+    // עדכון הסליידר שיתאים למגע
+    const sld = document.getElementById('mainX');
+    if (px >= sld.min && px <= sld.max) sld.value = px;
+    
+    requestAnimationFrame(updateAll);
   }
 
   function updateAll() {
-    px = parseFloat(document.getElementById('mainX').value);
+    // If not dragging via canvas, take value from slider
+    if (!isDragging) px = parseFloat(document.getElementById('mainX').value);
 
     document.getElementById('hX').innerText = px.toFixed(2);
     document.getElementById('hY').innerText = f(px).toFixed(2);
     document.getElementById('hM').innerText = df(px).toFixed(2);
-
+    
     renderEquation();
-
-    const dist = checkGoalAndToast();
-
-    const now = performance.now();
-    if (now - lastTickAt > 70) {
-      playTick(dist);
-      lastTickAt = now;
-    }
-
+    
+    const dist = checkGoal();
+    playTick(dist);
     updateProximity(dist);
     draw();
   }
 
   function updateProximity(dist) {
     const el = document.getElementById('prox');
-    if (curGoal === '') { el.style.opacity = 0; return; }
-
-    if (dist < 0.2) { el.innerText = "בוער! 🔥"; el.style.opacity = 1; el.style.color = "#ff4500"; }
-    else if (dist < 0.8) { el.innerText = "חם מאוד.. ☀️"; el.style.opacity = 1; el.style.color = "#ffa500"; }
-    else if (dist < 1.8) { el.innerText = "מתחמם 🌤️"; el.style.opacity = 1; el.style.color = "#ffeb3b"; }
-    else { el.style.opacity = 0; }
+    if (!curGoal || won) { el.style.opacity = 0; return; }
+    
+    el.style.opacity = dist < 2 ? 1 : 0;
+    if (dist < 0.2) { el.innerText = "בוער! 🔥"; el.style.color = "#ef4444"; }
+    else if (dist < 0.8) { el.innerText = "מתחמם.. ☀️"; el.style.color = "#f59e0b"; }
+    else { el.innerText = "קר ❄️"; el.style.color = "#3b82f6"; }
   }
 
-  // ✅ בול פגיעה מופיע רק בזמן פגיעה ונעלם מיד כשזזים
-  function checkGoalAndToast() {
-    const y = f(px);
-    const m = df(px);
+  function checkGoal() {
+    const y = f(px), m = df(px);
     let d = 10;
-
     switch(curGoal) {
       case 'm0': d = Math.abs(m); break;
-      case 'm1': d = Math.abs(m - 1); break;
-      case 'm2': d = Math.abs(m - 2); break;
+      case 'm1': d = Math.abs(m-1); break;
+      case 'm2': d = Math.abs(m-2); break;
       case 'y0': d = Math.abs(y); break;
-      case 'y3': d = Math.abs(y - 3); break;
-      case 'y-2': d = Math.abs(y + 2); break;
+      case 'y3': d = Math.abs(y-3); break;
+      case 'y-2': d = Math.abs(y+2); break;
       case 'tangent0': d = Math.abs(y - m*px); break;
-      case 'normal4': d = Math.abs(m) > 0.1 ? Math.abs((px + m*y) - 4) : 5; break;
-      case 'normal0': d = Math.abs(px + m*y); break;
-      case 'ym': d = Math.abs(y - m); break;
+      case 'normal4': d = Math.abs(m)>0.1 ? Math.abs((px+m*y)-4) : 5; break;
+      case 'normal0': d = Math.abs(px+m*y); break;
+      case 'ym': d = Math.abs(y-m); break;
       case 'x0': d = Math.abs(px); break;
     }
-
-    const winEl = document.getElementById('win');
+    
+    const win = document.getElementById('win');
     if (d < 0.05) {
-      if (!won) { won = true; playWin(); }
-      winEl.classList.add('show');
+      if (!won) { won = true; playWin(); win.classList.add('show'); }
     } else {
-      won = false;
-      winEl.classList.remove('show');
+      won = false; win.classList.remove('show');
     }
     return d;
   }
 
   function initQuestion() {
-    let q = questions[document.getElementById('qSelect').value];
-
-    // ✅ תמיד מציג תיאור שאלה
+    const q = questions[document.getElementById('qSelect').value];
     document.getElementById('qDesc').innerText = q.d;
-
-    cf = [...q.p];
-    curGoal = q.goal;
-    won = false;
-
+    cf = [...q.p]; curGoal = q.goal; won = false;
     document.getElementById('win').classList.remove('show');
-
+    
     document.getElementById('mA').value = cf[0];
     document.getElementById('mB').value = cf[1];
     document.getElementById('mC').value = cf[2];
     document.getElementById('mD').value = cf[3];
-
+    
     px = (curGoal === 'x0') ? -3 : 2;
     document.getElementById('mainX').value = px;
-
     updateAll();
   }
 
   function manual() {
-    cf = [
-      parseFloat(document.getElementById('mA').value),
-      parseFloat(document.getElementById('mB').value),
-      parseFloat(document.getElementById('mC').value),
-      parseFloat(document.getElementById('mD').value)
-    ];
-
-    curGoal = '';
-    won = false;
-
+    cf = ['mA','mB','mC','mD'].map(id => parseFloat(document.getElementById(id).value));
+    curGoal = ''; won = false;
     document.getElementById('win').classList.remove('show');
-    document.getElementById('qDesc').innerText = "🔧 מצב חקירה חופשית - נסה לשחק עם המקדמים!";
-    playClick();
+    document.getElementById('qDesc').innerText = "🔧 חקירה חופשית";
     updateAll();
   }
 
   function renderEquation() {
-    let t = [];
-    const fmt = (v, s) => {
-      if (v === 0) return null;
-      let res = (v === 1 && s !== "" ? "" : v === -1 && s !== "" ? "-" : v);
-      return res + s;
-    };
-
-    let t1 = fmt(cf[0], "x³"),
-        t2 = fmt(cf[1], "x²"),
-        t3 = fmt(cf[2], "x"),
-        t4 = (cf[3] !== 0 || (!t1 && !t2 && !t3)) ? cf[3] : null;
-
-    if (t1) t.push(t1);
-    if (t2) t.push(t2);
-    if (t3) t.push(t3);
-    if (t4 !== null) t.push(String(t4));
-
-    document.getElementById('eqn').innerText =
-      "y = " + t.join(" + ").replace(/\+ -/g, "- ");
+    const fmt = (v, s) => v===0 ? "" : (v===1 && s!=="" ? "" : (v===-1 && s!=="" ? "-" : v)) + s;
+    let txt = [fmt(cf[0],"x³"), fmt(cf[1],"x²"), fmt(cf[2],"x"), cf[3]].filter(x=>x!=="").join(" + ").replace(/\+ -/g,"- ");
+    if(txt.endsWith(" + ")) txt = txt.slice(0,-3);
+    document.getElementById('eqn').innerText = "y = " + (txt || "0");
   }
 
   function draw() {
     ctx.clearRect(0,0,W,H);
 
-    // grid
-    ctx.strokeStyle = "#e2e8f0";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    for (let i=-10; i<=10; i++) {
-      ctx.moveTo(ox + i*scale, 0); ctx.lineTo(ox + i*scale, H);
-      ctx.moveTo(0, oy - i*scale); ctx.lineTo(W, oy - i*scale);
+    // Grid (Dynamic Infinite)
+    ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 1; ctx.beginPath();
+    const startX = Math.floor(-ox/scale), endX = Math.ceil((W-ox)/scale);
+    for(let i=startX; i<=endX; i++) {
+        ctx.moveTo(ox+i*scale, 0); ctx.lineTo(ox+i*scale, H);
+    }
+    const startY = Math.floor((oy-H)/scale), endY = Math.ceil(oy/scale);
+    for(let i=startY; i<=endY; i++) {
+        ctx.moveTo(0, oy-i*scale); ctx.lineTo(W, oy-i*scale);
     }
     ctx.stroke();
 
-    // axes
-    ctx.strokeStyle = "#94a3b8";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0,oy); ctx.lineTo(W,oy);
-    ctx.moveTo(ox,0); ctx.lineTo(ox,H);
-    ctx.stroke();
+    // Axes
+    ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 2; ctx.beginPath();
+    ctx.moveTo(0,oy); ctx.lineTo(W,oy); ctx.moveTo(ox,0); ctx.lineTo(ox,H); ctx.stroke();
 
-    // function
-    ctx.strokeStyle = "#2563eb";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    for (let x=-8; x<=8; x+=0.05) {
-      let gx = ox + x*scale;
-      let gy = oy - f(x)*scale;
-      if (x === -8) ctx.moveTo(gx,gy);
-      else ctx.lineTo(gx,gy);
+    // Function (Infinite draw)
+    ctx.strokeStyle = "#2563eb"; ctx.lineWidth = 3; ctx.beginPath();
+    // מצייר בדיוק מרוחב המסך ומעט מעבר כדי שלא יראו קטיעה
+    const screenMinX = (0 - ox) / scale - 1;
+    const screenMaxX = (W - ox) / scale + 1;
+    
+    for (let x = screenMinX; x <= screenMaxX; x += 0.05) {
+      let gx = ox + x*scale, gy = oy - f(x)*scale;
+      if (x === screenMinX) ctx.moveTo(gx, gy);
+      else ctx.lineTo(gx, gy);
     }
     ctx.stroke();
 
-    // point
-    let y0 = f(px);
-    let m = df(px);
-    let cx = ox + px*scale;
-    let cy = oy - y0*scale;
+    // Tangent & Normal (Infinite Lines)
+    let y0 = f(px), m = df(px), cx = ox + px*scale, cy = oy - y0*scale;
+    const bigL = Math.max(W,H) * 2; // אורך קו מספיק גדול לכסות כל מסך
 
-    // tangent
-    ctx.strokeStyle = "#f59e0b";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(cx - 400, cy + 400*m);
-    ctx.lineTo(cx + 400, cy - 400*m);
+    // Tangent (Orange)
+    ctx.strokeStyle = "#f59e0b"; ctx.lineWidth = 2; ctx.beginPath();
+    ctx.moveTo(cx - bigL, cy + bigL*m); 
+    ctx.lineTo(cx + bigL, cy - bigL*m); 
     ctx.stroke();
 
-    // normal
-    ctx.strokeStyle = "#9333ea";
-    ctx.setLineDash([5,5]);
-    ctx.beginPath();
-    if (Math.abs(m) > 0.01) {
+    // Normal (Purple)
+    ctx.strokeStyle = "#9333ea"; ctx.setLineDash([6,6]); ctx.beginPath();
+    if (Math.abs(m) > 0.001) {
       let nm = -1/m;
-      ctx.moveTo(cx - 400, cy + 400*nm);
-      ctx.lineTo(cx + 400, cy - 400*nm);
+      ctx.moveTo(cx - bigL, cy + bigL*nm);
+      ctx.lineTo(cx + bigL, cy - bigL*nm);
     } else {
-      ctx.moveTo(cx, 0);
-      ctx.lineTo(cx, H);
+      ctx.moveTo(cx, 0); ctx.lineTo(cx, H);
     }
-    ctx.stroke();
-    ctx.setLineDash([]);
+    ctx.stroke(); ctx.setLineDash([]);
 
-    // point dot
-    ctx.fillStyle = "#2563eb";
-    ctx.beginPath();
-    ctx.arc(cx, cy, 6, 0, Math.PI*2);
-    ctx.fill();
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    // Point
+    ctx.fillStyle = "#2563eb"; ctx.beginPath(); ctx.arc(cx, cy, 7, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.stroke();
   }
 
   window.onload = init;
