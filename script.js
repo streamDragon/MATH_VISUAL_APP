@@ -1,14 +1,29 @@
-/* נתונים ושאלות */
+/* --- מאגר השאלות החכמות --- */
 const questions = [
-    { cat: "התחלה", t: "מינימום", d: "גררו את הנקודה לתחתית העמק.", p: [0, 1, -4, 0], goal: 'm0' },
-    { cat: "התחלה", t: "חיתוך X", d: "איפה הגרף חותך את ציר ה-X?", p: [0, 0.5, -2, -2], goal: 'y0' },
-    { cat: "שיפוע", t: "שיפוע 1", d: "מצאו נקודה שהשיפוע הוא 1 (45°).", p: [0, 0.2, 0, 0], goal: 'm1' },
-    { cat: "שיפוע", t: "שיפוע 0", d: "מצאו נקודה שבה המשיק אופקי.", p: [0.3, 0, -3, 0], goal: 'm0' },
-    { cat: "מתקדם", t: "נורמל לראשית", d: "כוון שהאנך (הקו הסגול) יעבור ב-0,0.", p: [0, 1, 0, 1], goal: 'normal0' }
+    // שלב 1: חימום
+    { cat: "חימום", t: "פסגת ההר", d: "מצאו את נקודת המקסימום (הפסגה).", p: [-1, 0, 0, 4], goal: 'm0' },
+    
+    // שלב 2: שאלות משיק לנקודה חיצונית
+    { cat: "משיקים", t: "המגדלור", d: "כוונו את המשיק (הקרן) לנקודה האדומה למעלה (0,5).", 
+      p: [-0.5, 0, 0, 3], goal: 'tan_pass', target: [0, 5] },
+
+    { cat: "משיקים", t: "קליעה למטרה", d: "מצאו משיק שעובר דרך הנקודה (4,0) שעל ציר ה-X.", 
+      p: [-0.25, 0, 0, 4], goal: 'tan_pass', target: [4, 0] },
+
+    // שלב 3: נורמלים (אנכים)
+    { cat: "אנכים", t: "האנך הקצר", d: "כוונו את האנך הסגול (נורמל) שיעבור דרך הנקודה (0,2).", 
+      p: [0.5, 0, 0, 0], goal: 'norm_pass', target: [0, 2] },
+
+    { cat: "אנכים", t: "נורמל לראשית", d: "מצאו נקודה בה האנך עובר בראשית הצירים (0,0).", 
+      p: [0, 0.2, -1, 2], goal: 'norm_pass', target: [0, 0] },
+
+    // שלב 4: שיפועים מיוחדים
+    { cat: "מתקדם", t: "התנגשות ב-90°", d: "מצאו נקודה שבה המשיק מאונך לישר y=x (כלומר, m=-1).", 
+      p: [0, 0.25, 0, -2], goal: 'slope_val', targetVal: -1 }
 ];
 
 let cvs, ctx, W, H, mainArea;
-let scale = 40, ox, oy;
+let scale = 45, ox, oy;
 let px = 0, cf = [0,1,0,0], goal = '';
 let isDrag = false;
 
@@ -17,10 +32,8 @@ window.onload = () => {
     ctx = cvs.getContext('2d');
     mainArea = document.getElementById('mainArea');
     
-    // ניהול גודל
+    // ניהול אירועים
     window.addEventListener('resize', resize);
-    
-    // אירועי מגע ועכבר
     cvs.addEventListener('touchstart', e => start(e.touches[0]), {passive: false});
     cvs.addEventListener('touchmove', e => move(e.touches[0]), {passive: false});
     cvs.addEventListener('touchend', end);
@@ -34,7 +47,6 @@ window.onload = () => {
 };
 
 function resize() {
-    // לוקח גודל מהאלמנט העוטף (mainArea)
     W = cvs.width = mainArea.clientWidth;
     H = cvs.height = mainArea.clientHeight;
     ox = W/2; 
@@ -55,44 +67,50 @@ function updateFromSlider() {
 
 function start(e) { isDrag = true; move(e); }
 function end() { isDrag = false; }
+
 function move(e) {
     if(!isDrag) return;
     if(e.preventDefault) e.preventDefault();
-    
     let rect = cvs.getBoundingClientRect();
-    // חישוב מיקום X לפי העכבר/אצבע
     px = (e.clientX - rect.left - ox) / scale;
+    if(px < -10) px = -10; if(px > 10) px = 10;
     
-    // עדכון סליידר שיתאים לגרף
-    let sld = document.getElementById('mainX');
-    // הגבלה לתחום הסליידר
-    if(px < -10) px = -10;
-    if(px > 10) px = 10;
-    sld.value = px;
-    
+    document.getElementById('mainX').value = px;
     update();
 }
 
 function update() {
     let y = f(px), m = df(px);
-    document.getElementById('hX').innerText = px.toFixed(1);
-    document.getElementById('hY').innerText = y.toFixed(1);
-    document.getElementById('hM').innerText = m.toFixed(1);
-    
     checkWin(y, m);
     draw();
 }
 
 function checkWin(y, m) {
     if(!goal) return;
-    let d = 99;
-    if(goal==='m0') d=Math.abs(m);
-    else if(goal==='m1') d=Math.abs(m-1);
-    else if(goal==='y0') d=Math.abs(y);
-    else if(goal==='normal0') d=Math.abs(px + m*y);
+    let win = false;
+    let q = questions[document.getElementById('qSelect').value];
+
+    // בדיקות ניצחון
+    if(goal === 'm0') win = Math.abs(m) < 0.2;
+    else if(goal === 'slope_val') win = Math.abs(m - q.targetVal) < 0.2;
     
+    // משיק עובר בנקודה
+    else if(goal === 'tan_pass') {
+        let t = q.target; 
+        let predictedY = m * (t[0] - px) + y;
+        win = Math.abs(predictedY - t[1]) < 0.5;
+    }
+    
+    // נורמל עובר בנקודה
+    else if(goal === 'norm_pass') {
+        let t = q.target;
+        // נוסחה למניעת חלוקה ב-0: (dy)*m + dx = 0
+        let val = (t[1] - y) * m + (t[0] - px);
+        win = Math.abs(val) < 0.6;
+    }
+
     let badge = document.getElementById('successBanner');
-    if(d < 0.15) badge.classList.add('show');
+    if(win) badge.classList.add('show');
     else badge.classList.remove('show');
 }
 
@@ -108,45 +126,62 @@ function draw() {
     
     // צירים
     ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 2; ctx.beginPath();
-    ctx.moveTo(0,oy); ctx.lineTo(W,oy);
-    ctx.moveTo(ox,0); ctx.lineTo(ox,H);
-    ctx.stroke();
+    ctx.moveTo(0,oy); ctx.lineTo(W,oy); ctx.moveTo(ox,0); ctx.lineTo(ox,H); ctx.stroke();
     
+    // --- ציור נקודת מטרה (Target) ---
+    let q = questions[document.getElementById('qSelect').value];
+    if(q && q.target) {
+        let tx = ox + q.target[0] * scale;
+        let ty = oy - q.target[1] * scale;
+        
+        // הילה
+        ctx.beginPath(); ctx.fillStyle = "rgba(239, 68, 68, 0.2)";
+        ctx.arc(tx, ty, 15, 0, Math.PI*2); ctx.fill();
+        // נקודה
+        ctx.beginPath(); ctx.fillStyle = "#ef4444";
+        ctx.arc(tx, ty, 5, 0, Math.PI*2); ctx.fill();
+        // טקסט
+        ctx.fillStyle = "#ef4444"; ctx.font = "bold 12px sans-serif";
+        ctx.fillText("מטרה", tx + 10, ty);
+    }
+
     // פונקציה
-    ctx.strokeStyle = "#2563eb"; ctx.lineWidth = 3; ctx.beginPath();
+    ctx.strokeStyle = "#2563eb"; ctx.lineWidth = 4; ctx.beginPath();
     let sx = -ox/scale, ex = (W-ox)/scale;
-    // רזולוציה עדינה לציור חלק
     for(let x=sx; x<=ex; x+=0.05) {
         let cx=ox+x*scale, cy=oy-f(x)*scale;
         if(x===sx) ctx.moveTo(cx,cy); else ctx.lineTo(cx,cy);
     }
     ctx.stroke();
     
-    // משיק
+    // משיק (כתום)
     let cx=ox+px*scale, cy=oy-f(px)*scale, m=df(px);
     ctx.strokeStyle="#f97316"; ctx.lineWidth=2; ctx.beginPath();
     ctx.moveTo(cx-1000, cy+1000*m); ctx.lineTo(cx+1000, cy-1000*m);
     ctx.stroke();
 
-    if(goal==='normal0') { // אנך
+    // נורמל (סגול) - מצויר רק בשאלות רלוונטיות או אם המשיק אופקי
+    if(q && q.goal === 'norm_pass') { 
         ctx.strokeStyle="#a855f7"; ctx.setLineDash([5,5]); ctx.beginPath();
         let nm = -1/m;
-        ctx.moveTo(cx-1000, cy+1000*nm); ctx.lineTo(cx+1000, cy-1000*nm);
+        // אם m=0 הנורמל הוא אנכי לחלוטין
+        if(Math.abs(m)<0.01) { ctx.moveTo(cx, cy-1000); ctx.lineTo(cx, cy+1000); }
+        else { ctx.moveTo(cx-1000, cy+1000*nm); ctx.lineTo(cx+1000, cy-1000*nm); }
         ctx.stroke(); ctx.setLineDash([]);
     }
     
-    // נקודה
-    ctx.fillStyle="#2563eb"; ctx.beginPath(); ctx.arc(cx,cy,8,0,6.28); ctx.fill();
-    ctx.fillStyle="white"; ctx.beginPath(); ctx.arc(cx,cy,3,0,6.28); ctx.fill();
+    // נקודה כחולה
+    ctx.fillStyle="#2563eb"; ctx.beginPath(); ctx.arc(cx,cy,9,0,6.28); ctx.fill();
+    ctx.strokeStyle="white"; ctx.lineWidth=2; ctx.stroke();
 }
 
 /* ניהול ממשק */
-function changeZoom(v) { scale *= v; scale=Math.max(10, Math.min(150, scale)); draw(); }
-function resetView() { scale=40; ox=W/2; oy=H/2+H*0.1; draw(); }
+function changeZoom(v) { scale *= v; scale=Math.max(15, Math.min(120, scale)); draw(); }
+function resetView() { scale=45; ox=W/2; oy=H/2+H*0.1; draw(); }
 
 function initMenu() {
     let s = document.getElementById('qSelect');
-    s.innerHTML = ""; // ניקוי
+    s.innerHTML = "";
     let cats = {};
     questions.forEach((q,i) => {
         if(!cats[q.cat]) cats[q.cat]=[];
@@ -174,14 +209,12 @@ function loadQ(i) {
     document.getElementById('qText').innerText = q.d;
     ['mA','mB','mC','mD'].forEach((id,k)=>document.getElementById(id).value=cf[k]);
     
-    // איפוס מיקום התחלתי
     px = -3;
     document.getElementById('mainX').value=px;
     document.getElementById('successBanner').classList.remove('show');
     
-    // רענון טקסט משוואה יפה
     let txt = `y = ${cf[0]?cf[0]+"x³ ":""}${cf[1]?cf[1]+"x² ":""}${cf[2]?cf[2]+"x ":""}${cf[3]||""}`;
-    txt = txt.replace(/\+ -/g, "- ").replace(/ 1x/g," x").replace(/ 0x./g,""); // ניקויים
+    txt = txt.replace(/\+ -/g, "- ").replace(/ 1x/g," x").replace(/ 0x./g,"");
     if(txt === "y = ") txt = "y = 0";
     document.getElementById('eqn').innerText = txt;
     
