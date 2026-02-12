@@ -1,145 +1,532 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MATH_VISUAL_APP</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>מעבדת חקירה V35 - תיקון אנדרואיד/Google Sites</title>
+
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 16px; }
-    .wrap { max-width: 900px; margin: 0 auto; }
-    canvas { width: 100%; height: 420px; border: 1px solid #ddd; border-radius: 8px; }
-    .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 14px; }
-    .card { border: 1px solid #eee; border-radius: 8px; padding: 10px; }
-    label { display:block; font-size: 14px; margin-bottom: 6px; }
-    input[type="range"] { width: 100%; }
-    .eq { font-size: 18px; margin: 8px 0 12px; }
-    .small { font-size: 12px; opacity: .75; }
+    :root { --p:#2563eb; --s:#f59e0b; --a:#9333ea; --bg:#f1f5f9; --win:#16a34a; --vh: 1vh; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:#cbd5e1; font-family: system-ui, sans-serif; }
+
+    /* ✅ הכי חשוב: גובה אמיתי לפי JS (visualViewport) ולא לפי 100vh */
+    .app-container{
+      width:100%;
+      height: calc(var(--vh) * 100);
+      background:white;
+      display:flex;
+      flex-direction:column;
+      position:relative;
+    }
+
+    @media (min-width: 600px){
+      body{ display:flex; justify-content:center; align-items:center; }
+      .app-container{
+        max-width: 480px;
+        border-radius:20px;
+        box-shadow:0 20px 50px rgba(0,0,0,0.2);
+        overflow:hidden;
+        height: 95vh; /* בדסקטופ רגיל זה בסדר */
+      }
+    }
+
+    .header{
+      padding: 12px;
+      border-bottom: 1px solid #e2e8f0;
+      flex: 0 0 auto;
+      background: #fff;
+      position: relative;
+    }
+
+    .sound-toggle{
+      position:absolute; left:12px; top:18px;
+      background:var(--bg); border:1px solid #ddd;
+      border-radius:50%;
+      width:35px; height:35px;
+      cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px;
+      z-index:50;
+    }
+
+    select{
+      width: calc(100% - 45px);
+      margin-right:45px;
+      padding:10px;
+      border-radius:10px;
+      font-size:16px;
+      font-weight:bold;
+      background:var(--bg);
+      border:1px solid #ddd;
+      margin-bottom:8px;
+    }
+
+    .equation-display{
+      font-family:"Times New Roman", serif;
+      font-size:26px;
+      color:var(--p);
+      text-align:center;
+      direction:ltr;
+      min-height:40px;
+      font-weight:bold;
+    }
+
+    .canvas-area{
+      flex: 1 1 auto;
+      min-height: 0;           /* ✅ חשוב ל-flex כדי שהקנבס יוכל להתמתח */
+      position: relative;
+      background:white;
+      overflow:hidden;
+    }
+
+    canvas{
+      width:100%;
+      height:100%;
+      display:block;
+      touch-action:none;
+    }
+
+    .hud{
+      position:absolute;
+      top:10px; left:10px; right:10px;
+      background: rgba(255,255,255,0.92);
+      padding:8px;
+      border-radius:12px;
+      display:flex;
+      justify-content:space-around;
+      border:1px solid #e2e8f0;
+      pointer-events:none;
+    }
+    .hud b{ font-family: monospace; font-size:14px; }
+    .hud span{ font-size:10px; color:#64748b; display:block; text-align:center; }
+
+    .proximity-bar{
+      position:absolute;
+      bottom:10px;
+      left:50%;
+      transform:translateX(-50%);
+      padding:5px 15px;
+      border-radius:15px;
+      font-size:12px;
+      font-weight:bold;
+      background: rgba(0,0,0,0.7);
+      color:white;
+      transition:0.2s;
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .controls{
+      padding: 12px 15px;
+      background:#fff;
+      flex: 0 0 auto;
+      border-top: 1px solid #eee;
+    }
+
+    .q-desc{
+      font-size:15px;
+      text-align:center;
+      color:#1e293b;
+      margin-bottom:8px;
+      min-height:2.2em;
+      font-weight:bold;
+      line-height:1.35;
+    }
+
+    input[type=range]{ width:100%; margin:10px 0 6px; cursor:pointer; }
+
+    details{ background:var(--bg); border-radius:8px; padding:5px; }
+    summary{ font-size:12px; cursor:pointer; text-align:center; color:#64748b; padding:5px; font-weight:bold; }
+    .manual-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:10px; }
+
+    /* ✅ "בול פגיעה" לא תופס מקום ולא מסתיר כשהוא לא פעיל */
+    .win-toast{
+      position:absolute;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      background:var(--win);
+      color:white;
+      padding:14px 18px;
+      border-radius:999px;
+      font-weight:800;
+      opacity:0;
+      pointer-events:none;
+      transition:0.15s;
+      z-index:100;
+      box-shadow:0 10px 30px rgba(22,163,74,0.35);
+      display:none;
+      white-space:nowrap;
+      max-width: 92%;
+      text-align:center;
+    }
+    .win-toast.show{
+      display:block;
+      opacity:1;
+      transform:translate(-50%,-50%) scale(1.03);
+    }
   </style>
 </head>
-<body>
-<div class="wrap">
-  <h2>ויזואליזציה: פרבולה y = ax² + bx + c</h2>
-  <div class="eq" id="eq"></div>
-  <canvas id="cv" width="900" height="420"></canvas>
 
-  <div class="row">
-    <div class="card">
-      <label>a: <span id="aVal"></span></label>
-      <input id="a" type="range" min="-5" max="5" step="0.1" value="1">
-      <div class="small">משפיע על "פתיחות" וכיוון</div>
+<body>
+  <div class="app-container">
+    <div class="header">
+      <button class="sound-toggle" onclick="toggleSound(); playClick();" id="soundBtn">🔊</button>
+      <select id="qSelect" onchange="initQuestion(); playClick();"></select>
+      <div id="eqn" class="equation-display">y = x²</div>
     </div>
-    <div class="card">
-      <label>b: <span id="bVal"></span></label>
-      <input id="b" type="range" min="-10" max="10" step="0.1" value="-4">
-      <div class="small">משפיע על מיקום הקודקוד בציר x</div>
+
+    <div class="canvas-area" id="cWrap">
+      <canvas id="cvs"></canvas>
+
+      <div class="hud">
+        <div><span>X</span><b id="hX">0</b></div>
+        <div><span>Y</span><b id="hY">0</b></div>
+        <div><span>שיפוע m</span><b id="hM">0</b></div>
+      </div>
+
+      <div id="prox" class="proximity-bar">חם... 🔥</div>
+      <div id="win" class="win-toast">✨ בול פגיעה! ישר 90+ מעולה! ✨</div>
     </div>
-    <div class="card">
-      <label>c: <span id="cVal"></span></label>
-      <input id="c" type="range" min="-20" max="20" step="0.1" value="4">
-      <div class="small">חיתוך עם ציר y</div>
+
+    <div class="controls">
+      <div id="qDesc" class="q-desc">טוען שאלה...</div>
+      <input type="range" id="mainX" min="-6" max="6" step="0.01" oninput="updateAll()">
+
+      <details onclick="playClick()">
+        <summary>⚙️ עריכה ידנית</summary>
+        <div class="manual-grid">
+          <input type="range" id="mA" min="-1" max="1" step="0.1" value="0" oninput="manual()">
+          <input type="range" id="mB" min="-2" max="2" step="0.1" value="1" oninput="manual()">
+          <input type="range" id="mC" min="-4" max="4" step="0.1" value="0" oninput="manual()">
+          <input type="range" id="mD" min="-4" max="4" step="0.1" value="0" oninput="manual()">
+        </div>
+      </details>
     </div>
   </div>
-</div>
 
 <script>
-  const cv = document.getElementById('cv');
-  const ctx = cv.getContext('2d');
+  /* =========================
+     ✅ FIX אנדרואיד/Google Sites:
+     מחשבים גובה אמיתי עם visualViewport
+     ומעדכנים CSS var(--vh)
+  ========================= */
+  function setRealVh(){
+    const h = (window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight;
+    document.documentElement.style.setProperty('--vh', (h * 0.01) + 'px');
+  }
+  window.addEventListener('resize', setRealVh);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', setRealVh);
+  setRealVh();
 
-  const aEl = document.getElementById('a');
-  const bEl = document.getElementById('b');
-  const cEl = document.getElementById('c');
+  // ===== Sound =====
+  let soundEnabled = true;
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-  const aVal = document.getElementById('aVal');
-  const bVal = document.getElementById('bVal');
-  const cVal = document.getElementById('cVal');
-  const eq = document.getElementById('eq');
-
-  // world coords
-  let xMin=-10, xMax=10, yMin=-10, yMax=10;
-
-  function f(x,a,b,c){ return a*x*x + b*x + c; }
-
-  function w2s(x,y){
-    const sx = (x - xMin) / (xMax - xMin) * cv.width;
-    const sy = cv.height - (y - yMin) / (yMax - yMin) * cv.height;
-    return [sx, sy];
+  function playNote(freq, type, duration, vol) {
+    if (!soundEnabled) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime + duration);
+  }
+  function playClick() { playNote(400, 'triangle', 0.05, 0.05); }
+  function playTick(dist) {
+    let freq = 120 + (1 - Math.min(dist, 1)) * 700;
+    playNote(freq, 'sine', 0.035, 0.04);
+  }
+  function playWin() {
+    [523, 659, 783, 1046].forEach((f, i) => setTimeout(() => playNote(f, 'sine', 0.25, 0.09), i * 90));
+  }
+  function toggleSound() {
+    soundEnabled = !soundEnabled;
+    document.getElementById('soundBtn').innerText = soundEnabled ? "🔊" : "🔈";
   }
 
-  function drawAxes(){
-    ctx.clearRect(0,0,cv.width,cv.height);
+  // ===== Questions =====
+  const questions = [
+    { t: "1. קודקוד הפרבולה", d: "מצא את הנקודה שבה השיפוע הוא 0.", p: [0, 1, -4, 4], goal: 'm0' },
+    { t: "2. משיק בראשית", d: "הזז את X כך שהמשיק יעבור ב-(0,0).", p: [0, 0.5, 0, 2], goal: 'tangent0' },
+    { t: "3. האנך ב-X=4", d: "מצא נקודה שבה האנך חותך את ציר ה-X ב-4.", p: [0, 0.5, 0, 1], goal: 'normal4' },
+    { t: "4. זווית 45°", d: "מצא נקודה שבה השיפוע שווה ל-1.", p: [0, 0.25, 0, -2], goal: 'm1' },
+    { t: "5. חיתוך ציר X", d: "מצא נקודה שבה Y=0 (שורש הפונקציה).", p: [0, 1, -2, -3], goal: 'y0' },
+    { t: "6. קיצון מקומי", d: "מצא נקודת מקסימום מקומית (שיפוע 0).", p: [-0.3, 0, 1.5, 0], goal: 'm0' },
+    { t: "7. נורמל לראשית", d: "הזז את X כך שהאנך הסגול יעבור ב-(0,0).", p: [0, 1, 0, 2], goal: 'normal0' },
+    { t: "8. Y שווה לשיפוע", d: "מצא נקודה שבה ערך הפונקציה (y) שווה לשיפוע (m).", p: [0, 0.5, 1, 0], goal: 'ym' },
+    { t: "9. נקודת פיתול (מעבר)", d: "מצא את הנקודה שבה הגרף משנה את כיוון הקעירות שלו (x=0).", p: [0.5, 0, 0, 0], goal: 'x0' },
+    { t: "10. אתגר (Y=3)", d: "הזז את X עד שערך ה-Y יהיה בדיוק 3.", p: [0, 0.2, 0, 0], goal: 'y3' },
+    { t: "11. שיפוע 2", d: "מצא נקודה שבה השיפוע שווה ל-2.", p: [0, 0.6, -1, 0], goal: 'm2' },
+    { t: "12. אתגר (Y=-2)", d: "הזז את X עד שערך ה-Y יהיה בדיוק ‎-2.", p: [0, 0.3, 0, -3], goal: 'y-2' }
+  ];
+
+  // ===== Canvas & State =====
+  let cnv = document.getElementById('cvs'),
+      ctx = cnv.getContext('2d'),
+      W, H,
+      scale = 45,
+      ox, oy,
+      px = 1;
+
+  let cf = [0, 1, 0, 0], curGoal = '', won = false;
+
+  // smooth move
+  let pendingClientX = null;
+  let moveRaf = false;
+
+  // throttle tick sound
+  let lastTickAt = 0;
+
+  function f(x) { return cf[0]*x**3 + cf[1]*x**2 + cf[2]*x + cf[3]; }
+  function df(x) { return 3*cf[0]*x**2 + 2*cf[1]*x + cf[2]; }
+
+  function init() {
+    let s = document.getElementById('qSelect');
+    questions.forEach((q, i) => s.add(new Option(q.t, i)));
+
+    window.addEventListener('resize', resize);
+
+    cnv.addEventListener('touchstart', (e) => { handleMove(e.touches[0].clientX); e.preventDefault(); }, { passive:false });
+    cnv.addEventListener('touchmove',  (e) => { handleMove(e.touches[0].clientX); e.preventDefault(); }, { passive:false });
+
+    resize();
+    initQuestion();
+  }
+
+  function resize() {
+    const r = document.getElementById('cWrap').getBoundingClientRect();
+    W = r.width; H = r.height;
+
+    const dpr = window.devicePixelRatio || 1;
+    cnv.width = Math.floor(W * dpr);
+    cnv.height = Math.floor(H * dpr);
+
+    // ✅ לא לצבור scale
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    ox = W/2;
+    oy = H/2 + 50;
+
+    updateAll();
+  }
+
+  function handleMove(clientX) {
+    pendingClientX = clientX;
+    if (moveRaf) return;
+    moveRaf = true;
+
+    requestAnimationFrame(() => {
+      moveRaf = false;
+      let r = cnv.getBoundingClientRect();
+      px = Math.max(-6, Math.min(6, (pendingClientX - r.left - ox) / scale));
+      document.getElementById('mainX').value = px;
+      updateAll();
+    });
+  }
+
+  function updateAll() {
+    px = parseFloat(document.getElementById('mainX').value);
+
+    document.getElementById('hX').innerText = px.toFixed(2);
+    document.getElementById('hY').innerText = f(px).toFixed(2);
+    document.getElementById('hM').innerText = df(px).toFixed(2);
+
+    renderEquation();
+
+    const dist = checkGoalAndToast();
+
+    const now = performance.now();
+    if (now - lastTickAt > 70) {
+      playTick(dist);
+      lastTickAt = now;
+    }
+
+    updateProximity(dist);
+    draw();
+  }
+
+  function updateProximity(dist) {
+    const el = document.getElementById('prox');
+    if (curGoal === '') { el.style.opacity = 0; return; }
+
+    if (dist < 0.2) { el.innerText = "בוער! 🔥"; el.style.opacity = 1; el.style.color = "#ff4500"; }
+    else if (dist < 0.8) { el.innerText = "חם מאוד.. ☀️"; el.style.opacity = 1; el.style.color = "#ffa500"; }
+    else if (dist < 1.8) { el.innerText = "מתחמם 🌤️"; el.style.opacity = 1; el.style.color = "#ffeb3b"; }
+    else { el.style.opacity = 0; }
+  }
+
+  // ✅ בול פגיעה מופיע רק בזמן פגיעה ונעלם מיד כשזזים
+  function checkGoalAndToast() {
+    const y = f(px);
+    const m = df(px);
+    let d = 10;
+
+    switch(curGoal) {
+      case 'm0': d = Math.abs(m); break;
+      case 'm1': d = Math.abs(m - 1); break;
+      case 'm2': d = Math.abs(m - 2); break;
+      case 'y0': d = Math.abs(y); break;
+      case 'y3': d = Math.abs(y - 3); break;
+      case 'y-2': d = Math.abs(y + 2); break;
+      case 'tangent0': d = Math.abs(y - m*px); break;
+      case 'normal4': d = Math.abs(m) > 0.1 ? Math.abs((px + m*y) - 4) : 5; break;
+      case 'normal0': d = Math.abs(px + m*y); break;
+      case 'ym': d = Math.abs(y - m); break;
+      case 'x0': d = Math.abs(px); break;
+    }
+
+    const winEl = document.getElementById('win');
+    if (d < 0.05) {
+      if (!won) { won = true; playWin(); }
+      winEl.classList.add('show');
+    } else {
+      won = false;
+      winEl.classList.remove('show');
+    }
+    return d;
+  }
+
+  function initQuestion() {
+    let q = questions[document.getElementById('qSelect').value];
+
+    // ✅ תמיד מציג תיאור שאלה
+    document.getElementById('qDesc').innerText = q.d;
+
+    cf = [...q.p];
+    curGoal = q.goal;
+    won = false;
+
+    document.getElementById('win').classList.remove('show');
+
+    document.getElementById('mA').value = cf[0];
+    document.getElementById('mB').value = cf[1];
+    document.getElementById('mC').value = cf[2];
+    document.getElementById('mD').value = cf[3];
+
+    px = (curGoal === 'x0') ? -3 : 2;
+    document.getElementById('mainX').value = px;
+
+    updateAll();
+  }
+
+  function manual() {
+    cf = [
+      parseFloat(document.getElementById('mA').value),
+      parseFloat(document.getElementById('mB').value),
+      parseFloat(document.getElementById('mC').value),
+      parseFloat(document.getElementById('mD').value)
+    ];
+
+    curGoal = '';
+    won = false;
+
+    document.getElementById('win').classList.remove('show');
+    document.getElementById('qDesc').innerText = "🔧 מצב חקירה חופשית - נסה לשחק עם המקדמים!";
+    playClick();
+    updateAll();
+  }
+
+  function renderEquation() {
+    let t = [];
+    const fmt = (v, s) => {
+      if (v === 0) return null;
+      let res = (v === 1 && s !== "" ? "" : v === -1 && s !== "" ? "-" : v);
+      return res + s;
+    };
+
+    let t1 = fmt(cf[0], "x³"),
+        t2 = fmt(cf[1], "x²"),
+        t3 = fmt(cf[2], "x"),
+        t4 = (cf[3] !== 0 || (!t1 && !t2 && !t3)) ? cf[3] : null;
+
+    if (t1) t.push(t1);
+    if (t2) t.push(t2);
+    if (t3) t.push(t3);
+    if (t4 !== null) t.push(String(t4));
+
+    document.getElementById('eqn').innerText =
+      "y = " + t.join(" + ").replace(/\+ -/g, "- ");
+  }
+
+  function draw() {
+    ctx.clearRect(0,0,W,H);
 
     // grid
-    ctx.globalAlpha = 0.25;
-    for(let i=Math.ceil(xMin); i<=xMax; i++){
-      const [sx] = w2s(i,0);
-      ctx.beginPath(); ctx.moveTo(sx,0); ctx.lineTo(sx,cv.height); ctx.stroke();
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let i=-10; i<=10; i++) {
+      ctx.moveTo(ox + i*scale, 0); ctx.lineTo(ox + i*scale, H);
+      ctx.moveTo(0, oy - i*scale); ctx.lineTo(W, oy - i*scale);
     }
-    for(let j=Math.ceil(yMin); j<=yMax; j++){
-      const [,sy] = w2s(0,j);
-      ctx.beginPath(); ctx.moveTo(0,sy); ctx.lineTo(cv.width,sy); ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
+    ctx.stroke();
 
     // axes
+    ctx.strokeStyle = "#94a3b8";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    const [x0,y0]=w2s(0,0);
-    ctx.moveTo(0,y0); ctx.lineTo(cv.width,y0); // x-axis
-    ctx.moveTo(x0,0); ctx.lineTo(x0,cv.height); // y-axis
+    ctx.moveTo(0,oy); ctx.lineTo(W,oy);
+    ctx.moveTo(ox,0); ctx.lineTo(ox,H);
     ctx.stroke();
-    ctx.lineWidth = 1;
-  }
 
-  function drawParabola(a,b,c){
-    // auto y-range based on sampling
-    let ys=[];
-    for(let x=xMin; x<=xMax; x+=0.2){ ys.push(f(x,a,b,c)); }
-    const lo = Math.min(...ys), hi = Math.max(...ys);
-    const pad = Math.max(2, (hi-lo)*0.15);
-    yMin = Math.floor(lo - pad);
-    yMax = Math.ceil(hi + pad);
-
-    drawAxes();
-
-    // curve
+    // function
+    ctx.strokeStyle = "#2563eb";
+    ctx.lineWidth = 3;
     ctx.beginPath();
-    let first=true;
-    for(let x=xMin; x<=xMax; x+=0.05){
-      const y=f(x,a,b,c);
-      const [sx,sy]=w2s(x,y);
-      if(first){ ctx.moveTo(sx,sy); first=false; }
-      else ctx.lineTo(sx,sy);
+    for (let x=-8; x<=8; x+=0.05) {
+      let gx = ox + x*scale;
+      let gy = oy - f(x)*scale;
+      if (x === -8) ctx.moveTo(gx,gy);
+      else ctx.lineTo(gx,gy);
     }
-    ctx.lineWidth=3;
     ctx.stroke();
-    ctx.lineWidth=1;
 
-    // vertex
-    if(a !== 0){
-      const xv = -b/(2*a);
-      const yv = f(xv,a,b,c);
-      const [sx,sy]=w2s(xv,yv);
-      ctx.beginPath(); ctx.arc(sx,sy,6,0,Math.PI*2); ctx.fill();
+    // point
+    let y0 = f(px);
+    let m = df(px);
+    let cx = ox + px*scale;
+    let cy = oy - y0*scale;
+
+    // tangent
+    ctx.strokeStyle = "#f59e0b";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx - 400, cy + 400*m);
+    ctx.lineTo(cx + 400, cy - 400*m);
+    ctx.stroke();
+
+    // normal
+    ctx.strokeStyle = "#9333ea";
+    ctx.setLineDash([5,5]);
+    ctx.beginPath();
+    if (Math.abs(m) > 0.01) {
+      let nm = -1/m;
+      ctx.moveTo(cx - 400, cy + 400*nm);
+      ctx.lineTo(cx + 400, cy - 400*nm);
+    } else {
+      ctx.moveTo(cx, 0);
+      ctx.lineTo(cx, H);
     }
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // point dot
+    ctx.fillStyle = "#2563eb";
+    ctx.beginPath();
+    ctx.arc(cx, cy, 6, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 2;
+    ctx.stroke();
   }
 
-  function fmt(n){ return (Math.round(n*10)/10).toFixed(1); }
-
-  function render(){
-    const a=Number(aEl.value), b=Number(bEl.value), c=Number(cEl.value);
-    aVal.textContent = fmt(a);
-    bVal.textContent = fmt(b);
-    cVal.textContent = fmt(c);
-
-    const signB = b>=0 ? "+" : "−";
-    const signC = c>=0 ? "+" : "−";
-    eq.textContent = `y = ${fmt(a)}x² ${signB} ${fmt(Math.abs(b))}x ${signC} ${fmt(Math.abs(c))}`;
-
-    drawParabola(a,b,c);
-  }
-
-  [aEl,bEl,cEl].forEach(el => el.addEventListener('input', render));
-  render();
+  window.onload = init;
 </script>
 </body>
 </html>
