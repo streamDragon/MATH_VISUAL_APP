@@ -1,168 +1,203 @@
-/* style.css - גרסה סופית עם מד התקדמות */
+/* style.css - גרסה סופית */
+:root {
+    --primary: #2563eb;
+    --secondary: #f97316;
+    --bg: #f8fafc;
+    --text: #1e293b;
+    --success: #22c55e;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
 
 body {
-    margin: 0; padding: 0;
-    height: 100vh; display: flex; flex-direction: column;
     font-family: 'Rubik', sans-serif;
-    background-color: #f8fafc; color: #334155;
-    overflow: hidden;
+    background-color: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* מונע גלילה מיותרת */
 }
 
-/* --- Header --- */
+/* --- כותרת עליונה --- */
 header {
-    background: white; z-index: 10;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    background: white;
+    padding: 10px 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    z-index: 10;
 }
+
 .header-top {
-    padding: 8px 12px;
-    display: flex; justify-content: space-between; align-items: center;
-    background: #f1f5f9; border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
 }
-h1 { margin: 0; font-size: 1.1rem; color: #1e293b; }
-.game-stats { font-weight: bold; color: #64748b; background: #e2e8f0; padding: 4px 8px; border-radius: 4px; font-size: 0.9rem; }
 
-.controls { display: flex; gap: 6px; }
-.btn-nav {
-    background: #3b82f6; color: white; border: none; padding: 6px 12px;
-    border-radius: 6px; font-size: 0.9rem; cursor: pointer;
-    transition: background 0.2s;
-}
-.btn-nav:hover { background: #2563eb; }
+h1 { font-size: 1.2rem; margin: 0; color: var(--primary); }
+.game-stats { font-weight: bold; color: #64748b; }
 
-/* מד קרבה (חם/קר) */
-.proximity-container {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    background: #f8fafc; padding: 5px; border-bottom: 1px solid #e2e8f0;
+.controls { display: flex; gap: 8px; }
+.btn-nav, select {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: white;
+    cursor: pointer;
+    font-family: inherit;
 }
-.proximity-label { font-size: 0.8rem; color: #64748b; font-weight: bold; }
-.proximity-bar-bg {
-    width: 200px; height: 10px; background: #cbd5e1;
-    border-radius: 5px; overflow: hidden;
-}
-.proximity-fill {
-    height: 100%; width: 0%;
-    background: linear-gradient(90deg, #ef4444, #eab308, #22c55e);
-    transition: width 0.3s ease;
-}
+.btn-nav:hover { background: #f1f5f9; }
+
+/* מד קרבה ומשוואות */
+.proximity-container { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.proximity-bar-bg { flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+.proximity-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ef4444, #eab308, #22c55e); transition: width 0.2s; }
 
 .instruction-box {
-    padding: 10px; text-align: center;
-    background: #e0f2fe; color: #0369a1;
-    font-weight: 500; font-size: 1rem;
-    border-bottom: 1px solid #bfdbfe;
+    background: #eff6ff;
+    padding: 8px;
+    border-radius: 6px;
+    border-right: 4px solid var(--primary);
+    font-size: 0.95rem;
+    margin-bottom: 8px;
 }
 
-/* תצוגת המשוואות */
 .math-display-row {
-    display: flex; justify-content: center; align-items: center; gap: 20px;
-    padding: 10px 0; background: white;
-}
-.equation-display {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
     font-family: 'Courier New', monospace;
-    font-weight: 900; font-size: 1.5rem;
-    color: #1d4ed8; direction: ltr;
-    text-shadow: 1px 1px 0px rgba(0,0,0,0.05);
+    font-weight: bold;
+    direction: ltr; /* כדי שהמספרים לא יתהפכו */
+    background: #f8fafc;
+    padding: 5px;
+    border-radius: 4px;
 }
-.equation-display.deriv { color: #c2410c; }
-.separator { color: #cbd5e1; font-size: 1.5rem; font-weight: 300; }
+.deriv { color: var(--secondary); }
 
-/* --- Main Area --- */
-main { flex: 1; position: relative; width: 100%; height: 100%; overflow: hidden; }
-canvas { display: block; width: 100%; height: 100%; cursor: crosshair; touch-action: none; }
-
-/* לוח נוסחאות - צד ימין למעלה */
-.formula-overlay {
-    position: absolute; top: 15px; right: 15px;
-    background: rgba(255, 255, 255, 0.95);
-    padding: 12px; width: 160px;
-    border-radius: 10px; border: 1px solid #cbd5e1;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    font-size: 0.85rem; pointer-events: none; z-index: 100;
-    text-align: left; direction: ltr;
+/* --- אזור ראשי (קנבס) --- */
+#mainArea {
+    position: relative; /* קריטי למיקום האלמנטים הצפים! */
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
+    cursor: crosshair;
 }
-.formula-title {
-    font-weight: bold; text-align: right; color: #64748b;
-    margin-bottom: 8px; border-bottom: 2px solid #f1f5f9; padding-bottom: 4px;
-}
-.formula-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-.formula-row span:first-child { font-size: 0.75rem; color: #94a3b8; margin-right: 5px; }
-.math { font-weight: bold; color: #334155; font-family: 'Courier New', monospace; }
 
-/* כפתורי זום - צד שמאל למעלה */
+canvas { display: block; width: 100%; height: 100%; }
+
+/* אלמנטים צפים על הקנבס */
 .zoom-controls {
-    position: absolute; top: 15px; left: 15px;
-    display: flex; flex-direction: column; gap: 5px; z-index: 100;
+    position: absolute;
+    top: 10px;
+    left: 10px; /* צד שמאל כי אנחנו בעברית */
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 .zoom-controls button {
-    width: 36px; height: 36px; background: white; border: 1px solid #cbd5e1;
-    border-radius: 8px; font-size: 1.2rem; color: #475569;
-    cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    width: 36px; height: 36px;
+    background: white; border: 1px solid #cbd5e1;
+    border-radius: 50%; font-size: 1.2rem;
+    cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
-.zoom-controls button:active { background: #f1f5f9; transform: translateY(1px); }
 
-/* באנר הצלחה - למעלה באמצע */
+.formula-overlay {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: rgba(255,255,255,0.9);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.8rem;
+    pointer-events: none;
+}
+.formula-row { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 2px; }
+.math { font-family: monospace; font-weight: bold; direction: ltr; }
+
+/* --- השלשה הקדושה (התיקון הגדול) --- */
+.trinity-tooltip {
+    position: absolute;
+    /* top/left ייקבעו ב-JS */
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid var(--primary);
+    border-radius: 8px;
+    padding: 8px 12px;
+    pointer-events: none; /* כדי שהעכבר יעבור דרכו */
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    z-index: 100;
+    min-width: 120px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    direction: ltr;
+    transform: translate(15px, -50%); /* הזזה קטנה הצידה מהנקודה */
+}
+
+#valM { color: var(--secondary); border-bottom: 1px solid #eee; padding-bottom: 2px; margin-bottom: 2px;}
+#lineEqn { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+
+/* באנר הצלחה */
 #successBanner {
-    position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-    background: #22c55e; color: white; padding: 12px 30px;
-    border-radius: 30px; font-size: 1.3rem; font-weight: bold;
-    display: none; z-index: 1000;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 3px solid #f0fdf4;
-    animation: popDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: var(--success);
+    color: white;
+    padding: 20px 40px;
+    border-radius: 50px;
+    font-size: 2rem;
+    font-weight: 900;
+    box-shadow: 0 10px 25px rgba(34, 197, 94, 0.5);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 200;
+    text-align: center;
 }
-#successBanner.show { display: block; }
-@keyframes popDown { from { top: -60px; opacity: 0; } to { top: 20px; opacity: 1; } }
+#successBanner.show { transform: translate(-50%, -50%) scale(1); }
 
-/* --- Footer --- */
+/* --- תחתית (סליידרים) --- */
 footer {
-    flex: 0 0 auto; background: #fff;
-    border-top: 1px solid #e2e8f0; padding: 8px; z-index: 10;
-    display: flex; flex-direction: column; gap: 8px;
-    box-shadow: 0 -5px 15px rgba(0,0,0,0.03);
+    background: white;
+    padding: 10px 15px;
+    border-top: 1px solid #e2e8f0;
+    z-index: 20;
 }
 
 .slider-container {
-    background: #f8fafc; padding: 8px 15px; border-radius: 8px;
-    border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 5px;
+    background: #f1f5f9;
+    border-radius: 8px;
 }
-.slider-container input { flex: 1; height: 6px; cursor: pointer; }
-.lbl { font-weight: bold; color: #475569; }
+.slider-container input { flex: 1; }
 
-.function-editor { background: #f8fafc; border-radius: 8px; padding: 6px; border: 1px solid #f1f5f9; }
-.editor-title { font-size: 0.75rem; text-align: center; color: #94a3b8; margin-bottom: 5px; }
+.function-editor {
+    border-top: 1px dashed #cbd5e1;
+    padding-top: 10px;
+}
+.editor-title { font-size: 0.8rem; color: #64748b; margin-bottom: 5px; text-align: center; }
 
-.coef-control-panel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.coef-control-panel {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
 .coef-group {
-    background: white; border: 1px solid #cbd5e1; border-radius: 6px;
-    padding: 4px; display: flex; flex-direction: column; align-items: center;
-}
-.coef-group label { font-size: 0.7rem; color: #64748b; margin-bottom: 3px; }
-.coef-group input { width: 100%; margin: 0; }
-.val-display { font-size: 0.8rem; font-weight: bold; color: #2563eb; margin-top: 2px; }
-
-@media (max-width: 600px) {
-    .coef-control-panel { grid-template-columns: 1fr 1fr; }
-    .equation-display { font-size: 1.1rem; }
-    .header-top h1 { font-size: 0.9rem; }
-    .formula-overlay { display: none; }
-    .math-display-row { gap: 10px; }
-}
-/* עיצוב השלשה הקדושה המרחפת */
-.trinity-tooltip {
-    position: absolute;
-    background: rgba(255, 255, 255, 0.95);
-    border: 2px solid #2563eb;
-    border-radius: 10px;
-    padding: 12px;
-    pointer-events: none; /* חשוב: שהעכבר "יעבור דרכו" לקנבס */
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    font-weight: 900;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    font-size: 1rem;
-    min-width: 100px;
+    align-items: center;
+    width: 22%;
+    font-size: 0.8rem;
 }
+.coef-group input { width: 100%; }
+.val-display { font-family: monospace; font-weight: bold; color: var(--primary); }
 
-#valM { color: #c2410c; } /* צבע לשיפוע */
-#valX, #valY { color: #1e293b; }
+/* עיצוב סליידרים */
+input[type=range] { cursor: pointer; }
