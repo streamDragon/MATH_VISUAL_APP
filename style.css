@@ -1,137 +1,103 @@
 :root {
-    --primary: #3b82f6;
+    --primary: #2563eb;
+    --bg: #f8fafc;
     --success: #22c55e;
-    --warning: #eab308;
-    --bg-color: #f1f5f9;
 }
 
-/* איפוס מלא למניעת גלילה של כל העמוד */
-html, body {
-    margin: 0; padding: 0; width: 100%; height: 100%;
-    overflow: hidden; /* קריטי למובייל */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: var(--bg-color);
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+    margin: 0; padding: 0;
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #e2e8f0;
+    /* נועל את המסך בדיוק לגודל החלון - קריטי למובייל */
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
 }
 
 .app-layout {
     display: flex;
     flex-direction: column;
     height: 100%;
-    max-width: 600px;
-    margin: 0 auto;
+    width: 100%;
     background: white;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
 }
 
 /* --- Header --- */
 .header-section {
-    padding: 10px;
-    background: #fff;
-    border-bottom: 1px solid #e2e8f0;
-    flex-shrink: 0; /* לא מתכווץ */
-}
-
-.top-controls {
-    display: flex; gap: 8px; margin-bottom: 8px; height: 40px;
-}
-
-.btn-icon { width: 40px; border-radius: 50%; border: 1px solid #ccc; background: #f8fafc; font-size: 18px; }
-.btn-next { background: var(--primary); color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; }
-select { flex-grow: 1; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; padding-right: 10px;}
-
-.instruction-card {
-    background: #fef9c3; /* צהוב בהיר */
-    border: 1px solid #facc15;
-    border-radius: 8px;
     padding: 8px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    background: white;
+    border-bottom: 1px solid #cbd5e1;
+    flex-shrink: 0;
 }
-.card-icon { font-size: 20px; }
-.card-text h3 { margin: 0; font-size: 14px; color: #854d0e; }
-.card-text p { margin: 2px 0 0; font-size: 13px; color: #422006; line-height: 1.1; }
 
-/* --- Canvas Area (The Flexible Part) --- */
-.canvas-container {
-    flex-grow: 1; /* לוקח את כל המקום שנשאר! */
+.top-row { display: flex; gap: 8px; margin-bottom: 5px; height: 36px; }
+select { flex: 1; border-radius: 6px; border: 1px solid #94a3b8; font-size: 16px; background: #fff; }
+.btn-next { background: var(--primary); color: white; border: none; padding: 0 12px; border-radius: 6px; font-weight: bold; }
+
+.instruction-box {
+    background: #fff7ed; border: 1px solid #fdba74;
+    padding: 8px; border-radius: 6px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; color: #7c2d12;
+}
+
+/* --- Canvas (החלק הגמיש) --- */
+.canvas-wrapper {
+    flex-grow: 1; /* תופס את כל שאר המקום */
     position: relative;
     background: #fff;
-    cursor: crosshair;
     overflow: hidden;
-    min-height: 0; /* טריק חשוב לפלקס */
+    cursor: crosshair;
 }
-
 canvas { display: block; width: 100%; height: 100%; }
 
-.equation-overlay {
+.equation-display {
     position: absolute; top: 10px; width: 100%; text-align: center;
-    font-size: 20px; font-weight: bold; color: var(--primary);
-    text-shadow: 0 2px 4px rgba(255,255,255,0.8);
+    font-weight: bold; color: #1e293b; font-size: 18px; pointer-events: none;
+    text-shadow: 0 0 5px white;
+}
+
+.hud {
+    position: absolute; top: 5px; left: 5px;
+    font-size: 11px; font-family: monospace;
+    background: rgba(255,255,255,0.8); padding: 4px; border-radius: 4px;
     pointer-events: none;
 }
 
-.hud-panel {
-    position: absolute; top: 10px; right: 10px;
-    background: rgba(255,255,255,0.9); padding: 6px;
-    border-radius: 6px; border: 1px solid #cbd5e1;
-    font-size: 12px; font-family: monospace; pointer-events: none;
+/* חותמת הצלחה (במקום חלון קופץ) */
+.success-badge {
+    position: absolute; top: 40px; left: 50%; transform: translateX(-50%) scale(0);
+    background: var(--success); color: white;
+    padding: 5px 20px; border-radius: 20px;
+    font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none; z-index: 10;
 }
-.hud-panel b { color: var(--primary); }
+.success-badge.show { transform: translateX(-50%) scale(1); }
 
-/* כפתורי זום צפים */
-.zoom-fab {
-    position: absolute;
-    bottom: 20px;
-    left: 20px; /* צד שמאל למטה */
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    z-index: 50;
+/* כפתורי צד (זום) */
+.fab-controls {
+    position: absolute; bottom: 15px; right: 15px;
+    display: flex; flex-direction: column; gap: 8px;
 }
-.zoom-fab button {
-    width: 45px; height: 45px;
-    border-radius: 50%;
-    background: white; border: 1px solid #94a3b8;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    font-size: 24px; color: #333;
-    cursor: pointer;
+.fab-controls button {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: white; border: 1px solid #cbd5e1;
+    font-size: 20px; color: #333;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
-.zoom-fab button:active { background: #f1f5f9; transform: scale(0.95); }
 
 /* --- Footer --- */
 .footer-section {
-    padding: 15px;
-    background: #f8fafc;
-    border-top: 1px solid #e2e8f0;
-    flex-shrink: 0; /* לא מתכווץ */
+    padding: 10px;
+    background: #f1f5f9;
+    border-top: 1px solid #cbd5e1;
+    flex-shrink: 0;
 }
-.slider-area { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
-input[type=range] { width: 100%; height: 30px; }
-
-.manual-inputs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 5px; }
-.manual-inputs input { width: 100%; padding: 5px; text-align: center; border: 1px solid #ccc; border-radius: 4px; }
-
-/* Feedback */
-.feedback-toast {
-    position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
-    background: rgba(0,0,0,0.7); color: white; padding: 5px 12px;
-    border-radius: 15px; font-size: 14px; opacity: 0; transition: 0.3s;
-    pointer-events: none;
-}
-.win-overlay {
-    position: absolute; top:0; left:0; right:0; bottom:0;
-    background: rgba(255,255,255,0.85);
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none; transition: 0.3s; z-index: 100;
-}
-.win-overlay.show { opacity: 1; pointer-events: all; }
-.win-box {
-    background: white; padding: 20px; border-radius: 15px;
-    text-align: center; border: 2px solid var(--success);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
-.win-box button {
-    margin-top: 10px; padding: 8px 16px; background: var(--success);
-    color: white; border: none; border-radius: 6px; font-size: 16px;
-}
+.slider-container input { width: 100%; height: 40px; margin: 0; }
+details { margin-top: 5px; }
+summary { font-size: 12px; color: #64748b; text-align: center; padding: 5px; }
+.inputs-row { display: flex; gap: 5px; }
+.inputs-row input { flex: 1; padding: 5px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px; }
