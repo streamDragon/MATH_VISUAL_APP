@@ -1,127 +1,308 @@
-/* script.js - גרסת המעבדה המתקדמת: שלשה קדושה, משולשים ופרמטרים */
+/* script.js - גרסה סופית ומלאה */
 
+// נתוני השאלות - כולל שלבים ופרמטרים
 const bagrutData = [
-    { t: "מינימום", d: "מצאו את נקודת המינימום של הפונקציה.", p: [0, 1, -4, 4], goal: 'm0_min' },
-    { t: "חיתוך ציר Y", d: "מצאו את נקודת החיתוך עם ציר ה-Y.", p: [0, 1, -2, -3], goal: 'x0' },
-    { t: "משיק לראשית", d: "מצאו נקודה שהמשיק דרכה עובר ב-(0,0).", p: [0, -1, 4, 0], goal: 'tan_pass', target: [0,0] },
-    { t: "נורמל לראשית", d: "מצאו נקודה שהנורמל עובר ב-(0,0).", p: [0, 1, -4, 4], goal: 'norm_pass', target: [0,0] },
-    
-    // שאלות פרמטרים חדשות
     { 
-        t: "פרמטר k - השקה", 
-        d: "שנו את הפרמטר k (הזחלן d) כך שהפרבולה $f(x)=x^2+k$ תשיק לציר ה-X.", 
-        p: [0, 1, 0, 5], goal: 'param_k', targetVal: 0, paramIdx: 3 
+        t: "שלב 1: מינימום", 
+        d: "הזיזו את הנקודה הכחולה לנקודת המינימום של הפונקציה.", 
+        p: [0, 1, -4, 4], // x^2 - 4x + 4
+        goal: 'min_point' 
     },
     { 
-        t: "פרמטר a - קודקוד", 
-        d: "שנו את a כך שקודקוד הפרבולה $f(x)=ax^2-4x+1$ יהיה ב-y=-3.", 
-        p: [1, 0, -4, 1], goal: 'param_a', targetVal: -3, paramIdx: 0 
+        t: "שלב 2: חיתוך Y", 
+        d: "מצאו את נקודת החיתוך של הפונקציה עם ציר ה-Y.", 
+        p: [0, 1, -2, -3], 
+        goal: 'y_intercept' 
     },
     { 
-        t: "פרמטר k - שיפוע", 
-        d: "מצאו k כך שהשיפוע של $f(x)=x^3+kx$ בנקודה x=1 יהיה בדיוק 0.", 
-        p: [1, 0, 5, 0], goal: 'param_k_slope', targetVal: 0, paramIdx: 2 
+        t: "שלב 3: שיפוע אפס", 
+        d: "מצאו נקודה שבה המשיק מקביל לציר ה-X (שיפוע 0).", 
+        p: [-1, 3, 0, -2], // -x^3 + 3x^2 ...
+        goal: 'slope_zero' 
+    },
+    { 
+        t: "שלב 4: משיק לראשית", 
+        d: "מצאו נקודה שהמשיק העובר דרכה חותך את ראשית הצירים (0,0).", 
+        p: [0, -0.5, 2, 1], 
+        goal: 'tan_pass_origin' 
+    },
+    { 
+        t: "אתגר פרמטר K", 
+        d: "השתמשו בזחלן d (למטה) כדי להזיז את הפונקציה כך שתשיק לציר ה-X.", 
+        p: [0, 1, 0, 2], // התחלה ב y=x^2+2
+        goal: 'param_touch_x',
+        paramIdx: 3, // שולט על d
+        targetVal: 0
+    },
+    { 
+        t: "משולש הזהב", 
+        d: "מצאו נקודה שבה המשיק יוצר משולש עם הצירים בשטח של בערך 2.", 
+        p: [0, 0.5, -2, 4], 
+        goal: 'triangle_area',
+        targetVal: 2
     }
 ];
 
+// משתנים גלובליים
 let cvs, ctx, W, H, mainArea;
-let baseScale = 45, scale = 45;
-let ox, oy, px = 0, cf = [0,1,0,0], goal = '';
-let isDrag = false, audioCtx = null, isMuted = false;
+let baseScale = 40, scale = 40;
+let ox, oy; // ראשית הצירים
+let px = 0; // מיקום ה-x הנוכחי של השחקן
+let cf = [0, 1, 0, 0]; // מקדמי הפונקציה a,b,c,d
+let currentQ = 0;
+let isDrag = false;
+let audioCtx = null, isMuted = false;
 
+// אתחול
 window.onload = () => {
     cvs = document.getElementById('cvs');
     ctx = cvs.getContext('2d');
     mainArea = document.getElementById('mainArea');
-    window.addEventListener('resize', resize);
     
-    // מאזיני עכבר ומגע
-    const startEv = (e) => { isDrag = true; initAudio(); moveEv(e); playTone(150, 0.05); };
-    const moveEv = (e) => {
-        if(!isDrag) return;
-        let rect = cvs.getBoundingClientRect();
-        let clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-        px = (clientX - rect.left - ox) / scale;
-        px = Math.max(-10, Math.min(10, px));
-        if(Math.abs(px) < 0.08) px = 0;
-        document.getElementById('mainX').value = px;
-        update();
-    };
-    const endEv = () => { isDrag = false; };
-
-    cvs.addEventListener('mousedown', startEv);
-    window.addEventListener('mousemove', moveEv);
-    window.addEventListener('mouseup', endEv);
-    cvs.addEventListener('touchstart', (e) => { e.preventDefault(); startEv(e); }, {passive:false});
-    cvs.addEventListener('touchmove', (e) => { e.preventDefault(); moveEv(e); }, {passive:false});
-    cvs.addEventListener('touchend', endEv);
-
-    initMenu();
+    // התאמה לגודל מסך
+    window.addEventListener('resize', resize);
     resize();
+
+    // אירועי עכבר/מגע
+    setupEvents();
+    
+    // טעינת רשימת שאלות
+    initMenu();
+    
+    // התחלת שאלה ראשונה
     loadQ(0);
+    
+    // לולאת ציור ראשונית
+    requestAnimationFrame(animate);
 };
 
-function initMenu() {
-    let sel = document.getElementById('qSelect');
-    bagrutData.forEach((q, i) => {
-        let opt = document.createElement('option');
-        opt.value = i; opt.text = `${i+1}. ${q.t}`;
-        sel.appendChild(opt);
-    });
+function resize() {
+    W = cvs.width = mainArea.clientWidth;
+    H = cvs.height = mainArea.clientHeight;
+    ox = W / 2;
+    oy = H / 2 + 50; // קצת למטה מהאמצע
+    draw();
 }
 
-function loadQuestionFromSelect() { loadQ(parseInt(document.getElementById('qSelect').value)); }
-function nextQuestion() {
-    let next = parseInt(document.getElementById('qSelect').value) + 1;
-    if(next < bagrutData.length) {
-        document.getElementById('qSelect').value = next;
-        loadQ(next);
-    }
+function setupEvents() {
+    // גרירה בקנבס
+    const start = (e) => { 
+        isDrag = true; 
+        initAudio(); 
+        handleMove(e);
+        playTone(200, 0.05); 
+    };
+    const move = (e) => { if(isDrag) handleMove(e); };
+    const end = () => { isDrag = false; };
+
+    cvs.addEventListener('mousedown', start);
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', end);
+    
+    cvs.addEventListener('touchstart', (e) => { e.preventDefault(); start(e); }, {passive: false});
+    cvs.addEventListener('touchmove', (e) => { e.preventDefault(); move(e); }, {passive: false});
+    cvs.addEventListener('touchend', end);
 }
 
-function loadQ(idx) {
-    let q = bagrutData[idx];
-    document.getElementById('qText').innerHTML = q.d;
-    document.getElementById('qCounter').innerText = `שאלה ${idx+1} / ${bagrutData.length}`;
-    document.getElementById('successBanner').classList.remove('show');
-    cf = [...q.p];
-    document.getElementById('mA').value = cf[0];
-    document.getElementById('mB').value = cf[1];
-    document.getElementById('mC').value = cf[2];
-    document.getElementById('mD').value = cf[3];
-    goal = q.goal;
-    px = 2; 
-    update();
+function handleMove(e) {
+    let clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+    let rect = cvs.getBoundingClientRect();
+    
+    // המרה מפיקסלים לקואורדינטות מתמטיות
+    px = (clientX - rect.left - ox) / scale;
+    
+    // גבולות
+    px = Math.max(-10, Math.min(10, px));
+    
+    // סנכרון סליידר תחתון
+    document.getElementById('mainX').value = px;
+    
+    updateGame();
 }
 
+// עדכון מהסליידר התחתון
+function updateFromSlider() {
+    px = parseFloat(document.getElementById('mainX').value);
+    updateGame();
+}
+
+// עדכון זחלנים ידני (פרמטרים)
 function manual() {
     cf[0] = parseFloat(document.getElementById('mA').value);
     cf[1] = parseFloat(document.getElementById('mB').value);
     cf[2] = parseFloat(document.getElementById('mC').value);
     cf[3] = parseFloat(document.getElementById('mD').value);
-    update();
+    updateGame();
 }
 
-function update() {
-    // עדכון תצוגת מספרים
-    document.getElementById('valA').innerText = cf[0];
-    document.getElementById('valB').innerText = cf[1];
-    document.getElementById('valC').innerText = cf[2];
-    document.getElementById('valD').innerText = cf[3];
-    
-    let y = f(px), m = df(px);
-    updateTrinityDisplay(px, y, m);
-    
-    let dist = calcDist(y, m);
-    updateProximity(dist);
-    checkWin(dist);
-    draw();
-}
+/* --- לוגיקת משחק --- */
 
 function f(x) { return cf[0]*x**3 + cf[1]*x**2 + cf[2]*x + cf[3]; }
 function df(x) { return 3*cf[0]*x**2 + 2*cf[1]*x + cf[2]; }
 
-/* --- השלשה הקדושה והמשולש --- */
+function updateGame() {
+    // עדכון תצוגה מספרית של המקדמים
+    document.getElementById('valA').innerText = cf[0];
+    document.getElementById('valB').innerText = cf[1];
+    document.getElementById('valC').innerText = cf[2];
+    document.getElementById('valD').innerText = cf[3];
+
+    // עדכון משוואות בכותרת
+    let eqStr = "y = ";
+    if(cf[0]) eqStr += `${cf[0]}x³ + `;
+    if(cf[1]) eqStr += `${cf[1]}x² + `;
+    if(cf[2]) eqStr += `${cf[2]}x + `;
+    eqStr += cf[3];
+    document.getElementById('eqn').innerText = eqStr.replace(/\+ -/g, '- ').replace(/\+ 0x.?/g, '');
+    
+    document.getElementById('derivEqn').innerText = `f'(x) = ${(3*cf[0]).toFixed(1)}x² + ${(2*cf[1]).toFixed(1)}x + ${cf[2]}`;
+
+    // חישוב מרחק ליעד
+    checkWinCondition();
+    
+    // ציור מחדש
+    draw();
+}
+
+function checkWinCondition() {
+    let q = bagrutData[currentQ];
+    let dist = 100;
+    let m = df(px);
+    let y = f(px);
+    
+    if (q.goal === 'min_point') {
+        // גם נגזרת 0 וגם נגזרת שנייה חיובית
+        let d2 = 6*cf[0]*px + 2*cf[1];
+        dist = Math.abs(m) + (d2 > 0 ? 0 : 5);
+    } 
+    else if (q.goal === 'y_intercept') {
+        dist = Math.abs(px - 0);
+    }
+    else if (q.goal === 'slope_zero') {
+        dist = Math.abs(m);
+    }
+    else if (q.goal === 'tan_pass_origin') {
+        // משוואת משיק: Y - y1 = m(X - x1) -> עבור (0,0): -y1 = -m*x1
+        dist = Math.abs(y - m*px);
+    }
+    else if (q.goal === 'param_touch_x') {
+        // בדיקה אם ה-Y בנקודת הקיצון קרוב ל-0
+        let vertexX = -cf[2]/(2*cf[1] || 1); 
+        dist = Math.abs(f(vertexX));
+    }
+    
+    // עדכון מד קרבה
+    let p = Math.max(0, Math.min(100, (1 - dist/3) * 100));
+    document.getElementById('proximityBar').style.width = p + "%";
+    
+    // ניצחון
+    let banner = document.getElementById('successBanner');
+    if (dist < 0.15) {
+        if (!banner.classList.contains('show')) {
+            banner.classList.add('show');
+            playTone(600, 0.1);
+            setTimeout(() => playTone(800, 0.3), 150);
+        }
+    } else {
+        banner.classList.remove('show');
+    }
+}
+
+/* --- ציור --- */
+
+function draw() {
+    ctx.clearRect(0, 0, W, H);
+    
+    drawGrid();
+    
+    let y = f(px);
+    let m = df(px);
+    
+    // ציור המשולש שנוצר עם הצירים
+    drawTriangle(px, y, m);
+
+    // ציור הפונקציה
+    ctx.beginPath();
+    ctx.strokeStyle = "#2563eb";
+    ctx.lineWidth = 3;
+    for (let i = 0; i <= W; i += 5) {
+        let realX = (i - ox) / scale;
+        let realY = f(realX);
+        let screenY = oy - realY * scale;
+        if (i === 0) ctx.moveTo(i, screenY);
+        else ctx.lineTo(i, screenY);
+    }
+    ctx.stroke();
+    
+    // ציור משיק
+    drawTangent(px, y, m);
+    
+    // עדכון השלשה הקדושה
+    updateTrinityDisplay(px, y, m);
+}
+
+function drawGrid() {
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    // אנכיים
+    for(let x=ox%scale; x<W; x+=scale) { ctx.moveTo(x,0); ctx.lineTo(x,H); }
+    // אופקיים
+    for(let y=oy%scale; y<H; y+=scale) { ctx.moveTo(0,y); ctx.lineTo(W,y); }
+    ctx.stroke();
+    
+    // צירים ראשיים
+    ctx.strokeStyle = "#94a3b8";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, oy); ctx.lineTo(W, oy);
+    ctx.moveTo(ox, 0); ctx.lineTo(ox, H);
+    ctx.stroke();
+}
+
+function drawTangent(x1, y1, m) {
+    let screenX = ox + x1 * scale;
+    let screenY = oy - y1 * scale;
+    
+    ctx.strokeStyle = "#f97316"; // כתום
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    // מצייר קו באורך 1000 פיקסלים לכל כיוון לפי השיפוע
+    // שיפוע במסך הוא שלילי כי Y הפוך
+    ctx.moveTo(screenX - 1000, screenY + 1000 * m);
+    ctx.lineTo(screenX + 1000, screenY - 1000 * m);
+    ctx.stroke();
+    
+    // הנקודה עצמה
+    ctx.fillStyle = "#2563eb";
+    ctx.beginPath();
+    ctx.arc(screenX, screenY, 6, 0, Math.PI*2);
+    ctx.fill();
+}
+
+function drawTriangle(x1, y1, m) {
+    // מגן מחלוקה ב-0
+    if(Math.abs(m) < 0.01) return;
+    
+    // חיתוך עם ציר ה-X: y=0 => 0 = mx+b => x_int = x1 - y1/m
+    let xInt = x1 - (y1 / m);
+    // חיתוך עם ציר ה-Y: x=0 => y_int = y1 - m*x1
+    let yInt = y1 - (m * x1);
+    
+    ctx.beginPath();
+    ctx.moveTo(ox, oy); // ראשית
+    ctx.lineTo(ox + xInt * scale, oy); // חיתוך X
+    ctx.lineTo(ox, oy - yInt * scale); // חיתוך Y
+    ctx.closePath();
+    
+    ctx.fillStyle = "rgba(37, 99, 235, 0.15)"; // כחול בהיר שקוף
+    ctx.fill();
+    ctx.strokeStyle = "rgba(37, 99, 235, 0.3)";
+    ctx.setLineDash([5, 5]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+}
+
 function updateTrinityDisplay(x, y, m) {
     const tooltip = document.getElementById('holyTrinity');
     const elX = document.getElementById('valX');
@@ -129,126 +310,73 @@ function updateTrinityDisplay(x, y, m) {
     const elM = document.getElementById('valM');
     const elLine = document.getElementById('lineEqn');
 
-    tooltip.style.display = 'flex';
-    elX.innerHTML = `x = ${x.toFixed(2)}`;
-    elY.innerHTML = `y = ${y.toFixed(2)}`;
-    elM.innerHTML = `m = ${m.toFixed(2)}`;
+    // עדכון טקסט
+    elX.innerText = `x = ${x.toFixed(2)}`;
+    elY.innerText = `y = ${y.toFixed(2)}`;
+    elM.innerText = `m = ${m.toFixed(2)}`;
     
     let b = y - m * x;
-    elLine.innerHTML = `משיק: y = ${m.toFixed(1)}x ${b>=0?'+':''}${b.toFixed(1)}`;
-
-    let sx = ox + x * scale;
-    let sy = oy - y * scale;
-    tooltip.style.left = (sx + 20) + 'px';
-    tooltip.style.top = (sy - 100) + 'px';
-}
-
-function drawTriangle(x, y, m) {
-    if(Math.abs(m) < 0.05) return;
-    let xInt = x - (y / m);
-    let yInt = y - (m * x);
-
-    ctx.beginPath();
-    ctx.moveTo(ox, oy);
-    ctx.lineTo(ox + xInt * scale, oy);
-    ctx.lineTo(ox, oy - yInt * scale);
-    ctx.closePath();
-    ctx.fillStyle = "rgba(59, 130, 246, 0.15)";
-    ctx.fill();
-    ctx.strokeStyle = "rgba(37, 99, 235, 0.4)";
-    ctx.stroke();
-}
-
-/* --- לוגיקת מרחק וניצחון --- */
-function calcDist(y, m) {
-    let q = bagrutData[document.getElementById('qSelect').value];
-    if(goal === 'm0_min') return Math.abs(m) + ( (6*cf[0]*px+2*cf[1]) < 0 ? 5 : 0);
-    if(goal === 'tan_pass') return Math.abs(y - m*px);
-    if(goal === 'norm_pass') {
-        let nm = -1/m; return Math.abs(y - nm*px);
-    }
-    // לוגיקת פרמטרים
-    if(goal === 'param_k') return Math.abs(f(-cf[2]/(2*cf[1]||1))); // השקה לציר X
-    if(goal === 'param_a') {
-        let vx = -cf[2]/(2*cf[0]||1);
-        return Math.abs(f(vx) - q.targetVal);
-    }
-    if(goal === 'param_k_slope') return Math.abs(df(1) - q.targetVal);
+    let sign = b >= 0 ? "+" : "";
+    elLine.innerText = `y = ${m.toFixed(2)}x ${sign} ${b.toFixed(2)}`;
     
-    return Math.abs(px); // ברירת מחדל חיתוך ציר Y
-}
-
-function checkWin(dist) {
-    let win = dist < 0.1;
-    let banner = document.getElementById('successBanner');
-    if(win && !banner.classList.contains('show')) {
-        banner.classList.add('show');
-        playTone(600, 0.1); setTimeout(()=>playTone(800, 0.2), 100);
-    } else if(!win) {
-        banner.classList.remove('show');
-    }
-}
-
-/* --- גרפיקה --- */
-function draw() {
-    ctx.clearRect(0,0,W,H);
+    // עדכון מיקום
+    // חשוב: המיקום הוא יחסי ל-mainArea בגלל position: relative ב-CSS
+    let screenX = ox + x * scale;
+    let screenY = oy - y * scale;
     
-    // גריד וצירים
-    ctx.strokeStyle = "#e2e8f0"; ctx.beginPath();
-    for(let x=ox%scale; x<W; x+=scale) { ctx.moveTo(x,0); ctx.lineTo(x,H); }
-    for(let y=oy%scale; y<H; y+=scale) { ctx.moveTo(0,y); ctx.lineTo(W,y); }
-    ctx.stroke();
+    tooltip.style.left = (screenX) + 'px';
+    tooltip.style.top = (screenY - 15) + 'px';
+    tooltip.style.display = 'flex';
+}
 
-    ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 2; ctx.beginPath();
-    ctx.moveTo(0, oy); ctx.lineTo(W, oy); ctx.moveTo(ox, 0); ctx.lineTo(ox, H);
-    ctx.stroke();
+/* --- ניהול שאלות --- */
+function initMenu() {
+    let sel = document.getElementById('qSelect');
+    sel.innerHTML = "";
+    bagrutData.forEach((q, i) => {
+        let opt = document.createElement('option');
+        opt.value = i;
+        opt.text = q.t;
+        sel.appendChild(opt);
+    });
+}
 
-    let y = f(px), m = df(px);
-    drawTriangle(px, y, m);
+function loadQ(idx) {
+    currentQ = idx;
+    let q = bagrutData[idx];
+    document.getElementById('qSelect').value = idx;
+    document.getElementById('qCounter').innerText = `שאלה ${idx+1} / ${bagrutData.length}`;
+    document.getElementById('qText').innerText = q.d;
+    
+    // טעינת מקדמים
+    cf = [...q.p];
+    document.getElementById('mA').value = cf[0];
+    document.getElementById('mB').value = cf[1];
+    document.getElementById('mC').value = cf[2];
+    document.getElementById('mD').value = cf[3];
+    
+    // איפוס מיקום שחקן
+    px = -1;
+    document.getElementById('mainX').value = px;
+    
+    updateGame();
+}
 
-    // גרף הפונקציה
-    ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 3; ctx.beginPath();
-    for(let i=0; i<=W; i+=2) {
-        let xx = (i - ox) / scale;
-        let yy = oy - f(xx) * scale;
-        if(i===0) ctx.moveTo(i, yy); else ctx.lineTo(i, yy);
+function loadQuestionFromSelect() {
+    loadQ(parseInt(document.getElementById('qSelect').value));
+}
+
+function nextQuestion() {
+    if (currentQ < bagrutData.length - 1) {
+        loadQ(currentQ + 1);
     }
-    ctx.stroke();
-
-    // משיק
-    let cx = ox + px * scale, cy = oy - y * scale;
-    ctx.strokeStyle = "#f97316"; ctx.lineWidth = 2; ctx.beginPath();
-    ctx.moveTo(cx - 500, cy + 500*m); ctx.lineTo(cx + 500, cy - 500*m);
-    ctx.stroke();
-
-    // הנקודה
-    ctx.fillStyle = "#2563eb"; ctx.beginPath();
-    ctx.arc(cx, cy, 7, 0, Math.PI*2); ctx.fill();
 }
 
-/* --- צלילים ומערכת --- */
-function initAudio() { if(!audioCtx) audioCtx = new AudioContext(); }
-function playTone(freq, dur) {
-    if(isMuted || !audioCtx) return;
-    let osc = audioCtx.createOscillator();
-    let g = audioCtx.createGain();
-    osc.connect(g); g.connect(audioCtx.destination);
-    osc.frequency.value = freq;
-    g.gain.setValueAtTime(0.1, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-    osc.start(); osc.stop(audioCtx.currentTime + dur);
-}
-
-function updateProximity(dist) {
-    let p = Math.max(0, Math.min(100, (1 - dist/5)*100));
-    document.getElementById('proximityBar').style.width = p + "%";
-}
-
-function resize() {
-    W = cvs.width = mainArea.clientWidth;
-    H = cvs.height = mainArea.clientHeight;
-    ox = W/2; oy = H/2 + 50;
-    draw();
+/* --- מערכת סאונד פשוטה --- */
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
 }
 
 function toggleMute() {
@@ -256,6 +384,31 @@ function toggleMute() {
     document.getElementById('btnSound').innerText = isMuted ? "🔇" : "🔊";
 }
 
-function zoomIn() { scale *= 1.2; draw(); }
-function zoomOut() { scale /= 1.2; draw(); }
+function playTone(freq, duration) {
+    if (isMuted || !audioCtx) return;
+    
+    let osc = audioCtx.createOscillator();
+    let gain = audioCtx.createGain();
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+}
+
+function animate() {
+    // כרגע הציור מבוסס אירועים, אבל אפשר להוסיף אנימציות רקע אם נרצה
+    // requestAnimationFrame(animate);
+}
+
+/* --- זום --- */
+function zoomIn() { scale *= 1.1; draw(); }
+function zoomOut() { scale /= 1.1; draw(); }
 function resetZoom() { scale = baseScale; draw(); }
