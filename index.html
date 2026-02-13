@@ -5,87 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Math Visual App</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div id="app-container">
     
+    <aside id="side-panel">
+        <div class="header-row">
+            <h2>חקר פונקציות</h2>
+            <button class="icon-btn" onclick="toggleSound()" id="btnSound">🔊</button>
+        </div>
+
+        <div class="card question-card">
+            <div style="display:flex; justify-content:space-between;">
+                <h3 id="qCounter">שאלה 1</h3>
+                <button class="small-btn" onclick="openFormulas()">דף נוסחאות 📜</button>
+            </div>
+            <p id="qText">טוען שאלה...</p>
+            <select id="qSelect" onchange="loadQuestionFromSelect()"></select>
+        </div>
+
+        <div class="card" id="game-panel" style="display:none; text-align:center;">
+             <h4>🎯 מצא את המשיק!</h4>
+             <div id="hotColdText">הזז את הסליידר...</div>
+             <div class="progress-bar"><div id="proximityBar"></div></div>
+        </div>
+
+        <div class="card control-box">
+            <label>הזז את ה-X: <span id="valX_slider" style="color:blue">0</span></label>
+            <input type="range" id="mainX" min="-5" max="5" step="0.1" oninput="updateFromSlider()">
+        </div>
+
+        <div class="card control-box">
+            <h4>שינוי הפונקציה</h4>
+            <div class="slider-row"><label>a: <span id="valA"></span></label><input type="range" id="mA" min="-5" max="5" step="0.1" oninput="manual()"></div>
+            <div class="slider-row"><label>b: <span id="valB"></span></label><input type="range" id="mB" min="-5" max="5" step="0.1" oninput="manual()"></div>
+            <div class="slider-row"><label>c: <span id="valC"></span></label><input type="range" id="mC" min="-5" max="5" step="0.1" oninput="manual()"></div>
+            <div class="slider-row"><label>d: <span id="valD"></span></label><input type="range" id="mD" min="-5" max="5" step="0.1" oninput="manual()"></div>
+        </div>
+
+        <div style="margin-top:auto; display:flex; gap:5px;">
+             <button class="btn" onclick="resetView()">איפוס</button>
+             <button class="btn primary" onclick="nextQuestion()" style="flex:1;">הבא &larr;</button>
+        </div>
+    </aside>
+
     <main id="graph-panel">
         <canvas id="cvs"></canvas>
         
         <div id="hud-top-left">
-            <div id="eqn"></div>
-            <div id="derivEqn"></div>
+            <div id="eqn" style="color:blue;"></div>
+            <div id="derivEqn" style="color:red; font-size:0.9em; margin-top:5px;"></div>
         </div>
 
-        <div id="successToast">כל הכבוד! ✅</div>
-
-        <div id="proximityWrapper">
-            <div id="hotColdText">קר...</div>
-            <div id="proximityBarContainer"><div id="proximityBar"></div></div>
-        </div>
+        <div id="successToast">כל הכבוד! 🎉</div>
         
-        <div id="holyTrinity">
-            <div class="triItem"><span id="valX"></span></div>
-            <div class="triItem"><span id="valY"></span></div>
-            <div class="triItem"><span id="valM"></span></div>
-            <div class="triItem" id="lineEqn" style="font-size:0.85em; margin-top:3px; border-top:1px solid #ddd; padding-top:2px;"></div>
-        </div>
+        <div id="holyTrinity"></div>
     </main>
-
-    <aside id="side-panel">
-        
-        <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3 id="qCounter" style="margin:0; color:#2563eb;">שאלה 1</h3>
-                <button id="btnSound" onclick="toggleMute()" class="icon-btn">🔊</button>
-            </div>
-            <p id="qText" style="margin-top:10px; font-weight:600;"></p>
-            <select id="qSelect" onchange="loadQuestionFromSelect()" style="width:100%; margin-top:5px; padding:5px;"></select>
-        </div>
-
-        <div id="sliderXContainer" class="card control-box">
-            <label>הזז את ה-X: <span id="valX_slider" style="float:left; color:#2563eb;">0</span></label>
-            <input type="range" id="mainX" min="-10" max="10" step="0.1" oninput="updateFromSlider()">
-        </div>
-
-        <div class="card control-box">
-            <h4>פרמטרים (משנים את הפונקציה)</h4>
-            
-            <div class="slider-row">
-                <label>a (x³): <span id="valA"></span></label>
-                <input type="range" id="mA" min="-5" max="5" step="0.1" oninput="manual()">
-            </div>
-            <div class="slider-row">
-                <label>b (x²): <span id="valB"></span></label>
-                <input type="range" id="mB" min="-5" max="5" step="0.1" oninput="manual()">
-            </div>
-            <div class="slider-row">
-                <label>c (x): <span id="valC"></span></label>
-                <input type="range" id="mC" min="-10" max="10" step="0.1" oninput="manual()">
-            </div>
-            <div class="slider-row">
-                <label>d (מספר): <span id="valD"></span></label>
-                <input type="range" id="mD" min="-10" max="10" step="0.1" oninput="manual()">
-            </div>
-        </div>
-
-        <div class="card" style="flex:1; display:flex; flex-direction:column; min-height:100px;">
-            <h4>יומן משוואות</h4>
-            <div id="journalList"></div>
-        </div>
-
-        <div style="display:flex; gap:10px; margin-top:10px;">
-             <button class="btn" onclick="zoomIn()">➕ זום</button>
-             <button class="btn" onclick="zoomOut()">➖ זום</button>
-             <button class="btn" onclick="resetZoom()">איפוס</button>
-             <button class="btn primary" onclick="nextQuestion()" style="margin-right:auto;">הבא &larr;</button>
-        </div>
-
-    </aside>
 
 </div>
 
+<div id="formulaModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeFormulas()">&times;</span>
+        <h3>דף נוסחאות - נגזרות</h3>
+        <ul>
+            <li>$(x^n)' = n \cdot x^{n-1}$</li>
+            <li>$(ax)' = a$</li>
+            <li>$(c)' = 0$  (מספר קבוע)</li>
+            <li>$(x^2)' = 2x$</li>
+            <li>$(x^3)' = 3x^2$</li>
+        </ul>
+    </div>
+</div>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script src="bagrut_questions.js"></script>
 <script src="script.js"></script>
 </body>
