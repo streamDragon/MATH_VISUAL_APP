@@ -2,97 +2,102 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מעבדה לחקירת פונקציות</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>מעבדת חקירת פונקציות - הדור הבא</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&family=Computer+Modern+Serif&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div class="container">
-    <header class="main-header">
-        <div class="math-display">
-            <div class="func-line">f(x) = <span id="funcEqn" dir="ltr">...</span></div>
-            <div class="deriv-line">f'(x) = <span id="derivEqn" dir="ltr">...</span></div>
+<header>
+    <div class="header-top">
+        <h1>מעבדת חקירה</h1>
+        <div class="controls">
+             <button id="btnMode" class="btn-nav" onclick="toggleMode()">מצב: חקירה</button>
+             <button id="btnSound" class="btn-nav" onclick="toggleMute()">🔊</button>
+             <select id="qSelect" onchange="loadQuestionFromSelect()"></select>
+             <button class="btn-nav" onclick="nextQuestion()">></button>
         </div>
+    </div>
+    
+    <div class="math-display-row">
+        <span id="derivEqn"></span>
+        <span class="separator"> | </span>
+        <span id="eqn"></span>
+    </div>
+
+    <div class="instruction-box">
+        <span id="qCounter" style="font-weight:bold; color:var(--primary);"></span> 
+        <span id="qText"></span>
+    </div>
+    
+    <div class="proximity-container">
+        <div class="proximity-bar-bg">
+            <div id="proximityBar" class="proximity-fill"></div>
+        </div>
+        <span style="font-size:0.8rem">דיוק</span>
+    </div>
+</header>
+
+<div class="workspace">
+    <div id="mainArea">
+        <canvas id="cvs"></canvas>
         
-        <div class="trinity-panel">
-            <div class="trinity-item">
-                <span class="label">X</span>
-                <span id="dispX" class="value">0</span>
-            </div>
-            <div class="trinity-item">
-                <span class="label">Y (גובה)</span>
-                <span id="dispY" class="value">0</span>
-            </div>
-            <div class="trinity-item slope-highlight">
-                <span class="label">M (שיפוע)</span>
-                <span id="dispM" class="value">0</span>
-            </div>
-        </div>
-    </header>
-
-    <div class="workspace">
-        <div class="main-content">
-            <div class="question-box">
-                <div class="question-nav">
-                    <button id="btnPrev" class="nav-btn">⬅️ הקודם</button>
-                    <select id="selectQuestion" class="nav-select"></select>
-                    <button id="btnNext" class="nav-btn">הבא ➡️</button>
-                </div>
-                <h2 id="questionTitle">טוען שאלה...</h2>
-                <div id="questionText">אנא המתן לטעינת הנתונים...</div>
-                <div id="successMessage"></div>
-            </div>
-            
-            <div id="canvasContainer">
-                <canvas id="graphCanvas"></canvas>
-            </div>
+        <div class="zoom-controls">
+            <button onclick="zoomIn()">+</button>
+            <button onclick="resetZoom()">⟲</button>
+            <button onclick="zoomOut()">-</button>
         </div>
 
-        <div class="sidebar">
-            <div class="panel controls">
-                <h3>🎛️ פרמטרים של הפונקציה</h3>
-                <div class="control-group">
-                    <label>a: <span id="valA">0</span></label>
-                    <input type="range" id="paramA" min="-2" max="2" step="0.1">
-                </div>
-                <div class="control-group">
-                    <label>b: <span id="valB">0</span></label>
-                    <input type="range" id="paramB" min="-3" max="3" step="0.1">
-                </div>
-                <div class="control-group">
-                    <label>c: <span id="valC">0</span></label>
-                    <input type="range" id="paramC" min="-5" max="5" step="0.1">
-                </div>
-                <div class="control-group">
-                    <label>d: <span id="valD">0</span></label>
-                    <input type="range" id="paramD" min="-5" max="5" step="0.1">
-                </div>
-            </div>
-
-            <div class="panel x-control">
-                <h3>📍 חקירת נקודה</h3>
-                <div class="control-group">
-                    <label>מיקום ה-X: <span id="valX">0</span></label>
-                    <input type="range" id="paramX" min="-6" max="6" step="0.1">
-                </div>
-                <div class="tangent-eqn-box" dir="ltr">
-                    <strong>Tangent Equation:</strong>
-                    <div id="tangentEqn">y - y₁ = m(x - x₁)</div>
-                </div>
-            </div>
-
-            <div class="panel journal">
-                <h3>📜 יומן הצלחות</h3>
-                <ul id="journalList"></ul>
-            </div>
+        <div id="successBanner">כל הכבוד! 🏆</div>
+        
+        <div id="holyTrinity" class="trinity-tooltip">
+            <div id="valX"></div>
+            <div id="valY"></div>
+            <div id="valM"></div>
+            <div id="lineEqn"></div>
         </div>
+    </div>
+
+    <div id="mathJournal" class="math-journal">
+        <div class="journal-title">יומן משוואות</div>
+        <div id="journalList"></div>
     </div>
 </div>
 
-<script src="bagrut_questions.js"></script>
-<script src="script.js"></script>
+<footer>
+    <div class="slider-container" id="sliderXContainer">
+        <span class="val-display">x</span>
+        <input type="range" id="mainX" min="-10" max="10" step="0.01" value="0" oninput="updateFromSlider()">
+    </div>
 
+    <div class="function-editor">
+        <div class="editor-title">פרמטרים (משנים את הפונקציה)</div>
+        <div class="coef-control-panel">
+            <div class="coef-group">
+                <label>a (x³)</label>
+                <input type="range" id="mA" min="-2" max="2" step="0.1" value="0" oninput="manual()">
+                <span id="valA" class="val-display">0</span>
+            </div>
+            <div class="coef-group">
+                <label>b (x²)</label>
+                <input type="range" id="mB" min="-4" max="4" step="0.1" value="1" oninput="manual()">
+                <span id="valB" class="val-display">1</span>
+            </div>
+            <div class="coef-group">
+                <label>c (x)</label>
+                <input type="range" id="mC" min="-5" max="5" step="0.1" value="0" oninput="manual()">
+                <span id="valC" class="val-display">0</span>
+            </div>
+            <div class="coef-group">
+                <label>d (חופשי)</label>
+                <input type="range" id="mD" min="-5" max="5" step="0.1" value="0" oninput="manual()">
+                <span id="valD" class="val-display">0</span>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="script.js"></script>
 </body>
 </html>
