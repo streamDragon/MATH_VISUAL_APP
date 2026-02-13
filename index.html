@@ -1,13 +1,3 @@
-זהו השיפור המשמעותי ביותר עד כה. הוספתי את כל מה שביקשת:
-
-1. **סימון זוויות ונקודות חיתוך:** כעת המשיק והאנך מסמנים את נקודות החיתוך שלהם עם הצירים (נקודות אפורות קטנות) + סימון זווית ישרה ברור ביניהם.
-2. **הסבר על הפרמטרים (A, B, C, D):** הוספתי "מקרא" ברור מעל הסליידרים שמסביר במילים פשוטות מה כל אחד עושה (עקמומיות, הזזה, גובה).
-3. **תפריט עליון קבוע:** רשימת השאלות וכפתור "השאלה הבאה" נעוצים למעלה (Sticky) ולא נעלמים בגלילה.
-4. **ממשק:** עיצוב נקי יותר שמותאם גם למחשב וגם לנייד.
-
-הנה הקובץ המלא והסופי. **פשוט לשמור כ-`index.html` ולהריץ.**
-
-```html
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -35,19 +25,21 @@
             display: flex;
             flex-direction: row; 
             overflow: hidden;
+            user-select: none; /* מניעת סימון טקסט בגרירה */
         }
 
-        /* --- אזור הגרף (שמאל במחשב, למעלה בנייד) --- */
+        /* --- אזור הגרף --- */
         #graph-container {
             flex: 1;
             position: relative;
             background: white;
             cursor: crosshair;
             height: 100%;
+            touch-action: none; /* חשוב לגרירה במובייל */
         }
         canvas { display: block; width: 100%; height: 100%; }
 
-        /* --- סרגל כלים (ימין במחשב, למטה בנייד) --- */
+        /* --- סרגל כלים --- */
         #sidebar {
             width: 380px;
             background: var(--panel-bg);
@@ -59,31 +51,22 @@
             z-index: 10;
         }
 
-        /* --- כותרת ותפריט (קבועים למעלה) --- */
         .sidebar-header {
             padding: 15px;
             background: #f1f5f9;
             border-bottom: 1px solid var(--border);
-            flex-shrink: 0; /* מונע כיווץ */
+            flex-shrink: 0; 
         }
 
-        /* עיצוב התפריט והכפתורים */
-        .nav-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 8px;
-        }
-        .nav-label { font-weight: bold; color: #334155; }
-        
         select {
             width: 100%; padding: 10px; font-size: 1rem;
             border: 1px solid #94a3b8; border-radius: 6px;
             background: white; cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-top: 5px;
         }
 
-        /* כפתור "השאלה הבאה" */
         #success-area {
-            display: none; /* מוסתר כברירת מחדל */
+            display: none;
             margin-top: 10px;
             animation: slideDown 0.3s ease-out;
         }
@@ -97,14 +80,12 @@
         #btn-next:hover { background: #16a34a; }
         @keyframes slideDown { from { opacity:0; transform: translateY(-10px); } to { opacity:1; transform: translateY(0); } }
 
-        /* --- תוכן נגלל --- */
         .scroll-content {
             flex: 1;
             overflow-y: auto;
             padding: 15px;
         }
 
-        /* כרטיסיות מידע */
         .card {
             background: white; border: 1px solid var(--border);
             border-radius: 8px; padding: 12px; margin-bottom: 15px;
@@ -112,7 +93,6 @@
         .card h3 { margin: 0 0 8px 0; font-size: 1.1rem; color: #1e293b; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         .card p { margin: 0; font-size: 0.95rem; color: #475569; line-height: 1.5; white-space: pre-line; }
 
-        /* אזור הסליידרים */
         .params-legend {
             display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
             font-size: 0.8rem; color: #64748b; margin-bottom: 10px;
@@ -130,11 +110,10 @@
             flex: 1; margin: 0 10px; height: 30px; cursor: pointer;
         }
         .val-disp { 
-            width: 40px; text-align: left; font-family: monospace; 
-            font-weight: bold; color: var(--primary); 
+            width: 45px; text-align: left; font-family: monospace; 
+            font-weight: bold; color: var(--primary); font-size: 0.9rem;
         }
 
-        /* כפתור טוגל למעבדת האנך */
         .toggle-btn {
             width: 100%; padding: 12px;
             background: white; border: 2px solid var(--purple); color: var(--purple);
@@ -143,7 +122,6 @@
         }
         .toggle-btn.active { background: var(--purple); color: white; }
 
-        /* התאמה למובייל */
         @media (max-width: 768px) {
             body { flex-direction: column; }
             #graph-container { height: 45vh; border-bottom: 2px solid #cbd5e1; }
@@ -155,17 +133,12 @@
 
     <div id="graph-container">
         <canvas id="cvs"></canvas>
-        <div style="position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.9); padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; pointer-events: none; direction: ltr; border: 1px solid #ccc;">
-            <div id="debug-info">טוען...</div>
         </div>
-    </div>
 
     <div id="sidebar">
         
         <div class="sidebar-header">
-            <div class="nav-header">
-                <span class="nav-label">בחר משימה:</span>
-            </div>
+            <label style="font-weight:bold; color:#334155;">בחר משימה:</label>
             <select id="questionsMenu"></select>
 
             <div id="success-area">
@@ -183,6 +156,10 @@
                 <p id="qDesc">...</p>
             </div>
 
+            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">
+                💡 טיפ: ניתן לגרור את הנקודה הכחולה עם העכבר/אצבע
+            </div>
+
             <div class="card" style="background: #fff7ed; border-color: #fdba74;">
                 <h3 style="color:var(--orange)">📍 שליטה בנקודה</h3>
                 <div class="control-row">
@@ -192,13 +169,13 @@
                 </div>
             </div>
 
-            <button class="toggle-btn" id="btnNormalToggle" onclick="toggleNormal()">📐 מעבדת האנך (לחץ לפתיחה)</button>
+            <button class="toggle-btn" id="btnNormalToggle" onclick="toggleNormal()">📐 מעבדת האנך</button>
             
             <div class="card" id="normalControls" style="display:none; border-color: var(--purple);">
                 <h3 style="color:var(--purple)">כיוון האנך</h3>
-                <p style="font-size:0.85rem; margin-bottom:10px; color:#666;">
-                    האנך (סגול) חותך את המשיק (כתום). נסו ליצור זווית של 90°.
-                </p>
+                <div style="font-size: 0.9rem; margin-bottom: 8px; background: #f3e8ff; padding: 5px; border-radius: 4px;">
+                    מכפלת שיפועים: <span id="slopeProd" style="font-weight:bold; direction:ltr;"></span>
+                </div>
                 <div class="control-row">
                     <label>m2</label>
                     <input type="range" id="inpNormalSlope" min="-10" max="10" step="0.1" value="1" oninput="updateSystem()">
@@ -210,7 +187,7 @@
                 <h3>🛠 בניית הפונקציה</h3>
                 
                 <div class="params-legend">
-                    <div class="legend-item"><b>a</b>: עקמומיות / כיוון</div>
+                    <div class="legend-item"><b>a</b>: עקמומיות</div>
                     <div class="legend-item"><b>b</b>: הזזה אופקית</div>
                     <div class="legend-item"><b>c</b>: שיפוע בחיתוך</div>
                     <div class="legend-item"><b>d</b>: גובה (למעלה/למטה)</div>
@@ -230,39 +207,33 @@
 /* === מאגר השאלות === */
 const QUESTIONS = [
     {
-        title: "שלב 1: בנייה וחקירה",
-        desc: "לפני שמתחילים לחקור, צריך להבין את הכלים:\n1. השתמשו ב-**a, b, c, d** למטה כדי לשנות את צורת הפונקציה.\n2. לאחר מכן, הזיזו את ה-**X** כדי לטייל עליה.\n\nהמטרה: שחקו חופשי עד שתבינו מה כל כפתור עושה.",
+        title: "שלב 1: בנייה וחקירה חופשית",
+        desc: "נסו לגרור את הנקודה הכחולה עם העכבר!\n\n1. השתמשו ב-a, b, c, d לבניית הפונקציה.\n2. גררו את הגרף למעלה/למטה כדי לשנות את הגובה (d).",
         params: [0.5, 0, -2, 0], 
         goal: "free"
     },
     {
         title: "משיק אופקי (קיצון)",
-        desc: "הזיזו את ה-X עד שהמשיק (הקו הכתום) יהיה מאוזן לגמרי (שיפוע 0).\nזוהי נקודת הקיצון של הפונקציה.",
+        desc: "מצאו את נקודת הקיצון.\nהזיזו את X עד שהמשיק יהיה שטוח לגמרי (m=0).",
         params: [0.5, 0, -2, 0], 
         goal: "slope_zero"
     },
     {
         title: "שיפוע 2 בפרבולה",
-        desc: "עבור הפרבולה: y = x² - 2.\nמצאו היכן צריך לעמוד (X) כדי שהשיפוע יהיה בדיוק 2.",
+        desc: "נתונה הפרבולה: y = x² - 2.\nמצאו את הנקודה שבה השיפוע (m) הוא 2 בדיוק.",
         params: [0, 1, 0, -2], 
         goal: "slope_match",
         targetSlope: 2
     },
     {
         title: "מעבדת האנך - 90 מעלות",
-        desc: "1. פתחו את 'מעבדת האנך'.\n2. כוונו את האנך (m2) עד שיווצר ריבוע ירוק קטן בינו לבין המשיק (90°).",
+        desc: "פתחו את 'מעבדת האנך' וכוונו את השיפוע (m2) עד שהמכפלה תהיה 1-.\n(יוצר זווית ישרה).",
         params: [0, 0.5, 0, 0], 
         goal: "normal_match"
     },
     {
-        title: "אתגר המשיק והאנך",
-        desc: "מצאו מצב שבו המשיק הוא 1, והאנך הוא 1-.\n(צריך להזיז גם את X וגם את שיפוע האנך עד שהריבוע הירוק יופיע בשיפועים הנכונים).",
-        params: [0.1, 0, 0, 0], 
-        goal: "normal_match"
-    },
-    {
-        title: "צלף: הזזה אנכית",
-        desc: "הזיזו **רק** את הפרמטר d (גובה) כדי שהקו הכחול יעבור דרך הנקודה האדומה.",
+        title: "צלף: פגיעה במטרה",
+        desc: "הזיזו את d (אפשר לגרור את הרקע למעלה/למטה) כדי שהקו הכחול יעבור דרך הנקודה האדומה.",
         params: [0, 1, -2, 0],
         targets: [{x: 2, y: 4}],
         goal: "hit_target",
@@ -270,7 +241,7 @@ const QUESTIONS = [
     },
     {
         title: "האתגר הכפול",
-        desc: "פגעו בשתי הנקודות יחד! שנו את b (הזזה) ואת d (גובה).",
+        desc: "פגעו בשתי הנקודות יחד! שנו את b ואת d.",
         params: [0, 0, 0, 0],
         targets: [{x: -1, y: 2}, {x: 2, y: 5}], 
         goal: "hit_target",
@@ -278,19 +249,29 @@ const QUESTIONS = [
     }
 ];
 
-/* === משתנים גלובליים === */
 let cvs, ctx, width, height, scale = 40, originX, originY;
 let a=0, b=0, c=0, d=0, xVal=0;
 let showNormal = false;
 let currQIndex = 0;
 let isWin = false;
 
-/* === אתחול === */
+// משתנים לגרירה
+let isDragging = false;
+let dragTarget = null; // 'point' or 'bg'
+let lastMouseX = 0, lastMouseY = 0;
+
 window.onload = function() {
     cvs = document.getElementById('cvs');
     ctx = cvs.getContext('2d');
     
-    // בניית התפריט
+    // אירועי עכבר/מגע
+    cvs.addEventListener('mousedown', startDrag);
+    cvs.addEventListener('touchstart', (e) => startDrag(e.touches[0]));
+    window.addEventListener('mousemove', doDrag);
+    window.addEventListener('touchmove', (e) => doDrag(e.touches[0]));
+    window.addEventListener('mouseup', endDrag);
+    window.addEventListener('touchend', endDrag);
+
     const menu = document.getElementById('questionsMenu');
     QUESTIONS.forEach((q, idx) => {
         let opt = document.createElement('option');
@@ -306,6 +287,75 @@ window.onload = function() {
     requestAnimationFrame(loop);
 };
 
+/* === לוגיקת גרירה === */
+function startDrag(e) {
+    const rect = cvs.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    
+    // המרה לקואורדינטות גרף
+    let clickX = (mx - originX) / scale;
+    let clickY = (originY - my) / scale;
+    
+    // חישוב מיקום הנקודה הנוכחית
+    let curY = a*xVal**3 + b*xVal**2 + c*xVal + d;
+    
+    // בדיקה אם לחצנו קרוב לנקודה הכחולה (רדיוס סביר)
+    let dist = Math.sqrt((clickX - xVal)**2 + (clickY - curY)**2);
+    
+    if (dist < 1.0 && !document.getElementById('inpX').disabled) {
+        isDragging = true;
+        dragTarget = 'point';
+    } else if (!document.getElementById('inpD').disabled) {
+        // אם לא על הנקודה, מזיזים את הגרף (משנים את D)
+        isDragging = true;
+        dragTarget = 'bg';
+    }
+    
+    lastMouseX = mx;
+    lastMouseY = my;
+}
+
+function doDrag(e) {
+    if (!isDragging) return;
+    
+    const rect = cvs.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    
+    if (dragTarget === 'point') {
+        // חישוב X חדש
+        let newX = (mx - originX) / scale;
+        // הגבלה לטווח
+        newX = Math.max(-5, Math.min(5, newX));
+        
+        document.getElementById('inpX').value = newX;
+        xVal = newX;
+    } else if (dragTarget === 'bg') {
+        // שינוי D לפי תזוזה אנכית
+        let dyPixels = my - lastMouseY;
+        let dChange = dyPixels / scale; // Y הפוך במסך, אבל גרירה למטה צריכה להוריד את הגרף?
+        // למעשה, אם אני גורר למטה, אני רוצה שהגרף ירד -> D קטן
+        // במחשב: Y עולה למטה. אז dy חיובי = למטה.
+        // בנוסחה: Y = ... + d. במסך: py = originY - Y*scale.
+        // בוא נעשה פשוט: גרירה למעלה (dy שלילי) -> D עולה.
+        
+        let newD = d + (dChange * -1); 
+        newD = Math.max(-5, Math.min(5, newD));
+        document.getElementById('inpD').value = newD;
+        d = newD;
+    }
+    
+    lastMouseX = mx;
+    lastMouseY = my;
+    updateSystem();
+}
+
+function endDrag() {
+    isDragging = false;
+    dragTarget = null;
+}
+
 function resizeCanvas() {
     const container = document.getElementById('graph-container');
     width = cvs.width = container.offsetWidth;
@@ -320,24 +370,21 @@ function loadQuestion(idx) {
     currQIndex = idx;
     isWin = false;
     document.getElementById('questionsMenu').value = idx;
-    document.getElementById('success-area').style.display = 'none'; // הסתרת כפתור הבא
+    document.getElementById('success-area').style.display = 'none';
 
     const q = QUESTIONS[idx];
     document.getElementById('qTitle').innerText = q.title;
     document.getElementById('qDesc').innerText = q.desc;
 
-    // טעינת פרמטרים מהשאלה
     [a, b, c, d] = q.params;
     xVal = 0;
 
-    // עדכון הממשק
     document.getElementById('inpA').value = a;
     document.getElementById('inpB').value = b;
     document.getElementById('inpC').value = c;
     document.getElementById('inpD').value = d;
     document.getElementById('inpX').value = xVal;
 
-    // ניהול נעילות
     const allInputs = ['inpA', 'inpB', 'inpC', 'inpD', 'inpX'];
     allInputs.forEach(id => {
         const el = document.getElementById(id);
@@ -352,7 +399,6 @@ function loadQuestion(idx) {
             el.parentElement.style.opacity = "0.5";
         });
     }
-
     updateSystem();
 }
 
@@ -362,11 +408,9 @@ function toggleNormal() {
     const panel = document.getElementById('normalControls');
     if (showNormal) {
         btn.classList.add('active');
-        btn.innerText = "📐 מעבדת האנך (פתוח)";
         panel.style.display = 'block';
     } else {
         btn.classList.remove('active');
-        btn.innerText = "📐 מעבדת האנך (לחץ לפתיחה)";
         panel.style.display = 'none';
     }
     updateSystem();
@@ -379,16 +423,15 @@ function updateSystem() {
     d = parseFloat(document.getElementById('inpD').value);
     xVal = parseFloat(document.getElementById('inpX').value);
 
-    document.getElementById('valA').innerText = a;
-    document.getElementById('valB').innerText = b;
-    document.getElementById('valC').innerText = c;
-    document.getElementById('valD').innerText = d;
+    document.getElementById('valA').innerText = a.toFixed(1);
+    document.getElementById('valB').innerText = b.toFixed(1);
+    document.getElementById('valC').innerText = c.toFixed(1);
+    document.getElementById('valD').innerText = d.toFixed(1);
     document.getElementById('valX').innerText = xVal.toFixed(1);
     
     checkWin();
 }
 
-/* === לוגיקה גרפית === */
 function loop() {
     draw();
     requestAnimationFrame(loop);
@@ -398,15 +441,22 @@ function draw() {
     ctx.clearRect(0, 0, width, height);
     drawGrid();
 
-    // ציור המטרות
+    // מטרות
     const q = QUESTIONS[currQIndex];
     if (q.targets) {
         q.targets.forEach(t => {
             let tx = originX + t.x * scale;
             let ty = originY - t.y * scale;
+            
+            // נקודה אדומה
             ctx.fillStyle = '#ef4444'; 
             ctx.beginPath(); ctx.arc(tx, ty, 6, 0, Math.PI*2); ctx.fill();
             
+            // טקסט קואורדינטות למטרה
+            ctx.fillStyle = '#dc2626';
+            ctx.font = 'bold 12px monospace';
+            ctx.fillText(`(${t.x},${t.y})`, tx + 10, ty - 10);
+
             // בדיקת פגיעה
             let yAtT = a*t.x**3 + b*t.x**2 + c*t.x + d;
             if (Math.abs(yAtT - t.y) < 0.2) {
@@ -416,8 +466,8 @@ function draw() {
         });
     }
 
-    // ציור הפונקציה
-    ctx.lineWidth = 3; 
+    // --- ציור הפונקציה (עבה יותר!) ---
+    ctx.lineWidth = 5;  // שינוי לבקשתך
     ctx.strokeStyle = "#2563eb";
     ctx.beginPath();
     let started = false;
@@ -441,18 +491,27 @@ function draw() {
     let py = originY - curY * scale;
     let slope = 3*a*xVal**2 + 2*b*xVal + c;
 
-    // 1. ציור משיק (כתום) + חיתוך צירים
+    // 1. משיק
     drawLinearFunc(px, py, slope, "#f97316", false);
     
-    // 2. ציור אנך (סגול) + חיתוך צירים
-    let normalSlope = 1;
+    // 2. אנך (אם פתוח)
     if (showNormal) {
-        normalSlope = parseFloat(document.getElementById('inpNormalSlope').value);
+        let normalSlope = parseFloat(document.getElementById('inpNormalSlope').value);
         document.getElementById('valNormal').innerText = normalSlope.toFixed(2);
         
+        // חישוב והצגת הכפל שיפועים
+        let prod = (slope * normalSlope).toFixed(2);
+        document.getElementById('slopeProd').innerText = 
+            `${slope.toFixed(2)} × ${normalSlope.toFixed(2)} = ${prod}`;
+        
+        if (Math.abs(slope * normalSlope + 1) < 0.15) {
+             document.getElementById('slopeProd').style.color = "#22c55e"; // ירוק כשטוב
+        } else {
+             document.getElementById('slopeProd').style.color = "#ef4444";
+        }
+
         drawLinearFunc(px, py, normalSlope, "#9333ea", true);
         
-        // ציור זווית ישרה אם קרובים ל-90 מעלות
         if (Math.abs(slope * normalSlope + 1) < 0.15) {
             drawRightAngleSquare(px, py, Math.atan(slope));
         }
@@ -460,23 +519,29 @@ function draw() {
 
     // הנקודה הראשית
     ctx.fillStyle = "#2563eb"; 
-    ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(px, py, 7, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = "white"; 
-    ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2); ctx.fill();
 
-    // טקסט דיבאג
-    document.getElementById('debug-info').innerText = 
-        `x: ${xVal.toFixed(1)}, y: ${curY.toFixed(1)}, m: ${slope.toFixed(2)}`;
+    // --- השילוש הקדוש (על הנקודה) ---
+    // רקע חצי שקוף לטקסט
+    let textStr = `(${xVal.toFixed(1)}, ${curY.toFixed(1)}) m=${slope.toFixed(2)}`;
+    ctx.font = "bold 13px sans-serif";
+    let tw = ctx.measureText(textStr).width;
+    
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.fillRect(px + 10, py - 25, tw + 10, 20);
+    
+    ctx.fillStyle = "#0f172a";
+    ctx.fillText(textStr, px + 15, py - 10);
 }
 
-// פונקציה חכמה לציור קו + נקודות חיתוך
 function drawLinearFunc(cx, cy, m, color, dashed) {
     ctx.save();
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     if (dashed) ctx.setLineDash([5, 5]);
 
-    // ציור הקו הארוך
     let len = 1000;
     let angle = Math.atan(-m); 
     ctx.beginPath();
@@ -485,64 +550,38 @@ function drawLinearFunc(cx, cy, m, color, dashed) {
     ctx.stroke();
     ctx.restore();
 
-    // === חדש: חישוב וציור נקודות חיתוך עם הצירים ===
-    // משוואת הישר: Y - y0 = m(X - x0)  =>  Y = m(X - x0) + y0
-    // (כאן X,Y הם קואורדינטות מתמטיות)
-    
+    // נקודות חיתוך צירים (קטנות ואפורות)
+    let mathY0 = (originY - cy) / scale;
     let mathX0 = xVal;
-    let mathY0 = (originY - cy) / scale; // המרה מפיקסל למתמטי
 
-    // 1. חיתוך עם ציר Y (כש X=0)
+    // חיתוך Y
     let yIntercept = m * (0 - mathX0) + mathY0;
     let pyInt = originY - yIntercept * scale;
-    let pxInt = originX; // X=0 הוא באמצע המסך
+    if (pyInt > 0 && pyInt < height) drawInterceptDot(originX, pyInt, color);
 
-    if (pyInt > 0 && pyInt < height) {
-        drawInterceptDot(pxInt, pyInt, color);
-    }
-
-    // 2. חיתוך עם ציר X (כש Y=0)
-    // 0 = m(X - x0) + y0  =>  -y0 = m(X - x0) => -y0/m = X - x0 => X = x0 - y0/m
-    if (Math.abs(m) > 0.01) { // מניעת חלוקה באפס
+    // חיתוך X
+    if (Math.abs(m) > 0.01) {
         let xIntercept = mathX0 - (mathY0 / m);
         let pxXInt = originX + xIntercept * scale;
-        let pyXInt = originY; // Y=0 הוא באמצע המסך
-
-        if (pxXInt > 0 && pxXInt < width) {
-            drawInterceptDot(pxXInt, pyXInt, color);
-        }
+        if (pxXInt > 0 && pxXInt < width) drawInterceptDot(pxXInt, originY, color);
     }
 }
 
 function drawInterceptDot(x, y, color) {
-    ctx.fillStyle = "#64748b"; // צבע אפור לנקודות חיתוך
-    ctx.beginPath();
-    ctx.arc(x, y, 4, 0, Math.PI*2);
-    ctx.fill();
-    // מסגרת בצבע הקו
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1;
-    ctx.stroke();
+    ctx.fillStyle = "#94a3b8"; 
+    ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI*2); ctx.fill();
 }
 
 function drawRightAngleSquare(x, y, angle) {
-    const s = 14; // גודל הריבוע
+    const s = 14;
     ctx.save();
     ctx.translate(x, y);
-    ctx.rotate(-angle); // מסובבים לפי המשיק
-    
+    ctx.rotate(-angle);
     ctx.beginPath();
-    ctx.strokeStyle = "#22c55e"; // ירוק
-    ctx.lineWidth = 2;
-    ctx.fillStyle = "rgba(34, 197, 94, 0.2)"; // מילוי שקוף
-
-    // ציור צורת "ר" (ריבוע)
-    ctx.moveTo(s, 0);
-    ctx.lineTo(s, -s); // למעלה
-    ctx.lineTo(0, -s); // שמאלה (לכיוון האנך)
-    
-    ctx.stroke();
-    ctx.fill();
+    ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 2;
+    ctx.fillStyle = "rgba(34, 197, 94, 0.2)";
+    ctx.moveTo(s, 0); ctx.lineTo(s, -s); ctx.lineTo(0, -s);
+    ctx.stroke(); ctx.fill();
     ctx.restore();
 }
 
@@ -553,14 +592,12 @@ function drawGrid() {
     for(let y=originY%scale; y<height; y+=scale) { ctx.moveTo(0,y); ctx.lineTo(width,y); }
     ctx.stroke();
     
-    // צירים ראשיים
     ctx.strokeStyle = '#334155'; ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(0, originY); ctx.lineTo(width, originY);
     ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
     ctx.stroke();
 
-    // חצים לצירים
     ctx.fillStyle = '#334155';
     ctx.fillText("x", width - 15, originY - 5);
     ctx.fillText("y", originX + 5, 15);
@@ -588,11 +625,10 @@ function checkWin() {
         if (allHit) win = true;
     }
 
-    // טיפול בהצגת כפתור הניצחון
     const successArea = document.getElementById('success-area');
     if (win && !isWin) {
         isWin = true;
-        successArea.style.display = 'block'; // מופיע למעלה!
+        successArea.style.display = 'block'; 
     } else if (!win) {
         isWin = false;
         successArea.style.display = 'none';
@@ -600,14 +636,9 @@ function checkWin() {
 }
 
 function nextQuestion() {
-    if (currQIndex < QUESTIONS.length - 1) {
-        loadQuestion(currQIndex + 1);
-    } else {
-        alert("סיימת את כל המשימות בהצלחה!");
-    }
+    if (currQIndex < QUESTIONS.length - 1) loadQuestion(currQIndex + 1);
+    else alert("סיימת את כל המשימות בהצלחה!");
 }
 </script>
 </body>
 </html>
-
-```
