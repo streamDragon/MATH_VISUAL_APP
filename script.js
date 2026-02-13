@@ -152,28 +152,101 @@ function d2f(x) {
   return 6 * cf[0] * x + 2 * cf[1];
 }
 
-function formatPoly(a, b, c, d) {
-  const terms = [];
-  if (Math.abs(a) > 0.001) terms.push(`${Number(a.toFixed(2))}x³`);
-  if (Math.abs(b) > 0.001) terms.push(`${Number(b.toFixed(2))}x²`);
-  if (Math.abs(c) > 0.001) terms.push(`${Number(c.toFixed(2))}x`);
-  if (Math.abs(d) > 0.001 || terms.length === 0)
-    terms.push(`${Number(d.toFixed(2))}`);
-  return "f(x) = " + terms.join(" + ").replace(/\+ -/g, "- ");
+
+
+// ===============================
+// Pretty formatting helpers
+// ===============================
+
+function fmtCoeff(n, isFirstTerm = false) {
+  // מחזיר מחרוזת מקדם לתצוגה: בלי 1, בלי -1, עם +/-
+  // דוגמאות:
+  //  1   -> ""   (או "+" אם לא ראשון)
+  // -1   -> "-"
+  //  2   -> "2"
+  // -2   -> "-2"
+  if (Math.abs(n) < 1e-9) return "";
+
+  const sign = n < 0 ? "-" : isFirstTerm ? "" : "+";
+  const abs = Math.abs(n);
+
+  // בלי "1" (וגם בלי "-1") לפני x
+  const mag = Math.abs(abs - 1) < 1e-9 ? "" : String(Number(abs.toFixed(2)));
+
+  return sign + mag;
 }
+
+function fmtConst(n, isFirstTerm = false) {
+  // קבוע: אם לא ראשון -> מוסיף +/-
+  if (Math.abs(n) < 1e-9) return isFirstTerm ? "0" : "";
+  const sign = n < 0 ? "-" : isFirstTerm ? "" : "+";
+  return sign + String(Number(Math.abs(n).toFixed(2)));
+}
+
+// ===============================
+// f(x) formatter (cubic)
+// ===============================
+
+function formatPoly(a, b, c, d) {
+  const eps = 1e-9;
+  let out = "f(x) = ";
+  let first = true;
+
+  const addTerm = (coeff, body) => {
+    if (Math.abs(coeff) < eps) return;
+    out += fmtCoeff(coeff, first) + body;
+    first = false;
+  };
+
+  addTerm(a, "x³");
+  addTerm(b, "x²");
+  addTerm(c, "x");
+
+  // constant term
+  if (Math.abs(d) >= eps || first) {
+    if (first) out += String(Number(d.toFixed(2)));
+    else out += (d < 0 ? "-" : "+") + String(Number(Math.abs(d).toFixed(2)));
+  }
+
+  return out.replace(/\+\s/g, "+ ").replace(/-\s/g, "- ");
+}
+
+// ===============================
+// f'(x) formatter (derivative of cubic)
+// ===============================
 
 function formatDeriv(a, b, c) {
   // f'(x) = 3ax^2 + 2bx + c
-  const A = 3 * a,
-    B = 2 * b,
-    C = c;
-  const terms = [];
-  if (Math.abs(A) > 0.001) terms.push(`${Number(A.toFixed(2))}x²`);
-  if (Math.abs(B) > 0.001) terms.push(`${Number(B.toFixed(2))}x`);
-  if (Math.abs(C) > 0.001 || terms.length === 0)
-    terms.push(`${Number(C.toFixed(2))}`);
-  return "f'(x) = " + terms.join(" + ").replace(/\+ -/g, "- ");
+  const A = 3 * a;
+  const B = 2 * b;
+  const C = c;
+
+  const eps = 1e-9;
+  let out = "f'(x) = ";
+  let first = true;
+
+  const addTerm = (coeff, body) => {
+    if (Math.abs(coeff) < eps) return;
+    out += fmtCoeff(coeff, first) + body;
+    first = false;
+  };
+
+  addTerm(A, "x²");
+  addTerm(B, "x");
+
+  // constant term
+  if (Math.abs(C) >= eps || first) {
+    if (first) out += String(Number(C.toFixed(2)));
+    else out += (C < 0 ? "-" : "+") + String(Number(Math.abs(C).toFixed(2)));
+  }
+
+  return out.replace(/\+\s/g, "+ ").replace(/-\s/g, "- ");
 }
+
+
+
+
+
 
 // ---------- Game Update ----------
 function updateGame() {
