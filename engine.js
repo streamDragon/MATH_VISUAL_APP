@@ -1,4 +1,6 @@
-/* === Engine.js: מנוע גרפי ולוגיקה ויזואלית === */
+// ==========================================
+//  המנוע (Engine) - לוגיקה וציור
+// ==========================================
 
 let cvs, ctx, width, height, scale = 40, originX, originY;
 let a=0, b=0, c=0, d=0, xVal=0;
@@ -7,319 +9,331 @@ let currQIndex = 0;
 let isWin = false;
 let isDragging = false, dragTarget = null, lastMouseY = 0;
 
+// פונקציית אתחול - רצה כשהדף נטען
 window.onload = function() {
     cvs = document.getElementById('cvs');
     ctx = cvs.getContext('2d');
     
-    // חיבור אירועי גרירה (Touch + Mouse)
+    // מאזינים לאירועי עכבר ומגע
     cvs.addEventListener('mousedown', startDrag);
-    cvs.addEventListener('touchstart', (e) => startDrag(e.touches[0]), {passive: false});
-    window.addEventListener('mousemove', doDrag);
-    window.addEventListener('touchmove', (e) => doDrag(e.touches[0]), {passive: false});
-    window.addEventListener('mouseup', endDrag);
-    window.addEventListener('touchend', endDrag);
+    cvs.addEventListener('mousemove', doDrag);
+    cvs.addEventListener('mouseup', endDrag);
+    cvs.addEventListener('touchstart', (e) => startDrag(e.touches[0]));
+    cvs.addEventListener('touchmove', (e) => { e.preventDefault(); doDrag(e.touches[0]); }, {passive: false});
+    cvs.addEventListener('touchend', endDrag);
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
     // חיבור כפתורים וסליידרים
-    ['inpA','inpB','inpC','inpD','inpX','inpNormalSlope'].forEach(id => {
-        document.getElementById(id).addEventListener('input', updateSystem);
-    });
-    document.getElementById('btnNormalToggle').onclick = toggleNormal;
+    document.getElementById('inpX').oninput = (e) => updateParam('x', e.target.value);
+    document.getElementById('inpA').oninput = (e) => updateParam('a', e.target.value);
+    document.getElementById('inpB').oninput = (e) => updateParam('b', e.target.value);
+    document.getElementById('inpC').oninput = (e) => updateParam('c', e.target.value);
+    document.getElementById('inpD').oninput = (e) => updateParam('d', e.target.value);
+    document.getElementById('inpNormalSlope').oninput = (e) => { draw(); checkWin(); };
+    
+    document.getElementById('questionsMenu').onchange = (e) => loadQuestion(e.target.value);
+    document.getElementById('btnNormalToggle').onclick = toggleNormalLab;
 
-    // טעינת שאלות מקובץ questions.js
-    const menu = document.getElementById('questionsMenu');
-    if (typeof QUESTIONS !== 'undefined') {
-        QUESTIONS.forEach((q, idx) => {
-            let opt = document.createElement('option');
-            opt.value = idx; opt.text = `${idx+1}. ${q.title}`;
-            menu.appendChild(opt);
-        });
-        menu.onchange = (e) => loadQuestion(parseInt(e.target.value));
-        
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-        loadQuestion(0);
-        requestAnimationFrame(loop);
-    } else {
-        alert("שגיאה: קובץ questions.js לא נטען!");
-    }
+    initQuestionsMenu();
+    loadQuestion(0);
+    loop();
 };
 
-/* === ניהול גרירה === */
-function startDrag(e) {
-    const rect = cvs.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-    
-    let curY = a*xVal**3 + b*xVal**2 + c*xVal + d;
-    let px = originX + xVal * scale;
-    let py = originY - curY * scale;
-
-    let dist = Math.sqrt((mx - px)**2 + (my - py)**2);
-    
-    if (dist < 40 && !document.getElementById('inpX').disabled) {
-        isDragging = true; dragTarget = 'point';
-    } else if (!document.getElementById('inpD').disabled) {
-        isDragging = true; dragTarget = 'bg';
-    }
-    lastMouseY = my;
-}
-
-function doDrag(e) {
-    if (!isDragging) return;
-    // מניעת גלילה במסך מגע
-    if(e.preventDefault) e.preventDefault();
-
-    const rect = cvs.getBoundingClientRect();
-    const my = e.clientY - rect.top;
-    const mx = e.clientX - rect.left;
-    
-    if (dragTarget === 'point') {
-        let newX = (mx - originX) / scale;
-        newX = Math.max(-5, Math.min(5, newX));
-        document.getElementById('inpX').value = newX;
-        xVal = newX;
-    } else if (dragTarget === 'bg') {
-        let deltaY = (my - lastMouseY) / scale; 
-        let newD = d - deltaY; 
-        newD = Math.max(-5, Math.min(5, newD));
-        document.getElementById('inpD').value = newD;
-        d = newD;
-    }
-    lastMouseY = my;
-    updateSystem();
-}
-
-function endDrag() { isDragging = false; dragTarget = null; }
-
 function resizeCanvas() {
-    const container = document.getElementById('graph-container');
-    width = cvs.width = container.offsetWidth;
-    height = cvs.height = container.offsetHeight;
-    originX = width / 2; originY = height / 2;
-    scale = (width < 500) ? 30 : 40; 
-    updateSystem();
+    width = cvs.width = document.getElementById('graph-container').offsetWidth;
+    height = cvs.height = document.getElementById('graph-container').offsetHeight;
+    originX = width / 2;
+    originY = height / 2;
+    draw();
 }
 
-function loadQuestion(idx) {
-    currQIndex = idx; isWin = false;
-    document.getElementById('questionsMenu').value = idx;
-    document.getElementById('success-area').style.display = 'none';
+function updateParam(param, val) {
+    val = parseFloat(val);
+    if (param === 'x') xVal = val;
+    if (param === 'a') a = val;
+    if (param === 'b') b = val;
+    if (param === 'c') c = val;
+    if (param === 'd') d = val;
+    
+    // עדכון התצוגה המספרית
+    if(param === 'x') document.getElementById('valX').innerText = val.toFixed(1);
+    else document.getElementById('val' + param.toUpperCase()).innerText = val.toFixed(1);
+    
+    draw();
+    checkWin();
+}
 
-    const q = QUESTIONS[idx];
+function initQuestionsMenu() {
+    const sel = document.getElementById('questionsMenu');
+    sel.innerHTML = "";
+    QUESTIONS.forEach((q, i) => {
+        let opt = document.createElement('option');
+        opt.value = i;
+        opt.innerText = q.title;
+        sel.appendChild(opt);
+    });
+}
+
+function loadQuestion(index) {
+    currQIndex = parseInt(index);
+    let q = QUESTIONS[currQIndex];
+    
+    // איפוס סליידרים וערכים
+    a = q.params[0]; document.getElementById('inpA').value = a; document.getElementById('valA').innerText = a;
+    b = q.params[1]; document.getElementById('inpB').value = b; document.getElementById('valB').innerText = b;
+    c = q.params[2]; document.getElementById('inpC').value = c; document.getElementById('valC').innerText = c;
+    d = q.params[3]; document.getElementById('inpD').value = d; document.getElementById('valD').innerText = d;
+    
+    xVal = 0; 
+    document.getElementById('inpX').value = 0;
+    document.getElementById('valX').innerText = "0";
+
+    // עדכון טקסטים
     document.getElementById('qTitle').innerText = q.title;
     document.getElementById('qDesc').innerText = q.desc;
+    document.getElementById('success-area').style.display = 'none';
+    isWin = false;
 
-    [a, b, c, d] = q.params;
-    xVal = 0;
-
-    document.getElementById('inpA').value = a;
-    document.getElementById('inpB').value = b;
-    document.getElementById('inpC').value = c;
-    document.getElementById('inpD').value = d;
-    document.getElementById('inpX').value = xVal;
-
-    ['inpA', 'inpB', 'inpC', 'inpD', 'inpX'].forEach(id => {
-        const el = document.getElementById(id);
-        el.disabled = false; el.parentElement.style.opacity = "1";
-    });
-
+    // פתיחת/נעילת סליידרים
+    ['inpA','inpB','inpC','inpD','inpX'].forEach(id => document.getElementById(id).disabled = false);
     if (q.locked) {
-        q.locked.forEach(id => {
-            const el = document.getElementById(id);
-            el.disabled = true; el.parentElement.style.opacity = "0.5";
-        });
+        q.locked.forEach(id => document.getElementById(id).disabled = true);
     }
-    updateSystem();
-}
-
-function toggleNormal() {
-    showNormal = !showNormal;
-    const btn = document.getElementById('btnNormalToggle');
-    const panel = document.getElementById('normalControls');
-    if (showNormal) {
-        btn.classList.add('active');
-        btn.innerText = "📐 מעבדת האנך (פתוח)";
-        panel.style.display = 'block';
-    } else {
-        btn.classList.remove('active');
-        btn.innerText = "📐 מעבדת האנך (לחץ לפתיחה)";
-        panel.style.display = 'none';
-    }
-    updateSystem();
-}
-
-function updateSystem() {
-    a = parseFloat(document.getElementById('inpA').value);
-    b = parseFloat(document.getElementById('inpB').value);
-    c = parseFloat(document.getElementById('inpC').value);
-    d = parseFloat(document.getElementById('inpD').value);
-    xVal = parseFloat(document.getElementById('inpX').value);
-
-    document.getElementById('valA').innerText = a.toFixed(1);
-    document.getElementById('valB').innerText = b.toFixed(1);
-    document.getElementById('valC').innerText = c.toFixed(1);
-    document.getElementById('valD').innerText = d.toFixed(1);
-    document.getElementById('valX').innerText = xVal.toFixed(1);
     
-    // בדיקת לוגיקה מקובץ השאלות
-    const q = QUESTIONS[currQIndex];
-    let m = 3*a*xVal**2 + 2*b*xVal + c;
-    let nm = parseFloat(document.getElementById('inpNormalSlope').value);
-    
-    const state = { m, nm, x: xVal, y: (a*xVal**3+b*xVal**2+c*xVal+d), a, b, c, d, showNormal };
-    
-    // קריאה לפונקציה בקובץ questions.js
-    let win = false;
-    if (typeof checkWinLogic === 'function') {
-        win = checkWinLogic(q, state);
-    }
-
-    const successArea = document.getElementById('success-area');
-    if (win && !isWin) {
-        isWin = true; successArea.style.display = 'block'; 
-    } else if (!win) {
-        isWin = false; successArea.style.display = 'none';
-    }
+    draw();
 }
 
 function nextQuestion() {
-    if (currQIndex < QUESTIONS.length - 1) loadQuestion(currQIndex + 1);
-    else alert("סיימת את כל המשימות בהצלחה!");
+    if (currQIndex < QUESTIONS.length - 1) {
+        document.getElementById('questionsMenu').value = currQIndex + 1;
+        loadQuestion(currQIndex + 1);
+    } else {
+        alert("סיימת את כל המשימות! כל הכבוד!");
+    }
 }
 
-/* === ציור === */
-function loop() { draw(); requestAnimationFrame(loop); }
+function toggleNormalLab() {
+    showNormal = !showNormal;
+    const div = document.getElementById('normalControls');
+    const btn = document.getElementById('btnNormalToggle');
+    if (showNormal) {
+        div.style.display = 'block';
+        btn.classList.add('active');
+        btn.innerText = "📐 סגור מעבדת אנך";
+    } else {
+        div.style.display = 'none';
+        btn.classList.remove('active');
+        btn.innerText = "📐 מעבדת האנך (לחץ לפתיחה)";
+    }
+    draw();
+    checkWin();
+}
 
+// לוגיקת הציור
 function draw() {
+    // נקה מסך
     ctx.clearRect(0, 0, width, height);
-    drawGrid();
+    
+    // רשת
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for(let i = 0; i <= width/2; i+=scale) { ctx.moveTo(originX+i,0); ctx.lineTo(originX+i,height); ctx.moveTo(originX-i,0); ctx.lineTo(originX-i,height); }
+    for(let i = 0; i <= height/2; i+=scale) { ctx.moveTo(0,originY+i); ctx.lineTo(width,originY+i); ctx.moveTo(0,originY-i); ctx.lineTo(width,originY-i); }
+    ctx.stroke();
 
-    const q = QUESTIONS[currQIndex];
+    // צירים
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, originY); ctx.lineTo(width, originY);
+    ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
+    ctx.stroke();
+
+    // פונקציה ראשית (כחול)
+    ctx.strokeStyle = '#2563eb';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (let px = 0; px < width; px+=2) {
+        let x = (px - originX) / scale;
+        let y = a*x*x*x + b*x*x + c*x + d;
+        let py = originY - y * scale;
+        if (px===0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+
+    // חישוב נקודה ושיפוע
+    let yVal = a*Math.pow(xVal,3) + b*Math.pow(xVal,2) + c*xVal + d;
+    let slope = 3*a*Math.pow(xVal,2) + 2*b*xVal + c;
+    
+    let px = originX + xVal * scale;
+    let py = originY - yVal * scale;
+
+    // משיק (כתום)
+    let tLength = 1000;
+    ctx.strokeStyle = '#f97316';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(px - tLength, py + tLength * slope);
+    ctx.lineTo(px + tLength, py - tLength * slope);
+    ctx.stroke();
+
+    // אנך (סגול) - אם פעיל
+    let normalSlopeVal = parseFloat(document.getElementById('inpNormalSlope').value);
+    if (showNormal) {
+        ctx.strokeStyle = '#9333ea'; // סגול
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        // ציור קו לפי השיפוע שבסליידר m2
+        ctx.moveTo(px - tLength, py + tLength * normalSlopeVal);
+        ctx.lineTo(px + tLength, py - tLength * normalSlopeVal);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // הצגת מכפלת השיפועים
+        let prod = slope * normalSlopeVal;
+        document.getElementById('slopeProd').innerText = prod.toFixed(2);
+        document.getElementById('valNormal').innerText = normalSlopeVal.toFixed(2);
+        
+        // סימון זווית אם זה קרוב ל-90 מעלות (מכפלה -1)
+        if (Math.abs(prod + 1) < 0.1) {
+            ctx.fillStyle = 'rgba(147, 51, 234, 0.2)';
+            ctx.fillRect(px, py, 20, -20 * Math.sign(slope)); // סימון סכמטי
+        }
+    }
+
+    // נקודה נוכחית
+    ctx.fillStyle = '#2563eb';
+    ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI*2); ctx.fill();
+
+    // מטרות (אם יש)
+    let q = QUESTIONS[currQIndex];
     if (q.targets) {
         q.targets.forEach(t => {
             let tx = originX + t.x * scale;
             let ty = originY - t.y * scale;
-            
-            ctx.fillStyle = '#ef4444'; 
-            ctx.beginPath(); ctx.arc(tx, ty, 6, 0, Math.PI*2); ctx.fill();
-            
-            ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-            ctx.fillRect(tx + 8, ty - 18, 50, 16);
-            ctx.fillStyle = '#dc2626';
-            ctx.font = 'bold 12px monospace';
-            ctx.textAlign = 'left';
-            ctx.fillText(`(${t.x},${t.y})`, tx + 10, ty - 6);
-
-            let yAtT = a*t.x**3 + b*t.x**2 + c*t.x + d;
-            if (Math.abs(yAtT - t.y) < 0.25) {
-                ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 3;
-                ctx.beginPath(); ctx.arc(tx, ty, 10, 0, Math.PI*2); ctx.stroke();
-            }
+            ctx.fillStyle = '#ef4444'; // אדום
+            ctx.beginPath(); ctx.arc(tx, ty, 5, 0, Math.PI*2); ctx.fill();
         });
     }
+}
 
-    ctx.lineWidth = 5; ctx.strokeStyle = "#2563eb";
-    ctx.beginPath();
-    let started = false;
-    for (let px = 0; px < width; px+=2) {
-        let mx = (px - originX) / scale;
-        let my = a*mx**3 + b*mx**2 + c*mx + d;
-        let py = originY - my * scale;
-        if (py > -height && py < height*2) {
-            if (!started) { ctx.moveTo(px, py); started = true; }
-            else { ctx.lineTo(px, py); }
-        } else { started = false; }
-    }
-    ctx.stroke();
-
-    let curY = a*xVal**3 + b*xVal**2 + c*xVal + d;
-    let px = originX + xVal * scale;
-    let py = originY - curY * scale;
-    let slope = 3*a*xVal**2 + 2*b*xVal + c;
-
-    drawLinearFunc(px, py, slope, "#f97316", false);
+// בדיקת ניצחון
+function checkWin() {
+    if (isWin) return;
     
-    if (showNormal) {
-        let normalSlope = parseFloat(document.getElementById('inpNormalSlope').value);
-        document.getElementById('valNormal').innerText = normalSlope.toFixed(2);
-        
-        let prod = (slope * normalSlope).toFixed(2);
-        const prodEl = document.getElementById('slopeProd');
-        prodEl.innerText = `${slope.toFixed(2)} × ${normalSlope.toFixed(2)} = ${prod}`;
-        
-        let isPerp = Math.abs(slope * normalSlope + 1) < 0.15;
-        prodEl.style.color = isPerp ? "#16a34a" : "#ef4444";
+    let q = QUESTIONS[currQIndex];
+    let win = false;
+    
+    // נתונים נוכחיים
+    let slope = 3*a*Math.pow(xVal,2) + 2*b*xVal + c;
+    let m2 = parseFloat(document.getElementById('inpNormalSlope').value);
+    let yVal = a*Math.pow(xVal,3) + b*Math.pow(xVal,2) + c*xVal + d;
 
-        drawLinearFunc(px, py, normalSlope, "#9333ea", true);
-        if (isPerp) drawRightAngleSquare(px, py, Math.atan(slope));
+    // לוגיקה לפי סוג משימה
+    if (q.goal === 'slope_zero') {
+        if (Math.abs(slope) < 0.1) win = true;
+    }
+    else if (q.goal === 'slope_match') {
+        if (Math.abs(slope - q.targetSlope) < 0.15) win = true;
+    }
+    else if (q.goal === 'normal_match') {
+        if (showNormal && Math.abs(slope * m2 + 1) < 0.15) win = true;
+    }
+    else if (q.goal === 'hit_target') {
+        let allHit = true;
+        q.targets.forEach(t => {
+            let yAtTarget = a * Math.pow(t.x, 3) + b * Math.pow(t.x, 2) + c * t.x + d;
+            if (Math.abs(yAtTarget - t.y) > 0.3) allHit = false;
+        });
+        if (allHit) win = true;
     }
 
-    ctx.fillStyle = "#2563eb"; 
-    ctx.beginPath(); ctx.arc(px, py, 7, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = "white"; 
-    ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2); ctx.fill();
-
-    let infoText = `(${xVal.toFixed(1)}, ${curY.toFixed(1)}) m=${slope.toFixed(2)}`;
-    ctx.font = "bold 13px sans-serif";
-    let tw = ctx.measureText(infoText).width;
-    ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
-    ctx.strokeStyle = "#cbd5e1"; ctx.lineWidth = 1;
-    let bx = px + 12, by = py - 28;
-    if (bx + tw > width) bx = px - tw - 12;
-    if (by < 10) by = py + 20;
-    ctx.fillRect(bx, by, tw + 8, 20);
-    ctx.strokeRect(bx, by, tw + 8, 20);
-    ctx.fillStyle = "#0f172a"; ctx.textAlign = 'left';
-    ctx.fillText(infoText, bx + 4, by + 14);
-}
-
-function drawLinearFunc(cx, cy, m, color, dashed) {
-    ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 2;
-    if (dashed) ctx.setLineDash([5, 5]);
-    let len = 1000; let angle = Math.atan(-m); 
-    ctx.beginPath();
-    ctx.moveTo(cx - Math.cos(angle)*len, cy - Math.sin(angle)*len);
-    ctx.lineTo(cx + Math.cos(angle)*len, cy + Math.sin(angle)*len);
-    ctx.stroke(); ctx.restore();
-
-    let mathY0 = (originY - cy) / scale;
-    let mathX0 = xVal;
-    let yIntercept = m * (0 - mathX0) + mathY0;
-    let pyInt = originY - yIntercept * scale;
-    if (pyInt > 0 && pyInt < height) drawInterceptDot(originX, pyInt, color);
-
-    if (Math.abs(m) > 0.01) {
-        let xIntercept = mathX0 - (mathY0 / m);
-        let pxXInt = originX + xIntercept * scale;
-        if (pxXInt > 0 && pxXInt < width) drawInterceptDot(pxXInt, originY, color);
+    if (win) {
+        isWin = true;
+        document.getElementById('success-area').style.display = 'block';
+        confettiEffect();
     }
 }
 
-function drawInterceptDot(x, y, borderColor) {
-    ctx.fillStyle = "#64748b"; 
-    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = borderColor; ctx.lineWidth = 1; ctx.stroke();
+function loop() {
+    requestAnimationFrame(loop);
 }
 
-function drawRightAngleSquare(x, y, angle) {
-    const s = 14; ctx.save();
-    ctx.translate(x, y); ctx.rotate(-angle);
-    ctx.beginPath(); ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 2;
-    ctx.fillStyle = "rgba(34, 197, 94, 0.2)";
-    ctx.moveTo(s, 0); ctx.lineTo(s, -s); ctx.lineTo(0, -s);
-    ctx.stroke(); ctx.fill(); ctx.restore();
+// גרירה
+function startDrag(e) {
+    let mx = e.clientX || e.pageX;
+    let my = e.clientY || e.pageY;
+    let rect = cvs.getBoundingClientRect();
+    mx -= rect.left; my -= rect.top;
+
+    let px = originX + xVal * scale;
+    let py = originY - (a*Math.pow(xVal,3) + b*Math.pow(xVal,2) + c*xVal + d) * scale;
+
+    if (Math.hypot(mx-px, my-py) < 20) {
+        isDragging = true;
+        dragTarget = 'point';
+    } else {
+        isDragging = true;
+        dragTarget = 'bg';
+        lastMouseY = my;
+    }
 }
 
-function drawGrid() {
-    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1; ctx.beginPath();
-    for(let x=originX%scale; x<width; x+=scale) { ctx.moveTo(x,0); ctx.lineTo(x,height); }
-    for(let y=originY%scale; y<height; y+=scale) { ctx.moveTo(0,y); ctx.lineTo(width,y); }
-    ctx.stroke();
-    ctx.strokeStyle = '#334155'; ctx.lineWidth = 2; ctx.beginPath();
-    ctx.moveTo(0, originY); ctx.lineTo(width, originY);
-    ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
-    ctx.stroke();
-    ctx.fillStyle = '#334155'; ctx.font = "14px Arial";
-    ctx.fillText("x", width - 15, originY - 5);
-    ctx.fillText("y", originX + 5, 15);
+function doDrag(e) {
+    if (!isDragging) return;
+    let mx = e.clientX || e.pageX;
+    let my = e.clientY || e.pageY;
+    let rect = cvs.getBoundingClientRect();
+    mx -= rect.left; my -= rect.top;
+
+    if (dragTarget === 'point') {
+        // אם סליידר X נעול, לא נותנים לגרור את הנקודה
+        if (document.getElementById('inpX').disabled) return;
+        
+        let newX = (mx - originX) / scale;
+        // מגבלות המסך
+        newX = Math.max(-10, Math.min(10, newX));
+        updateParam('x', newX);
+        document.getElementById('inpX').value = newX;
+    } 
+    else if (dragTarget === 'bg') {
+        // גרירת רקע משנה את d (גובה)
+        if (document.getElementById('inpD').disabled) return;
+
+        let deltaY = (my - lastMouseY) / scale;
+        let newD = d + deltaY; // הפוך כי Y יורד למטה
+        newD = Math.max(-5, Math.min(5, newD)); // גבולות
+        updateParam('d', newD);
+        document.getElementById('inpD').value = newD;
+        lastMouseY = my;
+    }
+}
+
+function endDrag() {
+    isDragging = false;
+    dragTarget = null;
+}
+
+// אפקט קונפטי פשוט
+function confettiEffect() {
+    let colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'];
+    for(let i=0; i<30; i++) {
+        let div = document.createElement('div');
+        div.style.position = 'absolute';
+        div.style.left = (50 + Math.random()*20) + '%';
+        div.style.top = '20%';
+        div.style.width = '10px'; div.style.height = '10px';
+        div.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+        div.style.transition = 'all 1s ease-out';
+        document.body.appendChild(div);
+        setTimeout(() => {
+            div.style.top = (20 + Math.random()*50) + '%';
+            div.style.left = (40 + Math.random()*40) + '%';
+            div.style.opacity = 0;
+        }, 10);
+        setTimeout(() => div.remove(), 1000);
+    }
 }
