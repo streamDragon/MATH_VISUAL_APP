@@ -3,357 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>מערכת חקר פונקציות מלאה</title>
+    <title>מערכת חקר פונקציות</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <style>
-        /* --- CSS: עיצוב בתוך הקובץ למניעת תקלות --- */
         :root {
-            --primary: #2563eb;     /* כחול ראשי */
-            --accent: #16a34a;      /* ירוק להצלחה */
-            --bg-color: #f8fafc;
-            --sidebar-width: 340px;
+            --primary: #2563eb;
+            --accent: #16a34a;
+            --bg-sidebar: #ffffff;
+            --bg-app: #f1f5f9;
         }
 
-        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; padding: 0; font-family: 'Rubik', sans-serif; background: var(--bg-app); height: 100vh; overflow: hidden; display: flex; }
+
+        /* מבנה */
+        #app { display: flex; width: 100%; height: 100%; }
         
-        body {
-            margin: 0; padding: 0;
-            font-family: 'Rubik', sans-serif;
-            background-color: var(--bg-color);
-            height: 100vh;
-            overflow: hidden; /* מונע גלילה של כל המסך */
-            display: flex;
-        }
-
-        /* מבנה ראשי */
-        #app-container {
-            display: flex;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* תפריט צד ימין */
+        /* צד ימין - תפריט */
         aside {
-            width: var(--sidebar-width);
-            background: #ffffff;
-            border-left: 1px solid #e2e8f0;
-            display: flex;
-            flex-direction: column;
-            padding: 16px;
-            gap: 16px;
-            overflow-y: auto;
-            z-index: 10;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            width: 320px; background: var(--bg-sidebar); border-left: 1px solid #cbd5e1;
+            display: flex; flex-direction: column; padding: 15px; gap: 12px;
+            overflow-y: auto; z-index: 20; box-shadow: 2px 0 10px rgba(0,0,0,0.05);
         }
 
-        /* אזור הגרף (שמאל) */
-        main {
-            flex: 1;
-            position: relative;
-            background: #ffffff;
-            cursor: crosshair;
-        }
+        /* צד שמאל - גרף */
+        main { flex: 1; position: relative; background: #fff; cursor: crosshair; }
+        canvas { display: block; width: 100%; height: 100%; }
 
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* כרטיסיות מידע */
-        .card {
-            background: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            border-radius: 12px;
-            padding: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .card h3, .card h4 { margin: 0 0 8px 0; color: #1e293b; font-size: 1rem; }
-        
-        /* כפתורים */
-        .btn {
-            background: white; border: 1px solid #94a3b8;
-            padding: 8px 16px; border-radius: 6px;
-            cursor: pointer; font-weight: 500;
-            transition: 0.2s;
-        }
-        .btn-primary { background: var(--primary); color: white; border: none; }
-        .btn-primary:hover { background: #1d4ed8; }
-        .btn-icon { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
+        /* כרטיסים בתפריט */
+        .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; }
+        .card h3 { margin: 0 0 5px 0; font-size: 1rem; color: #1e293b; }
+        .card p { margin: 0; font-size: 0.9rem; color: #475569; line-height: 1.4; white-space: pre-line; }
 
         /* סליידרים */
-        .slider-group { display: flex; flex-direction: column; gap: 8px; }
-        .slider-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.9rem; }
-        input[type=range] { flex: 1; margin: 0 10px; accent-color: var(--primary); cursor: pointer; }
+        .control-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .control-row label { font-size: 0.9rem; font-weight: 500; width: 80px; }
+        input[type=range] { flex: 1; cursor: pointer; accent-color: var(--primary); }
+        .val-display { font-family: monospace; width: 40px; text-align: left; margin-right: 8px; color: var(--primary); font-weight: bold; }
 
-        /* משחק חם/קר */
-        #game-panel { display: none; text-align: center; background: #fff7ed; border-color: #fdba74; }
-        .progress-bar {
-            height: 12px; background: #e2e8f0; border-radius: 6px;
-            margin-top: 8px; overflow: hidden; position: relative;
+        /* דף נוסחאות (מוטמע בגרף) */
+        #paper-hud {
+            position: absolute; top: 10px; left: 10px; /* צד שמאל באנגלית, ימין בעברית בגלל RTL */
+            right: auto; /* מאפסים צד שני */
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px; border-radius: 8px;
+            border: 1px solid #94a3b8;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            pointer-events: none; /* כדי שאפשר יהיה ללחוץ על הגרף מתחת אם צריך */
+            max-width: 250px;
         }
-        #proximityBar {
-            height: 100%; width: 0%;
-            background: linear-gradient(90deg, #3b82f6, #ef4444);
-            transition: width 0.3s ease;
-        }
+        /* בגלל שהמסך RTL, ה-absolute left ממקם אותו משמאל. אם רוצים בימין (על הגרף): */
+        /* תיקון למיקום: */
+        #paper-hud { left: unset; right: 20px; top: 20px; text-align: right; }
 
-        /* תצוגה על הגרף (HUD) */
-        #hud {
-            position: absolute; top: 16px; right: 16px; /* בצד ימין למעלה */
-            background: rgba(255, 255, 255, 0.9);
-            padding: 12px; border-radius: 8px;
-            border: 1px solid #cbd5e1;
-            font-family: 'Times New Roman', serif;
-            font-size: 1.1rem;
-            pointer-events: none;
-        }
-        .math-blue { color: var(--primary); font-weight: bold; }
-        .math-red { color: #ef4444; font-size: 0.9em; margin-top: 4px; }
+        .formula-line { font-family: 'Times New Roman', serif; font-size: 1.1rem; margin-bottom: 5px; color: #0f172a; }
+        .formula-label { font-size: 0.85rem; color: #64748b; font-weight: bold; margin-bottom: 2px; display: block; font-family: 'Rubik'; }
 
-        /* הודעת הצלחה */
-        #toast {
-            position: absolute; top: 20px; left: 50%;
-            transform: translate(-50%, -150%);
-            background: var(--accent); color: white;
-            padding: 12px 24px; border-radius: 50px;
-            font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 100;
+        /* טולטיפ וכפתורים */
+        #tooltip { position: absolute; background: rgba(0,0,0,0.8); color: white; padding: 5px; border-radius: 4px; font-size: 0.8rem; display: none; pointer-events: none; direction: ltr; }
+        
+        #toast { 
+            position: absolute; top: 20px; left: 50%; transform: translate(-50%, -150%);
+            background: var(--accent); color: white; padding: 10px 20px; border-radius: 50px;
+            transition: 0.3s; z-index: 100; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         #toast.show { transform: translate(-50%, 0); }
 
-        /* טולטיפ עוקב (x,y,m) */
-        #tooltip {
-            position: absolute; display: none;
-            background: rgba(0,0,0,0.8); color: white;
-            padding: 6px; border-radius: 4px; font-size: 0.8rem;
-            pointer-events: none; white-space: nowrap; z-index: 50;
-        }
-
-        /* מודל דף נוסחאות */
-        #modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 200;
-        }
-        .modal-content {
-            background: white; width: 90%; max-width: 500px;
-            margin: 100px auto; padding: 20px; border-radius: 12px;
-            position: relative;
-        }
-
         /* התאמה למובייל */
         @media (max-width: 768px) {
-            #app-container { flex-direction: column-reverse; }
-            aside { width: 100%; height: 45%; border-left: none; border-top: 1px solid #ddd; }
+            #app { flex-direction: column-reverse; }
+            aside { width: 100%; height: 45%; }
             main { height: 55%; }
+            #paper-hud { transform: scale(0.8); transform-origin: top right; }
         }
     </style>
 </head>
 <body>
 
-<div id="toast">כל הכבוד! הצלחת 🎉</div>
+<div id="toast">🎉 כל הכבוד! הצלחת</div>
 
-<div id="app-container">
-    
+<div id="app">
     <aside>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2 style="margin:0;">חקר פונקציות</h2>
-            <div>
-                <button class="btn-icon" onclick="toggleSound()" title="סאונד" id="btnSound">🔊</button>
-                <button class="btn" onclick="openModal()" style="font-size:0.8rem;">דף נוסחאות 📜</button>
+        <h2 style="margin:0 0 10px 0;">מעבדת חקירה</h2>
+        
+        <div class="card" style="border-left: 4px solid var(--primary);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>שאלה נוכחית:</h3>
+                <span id="qIndexBadge" style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-size:0.8rem;">1/5</span>
             </div>
+            <select id="qSelect" onchange="gameLoadQuestion(this.value)" style="width:100%; margin: 8px 0; padding: 5px;"></select>
+            <p id="qDesc">טוען...</p>
         </div>
 
         <div class="card">
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                <h3 id="qTitle">שאלה 1</h3>
-                <span id="qTag" style="font-size:0.8rem; background:#ddd; padding:2px 6px; border-radius:4px;">חקירה</span>
-            </div>
-            <p id="qDesc" style="font-size:0.95rem; line-height:1.4;">טוען נתונים...</p>
-            
-            <div style="margin-top:10px;">
-                <label style="font-size:0.85rem; font-weight:bold;">בחר שאלה:</label>
-                <select id="qSelect" onchange="loadSelectedQuestion()" style="width:100%; padding:5px; margin-top:4px;"></select>
-            </div>
+            <h3>פרמטרים (בנייה)</h3>
+            <div class="control-row"><label>a (x³)</label><input type="range" id="inpA" min="-2" max="2" step="0.1" oninput="sysUpdate()"><div class="val-display" id="valA">0</div></div>
+            <div class="control-row"><label>b (x²)</label><input type="range" id="inpB" min="-4" max="4" step="0.1" oninput="sysUpdate()"><div class="val-display" id="valB">0</div></div>
+            <div class="control-row"><label>c (x)</label><input type="range" id="inpC" min="-5" max="5" step="0.1" oninput="sysUpdate()"><div class="val-display" id="valC">0</div></div>
+            <div class="control-row"><label>d (מספר)</label><input type="range" id="inpD" min="-5" max="5" step="0.1" oninput="sysUpdate()"><div class="val-display" id="valD">0</div></div>
         </div>
 
-        <div class="card" id="game-panel">
-            <h4>🎯 מד חם-קר</h4>
-            <div id="gameText">התקרב ליעד...</div>
-            <div class="progress-bar"><div id="proximityBar"></div></div>
-        </div>
-
-        <div class="card">
-            <div class="slider-row">
-                <label>הזזת X</label>
-                <span id="valX" style="font-weight:bold; color:var(--primary);">0.0</span>
+        <div class="card" style="border-left: 4px solid #f97316;">
+            <h3>חקירה (הזזת X)</h3>
+            <div class="control-row">
+                <input type="range" id="inpX" min="-5" max="5" step="0.1" oninput="sysUpdate()">
+                <div class="val-display" id="valX" style="color:#f97316;">0</div>
             </div>
-            <input type="range" id="inpX" min="-5" max="5" step="0.1" oninput="updateSystem()">
-        </div>
-
-        <div class="card">
-            <h4>פרמטרים (בניית הפונקציה)</h4>
-            <div class="slider-group">
-                <div class="slider-row"><label>a (x³): <span id="valA">1</span></label><input type="range" id="inpA" min="-2" max="2" step="0.1" oninput="updateSystem()"></div>
-                <div class="slider-row"><label>b (x²): <span id="valB">0</span></label><input type="range" id="inpB" min="-4" max="4" step="0.1" oninput="updateSystem()"></div>
-                <div class="slider-row"><label>c (x): <span id="valC">0</span></label><input type="range" id="inpC" min="-5" max="5" step="0.1" oninput="updateSystem()"></div>
-                <div class="slider-row"><label>d (מספר): <span id="valD">0</span></label><input type="range" id="inpD" min="-5" max="5" step="0.1" oninput="updateSystem()"></div>
+            <div style="font-size:0.85rem; text-align:center; color:#64748b; margin-top:5px;">
+                ערך נגזרת (שיפוע): <span id="valSlope" style="font-weight:bold; color:black;">0.00</span>
             </div>
         </div>
         
-        <button class="btn btn-primary" onclick="nextQuestion()" style="margin-top:auto;">השאלה הבאה &larr;</button>
+        <button onclick="gameNext()" style="margin-top:auto; padding:10px; background:var(--primary); color:white; border:none; border-radius:6px; font-size:1rem; cursor:pointer;">השאלה הבאה &larr;</button>
     </aside>
 
     <main id="graphContainer">
         <canvas id="cvs"></canvas>
         
-        <div id="hud">
-            <div id="mathFunc" class="math-blue">f(x) = ...</div>
-            <div id="mathDeriv" class="math-red">f'(x) = ...</div>
+        <div id="paper-hud">
+            <span class="formula-label">הפונקציה:</span>
+            <div class="formula-line" id="mathFunc" style="color:var(--primary);">f(x) = ...</div>
+            
+            <div style="margin-top:10px; border-top:1px dashed #cbd5e1; padding-top:10px;">
+                <span class="formula-label">הנגזרת (נוסחה):</span>
+                <div class="formula-line" id="mathDerivText">f'(x) = 3ax² + 2bx + c</div>
+                
+                <span class="formula-label" style="margin-top:8px;">חישוב בנקודה X:</span>
+                <div class="formula-line" id="mathCalc" style="color:#ef4444;">f'(...) = ...</div>
+            </div>
         </div>
 
         <div id="tooltip"></div>
     </main>
-
 </div>
 
-<div id="modal" onclick="if(event.target==this) closeModal()">
-    <div class="modal-content">
-        <span onclick="closeModal()" style="float:left; cursor:pointer; font-size:1.5rem;">&times;</span>
-        <h3>דף נוסחאות - נגזרות</h3>
-        <hr>
-        <ul style="line-height:1.8; padding-right:20px;">
-            <li>$(x^n)' = n \cdot x^{n-1}$</li>
-            <li>$(ax^2)' = 2ax$</li>
-            <li>$(bx)' = b$</li>
-            <li>$(מספר)' = 0$</li>
-            <li>נגזרת של $f(x) = ax^3 + bx^2 + cx + d$:<br> $$f'(x) = 3ax^2 + 2bx + c$$</li>
-        </ul>
-        <button class="btn btn-primary" onclick="closeModal()" style="width:100%">סגור</button>
-    </div>
-</div>
+<script src="questions.js"></script>
 
 <script>
-/* כאן נמצא כל המוח של האפליקציה.
-   בגלל שזה בקובץ אחד, אין בעיות של טעינה או סינכרון.
-*/
-
-// --- 1. המאגר (השאלות שלך) ---
-const QUESTIONS = [
-  {
-    id: 1,
-    title: "חקירה 1: נקודת מינימום",
-    desc: "מצא/י את נקודת המינימום של הפרבולה.\nרמז: בנקודת קיצון השיפוע (הנגזרת) הוא 0.\nהזז את ה-X עד שהמשיק יהיה אופקי לגמרי.",
-    params: [0, 1, -4, 4], // y = x^2 - 4x + 4
-    goal: "slope_zero",
-    targetX: 2 // התשובה הנכונה
-  },
-  {
-    id: 2,
-    title: "חקירה 2: משיק אופקי",
-    desc: "מצא/י נקודה שבה המשיק מקביל לציר X (שיפוע 0).\nשימו לב איך הנגזרת (הקו האדום המקווקו) מתאפסת באותה נקודה.",
-    params: [-1, 0, 9, 0], // y = -x^3 + 9x
-    goal: "slope_zero",
-    // כאן יש שתי תשובות אפשריות (3 ו -3), הקוד יזהה לבד שיפוע 0
-  },
-  {
-    id: 3,
-    title: "בנייה 1: הזזה אנכית (d)",
-    desc: "המטרה: שנו את הפרמטר d (הסליידר התחתון) כך שהפונקציה תעבור דרך ראשית הצירים (0,0).\nהשאירו את X על 0 ובדקו.",
-    params: [0, 1, 0, 5], // מתחיל לא נכון
-    locked: ["inpA", "inpB", "inpC"], // נועל הכל חוץ מ-d
-    targets: [{x:0, y:0}],
-    goal: "hit_target"
-  },
-  {
-    id: 4,
-    title: "בנייה 2: ישר דרך נקודות",
-    desc: "נתון ישר (ליניארי). כווננו את השיפוע (c) ואת החיתוך (d) כך שהישר יעבור דרך שתי הנקודות הירוקות.",
-    params: [0, 0, 1, 0], 
-    locked: ["inpA", "inpB"],
-    targets: [{x:0, y:2}, {x:2, y:0}],
-    goal: "hit_target"
-  }
-];
-
-// --- 2. משתנים גלובליים ---
-const canvas = document.getElementById('cvs');
-const ctx = canvas.getContext('2d');
+/**
+ * ============================================================
+ * SECTION 1: CONFIG & STATE (הגדרות ומשתנים)
+ * ============================================================
+ */
+const cvs = document.getElementById('cvs');
+const ctx = cvs.getContext('2d');
 let width, height, scale = 40, originX, originY;
 
-// מצב הפונקציה
-let a=0, b=0, c=0, d=0;
-let xVal = 0;
+// משתני הפונקציה
+let a=0, b=0, c=0, d=0, xVal=0;
 
-// מצב האפליקציה
-let currentQIndex = 0;
+// מצב משחק
+let currQIndex = 0;
 let isSolved = false;
-let isSoundOn = true;
-let audioCtx = null; // ייווצר רק בלחיצה הראשונה
 
-// --- 3. אתחול ---
+// בדיקה שהשאלות נטענו
+if (typeof QUESTIONS === 'undefined') {
+    alert("שגיאה: קובץ השאלות (questions.js) לא נמצא או לא נטען!");
+}
+
+/**
+ * ============================================================
+ * SECTION 2: INITIALIZATION (אתחול המערכת)
+ * ============================================================
+ */
 window.onload = function() {
-    initResize();
-    initQuestions();
-    loadQuestion(0);
-    animate(); // מתחיל את לולאת הציור
+    initResize();    // 1. סידור גודל מסך
+    initUI();        // 2. בניית הרשימה
+    gameLoadQuestion(0); // 3. טעינת שאלה ראשונה
+    animate();       // 4. התחלת ציור
 };
 
 function initResize() {
+    const container = document.getElementById('graphContainer');
     const resize = () => {
-        const container = document.getElementById('graphContainer');
-        canvas.width = width = container.clientWidth;
-        canvas.height = height = container.clientHeight;
+        width = cvs.width = container.clientWidth;
+        height = cvs.height = container.clientHeight;
         originX = width / 2;
         originY = height / 2;
-        draw(); // ציור מחדש מיידי
+        sysUpdate(); // עדכון מיידי אחרי שינוי גודל
     };
     window.addEventListener('resize', resize);
-    resize();
+    resize(); // הרצה ראשונית
 }
 
-function initQuestions() {
-    const select = document.getElementById('qSelect');
+function initUI() {
+    const sel = document.getElementById('qSelect');
     QUESTIONS.forEach((q, i) => {
         let opt = document.createElement('option');
         opt.value = i;
         opt.innerText = q.title;
-        select.appendChild(opt);
+        sel.appendChild(opt);
     });
 }
 
-// --- 4. לוגיקה של שאלות ---
-function loadSelectedQuestion() {
-    const idx = document.getElementById('qSelect').value;
-    loadQuestion(parseInt(idx));
-}
-
-function nextQuestion() {
-    if (currentQIndex < QUESTIONS.length - 1) {
-        currentQIndex++;
-        loadQuestion(currentQIndex);
-    }
-}
-
-function loadQuestion(index) {
-    currentQIndex = index;
-    const q = QUESTIONS[index];
+/**
+ * ============================================================
+ * SECTION 3: GAME LOGIC (לוגיקה וניהול שאלות)
+ * ============================================================
+ */
+function gameLoadQuestion(idx) {
+    currQIndex = parseInt(idx);
+    const q = QUESTIONS[currQIndex];
     isSolved = false;
-    document.getElementById('qSelect').value = index;
+    
+    // עדכון UI
+    document.getElementById('qSelect').value = currQIndex;
+    document.getElementById('qIndexBadge').innerText = `${currQIndex + 1} / ${QUESTIONS.length}`;
+    document.getElementById('qDesc').innerText = q.desc;
     document.getElementById('toast').classList.remove('show');
 
-    // עדכון טקסט
-    document.getElementById('qTitle').innerText = q.title;
-    document.getElementById('qDesc').innerText = q.desc;
-    document.getElementById('qTag').innerText = (q.goal === 'slope_zero') ? 'חקירה' : 'בנייה';
-
-    // איפוס פרמטרים
+    // איפוס פרמטרים לפי השאלה
     [a, b, c, d] = q.params;
     document.getElementById('inpA').value = a;
     document.getElementById('inpB').value = b;
@@ -364,280 +226,194 @@ function loadQuestion(index) {
     xVal = 0;
     document.getElementById('inpX').value = 0;
 
-    // נעילת סליידרים
-    ['inpA','inpB','inpC','inpD'].forEach(id => document.getElementById(id).disabled = false);
+    // ניהול נעילות (Enable/Disable)
+    const allInputs = ['inpA', 'inpB', 'inpC', 'inpD', 'inpX'];
+    allInputs.forEach(id => document.getElementById(id).disabled = false);
+    
     if (q.locked) {
         q.locked.forEach(id => document.getElementById(id).disabled = true);
     }
 
-    updateSystem();
+    sysUpdate();
 }
 
-// --- 5. עדכון וציור ---
-function updateSystem() {
-    // קריאה מהסליידרים
+function gameNext() {
+    if (currQIndex < QUESTIONS.length - 1) {
+        gameLoadQuestion(currQIndex + 1);
+    }
+}
+
+// פונקציה ראשית שנקראת בכל שינוי סליידר
+function sysUpdate() {
+    // קריאת ערכים
     a = parseFloat(document.getElementById('inpA').value);
     b = parseFloat(document.getElementById('inpB').value);
     c = parseFloat(document.getElementById('inpC').value);
     d = parseFloat(document.getElementById('inpD').value);
     xVal = parseFloat(document.getElementById('inpX').value);
 
-    // עדכון טקסטים במסך
+    // עדכון טקסטים
     document.getElementById('valA').innerText = a;
     document.getElementById('valB').innerText = b;
     document.getElementById('valC').innerText = c;
     document.getElementById('valD').innerText = d;
     document.getElementById('valX').innerText = xVal.toFixed(1);
 
-    // עדכון משוואות
-    updateEquations();
-    
-    // בדיקת ניצחון
-    checkGameLogic();
+    // חישוב נגזרת
+    let slope = 3*a*xVal*xVal + 2*b*xVal + c;
+    document.getElementById('valSlope').innerText = slope.toFixed(2);
+    if(Math.abs(slope) < 0.1) document.getElementById('valSlope').style.color = '#16a34a'; // ירוק אם קרוב ל-0
+    else document.getElementById('valSlope').style.color = 'black';
 
-    // קריאה לציור תתבצע ב-requestAnimationFrame
+    updateEquationsText(slope);
+    checkWinCondition(slope);
 }
 
-function updateEquations() {
-    // בניית מחרוזת פונקציה
+function updateEquationsText(slope) {
+    // פורמט יפה לפונקציה
     let txt = "f(x) = ";
-    if (a!==0) txt += `${a}x^3 `;
-    if (b!==0) txt += `${b>=0&&a!==0?'+':''}${b}x^2 `;
-    if (c!==0) txt += `${c>=0&&(a!==0||b!==0)?'+':''}${c}x `;
-    if (d!==0) txt += `${d>=0&&(a!==0||b!==0||c!==0)?'+':''}${d}`;
-    if (a===0 && b===0 && c===0 && d===0) txt += "0";
+    let terms = [];
+    if (a !== 0) terms.push(`${a}x³`);
+    if (b !== 0) terms.push(`${b}x²`);
+    if (c !== 0) terms.push(`${c}x`);
+    if (d !== 0) terms.push(`${d}`);
+    
+    if (terms.length === 0) txt += "0";
+    else txt += terms.join(" + ").replace(/\+ -/g, "- "); // תיקון פלוס מינוס
     
     document.getElementById('mathFunc').innerText = txt;
-
-    // בניית מחרוזת נגזרת
-    let slope = 3*a*xVal*xVal + 2*b*xVal + c;
-    document.getElementById('mathDeriv').innerText = `f'(${xVal}) = ${slope.toFixed(2)}`;
+    document.getElementById('mathCalc').innerText = `f'(${xVal}) = ${slope.toFixed(2)}`;
 }
 
-// לולאת הציור הראשית
+function checkWinCondition(slope) {
+    if (isSolved) return;
+    const q = QUESTIONS[currQIndex];
+    if (q.goal === 'free') return;
+
+    let solved = false;
+    
+    // בדיקת חקירה (שיפוע 0)
+    if (q.goal === 'slope_zero') {
+        let dist = Math.abs(slope);
+        if (q.targetX !== undefined) dist += Math.abs(xVal - q.targetX);
+        if (dist < 0.15) solved = true;
+    }
+    
+    // בדיקת מטרות (בנייה)
+    if (q.goal === 'hit_target') {
+        let totalErr = 0;
+        q.targets.forEach(t => {
+            let y = a*t.x**3 + b*t.x**2 + c*t.x + d;
+            totalErr += Math.abs(y - t.y);
+        });
+        if (totalErr < 0.15) solved = true;
+    }
+
+    if (solved) {
+        isSolved = true;
+        document.getElementById('toast').classList.add('show');
+        setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
+    }
+}
+
+/**
+ * ============================================================
+ * SECTION 4: DRAWING (ציור הגרף)
+ * ============================================================
+ */
 function animate() {
     draw();
     requestAnimationFrame(animate);
 }
 
 function draw() {
-    // ניקוי
     ctx.clearRect(0, 0, width, height);
-
+    
     // רשת צירים
     drawGrid();
 
     // מטרות (אם יש)
-    const q = QUESTIONS[currentQIndex];
+    const q = QUESTIONS[currQIndex];
     if (q.targets) {
-        q.targets.forEach(t => drawTarget(t.x, t.y));
+        q.targets.forEach(t => {
+            drawPoint(t.x, t.y, '#16a34a', true); // נקודה ירוקה עם הילה
+        });
     }
 
-    // הפונקציה הראשית
+    // ציור הפונקציה
     ctx.lineWidth = 3;
-    ctx.strokeStyle = '#2563eb'; // כחול
-    drawGraph(x => a*x*x*x + b*x*x + c*x + d);
+    ctx.strokeStyle = '#2563eb';
+    ctx.beginPath();
+    for (let px = 0; px < width; px+=2) {
+        let x = (px - originX) / scale;
+        let y = a*x**3 + b*x**2 + c*x + d;
+        let py = originY - y * scale;
+        if (px===0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
 
-    // הנגזרת (אופציונלי - קו מקווקו אדום שמראה את ערך השיפוע כפונקציה)
-    // אם רוצים לצייר את גרף הנגזרת עצמו:
+    // ציור משיק ונקודה נוכחית
+    let y0 = a*xVal**3 + b*xVal**2 + c*xVal + d;
+    let m = 3*a*xVal**2 + 2*b*xVal + c;
+    
+    // משיק (כתום)
+    let tanLen = 2.5;
+    let x1 = xVal - tanLen;
+    let y1 = m*(x1-xVal) + y0;
+    let x2 = xVal + tanLen;
+    let y2 = m*(x2-xVal) + y0;
+    
+    ctx.beginPath();
+    ctx.strokeStyle = '#f97316';
     ctx.lineWidth = 2;
-    ctx.strokeStyle = '#ef4444'; // אדום
-    ctx.setLineDash([5, 5]);
-    drawGraph(x => 3*a*x*x + 2*b*x + c);
-    ctx.setLineDash([]);
+    ctx.moveTo(originX + x1*scale, originY - y1*scale);
+    ctx.lineTo(originX + x2*scale, originY - y2*scale);
+    ctx.stroke();
 
-    // הנקודה והמשיק
-    drawTangent(xVal);
+    // נקודה כחולה
+    drawPoint(xVal, y0, '#2563eb', false);
 }
 
 function drawGrid() {
-    ctx.beginPath();
     ctx.strokeStyle = '#e2e8f0';
     ctx.lineWidth = 1;
-    
-    // רשת
+    ctx.beginPath();
+    // אנכיים
     for (let x = originX % scale; x < width; x += scale) {
         ctx.moveTo(x, 0); ctx.lineTo(x, height);
     }
+    // אופקיים
     for (let y = originY % scale; y < height; y += scale) {
         ctx.moveTo(0, y); ctx.lineTo(width, y);
     }
     ctx.stroke();
 
     // צירים ראשיים
-    ctx.beginPath();
-    ctx.strokeStyle = '#334155';
+    ctx.strokeStyle = '#94a3b8';
     ctx.lineWidth = 2;
+    ctx.beginPath();
     ctx.moveTo(0, originY); ctx.lineTo(width, originY);
     ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
     ctx.stroke();
-}
-
-function drawGraph(func) {
-    ctx.beginPath();
-    let first = true;
-    for (let px = 0; px < width; px += 2) {
-        let x = (px - originX) / scale;
-        let y = func(x);
-        let py = originY - y * scale;
-        
-        // הגנה מפני מספרים ענקיים
-        if (py < -1000 || py > height + 1000) {
-            first = true; continue;
-        }
-
-        if (first) { ctx.moveTo(px, py); first = false; }
-        else { ctx.lineTo(px, py); }
-    }
-    ctx.stroke();
-}
-
-function drawTarget(tx, ty) {
-    let px = originX + tx * scale;
-    let py = originY - ty * scale;
     
-    ctx.fillStyle = 'rgba(22, 163, 74, 0.3)'; // ירוק הילה
-    ctx.beginPath(); ctx.arc(px, py, 12, 0, Math.PI*2); ctx.fill();
+    // מספרים
+    ctx.fillStyle = '#64748b';
+    ctx.font = '10px sans-serif';
+    ctx.fillText('0', originX + 2, originY + 12);
+}
+
+function drawPoint(x, y, color, glow) {
+    let px = originX + x * scale;
+    let py = originY - y * scale;
     
-    ctx.fillStyle = '#16a34a'; // ירוק נקודה
-    ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2); ctx.fill();
-}
-
-function drawTangent(x0) {
-    let y0 = a*x0*x0*x0 + b*x0*x0 + c*x0 + d;
-    let m = 3*a*x0*x0 + 2*b*x0 + c;
-
-    let px = originX + x0 * scale;
-    let py = originY - y0 * scale;
-
-    // נקודה כחולה
-    ctx.fillStyle = '#2563eb';
-    ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI*2); ctx.fill();
-
-    // קו משיק (כתום)
-    ctx.strokeStyle = '#f97316';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    let delta = 2; // אורך המשיק
-    let x1 = x0 - delta;
-    let y1 = m*(x1-x0) + y0;
-    let x2 = x0 + delta;
-    let y2 = m*(x2-x0) + y0;
-    
-    ctx.moveTo(originX + x1*scale, originY - y1*scale);
-    ctx.lineTo(originX + x2*scale, originY - y2*scale);
-    ctx.stroke();
-
-    // עדכון טולטיפ
-    const tt = document.getElementById('tooltip');
-    tt.style.display = 'block';
-    tt.style.left = (px + 10) + 'px';
-    tt.style.top = (py - 30) + 'px';
-    tt.innerHTML = `(${x0.toFixed(1)}, ${y0.toFixed(1)})<br>m = ${m.toFixed(2)}`;
-}
-
-// --- 6. משחק וסאונד ---
-function checkGameLogic() {
-    if (isSolved) return;
-    
-    const q = QUESTIONS[currentQIndex];
-    let distance = 100;
-
-    // לוגיקה 1: חקירה (שיפוע 0)
-    if (q.goal === 'slope_zero') {
-        let m = 3*a*xVal*xVal + 2*b*xVal + c;
-        // המרחק הוא כמה השיפוע רחוק מ-0
-        distance = Math.abs(m); 
-        
-        // אם יש יעד ספציפי ל-X (למשל מינימום ולא מקסימום)
-        if (q.targetX !== undefined) {
-            distance += Math.abs(xVal - q.targetX);
-        }
-    } 
-    // לוגיקה 2: בנייה (פגיעה במטרות)
-    else if (q.goal === 'hit_target') {
-        let totalError = 0;
-        q.targets.forEach(t => {
-            let yCalc = a*t.x*t.x*t.x + b*t.x*t.x + c*t.x + d;
-            totalError += Math.abs(yCalc - t.y);
-        });
-        distance = totalError;
+    if (glow) {
+        ctx.fillStyle = color + '40'; // שקיפות
+        ctx.beginPath(); ctx.arc(px, py, 12, 0, Math.PI*2); ctx.fill();
     }
-
-    // עדכון מד חם/קר
-    updateHotCold(distance);
-
-    // בדיקת ניצחון (סף רגישות 0.1)
-    if (distance < 0.15) {
-        gameWin();
-    }
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI*2); ctx.fill();
 }
-
-function updateHotCold(dist) {
-    const bar = document.getElementById('proximityBar');
-    const txt = document.getElementById('gameText');
-    const panel = document.getElementById('game-panel');
-    
-    // מציג את הפאנל רק אם יש משחק רלוונטי
-    panel.style.display = 'block';
-
-    let percent = Math.max(0, 100 - (dist * 25));
-    bar.style.width = percent + "%";
-
-    if (dist < 0.2) txt.innerText = "🔥🔥 רותח!!";
-    else if (dist < 1) txt.innerText = "🔥 חם...";
-    else if (dist < 3) txt.innerText = "❄️ מתחמם...";
-    else txt.innerText = "🧊 קפוא";
-}
-
-function gameWin() {
-    isSolved = true;
-    document.getElementById('toast').classList.add('show');
-    playSound('win');
-    setTimeout(() => {
-        document.getElementById('toast').classList.remove('show');
-    }, 3000);
-}
-
-// ניהול סאונד
-function toggleSound() {
-    isSoundOn = !isSoundOn;
-    document.getElementById('btnSound').innerText = isSoundOn ? '🔊' : '🔇';
-    // אתחול הקשר אודיו בלחיצה ראשונה (דרישת דפדפן)
-    if (isSoundOn && !audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-}
-
-function playSound(type) {
-    if (!isSoundOn) return;
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    if (type === 'win') {
-        // צליל ניצחון (מג'ור)
-        const now = audioCtx.currentTime;
-        osc.frequency.setValueAtTime(523.25, now); // C5
-        osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
-        osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
-        
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
-        
-        osc.start(now);
-        osc.stop(now + 0.6);
-    }
-}
-
-// ניהול מודל
-function openModal() { document.getElementById('modal').style.display = 'block'; }
-function closeModal() { document.getElementById('modal').style.display = 'none'; }
-
 </script>
 </body>
 </html>
