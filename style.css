@@ -1,163 +1,425 @@
-/* style.css */
-:root {
-    --primary: #2563eb;
-    --secondary: #f97316;
-    --accent: #d946ef;
-    --bg: #f8fafc;
-    --text: #1e293b;
-    --success: #22c55e;
-    --journal-bg: #fffbeb; /* צבע דפי דפדפת צהבהב */
+/* style.css — גרסה מלאה ורספונסיבית (דסקטופ + טלפון)
+   מטרות:
+   1) "כל הכבוד" לא באמצע הגרף — באנר בפינה.
+   2) ליד הגרף: תצוגת f(x), f'(x), m, משוואת משיק.
+   3) יומן/מטרות בצד בדסקטופ, ובטלפון הופך לשכבה מתקפלת/מתחת לגרף.
+   4) סליידרים נוחים בטלפון (גדולים, לא נחתכים).
+*/
+
+:root{
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --line: #e2e8f0;
+
+  --blue: #2563eb;
+  --orange: #f97316;
+  --purple: #d946ef;
+  --green: #22c55e;
+  --red: #ef4444;
+
+  --shadow: 0 8px 20px rgba(15, 23, 42, 0.10);
+  --radius: 14px;
+
+  --topbar-h: 58px;
+  --gap: 12px;
+
+  --font: "Rubik", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-
-body {
-    font-family: 'Rubik', sans-serif;
-    background-color: var(--bg);
-    color: var(--text);
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+*{ box-sizing:border-box; }
+html, body{ height:100%; }
+body{
+  margin:0;
+  font-family:var(--font);
+  color:var(--ink);
+  background:var(--bg);
+  direction: rtl;
 }
 
-header {
-    background: white;
-    padding: 8px 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    z-index: 20;
+/* ---------- Layout ---------- */
+/* מומלץ שה-HTML יכיל משהו בסגנון:
+   <div id="app">
+     <header id="topBar">...</header>
+     <main id="layout">
+       <section id="mainArea"> <canvas id="cvs"></canvas> ... </section>
+       <aside id="sideArea"> ... </aside>
+     </main>
+   </div>
+*/
+#app{
+  min-height:100%;
+  display:flex;
+  flex-direction:column;
 }
 
-.header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-h1 { font-size: 1.1rem; color: var(--primary); margin: 0; }
-.controls { display: flex; gap: 5px; }
-.btn-nav, select {
-    padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1;
-    background: white; cursor: pointer; font-size: 0.85rem;
-}
-#btnMode { background: var(--primary); color: white; border: none; font-weight: bold; }
-
-.proximity-container { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
-.proximity-bar-bg { flex: 1; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
-.proximity-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ef4444, #eab308, #22c55e); transition: width 0.2s; }
-
-.instruction-box {
-    background: #eff6ff; padding: 6px; border-radius: 4px;
-    border-right: 3px solid var(--primary); font-size: 0.9rem; margin: 5px 0;
+#topBar{
+  height:var(--topbar-h);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 0 12px;
+  background: var(--card);
+  border-bottom:1px solid var(--line);
+  position: sticky;
+  top:0;
+  z-index: 50;
 }
 
-.math-display-row {
-    display: flex; justify-content: center; align-items: center; gap: 10px;
-    font-family: 'Courier New', monospace; font-weight: bold; font-size: 1rem;
-    background: #f1f5f9; padding: 6px; border-radius: 6px;
-    border: 1px solid #cbd5e1; direction: ltr; min-height: 35px;
-}
-#eqn { color: var(--primary); }
-#derivEqn { color: var(--secondary); }
-.separator { color: #ccc; }
-
-/* --- Workspace Layout (Canvas + Journal) --- */
-.workspace {
-    display: flex;
-    flex: 1;
-    position: relative;
-    overflow: hidden;
+#layout{
+  flex:1;
+  display:grid;
+  grid-template-columns: 1fr 340px; /* גרף + צד */
+  gap: var(--gap);
+  padding: var(--gap);
+  align-items: start;
 }
 
-#mainArea {
-    position: relative;
-    flex: 3; /* הרוב הולך לקנבס */
-    background: white;
-    cursor: crosshair;
+/* ---------- Cards ---------- */
+.card{
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
 }
 
-/* --- Math Journal (היומן המתמטי) --- */
-.math-journal {
-    flex: 1;
-    min-width: 120px;
-    max-width: 200px;
-    background: var(--journal-bg);
-    border-right: 1px solid #e2e8f0; /* גבול מימין במקום משמאל כי זה RTL */
-    padding: 10px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    box-shadow: inset 5px 0 10px -5px rgba(0,0,0,0.1);
+/* ---------- Main (Graph) ---------- */
+#mainArea{
+  position:relative;
+  overflow:hidden;
+  min-height: 520px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: #fff;
+  box-shadow: var(--shadow);
 }
 
-.journal-title {
-    font-weight: bold; color: #92400e; border-bottom: 2px solid #fcd34d;
-    padding-bottom: 5px; margin-bottom: 10px; text-align: center; font-size: 0.9rem;
+/* הקנבס יתפוס את כל שטח המיכל */
+#cvs{
+  width:100%;
+  height:100%;
+  display:block;
+  touch-action: none; /* חשוב לגרירה בטלפון */
 }
 
-.journal-entry {
-    background: white;
-    border: 1px solid #fcd34d;
-    border-left: 3px solid var(--success);
-    padding: 8px;
-    margin-bottom: 8px;
-    border-radius: 4px;
-    font-family: 'Courier New', monospace;
-    font-size: 0.85rem;
-    direction: ltr;
-    animation: popIn 0.3s ease-out;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-@keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-/* אם המסך צר (מובייל), היומן יורד למטה או נעלם */
-@media (max-width: 600px) {
-    .workspace { flex-direction: column; }
-    #mainArea { flex: 2; }
-    .math-journal { flex: 1; width: 100%; max-width: none; border-right: none; border-top: 1px solid #e2e8f0; flex-direction: row; overflow-x: auto; gap: 10px; align-items: center; min-height: 60px; }
-    .journal-entry { min-width: 100px; margin-bottom: 0; height: fit-content; }
-}
-
-canvas { display: block; width: 100%; height: 100%; }
-
-.zoom-controls {
-    position: absolute; top: 10px; left: 10px;
-    display: flex; flex-direction: column; gap: 5px; z-index: 50;
-}
-.zoom-controls button {
-    width: 30px; height: 30px; background: white; border: 1px solid #94a3b8;
-    border-radius: 4px; font-size: 1.1rem; cursor: pointer;
+/* ---------- HUD בצד הגרף (נוסחאות) ---------- */
+/* מומלץ HTML:
+<div id="hudBox">
+  <div class="hudRow"><span class="hudLbl">f(x)</span><span id="eqn"></span></div>
+  <div class="hudRow"><span class="hudLbl">f'(x)</span><span id="derivEqn"></span></div>
+  <div class="hudRow"><span class="hudLbl">m</span><span id="valM"></span></div>
+  <div class="hudRow"><span class="hudLbl">משיק</span><span id="lineEqn"></span></div>
+</div>
+*/
+#hudBox{
+  position:absolute;
+  top: 10px;
+  left: 10px;          /* בצד שמאל של הגרף (RTL עדיין נוח) */
+  z-index: 20;
+  width: min(360px, calc(100% - 20px));
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  box-shadow: 0 6px 16px rgba(15,23,42,0.12);
 }
 
-/* Tooltip */
-.trinity-tooltip {
-    position: absolute;
-    background: rgba(255, 255, 255, 0.95);
-    border: 2px solid var(--primary);
-    border-radius: 8px; padding: 6px 10px;
-    pointer-events: none; display: none; flex-direction: column;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 1000;
-    font-family: 'Courier New', monospace; font-weight: bold; direction: ltr;
-    transform: translate(15px, -50%); font-size: 0.85rem;
+.hudRow{
+  display:flex;
+  gap:10px;
+  align-items: baseline;
+  padding: 4px 0;
+  border-bottom: 1px dashed rgba(226,232,240,0.8);
 }
-#valX { color: #334155; }
-#valY { color: var(--primary); }
-#valM { color: var(--secondary); border-bottom: 1px solid #e2e8f0; margin-bottom: 2px; }
-#lineEqn { font-size: 0.7rem; color: #64748b; margin-top: 2px;}
+.hudRow:last-child{ border-bottom:none; }
 
-#successBanner {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    background: var(--success); color: white;
-    padding: 15px 30px; border-radius: 50px;
-    font-size: 1.5rem; font-weight: 900;
-    box-shadow: 0 10px 25px rgba(34, 197, 94, 0.5);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    z-index: 2000; pointer-events: none; white-space: nowrap;
+.hudLbl{
+  min-width: 56px;
+  font-size: 12px;
+  color: var(--muted);
 }
-#successBanner.show { transform: translate(-50%, -50%) scale(1); }
+#eqn, #derivEqn, #lineEqn{
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-footer { background: white; padding: 5px 10px; border-top: 1px solid #e2e8f0; z-index: 30; }
-.slider-container { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; background: #f1f5f9; padding: 4px; border-radius: 4px; }
-.slider-container input { flex: 1; direction: ltr; }
-.function-editor { border-top: 1px dashed #cbd5e1; padding-top: 4px; }
-.editor-title { font-size: 0.7rem; color: #94a3b8; text-align: center; margin-bottom: 2px; }
-.coef-control-panel { display: flex; justify-content: space-around; }
-.coef-group { display: flex; flex-direction: column; align-items: center; width: 22%; font-size: 0.7rem; }
-.coef-group input { width: 100%; margin: 2px 0; }
-.val-display { font-family: monospace; font-weight: bold; color: var(--primary); }
+/* ---------- "השלשה הקדושה" ליד הנקודה ---------- */
+#holyTrinity{
+  position:absolute;
+  z-index: 25;
+  display:none; /* הסקריפט מדליק/מכבה */
+  gap:8px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgba(15,23,42,0.12);
+  transform: translate(-50%, -120%); /* מעל הנקודה, לא על הגרף */
+  pointer-events:none;
+}
+#holyTrinity .triItem{
+  font-size: 12px;
+  color: var(--ink);
+  font-weight: 700;
+}
+#holyTrinity .triItem small{
+  display:block;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* ---------- Banner הצלחה (לא באמצע) ---------- */
+#successBanner{
+  position:absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 30;
+  opacity:0;
+  transform: translateY(-6px);
+  transition: 160ms ease;
+  pointer-events:none;
+
+  background: rgba(34,197,94,0.95);
+  color: white;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 800;
+  box-shadow: 0 10px 24px rgba(34,197,94,0.25);
+}
+#successBanner.show{
+  opacity:1;
+  transform: translateY(0);
+}
+
+/* ---------- חם/קר (Proximity) ---------- */
+#proximityWrap{
+  position:absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 20;
+  width: min(320px, calc(100% - 20px));
+  background: rgba(255,255,255,0.92);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow:hidden;
+  box-shadow: 0 6px 16px rgba(15,23,42,0.10);
+}
+#proximityBar{
+  height: 12px;
+  width: 0%;
+  background: linear-gradient(90deg, #60a5fa, #fbbf24, #f97316, #ef4444);
+  transition: width 120ms linear;
+}
+#proximityLabel{
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--muted);
+  display:flex;
+  justify-content: space-between;
+}
+
+/* ---------- Sliders (X + פרמטרים) ---------- */
+.controlsRow{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+  background: rgba(255,255,255,0.96);
+}
+
+#sliderXContainer{
+  display:flex; /* הסקריפט שולט */
+  align-items:center;
+  gap:10px;
+  width:100%;
+}
+#mainX{
+  width:100%;
+  accent-color: var(--blue);
+}
+
+.paramPanel{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+  background: rgba(255,255,255,0.96);
+}
+.paramBox{
+  border:1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+}
+.paramHdr{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  margin-bottom:8px;
+}
+.paramHdr .lbl{
+  font-weight:800;
+  color: var(--ink);
+}
+.paramHdr .val{
+  font-weight:900;
+  color: var(--blue);
+}
+.paramBox input[type="range"]{
+  width:100%;
+  accent-color: var(--blue);
+}
+
+/* ---------- Side (יומן/הנחיות/תפריט) ---------- */
+#sideArea{
+  display:flex;
+  flex-direction:column;
+  gap: var(--gap);
+  min-height: 520px;
+}
+
+#questionCard, #journalCard{
+  padding: 12px;
+}
+
+#qCounter{
+  font-weight: 900;
+  color: var(--blue);
+  margin-bottom: 6px;
+}
+#qText{
+  color: var(--ink);
+  line-height: 1.45;
+  font-weight: 600;
+}
+.hintList{
+  margin: 8px 0 0;
+  padding: 0 18px 0 0;
+  color: var(--muted);
+}
+.hintList li{ margin: 4px 0; }
+
+#journalList{
+  max-height: 320px;
+  overflow:auto;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px dashed var(--line);
+  background: #fbfcff;
+}
+.journal-entry{
+  padding: 8px 10px;
+  border-radius: 10px;
+  margin: 6px 0;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  font-weight: 700;
+  color: var(--ink);
+}
+.journal-entry.ok{
+  border-color: rgba(34,197,94,0.45);
+  background: rgba(34,197,94,0.08);
+}
+
+/* ---------- Buttons ---------- */
+.btn{
+  border:1px solid var(--line);
+  background: #fff;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-weight: 800;
+  cursor:pointer;
+  transition: 120ms ease;
+}
+.btn:hover{ transform: translateY(-1px); box-shadow: 0 10px 18px rgba(15,23,42,0.08); }
+.btn.primary{
+  background: var(--blue);
+  color: #fff;
+  border-color: transparent;
+}
+.btn.icon{
+  width: 42px;
+  height: 40px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 18px;
+}
+
+/* ---------- Inputs ---------- */
+select, input[type="text"]{
+  border:1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-weight: 700;
+  background:#fff;
+}
+
+/* ---------- Utilities ---------- */
+.muted{ color: var(--muted); }
+.row{ display:flex; gap:10px; align-items:center; }
+.space{ flex:1; }
+
+/* ---------- Mobile (טלפון) ---------- */
+@media (max-width: 920px){
+  #layout{
+    grid-template-columns: 1fr;
+  }
+  #sideArea{
+    min-height: auto;
+  }
+}
+
+@media (max-width: 520px){
+  :root{
+    --topbar-h: 54px;
+    --gap: 10px;
+  }
+
+  #layout{ padding: 10px; }
+
+  #mainArea{
+    min-height: 420px;
+  }
+
+  #hudBox{
+    top: 8px;
+    left: 8px;
+    width: calc(100% - 16px);
+    padding: 9px 10px;
+  }
+
+  #successBanner{
+    top: 8px;
+    right: 8px;
+    padding: 9px 12px;
+    font-size: 14px;
+  }
+
+  #proximityWrap{
+    bottom: 8px;
+    left: 8px;
+    width: calc(100% - 16px);
+  }
+
+  .paramPanel{
+    grid-template-columns: 1fr; /* בטלפון: סליידרים אחד מתחת לשני */
+  }
+
+  /* סליידרים בטלפון — גדולים ונוחים */
+  input[type="range"]{
+    height: 26px;
+  }
+
+  #journalList{
+    max-height: 240px;
+  }
+}
