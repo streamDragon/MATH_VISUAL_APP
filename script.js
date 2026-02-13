@@ -187,35 +187,27 @@ function fmtConst(n, isFirstTerm = false) {
 // f(x) formatter (cubic)
 // ===============================
 
-// החלף את formatPoly שלך בזה (תומך גם ב- a x^3, גם ב- b x^2, וגם ב- c x, וגם ב- d)
-// - לא מציג 1x / 1x² / 1x³  -> מציג x / x² / x³
-// - לא מציג -1x ...        -> מציג -x ...
-// - לא משאיר "+ -"         -> מציג "-" תקין
+// ===============================
+// Pretty formatting helpers
+// ===============================
 function formatPoly(a, b, c, d) {
-  const EPS = 1e-9;
+  const isZero = (v) => Math.abs(v) < 1e-6;
+  const r1 = (v) => Number(v.toFixed(1));
 
-  const round1 = (v) => Number(v.toFixed(1));
-  const isZero = (v) => Math.abs(v) < 0.001;
-
-  // מחזיר מחרוזת של מקדם ל-X: "", "-", "2.5" וכו'
-  function coefX(v) {
-    if (Math.abs(v - 1) < EPS) return "";   // 1x -> x
-    if (Math.abs(v + 1) < EPS) return "-";  // -1x -> -x
-    return String(round1(v));
-  }
-
-  // בונה איבר יחיד בלי סימן חיבור בתחילתו (הסימן יטופל אחר כך)
   function term(v, power) {
     if (isZero(v)) return null;
 
-    // קבוע
-    if (power === 0) return String(round1(v));
+    // constant
+    if (power === 0) return String(r1(v));
 
-    const cfx = coefX(v);
-    const xPart = power === 1 ? "x" : `x^${power}`;
+    // coefficient rules: 1 -> "", -1 -> "-"
+    let coef = "";
+    if (Math.abs(v - 1) < 1e-6) coef = "";
+    else if (Math.abs(v + 1) < 1e-6) coef = "-";
+    else coef = String(r1(v));
 
-    // אם המקדם הוא "" או "-" מצמידים ישירות ל-xPart, אחרת מוסיפים ככפל סמלי
-    return `${cfx}${xPart}`; // למשל: "-x^2" או "2.5x^3" או "x"
+    const xPart = power === 1 ? "x" : (power === 2 ? "x²" : "x³");
+    return `${coef}${xPart}`; // e.g. "-x²", "2.5x³", "x"
   }
 
   const parts = [
@@ -227,70 +219,51 @@ function formatPoly(a, b, c, d) {
 
   if (parts.length === 0) return "y = 0";
 
-  // מחברים עם +/-
   let out = parts[0];
   for (let i = 1; i < parts.length; i++) {
     const t = parts[i];
-    // אם האיבר כבר מתחיל במינוס, לא מוסיפים "+", אלא " - " ומורידים את המינוס
-    if (t[0] === "-") out += " - " + t.slice(1);
+    if (t.startsWith("-")) out += " - " + t.slice(1);
     else out += " + " + t;
   }
-
-  // לשמור על הסגנון שלך (³²) אם אתה רוצה:
-  // החזרה למעלה משתמשת ב-x^n. אם אתה מעדיף תווים עליונים:
-  out = out.replace(/x\^3/g, "x³").replace(/x\^2/g, "x²");
-
   return "y = " + out;
 }
 
-
-  addTerm(a, "x³");
-  addTerm(b, "x²");
-  addTerm(c, "x");
-
-  // constant term
-  if (Math.abs(d) >= eps || first) {
-    if (first) out += String(Number(d.toFixed(2)));
-    else out += (d < 0 ? "-" : "+") + String(Number(Math.abs(d).toFixed(2)));
-  }
-
-  return out.replace(/\+\s/g, "+ ").replace(/-\s/g, "- ");
-}
-
-// ===============================
-// f'(x) formatter (derivative of cubic)
-// ===============================
-
 function formatDeriv(a, b, c) {
   // f'(x) = 3ax^2 + 2bx + c
-  const A = 3 * a;
-  const B = 2 * b;
-  const C = c;
+  const A = 3 * a, B = 2 * b, C = c;
+  const isZero = (v) => Math.abs(v) < 1e-6;
+  const r1 = (v) => Number(v.toFixed(1));
 
-  const eps = 1e-9;
-  let out = "f'(x) = ";
-  let first = true;
+  function term(v, power) {
+    if (isZero(v)) return null;
 
-  const addTerm = (coeff, body) => {
-    if (Math.abs(coeff) < eps) return;
-    out += fmtCoeff(coeff, first) + body;
-    first = false;
-  };
+    if (power === 0) return String(r1(v));
 
-  addTerm(A, "x²");
-  addTerm(B, "x");
+    let coef = "";
+    if (Math.abs(v - 1) < 1e-6) coef = "";
+    else if (Math.abs(v + 1) < 1e-6) coef = "-";
+    else coef = String(r1(v));
 
-  // constant term
-  if (Math.abs(C) >= eps || first) {
-    if (first) out += String(Number(C.toFixed(2)));
-    else out += (C < 0 ? "-" : "+") + String(Number(Math.abs(C).toFixed(2)));
+    const xPart = power === 1 ? "x" : "x²";
+    return `${coef}${xPart}`;
   }
 
-  return out.replace(/\+\s/g, "+ ").replace(/-\s/g, "- ");
+  const parts = [
+    term(A, 2),
+    term(B, 1),
+    term(C, 0),
+  ].filter(Boolean);
+
+  if (parts.length === 0) return "f'(x) = 0";
+
+  let out = parts[0];
+  for (let i = 1; i < parts.length; i++) {
+    const t = parts[i];
+    if (t.startsWith("-")) out += " - " + t.slice(1);
+    else out += " + " + t;
+  }
+  return "f'(x) = " + out;
 }
-
-
-
 
 
 
