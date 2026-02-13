@@ -1,9 +1,11 @@
-/* === זה הקובץ היחיד שצריך לערוך כדי להוסיף תוכן === */
+// ==========================================
+//  קובץ השאלות - כאן עורכים ומוסיפים משימות
+// ==========================================
 
 const QUESTIONS = [
     {
         title: "שלב 1: משחקים חופשיים",
-        desc: "זהו שלב חופשי.\n1. שחקו עם הסליידרים.\n2. גררו את הנקודה הכחולה לטייל על הגרף.",
+        desc: "זהו שלב חופשי.\n1. שחקו עם הסליידרים בצד ימין.\n2. גררו את הנקודה הכחולה לטייל על הגרף.",
         params: [0.5, 0, -2, 0], // [a, b, c, d]
         goal: "free"
     },
@@ -22,7 +24,7 @@ const QUESTIONS = [
     },
     {
         title: "מעבדת האנך",
-        desc: "פתחו את 'מעבדת האנך'. כוונו את m2 כך שמכפלת השיפועים תהיה 1-.",
+        desc: "1. פתחו את 'מעבדת האנך' בתפריט.\n2. כוונו את m2 כך שמכפלת השיפועים תהיה 1-.",
         params: [0, 0.5, 0, 0], 
         goal: "normal_match"
     },
@@ -30,9 +32,9 @@ const QUESTIONS = [
         title: "פגיעה במטרה",
         desc: "הזיזו את הגרף (גרירת רקע או סליידר d) עד שהקו יעבור בנקודה האדומה.",
         params: [0, 1, -2, 0],
-        targets: [{x: 2, y: 4}], // רשימת מטרות
+        targets: [{x: 2, y: 4}], 
         goal: "hit_target",
-        locked: ["inpA", "inpB", "inpC", "inpX"] // סליידרים נעולים
+        locked: ["inpA", "inpB", "inpC", "inpX"] // נועל את הסליידרים האחרים
     },
     {
         title: "האתגר הכפול",
@@ -41,45 +43,13 @@ const QUESTIONS = [
         targets: [{x: -1, y: 2}, {x: 2, y: 5}], 
         goal: "hit_target",
         locked: ["inpA", "inpC"]
+    },
+    {
+        title: "אתגר הפרבולה ההפוכה",
+        desc: "הפכו את הפרבולה לצורה 'עצובה' (a שלילי) ונסו לפגוע בנקודה (0,0) בדיוק.",
+        params: [1, 0, 0, 2],
+        targets: [{x: 0, y: 0}],
+        goal: "hit_target",
+        locked: ["inpB", "inpC"]
     }
 ];
-
-// === כאן מחליטים מתי המשתמש ניצח ===
-// הפונקציה הזו מקבלת מהמנוע את כל הנתונים:
-// state = { m (שיפוע), nm (שיפוע אנך), x, y, a, b, c, d }
-function checkWinLogic(q, state) {
-    
-    // 1. בדיקת שיפוע 0
-    if (q.goal === 'slope_zero') {
-        return Math.abs(state.m) < 0.1;
-    }
-    
-    // 2. בדיקת שיפוע יעד
-    if (q.goal === 'slope_match') {
-        return Math.abs(state.m - q.targetSlope) < 0.15;
-    }
-    
-    // 3. בדיקת אנך (מכפלה שווה -1)
-    if (q.goal === 'normal_match') {
-        if (!state.showNormal) return false;
-        return Math.abs(state.m * state.nm + 1) < 0.15;
-    }
-    
-    // 4. בדיקת פגיעה במטרות
-    if (q.goal === 'hit_target') {
-        let allHit = true;
-        q.targets.forEach(t => {
-            // חישוב Y בנקודה של המטרה
-            let yAtTarget = state.a * Math.pow(t.x, 3) + 
-                            state.b * Math.pow(t.x, 2) + 
-                            state.c * t.x + 
-                            state.d;
-            
-            // האם הפונקציה עוברת קרוב למטרה? (סטייה של 0.3)
-            if (Math.abs(yAtTarget - t.y) > 0.3) allHit = false;
-        });
-        return allHit;
-    }
-
-    return false; // ברירת מחדל
-}
