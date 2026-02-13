@@ -455,86 +455,71 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
+// --- לולאת הציור הראשית ---
 function draw() {
-    ctx.clearRect(0,0,width,height);
+    // 1. ניקוי הלוח
+    ctx.clearRect(0, 0, width, height);
+
+    // 2. ציור רשת צירים (גריד)
+    drawGrid();
+
+    // 3. ציור הפונקציה עצמה (החלק החסר!)
+    drawFunction();
+
+    // 4. ציור המשיק והנקודה (אם יש)
+    drawTangent();
     
-    // גריד
-    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1; ctx.beginPath();
-    for(let x=originX%scale; x<width; x+=scale) { ctx.moveTo(x,0); ctx.lineTo(x,height); }
-    for(let y=originY%scale; y<height; y+=scale) { ctx.moveTo(0,y); ctx.lineTo(width,y); }
-    ctx.stroke();
-
-    // צירים
-    ctx.strokeStyle = '#64748b'; ctx.lineWidth = 2; ctx.beginPath();
-    ctx.moveTo(0, originY); ctx.lineTo(width, originY);
-    ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
-    ctx.stroke();
-
-    // מטרות (אם יש)
-    const q = QUESTIONS[currQIndex];
-    if (q.targets) {
-        q.targets.forEach(t => {
-            let tx = originX + t.x * scale;
-            let ty = originY - t.y * scale;
-            ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(tx, ty, 6, 0, Math.PI*2); ctx.fill();
-            // בדיקה ויזואלית אם פגענו
-            let curY = a*t.x**3 + b*t.x**2 + c*t.x + d;
-            if(Math.abs(curY - t.y) < 0.3) {
-                ctx.strokeStyle='#16a34a'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(tx, ty, 10, 0, Math.PI*2); ctx.stroke();
-            }
-        });
+    // 5. ציור אנך (אם הפיצ'ר פעיל)
+    if (showNormal) { 
+       drawNormal(); 
     }
 
-    // פונקציה
-    ctx.lineWidth = 3; ctx.strokeStyle = '#2563eb'; ctx.beginPath();
-    let started = false;
-    for(let px=0; px<width; px+=3) {
-        let x = (px - originX)/scale;
-        let y = a*x**3 + b*x**2 + c*x + d;
-        let py = originY - y*scale;
-        if(py>-height && py<height*2) {
-            if(!started) { ctx.moveTo(px,py); started=true; } else ctx.lineTo(px,py);
-        } else started=false;
-    }
-    ctx.stroke();
+    // 6. ציור מטרות (הנקודות האדומות)
+    drawTargets();
+}
 
-    // משיק ונקודה
-    let y0 = a*xVal**3 + b*xVal**2 + c*xVal + d;
-    let m = 3*a*xVal**2 + 2*b*xVal + c;
-    let px = originX + xVal*scale;
-    let py = originY - y0*scale;
+// --- הפונקציה שמציירת את הגרף הכחול ---
+function drawFunction() {
+    ctx.beginPath();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "#2563eb"; // כחול יפה ובולט
 
-    // קו משיק
-    let len = width;
-    let x1 = xVal - len/scale, y1 = m*(x1-xVal)+y0;
-    let x2 = xVal + len/scale, y2 = m*(x2-xVal)+y0;
-    ctx.strokeStyle = '#f97316'; ctx.lineWidth = 2; ctx.beginPath();
-    ctx.moveTo(originX+x1*scale, originY-y1*scale);
-    ctx.lineTo(originX+x2*scale, originY-y2*scale);
-    ctx.stroke();
-
-    // קו אנך
-    if(showNormal) {
-        let nm = normalSlope;
-        let ny1 = nm*(x1-xVal)+y0;
-        let ny2 = nm*(x2-xVal)+y0;
-        ctx.strokeStyle = '#9333ea'; ctx.lineWidth = 2; ctx.setLineDash([6,4]);
-        ctx.beginPath();
-        ctx.moveTo(originX+x1*scale, originY-ny1*scale);
-        ctx.lineTo(originX+x2*scale, originY-ny2*scale);
-        ctx.stroke();
-        ctx.setLineDash([]);
+    let startX = 0;
+    
+    // רץ על כל פיקסל לרוחב המסך
+    for (let px = 0; px < width; px++) {
         
-        // סימון זווית ישרה
-        if(Math.abs(m*nm+1) < 0.15) {
-            drawRightAngle(px, py, Math.atan(m));
+        // המרה מפיקסלים לערך מתמטי (X)
+        // (px - originX) / scale
+        // אבל נכתוב את זה בצורה בטוחה:
+        let mathX = (px - originX) / scale;
+
+        // חישוב ה-Y המתמטי לפי הנוסחה: ax^3 + bx^2 + cx + d
+        // אנו משתמשים במשתנים הגלובליים a,b,c,d שמתעדכנים מהסליידרים
+        let mathY = (a * (mathX ** 3)) + (b * (mathX ** 2)) + (c * mathX) + d;
+
+        // המרה חזרה לפיקסל במסך (Y)
+        // ציר Y הפוך במסך (למעלה זה מינוס)
+        let py = originY - (mathY * scale);
+
+        // אם זו הנקודה הראשונה - רק מזיזים את המכחול
+        if (px === 0) {
+            ctx.moveTo(px, py);
+        } else {
+            // נקודות הבאות - מותחים קו
+            // בדיקת גבולות כדי לא לצייר קווים משוגעים מחוץ למסך
+            if (py > -height && py < height * 2) {
+                ctx.lineTo(px, py);
+            } else {
+                ctx.moveTo(px, py); // "הרמת עט" אם יצאנו מהגבולות
+            }
         }
     }
-
-    // נקודה
-    ctx.fillStyle = '#2563eb'; ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI*2); ctx.fill();
+    ctx.stroke();
 }
+
+
+    
 
 function drawRightAngle(x, y, angle) {
     const s = 14;
