@@ -3,8 +3,10 @@
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function playSound(type) {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    
+     
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume(); // זה משחרר את החסימה של הדפדפן
+    }
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
     
