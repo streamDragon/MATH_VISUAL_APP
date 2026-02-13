@@ -187,16 +187,62 @@ function fmtConst(n, isFirstTerm = false) {
 // f(x) formatter (cubic)
 // ===============================
 
+// החלף את formatPoly שלך בזה (תומך גם ב- a x^3, גם ב- b x^2, וגם ב- c x, וגם ב- d)
+// - לא מציג 1x / 1x² / 1x³  -> מציג x / x² / x³
+// - לא מציג -1x ...        -> מציג -x ...
+// - לא משאיר "+ -"         -> מציג "-" תקין
 function formatPoly(a, b, c, d) {
-  const eps = 1e-9;
-  let out = "f(x) = ";
-  let first = true;
+  const EPS = 1e-9;
 
-  const addTerm = (coeff, body) => {
-    if (Math.abs(coeff) < eps) return;
-    out += fmtCoeff(coeff, first) + body;
-    first = false;
-  };
+  const round1 = (v) => Number(v.toFixed(1));
+  const isZero = (v) => Math.abs(v) < 0.001;
+
+  // מחזיר מחרוזת של מקדם ל-X: "", "-", "2.5" וכו'
+  function coefX(v) {
+    if (Math.abs(v - 1) < EPS) return "";   // 1x -> x
+    if (Math.abs(v + 1) < EPS) return "-";  // -1x -> -x
+    return String(round1(v));
+  }
+
+  // בונה איבר יחיד בלי סימן חיבור בתחילתו (הסימן יטופל אחר כך)
+  function term(v, power) {
+    if (isZero(v)) return null;
+
+    // קבוע
+    if (power === 0) return String(round1(v));
+
+    const cfx = coefX(v);
+    const xPart = power === 1 ? "x" : `x^${power}`;
+
+    // אם המקדם הוא "" או "-" מצמידים ישירות ל-xPart, אחרת מוסיפים ככפל סמלי
+    return `${cfx}${xPart}`; // למשל: "-x^2" או "2.5x^3" או "x"
+  }
+
+  const parts = [
+    term(a, 3),
+    term(b, 2),
+    term(c, 1),
+    term(d, 0),
+  ].filter(Boolean);
+
+  if (parts.length === 0) return "y = 0";
+
+  // מחברים עם +/-
+  let out = parts[0];
+  for (let i = 1; i < parts.length; i++) {
+    const t = parts[i];
+    // אם האיבר כבר מתחיל במינוס, לא מוסיפים "+", אלא " - " ומורידים את המינוס
+    if (t[0] === "-") out += " - " + t.slice(1);
+    else out += " + " + t;
+  }
+
+  // לשמור על הסגנון שלך (³²) אם אתה רוצה:
+  // החזרה למעלה משתמשת ב-x^n. אם אתה מעדיף תווים עליונים:
+  out = out.replace(/x\^3/g, "x³").replace(/x\^2/g, "x²");
+
+  return "y = " + out;
+}
+
 
   addTerm(a, "x³");
   addTerm(b, "x²");
