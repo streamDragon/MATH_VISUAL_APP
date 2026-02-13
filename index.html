@@ -3,58 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מעבדה לחקירת פונקציות - הכנה לבגרות</title>
+    <title>מעבדה לחקירת פונקציות - המפלצת</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&family=Computer+Modern+Serif&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div class="container">
-    <div class="main-content">
-        <div class="question-box">
-            <h2 id="questionTitle">טוען שאלה...</h2>
-            <div id="questionText" class="instructions">אנא המתן...</div>
-            <div id="successMessage"></div>
+    <header class="main-header">
+        <div class="math-display">
+            <div class="func-line">f(x) = <span id="funcEqn" dir="ltr">...</span></div>
+            <div class="deriv-line">f'(x) = <span id="derivEqn" dir="ltr">...</span></div>
         </div>
         
-        <div id="canvasContainer">
-            <canvas id="graphCanvas"></canvas>
-        </div>
-    </div>
-
-    <div class="sidebar">
-        
-        <div class="panel">
-            <h3>פרמטרים</h3>
-            <div class="control-group">
-                <label>a = <span id="valA">1</span></label>
-                <input type="range" id="paramA" min="-5" max="5" step="0.1" value="1">
+        <div class="trinity-panel">
+            <div class="trinity-item">
+                <span class="label">X</span>
+                <span class="value" id="dispX">0</span>
             </div>
-            <div class="control-group">
-                <label>b = <span id="valB">0</span></label>
-                <input type="range" id="paramB" min="-5" max="5" step="0.1" value="0">
+            <div class="trinity-item">
+                <span class="label">Y</span>
+                <span class="value" id="dispY">0</span>
+                <small>(גובה)</small>
             </div>
-            <div class="control-group">
-                <label>c = <span id="valC">0</span></label>
-                <input type="range" id="paramC" min="-5" max="5" step="0.1" value="0">
-            </div>
-            <div class="control-group">
-                <label>d = <span id="valD">0</span></label>
-                <input type="range" id="paramD" min="-5" max="5" step="0.1" value="0">
+            <div class="trinity-item slope">
+                <span class="label">M</span>
+                <span class="value" id="dispM">0</span>
+                <small>(שיפוע)</small>
             </div>
         </div>
+    </header>
 
-        <div class="panel x-control">
-            <h3>חקירה (הזזת הנקודה)</h3>
-            <div class="control-group">
-                <label>x = <span id="valX">0</span></label>
-                <input type="range" id="paramX" min="-10" max="10" step="0.1" value="0">
+    <div class="workspace">
+        <div class="main-content">
+            <div class="question-box">
+                <h2 id="questionTitle">שאלה</h2>
+                <div id="questionText">הוראות...</div>
+                <div id="successMessage"></div>
+            </div>
+            
+            <div id="canvasContainer">
+                <canvas id="graphCanvas"></canvas>
+                <div id="floatingLabel" class="floating-label" style="display:none;"></div>
             </div>
         </div>
 
-        <div class="panel">
-            <h3>📝 יומן מתמטי</h3>
-            <ul id="journalList">
-            </ul>
+        <div class="sidebar">
+            <div class="panel controls">
+                <h3>🎛️ פרמטרים</h3>
+                <div class="control-group">
+                    <label>a <small>(מקדם x³)</small> <span id="valA">1</span></label>
+                    <input type="range" id="paramA" min="-2" max="2" step="0.1" value="1">
+                </div>
+                <div class="control-group">
+                    <label>b <small>(מקדם x²)</small> <span id="valB">0</span></label>
+                    <input type="range" id="paramB" min="-3" max="3" step="0.1" value="0">
+                </div>
+                <div class="control-group">
+                    <label>c <small>(מקדם x)</small> <span id="valC">0</span></label>
+                    <input type="range" id="paramC" min="-5" max="5" step="0.1" value="0">
+                </div>
+                <div class="control-group">
+                    <label>d <small>(חופשי)</small> <span id="valD">0</span></label>
+                    <input type="range" id="paramD" min="-5" max="5" step="0.1" value="0">
+                </div>
+            </div>
+
+            <div class="panel x-control">
+                <h3>📍 חקירה</h3>
+                <div class="control-group">
+                    <label>מיקום ה-X <span id="valX">0</span></label>
+                    <input type="range" id="paramX" min="-6" max="6" step="0.1" value="0">
+                </div>
+                <div class="tangent-info" dir="ltr" id="tangentEqn">y - y1 = m(x - x1)</div>
+            </div>
+
+            <div class="panel journal">
+                <h3>📜 יומן הצלחות</h3>
+                <ul id="journalList"></ul>
+            </div>
         </div>
     </div>
 </div>
