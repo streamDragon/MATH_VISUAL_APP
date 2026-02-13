@@ -1,14 +1,25 @@
+זהו השיפור המשמעותי ביותר עד כה. הוספתי את כל מה שביקשת:
+
+1. **סימון זוויות ונקודות חיתוך:** כעת המשיק והאנך מסמנים את נקודות החיתוך שלהם עם הצירים (נקודות אפורות קטנות) + סימון זווית ישרה ברור ביניהם.
+2. **הסבר על הפרמטרים (A, B, C, D):** הוספתי "מקרא" ברור מעל הסליידרים שמסביר במילים פשוטות מה כל אחד עושה (עקמומיות, הזזה, גובה).
+3. **תפריט עליון קבוע:** רשימת השאלות וכפתור "השאלה הבאה" נעוצים למעלה (Sticky) ולא נעלמים בגלילה.
+4. **ממשק:** עיצוב נקי יותר שמותאם גם למחשב וגם לנייד.
+
+הנה הקובץ המלא והסופי. **פשוט לשמור כ-`index.html` ולהריץ.**
+
+```html
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>מערכת חקר פונקציות - גרסה סופית</title>
+    <title>מערכת חקר פונקציות מתקדמת</title>
     <style>
         :root {
             --primary: #2563eb;    /* כחול */
             --success: #22c55e;    /* ירוק */
             --purple: #9333ea;     /* סגול לאנך */
+            --orange: #f97316;     /* כתום למשיק */
             --bg: #f8fafc;
             --panel-bg: #ffffff;
             --border: #cbd5e1;
@@ -22,11 +33,11 @@
             background: var(--bg);
             height: 100vh; width: 100vw;
             display: flex;
-            flex-direction: row; /* ברירת מחדל: מחשב - זה לצד זה */
+            flex-direction: row; 
             overflow: hidden;
         }
 
-        /* --- אזור הגרף --- */
+        /* --- אזור הגרף (שמאל במחשב, למעלה בנייד) --- */
         #graph-container {
             flex: 1;
             position: relative;
@@ -36,54 +47,57 @@
         }
         canvas { display: block; width: 100%; height: 100%; }
 
-        /* --- סרגל כלים (צד/למטה) --- */
+        /* --- סרגל כלים (ימין במחשב, למטה בנייד) --- */
         #sidebar {
-            width: 350px;
+            width: 380px;
             background: var(--panel-bg);
-            border-right: 1px solid var(--border); /* במחשב הגבול מימין כי זה RTL */
+            border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
             height: 100%;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            box-shadow: -2px 0 10px rgba(0,0,0,0.05);
             z-index: 10;
         }
 
-        /* כותרת ותפריט קבועים למעלה */
+        /* --- כותרת ותפריט (קבועים למעלה) --- */
         .sidebar-header {
             padding: 15px;
             background: #f1f5f9;
             border-bottom: 1px solid var(--border);
-            flex-shrink: 0; /* לא מתכווץ */
+            flex-shrink: 0; /* מונע כיווץ */
         }
 
-        /* רשימת השאלות וההצלחה */
-        #question-nav {
-            margin-bottom: 10px;
+        /* עיצוב התפריט והכפתורים */
+        .nav-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px;
         }
+        .nav-label { font-weight: bold; color: #334155; }
+        
         select {
             width: 100%; padding: 10px; font-size: 1rem;
             border: 1px solid #94a3b8; border-radius: 6px;
-            background: white;
+            background: white; cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        /* תיבת הצלחה */
-        #success-msg {
-            display: none; /* מוסתר עד שמנצחים */
-            background: #dcfce7; color: #14532d;
-            border: 2px solid var(--success);
-            padding: 10px; border-radius: 8px;
-            text-align: center; margin-top: 10px;
-            animation: popIn 0.5s ease;
+        /* כפתור "השאלה הבאה" */
+        #success-area {
+            display: none; /* מוסתר כברירת מחדל */
+            margin-top: 10px;
+            animation: slideDown 0.3s ease-out;
         }
-        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        
         #btn-next {
             background: var(--success); color: white; border: none;
-            padding: 8px 16px; font-size: 1rem; font-weight: bold;
-            border-radius: 6px; cursor: pointer; margin-top: 5px; width: 100%;
+            padding: 12px; font-size: 1rem; font-weight: bold;
+            border-radius: 6px; cursor: pointer; width: 100%;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+            box-shadow: 0 4px 6px rgba(34, 197, 94, 0.3);
         }
+        #btn-next:hover { background: #16a34a; }
+        @keyframes slideDown { from { opacity:0; transform: translateY(-10px); } to { opacity:1; transform: translateY(0); } }
 
-        /* תוכן נגלל (הסליידרים וההסברים) */
+        /* --- תוכן נגלל --- */
         .scroll-content {
             flex: 1;
             overflow-y: auto;
@@ -93,50 +107,47 @@
         /* כרטיסיות מידע */
         .card {
             background: white; border: 1px solid var(--border);
-            border-radius: 8px; padding: 12px; margin-bottom: 12px;
+            border-radius: 8px; padding: 12px; margin-bottom: 15px;
         }
-        .card h3 { margin: 0 0 5px 0; font-size: 1.1rem; color: #1e293b; }
-        .card p { margin: 0; font-size: 0.95rem; color: #475569; line-height: 1.4; white-space: pre-line; }
+        .card h3 { margin: 0 0 8px 0; font-size: 1.1rem; color: #1e293b; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .card p { margin: 0; font-size: 0.95rem; color: #475569; line-height: 1.5; white-space: pre-line; }
 
-        /* סליידרים */
+        /* אזור הסליידרים */
+        .params-legend {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+            font-size: 0.8rem; color: #64748b; margin-bottom: 10px;
+            background: #f8fafc; padding: 8px; border-radius: 6px;
+        }
+        .legend-item b { color: #334155; }
+
         .control-row {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 12px;
+            display: flex; align-items: center; margin-bottom: 12px;
         }
-        .control-row label { font-weight: bold; width: 25px; }
+        .control-row label { 
+            font-weight: bold; width: 25px; font-family: monospace; font-size: 1.1rem;
+        }
         input[type=range] {
-            flex: 1; margin: 0 10px; height: 25px; /* גדול יותר למובייל */
-            cursor: pointer;
+            flex: 1; margin: 0 10px; height: 30px; cursor: pointer;
         }
-        .val-disp { width: 35px; text-align: left; font-family: monospace; font-weight: bold; color: var(--primary); }
+        .val-disp { 
+            width: 40px; text-align: left; font-family: monospace; 
+            font-weight: bold; color: var(--primary); 
+        }
 
-        /* כפתור טוגל (Toggle) למעבדת האנך */
+        /* כפתור טוגל למעבדת האנך */
         .toggle-btn {
-            width: 100%; padding: 10px;
+            width: 100%; padding: 12px;
             background: white; border: 2px solid var(--purple); color: var(--purple);
             border-radius: 8px; font-weight: bold; cursor: pointer;
-            margin-bottom: 10px;
+            margin-bottom: 15px; transition: all 0.2s;
         }
         .toggle-btn.active { background: var(--purple); color: white; }
 
-        /* --- התאמה למובייל (Android/iOS) --- */
+        /* התאמה למובייל */
         @media (max-width: 768px) {
-            body { flex-direction: column; } /* גרף למעלה, כלים למטה */
-            
-            #graph-container {
-                height: 40vh; /* 40% גובה לגרף */
-                width: 100%;
-                border-bottom: 2px solid #cbd5e1;
-            }
-            
-            #sidebar {
-                width: 100%;
-                height: 60vh; /* 60% גובה לכלים */
-                border-right: none;
-            }
-            
-            /* שיפורים למגע */
-            select, button, input[type=range] { touch-action: manipulation; }
+            body { flex-direction: column; }
+            #graph-container { height: 45vh; border-bottom: 2px solid #cbd5e1; }
+            #sidebar { width: 100%; height: 55vh; border-right: none; }
         }
     </style>
 </head>
@@ -144,35 +155,38 @@
 
     <div id="graph-container">
         <canvas id="cvs"></canvas>
-        <div style="position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.9); padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; pointer-events: none; direction: ltr;">
-            <div id="debug-info">f(x) = ...</div>
+        <div style="position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.9); padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; pointer-events: none; direction: ltr; border: 1px solid #ccc;">
+            <div id="debug-info">טוען...</div>
         </div>
     </div>
 
     <div id="sidebar">
         
         <div class="sidebar-header">
-            <div id="question-nav">
-                <label style="font-weight: bold; display:block; margin-bottom:5px;">בחר שאלה:</label>
-                <select id="questionsMenu"></select>
+            <div class="nav-header">
+                <span class="nav-label">בחר משימה:</span>
             </div>
+            <select id="questionsMenu"></select>
 
-            <div id="success-msg">
-                <div>🎉 <b>כל הכבוד! הצלחת!</b></div>
-                <button id="btn-next" onclick="nextQuestion()">עבור לשאלה הבאה &larr;</button>
+            <div id="success-area">
+                <button id="btn-next" onclick="nextQuestion()">
+                    <span>🎉 כל הכבוד! לשאלה הבאה</span>
+                    <span>&larr;</span>
+                </button>
             </div>
         </div>
 
         <div class="scroll-content">
             
             <div class="card" style="border-right: 4px solid var(--primary);">
-                <h3 id="qTitle">טוען...</h3>
+                <h3 id="qTitle">...</h3>
                 <p id="qDesc">...</p>
             </div>
 
             <div class="card" style="background: #fff7ed; border-color: #fdba74;">
-                <h3 style="color:#c2410c">הזזת הנקודה (X)</h3>
+                <h3 style="color:var(--orange)">📍 שליטה בנקודה</h3>
                 <div class="control-row">
+                    <label>X</label>
                     <input type="range" id="inpX" min="-5" max="5" step="0.1" oninput="updateSystem()">
                     <span class="val-disp" id="valX">0</span>
                 </div>
@@ -182,7 +196,9 @@
             
             <div class="card" id="normalControls" style="display:none; border-color: var(--purple);">
                 <h3 style="color:var(--purple)">כיוון האנך</h3>
-                <p style="font-size:0.8rem; margin-bottom:10px;">הזיזו את הסליידר כדי לשנות את השיפוע של הקו הסגול:</p>
+                <p style="font-size:0.85rem; margin-bottom:10px; color:#666;">
+                    האנך (סגול) חותך את המשיק (כתום). נסו ליצור זווית של 90°.
+                </p>
                 <div class="control-row">
                     <label>m2</label>
                     <input type="range" id="inpNormalSlope" min="-10" max="10" step="0.1" value="1" oninput="updateSystem()">
@@ -191,53 +207,62 @@
             </div>
 
             <div class="card">
-                <h3>בניית הפונקציה</h3>
-                <div class="control-row" id="rowA"><label>a</label><input type="range" id="inpA" min="-2" max="2" step="0.1" oninput="updateSystem()"><span class="val-disp" id="valA">0</span></div>
-                <div class="control-row" id="rowB"><label>b</label><input type="range" id="inpB" min="-3" max="3" step="0.1" oninput="updateSystem()"><span class="val-disp" id="valB">0</span></div>
-                <div class="control-row" id="rowC"><label>c</label><input type="range" id="inpC" min="-5" max="5" step="0.1" oninput="updateSystem()"><span class="val-disp" id="valC">0</span></div>
-                <div class="control-row" id="rowD"><label>d</label><input type="range" id="inpD" min="-5" max="5" step="0.1" oninput="updateSystem()"><span class="val-disp" id="valD">0</span></div>
+                <h3>🛠 בניית הפונקציה</h3>
+                
+                <div class="params-legend">
+                    <div class="legend-item"><b>a</b>: עקמומיות / כיוון</div>
+                    <div class="legend-item"><b>b</b>: הזזה אופקית</div>
+                    <div class="legend-item"><b>c</b>: שיפוע בחיתוך</div>
+                    <div class="legend-item"><b>d</b>: גובה (למעלה/למטה)</div>
+                </div>
+
+                <div class="control-row"><label>a</label><input type="range" id="inpA" min="-2" max="2" step="0.1" oninput="updateSystem()"><span class="val-disp" id="valA">0</span></div>
+                <div class="control-row"><label>b</label><input type="range" id="inpB" min="-3" max="3" step="0.1" oninput="updateSystem()"><span class="val-disp" id="valB">0</span></div>
+                <div class="control-row"><label>c</label><input type="range" id="inpC" min="-5" max="5" step="0.1" oninput="updateSystem()"><span class="val-disp" id="valC">0</span></div>
+                <div class="control-row"><label>d</label><input type="range" id="inpD" min="-5" max="5" step="0.1" oninput="updateSystem()"><span class="val-disp" id="valD">0</span></div>
             </div>
 
-            <div style="height: 50px;"></div> </div>
+            <div style="height: 50px;"></div>
+        </div>
     </div>
 
 <script>
 /* === מאגר השאלות === */
 const QUESTIONS = [
     {
-        title: "שלב 1: בנייה ואז חקירה",
-        desc: "ברוכים הבאים!\nכאן עובדים בשני שלבים:\n1. השתמשו בסליידרים a, b, c, d למטה כדי **לבנות** את הפונקציה.\n2. לאחר מכן, הזיזו את ה-X (למעלה) כדי **לחקור** נקודות עליה.\n\nנסו לשחק עם הסליידרים כדי להבין.",
+        title: "שלב 1: בנייה וחקירה",
+        desc: "לפני שמתחילים לחקור, צריך להבין את הכלים:\n1. השתמשו ב-**a, b, c, d** למטה כדי לשנות את צורת הפונקציה.\n2. לאחר מכן, הזיזו את ה-**X** כדי לטייל עליה.\n\nהמטרה: שחקו חופשי עד שתבינו מה כל כפתור עושה.",
         params: [0.5, 0, -2, 0], 
         goal: "free"
     },
     {
         title: "משיק אופקי (קיצון)",
-        desc: "המשימה: מצאו את נקודת הקיצון.\nהזיזו את ה-X ימינה/שמאלה עד שהקו הכתום (המשיק) יהיה אופקי לגמרי (שיפוע 0).",
+        desc: "הזיזו את ה-X עד שהמשיק (הקו הכתום) יהיה מאוזן לגמרי (שיפוע 0).\nזוהי נקודת הקיצון של הפונקציה.",
         params: [0.5, 0, -2, 0], 
         goal: "slope_zero"
     },
     {
-        title: "שיפוע ספציפי",
-        desc: "נתונה הפרבולה: y = x² - 2.\nמצאו את הנקודה (X) שבה השיפוע של המשיק הוא בדיוק 2.",
+        title: "שיפוע 2 בפרבולה",
+        desc: "עבור הפרבולה: y = x² - 2.\nמצאו היכן צריך לעמוד (X) כדי שהשיפוע יהיה בדיוק 2.",
         params: [0, 1, 0, -2], 
         goal: "slope_match",
         targetSlope: 2
     },
     {
-        title: "מעבדת האנך - היכרות",
-        desc: "1. פתחו את 'מעבדת האנך' (כפתור סגול).\n2. הזיזו את סליידר האנך (m2) עד שהקו הסגול יהיה מאונך לכתום (יוצר 90°).",
+        title: "מעבדת האנך - 90 מעלות",
+        desc: "1. פתחו את 'מעבדת האנך'.\n2. כוונו את האנך (m2) עד שיווצר ריבוע ירוק קטן בינו לבין המשיק (90°).",
         params: [0, 0.5, 0, 0], 
         goal: "normal_match"
     },
     {
         title: "אתגר המשיק והאנך",
-        desc: "מצאו מצב שבו:\nהמשיק הוא 1, והאנך הוא 1-.\n(צריך להזיז גם את X וגם את שיפוע האנך).",
+        desc: "מצאו מצב שבו המשיק הוא 1, והאנך הוא 1-.\n(צריך להזיז גם את X וגם את שיפוע האנך עד שהריבוע הירוק יופיע בשיפועים הנכונים).",
         params: [0.1, 0, 0, 0], 
         goal: "normal_match"
     },
     {
-        title: "צלף: פגיעה במטרה",
-        desc: "הזיזו **רק** את הפרמטר d כדי שהקו הכחול יעבור דרך הנקודה האדומה (2,4).",
+        title: "צלף: הזזה אנכית",
+        desc: "הזיזו **רק** את הפרמטר d (גובה) כדי שהקו הכחול יעבור דרך הנקודה האדומה.",
         params: [0, 1, -2, 0],
         targets: [{x: 2, y: 4}],
         goal: "hit_target",
@@ -245,7 +270,7 @@ const QUESTIONS = [
     },
     {
         title: "האתגר הכפול",
-        desc: "עליכם לפגוע בשתי הנקודות יחד!\nשנו את b (רוחב) ואת d (גובה) עד שהקו יעבור בשתיהן.",
+        desc: "פגעו בשתי הנקודות יחד! שנו את b (הזזה) ואת d (גובה).",
         params: [0, 0, 0, 0],
         targets: [{x: -1, y: 2}, {x: 2, y: 5}], 
         goal: "hit_target",
@@ -275,14 +300,9 @@ window.onload = function() {
     });
     menu.onchange = (e) => loadQuestion(parseInt(e.target.value));
 
-    // התאמה לגודל מסך
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
-    
-    // טעינת שאלה ראשונה
     loadQuestion(0);
-    
-    // התחלת אנימציה
     requestAnimationFrame(loop);
 };
 
@@ -292,25 +312,25 @@ function resizeCanvas() {
     height = cvs.height = container.offsetHeight;
     originX = width / 2;
     originY = height / 2;
-    scale = (width < 500) ? 30 : 40; // זום קצת החוצה בנייד
-    updateSystem(); // עדכון חישובים
+    scale = (width < 500) ? 30 : 40; 
+    updateSystem();
 }
 
 function loadQuestion(idx) {
     currQIndex = idx;
     isWin = false;
     document.getElementById('questionsMenu').value = idx;
-    document.getElementById('success-msg').style.display = 'none';
+    document.getElementById('success-area').style.display = 'none'; // הסתרת כפתור הבא
 
     const q = QUESTIONS[idx];
     document.getElementById('qTitle').innerText = q.title;
     document.getElementById('qDesc').innerText = q.desc;
 
-    // טעינת פרמטרים
+    // טעינת פרמטרים מהשאלה
     [a, b, c, d] = q.params;
     xVal = 0;
 
-    // עדכון ה-HTML
+    // עדכון הממשק
     document.getElementById('inpA').value = a;
     document.getElementById('inpB').value = b;
     document.getElementById('inpC').value = c;
@@ -320,14 +340,16 @@ function loadQuestion(idx) {
     // ניהול נעילות
     const allInputs = ['inpA', 'inpB', 'inpC', 'inpD', 'inpX'];
     allInputs.forEach(id => {
-        document.getElementById(id).disabled = false;
-        document.getElementById(id).parentElement.style.opacity = "1";
+        const el = document.getElementById(id);
+        el.disabled = false;
+        el.parentElement.style.opacity = "1";
     });
 
     if (q.locked) {
         q.locked.forEach(id => {
-            document.getElementById(id).disabled = true;
-            document.getElementById(id).parentElement.style.opacity = "0.5";
+            const el = document.getElementById(id);
+            el.disabled = true;
+            el.parentElement.style.opacity = "0.5";
         });
     }
 
@@ -351,21 +373,18 @@ function toggleNormal() {
 }
 
 function updateSystem() {
-    // קריאת ערכים
     a = parseFloat(document.getElementById('inpA').value);
     b = parseFloat(document.getElementById('inpB').value);
     c = parseFloat(document.getElementById('inpC').value);
     d = parseFloat(document.getElementById('inpD').value);
     xVal = parseFloat(document.getElementById('inpX').value);
 
-    // עדכון טקסטים ליד הסליידרים
     document.getElementById('valA').innerText = a;
     document.getElementById('valB').innerText = b;
     document.getElementById('valC').innerText = c;
     document.getElementById('valD').innerText = d;
     document.getElementById('valX').innerText = xVal.toFixed(1);
     
-    // בדיקת ניצחון
     checkWin();
 }
 
@@ -376,13 +395,10 @@ function loop() {
 }
 
 function draw() {
-    // ניקוי
     ctx.clearRect(0, 0, width, height);
-
-    // גריד
     drawGrid();
 
-    // מטרות (נקודות אדומות)
+    // ציור המטרות
     const q = QUESTIONS[currQIndex];
     if (q.targets) {
         q.targets.forEach(t => {
@@ -391,16 +407,16 @@ function draw() {
             ctx.fillStyle = '#ef4444'; 
             ctx.beginPath(); ctx.arc(tx, ty, 6, 0, Math.PI*2); ctx.fill();
             
-            // בדיקה אם פגענו
+            // בדיקת פגיעה
             let yAtT = a*t.x**3 + b*t.x**2 + c*t.x + d;
-            if (Math.abs(yAtT - t.y) < 0.2) { // פגיעה!
+            if (Math.abs(yAtT - t.y) < 0.2) {
                 ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 3;
                 ctx.beginPath(); ctx.arc(tx, ty, 10, 0, Math.PI*2); ctx.stroke();
             }
         });
     }
 
-    // הפונקציה (הקו הכחול)
+    // ציור הפונקציה
     ctx.lineWidth = 3; 
     ctx.strokeStyle = "#2563eb";
     ctx.beginPath();
@@ -414,109 +430,119 @@ function draw() {
             if (!started) { ctx.moveTo(px, py); started = true; }
             else { ctx.lineTo(px, py); }
         } else {
-            started = false; // שבירת קו אם יוצאים מהגבול
+            started = false; 
         }
     }
     ctx.stroke();
 
-    // נקודת X נוכחית
+    // נתונים לנקודה הנוכחית
     let curY = a*xVal**3 + b*xVal**2 + c*xVal + d;
     let px = originX + xVal * scale;
     let py = originY - curY * scale;
-
-    // חישוב שיפוע משיק
     let slope = 3*a*xVal**2 + 2*b*xVal + c;
 
-    // ציור משיק (כתום)
+    // 1. ציור משיק (כתום) + חיתוך צירים
     drawLinearFunc(px, py, slope, "#f97316", false);
-
-    // ציור אנך (סגול)
+    
+    // 2. ציור אנך (סגול) + חיתוך צירים
+    let normalSlope = 1;
     if (showNormal) {
-        let normalSlope = parseFloat(document.getElementById('inpNormalSlope').value);
+        normalSlope = parseFloat(document.getElementById('inpNormalSlope').value);
         document.getElementById('valNormal').innerText = normalSlope.toFixed(2);
         
-        drawLinearFunc(px, py, normalSlope, "#9333ea", true); // true = מקווקו
+        drawLinearFunc(px, py, normalSlope, "#9333ea", true);
         
-        // ציור משולש שיפוע לאנך
-        drawSlopeTriangle(px, py, normalSlope);
-
-        // סימון זווית ישרה אם קרוב ל-90 מעלות
+        // ציור זווית ישרה אם קרובים ל-90 מעלות
         if (Math.abs(slope * normalSlope + 1) < 0.15) {
-            drawRightAngleMarker(px, py, Math.atan(slope));
+            drawRightAngleSquare(px, py, Math.atan(slope));
         }
     }
 
-    // הנקודה עצמה
+    // הנקודה הראשית
     ctx.fillStyle = "#2563eb"; 
     ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = "white"; 
     ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI*2); ctx.fill();
 
-    // דיבאג טקסט על המסך
+    // טקסט דיבאג
     document.getElementById('debug-info').innerText = 
         `x: ${xVal.toFixed(1)}, y: ${curY.toFixed(1)}, m: ${slope.toFixed(2)}`;
 }
 
-// פונקציית עזר לציור קו ישר (משיק או אנך)
+// פונקציה חכמה לציור קו + נקודות חיתוך
 function drawLinearFunc(cx, cy, m, color, dashed) {
+    ctx.save();
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     if (dashed) ctx.setLineDash([5, 5]);
-    else ctx.setLineDash([]);
-    
-    ctx.beginPath();
-    // ציור קו ארוך שיוצא מהמרכז לשני הצדדים
-    let len = 1000; // אורך בפיקסלים
-    // חישוב הזווית כדי לצייר קו
-    // זווית בראדיאנים. במחשב Y הפוך אז שמים מינוס
+
+    // ציור הקו הארוך
+    let len = 1000;
     let angle = Math.atan(-m); 
-    
+    ctx.beginPath();
     ctx.moveTo(cx - Math.cos(angle)*len, cy - Math.sin(angle)*len);
     ctx.lineTo(cx + Math.cos(angle)*len, cy + Math.sin(angle)*len);
     ctx.stroke();
-    ctx.setLineDash([]);
+    ctx.restore();
+
+    // === חדש: חישוב וציור נקודות חיתוך עם הצירים ===
+    // משוואת הישר: Y - y0 = m(X - x0)  =>  Y = m(X - x0) + y0
+    // (כאן X,Y הם קואורדינטות מתמטיות)
+    
+    let mathX0 = xVal;
+    let mathY0 = (originY - cy) / scale; // המרה מפיקסל למתמטי
+
+    // 1. חיתוך עם ציר Y (כש X=0)
+    let yIntercept = m * (0 - mathX0) + mathY0;
+    let pyInt = originY - yIntercept * scale;
+    let pxInt = originX; // X=0 הוא באמצע המסך
+
+    if (pyInt > 0 && pyInt < height) {
+        drawInterceptDot(pxInt, pyInt, color);
+    }
+
+    // 2. חיתוך עם ציר X (כש Y=0)
+    // 0 = m(X - x0) + y0  =>  -y0 = m(X - x0) => -y0/m = X - x0 => X = x0 - y0/m
+    if (Math.abs(m) > 0.01) { // מניעת חלוקה באפס
+        let xIntercept = mathX0 - (mathY0 / m);
+        let pxXInt = originX + xIntercept * scale;
+        let pyXInt = originY; // Y=0 הוא באמצע המסך
+
+        if (pxXInt > 0 && pxXInt < width) {
+            drawInterceptDot(pxXInt, pyXInt, color);
+        }
+    }
 }
 
-// ציור משולש שיפוע
-function drawSlopeTriangle(cx, cy, m) {
-    // נזוז יחידה אחת ימינה (בסקאלה של הגרף)
-    let stepPx = 1 * scale; 
-    let risePx = -m * scale; // Y הפוך
-    
-    // נקודות המשולש: התחלה, ימינה, ואז למעלה/למטה
-    let p1x = cx, p1y = cy;
-    let p2x = cx + stepPx, p2y = cy; // אופקי
-    let p3x = p2x, p3y = cy + risePx; // אנכי
-
-    ctx.fillStyle = "rgba(147, 51, 234, 0.2)";
-    ctx.strokeStyle = "rgba(147, 51, 234, 0.8)";
+function drawInterceptDot(x, y, color) {
+    ctx.fillStyle = "#64748b"; // צבע אפור לנקודות חיתוך
     ctx.beginPath();
-    ctx.moveTo(p1x, p1y);
-    ctx.lineTo(p2x, p2y);
-    ctx.lineTo(p3x, p3y);
-    ctx.closePath();
+    ctx.arc(x, y, 4, 0, Math.PI*2);
     ctx.fill();
+    // מסגרת בצבע הקו
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
     ctx.stroke();
-    
-    // כיתוב
-    ctx.font = "12px sans-serif";
-    ctx.fillStyle = "#9333ea";
-    ctx.textAlign = "center";
-    ctx.fillText("1", (p1x+p2x)/2, p2y + 15);
-    ctx.fillText(m.toFixed(1), p2x + 10, (p2y+p3y)/2);
 }
 
-function drawRightAngleMarker(x, y, angle) {
-    const s = 12;
+function drawRightAngleSquare(x, y, angle) {
+    const s = 14; // גודל הריבוע
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(-angle); // מסובבים לפי המשיק
+    
     ctx.beginPath();
-    ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 2;
+    ctx.strokeStyle = "#22c55e"; // ירוק
+    ctx.lineWidth = 2;
+    ctx.fillStyle = "rgba(34, 197, 94, 0.2)"; // מילוי שקוף
+
+    // ציור צורת "ר" (ריבוע)
     ctx.moveTo(s, 0);
-    ctx.lineTo(s, -s);
-    ctx.lineTo(0, -s);
+    ctx.lineTo(s, -s); // למעלה
+    ctx.lineTo(0, -s); // שמאלה (לכיוון האנך)
+    
     ctx.stroke();
+    ctx.fill();
     ctx.restore();
 }
 
@@ -528,19 +554,23 @@ function drawGrid() {
     ctx.stroke();
     
     // צירים ראשיים
-    ctx.strokeStyle = '#64748b'; ctx.lineWidth = 2;
+    ctx.strokeStyle = '#334155'; ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(0, originY); ctx.lineTo(width, originY);
     ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
     ctx.stroke();
+
+    // חצים לצירים
+    ctx.fillStyle = '#334155';
+    ctx.fillText("x", width - 15, originY - 5);
+    ctx.fillText("y", originX + 5, 15);
 }
 
 function checkWin() {
     const q = QUESTIONS[currQIndex];
-    if (q.goal === 'free') return; // אין ניצחון בחקירה חופשית
+    if (q.goal === 'free') return; 
 
     let m = 3*a*xVal**2 + 2*b*xVal + c;
-    let curY = a*xVal**3 + b*xVal**2 + c*xVal + d;
     let win = false;
 
     if (q.goal === 'slope_zero' && Math.abs(m) < 0.1) win = true;
@@ -558,12 +588,14 @@ function checkWin() {
         if (allHit) win = true;
     }
 
+    // טיפול בהצגת כפתור הניצחון
+    const successArea = document.getElementById('success-area');
     if (win && !isWin) {
         isWin = true;
-        document.getElementById('success-msg').style.display = 'block';
+        successArea.style.display = 'block'; // מופיע למעלה!
     } else if (!win) {
         isWin = false;
-        document.getElementById('success-msg').style.display = 'none';
+        successArea.style.display = 'none';
     }
 }
 
@@ -571,9 +603,11 @@ function nextQuestion() {
     if (currQIndex < QUESTIONS.length - 1) {
         loadQuestion(currQIndex + 1);
     } else {
-        alert("סיימת את כל המשימות!");
+        alert("סיימת את כל המשימות בהצלחה!");
     }
 }
 </script>
 </body>
 </html>
+
+```
