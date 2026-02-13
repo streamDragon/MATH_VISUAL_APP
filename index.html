@@ -1,114 +1,102 @@
-<script src="bagrutQuestions.js"></script>
-    
-    <script src="script.js"></script>
-</body>
-</html>
-
-
-
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>מעבדת חקירת פונקציות - הדור הבא</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מעבדה לחקירת פונקציות - הכנה לבגרות</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background: #f4f4f9; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; display: flex; gap: 20px; }
+        
+        /* צד ימין - הגרף והשאלות */
+        .main-content { flex: 2; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        canvas { width: 100%; height: 500px; background: #fff; border: 1px solid #eee; border-radius: 8px; cursor: crosshair; }
+        
+        /* אזור השאלה */
+        .question-box { background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-right: 5px solid #2196F3; }
+        h2 { margin: 0 0 10px 0; color: #1565C0; }
+        .instructions { font-size: 1.1em; margin-bottom: 10px; }
+
+        /* הודעת הצלחה */
+        #successMessage {
+            display: none;
+            background: #d4edda; color: #155724; 
+            padding: 15px; margin-top: 10px; 
+            border-radius: 5px; text-align: center; font-weight: bold;
+            animation: popIn 0.5s ease;
+        }
+
+        /* צד שמאל - בקרה ויומן */
+        .sidebar { flex: 1; display: flex; flex-direction: column; gap: 20px; }
+        .panel { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        
+        /* סליידרים */
+        .control-group { margin-bottom: 15px; }
+        label { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; }
+        input[type=range] { width: 100%; }
+        
+        /* סליידר X מיוחד */
+        .x-control { background: #fff3e0; padding: 10px; border-radius: 5px; border: 1px solid #ffe0b2; }
+
+        /* יומן מתמטי */
+        #journalList { list-style: none; padding: 0; margin: 0; max-height: 300px; overflow-y: auto; }
+        
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
 </head>
 <body>
 
-<header>
-    <div class="header-top">
-        <h1>מעבדת חקירה</h1>
-        <div class="controls">
-             <button id="btnMode" class="btn-nav" onclick="toggleMode()">מצב: חקירה</button>
-             <button id="btnSound" class="btn-nav" onclick="toggleMute()">🔊</button>
-             <select id="qSelect" onchange="loadQuestionFromSelect()"></select>
-             <button class="btn-nav" onclick="nextQuestion()">></button>
+<div class="container">
+    <div class="main-content">
+        <div class="question-box">
+            <h2 id="questionTitle">טוען שאלה...</h2>
+            <div id="questionText" class="instructions">אנא המתן...</div>
+            <div id="successMessage"></div>
         </div>
-    </div>
-    
-    <div class="math-display-row">
-        <span id="derivEqn"></span>
-        <span class="separator"> | </span>
-        <span id="eqn"></span>
-    </div>
-
-    <div class="instruction-box">
-        <span id="qCounter" style="font-weight:bold; color:var(--primary);"></span> 
-        <span id="qText"></span>
-    </div>
-    
-    <div class="proximity-container">
-        <div class="proximity-bar-bg">
-            <div id="proximityBar" class="proximity-fill"></div>
-        </div>
-        <span style="font-size:0.8rem">דיוק</span>
-    </div>
-</header>
-
-<div class="workspace">
-    <div id="mainArea">
-        <canvas id="cvs"></canvas>
         
-        <div class="zoom-controls">
-            <button onclick="zoomIn()">+</button>
-            <button onclick="resetZoom()">⟲</button>
-            <button onclick="zoomOut()">-</button>
-        </div>
-
-        <div id="successBanner">כל הכבוד! 🏆</div>
-        
-        <div id="holyTrinity" class="trinity-tooltip">
-            <div id="valX"></div>
-            <div id="valY"></div>
-            <div id="valM"></div>
-            <div id="lineEqn"></div>
-        </div>
+        <canvas id="graphCanvas"></canvas>
     </div>
 
-    <div id="mathJournal" class="math-journal">
-        <div class="journal-title">יומן משוואות</div>
-        <div id="journalList"></div>
+    <div class="sidebar">
+        
+        <div class="panel">
+            <h3>פרמטרים</h3>
+            <div class="control-group">
+                <label>a = <span id="valA">1</span></label>
+                <input type="range" id="paramA" min="-5" max="5" step="0.1" value="1">
+            </div>
+            <div class="control-group">
+                <label>b = <span id="valB">0</span></label>
+                <input type="range" id="paramB" min="-5" max="5" step="0.1" value="0">
+            </div>
+            <div class="control-group">
+                <label>c = <span id="valC">0</span></label>
+                <input type="range" id="paramC" min="-5" max="5" step="0.1" value="0">
+            </div>
+            <div class="control-group">
+                <label>d = <span id="valD">0</span></label>
+                <input type="range" id="paramD" min="-5" max="5" step="0.1" value="0">
+            </div>
+        </div>
+
+        <div class="panel x-control">
+            <h3>חקירה (הזזת הנקודה)</h3>
+            <div class="control-group">
+                <label>x = <span id="valX">0</span></label>
+                <input type="range" id="paramX" min="-10" max="10" step="0.1" value="0">
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>📝 יומן מתמטי</h3>
+            <ul id="journalList">
+                </ul>
+        </div>
     </div>
 </div>
 
-<footer>
-    <div class="slider-container" id="sliderXContainer">
-        <span class="val-display">x</span>
-        <input type="range" id="mainX" min="-10" max="10" step="0.01" value="0" oninput="updateFromSlider()">
-    </div>
-
-    <div class="function-editor">
-        <div class="editor-title">פרמטרים (משנים את הפונקציה)</div>
-        <div class="coef-control-panel">
-            <div class="coef-group">
-                <label>a (x³)</label>
-                <input type="range" id="mA" min="-2" max="2" step="0.1" value="0" oninput="manual()">
-                <span id="valA" class="val-display">0</span>
-            </div>
-            <div class="coef-group">
-                <label>b (x²)</label>
-                <input type="range" id="mB" min="-4" max="4" step="0.1" value="1" oninput="manual()">
-                <span id="valB" class="val-display">1</span>
-            </div>
-            <div class="coef-group">
-                <label>c (x)</label>
-                <input type="range" id="mC" min="-5" max="5" step="0.1" value="0" oninput="manual()">
-                <span id="valC" class="val-display">0</span>
-            </div>
-            <div class="coef-group">
-                <label>d (חופשי)</label>
-                <input type="range" id="mD" min="-5" max="5" step="0.1" value="0" oninput="manual()">
-                <span id="valD" class="val-display">0</span>
-            </div>
-        </div>
-    </div>
-</footer>
-
 <script src="bagrutQuestions.js"></script>
-
-    <script src="script.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>
