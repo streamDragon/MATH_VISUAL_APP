@@ -1,15 +1,11 @@
-/* === מנוע גרפי ולוגיקה ויזואלית === */
+/* === Engine.js: מנוע גרפי ולוגיקה ויזואלית === */
 
 let cvs, ctx, width, height, scale = 40, originX, originY;
 let a=0, b=0, c=0, d=0, xVal=0;
 let showNormal = false;
 let currQIndex = 0;
 let isWin = false;
-
-// משתנים לגרירה
-let isDragging = false;
-let dragTarget = null;
-let lastMouseY = 0;
+let isDragging = false, dragTarget = null, lastMouseY = 0;
 
 window.onload = function() {
     cvs = document.getElementById('cvs');
@@ -17,27 +13,28 @@ window.onload = function() {
     
     // חיבור אירועי גרירה (Touch + Mouse)
     cvs.addEventListener('mousedown', startDrag);
-    cvs.addEventListener('touchstart', (e) => startDrag(e.touches[0]));
+    cvs.addEventListener('touchstart', (e) => startDrag(e.touches[0]), {passive: false});
     window.addEventListener('mousemove', doDrag);
-    window.addEventListener('touchmove', (e) => doDrag(e.touches[0]));
+    window.addEventListener('touchmove', (e) => doDrag(e.touches[0]), {passive: false});
     window.addEventListener('mouseup', endDrag);
     window.addEventListener('touchend', endDrag);
 
     // חיבור כפתורים וסליידרים
-    setupControls();
+    ['inpA','inpB','inpC','inpD','inpX','inpNormalSlope'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateSystem);
+    });
+    document.getElementById('btnNormalToggle').onclick = toggleNormal;
 
-    // בניית התפריט מקובץ השאלות
+    // טעינת שאלות מקובץ questions.js
     const menu = document.getElementById('questionsMenu');
     if (typeof QUESTIONS !== 'undefined') {
         QUESTIONS.forEach((q, idx) => {
             let opt = document.createElement('option');
-            opt.value = idx;
-            opt.text = `${idx+1}. ${q.title}`;
+            opt.value = idx; opt.text = `${idx+1}. ${q.title}`;
             menu.appendChild(opt);
         });
         menu.onchange = (e) => loadQuestion(parseInt(e.target.value));
         
-        // התחלה
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
         loadQuestion(0);
@@ -47,43 +44,34 @@ window.onload = function() {
     }
 };
 
-function setupControls() {
-    ['inpA','inpB','inpC','inpD','inpX','inpNormalSlope'].forEach(id => {
-        document.getElementById(id).addEventListener('input', updateSystem);
-    });
-
-    document.getElementById('btnNormalToggle').onclick = toggleNormal;
-}
-
-/* === לוגיקת גרירה === */
+/* === ניהול גרירה === */
 function startDrag(e) {
     const rect = cvs.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
     
-    // חישוב מיקום נוכחי
     let curY = a*xVal**3 + b*xVal**2 + c*xVal + d;
     let px = originX + xVal * scale;
     let py = originY - curY * scale;
 
     let dist = Math.sqrt((mx - px)**2 + (my - py)**2);
     
-    if (dist < 30 && !document.getElementById('inpX').disabled) {
-        isDragging = true;
-        dragTarget = 'point';
+    if (dist < 40 && !document.getElementById('inpX').disabled) {
+        isDragging = true; dragTarget = 'point';
     } else if (!document.getElementById('inpD').disabled) {
-        isDragging = true;
-        dragTarget = 'bg';
+        isDragging = true; dragTarget = 'bg';
     }
     lastMouseY = my;
 }
 
 function doDrag(e) {
     if (!isDragging) return;
-    
+    // מניעת גלילה במסך מגע
+    if(e.preventDefault) e.preventDefault();
+
     const rect = cvs.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
+    const mx = e.clientX - rect.left;
     
     if (dragTarget === 'point') {
         let newX = (mx - originX) / scale;
@@ -92,12 +80,11 @@ function doDrag(e) {
         xVal = newX;
     } else if (dragTarget === 'bg') {
         let deltaY = (my - lastMouseY) / scale; 
-        let newD = d - deltaY; // גרירה למטה מורידה את הערך
+        let newD = d - deltaY; 
         newD = Math.max(-5, Math.min(5, newD));
         document.getElementById('inpD').value = newD;
         d = newD;
     }
-    
     lastMouseY = my;
     updateSystem();
 }
@@ -108,15 +95,13 @@ function resizeCanvas() {
     const container = document.getElementById('graph-container');
     width = cvs.width = container.offsetWidth;
     height = cvs.height = container.offsetHeight;
-    originX = width / 2;
-    originY = height / 2;
+    originX = width / 2; originY = height / 2;
     scale = (width < 500) ? 30 : 40; 
     updateSystem();
 }
 
 function loadQuestion(idx) {
-    currQIndex = idx;
-    isWin = false;
+    currQIndex = idx; isWin = false;
     document.getElementById('questionsMenu').value = idx;
     document.getElementById('success-area').style.display = 'none';
 
@@ -127,26 +112,21 @@ function loadQuestion(idx) {
     [a, b, c, d] = q.params;
     xVal = 0;
 
-    // עדכון סליידרים
     document.getElementById('inpA').value = a;
     document.getElementById('inpB').value = b;
     document.getElementById('inpC').value = c;
     document.getElementById('inpD').value = d;
     document.getElementById('inpX').value = xVal;
 
-    // איפוס נעילות
-    const allInputs = ['inpA', 'inpB', 'inpC', 'inpD', 'inpX'];
-    allInputs.forEach(id => {
+    ['inpA', 'inpB', 'inpC', 'inpD', 'inpX'].forEach(id => {
         const el = document.getElementById(id);
-        el.disabled = false;
-        el.parentElement.style.opacity = "1";
+        el.disabled = false; el.parentElement.style.opacity = "1";
     });
 
     if (q.locked) {
         q.locked.forEach(id => {
             const el = document.getElementById(id);
-            el.disabled = true;
-            el.parentElement.style.opacity = "0.5";
+            el.disabled = true; el.parentElement.style.opacity = "0.5";
         });
     }
     updateSystem();
@@ -169,36 +149,36 @@ function toggleNormal() {
 }
 
 function updateSystem() {
-    // קריאת ערכים
     a = parseFloat(document.getElementById('inpA').value);
     b = parseFloat(document.getElementById('inpB').value);
     c = parseFloat(document.getElementById('inpC').value);
     d = parseFloat(document.getElementById('inpD').value);
     xVal = parseFloat(document.getElementById('inpX').value);
 
-    // עדכון תצוגה טקסטואלית
     document.getElementById('valA').innerText = a.toFixed(1);
     document.getElementById('valB').innerText = b.toFixed(1);
     document.getElementById('valC').innerText = c.toFixed(1);
     document.getElementById('valD').innerText = d.toFixed(1);
     document.getElementById('valX').innerText = xVal.toFixed(1);
     
-    // בדיקת ניצחון
+    // בדיקת לוגיקה מקובץ השאלות
     const q = QUESTIONS[currQIndex];
     let m = 3*a*xVal**2 + 2*b*xVal + c;
     let nm = parseFloat(document.getElementById('inpNormalSlope').value);
-
-    // קריאה לפונקציית הבדיקה מקובץ השאלות
-    const currentState = { m, nm, a, b, c, d, showNormal };
-    let win = checkWinCondition(q, currentState);
+    
+    const state = { m, nm, x: xVal, y: (a*xVal**3+b*xVal**2+c*xVal+d), a, b, c, d, showNormal };
+    
+    // קריאה לפונקציה בקובץ questions.js
+    let win = false;
+    if (typeof checkWinLogic === 'function') {
+        win = checkWinLogic(q, state);
+    }
 
     const successArea = document.getElementById('success-area');
     if (win && !isWin) {
-        isWin = true;
-        successArea.style.display = 'block'; 
+        isWin = true; successArea.style.display = 'block'; 
     } else if (!win) {
-        isWin = false;
-        successArea.style.display = 'none';
+        isWin = false; successArea.style.display = 'none';
     }
 }
 
@@ -208,16 +188,12 @@ function nextQuestion() {
 }
 
 /* === ציור === */
-function loop() {
-    draw();
-    requestAnimationFrame(loop);
-}
+function loop() { draw(); requestAnimationFrame(loop); }
 
 function draw() {
     ctx.clearRect(0, 0, width, height);
     drawGrid();
 
-    // ציור מטרות
     const q = QUESTIONS[currQIndex];
     if (q.targets) {
         q.targets.forEach(t => {
@@ -242,16 +218,13 @@ function draw() {
         });
     }
 
-    // ציור פונקציה (קו עבה)
-    ctx.lineWidth = 5;  
-    ctx.strokeStyle = "#2563eb";
+    ctx.lineWidth = 5; ctx.strokeStyle = "#2563eb";
     ctx.beginPath();
     let started = false;
     for (let px = 0; px < width; px+=2) {
         let mx = (px - originX) / scale;
         let my = a*mx**3 + b*mx**2 + c*mx + d;
         let py = originY - my * scale;
-        
         if (py > -height && py < height*2) {
             if (!started) { ctx.moveTo(px, py); started = true; }
             else { ctx.lineTo(px, py); }
@@ -259,16 +232,13 @@ function draw() {
     }
     ctx.stroke();
 
-    // נתונים
     let curY = a*xVal**3 + b*xVal**2 + c*xVal + d;
     let px = originX + xVal * scale;
     let py = originY - curY * scale;
     let slope = 3*a*xVal**2 + 2*b*xVal + c;
 
-    // משיק
     drawLinearFunc(px, py, slope, "#f97316", false);
     
-    // אנך
     if (showNormal) {
         let normalSlope = parseFloat(document.getElementById('inpNormalSlope').value);
         document.getElementById('valNormal').innerText = normalSlope.toFixed(2);
@@ -284,23 +254,19 @@ function draw() {
         if (isPerp) drawRightAngleSquare(px, py, Math.atan(slope));
     }
 
-    // נקודה ראשית
     ctx.fillStyle = "#2563eb"; 
     ctx.beginPath(); ctx.arc(px, py, 7, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = "white"; 
     ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2); ctx.fill();
 
-    // השילוש הקדוש
     let infoText = `(${xVal.toFixed(1)}, ${curY.toFixed(1)}) m=${slope.toFixed(2)}`;
     ctx.font = "bold 13px sans-serif";
     let tw = ctx.measureText(infoText).width;
-    
     ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
     ctx.strokeStyle = "#cbd5e1"; ctx.lineWidth = 1;
     let bx = px + 12, by = py - 28;
     if (bx + tw > width) bx = px - tw - 12;
     if (by < 10) by = py + 20;
-
     ctx.fillRect(bx, by, tw + 8, 20);
     ctx.strokeRect(bx, by, tw + 8, 20);
     ctx.fillStyle = "#0f172a"; ctx.textAlign = 'left';
@@ -308,19 +274,14 @@ function draw() {
 }
 
 function drawLinearFunc(cx, cy, m, color, dashed) {
-    ctx.save();
-    ctx.strokeStyle = color; ctx.lineWidth = 2;
+    ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 2;
     if (dashed) ctx.setLineDash([5, 5]);
-
-    let len = 1000;
-    let angle = Math.atan(-m); 
+    let len = 1000; let angle = Math.atan(-m); 
     ctx.beginPath();
     ctx.moveTo(cx - Math.cos(angle)*len, cy - Math.sin(angle)*len);
     ctx.lineTo(cx + Math.cos(angle)*len, cy + Math.sin(angle)*len);
-    ctx.stroke();
-    ctx.restore();
+    ctx.stroke(); ctx.restore();
 
-    // חיתוך צירים
     let mathY0 = (originY - cy) / scale;
     let mathX0 = xVal;
     let yIntercept = m * (0 - mathX0) + mathY0;
@@ -341,29 +302,23 @@ function drawInterceptDot(x, y, borderColor) {
 }
 
 function drawRightAngleSquare(x, y, angle) {
-    const s = 14;
-    ctx.save();
+    const s = 14; ctx.save();
     ctx.translate(x, y); ctx.rotate(-angle);
     ctx.beginPath(); ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 2;
     ctx.fillStyle = "rgba(34, 197, 94, 0.2)";
     ctx.moveTo(s, 0); ctx.lineTo(s, -s); ctx.lineTo(0, -s);
-    ctx.stroke(); ctx.fill();
-    ctx.restore();
+    ctx.stroke(); ctx.fill(); ctx.restore();
 }
 
 function drawGrid() {
-    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
-    ctx.beginPath();
+    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1; ctx.beginPath();
     for(let x=originX%scale; x<width; x+=scale) { ctx.moveTo(x,0); ctx.lineTo(x,height); }
     for(let y=originY%scale; y<height; y+=scale) { ctx.moveTo(0,y); ctx.lineTo(width,y); }
     ctx.stroke();
-    
-    ctx.strokeStyle = '#334155'; ctx.lineWidth = 2;
-    ctx.beginPath();
+    ctx.strokeStyle = '#334155'; ctx.lineWidth = 2; ctx.beginPath();
     ctx.moveTo(0, originY); ctx.lineTo(width, originY);
     ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
     ctx.stroke();
-
     ctx.fillStyle = '#334155'; ctx.font = "14px Arial";
     ctx.fillText("x", width - 15, originY - 5);
     ctx.fillText("y", originX + 5, 15);
