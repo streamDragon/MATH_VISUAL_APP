@@ -1,184 +1,120 @@
-/* style.css — תיקון מלא למבנה הקיים (Google Sites + Mobile) */
+/* style.css - רספונסיביות מלאה (חלונות + מובייל) */
 
 :root {
-  --bg-color: #f8fafc;
-  --panel-bg: #ffffff;
-  --text-color: #0f172a;
-  --border-color: #cbd5e1;
-  --primary-color: #2563eb;
-  --success-color: #22c55e;
-  
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --radius: 12px;
-  --sidebar-width: 320px; /* רוחב קבוע לתפריט בצד */
+  --sidebar-width: 320px; /* רוחב התפריט במחשב */
+  --bg-color: #f1f5f9;
+  --primary: #2563eb;
 }
 
-/* איפוס בסיסי */
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; margin: 0; padding: 0; font-family: 'Rubik', sans-serif; background: var(--bg-color); direction: rtl; }
 
-/* --- המבנה הראשי --- */
-/* אנחנו משתמשים ב-Grid כי זה הכי יציב ולא נשבר בתוך Google Sites */
-#layout {
-  display: grid;
-  grid-template-columns: 1fr var(--sidebar-width); /* עמודה לגרף, עמודה לתפריט */
-  grid-template-rows: 1fr;
-  height: 100vh;
-  width: 100%;
-  overflow: hidden; /* מונע גלילה כפולה */
+body, html {
+  margin: 0; padding: 0;
+  height: 100%; width: 100%;
+  font-family: 'Rubik', sans-serif;
+  overflow: hidden; /* מונע גלילה של כל העמוד - רק החלקים הפנימיים נגללים */
+  background: var(--bg-color);
 }
 
-/* --- איזור הגרף (צד ימין/מרכז) --- */
-#mainArea {
+/* הקונטיינר הראשי - עוטף הכל */
+#app-container {
+  display: flex;
+  flex-direction: row; /* ברירת מחדל: שורה (צד לצד) */
+  height: 100vh;       /* 100% מגובה המסך */
+  width: 100vw;        /* 100% מרוחב המסך */
+}
+
+/* --- איזור הגרף --- */
+#graph-panel {
+  flex: 1; /* לוקח את כל המקום שנשאר! זה הסוד להתאמה בוינדוס */
   position: relative;
   background: #fff;
-  border-left: 1px solid var(--border-color);
-  width: 100%;
-  height: 100%;
   overflow: hidden;
+  min-width: 0; /* מונע בעיות גלישה */
 }
 
 #cvs {
-  display: block;
   width: 100%;
   height: 100%;
-  touch-action: none; /* חובה למובייל */
+  display: block;
 }
 
-/* --- תפריט צד (צד שמאל) --- */
-#sideArea {
-  background: var(--panel-bg);
+/* --- תפריט הצד --- */
+#side-panel {
+  width: var(--sidebar-width); /* רוחב קבוע במחשב */
+  flex-shrink: 0; /* לא מתכווץ גם אם אין מקום */
+  background: #ffffff;
+  border-right: 1px solid #cbd5e1;
   padding: 15px;
-  overflow-y: auto; /* מאפשר גלילה רק בתפריט אם הוא ארוך */
+  
+  /* גלילה פנימית - אם החלון נמוך, רק התפריט ייגלל */
+  overflow-y: auto; 
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 12px;
   box-shadow: -2px 0 10px rgba(0,0,0,0.05);
-  z-index: 10;
+  z-index: 20;
 }
 
-/* --- עיצוב כרטיסיות בתפריט --- */
-.card, #controls, #questionBox, #journalBox {
-  background: #f1f5f9;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
-  padding: 12px;
-  margin-bottom: 10px;
-}
-
-h3, h4 { margin: 0 0 10px 0; color: #334155; font-size: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; }
-
-/* --- סליידרים (גדולים ונוחים) --- */
-.control-row {
-  margin-bottom: 12px;
-}
-label { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; margin-bottom: 5px; }
-input[type="range"] {
-  width: 100%;
-  height: 24px; /* עבה לאצבעות */
-  cursor: pointer;
-  accent-color: var(--primary-color);
-}
-input[type="number"] { width: 60px; padding: 5px; border-radius: 6px; border: 1px solid #ccc; text-align: center; }
-
-/* --- הודעות צפות (Overlay) על הגרף --- */
-
-/* 1. באנר הצלחה בפינה */
-#successBanner, #successToast {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: var(--success-color);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 50px;
-  font-weight: bold;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  transform: translateY(-100px);
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  z-index: 100;
-  pointer-events: none;
-}
-#successBanner.show, #successToast.show { transform: translateY(0); }
-
-/* 2. תצוגת פונקציות (בפינה השמאלית של הגרף) */
-#eqnDisplay, .hud-panel {
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  background: rgba(255, 255, 255, 0.9);
+/* עיצוב כרטיסיות */
+.card, .control-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
   padding: 10px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  font-size: 14px;
-  font-weight: bold;
-  color: var(--primary-color);
-  pointer-events: none;
-  z-index: 50;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* 3. השלשה הקדושה (Tooltip) */
-#holyTrinity {
-  position: absolute;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid #333;
-  padding: 5px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  pointer-events: none;
-  display: none; /* JS will toggle */
-  z-index: 200;
-  white-space: nowrap;
+h3, h4 { margin: 0 0 8px 0; color: #334155; }
+
+/* סליידרים וכפתורים */
+input[type="range"] { width: 100%; height: 20px; accent-color: var(--primary); cursor: pointer; margin: 5px 0; }
+.btn { padding: 8px; border-radius: 6px; border: 1px solid #ccc; background: white; cursor: pointer; font-weight: bold; }
+.btn.primary { background: var(--primary); color: white; border: none; }
+
+/* --- אלמנטים צפים על הגרף (HUD) --- */
+#hud-top-left {
+  position: absolute; top: 10px; left: 10px;
+  background: rgba(255,255,255,0.85);
+  padding: 8px; border-radius: 8px; border: 1px solid #ddd;
+  pointer-events: none; color: var(--primary); font-weight: bold;
 }
 
-/* --- רספונסיביות (מובייל + מסכים צרים) --- */
-/* הוספתי Breakpoint של 850px כדי לתפוס גם טאבלטים ומסגרות קטנות */
-@media screen and (max-width: 850px) {
+#successToast {
+  position: absolute; top: 10px; right: 10px;
+  background: #22c55e; color: white; padding: 8px 16px;
+  border-radius: 20px; transform: translateY(-100px); transition: 0.3s;
+}
+#successToast.show { transform: translateY(0); }
+
+/* --- מצב "מסך קטן" (טלפון או חלון צר בוינדוס) --- */
+/* ברגע שהרוחב יורד מתחת ל-768 פיקסלים, העיצוב משתנה */
+@media (max-width: 768px) {
   
-  /* משנים כיוון: הכל אחד מתחת לשני */
-  #layout {
-    display: flex;
-    flex-direction: column;
-    height: auto; /* הגובה נקבע לפי התוכן */
-    overflow: visible;
+  #app-container {
+    flex-direction: column; /* משנים כיוון: עמודה (אחד מתחת לשני) */
   }
 
-  /* הגרף מקבל גובה קבוע בראש המסך */
-  #mainArea {
-    height: 55vh; /* 55% מגובה המסך */
+  /* הגרף מקבל גובה יחסי למסך */
+  #graph-panel {
     width: 100%;
-    border-left: none;
-    border-bottom: 1px solid var(--border-color);
-    flex-shrink: 0;
+    height: 50vh; /* 50% גובה */
+    flex: none;   /* מבטל את הגמישות כדי לקבע גובה */
+    border-bottom: 1px solid #cbd5e1;
   }
 
-  /* תפריט הצד יורד למטה ותופס את שאר המקום */
-  #sideArea {
+  /* התפריט תופס את שאר הגובה */
+  #side-panel {
     width: 100%;
-    height: auto;
-    max-height: none;
-    padding-bottom: 40px; /* מקום לגלילה בסוף */
-    box-shadow: none;
-  }
-
-  /* כיוונון אלמנטים צפים במובייל */
-  #eqnDisplay, .hud-panel {
-    top: 5px; left: 5px;
-    font-size: 12px;
-    padding: 6px;
+    height: 50vh; /* 50% הנותרים */
+    border-right: none;
+    padding: 10px;
   }
   
-  #successBanner {
-    top: 5px; right: 5px;
-    font-size: 13px;
-  }
-
-  /* סליידרים מסודרים בטור של 2 כדי לחסוך גובה */
-  #controls {
+  /* סידור סליידרים לחסכון במקום */
+  .control-box {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: 1fr 1fr; /* שני טורים */
+    gap: 8px;
   }
-  .control-row { margin-bottom: 0; }
+  .control-box h4 { grid-column: 1 / -1; } /* כותרת לרוחב מלא */
 }
