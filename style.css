@@ -1,266 +1,184 @@
-/* style.css — גרסה מותאמת למובייל ואנדרואיד */
+/* style.css — תיקון מלא למבנה הקיים (Google Sites + Mobile) */
 
 :root {
-  --bg: #f8fafc;
-  --card-bg: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border: #e2e8f0;
+  --bg-color: #f8fafc;
+  --panel-bg: #ffffff;
+  --text-color: #0f172a;
+  --border-color: #cbd5e1;
+  --primary-color: #2563eb;
+  --success-color: #22c55e;
   
-  --primary: #2563eb; /* כחול */
-  --success: #22c55e; /* ירוק */
-  --accent: #f59e0b;  /* כתום */
-  
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --radius: 12px;
-  --font-family: 'Assistant', 'Rubik', sans-serif;
+  --sidebar-width: 320px; /* רוחב קבוע לתפריט בצד */
 }
 
+/* איפוס בסיסי */
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; padding: 0; font-family: 'Rubik', sans-serif; background: var(--bg-color); direction: rtl; }
 
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: var(--font-family);
-  background: var(--bg);
-  color: var(--text-main);
-  direction: rtl;
-  overflow-x: hidden; /* מונע גלילה לצדדים בטלפון */
-}
-
-/* --- מבנה ראשי (Layout) --- */
-.container {
-  display: flex;
-  flex-direction: column;
+/* --- המבנה הראשי --- */
+/* אנחנו משתמשים ב-Grid כי זה הכי יציב ולא נשבר בתוך Google Sites */
+#layout {
+  display: grid;
+  grid-template-columns: 1fr var(--sidebar-width); /* עמודה לגרף, עמודה לתפריט */
+  grid-template-rows: 1fr;
   height: 100vh;
-  max-width: 100%;
+  width: 100%;
+  overflow: hidden; /* מונע גלילה כפולה */
 }
 
-/* --- כותרת עליונה --- */
-header.main-header {
-  flex: 0 0 auto;
-  background: var(--card-bg);
-  padding: 10px 15px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: var(--shadow);
-  z-index: 10;
-}
-
-/* איזור הנוסחאות בראש המסך */
-.math-display {
-  display: flex;
-  gap: 15px;
-  font-size: 14px;
-  font-weight: bold;
-}
-.math-display span {
-  font-family: 'Computer Modern Serif', serif;
-  color: var(--primary);
-  background: #eff6ff;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-/* --- איזור העבודה (גרף + צד) --- */
-.workspace {
-  flex: 1;
-  display: flex;
-  flex-direction: row; /* בדסקטופ: צד לצד */
-  overflow: hidden;
-  position: relative;
-}
-
-/* האיזור הראשי של הגרף */
-.main-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+/* --- איזור הגרף (צד ימין/מרכז) --- */
+#mainArea {
   position: relative;
   background: #fff;
-}
-
-#canvasContainer {
-  flex: 1;
-  position: relative;
+  border-left: 1px solid var(--border-color);
   width: 100%;
   height: 100%;
-  cursor: crosshair;
-  touch-action: none; /* קריטי לגרירה באנדרואיד */
+  overflow: hidden;
 }
 
-canvas {
+#cvs {
   display: block;
   width: 100%;
   height: 100%;
+  touch-action: none; /* חובה למובייל */
 }
 
-/* --- סרגל צד (פנל שליטה) --- */
-.sidebar {
-  width: 300px;
-  background: var(--card-bg);
-  border-right: 1px solid var(--border);
-  overflow-y: auto;
+/* --- תפריט צד (צד שמאל) --- */
+#sideArea {
+  background: var(--panel-bg);
   padding: 15px;
+  overflow-y: auto; /* מאפשר גלילה רק בתפריט אם הוא ארוך */
   display: flex;
   flex-direction: column;
   gap: 15px;
   box-shadow: -2px 0 10px rgba(0,0,0,0.05);
+  z-index: 10;
 }
 
-.panel {
-  background: #fff;
-  border: 1px solid var(--border);
+/* --- עיצוב כרטיסיות בתפריט --- */
+.card, #controls, #questionBox, #journalBox {
+  background: #f1f5f9;
+  border: 1px solid var(--border-color);
   border-radius: var(--radius);
   padding: 12px;
+  margin-bottom: 10px;
 }
 
-.panel h3 {
-  margin: 0 0 10px 0;
-  font-size: 16px;
-  color: var(--text-muted);
-  border-bottom: 2px solid #f1f5f9;
-  padding-bottom: 5px;
-}
+h3, h4 { margin: 0 0 10px 0; color: #334155; font-size: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; }
 
-/* --- סליידרים (מותאם לאצבעות) --- */
-.control-group {
+/* --- סליידרים (גדולים ונוחים) --- */
+.control-row {
   margin-bottom: 12px;
 }
-.control-group label {
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
+label { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; margin-bottom: 5px; }
 input[type="range"] {
   width: 100%;
-  height: 24px; /* גבוה יותר לטלפון */
-  accent-color: var(--primary);
+  height: 24px; /* עבה לאצבעות */
   cursor: pointer;
+  accent-color: var(--primary-color);
 }
+input[type="number"] { width: 60px; padding: 5px; border-radius: 6px; border: 1px solid #ccc; text-align: center; }
 
-/* --- השלשה הקדושה (Tooltip) --- */
-#holyTrinity {
-  position: absolute;
-  top: 0; left: 0;
-  display: none; /* מוסתר כברירת מחדל */
-  flex-direction: column;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid var(--text-main);
-  padding: 8px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  pointer-events: none; /* כדי לא להפריע ללחיצות */
-  transform: translate(-50%, -130%);
-  z-index: 100;
-  min-width: 100px;
-}
-.tri-row {
-  font-size: 12px;
-  font-weight: bold;
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-}
+/* --- הודעות צפות (Overlay) על הגרף --- */
 
-/* --- הודעות הצלחה וחם/קר --- */
-#successToast {
+/* 1. באנר הצלחה בפינה */
+#successBanner, #successToast {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  background: var(--success);
+  top: 15px;
+  right: 15px;
+  background: var(--success-color);
   color: white;
-  padding: 10px 20px;
+  padding: 8px 16px;
   border-radius: 50px;
   font-weight: bold;
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   transform: translateY(-100px);
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  z-index: 200;
+  z-index: 100;
+  pointer-events: none;
 }
-#successToast.show {
-  transform: translateY(0);
-}
+#successBanner.show, #successToast.show { transform: translateY(0); }
 
-#proximityWrapper {
+/* 2. תצוגת פונקציות (בפינה השמאלית של הגרף) */
+#eqnDisplay, .hud-panel {
   position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  background: rgba(255,255,255,0.9);
-  padding: 8px;
-  border-radius: 20px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  text-align: center;
-  z-index: 90;
-}
-#proximityBar {
-  height: 8px;
-  background: linear-gradient(90deg, #3b82f6, #ef4444);
-  width: 0%;
-  border-radius: 4px;
-  transition: width 0.2s;
-}
-#hotColdText {
-  font-size: 12px;
-  margin-top: 4px;
+  top: 15px;
+  left: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  font-size: 14px;
   font-weight: bold;
+  color: var(--primary-color);
+  pointer-events: none;
+  z-index: 50;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* --- התאמה למובייל (Android / iPhone) --- */
-@media screen and (max-width: 768px) {
+/* 3. השלשה הקדושה (Tooltip) */
+#holyTrinity {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #333;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  pointer-events: none;
+  display: none; /* JS will toggle */
+  z-index: 200;
+  white-space: nowrap;
+}
+
+/* --- רספונסיביות (מובייל + מסכים צרים) --- */
+/* הוספתי Breakpoint של 850px כדי לתפוס גם טאבלטים ומסגרות קטנות */
+@media screen and (max-width: 850px) {
   
-  /* שינוי כיוון: הכל מלמעלה למטה */
-  .workspace {
+  /* משנים כיוון: הכל אחד מתחת לשני */
+  #layout {
+    display: flex;
     flex-direction: column;
+    height: auto; /* הגובה נקבע לפי התוכן */
+    overflow: visible;
   }
 
-  /* הגרף מקבל גובה קבוע כדי שלא יימעך */
-  .main-content {
-    flex: none;
-    height: 55vh; /* 55% גובה מסך */
-  }
-
-  /* סרגל הצד יורד למטה ותופס את שאר המקום */
-  .sidebar {
+  /* הגרף מקבל גובה קבוע בראש המסך */
+  #mainArea {
+    height: 55vh; /* 55% מגובה המסך */
     width: 100%;
-    height: 45vh;
-    border-right: none;
-    border-top: 1px solid var(--border);
-    padding: 10px;
+    border-left: none;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
   }
 
-  /* הקטנת הכותרת העליונה בטלפון */
-  header.main-header {
-    padding: 5px 10px;
-    font-size: 0.9em;
-  }
-  .math-display {
-    flex-direction: column; /* נוסחאות אחת מתחת לשניה */
-    gap: 2px;
+  /* תפריט הצד יורד למטה ותופס את שאר המקום */
+  #sideArea {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    padding-bottom: 40px; /* מקום לגלילה בסוף */
+    box-shadow: none;
   }
 
-  /* התאמת הסליידרים שיהיו זה לצד זה לחסכון במקום */
-  .panel.controls {
+  /* כיוונון אלמנטים צפים במובייל */
+  #eqnDisplay, .hud-panel {
+    top: 5px; left: 5px;
+    font-size: 12px;
+    padding: 6px;
+  }
+  
+  #successBanner {
+    top: 5px; right: 5px;
+    font-size: 13px;
+  }
+
+  /* סליידרים מסודרים בטור של 2 כדי לחסוך גובה */
+  #controls {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
-  .control-group {
-    margin-bottom: 0;
-  }
-
-  /* תיקון הודעת ההצלחה בטלפון */
-  #successToast {
-    top: 10px;
-    right: 10px;
-    font-size: 14px;
-    padding: 6px 12px;
-  }
+  .control-row { margin-bottom: 0; }
 }
