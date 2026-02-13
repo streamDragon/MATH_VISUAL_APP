@@ -1,35 +1,44 @@
-/* bagrutQuestions.js */
+/* bagrut_questions.js - מאגר השאלות */
 const bagrutData = [
     {
         id: 1,
-        title: "שאלה 1: הזזות אנכיות",
-        instruction: "נתונה הפונקציה f(x) = x². <br> הזז את הפונקציה למעלה ב-2 יחידות.",
-        type: 'find_param',
-        setup: { a: 1, b: 0, c: 0, d: 0 }, 
-        goal: 'hit_target',
-        targetPoint: { x: 0, y: 2 },
-        locked: ['a', 'b', 'c'], // רק d פתוח
-        journalEq: "y = x² + 2"
+        title: "שאלה 1: חקירה בסיסית",
+        instruction: "נתונה הפונקציה f(x) = x². <br> חקור את הפונקציה ומצא את נקודת המינימום.",
+        type: "move_x", // סוג השאלה: הזזת נקודה
+        setup: { a: 1, b: 0, c: 0, d: 0 }, // פרמטרים התחלתיים
+        goal: "m0", // המטרה: שיפוע 0 (נקודת קיצון)
+        locked: ['a', 'b', 'c', 'd'], // המשתמש לא יכול לשנות את הפונקציה
+        targetPoint: { x: 0, y: 0 } // לא חובה בסוג הזה, אבל טוב שיהיה
     },
-    {
+    {   
+        // כאן היה חסר לך סוגריים מסולסלים בתמונה הקודמת!
         id: 2,
         title: "שאלה 2: שיפוע משיק",
-        instruction: "מצא את הנקודה שבה שיפוע המשיק הוא 0 (נקודת קיצון).",
-        type: 'move_x',
-        setup: { a: 1, b: -4, c: 0, d: 0 },
-        goal: 'm0',
-        locked: ['a', 'b', 'c', 'd'], // הכל נעול
-        journalEq: "f'(x) = 0"
+        instruction: "מצא נקודה על הגרף שבה שיפוע המשיק הוא 2.",
+        type: "move_x",
+        setup: { a: 1, b: 0, c: 0, d: 0 },
+        goal: "slope_val", // מטרה: להגיע לשיפוע מסוים
+        targetVal: 2,      // הערך של השיפוע שאנחנו מחפשים
+        locked: ['a', 'b', 'c', 'd']
     },
     {
         id: 3,
-        title: "שאלה 3: אתגר פרמטרים",
-        instruction: "מצא את a ו-b כך שהפרבולה תהיה 'בוכה' (הפוכה) והקודקוד שלה יהיה ב (0, 4).",
-        type: 'find_param',
+        title: "שאלה 3: מציאת פרמטר C",
+        instruction: "הפונקציה היא f(x) = x² + c. <br> מצא את ערך c כך שהפונקציה תעבור בנקודה (0, 2).",
+        type: "find_param", // סוג שאלה: מציאת פרמטר
         setup: { a: 1, b: 0, c: 0, d: 0 },
-        goal: 'complex',
-        targetPoint: { x: 0, y: 4, m: 0 }, 
-        locked: ['c', 'd'], // a, b פתוחים
-        journalEq: "y = -x² + 4"
+        goal: "hit_target", // המטרה: לפגוע בנקודה
+        targetPoint: { x: 0, y: 2 }, // הנקודה שצריך לעבור דרכה
+        locked: ['a', 'b', 'd'] // נועלים הכל חוץ מ-c
+    },
+    {
+        id: 4,
+        title: "שאלה 4: חקירה מורכבת",
+        instruction: "מצא את נקודת החיתוך עם ציר ה-X החיובי.",
+        type: "move_x",
+        setup: { a: -1, b: 2, c: 3, d: 0 },
+        goal: "y0", // מטרה: גובה 0 (חיתוך עם ציר איקס)
+        targetRegion: { min: 0.1, max: 5 }, // מכוון את המחשב לחפש בצד החיובי
+        locked: ['a', 'b', 'c', 'd']
     }
 ];
