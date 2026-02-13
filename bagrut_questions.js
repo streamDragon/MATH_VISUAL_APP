@@ -1,107 +1,174 @@
-/* bagrut_questions.js - מאגר השאלות המורחב */
-const bagrutData = [
-    // --- שאלות בסיס (פונקציה ריבועית) ---
+// --- מאגר השאלות החדש (10 שאלות) ---
+const questions = [
+    // --- שלב 1: שאלות בסיס (הזזת נקודה בלבד) ---
     {
         id: 1,
-        title: "שאלה 1: חקירה בסיסית",
-        instruction: "נתונה הפונקציה f(x) = x². <br> חקור את הפונקציה (הזז את ה-X) ומצא את נקודת המינימום.",
-        type: "move_x", 
-        setup: { a: 0, b: 1, c: 0, d: 0 }, // שים לב: במנוע שלך b זה המקדם של הריבוע אם a=0
-        goal: "m0", 
-        targetPoint: { x: 0, y: 0 },
-        locked: ['a', 'b', 'c', 'd'] 
+        title: "שאלה 1: הכרות עם קיצון",
+        instruction: "הזז את הנקודה הכחולה לנקודת המינימום של הפרבולה (השיפוע צריך להיות 0).",
+        type: "point", // מציאת נקודה
+        targetCondition: (state) => Math.abs(state.m) < 0.1 && state.isExtremum, 
+        setup: { a: 1, b: -4, c: 0, d: 0, showTangent: true },
+        locked: ['a', 'b', 'c', 'd'] // נועלים פרמטרים, רק X זז
     },
-    {   
+    {
         id: 2,
-        title: "שאלה 2: שיפוע משיק",
-        instruction: "נתונה הפונקציה f(x) = x². <br> מצא נקודה על הגרף שבה שיפוע המשיק הוא 2.",
-        type: "move_x",
-        setup: { a: 0, b: 1, c: 0, d: 0 },
-        goal: "slope_val", 
-        targetVal: 2,       
+        title: "שאלה 2: משיק בשיפוע חיובי",
+        instruction: "מצא נקודה על הגרף שבה שיפוע המשיק הוא בדיוק 2.",
+        type: "point",
+        targetCondition: (state) => Math.abs(state.m - 2) < 0.1,
+        setup: { a: 0.5, b: 0, c: -2, d: 0, showTangent: true },
         locked: ['a', 'b', 'c', 'd']
     },
     {
         id: 3,
-        title: "שאלה 3: הזזה אנכית",
-        instruction: "הפונקציה היא f(x) = x² + d. <br> שנה את הפרמטר d כך שהפונקציה תעבור בנקודה האדומה (0, 2).",
-        type: "find_param", 
-        setup: { a: 0, b: 1, c: 0, d: 0 },
-        goal: "hit_target", 
-        targetPoint: { x: 0, y: 2 }, 
-        locked: ['a', 'b', 'c'] // רק d פתוח
+        title: "שאלה 3: משיק בשיפוע שלילי",
+        instruction: "מצא נקודה על הגרף שבה שיפוע המשיק הוא -1.",
+        type: "point",
+        targetCondition: (state) => Math.abs(state.m - (-1)) < 0.1,
+        setup: { a: 0.5, b: 0, c: 1, d: 0, showTangent: true },
+        locked: ['a', 'b', 'c', 'd']
     },
     {
         id: 4,
-        title: "שאלה 4: שורשים (נקודות חיתוך)",
-        instruction: "נתונה הפונקציה f(x) = -x² + 2x + 3.<br> מצא את נקודת החיתוך עם ציר ה-X בתחום החיובי (x>0).",
-        type: "move_x",
-        setup: { a: 0, b: -1, c: 2, d: 3 },
-        goal: "y0", 
-        targetRegion: { min: 0.1, max: 5 }, 
+        title: "שאלה 4: ערך הפונקציה",
+        instruction: "מצא את הנקודה שבה ערך הפונקציה (y) הוא בדיוק 3.",
+        type: "point",
+        targetCondition: (state) => Math.abs(state.y - 3) < 0.1,
+        setup: { a: -0.5, b: 2, c: 1, d: 0, showTangent: false },
+        locked: ['a', 'b', 'c', 'd']
+    },
+    {
+        id: 5,
+        title: "שאלה 5: חיתוך עם הצירים",
+        instruction: "מצא את נקודת החיתוך הימנית של הפרבולה עם ציר ה-X.",
+        type: "point",
+        targetCondition: (state) => Math.abs(state.y) < 0.1 && state.x > 0,
+        setup: { a: 1, b: 0, c: -4, d: 0, showTangent: false },
         locked: ['a', 'b', 'c', 'd']
     },
 
-    // --- שאלות מתקדמות (פרמטרים ופונקציה ממעלה שלישית) ---
-    {
-        id: 5,
-        title: "שאלה 5: פרמטר b (הזזה אופקית)",
-        instruction: "נתונה הפונקציה f(x) = x² + bx.<br> מצא מה צריך להיות ערכו של b כדי שהפונקציה תעבור בנקודה (2,0).",
-        type: "find_param",
-        setup: { a: 0, b: 0, c: 0, d: 0 }, // המשתמש צריך להגיע ל-b=-2
-        goal: "hit_target",
-        targetPoint: { x: 2, y: 0 },
-        locked: ['a', 'c', 'd'] // רק b פתוח
-    },
+    // --- שלב 2: שאלות מתקדמות (שינוי פרמטרים) ---
     {
         id: 6,
-        title: "שאלה 6: פונקציה ממעלה שלישית",
-        instruction: "נתונה הפונקציה f(x) = x³ - 3x.<br> לפונקציה זו יש שתי נקודות קיצון. מצא את נקודת ה<b>מינימום</b> (הימנית).",
-        type: "move_x",
-        setup: { a: 1, b: 0, c: -3, d: 0 },
-        goal: "m0",
-        targetRegion: { min: 0.5, max: 2 }, // כדי לוודא שמוצאים את המינימום (1) ולא את המקסימום (-1)
-        locked: ['a', 'b', 'c', 'd']
+        title: "שאלה 6: הזזה אנכית (פרמטר C)",
+        instruction: "שנה את c כך שלפרבולה תהיה נקודת השקה אחת בלבד עם ציר ה-X (קודקוד על הציר).",
+        type: "parameter",
+        targetCondition: (state) => Math.abs(state.y) < 0.1 && Math.abs(state.m) < 0.1, // גם גובה 0 וגם שיפוע 0
+        setup: { a: 1, b: -2, c: 3, d: 0, showTangent: true },
+        locked: ['a', 'b', 'd'] // רק C פתוח
     },
     {
         id: 7,
-        title: "שאלה 7: רוחב הפונקציה (פרמטר a)",
-        instruction: "נתונה פרבולה f(x) = ax².<br> שנה את המקדם a כך שהפרבולה תהיה רחבה יותר ותעבור בנקודה (2, 2).",
-        type: "find_param",
-        setup: { a: 1, b: 0, c: 0, d: 0 }, // המשתמש צריך להגיע ל-a=0.5
-        goal: "hit_target",
-        targetPoint: { x: 2, y: 2 },
-        locked: ['b', 'c', 'd'] // נותנים לשחק רק עם a (שהוא בעצם b בקוד שלנו עבור פרבולות, אבל נשאיר למשתמש כתרגיל)
-        // הערה: בקוד שלך פונקציה ריבועית זה b*x^2. אז נפתח את b.
+        title: "שאלה 7: מניפולציה של השיפוע",
+        instruction: "שנה את הפרמטר a כך שהפונקציה תהיה 'פרבולה בוכה' (מקסימום) שעוברת בראשית.",
+        type: "parameter",
+        targetCondition: (state) => state.a < 0 && Math.abs(state.y) < 0.2 && Math.abs(state.x) < 0.2,
+        setup: { a: 2, b: 0, c: 0, d: 0, showTangent: false },
+        locked: ['b', 'c', 'd'] // רק A פתוח
     },
     {
         id: 8,
-        title: "שאלה 8: משיק שלילי",
-        instruction: "נתונה הפונקציה f(x) = x³.<br> מצא נקודה שבה השיפוע הוא חיובי אבל קטן מאוד (בין 0 ל-1).",
-        // תרגיל טריקי - זה ידרוש דיוק
-        type: "move_x",
-        setup: { a: 0.5, b: 0, c: 0, d: 0 },
-        goal: "slope_val",
-        targetVal: 0.5, // נקודה מסוימת
+        title: "שאלה 8: חקירת פונקציה ממעלה שלישית",
+        instruction: "הזז את הנקודה לנקודת המקסימום המקומי של הפונקציה.",
+        type: "point",
+        targetCondition: (state) => Math.abs(state.m) < 0.1 && state.x < 0, // מקסימום הוא בצד שמאל במקרה הזה
+        setup: { a: 0.3, b: 0, c: -3, d: 0, showTangent: true }, // יוצר פונקציה מעלה 3
         locked: ['a', 'b', 'c', 'd']
     },
     {
         id: 9,
-        title: "שאלה 9: חקירה חופשית",
-        instruction: "נתונה הפונקציה המורכבת: f(x) = x³ - 3x² + 2.<br> מצא את נקודת המקסימום המקומי.",
-        type: "move_x",
-        setup: { a: 1, b: -3, c: 0, d: 2 },
-        goal: "m0",
-        targetRegion: { min: -1, max: 1 }, // המקסימום הוא ב-0
-        locked: ['a', 'b', 'c', 'd']
+        title: "שאלה 9: יצירת משיק ספציפי",
+        instruction: "שנה את b כך שבנקודה x=1 השיפוע יהיה 0 (נקודת קיצון ב-x=1).",
+        type: "parameter",
+        targetCondition: (state) => Math.abs(state.x - 1) < 0.1 && Math.abs(state.m) < 0.1,
+        setup: { a: 1, b: -4, c: 0, d: 0, showTangent: true },
+        locked: ['a', 'c', 'd'] // רק b פתוח
     },
     {
         id: 10,
-        title: "שאלה 10: סיום - התאמת משיק",
-        instruction: "מצא את הנקודה שבה המשיק מקביל לציר ה-X (שיפוע 0) עבור הפונקציה f(x) = -x² + 4.",
-        type: "move_x",
-        setup: { a: 0, b: -1, c: 0, d: 4 },
-        goal: "m0",
-        locked: ['a', 'b', 'c', 'd']
+        title: "שאלה 10: אתגר מסכם",
+        instruction: "צור פרבולה שקודקודה נמצא בנקודה (2,1). השתמש ב-a, b, c.",
+        type: "parameter",
+        targetCondition: (state) => Math.abs(state.x - 2) < 0.2 && Math.abs(state.y - 1) < 0.2 && Math.abs(state.m) < 0.1,
+        setup: { a: 1, b: 0, c: 0, d: 0, showTangent: true },
+        locked: ['d'] // הכל פתוח חוץ מ-d
     }
 ];
+
+let currentLevelIndex = 0;
+
+// פונקציה שטוענת שאלה
+function initLevel(index) {
+    const q = questions[index];
+    
+    // עדכון כותרת והוראות
+    document.getElementById('questionText').innerHTML = `<strong>${q.title}</strong><br>${q.instruction}`;
+    document.getElementById('successMessage').style.display = 'none';
+
+    // איפוס סליידרים לפי הגדרות השאלה
+    ['a', 'b', 'c', 'd'].forEach(param => {
+        const slider = document.getElementById(`param${param.toUpperCase()}`);
+        if (q.setup[param] !== undefined) {
+            slider.value = q.setup[param];
+            // עדכון משתנים גלובליים
+            window[param] = q.setup[param]; 
+            document.getElementById(`val${param.toUpperCase()}`).textContent = q.setup[param];
+        }
+        
+        // נעילה/פתיחה של סליידרים
+        slider.disabled = q.locked.includes(param);
+        slider.parentElement.style.opacity = q.locked.includes(param) ? "0.5" : "1";
+    });
+
+    // איפוס הגרף (חשוב כדי לרענן את הנתונים)
+    updateGraph();
+}
+
+// פונקציה שבודקת תשובה (נקראת מתוך updateGraph)
+function checkAnswer(x, y, m, aVal) {
+    const q = questions[currentLevelIndex];
+    
+    // אובייקט מצב נוכחי לבדיקה
+    const currentState = {
+        x: x,
+        y: y,
+        m: m,
+        a: aVal,
+        isExtremum: Math.abs(m) < 0.05 // האם זה קיצון
+    };
+
+    // בדיקה האם התנאי מתקיים
+    if (q.targetCondition(currentState)) {
+        showSuccess();
+    }
+}
+
+// פונקציית הצלחה
+function showSuccess() {
+    const msg = document.getElementById('successMessage');
+    if (msg.style.display === 'block') return; // מניעת הבהוב
+
+    msg.style.display = 'block';
+    
+    // הוספה ליומן אם צריך
+    if (questions[currentLevelIndex].type === 'parameter') {
+        const funcStr = `f(x) = ${a}x² + ${b}x + ${c}`;
+        addJournalEntry(`נפתר: ${questions[currentLevelIndex].title}`);
+    }
+
+    // מעבר לשאלה הבאה אוטומטית אחרי 2 שניות
+    setTimeout(() => {
+        if (currentLevelIndex < questions.length - 1) {
+            currentLevelIndex++;
+            initLevel(currentLevelIndex);
+        } else {
+            alert("סיימת את כל השאלות! כל הכבוד!");
+            currentLevelIndex = 0;
+            initLevel(0);
+        }
+    }, 2000);
+}
+
+// --- חשוב: וודא שאתה קורא ל-checkAnswer מתוך updateGraph ---
+// בתוך הפונקציה updateGraph בקוד הקיים שלך, הוסף את השורה הזו בסוף:
+// checkAnswer(xPoint, yPoint, slopeAtPoint, a);
