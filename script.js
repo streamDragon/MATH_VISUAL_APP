@@ -402,35 +402,50 @@ function draw() {
   }
 }
 
-function drawTarget(x, y, label, isHit) {
-  const sx = ox + x * scale;
-  const sy = oy - y * scale;
+ function drawTarget(x, y, label, isHit) {
+    let sx = ox + x * scale;
+    let sy = oy - y * scale;
 
-  // outer ring
-  ctx.beginPath();
-  ctx.arc(sx, sy, 8, 0, Math.PI * 2);
-
-  if (isHit) {
-    ctx.fillStyle = "#22c55e";
-    ctx.fill();
-  } else {
-    ctx.strokeStyle = "#ef4444";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    ctx.setLineDash([2, 2]);
+    // עיגול מטרה
     ctx.beginPath();
-    ctx.arc(sx, sy, 12, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-  }
+    ctx.arc(sx, sy, 8, 0, Math.PI * 2);
 
-  // label + coordinates
-  ctx.fillStyle = "#64748b";
-  ctx.font = "12px Rubik";
-  const coord = `(${x},${y})`;
-  ctx.fillText(`${label} ${coord}`, sx + 10, sy - 10);
+    if (isHit) {
+        ctx.fillStyle = "#22c55e"; // ירוק מלא
+        ctx.fill();
+    } else {
+        ctx.strokeStyle = "#ef4444"; // אדום ריק
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // עיגול מקווקו מסביב
+        ctx.setLineDash([2, 2]);
+        ctx.beginPath();
+        ctx.arc(sx, sy, 12, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    // תווית (A / B / השקה וכו')
+    ctx.fillStyle = "#64748b";
+    ctx.font = "12px Rubik";
+    ctx.fillText(label, sx + 10, sy - 10);
+
+    // קואורדינטות מסביב לנקודה (4 צדדים)
+    const xTxt = `x=${Number(x).toFixed(2)}`;
+    const yTxt = `y=${Number(y).toFixed(2)}`;
+
+    ctx.font = "11px Rubik";
+    ctx.fillText(xTxt, sx - 14, sy - 18); // למעלה
+    ctx.fillText(yTxt, sx - 14, sy + 30); // למטה
+    ctx.fillText(xTxt, sx - 56, sy + 5);  // שמאל
+    ctx.fillText(yTxt, sx + 18, sy + 5);  // ימין
 }
+
+
+
+
+
 
 function drawGrid() {
   ctx.strokeStyle = "#e2e8f0";
