@@ -1,129 +1,148 @@
 :root {
     --primary: #2563eb;
-    --secondary: #f97316;
-    --bg: #f8fafc;
+    --accent: #f59e0b; /* כתום למשיק */
+    --bg: #f1f5f9;
+    --panel-bg: #ffffff;
     --text: #1e293b;
-    --success: #22c55e;
-    --journal-bg: #fffbeb;
+    --math-font: 'Times New Roman', serif;
 }
 
 body {
-    font-family: 'Rubik', 'Segoe UI', sans-serif;
-    margin: 0;
-    padding: 20px;
-    background: var(--bg);
+    font-family: 'Assistant', sans-serif;
+    background-color: var(--bg);
     color: var(--text);
+    margin: 0;
+    padding: 10px;
     height: 100vh;
     box-sizing: border-box;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    gap: 20px;
-    height: calc(100vh - 40px);
-}
-
-/* צד ימין - הגרף */
-.main-content {
-    flex: 2;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
 }
 
+/* Header & HUD */
+.main-header {
+    background: var(--panel-bg);
+    padding: 10px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.math-display {
+    font-family: var(--math-font);
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+.func-line { color: var(--primary); margin-bottom: 4px; }
+.deriv-line { color: #64748b; font-size: 1rem; }
+
+/* The Holy Trinity */
+.trinity-panel {
+    display: flex;
+    gap: 15px;
+    background: #f8fafc;
+    padding: 5px 15px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.trinity-item {
+    text-align: center;
+    min-width: 60px;
+    border-left: 1px solid #cbd5e1;
+    padding-left: 15px;
+}
+.trinity-item:last-child { border-left: none; }
+
+.trinity-item .label { display: block; font-weight: bold; color: #64748b; font-size: 0.8rem; }
+.trinity-item .value { display: block; font-size: 1.4rem; font-weight: bold; font-family: monospace; }
+.trinity-item.slope .value { color: var(--accent); }
+.trinity-item small { font-size: 0.7rem; color: #94a3b8; }
+
+/* Layout */
+.container { height: 100%; display: flex; flex-direction: column; }
+.workspace { display: flex; gap: 15px; flex: 1; overflow: hidden; }
+
+.main-content { flex: 3; display: flex; flex-direction: column; }
+.sidebar { flex: 1; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; min-width: 280px; }
+
+/* Canvas */
 #canvasContainer {
     flex: 1;
     position: relative;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    overflow: hidden;
+    background: white;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
+}
+canvas { width: 100%; height: 100%; cursor: crosshair; }
+
+/* Floating Label on Graph */
+.floating-label {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 4px 8px;
+    border: 1px solid var(--primary);
+    border-radius: 4px;
+    pointer-events: none;
+    font-size: 0.8rem;
+    font-family: monospace;
+    transform: translate(10px, -50%);
 }
 
-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-
-/* אזור השאלה */
+/* Question Box */
 .question-box {
     background: #eff6ff;
     padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border-right: 4px solid var(--primary);
+    border-radius: 10px;
+    border-right: 5px solid var(--primary);
+    margin-bottom: 10px;
 }
-
-h2 { margin: 0 0 10px 0; color: var(--primary); font-size: 1.2rem; }
-.instructions { font-size: 1rem; line-height: 1.5; }
-
-/* הודעות הצלחה */
 #successMessage {
     display: none;
-    margin-top: 10px;
-    padding: 10px;
     background: #dcfce7;
     color: #166534;
+    padding: 10px;
+    margin-top: 10px;
     border-radius: 6px;
-    animation: popIn 0.5s ease;
+    font-weight: bold;
+    animation: fadeIn 0.5s;
 }
 
-/* סרגל צד */
-.sidebar {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    min-width: 250px;
-    overflow-y: auto;
-}
+/* Controls */
+.panel { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.panel h3 { margin-top: 0; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px; font-size: 1rem; }
 
-.panel {
-    background: white;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
+.control-group { margin-bottom: 8px; }
+label { display: flex; justify-content: space-between; font-weight: 600; font-size: 0.9rem; }
+input[type=range] { width: 100%; cursor: pointer; accent-color: var(--primary); }
 
-/* סליידרים */
-.control-group { margin-bottom: 12px; }
-label { display: flex; justify-content: space-between; font-weight: bold; font-size: 0.9rem; margin-bottom: 4px; }
-input[type=range] { width: 100%; cursor: pointer; }
+.x-control { background: #fff7ed; border: 1px solid #ffedd5; }
+.x-control input { accent-color: var(--accent); }
 
-.x-control {
-    background: #fff7ed; /* כתום בהיר */
-    border: 1px solid #ffedd5;
-}
-
-/* יומן */
-#journalList {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-#journalList li {
-    background: var(--journal-bg);
-    border-right: 3px solid var(--success);
-    padding: 8px;
-    margin-bottom: 8px;
+.tangent-info {
+    text-align: center;
+    font-family: monospace;
+    background: rgba(255,255,255,0.5);
+    padding: 5px;
     border-radius: 4px;
+    margin-top: 5px;
     font-size: 0.85rem;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    color: #64748b;
 }
 
-@keyframes popIn {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+/* Journal */
+#journalList { list-style: none; padding: 0; margin: 0; }
+#journalList li {
+    padding: 8px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
 }
+#journalList li:before { content: "✅"; margin-left: 5px; }
 
-/* התאמה למובייל */
-@media (max-width: 768px) {
-    .container { flex-direction: column; height: auto; }
-    .main-content { height: 60vh; }
-}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
