@@ -1,100 +1,74 @@
-/* script.js - גרסה מתוקנת ונקייה */
+/* script.js - המנוע המלא והמתוקן */
 
 // --- משתנים גלובליים ---
 let canvas, ctx;
 let width, height;
 
-// פרמטרים (a,b,c,d)
-let a = 1, b = 0, c = 0, d = 0;
+// פרמטרים (a*x^3 + b*x^2 + c*x + d)
+let a = 0, b = 1, c = 0, d = 0;
 let currentX = 0;
-let scale = 40; // זום
+let scale = 40; // זום (פיקסלים ליחידה)
 let currentQIndex = 0;
 let isSolved = false;
 let isDragging = false;
 
 // --- אתחול המערכת ---
 window.onload = function() {
-    console.log("מערכת אותחלה...");
-
-    // 1. בדיקת נתונים
     if (typeof bagrutData === 'undefined') {
-        alert("שגיאה: קובץ השאלות bagrut_questions.js חסר.");
-        return;
+        alert("שגיאה: קובץ השאלות חסר."); return;
     }
 
-    // 2. אתחול קנבס
     canvas = document.getElementById('graphCanvas');
-    if (!canvas) {
-        console.error("לא נמצא קנבס!");
-        return;
-    }
     ctx = canvas.getContext('2d');
-
+    
     // התאמה לגודל
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // 3. אירועי עכבר/טאץ'
+    // אירועי עכבר וגרירה
     canvas.addEventListener('mousedown', startDrag);
-    canvas.addEventListener('mousemove', doDrag);
-    window.addEventListener('mouseup', endDrag); // עדיף על window כדי למנוע "בריחה"
-    
+    window.addEventListener('mousemove', doDrag);
+    window.addEventListener('mouseup', endDrag);
     canvas.addEventListener('touchstart', startDrag, {passive: false});
-    canvas.addEventListener('touchmove', doDrag, {passive: false});
+    window.addEventListener('touchmove', doDrag, {passive: false});
     window.addEventListener('touchend', endDrag);
 
-    // 4. ממשק
     setupControls();
-
-    // 5. טעינת שאלה ראשונה
     loadQuestion(0);
 };
 
-function setupControls() {
-    // פרמטרים a,b,c,d
-    ['a', 'b', 'c', 'd'].forEach(p => {
-        const slider = document.getElementById('param' + p.toUpperCase());
-        if (slider) {
-            slider.addEventListener('input', (e) => {
-                // עדכון המשתנה הגלובלי (למשל a = ערך)
-                window[p] = parseFloat(e.target.value);
-                // עדכון התצוגה המספרית
-                document.getElementById('val' + p.toUpperCase()).innerText = window[p];
-                updateGraph();
-            });
-        }
-    });
-
-    // סליידר X
-    const xSlider = document.getElementById('paramX');
-    if (xSlider) {
-        xSlider.addEventListener('input', (e) => {
-            currentX = parseFloat(e.target.value);
-            document.getElementById('valX').innerText = currentX;
-            updateGraph();
-        });
-    }
-}
-
 function resizeCanvas() {
     const container = canvas.parentElement;
-    if (container) {
-        width = container.clientWidth;
-        height = container.clientHeight || 500;
-    } else {
-        width = 800; height = 500;
-    }
+    width = container.clientWidth;
+    height = container.clientHeight;
     canvas.width = width;
     canvas.height = height;
     updateGraph();
 }
 
+function setupControls() {
+    ['a', 'b', 'c', 'd'].forEach(p => {
+        const slider = document.getElementById('param' + p.toUpperCase());
+        slider.addEventListener('input', (e) => {
+            window[p] = parseFloat(e.target.value);
+            document.getElementById('val' + p.toUpperCase()).innerText = window[p];
+            updateGraph();
+        });
+    });
+
+    const xSlider = document.getElementById('paramX');
+    xSlider.addEventListener('input', (e) => {
+        currentX = parseFloat(e.target.value);
+        document.getElementById('valX').innerText = currentX;
+        updateGraph();
+    });
+}
+
 // --- ניהול שאלות ---
 function loadQuestion(idx) {
     if (idx >= bagrutData.length) {
-        document.getElementById('questionTitle').innerText = "סיימת את המבחן! 🏆";
-        document.getElementById('questionText').innerHTML = "כל הכבוד, השלמת את כל המשימות.";
-        document.getElementById('successMessage').style.display = 'none';
+        document.getElementById('questionTitle').innerText = "סיימת את המשחק! 🏆";
+        document.getElementById('questionText').innerHTML = "כל הכבוד, אתה אלוף בחקירת פונקציות!";
         return;
     }
 
@@ -102,43 +76,36 @@ function loadQuestion(idx) {
     const q = bagrutData[idx];
     isSolved = false;
 
-    // UI Updates
+    // איפוס UI
     document.getElementById('successMessage').style.display = 'none';
     document.getElementById('questionTitle').innerText = q.title;
     document.getElementById('questionText').innerHTML = q.instruction;
 
-    // הגדרת פרמטרים ונעילות
+    // עדכון פרמטרים
     ['a', 'b', 'c', 'd'].forEach(p => {
         const val = q.setup[p];
-        window[p] = val; // עדכון לוגי
-        
+        window[p] = val;
         const slider = document.getElementById('param' + p.toUpperCase());
-        const label = document.getElementById('val' + p.toUpperCase());
-        
-        if (slider) {
-            slider.value = val;
-            if (label) label.innerText = val;
+        slider.value = val;
+        document.getElementById('val' + p.toUpperCase()).innerText = val;
 
-            const isLocked = q.locked.includes(p);
-            slider.disabled = isLocked;
-            slider.parentElement.style.opacity = isLocked ? "0.5" : "1";
-        }
+        const isLocked = q.locked.includes(p);
+        slider.disabled = isLocked;
+        slider.parentElement.style.opacity = isLocked ? "0.6" : "1";
     });
 
-    // טיפול ב-X
+    // *** תיקון הבאג: הגדרת מיקום התחלתי ל-X ***
+    // אם לא מוגדר startX, נתחיל ב- -5 כדי לא להיות על התשובה בטעות
+    const startPos = (q.startX !== undefined) ? q.startX : -4;
+    currentX = startPos;
+    
     const xSlider = document.getElementById('paramX');
     if (q.type === 'find_param') {
-        // נועלים את X, המשתמש צריך לשחק עם הפרמטרים
         currentX = q.targetPoint ? q.targetPoint.x : 0;
-        xSlider.value = currentX;
         xSlider.disabled = true;
-        xSlider.parentElement.style.opacity = "0.5";
     } else {
-        // חקירה רגילה
-        currentX = 0;
-        xSlider.value = 0;
         xSlider.disabled = false;
-        xSlider.parentElement.style.opacity = "1";
+        xSlider.value = currentX;
     }
     document.getElementById('valX').innerText = currentX;
 
@@ -154,189 +121,222 @@ function df(x) {
     return 3 * a * Math.pow(x, 2) + 2 * b * x + c;
 }
 
-// --- ציור ---
+// יצירת מחרוזת לתצוגה: f(x) = ...
+function getMathString(isDeriv) {
+    let parts = [];
+    
+    if (isDeriv) {
+        // נגזרת: 3ax^2 + 2bx + c
+        let A = 3*a, B = 2*b, C = c;
+        if (Math.abs(A) > 0.001) parts.push(`${round(A)}x²`);
+        if (Math.abs(B) > 0.001) parts.push(`${B > 0 && parts.length > 0 ? '+' : ''}${round(B)}x`);
+        if (Math.abs(C) > 0.001 || parts.length === 0) parts.push(`${C > 0 && parts.length > 0 ? '+' : ''}${round(C)}`);
+    } else {
+        // פונקציה: ax^3 + bx^2 + cx + d
+        if (Math.abs(a) > 0.001) parts.push(`${a==-1?'-':(a==1?'':a)}x³`);
+        if (Math.abs(b) > 0.001) parts.push(`${b > 0 && parts.length > 0 ? '+' : ''}${b}x²`);
+        if (Math.abs(c) > 0.001) parts.push(`${c > 0 && parts.length > 0 ? '+' : ''}${c}x`);
+        if (Math.abs(d) > 0.001 || parts.length === 0) parts.push(`${d > 0 && parts.length > 0 ? '+' : ''}${d}`);
+    }
+    return parts.join(' ');
+}
+
+function round(num) { return Math.round(num * 100) / 100; }
+
+// --- ציור ועדכון (Main Loop) ---
 function updateGraph() {
     if (!ctx) return;
     
-    // ניקוי
-    ctx.clearRect(0, 0, width, height);
+    // עדכון נתונים מספריים (The Trinity)
+    let yVal = f(currentX);
+    let mVal = df(currentX);
     
+    document.getElementById('dispX').innerText = currentX.toFixed(1);
+    document.getElementById('dispY').innerText = yVal.toFixed(2);
+    document.getElementById('dispM').innerText = mVal.toFixed(2);
+    
+    // עדכון משוואות
+    document.getElementById('funcEqn').innerText = getMathString(false);
+    document.getElementById('derivEqn').innerText = getMathString(true);
+    document.getElementById('tangentEqn').innerText = 
+        `y - ${yVal.toFixed(1)} = ${mVal.toFixed(2)}(x - ${currentX.toFixed(1)})`;
+
+    // ציור
+    ctx.clearRect(0, 0, width, height);
     drawGrid();
-    drawAxes();
+    drawFunction();
+    drawTangent(currentX, yVal, mVal);
 
-    // ציור הפונקציה
-    ctx.beginPath();
-    ctx.strokeStyle = "#007bff";
-    ctx.lineWidth = 3;
-
-    // ציור מפוטר לאמצע הקנבס
-    const centerX = width / 2;
-    const centerY = height / 2;
-
-    for (let px = 0; px <= width; px++) {
-        let xMath = (px - centerX) / scale;
-        let yMath = f(xMath);
-        let py = centerY - yMath * scale;
-        
-        if (px === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-    }
-    ctx.stroke();
-
-    drawTangent(currentX);
-
-    // נקודת מטרה
+    // ציור מטרות
     const q = bagrutData[currentQIndex];
-    if (q && q.type === 'find_param' && q.targetPoint) {
-        drawTargetPoint(q.targetPoint);
-    }
+    if (q.targetPoint) drawTargetPoint(q.targetPoint);
 
-    if (!isSolved) checkAnswer();
+    if (!isSolved) checkAnswer(yVal, mVal);
 }
 
 function drawGrid() {
-    ctx.beginPath();
-    ctx.strokeStyle = "#eee";
+    const cx = width / 2;
+    const cy = height / 2;
+
     ctx.lineWidth = 1;
+    ctx.strokeStyle = "#e2e8f0";
     
-    const cx = width / 2;
-    const cy = height / 2;
-
-    for (let x = cx; x < width; x += scale) { ctx.moveTo(x, 0); ctx.lineTo(x, height); }
-    for (let x = cx; x > 0; x -= scale) { ctx.moveTo(x, 0); ctx.lineTo(x, height); }
-    
-    for (let y = cy; y < height; y += scale) { ctx.moveTo(0, y); ctx.lineTo(width, y); }
-    for (let y = cy; y > 0; y -= scale) { ctx.moveTo(0, y); ctx.lineTo(width, y); }
-    
-    ctx.stroke();
-}
-
-function drawAxes() {
+    // גריד משני
     ctx.beginPath();
-    ctx.strokeStyle = "#333";
-    ctx.lineWidth = 2;
-    
-    const cx = width / 2;
-    const cy = height / 2;
-
-    // X axis
-    ctx.moveTo(0, cy); ctx.lineTo(width, cy);
-    // Y axis
-    ctx.moveTo(cx, 0); ctx.lineTo(cx, height);
+    for (let x = 0; x <= width; x += scale) { ctx.moveTo(x + (cx%scale), 0); ctx.lineTo(x + (cx%scale), height); }
+    for (let y = 0; y <= height; y += scale) { ctx.moveTo(0, y + (cy%scale)); ctx.lineTo(width, y + (cy%scale)); }
     ctx.stroke();
-    
+
+    // צירים ראשיים
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#475569";
+    ctx.beginPath();
+    ctx.moveTo(0, cy); ctx.lineTo(width, cy); // X
+    ctx.moveTo(cx, 0); ctx.lineTo(cx, height); // Y
+    ctx.stroke();
+
     // מספרים
-    ctx.font = "12px Arial";
-    ctx.fillStyle = "#666";
+    ctx.font = "12px sans-serif";
+    ctx.fillStyle = "#64748b";
     ctx.textAlign = "center";
-    
     for (let i = -10; i <= 10; i++) {
         if (i === 0) continue;
-        let px = cx + i * scale;
-        if (px > 0 && px < width) ctx.fillText(i, px, cy + 20);
+        ctx.fillText(i, cx + i * scale, cy + 20);
+        if (Math.abs(i) <= 6) ctx.fillText(i, cx - 15, cy - i * scale + 5); // Y axis numbers
     }
 }
 
-function drawTangent(x0) {
-    let y0 = f(x0);
-    let m = df(x0);
-    
-    let px = width / 2 + x0 * scale;
-    let py = height / 2 - y0 * scale;
-
-    // קו משיק
-    let len = 3; 
-    let x1 = x0 - len;
-    let y1 = y0 - m * len;
-    let x2 = x0 + len;
-    let y2 = y0 + m * len;
-    
+function drawFunction() {
     ctx.beginPath();
-    ctx.strokeStyle = "#ff9800";
-    ctx.lineWidth = 2;
-    ctx.moveTo(width / 2 + x1 * scale, height / 2 - y1 * scale);
-    ctx.lineTo(width / 2 + x2 * scale, height / 2 - y2 * scale);
-    ctx.stroke();
+    ctx.strokeStyle = "#2563eb"; // כחול ראשי
+    ctx.lineWidth = 3;
+    
+    const cx = width / 2;
+    const cy = height / 2;
 
-    // נקודה
+    let started = false;
+    for (let px = 0; px <= width; px+=2) { // רזולוציה
+        let xMath = (px - cx) / scale;
+        let yMath = f(xMath);
+        let py = cy - yMath * scale;
+        
+        // מניעת ציור מחוץ לגבולות הקיצוניים של הקנבס
+        if (py < -100 || py > height + 100) {
+           started = false; continue; 
+        }
+
+        if (!started) { ctx.moveTo(px, py); started = true; }
+        else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+}
+
+function drawTangent(x0, y0, m) {
+    const cx = width / 2;
+    const cy = height / 2;
+    const px = cx + x0 * scale;
+    const py = cy - y0 * scale;
+
+    // קו משיק ארוך
+    const length = 10; // יחידות מתמטיות לכל כיוון
+    const x1 = x0 - length;
+    const y1 = y0 - m * length;
+    const x2 = x0 + length;
+    const y2 = y0 + m * length;
+
+    ctx.beginPath();
+    ctx.strokeStyle = "#f59e0b"; // כתום
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]); // קו מקווקו
+    ctx.moveTo(cx + x1 * scale, cy - y1 * scale);
+    ctx.lineTo(cx + x2 * scale, cy - y2 * scale);
+    ctx.stroke();
+    ctx.setLineDash([]); // איפוס
+
+    // הנקודה עצמה
     ctx.beginPath();
     ctx.arc(px, py, 6, 0, 2 * Math.PI);
-    ctx.fillStyle = "#ff9800";
+    ctx.fillStyle = "#f59e0b";
     ctx.fill();
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 2;
     ctx.stroke();
+
+    // תווית צפה
+    const label = document.getElementById('floatingLabel');
+    label.style.display = 'block';
+    label.style.left = (px + 15) + 'px';
+    label.style.top = (py - 15) + 'px';
+    label.innerHTML = `(${x0.toFixed(1)}, ${y0.toFixed(1)})`;
 }
 
 function drawTargetPoint(pt) {
-    let px = width / 2 + pt.x * scale;
-    let py = height / 2 - pt.y * scale;
-    
+    const cx = width / 2;
+    const cy = height / 2;
+    const px = cx + pt.x * scale;
+    const py = cy - pt.y * scale;
+
     ctx.beginPath();
     ctx.arc(px, py, 5, 0, 2 * Math.PI);
-    ctx.fillStyle = "red";
+    ctx.fillStyle = "#ef4444"; // אדום
     ctx.fill();
-    ctx.fillText(`(${pt.x},${pt.y})`, px + 10, py - 10);
+    
+    // אפקט גל (Ripple)
+    ctx.beginPath();
+    ctx.arc(px, py, 10 + Math.sin(Date.now()/200)*3, 0, 2 * Math.PI);
+    ctx.strokeStyle = "rgba(239, 68, 68, 0.5)";
+    ctx.stroke();
 }
 
-// --- גרירה ---
-function getMousePos(evt) {
-    const rect = canvas.getBoundingClientRect();
-    const cX = evt.touches ? evt.touches[0].clientX : evt.clientX;
-    const cY = evt.touches ? evt.touches[0].clientY : evt.clientY;
-    return { x: cX - rect.left, y: cY - rect.top };
-}
-
+// --- אינטראקציה ---
 function startDrag(evt) {
-    const q = bagrutData[currentQIndex];
-    if (q.type === 'find_param') return; 
+    const rect = canvas.getBoundingClientRect();
+    const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+    const x = clientX - rect.left;
+    const cx = width / 2;
+    const mouseMathX = (x - cx) / scale;
 
-    const pos = getMousePos(evt);
-    let px = width / 2 + currentX * scale;
-    if (Math.abs(pos.x - px) < 40) { // מרחב תפיסה נוח
+    if (Math.abs(mouseMathX - currentX) < 1) { // תפיסה קלה
         isDragging = true;
-        evt.preventDefault();
     }
 }
 
 function doDrag(evt) {
     if (!isDragging) return;
     evt.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
     
-    const pos = getMousePos(evt);
-    let newX = (pos.x - width / 2) / scale;
-    
-    if (newX < -10) newX = -10;
-    if (newX > 10) newX = 10;
+    let newX = (clientX - rect.left - width/2) / scale;
     
     // Snap (מגנט) לחצאי שלמים
-    let rounded = Math.round(newX * 2) / 2;
-    if (Math.abs(newX - rounded) < 0.2) newX = rounded;
-    else newX = Math.round(newX * 10) / 10;
+    if (Math.abs(newX - Math.round(newX*2)/2) < 0.15) {
+        newX = Math.round(newX*2)/2;
+    }
+
+    // גבולות
+    if (newX < -6) newX = -6; if (newX > 6) newX = 6;
 
     currentX = newX;
-    
-    const xSlider = document.getElementById('paramX');
-    if (xSlider) xSlider.value = currentX;
+    document.getElementById('paramX').value = currentX;
     document.getElementById('valX').innerText = currentX;
-    
     updateGraph();
 }
 
-function endDrag() {
-    isDragging = false;
-}
+function endDrag() { isDragging = false; }
 
-// --- בדיקה ---
-function checkAnswer() {
+// --- בדיקת תשובה ---
+function checkAnswer(curY, curM) {
     const q = bagrutData[currentQIndex];
-    // אנחנו בודקים את הפונקציה לפי הפרמטרים הנוכחיים וה-X הנוכחי
-    let curY = f(currentX);
-    let curM = df(currentX);
     let win = false;
-    let tolerance = 0.15;
+    let tolerance = 0.1;
 
-    if (q.goal === 'm0' && Math.abs(curM) < tolerance) win = true; // מינימום/מקסימום
+    if (q.goal === 'm0' && Math.abs(curM) < tolerance) win = true;
     else if (q.goal === 'slope_val' && Math.abs(curM - q.targetVal) < tolerance) win = true;
-    else if (q.goal === 'hit_target' && Math.abs(curY - q.targetPoint.y) < tolerance) win = true;
+    else if (q.goal === 'hit_target' && Math.abs(curY - q.targetPoint.y) < tolerance) {
+        // בודקים שאנחנו גם ב-X הנכון
+        if (Math.abs(currentX - q.targetPoint.x) < tolerance) win = true;
+    }
     else if (q.goal === 'y0' && Math.abs(curY) < tolerance) {
         if (!q.targetRegion || (currentX > q.targetRegion.min && currentX < q.targetRegion.max)) {
             win = true;
@@ -347,23 +347,22 @@ function checkAnswer() {
         isSolved = true;
         const msg = document.getElementById('successMessage');
         msg.style.display = 'block';
-        msg.innerHTML = "<strong>כל הכבוד! 🎉 תשובה נכונה.</strong>";
+        msg.innerHTML = "🎉 כל הכבוד! תשובה נכונה.";
         
-        addToJournal(q.id);
-        
+        // הוספה ליומן
+        const list = document.getElementById('journalList');
+        const li = document.createElement('li');
+        li.innerHTML = `<span>שאלה ${q.id}</span> <span>(x=${currentX}, m=${curM.toFixed(1)})</span>`;
+        list.prepend(li);
+
         setTimeout(() => {
-            if (currentQIndex < bagrutData.length - 1) {
-                loadQuestion(currentQIndex + 1);
-            } else {
-                msg.innerHTML = "סיימת את כל השאלות!";
-            }
-        }, 2000);
+            if (currentQIndex < bagrutData.length - 1) loadQuestion(currentQIndex + 1);
+            else msg.innerHTML = "🏆 סיימת את כל השלבים!";
+        }, 1500);
     }
 }
 
-function addToJournal(qId) {
-    const list = document.getElementById('journalList');
-    const li = document.createElement('li');
-    li.innerHTML = `✅ שאלה ${qId} נפתרה <br> <small>x=${currentX}, m=${df(currentX).toFixed(1)}</small>`;
-    list.prepend(li);
-}
+// אנימציה תמידית ל-Target
+setInterval(() => {
+    if (bagrutData[currentQIndex].targetPoint) updateGraph();
+}, 100);
