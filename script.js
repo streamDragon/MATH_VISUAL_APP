@@ -1,62 +1,66 @@
-/* script.js - כולל יומן משוואות ומטרות ויזואליות
-   עדכונים לפי הבקשות שלך:
-   ✅ "כל הכבוד" לא באמצע: מציגים הודעה קטנה בפינה + לא חוסם נקודה
-   ✅ בצד הגרף: מציגים f(x), f'(x), m=f'(x0), נקודה (x0,y0), ומשוואת המשיק
-   ✅ לכל נקודת מטרה אדומה: מציגים גם (x,y) ליד התווית
-   ✅ מעדכן תמיד את הנגזרת ליד הפונקציה
-   ✅ בתרגיל "שתי נקודות": הצלחה רק אם *באותו רגע* הפונקציה פוגעת בשתיהן.
-      אם זזים ומאבדים נקודה – היא מתבטלת (solvedTargets מתאפס/מתעדכן בזמן אמת)
-*/
+/* script.js - גרפים/משיקים/מטרות/יומן - גרסה נקייה ומתוקנת */
 
-// --------- Globals ----------
-let cvs, ctx, W, H, mainArea;
-let baseScale = 40,
-  scale = 40;
-let ox,
-  oy; // origin screen coords
-let px = 0; // draggable x
-let cf = [0, 1, 0, 0]; // [a,b,c,d]
+"use strict";
+
+// -------------------- Globals --------------------
+let cvs, ctx, mainArea;
+let W = 0, H = 0;
+
+let baseScale = 40;
+let scale = 40;
+
+let ox = 0, oy = 0;     // origin (screen)
+let px = -1;            // draggable x
+
+let cf = [0, 1, 0, 0];  // [a,b,c,d]
 let currentQ = 0;
 let isDrag = false;
 
 // audio
-let audioCtx = null,
-  isMuted = false;
+let audioCtx = null;
+let isMuted = false;
 
 // targets
-let solvedTargets = []; // indices hit currently (dynamic)
-
-// success UI
+let solvedTargets = [];     // indices hit NOW (dynamic)
 let successShown = false;
 
-// ---------- Boot ----------
-window.onload = () => {
+// -------------------- Boot --------------------
+window.addEventListener("load", () => {
   cvs = document.getElementById("cvs");
+  if (!cvs) return console.error("Missing canvas #cvs");
   ctx = cvs.getContext("2d");
-  mainArea = document.getElementById("mainArea");
+
+  mainArea = document.getElementById("mainArea") || cvs.parentElement;
 
   window.addEventListener("resize", resize);
   resize();
+
   setupEvents();
   initMenu();
   loadQ(0);
 
-  // אם יש כפתור סאונד קיים:
   const btn = document.getElementById("btnSound");
   if (btn) btn.innerText = isMuted ? "🔇" : "🔊";
 
-  requestAnimationFrame(animate);
-};
+  // אם אין אנימציה רציפה - לא צריך requestAnimationFrame
+  // draw() נקרא בכל שינוי
+});
 
+// -------------------- Resize --------------------
 function resize() {
-  W = cvs.width = mainArea.clientWidth;
-  H = cvs.height = mainArea.clientHeight;
+  const w = mainArea ? mainArea.clientWidth : window.innerWidth;
+  const h = mainArea ? mainArea.clientHeight : window.innerHeight;
+
+  W = cvs.width = Math.max(200, w);
+  H = cvs.height = Math.max(200, h);
+
   ox = W / 2;
   oy = H / 2 + 50;
+
   draw();
 }
 
-// ---------- Input ----------
+// -------------------- Events (mouse/touch) --------------------
 function setupEvents() {
   const start = (e) => {
     isDrag = true;
@@ -64,7 +68,8 @@ function setupEvents() {
     handleInput(e);
   };
   const move = (e) => {
-    if (isDrag) handleInput(e);
+    if (!isDrag) return;
+    handleInput(e);
   };
   const end = () => {
     isDrag = false;
@@ -74,62 +79,53 @@ function setupEvents() {
   window.addEventListener("mousemove", move);
   window.addEventListener("mouseup", end);
 
-  cvs.addEventListener(
-    "touchstart",
-    (e) => {
-      e.preventDefault();
-      start(e);
-    },
-    { passive: false }
-  );
-  cvs.addEventListener(
-    "touchmove",
-    (e) => {
-      e.preventDefault();
-      move(e);
-    },
-    { passive: false }
-  );
-  cvs.addEventListener("touchend", end);
+  cvs.addEventListener("touchstart", (e) => { e.preventDefault(); start(e); }, { passive: false });
+  cvs.addEventListener("touchmove",  (e) => { e.preventDefault(); move(e);  }, { passive: false });
+  window.addEventListener("touchend", end);
 }
 
 function handleInput(e) {
-  const q = bagrutData[currentQ];
+  const q = bagrutData?.[currentQ];
+  if (!q) return;
 
   if (q.type === "move_x") {
-    const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
     const rect = cvs.getBoundingClientRect();
+    const clientX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0);
+
     px = (clientX - rect.left - ox) / scale;
-    px = Math.max(-10, Math.min(10, px));
+    px = clamp(px, -10, 10);
+
     const s = document.getElementById("mainX");
     if (s) s.value = px;
+
     updateGame();
   }
 }
 
 function updateFromSlider() {
-  px = parseFloat(document.getElementById("mainX").value);
+  const s = document.getElementById("mainX");
+  if (!s) return;
+  px = parseFloat(s.value);
   updateGame();
 }
 
 function manual() {
-  const q = bagrutData[currentQ];
+  const q = bagrutData?.[currentQ];
+  if (!q) return;
 
-  if (!q.locked || !q.locked.includes("a"))
-    cf[0] = parseFloat(document.getElementById("mA").value);
-  if (!q.locked || !q.locked.includes("b"))
-    cf[1] = parseFloat(document.getElementById("mB").value);
-  if (!q.locked || !q.locked.includes("c"))
-    cf[2] = parseFloat(document.getElementById("mC").value);
-  if (!q.locked || !q.locked.includes("d"))
-    cf[3] = parseFloat(document.getElementById("mD").value);
+  const getVal = (id) => parseFloat(document.getElementById(id)?.value ?? "0");
 
-  // אם נעול, נחזיר את הסליידר לערך האמיתי כדי שלא "ירוץ" ויזואלית
+  if (!q.locked || !q.locked.includes("a")) cf[0] = getVal("mA");
+  if (!q.locked || !q.locked.includes("b")) cf[1] = getVal("mB");
+  if (!q.locked || !q.locked.includes("c")) cf[2] = getVal("mC");
+  if (!q.locked || !q.locked.includes("d")) cf[3] = getVal("mD");
+
+  // אם נעול – נחזיר סליידר לערך האמיתי
   if (q.locked) {
-    if (q.locked.includes("a")) document.getElementById("mA").value = cf[0];
-    if (q.locked.includes("b")) document.getElementById("mB").value = cf[1];
-    if (q.locked.includes("c")) document.getElementById("mC").value = cf[2];
-    if (q.locked.includes("d")) document.getElementById("mD").value = cf[3];
+    if (q.locked.includes("a")) setElValue("mA", cf[0]);
+    if (q.locked.includes("b")) setElValue("mB", cf[1]);
+    if (q.locked.includes("c")) setElValue("mC", cf[2]);
+    if (q.locked.includes("d")) setElValue("mD", cf[3]);
   }
 
   updateGame();
@@ -141,7 +137,7 @@ function toggleMute() {
   if (btn) btn.innerText = isMuted ? "🔇" : "🔊";
 }
 
-// ---------- Math ----------
+// -------------------- Math --------------------
 function f(x) {
   return cf[0] * x ** 3 + cf[1] * x ** 2 + cf[2] * x + cf[3];
 }
@@ -152,89 +148,43 @@ function d2f(x) {
   return 6 * cf[0] * x + 2 * cf[1];
 }
 
-
-
-// ===============================
-// Pretty formatting helpers
-// ===============================
-
-function fmtCoeff(n, isFirstTerm = false) {
-  // מחזיר מחרוזת מקדם לתצוגה: בלי 1, בלי -1, עם +/-
-  // דוגמאות:
-  //  1   -> ""   (או "+" אם לא ראשון)
-  // -1   -> "-"
-  //  2   -> "2"
-  // -2   -> "-2"
-  if (Math.abs(n) < 1e-9) return "";
-
-  const sign = n < 0 ? "-" : isFirstTerm ? "" : "+";
-  const abs = Math.abs(n);
-
-  // בלי "1" (וגם בלי "-1") לפני x
-  const mag = Math.abs(abs - 1) < 1e-9 ? "" : String(Number(abs.toFixed(2)));
-
-  return sign + mag;
-}
-
-function fmtConst(n, isFirstTerm = false) {
-  // קבוע: אם לא ראשון -> מוסיף +/-
-  if (Math.abs(n) < 1e-9) return isFirstTerm ? "0" : "";
-  const sign = n < 0 ? "-" : isFirstTerm ? "" : "+";
-  return sign + String(Number(Math.abs(n).toFixed(2)));
-}
-
-// ===============================
-// f(x) formatter (cubic)
-// ===============================
-
-// ===============================
-// Pretty formatting helpers
-// ===============================
+// -------------------- Formatting (no 1x / -1x) --------------------
 function formatPoly(a, b, c, d) {
   const isZero = (v) => Math.abs(v) < 1e-6;
   const r1 = (v) => Number(v.toFixed(1));
 
-  function term(v, power) {
+  const term = (v, power) => {
     if (isZero(v)) return null;
 
-    // constant
     if (power === 0) return String(r1(v));
 
-    // coefficient rules: 1 -> "", -1 -> "-"
     let coef = "";
     if (Math.abs(v - 1) < 1e-6) coef = "";
     else if (Math.abs(v + 1) < 1e-6) coef = "-";
     else coef = String(r1(v));
 
     const xPart = power === 1 ? "x" : (power === 2 ? "x²" : "x³");
-    return `${coef}${xPart}`; // e.g. "-x²", "2.5x³", "x"
-  }
+    return `${coef}${xPart}`;
+  };
 
-  const parts = [
-    term(a, 3),
-    term(b, 2),
-    term(c, 1),
-    term(d, 0),
-  ].filter(Boolean);
+  const parts = [term(a, 3), term(b, 2), term(c, 1), term(d, 0)].filter(Boolean);
 
   if (parts.length === 0) return "y = 0";
 
   let out = parts[0];
   for (let i = 1; i < parts.length; i++) {
     const t = parts[i];
-    if (t.startsWith("-")) out += " - " + t.slice(1);
-    else out += " + " + t;
+    out += t.startsWith("-") ? ` - ${t.slice(1)}` : ` + ${t}`;
   }
   return "y = " + out;
 }
 
 function formatDeriv(a, b, c) {
-  // f'(x) = 3ax^2 + 2bx + c
   const A = 3 * a, B = 2 * b, C = c;
   const isZero = (v) => Math.abs(v) < 1e-6;
   const r1 = (v) => Number(v.toFixed(1));
 
-  function term(v, power) {
+  const term = (v, power) => {
     if (isZero(v)) return null;
 
     if (power === 0) return String(r1(v));
@@ -246,104 +196,78 @@ function formatDeriv(a, b, c) {
 
     const xPart = power === 1 ? "x" : "x²";
     return `${coef}${xPart}`;
-  }
+  };
 
-  const parts = [
-    term(A, 2),
-    term(B, 1),
-    term(C, 0),
-  ].filter(Boolean);
+  const parts = [term(A, 2), term(B, 1), term(C, 0)].filter(Boolean);
 
   if (parts.length === 0) return "f'(x) = 0";
 
   let out = parts[0];
   for (let i = 1; i < parts.length; i++) {
     const t = parts[i];
-    if (t.startsWith("-")) out += " - " + t.slice(1);
-    else out += " + " + t;
+    out += t.startsWith("-") ? ` - ${t.slice(1)}` : ` + ${t}`;
   }
   return "f'(x) = " + out;
 }
 
-
-
-// ---------- Game Update ----------
+// -------------------- Game Update --------------------
 function updateGame() {
-  // טקסטי מקדמים
-  const va = document.getElementById("valA");
-  const vb = document.getElementById("valB");
-  const vc = document.getElementById("valC");
-  const vd = document.getElementById("valD");
-  if (va) va.innerText = cf[0].toFixed(1);
-  if (vb) vb.innerText = cf[1].toFixed(1);
-  if (vc) vc.innerText = cf[2].toFixed(1);
-  if (vd) vd.innerText = cf[3].toFixed(1);
+  // update coefficient readouts
+  setElText("valA", cf[0].toFixed(1));
+  setElText("valB", cf[1].toFixed(1));
+  setElText("valC", cf[2].toFixed(1));
+  setElText("valD", cf[3].toFixed(1));
 
-  // טקסט פונקציה + נגזרת (צד הגרף)
-  const eqn = document.getElementById("eqn");
-  const deq = document.getElementById("derivEqn");
-  if (eqn) eqn.innerText = formatPoly(cf[0], cf[1], cf[2], cf[3]);
-  if (deq) deq.innerText = formatDeriv(cf[0], cf[1], cf[2]);
+  // function + derivative text
+  setElText("eqn", formatPoly(cf[0], cf[1], cf[2], cf[3]));
+  setElText("derivEqn", formatDeriv(cf[0], cf[1], cf[2]));
 
-  // עדכון תצוגת "מד חם-קר" + הצלחה
+  // win / hot-cold
   checkWinCondition();
 
-  // עדכון תצוגות צד (נקודה/שיפוע/משיק) בכל מצב
+  // side panel
   updateSidePanel();
 
   draw();
 }
 
 function updateSidePanel() {
-  // מציג:
-  // point: (x0, y0)
-  // m = f'(x0)
-  // tangent: y = m x + b
   const x0 = px;
   const y0 = f(px);
   const m = df(px);
   const b = y0 - m * x0;
 
-  const elPoint = document.getElementById("sidePoint");
-  const elSlope = document.getElementById("sideSlope");
-  const elTangent = document.getElementById("sideTangent");
-  const elFx = document.getElementById("sideFx");
-  const elDfx = document.getElementById("sideDfx");
+  setElText("sideFx", formatPoly(cf[0], cf[1], cf[2], cf[3]));
+  setElText("sideDfx", formatDeriv(cf[0], cf[1], cf[2]));
 
-  if (elFx) elFx.innerText = formatPoly(cf[0], cf[1], cf[2], cf[3]);
-  if (elDfx) elDfx.innerText = formatDeriv(cf[0], cf[1], cf[2]);
-
-  if (elPoint) elPoint.innerText = `נקודה: (x₀,y₀)=(${x0.toFixed(2)}, ${y0.toFixed(2)})`;
-  if (elSlope) elSlope.innerText = `שיפוע: m=f'(x₀)=${m.toFixed(3)}`;
-  if (elTangent)
-    elTangent.innerText = `משיק: y=${m.toFixed(2)}x${b >= 0 ? "+" : ""}${b.toFixed(2)}`;
+  setElText("sidePoint", `נקודה: (x₀,y₀)=(${x0.toFixed(2)}, ${y0.toFixed(2)})`);
+  setElText("sideSlope", `שיפוע: m=f'(x₀)=${m.toFixed(3)}`);
+  setElText("sideTangent", `משיק: y=${m.toFixed(2)}x${b >= 0 ? "+" : ""}${b.toFixed(2)}`);
 }
 
-// ---------- Win / Hot-Cold ----------
+// -------------------- Win / Hot-Cold --------------------
 function checkWinCondition() {
-  const q = bagrutData[currentQ];
+  const q = bagrutData?.[currentQ];
+  if (!q) return;
+
   let dist = 100;
 
-  // כל פעם נחשב "חם/קר" וגם נסנכרן solvedTargets דינמית
   if (q.goal === "hit_targets") {
-    // דינמי: לא "ננעלים" על נקודה שנפתרה.
-    // בכל frame: מי בתוך סף -> נחשב כ-hit, מי לא -> מתבטל.
     const hitNow = [];
-
     let totalError = 0;
 
-    q.targets.forEach((t, i) => {
+    for (let i = 0; i < (q.targets?.length ?? 0); i++) {
+      const t = q.targets[i];
       const val = f(t.x);
       const diff = Math.abs(val - t.y);
       totalError += diff;
-
       if (diff < 0.2) hitNow.push(i);
-    });
+    }
 
-    // זה הקטע החשוב לשאלה 5: הצלחה רק אם *כל* הנקודות hitNow בו זמנית
-    solvedTargets = hitNow.slice();
+    // dynamic: must hit all simultaneously
+    solvedTargets = hitNow;
 
-    // journal: נרשום f(x)=y רק כשהגענו לראשונה לאותה נקודה (ועדיין לא קיים ביומן)
+    // journal: only when the entry doesn't already exist
     solvedTargets.forEach((i) => {
       const t = q.targets[i];
       addJournalEntry(`f(${t.x}) = ${t.y}`);
@@ -352,17 +276,15 @@ function checkWinCondition() {
 
     dist = totalError * 10;
 
-    if (solvedTargets.length === q.targets.length) {
+    if ((q.targets?.length ?? 0) > 0 && solvedTargets.length === q.targets.length) {
       if (q.solvedEq) addJournalEntry("✅ " + q.solvedEq);
       triggerSuccess();
     } else {
-      // אם לא פגענו בכל הנקודות יחד — אין הצלחה
       hideSuccessIfNeeded();
     }
+
   } else {
-    // move_x
     const m = df(px);
-    const y = f(px);
 
     if (q.goal === "min_point") {
       const d2 = d2f(px);
@@ -375,12 +297,11 @@ function checkWinCondition() {
     else hideSuccessIfNeeded();
   }
 
-  // חם/קר מד קרבה
-  const p = Math.max(0, Math.min(100, (1 - dist / 5) * 100));
+  // hot/cold bar
+  const p = clamp((1 - dist / 5) * 100, 0, 100);
   const bar = document.getElementById("proximityBar");
   if (bar) bar.style.width = p + "%";
 
-  // "חם יותר" כשהקרוב — מוסיפים גם טקסט אם קיים
   const hot = document.getElementById("hotColdText");
   if (hot) {
     if (p > 85) hot.innerText = "🔥 חם מאוד!";
@@ -391,7 +312,6 @@ function checkWinCondition() {
 }
 
 function triggerSuccess() {
-  // במקום באמצע: נציג בפינה (מומלץ: אלמנט #successToast)
   const toast = document.getElementById("successToast");
   if (toast) {
     if (!successShown) {
@@ -401,7 +321,6 @@ function triggerSuccess() {
       successShown = true;
     }
   } else {
-    // fallback לישן אם קיים
     const banner = document.getElementById("successBanner");
     if (banner && !banner.classList.contains("show")) {
       banner.classList.add("show");
@@ -413,14 +332,17 @@ function triggerSuccess() {
 
 function hideSuccessIfNeeded() {
   if (!successShown) return;
+
   const toast = document.getElementById("successToast");
   if (toast) toast.classList.remove("show");
+
   const banner = document.getElementById("successBanner");
   if (banner) banner.classList.remove("show");
+
   successShown = false;
 }
 
-// ---------- Journal ----------
+// -------------------- Journal --------------------
 function addJournalEntry(text) {
   const list = document.getElementById("journalList");
   if (!list) return;
@@ -435,41 +357,28 @@ function addJournalEntry(text) {
   list.scrollTop = list.scrollHeight;
 }
 
-// ---------- Drawing ----------
+// -------------------- Drawing --------------------
 function draw() {
   ctx.clearRect(0, 0, W, H);
   drawGrid();
 
+  const q = bagrutData?.[currentQ];
+
   // targets
-  const q = bagrutData[currentQ];
-  if (q.targets) {
+  if (q?.targets) {
     q.targets.forEach((t, i) => {
-      drawTarget(t.x, t.y, t.label, solvedTargets.includes(i));
+      drawTarget(t.x, t.y, t.label ?? "", solvedTargets.includes(i));
     });
   }
 
   // function curve
-  ctx.beginPath();
-  ctx.strokeStyle = "#2563eb";
-  ctx.lineWidth = 3;
+  drawFunctionCurve();
 
-  for (let i = 0; i <= W; i += 4) {
-    const realX = (i - ox) / scale;
-    const realY = f(realX);
-    const screenY = oy - realY * scale;
-    if (i === 0) ctx.moveTo(i, screenY);
-    else ctx.lineTo(i, screenY);
-  }
-  ctx.stroke();
+  // point/tangent tools only if not find_param
+  if (q?.type !== "find_param") {
+    const y = f(px);
+    const m = df(px);
 
-  // point and tangent tools
-  const y = f(px);
-  const m = df(px);
-
-  // מצבי נקודה (move_x): מציגים משיק/נורמל/סימונים
-  // מצבי פרמטר (find_param): ברירת מחדל לא מציג נקודה,
-  // אבל אתה ביקשת שעדיין יופיעו נוסחאות בצד – זה כבר קורה ב-sidePanel
-  if (q.type !== "find_param") {
     drawTangent(px, y, m);
     drawNormal(px, y, m);
     drawRightAngleMarker(px, y, m);
@@ -488,58 +397,81 @@ function draw() {
 
     updateTrinityDisplay(px, y, m);
   } else {
-    // במצב פרמטרים: מסתירים tooltip אם רוצים
     const tooltip = document.getElementById("holyTrinity");
     if (tooltip) tooltip.style.display = "none";
   }
 }
 
- function drawTarget(x, y, label, isHit) {
-    let sx = ox + x * scale;
-    let sy = oy - y * scale;
+function drawFunctionCurve() {
+  ctx.beginPath();
+  ctx.strokeStyle = "#2563eb";
+  ctx.lineWidth = 3;
 
-    // עיגול מטרה
-    ctx.beginPath();
-    ctx.arc(sx, sy, 8, 0, Math.PI * 2);
+  let started = false;
+  for (let i = 0; i <= W; i += 3) {
+    const realX = (i - ox) / scale;
+    const realY = f(realX);
 
-    if (isHit) {
-        ctx.fillStyle = "#22c55e"; // ירוק מלא
-        ctx.fill();
-    } else {
-        ctx.strokeStyle = "#ef4444"; // אדום ריק
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // עיגול מקווקו מסביב
-        ctx.setLineDash([2, 2]);
-        ctx.beginPath();
-        ctx.arc(sx, sy, 12, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.setLineDash([]);
+    // clipping to avoid crazy spikes
+    if (!Number.isFinite(realY) || Math.abs(realY) > 1e4) {
+      started = false;
+      continue;
     }
 
-    // תווית (A / B / השקה וכו')
-    ctx.fillStyle = "#64748b";
-    ctx.font = "12px Rubik";
-    ctx.fillText(label, sx + 10, sy - 10);
+    const screenY = oy - realY * scale;
+    if (!started) {
+      ctx.moveTo(i, screenY);
+      started = true;
+    } else {
+      ctx.lineTo(i, screenY);
+    }
+  }
 
-    // קואורדינטות מסביב לנקודה (4 צדדים)
-    const xTxt = `x=${Number(x).toFixed(2)}`;
-    const yTxt = `y=${Number(y).toFixed(2)}`;
-
-    ctx.font = "11px Rubik";
-    ctx.fillText(xTxt, sx - 14, sy - 18); // למעלה
-    ctx.fillText(yTxt, sx - 14, sy + 30); // למטה
-    ctx.fillText(xTxt, sx - 56, sy + 5);  // שמאל
-    ctx.fillText(yTxt, sx + 18, sy + 5);  // ימין
+  ctx.stroke();
 }
 
+function drawTarget(x, y, label, isHit) {
+  const sx = ox + x * scale;
+  const sy = oy - y * scale;
 
+  // main circle
+  ctx.beginPath();
+  ctx.arc(sx, sy, 8, 0, Math.PI * 2);
 
+  if (isHit) {
+    ctx.fillStyle = "#22c55e";
+    ctx.fill();
+  } else {
+    ctx.strokeStyle = "#ef4444";
+    ctx.lineWidth = 2;
+    ctx.stroke();
 
+    // dashed outer ring
+    ctx.setLineDash([2, 2]);
+    ctx.beginPath();
+    ctx.arc(sx, sy, 12, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
 
+  // label
+  ctx.fillStyle = "#64748b";
+  ctx.font = "12px Rubik, Arial";
+  if (label) ctx.fillText(label, sx + 10, sy - 10);
+
+  // coordinates around (4 sides)
+  const xTxt = `x=${Number(x).toFixed(2)}`;
+  const yTxt = `y=${Number(y).toFixed(2)}`;
+
+  ctx.font = "11px Rubik, Arial";
+  ctx.fillText(xTxt, sx - 14, sy - 18); // top
+  ctx.fillText(yTxt, sx - 14, sy + 30); // bottom
+  ctx.fillText(xTxt, sx - 56, sy + 5);  // left
+  ctx.fillText(yTxt, sx + 18, sy + 5);  // right
+}
 
 function drawGrid() {
+  // thin grid
   ctx.strokeStyle = "#e2e8f0";
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -554,6 +486,7 @@ function drawGrid() {
   }
   ctx.stroke();
 
+  // axes
   ctx.strokeStyle = "#94a3b8";
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -567,6 +500,7 @@ function drawGrid() {
 function drawTangent(x1, y1, m) {
   const sx = ox + x1 * scale;
   const sy = oy - y1 * scale;
+
   ctx.strokeStyle = "#f97316";
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -578,12 +512,13 @@ function drawTangent(x1, y1, m) {
 function drawNormal(x1, y1, m) {
   const sx = ox + x1 * scale;
   const sy = oy - y1 * scale;
+
   ctx.strokeStyle = "#d946ef";
   ctx.setLineDash([5, 5]);
   ctx.lineWidth = 2;
   ctx.beginPath();
 
-  if (Math.abs(m) < 0.001) {
+  if (Math.abs(m) < 1e-3) {
     ctx.moveTo(sx, 0);
     ctx.lineTo(sx, H);
   } else {
@@ -622,68 +557,60 @@ function updateTrinityDisplay(x, y, m) {
   const tooltip = document.getElementById("holyTrinity");
   if (!tooltip) return;
 
-  const vx = document.getElementById("valX");
-  const vy = document.getElementById("valY");
-  const vm = document.getElementById("valM");
-  const le = document.getElementById("lineEqn");
-
-  if (vx) vx.innerText = `x = ${x.toFixed(2)}`;
-  if (vy) vy.innerText = `y = ${y.toFixed(2)}`;
-  if (vm) vm.innerText = `m = ${m.toFixed(2)}`;
+  setElText("valX", `x = ${x.toFixed(2)}`);
+  setElText("valY", `y = ${y.toFixed(2)}`);
+  setElText("valM", `m = ${m.toFixed(2)}`);
 
   const b = y - m * x;
-  if (le) le.innerText = `משיק: y=${m.toFixed(1)}x${b >= 0 ? "+" : ""}${b.toFixed(1)}`;
+  setElText("lineEqn", `משיק: y=${m.toFixed(1)}x${b >= 0 ? "+" : ""}${b.toFixed(1)}`);
 
   const sx = ox + x * scale;
   const sy = oy - y * scale;
+
   tooltip.style.left = sx + "px";
   tooltip.style.top = sy + "px";
   tooltip.style.display = "flex";
 }
 
-// ---------- Menu / Load Questions ----------
+// -------------------- Menu / Questions --------------------
 function initMenu() {
   const sel = document.getElementById("qSelect");
-  if (!sel) return;
+  if (!sel || !Array.isArray(bagrutData)) return;
+
   sel.innerHTML = "";
   bagrutData.forEach((q, i) => {
     const opt = document.createElement("option");
     opt.value = i;
-    opt.text = q.t;
+    opt.text = q.t ?? `שאלה ${i + 1}`;
     sel.appendChild(opt);
   });
 }
 
 function loadQ(idx) {
+  if (!Array.isArray(bagrutData) || !bagrutData[idx]) return;
+
   currentQ = idx;
   const q = bagrutData[idx];
 
-  const sel = document.getElementById("qSelect");
-  if (sel) sel.value = idx;
+  setElValue("qSelect", idx);
+  setElText("qCounter", `שאלה ${idx + 1}`);
+  setElText("qText", q.d ?? "");
 
-  const counter = document.getElementById("qCounter");
-  if (counter) counter.innerText = `שאלה ${idx + 1}`;
-
-  const qt = document.getElementById("qText");
-  if (qt) qt.innerText = q.d;
-
+  // clear journal
   const journal = document.getElementById("journalList");
   if (journal) journal.innerHTML = "";
 
-  // איפוס solvedTargets + success
+  // reset solved + success
   solvedTargets = [];
   hideSuccessIfNeeded();
 
   // reset params
-  cf = [...q.p];
-  const mA = document.getElementById("mA");
-  const mB = document.getElementById("mB");
-  const mC = document.getElementById("mC");
-  const mD = document.getElementById("mD");
-  if (mA) mA.value = cf[0];
-  if (mB) mB.value = cf[1];
-  if (mC) mC.value = cf[2];
-  if (mD) mD.value = cf[3];
+  cf = [...(q.p ?? [0, 1, 0, 0])];
+
+  setElValue("mA", cf[0]);
+  setElValue("mB", cf[1]);
+  setElValue("mC", cf[2]);
+  setElValue("mD", cf[3]);
 
   // unlock all then lock needed
   ["mA", "mB", "mC", "mD"].forEach((id) => {
@@ -692,10 +619,10 @@ function loadQ(idx) {
   });
 
   if (q.locked) {
-    if (q.locked.includes("a") && mA) mA.disabled = true;
-    if (q.locked.includes("b") && mB) mB.disabled = true;
-    if (q.locked.includes("c") && mC) mC.disabled = true;
-    if (q.locked.includes("d") && mD) mD.disabled = true;
+    if (q.locked.includes("a")) { const el = document.getElementById("mA"); if (el) el.disabled = true; }
+    if (q.locked.includes("b")) { const el = document.getElementById("mB"); if (el) el.disabled = true; }
+    if (q.locked.includes("c")) { const el = document.getElementById("mC"); if (el) el.disabled = true; }
+    if (q.locked.includes("d")) { const el = document.getElementById("mD"); if (el) el.disabled = true; }
   }
 
   // X slider visibility
@@ -704,8 +631,7 @@ function loadQ(idx) {
 
   if (q.type === "move_x") {
     px = -1;
-    const sx = document.getElementById("mainX");
-    if (sx) sx.value = px;
+    setElValue("mainX", px);
     if (xCont) xCont.style.display = "flex";
     if (tri) tri.style.display = "flex";
   } else {
@@ -717,43 +643,52 @@ function loadQ(idx) {
 }
 
 function loadQuestionFromSelect() {
-  loadQ(parseInt(document.getElementById("qSelect").value));
+  const sel = document.getElementById("qSelect");
+  if (!sel) return;
+  loadQ(parseInt(sel.value, 10));
 }
+
 function nextQuestion() {
+  if (!Array.isArray(bagrutData)) return;
   if (currentQ < bagrutData.length - 1) loadQ(currentQ + 1);
 }
 
-// ---------- Audio ----------
+// -------------------- Audio --------------------
 function initAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 }
 
 function playTone(freq, duration) {
   if (isMuted || !audioCtx) return;
+
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
+
   osc.connect(gain);
   gain.connect(audioCtx.destination);
+
   osc.frequency.value = freq;
   gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
   osc.start();
   osc.stop(audioCtx.currentTime + duration);
 }
 
-// ---------- Animation / Zoom ----------
-function animate() {
-  /* requestAnimationFrame(animate); */
+// -------------------- Zoom --------------------
+function zoomIn() { scale *= 1.1; draw(); }
+function zoomOut() { scale /= 1.1; draw(); }
+function resetZoom() { scale = baseScale; draw(); }
+
+// -------------------- Helpers --------------------
+function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+function setElText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = text;
 }
-function zoomIn() {
-  scale *= 1.1;
-  draw();
-}
-function zoomOut() {
-  scale /= 1.1;
-  draw();
-}
-function resetZoom() {
-  scale = baseScale;
-  draw();
+
+function setElValue(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.value = value;
 }
