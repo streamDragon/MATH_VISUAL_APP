@@ -3,39 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>מערכת חקר פונקציות</title>
+    <title>מערכת חקר פונקציות - גרסה מלאה</title>
     <style>
-        /* === עיצוב (STYLE) === */
-        :root { --primary:#2563eb; --success:#22c55e; --purple:#9333ea; --orange:#f97316; --bg:#f8fafc; --panel-bg:#ffffff; --border:#cbd5e1; }
+        :root {
+            --primary: #2563eb;    /* כחול */
+            --success: #22c55e;    /* ירוק */
+            --purple: #9333ea;     /* סגול לאנך */
+            --orange: #f97316;     /* כתום למשיק */
+            --bg: #f8fafc;
+            --panel-bg: #ffffff;
+            --border: #cbd5e1;
+        }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin:0; padding:0; font-family:'Segoe UI',sans-serif; background:var(--bg); height:100vh; width:100vw; display:flex; flex-direction:row; overflow:hidden; user-select:none; }
-        #graph-container { flex:1; position:relative; background:white; cursor:crosshair; height:100%; touch-action:none; }
-        canvas { display:block; width:100%; height:100%; }
-        #sidebar { width:380px; background:var(--panel-bg); border-right:1px solid var(--border); display:flex; flex-direction:column; height:100%; box-shadow:-2px 0 10px rgba(0,0,0,0.05); z-index:10; }
-        .sidebar-header { padding:15px; background:#f1f5f9; border-bottom:1px solid var(--border); flex-shrink:0; }
-        select { width:100%; padding:10px; font-size:1rem; border:1px solid #94a3b8; border-radius:6px; background:white; cursor:pointer; margin-top:5px; }
-        #success-area { display:none; margin-top:10px; background:#dcfce7; padding:10px; border-radius:6px; border:1px solid var(--success); animation:slideDown 0.3s ease-out; }
-        .success-msg { text-align:center; margin-bottom:5px; font-weight:bold; color:#14532d; }
-        #btn-next { background:var(--success); color:white; border:none; padding:10px; font-size:1rem; font-weight:bold; border-radius:6px; cursor:pointer; width:100%; display:flex; justify-content:center; align-items:center; gap:10px; }
-        #btn-next:hover { background:#16a34a; }
-        @keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
-        .scroll-content { flex:1; overflow-y:auto; padding:15px; }
-        .card { background:white; border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:15px; }
-        .card h3 { margin:0 0 8px 0; font-size:1.1rem; color:#1e293b; border-bottom:1px solid #eee; padding-bottom:5px; }
-        .card p { margin:0; font-size:0.95rem; color:#475569; line-height:1.5; white-space:pre-line; }
-        .tip-box { font-size:0.85rem; color:#64748b; margin-bottom:10px; text-align:center; background:#f1f5f9; padding:5px; border-radius:4px; }
-        .point-card { background:#fff7ed; border-color:#fdba74; } .point-card h3 { color:var(--orange); }
-        .params-legend { display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:0.8rem; color:#64748b; margin-bottom:10px; background:#f8fafc; padding:8px; border-radius:6px; }
-        .control-row { display:flex; align-items:center; margin-bottom:12px; }
-        .control-row label { font-weight:bold; width:25px; font-family:monospace; font-size:1.1rem; }
-        input[type=range] { flex:1; margin:0 10px; height:30px; cursor:pointer; }
-        .val-disp { width:45px; text-align:left; font-family:monospace; font-weight:bold; color:var(--primary); font-size:0.9rem; }
-        .toggle-btn { width:100%; padding:12px; background:white; border:2px solid var(--purple); color:var(--purple); border-radius:8px; font-weight:bold; cursor:pointer; margin-bottom:15px; transition:all 0.2s; }
-        .toggle-btn.active { background:var(--purple); color:white; }
-        #normalControls { border-color:var(--purple); } #normalControls h3 { color:var(--purple); }
-        .slope-prod-box { font-size:0.95rem; margin-bottom:10px; background:#f3e8ff; padding:8px; border-radius:4px; border:1px solid #d8b4fe; text-align:center; }
-        #slopeProd { font-weight:bold; font-family:monospace; font-size:1.1rem; direction:ltr; }
-        @media (max-width: 768px) { body { flex-direction:column; } #graph-container { height:45vh; border-bottom:2px solid #cbd5e1; } #sidebar { width:100%; height:55vh; border-right:none; } }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            height: 100vh; width: 100vw;
+            display: flex;
+            flex-direction: row; 
+            overflow: hidden;
+            user-select: none; /* מונע סימון טקסט בזמן גרירה */
+        }
+
+        /* --- אזור הגרף --- */
+        #graph-container {
+            flex: 1;
+            position: relative;
+            background: white;
+            cursor: crosshair;
+            height: 100%;
+            touch-action: none; /* קריטי לגרירה במובייל */
+        }
+        canvas { display: block; width: 100%; height: 100%; }
+
+        /* --- סרגל כלים --- */
+        #sidebar {
+            width: 380px;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding: 15px;
+            background: #f1f5f9;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0; 
+        }
+
+        select {
+            width: 100%; padding: 10px; font-size: 1rem;
+            border: 1px solid #94a3b8; border-radius: 6px;
+            background: white; cursor: pointer;
+            margin-top: 5px;
+        }
+
+        /* הודעת הצלחה וכפתור הבא - למעלה */
+        #success-area {
+            display: none;
+            margin-top: 10px;
+            background: #dcfce7;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--success);
+            animation: slideDown 0.3s ease-out;
+        }
+        #btn-next {
+            background: var(--success); color: white; border: none;
+            padding: 10px; font-size: 1rem; font-weight: bold;
+            border-radius: 6px; cursor: pointer; width: 100%;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        #btn-next:hover { background: #16a34a; }
+        @keyframes slideDown { from { opacity:0; transform: translateY(-10px); } to { opacity:1; transform: translateY(0); } }
+
+        .scroll-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .card {
+            background: white; border: 1px solid var(--border);
+            border-radius: 8px; padding: 12px; margin-bottom: 15px;
+        }
+        .card h3 { margin: 0 0 8px 0; font-size: 1.1rem; color: #1e293b; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .card p { margin: 0; font-size: 0.95rem; color: #475569; line-height: 1.5; white-space: pre-line; }
+
+        /* מקרא פרמטרים */
+        .params-legend {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+            font-size: 0.8rem; color: #64748b; margin-bottom: 10px;
+            background: #f8fafc; padding: 8px; border-radius: 6px;
+        }
+        .legend-item b { color: #334155; }
+
+        .control-row {
+            display: flex; align-items: center; margin-bottom: 12px;
+        }
+        .control-row label { 
+            font-weight: bold; width: 25px; font-family: monospace; font-size: 1.1rem;
+        }
+        input[type=range] {
+            flex: 1; margin: 0 10px; height: 30px; cursor: pointer;
+        }
+        .val-disp { 
+            width: 45px; text-align: left; font-family: monospace; 
+            font-weight: bold; color: var(--primary); font-size: 0.9rem;
+        }
+
+        .toggle-btn {
+            width: 100%; padding: 12px;
+            background: white; border: 2px solid var(--purple); color: var(--purple);
+            border-radius: 8px; font-weight: bold; cursor: pointer;
+            margin-bottom: 15px; transition: all 0.2s;
+        }
+        .toggle-btn.active { background: var(--purple); color: white; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            #graph-container { height: 45vh; border-bottom: 2px solid #cbd5e1; }
+            #sidebar { width: 100%; height: 55vh; border-right: none; }
+        }
     </style>
 </head>
 <body>
@@ -45,67 +141,524 @@
     </div>
 
     <div id="sidebar">
+        
         <div class="sidebar-header">
-            <label>בחר משימה:</label>
+            <label style="font-weight:bold; color:#334155;">בחר משימה:</label>
             <select id="questionsMenu"></select>
+
             <div id="success-area">
-                <div class="success-msg">🎉 כל הכבוד! הצלחת!</div>
-                <button id="btn-next" onclick="nextQuestion()">עבור לשאלה הבאה &larr;</button>
+                <div style="text-align:center; margin-bottom:5px; font-weight:bold; color:#14532d;">🎉 כל הכבוד! הצלחת!</div>
+                <button id="btn-next" onclick="nextQuestion()">
+                    <span>עבור לשאלה הבאה</span>
+                    <span>&larr;</span>
+                </button>
             </div>
         </div>
 
         <div class="scroll-content">
-            <div class="card" style="border-right: 4px solid #2563eb;">
+            
+            <div class="card" style="border-right: 4px solid var(--primary);">
                 <h3 id="qTitle">...</h3>
                 <p id="qDesc">...</p>
             </div>
 
-            <div class="tip-box">
+            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center; background:#f1f5f9; padding:5px; border-radius:4px;">
                 💡 <b>גרירה:</b> הזיזו את הנקודה הכחולה לשינוי X,<br>או את הרקע לשינוי הגובה (d).
             </div>
 
-            <div class="card point-card">
-                <h3>📍 שליטה בנקודה</h3>
+            <div class="card" style="background: #fff7ed; border-color: #fdba74;">
+                <h3 style="color:var(--orange)">📍 שליטה בנקודה</h3>
                 <div class="control-row">
                     <label>X</label>
-                    <input type="range" id="inpX" min="-5" max="5" step="0.1">
+                    <input type="range" id="inpX" min="-5" max="5" step="0.1" oninput="updateSystem()">
                     <span class="val-disp" id="valX">0</span>
                 </div>
             </div>
 
-            <button class="toggle-btn" id="btnNormalToggle">📐 מעבדת האנך (לחץ לפתיחה)</button>
-            <div class="card" id="normalControls" style="display:none;">
-                <h3>כיוון האנך</h3>
-                <div class="slope-prod-box">
+            <button class="toggle-btn" id="btnNormalToggle" onclick="toggleNormal()">📐 מעבדת האנך (לחץ לפתיחה)</button>
+            
+            <div class="card" id="normalControls" style="display:none; border-color: var(--purple);">
+                <h3 style="color:var(--purple)">כיוון האנך</h3>
+                <div style="font-size: 0.95rem; margin-bottom: 10px; background: #f3e8ff; padding: 8px; border-radius: 4px; border:1px solid #d8b4fe; text-align: center;">
                     מכפלת שיפועים $(m \cdot m_2)$:<br>
-                    <span id="slopeProd"></span>
+                    <span id="slopeProd" style="font-weight:bold; font-family:monospace; font-size:1.1rem; direction:ltr;"></span>
                 </div>
                 <div class="control-row">
                     <label>m2</label>
-                    <input type="range" id="inpNormalSlope" min="-10" max="10" step="0.1" value="1">
+                    <input type="range" id="inpNormalSlope" min="-10" max="10" step="0.1" value="1" oninput="updateSystem()">
                     <span class="val-disp" id="valNormal">1</span>
                 </div>
             </div>
 
             <div class="card">
                 <h3>🛠 בניית הפונקציה</h3>
+                
                 <div class="params-legend">
-                    <div><b>a</b>: עקמומיות</div>
-                    <div><b>b</b>: הזזה אופקית</div>
-                    <div><b>c</b>: שיפוע בחיתוך</div>
-                    <div><b>d</b>: גובה</div>
+                    <div class="legend-item"><b>a</b>: עקמומיות</div>
+                    <div class="legend-item"><b>b</b>: הזזה אופקית</div>
+                    <div class="legend-item"><b>c</b>: שיפוע בחיתוך</div>
+                    <div class="legend-item"><b>d</b>: גובה (למעלה/למטה)</div>
                 </div>
-                <div class="control-row"><label>a</label><input type="range" id="inpA" min="-2" max="2" step="0.1"><span class="val-disp" id="valA">0</span></div>
-                <div class="control-row"><label>b</label><input type="range" id="inpB" min="-3" max="3" step="0.1"><span class="val-disp" id="valB">0</span></div>
-                <div class="control-row"><label>c</label><input type="range" id="inpC" min="-5" max="5" step="0.1"><span class="val-disp" id="valC">0</span></div>
-                <div class="control-row"><label>d</label><input type="range" id="inpD" min="-5" max="5" step="0.1"><span class="val-disp" id="valD">0</span></div>
+
+                <div class="control-row"><label>a</label><input type="range" id="inpA" min="-2" max="2" step="0.1" oninput="updateSystem()"><span class="val-disp" id="valA">0</span></div>
+                <div class="control-row"><label>b</label><input type="range" id="inpB" min="-3" max="3" step="0.1" oninput="updateSystem()"><span class="val-disp" id="valB">0</span></div>
+                <div class="control-row"><label>c</label><input type="range" id="inpC" min="-5" max="5" step="0.1" oninput="updateSystem()"><span class="val-disp" id="valC">0</span></div>
+                <div class="control-row"><label>d</label><input type="range" id="inpD" min="-5" max="5" step="0.1" oninput="updateSystem()"><span class="val-disp" id="valD">0</span></div>
             </div>
+
             <div style="height: 50px;"></div>
         </div>
     </div>
 
-    <script src="questions.js"></script>
-    <script src="engine.js"></script>
+<script>
+/* === מאגר השאלות === */
+const QUESTIONS = [
+    {
+        title: "שלב 1: היכרות ומשחקים",
+        desc: "ברוכים הבאים!\n1. שחקו עם הסליידרים a,b,c,d כדי לעצב את הפונקציה.\n2. גררו את הנקודה הכחולה כדי לטייל על הגרף.\n3. גררו את הרקע הלבן למעלה/למטה כדי להרים או להוריד את הפונקציה.",
+        params: [0.5, 0, -2, 0], 
+        goal: "free"
+    },
+    {
+        title: "משיק אופקי (קיצון)",
+        desc: "הזיזו את הנקודה X עד שהמשיק הכתום יהיה ישר לגמרי (מאוזן).\nבמצב זה השיפוע הוא 0.",
+        params: [0.5, 0, -2, 0], 
+        goal: "slope_zero"
+    },
+    {
+        title: "שיפוע 2 בפרבולה",
+        desc: "נתונה הפונקציה. עליכם למצוא היכן השיפוע (m) שווה בדיוק ל-2.",
+        params: [0, 1, 0, -2], 
+        goal: "slope_match",
+        targetSlope: 2
+    },
+    {
+        title: "מעבדת האנך - 90 מעלות",
+        desc: "פתחו את 'מעבדת האנך' (למטה).\nשנו את שיפוע האנך (m2) עד שמכפלת השיפועים תהיה 1-.\nזה יוצר זווית ישרה (ריבוע ירוק).",
+        params: [0, 0.5, 0, 0], 
+        goal: "normal_match"
+    },
+    {
+        title: "צלף: פגיעה במטרה",
+        desc: "הזיזו את הפונקציה למעלה/למטה (בעזרת סליידר d או גרירת הרקע) עד שהקו הכחול יעבור דרך הנקודה האדומה.",
+        params: [0, 1, -2, 0],
+        targets: [{x: 2, y: 4}],
+        goal: "hit_target",
+        locked: ["inpA", "inpB", "inpC", "inpX"]
+    },
+    {
+        title: "האתגר הכפול",
+        desc: "פגעו בשתי הנקודות יחד! שנו את b (רוחב) ואת d (גובה).",
+        params: [0, 0, 0, 0],
+        targets: [{x: -1, y: 2}, {x: 2, y: 5}], 
+        goal: "hit_target",
+        locked: ["inpA", "inpC"]
+    }
+];
 
+/* === משתנים גלובליים === */
+let cvs, ctx, width, height, scale = 40, originX, originY;
+let a=0, b=0, c=0, d=0, xVal=0;
+let showNormal = false;
+let currQIndex = 0;
+let isWin = false;
+
+// משתנים לגרירה
+let isDragging = false;
+let dragTarget = null; // 'point' or 'bg'
+let lastMouseY = 0;
+
+/* === אתחול === */
+window.onload = function() {
+    cvs = document.getElementById('cvs');
+    ctx = cvs.getContext('2d');
+    
+    // מאזיני גרירה (עכבר + טאץ')
+    cvs.addEventListener('mousedown', startDrag);
+    cvs.addEventListener('touchstart', (e) => startDrag(e.touches[0]));
+    window.addEventListener('mousemove', doDrag);
+    window.addEventListener('touchmove', (e) => doDrag(e.touches[0]));
+    window.addEventListener('mouseup', endDrag);
+    window.addEventListener('touchend', endDrag);
+
+    // בניית תפריט
+    const menu = document.getElementById('questionsMenu');
+    QUESTIONS.forEach((q, idx) => {
+        let opt = document.createElement('option');
+        opt.value = idx;
+        opt.text = `${idx+1}. ${q.title}`;
+        menu.appendChild(opt);
+    });
+    menu.onchange = (e) => loadQuestion(parseInt(e.target.value));
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    loadQuestion(0);
+    requestAnimationFrame(loop);
+};
+
+/* === לוגיקת גרירה === */
+function startDrag(e) {
+    const rect = cvs.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    
+    let clickX = (mx - originX) / scale;
+    let clickY = (originY - my) / scale;
+    
+    // חישוב מיקום הנקודה על המסך
+    let curY = a*xVal**3 + b*xVal**2 + c*xVal + d;
+    let px = originX + xVal * scale;
+    let py = originY - curY * scale;
+
+    // בדיקת מרחק מהנקודה הכחולה (רדיוס 20 פיקסלים לנוחות)
+    let dist = Math.sqrt((mx - px)**2 + (my - py)**2);
+    
+    if (dist < 30 && !document.getElementById('inpX').disabled) {
+        isDragging = true;
+        dragTarget = 'point';
+    } else if (!document.getElementById('inpD').disabled) {
+        // אם לא לחצנו על הנקודה, מזיזים את ה-D
+        isDragging = true;
+        dragTarget = 'bg';
+    }
+    
+    lastMouseY = my;
+}
+
+function doDrag(e) {
+    if (!isDragging) return;
+    
+    const rect = cvs.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    
+    if (dragTarget === 'point') {
+        // חישוב X חדש
+        let newX = (mx - originX) / scale;
+        newX = Math.max(-5, Math.min(5, newX)); // הגבלת גבולות
+        document.getElementById('inpX').value = newX;
+        xVal = newX;
+    } else if (dragTarget === 'bg') {
+        // חישוב שינוי ב-D
+        let deltaY = (my - lastMouseY) / scale; 
+        // גרירה למטה (delta חיובי) צריכה להקטין את Y בגרף שלנו, אז D יורד
+        let newD = d - deltaY;
+        newD = Math.max(-5, Math.min(5, newD));
+        document.getElementById('inpD').value = newD;
+        d = newD;
+    }
+    
+    lastMouseY = my;
+    updateSystem();
+}
+
+function endDrag() {
+    isDragging = false;
+    dragTarget = null;
+}
+
+function resizeCanvas() {
+    const container = document.getElementById('graph-container');
+    width = cvs.width = container.offsetWidth;
+    height = cvs.height = container.offsetHeight;
+    originX = width / 2;
+    originY = height / 2;
+    scale = (width < 500) ? 30 : 40; 
+    updateSystem();
+}
+
+function loadQuestion(idx) {
+    currQIndex = idx;
+    isWin = false;
+    document.getElementById('questionsMenu').value = idx;
+    document.getElementById('success-area').style.display = 'none';
+
+    const q = QUESTIONS[idx];
+    document.getElementById('qTitle').innerText = q.title;
+    document.getElementById('qDesc').innerText = q.desc;
+
+    [a, b, c, d] = q.params;
+    xVal = 0;
+
+    document.getElementById('inpA').value = a;
+    document.getElementById('inpB').value = b;
+    document.getElementById('inpC').value = c;
+    document.getElementById('inpD').value = d;
+    document.getElementById('inpX').value = xVal;
+
+    // ניהול נעילות
+    const allInputs = ['inpA', 'inpB', 'inpC', 'inpD', 'inpX'];
+    allInputs.forEach(id => {
+        const el = document.getElementById(id);
+        el.disabled = false;
+        el.parentElement.style.opacity = "1";
+    });
+
+    if (q.locked) {
+        q.locked.forEach(id => {
+            const el = document.getElementById(id);
+            el.disabled = true;
+            el.parentElement.style.opacity = "0.5";
+        });
+    }
+    updateSystem();
+}
+
+function toggleNormal() {
+    showNormal = !showNormal;
+    const btn = document.getElementById('btnNormalToggle');
+    const panel = document.getElementById('normalControls');
+    if (showNormal) {
+        btn.classList.add('active');
+        btn.innerText = "📐 מעבדת האנך (פתוח)";
+        panel.style.display = 'block';
+    } else {
+        btn.classList.remove('active');
+        btn.innerText = "📐 מעבדת האנך (לחץ לפתיחה)";
+        panel.style.display = 'none';
+    }
+    updateSystem();
+}
+
+function updateSystem() {
+    a = parseFloat(document.getElementById('inpA').value);
+    b = parseFloat(document.getElementById('inpB').value);
+    c = parseFloat(document.getElementById('inpC').value);
+    d = parseFloat(document.getElementById('inpD').value);
+    xVal = parseFloat(document.getElementById('inpX').value);
+
+    document.getElementById('valA').innerText = a.toFixed(1);
+    document.getElementById('valB').innerText = b.toFixed(1);
+    document.getElementById('valC').innerText = c.toFixed(1);
+    document.getElementById('valD').innerText = d.toFixed(1);
+    document.getElementById('valX').innerText = xVal.toFixed(1);
+    
+    checkWin();
+}
+
+function loop() {
+    draw();
+    requestAnimationFrame(loop);
+}
+
+function draw() {
+    ctx.clearRect(0, 0, width, height);
+    drawGrid();
+
+    // === ציור מטרות ===
+    const q = QUESTIONS[currQIndex];
+    if (q.targets) {
+        q.targets.forEach(t => {
+            let tx = originX + t.x * scale;
+            let ty = originY - t.y * scale;
+            
+            // נקודה אדומה
+            ctx.fillStyle = '#ef4444'; 
+            ctx.beginPath(); ctx.arc(tx, ty, 6, 0, Math.PI*2); ctx.fill();
+            
+            // טקסט קואורדינטות ליד המטרה (חדש!)
+            ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+            ctx.fillRect(tx + 8, ty - 18, 50, 16); // רקע לטקסט
+            ctx.fillStyle = '#dc2626';
+            ctx.font = 'bold 12px monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText(`(${t.x},${t.y})`, tx + 10, ty - 6);
+
+            // בדיקת פגיעה
+            let yAtT = a*t.x**3 + b*t.x**2 + c*t.x + d;
+            if (Math.abs(yAtT - t.y) < 0.25) {
+                ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.arc(tx, ty, 10, 0, Math.PI*2); ctx.stroke();
+            }
+        });
+    }
+
+    // === ציור הפונקציה (קו עבה) ===
+    ctx.lineWidth = 5;  
+    ctx.strokeStyle = "#2563eb";
+    ctx.beginPath();
+    let started = false;
+    for (let px = 0; px < width; px+=2) {
+        let mx = (px - originX) / scale;
+        let my = a*mx**3 + b*mx**2 + c*mx + d;
+        let py = originY - my * scale;
+        
+        if (py > -height && py < height*2) {
+            if (!started) { ctx.moveTo(px, py); started = true; }
+            else { ctx.lineTo(px, py); }
+        } else {
+            started = false; 
+        }
+    }
+    ctx.stroke();
+
+    // נתוני הנקודה הנוכחית
+    let curY = a*xVal**3 + b*xVal**2 + c*xVal + d;
+    let px = originX + xVal * scale;
+    let py = originY - curY * scale;
+    let slope = 3*a*xVal**2 + 2*b*xVal + c;
+
+    // === 1. משיק (כתום) ===
+    drawLinearFunc(px, py, slope, "#f97316", false);
+    
+    // === 2. אנך (סגול) ===
+    if (showNormal) {
+        let normalSlope = parseFloat(document.getElementById('inpNormalSlope').value);
+        document.getElementById('valNormal').innerText = normalSlope.toFixed(2);
+        
+        // חישוב והצגת כפל שיפועים
+        let prod = (slope * normalSlope).toFixed(2);
+        const prodEl = document.getElementById('slopeProd');
+        prodEl.innerText = `${slope.toFixed(2)} × ${normalSlope.toFixed(2)} = ${prod}`;
+        
+        // צביעת הטקסט בירוק אם הזווית ישרה
+        let isPerpendicular = Math.abs(slope * normalSlope + 1) < 0.15;
+        prodEl.style.color = isPerpendicular ? "#16a34a" : "#ef4444";
+
+        drawLinearFunc(px, py, normalSlope, "#9333ea", true);
+        
+        // סימון זווית ישרה על הגרף
+        if (isPerpendicular) {
+            drawRightAngleSquare(px, py, Math.atan(slope));
+        }
+    }
+
+    // === הנקודה הראשית (כחולה) ===
+    ctx.fillStyle = "#2563eb"; 
+    ctx.beginPath(); ctx.arc(px, py, 7, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "white"; 
+    ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2); ctx.fill();
+
+    // === "השילוש הקדוש" (טקסט צף צמוד לנקודה) ===
+    let infoText = `(${xVal.toFixed(1)}, ${curY.toFixed(1)}) m=${slope.toFixed(2)}`;
+    
+    ctx.font = "bold 13px sans-serif";
+    let tw = ctx.measureText(infoText).width;
+    
+    // רקע חצי שקוף לטקסט
+    ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+    ctx.strokeStyle = "#cbd5e1";
+    ctx.lineWidth = 1;
+    let bx = px + 12, by = py - 28;
+    
+    // בדיקה שלא יוצא מהמסך
+    if (bx + tw > width) bx = px - tw - 12;
+    if (by < 10) by = py + 20;
+
+    ctx.fillRect(bx, by, tw + 8, 20);
+    ctx.strokeRect(bx, by, tw + 8, 20);
+    
+    ctx.fillStyle = "#0f172a";
+    ctx.textAlign = 'left';
+    ctx.fillText(infoText, bx + 4, by + 14);
+}
+
+// פונקציה לציור קו ישר + נקודות חיתוך צירים
+function drawLinearFunc(cx, cy, m, color, dashed) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    if (dashed) ctx.setLineDash([5, 5]);
+
+    let len = 1000;
+    let angle = Math.atan(-m); 
+    ctx.beginPath();
+    ctx.moveTo(cx - Math.cos(angle)*len, cy - Math.sin(angle)*len);
+    ctx.lineTo(cx + Math.cos(angle)*len, cy + Math.sin(angle)*len);
+    ctx.stroke();
+    ctx.restore();
+
+    // === נקודות חיתוך עם הצירים (אפורות) ===
+    let mathY0 = (originY - cy) / scale;
+    let mathX0 = xVal;
+
+    // חיתוך עם ציר Y (כש X=0)
+    let yIntercept = m * (0 - mathX0) + mathY0;
+    let pyInt = originY - yIntercept * scale;
+    if (pyInt > 0 && pyInt < height) drawInterceptDot(originX, pyInt, color);
+
+    // חיתוך עם ציר X (כש Y=0)
+    if (Math.abs(m) > 0.01) {
+        let xIntercept = mathX0 - (mathY0 / m);
+        let pxXInt = originX + xIntercept * scale;
+        if (pxXInt > 0 && pxXInt < width) drawInterceptDot(pxXInt, originY, color);
+    }
+}
+
+function drawInterceptDot(x, y, borderColor) {
+    ctx.fillStyle = "#64748b"; // אפור
+    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = borderColor; ctx.lineWidth = 1; ctx.stroke();
+}
+
+function drawRightAngleSquare(x, y, angle) {
+    const s = 14;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(-angle);
+    ctx.beginPath();
+    ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 2;
+    ctx.fillStyle = "rgba(34, 197, 94, 0.2)";
+    ctx.moveTo(s, 0); ctx.lineTo(s, -s); ctx.lineTo(0, -s);
+    ctx.stroke(); ctx.fill();
+    ctx.restore();
+}
+
+function drawGrid() {
+    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    for(let x=originX%scale; x<width; x+=scale) { ctx.moveTo(x,0); ctx.lineTo(x,height); }
+    for(let y=originY%scale; y<height; y+=scale) { ctx.moveTo(0,y); ctx.lineTo(width,y); }
+    ctx.stroke();
+    
+    ctx.strokeStyle = '#334155'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, originY); ctx.lineTo(width, originY);
+    ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
+    ctx.stroke();
+
+    ctx.fillStyle = '#334155'; ctx.font = "14px Arial";
+    ctx.fillText("x", width - 15, originY - 5);
+    ctx.fillText("y", originX + 5, 15);
+}
+
+function checkWin() {
+    const q = QUESTIONS[currQIndex];
+    if (q.goal === 'free') return; 
+
+    let m = 3*a*xVal**2 + 2*b*xVal + c;
+    let win = false;
+
+    if (q.goal === 'slope_zero' && Math.abs(m) < 0.1) win = true;
+    else if (q.goal === 'slope_match' && Math.abs(m - q.targetSlope) < 0.15) win = true;
+    else if (q.goal === 'normal_match') {
+        let nm = parseFloat(document.getElementById('inpNormalSlope').value);
+        if (showNormal && Math.abs(m * nm + 1) < 0.15) win = true;
+    }
+    else if (q.goal === 'hit_target') {
+        let allHit = true;
+        q.targets.forEach(t => {
+            let ty = a*t.x**3 + b*t.x**2 + c*t.x + d;
+            if (Math.abs(ty - t.y) > 0.3) allHit = false;
+        });
+        if (allHit) win = true;
+    }
+
+    const successArea = document.getElementById('success-area');
+    if (win && !isWin) {
+        isWin = true;
+        successArea.style.display = 'block'; 
+    } else if (!win) {
+        isWin = false;
+        successArea.style.display = 'none';
+    }
+}
+
+function nextQuestion() {
+    if (currQIndex < QUESTIONS.length - 1) loadQuestion(currQIndex + 1);
+    else alert("סיימת את כל המשימות בהצלחה!");
+}
+</script>
 </body>
 </html>
