@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>מערכת חקר פונקציות מתקדמת</title>
+    <title>מערכת חקר פונקציות - גרסה מלאה</title>
     <style>
         :root {
             --primary: #2563eb;    /* כחול */
@@ -25,7 +25,7 @@
             display: flex;
             flex-direction: row; 
             overflow: hidden;
-            user-select: none; /* מניעת סימון טקסט בגרירה */
+            user-select: none; /* מונע סימון טקסט בזמן גרירה */
         }
 
         /* --- אזור הגרף --- */
@@ -35,7 +35,7 @@
             background: white;
             cursor: crosshair;
             height: 100%;
-            touch-action: none; /* חשוב לגרירה במובייל */
+            touch-action: none; /* קריטי לגרירה במובייל */
         }
         canvas { display: block; width: 100%; height: 100%; }
 
@@ -65,17 +65,21 @@
             margin-top: 5px;
         }
 
+        /* הודעת הצלחה וכפתור הבא - למעלה */
         #success-area {
             display: none;
             margin-top: 10px;
+            background: #dcfce7;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--success);
             animation: slideDown 0.3s ease-out;
         }
         #btn-next {
             background: var(--success); color: white; border: none;
-            padding: 12px; font-size: 1rem; font-weight: bold;
+            padding: 10px; font-size: 1rem; font-weight: bold;
             border-radius: 6px; cursor: pointer; width: 100%;
             display: flex; justify-content: center; align-items: center; gap: 10px;
-            box-shadow: 0 4px 6px rgba(34, 197, 94, 0.3);
         }
         #btn-next:hover { background: #16a34a; }
         @keyframes slideDown { from { opacity:0; transform: translateY(-10px); } to { opacity:1; transform: translateY(0); } }
@@ -93,6 +97,7 @@
         .card h3 { margin: 0 0 8px 0; font-size: 1.1rem; color: #1e293b; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         .card p { margin: 0; font-size: 0.95rem; color: #475569; line-height: 1.5; white-space: pre-line; }
 
+        /* מקרא פרמטרים */
         .params-legend {
             display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
             font-size: 0.8rem; color: #64748b; margin-bottom: 10px;
@@ -133,7 +138,7 @@
 
     <div id="graph-container">
         <canvas id="cvs"></canvas>
-        </div>
+    </div>
 
     <div id="sidebar">
         
@@ -142,8 +147,9 @@
             <select id="questionsMenu"></select>
 
             <div id="success-area">
+                <div style="text-align:center; margin-bottom:5px; font-weight:bold; color:#14532d;">🎉 כל הכבוד! הצלחת!</div>
                 <button id="btn-next" onclick="nextQuestion()">
-                    <span>🎉 כל הכבוד! לשאלה הבאה</span>
+                    <span>עבור לשאלה הבאה</span>
                     <span>&larr;</span>
                 </button>
             </div>
@@ -156,8 +162,8 @@
                 <p id="qDesc">...</p>
             </div>
 
-            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center;">
-                💡 טיפ: ניתן לגרור את הנקודה הכחולה עם העכבר/אצבע
+            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px; text-align: center; background:#f1f5f9; padding:5px; border-radius:4px;">
+                💡 <b>גרירה:</b> הזיזו את הנקודה הכחולה לשינוי X,<br>או את הרקע לשינוי הגובה (d).
             </div>
 
             <div class="card" style="background: #fff7ed; border-color: #fdba74;">
@@ -169,12 +175,13 @@
                 </div>
             </div>
 
-            <button class="toggle-btn" id="btnNormalToggle" onclick="toggleNormal()">📐 מעבדת האנך</button>
+            <button class="toggle-btn" id="btnNormalToggle" onclick="toggleNormal()">📐 מעבדת האנך (לחץ לפתיחה)</button>
             
             <div class="card" id="normalControls" style="display:none; border-color: var(--purple);">
                 <h3 style="color:var(--purple)">כיוון האנך</h3>
-                <div style="font-size: 0.9rem; margin-bottom: 8px; background: #f3e8ff; padding: 5px; border-radius: 4px;">
-                    מכפלת שיפועים: <span id="slopeProd" style="font-weight:bold; direction:ltr;"></span>
+                <div style="font-size: 0.95rem; margin-bottom: 10px; background: #f3e8ff; padding: 8px; border-radius: 4px; border:1px solid #d8b4fe; text-align: center;">
+                    מכפלת שיפועים $(m \cdot m_2)$:<br>
+                    <span id="slopeProd" style="font-weight:bold; font-family:monospace; font-size:1.1rem; direction:ltr;"></span>
                 </div>
                 <div class="control-row">
                     <label>m2</label>
@@ -207,33 +214,33 @@
 /* === מאגר השאלות === */
 const QUESTIONS = [
     {
-        title: "שלב 1: בנייה וחקירה חופשית",
-        desc: "נסו לגרור את הנקודה הכחולה עם העכבר!\n\n1. השתמשו ב-a, b, c, d לבניית הפונקציה.\n2. גררו את הגרף למעלה/למטה כדי לשנות את הגובה (d).",
+        title: "שלב 1: היכרות ומשחקים",
+        desc: "ברוכים הבאים!\n1. שחקו עם הסליידרים a,b,c,d כדי לעצב את הפונקציה.\n2. גררו את הנקודה הכחולה כדי לטייל על הגרף.\n3. גררו את הרקע הלבן למעלה/למטה כדי להרים או להוריד את הפונקציה.",
         params: [0.5, 0, -2, 0], 
         goal: "free"
     },
     {
         title: "משיק אופקי (קיצון)",
-        desc: "מצאו את נקודת הקיצון.\nהזיזו את X עד שהמשיק יהיה שטוח לגמרי (m=0).",
+        desc: "הזיזו את הנקודה X עד שהמשיק הכתום יהיה ישר לגמרי (מאוזן).\nבמצב זה השיפוע הוא 0.",
         params: [0.5, 0, -2, 0], 
         goal: "slope_zero"
     },
     {
         title: "שיפוע 2 בפרבולה",
-        desc: "נתונה הפרבולה: y = x² - 2.\nמצאו את הנקודה שבה השיפוע (m) הוא 2 בדיוק.",
+        desc: "נתונה הפונקציה. עליכם למצוא היכן השיפוע (m) שווה בדיוק ל-2.",
         params: [0, 1, 0, -2], 
         goal: "slope_match",
         targetSlope: 2
     },
     {
         title: "מעבדת האנך - 90 מעלות",
-        desc: "פתחו את 'מעבדת האנך' וכוונו את השיפוע (m2) עד שהמכפלה תהיה 1-.\n(יוצר זווית ישרה).",
+        desc: "פתחו את 'מעבדת האנך' (למטה).\nשנו את שיפוע האנך (m2) עד שמכפלת השיפועים תהיה 1-.\nזה יוצר זווית ישרה (ריבוע ירוק).",
         params: [0, 0.5, 0, 0], 
         goal: "normal_match"
     },
     {
         title: "צלף: פגיעה במטרה",
-        desc: "הזיזו את d (אפשר לגרור את הרקע למעלה/למטה) כדי שהקו הכחול יעבור דרך הנקודה האדומה.",
+        desc: "הזיזו את הפונקציה למעלה/למטה (בעזרת סליידר d או גרירת הרקע) עד שהקו הכחול יעבור דרך הנקודה האדומה.",
         params: [0, 1, -2, 0],
         targets: [{x: 2, y: 4}],
         goal: "hit_target",
@@ -241,7 +248,7 @@ const QUESTIONS = [
     },
     {
         title: "האתגר הכפול",
-        desc: "פגעו בשתי הנקודות יחד! שנו את b ואת d.",
+        desc: "פגעו בשתי הנקודות יחד! שנו את b (רוחב) ואת d (גובה).",
         params: [0, 0, 0, 0],
         targets: [{x: -1, y: 2}, {x: 2, y: 5}], 
         goal: "hit_target",
@@ -249,6 +256,7 @@ const QUESTIONS = [
     }
 ];
 
+/* === משתנים גלובליים === */
 let cvs, ctx, width, height, scale = 40, originX, originY;
 let a=0, b=0, c=0, d=0, xVal=0;
 let showNormal = false;
@@ -258,13 +266,14 @@ let isWin = false;
 // משתנים לגרירה
 let isDragging = false;
 let dragTarget = null; // 'point' or 'bg'
-let lastMouseX = 0, lastMouseY = 0;
+let lastMouseY = 0;
 
+/* === אתחול === */
 window.onload = function() {
     cvs = document.getElementById('cvs');
     ctx = cvs.getContext('2d');
     
-    // אירועי עכבר/מגע
+    // מאזיני גרירה (עכבר + טאץ')
     cvs.addEventListener('mousedown', startDrag);
     cvs.addEventListener('touchstart', (e) => startDrag(e.touches[0]));
     window.addEventListener('mousemove', doDrag);
@@ -272,6 +281,7 @@ window.onload = function() {
     window.addEventListener('mouseup', endDrag);
     window.addEventListener('touchend', endDrag);
 
+    // בניית תפריט
     const menu = document.getElementById('questionsMenu');
     QUESTIONS.forEach((q, idx) => {
         let opt = document.createElement('option');
@@ -293,26 +303,26 @@ function startDrag(e) {
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
     
-    // המרה לקואורדינטות גרף
     let clickX = (mx - originX) / scale;
     let clickY = (originY - my) / scale;
     
-    // חישוב מיקום הנקודה הנוכחית
+    // חישוב מיקום הנקודה על המסך
     let curY = a*xVal**3 + b*xVal**2 + c*xVal + d;
+    let px = originX + xVal * scale;
+    let py = originY - curY * scale;
+
+    // בדיקת מרחק מהנקודה הכחולה (רדיוס 20 פיקסלים לנוחות)
+    let dist = Math.sqrt((mx - px)**2 + (my - py)**2);
     
-    // בדיקה אם לחצנו קרוב לנקודה הכחולה (רדיוס סביר)
-    let dist = Math.sqrt((clickX - xVal)**2 + (clickY - curY)**2);
-    
-    if (dist < 1.0 && !document.getElementById('inpX').disabled) {
+    if (dist < 30 && !document.getElementById('inpX').disabled) {
         isDragging = true;
         dragTarget = 'point';
     } else if (!document.getElementById('inpD').disabled) {
-        // אם לא על הנקודה, מזיזים את הגרף (משנים את D)
+        // אם לא לחצנו על הנקודה, מזיזים את ה-D
         isDragging = true;
         dragTarget = 'bg';
     }
     
-    lastMouseX = mx;
     lastMouseY = my;
 }
 
@@ -326,27 +336,19 @@ function doDrag(e) {
     if (dragTarget === 'point') {
         // חישוב X חדש
         let newX = (mx - originX) / scale;
-        // הגבלה לטווח
-        newX = Math.max(-5, Math.min(5, newX));
-        
+        newX = Math.max(-5, Math.min(5, newX)); // הגבלת גבולות
         document.getElementById('inpX').value = newX;
         xVal = newX;
     } else if (dragTarget === 'bg') {
-        // שינוי D לפי תזוזה אנכית
-        let dyPixels = my - lastMouseY;
-        let dChange = dyPixels / scale; // Y הפוך במסך, אבל גרירה למטה צריכה להוריד את הגרף?
-        // למעשה, אם אני גורר למטה, אני רוצה שהגרף ירד -> D קטן
-        // במחשב: Y עולה למטה. אז dy חיובי = למטה.
-        // בנוסחה: Y = ... + d. במסך: py = originY - Y*scale.
-        // בוא נעשה פשוט: גרירה למעלה (dy שלילי) -> D עולה.
-        
-        let newD = d + (dChange * -1); 
+        // חישוב שינוי ב-D
+        let deltaY = (my - lastMouseY) / scale; 
+        // גרירה למטה (delta חיובי) צריכה להקטין את Y בגרף שלנו, אז D יורד
+        let newD = d - deltaY;
         newD = Math.max(-5, Math.min(5, newD));
         document.getElementById('inpD').value = newD;
         d = newD;
     }
     
-    lastMouseX = mx;
     lastMouseY = my;
     updateSystem();
 }
@@ -385,6 +387,7 @@ function loadQuestion(idx) {
     document.getElementById('inpD').value = d;
     document.getElementById('inpX').value = xVal;
 
+    // ניהול נעילות
     const allInputs = ['inpA', 'inpB', 'inpC', 'inpD', 'inpX'];
     allInputs.forEach(id => {
         const el = document.getElementById(id);
@@ -408,9 +411,11 @@ function toggleNormal() {
     const panel = document.getElementById('normalControls');
     if (showNormal) {
         btn.classList.add('active');
+        btn.innerText = "📐 מעבדת האנך (פתוח)";
         panel.style.display = 'block';
     } else {
         btn.classList.remove('active');
+        btn.innerText = "📐 מעבדת האנך (לחץ לפתיחה)";
         panel.style.display = 'none';
     }
     updateSystem();
@@ -441,7 +446,7 @@ function draw() {
     ctx.clearRect(0, 0, width, height);
     drawGrid();
 
-    // מטרות
+    // === ציור מטרות ===
     const q = QUESTIONS[currQIndex];
     if (q.targets) {
         q.targets.forEach(t => {
@@ -452,22 +457,25 @@ function draw() {
             ctx.fillStyle = '#ef4444'; 
             ctx.beginPath(); ctx.arc(tx, ty, 6, 0, Math.PI*2); ctx.fill();
             
-            // טקסט קואורדינטות למטרה
+            // טקסט קואורדינטות ליד המטרה (חדש!)
+            ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+            ctx.fillRect(tx + 8, ty - 18, 50, 16); // רקע לטקסט
             ctx.fillStyle = '#dc2626';
             ctx.font = 'bold 12px monospace';
-            ctx.fillText(`(${t.x},${t.y})`, tx + 10, ty - 10);
+            ctx.textAlign = 'left';
+            ctx.fillText(`(${t.x},${t.y})`, tx + 10, ty - 6);
 
             // בדיקת פגיעה
             let yAtT = a*t.x**3 + b*t.x**2 + c*t.x + d;
-            if (Math.abs(yAtT - t.y) < 0.2) {
+            if (Math.abs(yAtT - t.y) < 0.25) {
                 ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 3;
                 ctx.beginPath(); ctx.arc(tx, ty, 10, 0, Math.PI*2); ctx.stroke();
             }
         });
     }
 
-    // --- ציור הפונקציה (עבה יותר!) ---
-    ctx.lineWidth = 5;  // שינוי לבקשתך
+    // === ציור הפונקציה (קו עבה) ===
+    ctx.lineWidth = 5;  
     ctx.strokeStyle = "#2563eb";
     ctx.beginPath();
     let started = false;
@@ -485,57 +493,68 @@ function draw() {
     }
     ctx.stroke();
 
-    // נתונים לנקודה הנוכחית
+    // נתוני הנקודה הנוכחית
     let curY = a*xVal**3 + b*xVal**2 + c*xVal + d;
     let px = originX + xVal * scale;
     let py = originY - curY * scale;
     let slope = 3*a*xVal**2 + 2*b*xVal + c;
 
-    // 1. משיק
+    // === 1. משיק (כתום) ===
     drawLinearFunc(px, py, slope, "#f97316", false);
     
-    // 2. אנך (אם פתוח)
+    // === 2. אנך (סגול) ===
     if (showNormal) {
         let normalSlope = parseFloat(document.getElementById('inpNormalSlope').value);
         document.getElementById('valNormal').innerText = normalSlope.toFixed(2);
         
-        // חישוב והצגת הכפל שיפועים
+        // חישוב והצגת כפל שיפועים
         let prod = (slope * normalSlope).toFixed(2);
-        document.getElementById('slopeProd').innerText = 
-            `${slope.toFixed(2)} × ${normalSlope.toFixed(2)} = ${prod}`;
+        const prodEl = document.getElementById('slopeProd');
+        prodEl.innerText = `${slope.toFixed(2)} × ${normalSlope.toFixed(2)} = ${prod}`;
         
-        if (Math.abs(slope * normalSlope + 1) < 0.15) {
-             document.getElementById('slopeProd').style.color = "#22c55e"; // ירוק כשטוב
-        } else {
-             document.getElementById('slopeProd').style.color = "#ef4444";
-        }
+        // צביעת הטקסט בירוק אם הזווית ישרה
+        let isPerpendicular = Math.abs(slope * normalSlope + 1) < 0.15;
+        prodEl.style.color = isPerpendicular ? "#16a34a" : "#ef4444";
 
         drawLinearFunc(px, py, normalSlope, "#9333ea", true);
         
-        if (Math.abs(slope * normalSlope + 1) < 0.15) {
+        // סימון זווית ישרה על הגרף
+        if (isPerpendicular) {
             drawRightAngleSquare(px, py, Math.atan(slope));
         }
     }
 
-    // הנקודה הראשית
+    // === הנקודה הראשית (כחולה) ===
     ctx.fillStyle = "#2563eb"; 
     ctx.beginPath(); ctx.arc(px, py, 7, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = "white"; 
     ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2); ctx.fill();
 
-    // --- השילוש הקדוש (על הנקודה) ---
-    // רקע חצי שקוף לטקסט
-    let textStr = `(${xVal.toFixed(1)}, ${curY.toFixed(1)}) m=${slope.toFixed(2)}`;
-    ctx.font = "bold 13px sans-serif";
-    let tw = ctx.measureText(textStr).width;
+    // === "השילוש הקדוש" (טקסט צף צמוד לנקודה) ===
+    let infoText = `(${xVal.toFixed(1)}, ${curY.toFixed(1)}) m=${slope.toFixed(2)}`;
     
-    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-    ctx.fillRect(px + 10, py - 25, tw + 10, 20);
+    ctx.font = "bold 13px sans-serif";
+    let tw = ctx.measureText(infoText).width;
+    
+    // רקע חצי שקוף לטקסט
+    ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+    ctx.strokeStyle = "#cbd5e1";
+    ctx.lineWidth = 1;
+    let bx = px + 12, by = py - 28;
+    
+    // בדיקה שלא יוצא מהמסך
+    if (bx + tw > width) bx = px - tw - 12;
+    if (by < 10) by = py + 20;
+
+    ctx.fillRect(bx, by, tw + 8, 20);
+    ctx.strokeRect(bx, by, tw + 8, 20);
     
     ctx.fillStyle = "#0f172a";
-    ctx.fillText(textStr, px + 15, py - 10);
+    ctx.textAlign = 'left';
+    ctx.fillText(infoText, bx + 4, by + 14);
 }
 
+// פונקציה לציור קו ישר + נקודות חיתוך צירים
 function drawLinearFunc(cx, cy, m, color, dashed) {
     ctx.save();
     ctx.strokeStyle = color;
@@ -550,16 +569,16 @@ function drawLinearFunc(cx, cy, m, color, dashed) {
     ctx.stroke();
     ctx.restore();
 
-    // נקודות חיתוך צירים (קטנות ואפורות)
+    // === נקודות חיתוך עם הצירים (אפורות) ===
     let mathY0 = (originY - cy) / scale;
     let mathX0 = xVal;
 
-    // חיתוך Y
+    // חיתוך עם ציר Y (כש X=0)
     let yIntercept = m * (0 - mathX0) + mathY0;
     let pyInt = originY - yIntercept * scale;
     if (pyInt > 0 && pyInt < height) drawInterceptDot(originX, pyInt, color);
 
-    // חיתוך X
+    // חיתוך עם ציר X (כש Y=0)
     if (Math.abs(m) > 0.01) {
         let xIntercept = mathX0 - (mathY0 / m);
         let pxXInt = originX + xIntercept * scale;
@@ -567,9 +586,10 @@ function drawLinearFunc(cx, cy, m, color, dashed) {
     }
 }
 
-function drawInterceptDot(x, y, color) {
-    ctx.fillStyle = "#94a3b8"; 
-    ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI*2); ctx.fill();
+function drawInterceptDot(x, y, borderColor) {
+    ctx.fillStyle = "#64748b"; // אפור
+    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = borderColor; ctx.lineWidth = 1; ctx.stroke();
 }
 
 function drawRightAngleSquare(x, y, angle) {
@@ -598,7 +618,7 @@ function drawGrid() {
     ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
     ctx.stroke();
 
-    ctx.fillStyle = '#334155';
+    ctx.fillStyle = '#334155'; ctx.font = "14px Arial";
     ctx.fillText("x", width - 15, originY - 5);
     ctx.fillText("y", originX + 5, 15);
 }
