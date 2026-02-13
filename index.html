@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מעבדה לחקירת פונקציות - המפלצת</title>
+    <title>מעבדה לחקירת פונקציות</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&family=Computer+Modern+Serif&display=swap" rel="stylesheet">
 </head>
@@ -19,17 +19,15 @@
         <div class="trinity-panel">
             <div class="trinity-item">
                 <span class="label">X</span>
-                <span class="value" id="dispX">0</span>
+                <span id="dispX" class="value">0</span>
             </div>
             <div class="trinity-item">
-                <span class="label">Y</span>
-                <span class="value" id="dispY">0</span>
-                <small>(גובה)</small>
+                <span class="label">Y (גובה)</span>
+                <span id="dispY" class="value">0</span>
             </div>
-            <div class="trinity-item slope">
-                <span class="label">M</span>
-                <span class="value" id="dispM">0</span>
-                <small>(שיפוע)</small>
+            <div class="trinity-item slope-highlight">
+                <span class="label">M (שיפוע)</span>
+                <span id="dispM" class="value">0</span>
             </div>
         </div>
     </header>
@@ -43,7 +41,7 @@
                     <button id="btnNext" class="nav-btn">הבא ➡️</button>
                 </div>
                 <h2 id="questionTitle">טוען שאלה...</h2>
-                <div id="questionText">אנא המתן...</div>
+                <div id="questionText">אנא המתן לטעינת הנתונים...</div>
                 <div id="successMessage"></div>
             </div>
             
@@ -54,39 +52,40 @@
 
         <div class="sidebar">
             <div class="panel controls">
-                <h3>🎛️ בנה את הפונקציה</h3>
+                <h3>🎛️ פרמטרים של הפונקציה</h3>
                 <div class="control-group">
-                    <label>a <small>(מקדם x³)</small> <span id="valA">1</span></label>
-                    <input type="range" id="paramA" min="-2" max="2" step="0.1" value="1">
+                    <label>a: <span id="valA">0</span></label>
+                    <input type="range" id="paramA" min="-2" max="2" step="0.1">
                 </div>
                 <div class="control-group">
-                    <label>b <small>(מקדם x²)</small> <span id="valB">0</span></label>
-                    <input type="range" id="paramB" min="-3" max="3" step="0.1" value="0">
+                    <label>b: <span id="valB">0</span></label>
+                    <input type="range" id="paramB" min="-3" max="3" step="0.1">
                 </div>
                 <div class="control-group">
-                    <label>c <small>(מקדם x)</small> <span id="valC">0</span></label>
-                    <input type="range" id="paramC" min="-5" max="5" step="0.1" value="0">
+                    <label>c: <span id="valC">0</span></label>
+                    <input type="range" id="paramC" min="-5" max="5" step="0.1">
                 </div>
                 <div class="control-group">
-                    <label>d <small>(חופשי)</small> <span id="valD">0</span></label>
-                    <input type="range" id="paramD" min="-5" max="5" step="0.1" value="0">
+                    <label>d: <span id="valD">0</span></label>
+                    <input type="range" id="paramD" min="-5" max="5" step="0.1">
                 </div>
             </div>
 
             <div class="panel x-control">
-                <h3>📍 טייל על הגרף</h3>
+                <h3>📍 חקירת נקודה</h3>
                 <div class="control-group">
-                    <label>מיקום ה-X <span id="valX">0</span></label>
-                    <input type="range" id="paramX" min="-6" max="6" step="0.1" value="0">
+                    <label>מיקום ה-X: <span id="valX">0</span></label>
+                    <input type="range" id="paramX" min="-6" max="6" step="0.1">
                 </div>
-                <div class="tangent-info" dir="ltr" id="tangentEqn"></div>
+                <div class="tangent-eqn-box" dir="ltr">
+                    <strong>Tangent Equation:</strong>
+                    <div id="tangentEqn">y - y₁ = m(x - x₁)</div>
+                </div>
             </div>
 
             <div class="panel journal">
-                <h3>📜 יומן משוואות</h3>
-                <div class="journal-scroll">
-                    <ul id="journalList"></ul>
-                </div>
+                <h3>📜 יומן הצלחות</h3>
+                <ul id="journalList"></ul>
             </div>
         </div>
     </div>
