@@ -3,102 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>מעבדת חקירת פונקציות - הדור הבא</title>
+    <title>Math Visual App</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<header>
-    <div class="header-top">
-        <h1>מעבדת חקירה</h1>
-        <div class="controls">
-             <button id="btnMode" class="btn-nav" onclick="toggleMode()">מצב: חקירה</button>
-             <button id="btnSound" class="btn-nav" onclick="toggleMute()">🔊</button>
-             <select id="qSelect" onchange="loadQuestionFromSelect()"></select>
-             <button class="btn-nav" onclick="nextQuestion()">></button>
-        </div>
-    </div>
+<div id="app-container">
     
-    <div class="math-display-row">
-        <span id="derivEqn"></span>
-        <span class="separator"> | </span>
-        <span id="eqn"></span>
-    </div>
-
-    <div class="instruction-box">
-        <span id="qCounter" style="font-weight:bold; color:var(--primary);"></span> 
-        <span id="qText"></span>
-    </div>
-    
-    <div class="proximity-container">
-        <div class="proximity-bar-bg">
-            <div id="proximityBar" class="proximity-fill"></div>
-        </div>
-        <span style="font-size:0.8rem">דיוק</span>
-    </div>
-</header>
-
-<div class="workspace">
-    <div id="mainArea">
+    <main id="graph-panel">
         <canvas id="cvs"></canvas>
         
-        <div class="zoom-controls">
-            <button onclick="zoomIn()">+</button>
-            <button onclick="resetZoom()">⟲</button>
-            <button onclick="zoomOut()">-</button>
+        <div id="hud-top-left">
+            <div id="eqn"></div>
+            <div id="derivEqn"></div>
         </div>
 
-        <div id="successBanner">כל הכבוד! 🏆</div>
+        <div id="successToast">כל הכבוד! ✅</div>
+
+        <div id="proximityWrapper">
+            <div id="hotColdText">קר...</div>
+            <div id="proximityBarContainer"><div id="proximityBar"></div></div>
+        </div>
         
-        <div id="holyTrinity" class="trinity-tooltip">
-            <div id="valX"></div>
-            <div id="valY"></div>
-            <div id="valM"></div>
-            <div id="lineEqn"></div>
+        <div id="holyTrinity">
+            <div class="triItem"><span id="valX"></span></div>
+            <div class="triItem"><span id="valY"></span></div>
+            <div class="triItem"><span id="valM"></span></div>
+            <div class="triItem" id="lineEqn" style="font-size:0.85em; margin-top:3px; border-top:1px solid #ddd; padding-top:2px;"></div>
         </div>
-    </div>
+    </main>
 
-    <div id="mathJournal" class="math-journal">
-        <div class="journal-title">יומן משוואות</div>
-        <div id="journalList"></div>
-    </div>
+    <aside id="side-panel">
+        
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 id="qCounter" style="margin:0; color:#2563eb;">שאלה 1</h3>
+                <button id="btnSound" onclick="toggleMute()" class="icon-btn">🔊</button>
+            </div>
+            <p id="qText" style="margin-top:10px; font-weight:600;"></p>
+            <select id="qSelect" onchange="loadQuestionFromSelect()" style="width:100%; margin-top:5px; padding:5px;"></select>
+        </div>
+
+        <div id="sliderXContainer" class="card control-box">
+            <label>הזז את ה-X: <span id="valX_slider" style="float:left; color:#2563eb;">0</span></label>
+            <input type="range" id="mainX" min="-10" max="10" step="0.1" oninput="updateFromSlider()">
+        </div>
+
+        <div class="card control-box">
+            <h4>פרמטרים (משנים את הפונקציה)</h4>
+            
+            <div class="slider-row">
+                <label>a (x³): <span id="valA"></span></label>
+                <input type="range" id="mA" min="-5" max="5" step="0.1" oninput="manual()">
+            </div>
+            <div class="slider-row">
+                <label>b (x²): <span id="valB"></span></label>
+                <input type="range" id="mB" min="-5" max="5" step="0.1" oninput="manual()">
+            </div>
+            <div class="slider-row">
+                <label>c (x): <span id="valC"></span></label>
+                <input type="range" id="mC" min="-10" max="10" step="0.1" oninput="manual()">
+            </div>
+            <div class="slider-row">
+                <label>d (מספר): <span id="valD"></span></label>
+                <input type="range" id="mD" min="-10" max="10" step="0.1" oninput="manual()">
+            </div>
+        </div>
+
+        <div class="card" style="flex:1; display:flex; flex-direction:column; min-height:100px;">
+            <h4>יומן משוואות</h4>
+            <div id="journalList"></div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:10px;">
+             <button class="btn" onclick="zoomIn()">➕ זום</button>
+             <button class="btn" onclick="zoomOut()">➖ זום</button>
+             <button class="btn" onclick="resetZoom()">איפוס</button>
+             <button class="btn primary" onclick="nextQuestion()" style="margin-right:auto;">הבא &larr;</button>
+        </div>
+
+    </aside>
+
 </div>
 
-<footer>
-    <div class="slider-container" id="sliderXContainer">
-        <span class="val-display">x</span>
-        <input type="range" id="mainX" min="-10" max="10" step="0.01" value="0" oninput="updateFromSlider()">
-    </div>
-
-    <div class="function-editor">
-        <div class="editor-title">פרמטרים (משנים את הפונקציה)</div>
-        <div class="coef-control-panel">
-            <div class="coef-group">
-                <label>a (x³)</label>
-                <input type="range" id="mA" min="-2" max="2" step="0.1" value="0" oninput="manual()">
-                <span id="valA" class="val-display">0</span>
-            </div>
-            <div class="coef-group">
-                <label>b (x²)</label>
-                <input type="range" id="mB" min="-4" max="4" step="0.1" value="1" oninput="manual()">
-                <span id="valB" class="val-display">1</span>
-            </div>
-            <div class="coef-group">
-                <label>c (x)</label>
-                <input type="range" id="mC" min="-5" max="5" step="0.1" value="0" oninput="manual()">
-                <span id="valC" class="val-display">0</span>
-            </div>
-            <div class="coef-group">
-                <label>d (חופשי)</label>
-                <input type="range" id="mD" min="-5" max="5" step="0.1" value="0" oninput="manual()">
-                <span id="valD" class="val-display">0</span>
-            </div>
-        </div>
-    </div>
-</footer>
-
-<script src="questions.js"></script>
+<script src="bagrut_questions.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
