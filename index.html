@@ -3,288 +3,314 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>מערכת חקר פונקציות - גרסה מלאה</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
+    <title>מערכת חקר פונקציות - גרסה סופית</title>
     <style>
         :root {
-            --primary: #2563eb;
-            --accent: #16a34a;
-            --purple: #9333ea;
-            --bg-sidebar: #ffffff;
-            --bg-app: #f8fafc;
-            --sidebar-width: 320px;
+            --primary: #2563eb;    /* כחול */
+            --success: #22c55e;    /* ירוק */
+            --purple: #9333ea;     /* סגול לאנך */
+            --bg: #f8fafc;
+            --panel-bg: #ffffff;
+            --border: #cbd5e1;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        html, body {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; font-family: 'Rubik', sans-serif;
-            background: var(--bg-app); position: fixed;
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            height: 100vh; width: 100vw;
+            display: flex;
+            flex-direction: row; /* ברירת מחדל: מחשב - זה לצד זה */
+            overflow: hidden;
         }
 
-        /* === גרף === */
-        main {
-            position: absolute; background: #fff; overflow: hidden;
-            top: 0; bottom: 0; left: 0; right: var(--sidebar-width);
-            z-index: 1; cursor: crosshair;
+        /* --- אזור הגרף --- */
+        #graph-container {
+            flex: 1;
+            position: relative;
+            background: white;
+            cursor: crosshair;
+            height: 100%;
         }
-        canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+        canvas { display: block; width: 100%; height: 100%; }
 
-        /* === HUD עליון קבוע (פונקציה ונגזרת) === */
-        #top-info {
-            position: absolute; top: 10px; left: 10px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 10px 15px; border-radius: 8px;
-            border: 1px solid #cbd5e1;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            pointer-events: none;
-            font-family: 'Times New Roman', serif;
-            font-size: 1.2rem; color: var(--primary);
-            text-align: left; direction: ltr; font-style: italic;
-        }
-        .deriv-text { color: #dc2626; font-size: 1rem; margin-top: 5px; }
-
-        /* === HUD מרחף על הנקודה === */
-        #floating-hud {
-            position: absolute; background: rgba(15, 23, 42, 0.9);
-            color: white; padding: 8px 12px; border-radius: 8px;
-            font-size: 0.85rem; pointer-events: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            white-space: nowrap; z-index: 10;
-            direction: ltr; text-align: left;
-            border: 1px solid rgba(255,255,255,0.2); display: none;
-        }
-        #floating-hud .row { display: flex; justify-content: space-between; gap: 15px; margin-bottom: 2px; }
-        #floating-hud .label { color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; }
-        #floating-hud .val { font-weight: bold; font-family: monospace; color: #fff; }
-        #floating-hud .tangent-eq { 
-            margin-top: 4px; padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.2); 
-            color: #fb923c; font-weight: bold; font-family: monospace;
+        /* --- סרגל כלים (צד/למטה) --- */
+        #sidebar {
+            width: 350px;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--border); /* במחשב הגבול מימין כי זה RTL */
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            z-index: 10;
         }
 
-        /* === סרגל כלים === */
-        aside {
-            position: absolute; background: var(--bg-sidebar);
-            border-left: 1px solid #cbd5e1; padding: 15px;
-            display: flex; flex-direction: column; gap: 12px;
-            overflow-y: auto; z-index: 2;
-            top: 0; bottom: 0; right: 0; width: var(--sidebar-width);
-            box-shadow: -2px 0 10px rgba(0,0,0,0.05);
+        /* כותרת ותפריט קבועים למעלה */
+        .sidebar-header {
+            padding: 15px;
+            background: #f1f5f9;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0; /* לא מתכווץ */
         }
 
-        .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; transition:0.3s;}
-        .card.active-normal { border: 2px solid var(--purple); background: #faf5ff; }
-        .card.question-box { border-right: 4px solid var(--primary); background: #eff6ff; }
-
-        h3 { margin: 0 0 8px 0; font-size: 1rem; color: #0f172a; }
-        .desc { font-size: 0.85rem; color: #475569; margin-bottom: 8px; line-height: 1.4; }
-
-        .control-row { display: flex; align-items: center; margin-bottom: 8px; height: 28px; }
-        .control-row label { font-size: 0.9rem; font-weight: 500; width: 25px; }
-        input[type=range] { flex: 1; cursor: pointer; margin: 0 8px; }
-        .val-display { font-family: monospace; width: 40px; text-align: left; color: var(--primary); font-weight: bold; }
-
-        /* כפתורים */
-        .btn-toggle {
-            background: white; border: 1px solid var(--purple); color: var(--purple);
-            padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+        /* רשימת השאלות וההצלחה */
+        #question-nav {
+            margin-bottom: 10px;
         }
-        .btn-toggle.active { background: var(--purple); color: white; }
-
-        .btn-next {
-            margin-top: auto; padding: 12px; background: #cbd5e1; color: white;
-            border: none; border-radius: 8px; font-size: 1rem; font-weight: bold;
-            cursor: not-allowed; width: 100%; transition: 0.3s;
+        select {
+            width: 100%; padding: 10px; font-size: 1rem;
+            border: 1px solid #94a3b8; border-radius: 6px;
+            background: white;
         }
-        .btn-next.enabled { background: var(--accent); cursor: pointer; animation: pop 0.3s; }
+
+        /* תיבת הצלחה */
+        #success-msg {
+            display: none; /* מוסתר עד שמנצחים */
+            background: #dcfce7; color: #14532d;
+            border: 2px solid var(--success);
+            padding: 10px; border-radius: 8px;
+            text-align: center; margin-top: 10px;
+            animation: popIn 0.5s ease;
+        }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         
-        @keyframes pop { 50% { transform: scale(1.05); } }
-
-        /* נוסחאות */
-        .formula-box {
-            background: #1e293b; color: #94a3b8; padding: 8px; border-radius: 6px;
-            font-family: monospace; text-align: center; direction: ltr; margin-top: 8px;
-            font-size: 0.9rem; border: 1px solid #334155;
+        #btn-next {
+            background: var(--success); color: white; border: none;
+            padding: 8px 16px; font-size: 1rem; font-weight: bold;
+            border-radius: 6px; cursor: pointer; margin-top: 5px; width: 100%;
         }
-        .formula-box.success { background: #dcfce7; color: #166534; border-color: #16a34a; }
 
+        /* תוכן נגלל (הסליידרים וההסברים) */
+        .scroll-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        /* כרטיסיות מידע */
+        .card {
+            background: white; border: 1px solid var(--border);
+            border-radius: 8px; padding: 12px; margin-bottom: 12px;
+        }
+        .card h3 { margin: 0 0 5px 0; font-size: 1.1rem; color: #1e293b; }
+        .card p { margin: 0; font-size: 0.95rem; color: #475569; line-height: 1.4; white-space: pre-line; }
+
+        /* סליידרים */
+        .control-row {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .control-row label { font-weight: bold; width: 25px; }
+        input[type=range] {
+            flex: 1; margin: 0 10px; height: 25px; /* גדול יותר למובייל */
+            cursor: pointer;
+        }
+        .val-disp { width: 35px; text-align: left; font-family: monospace; font-weight: bold; color: var(--primary); }
+
+        /* כפתור טוגל (Toggle) למעבדת האנך */
+        .toggle-btn {
+            width: 100%; padding: 10px;
+            background: white; border: 2px solid var(--purple); color: var(--purple);
+            border-radius: 8px; font-weight: bold; cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .toggle-btn.active { background: var(--purple); color: white; }
+
+        /* --- התאמה למובייל (Android/iOS) --- */
         @media (max-width: 768px) {
-            main { height: 50%; bottom: auto; right: 0; width: 100%; }
-            aside { top: 50%; height: 50%; width: 100%; border-left: none; border-top: 2px solid #cbd5e1; }
+            body { flex-direction: column; } /* גרף למעלה, כלים למטה */
+            
+            #graph-container {
+                height: 40vh; /* 40% גובה לגרף */
+                width: 100%;
+                border-bottom: 2px solid #cbd5e1;
+            }
+            
+            #sidebar {
+                width: 100%;
+                height: 60vh; /* 60% גובה לכלים */
+                border-right: none;
+            }
+            
+            /* שיפורים למגע */
+            select, button, input[type=range] { touch-action: manipulation; }
         }
     </style>
 </head>
 <body>
 
-<div id="top-info">
-    <div id="funcEq">f(x) = ...</div>
-    <div id="derivEq" class="deriv-text">f'(x) = ...</div>
-</div>
-
-<div id="floating-hud">
-    <div class="row"><span class="label">x:</span> <span id="hudX" class="val">0</span></div>
-    <div class="row"><span class="label">y:</span> <span id="hudY" class="val">0</span></div>
-    <div class="row"><span class="label">m:</span> <span id="hudM" class="val">0</span></div>
-    <div class="tangent-eq" id="hudTanEq">y = ...</div>
-</div>
-
-<main id="graphContainer">
-    <canvas id="cvs"></canvas>
-</main>
-
-<aside>
-    <div class="card question-box">
-        <h3 id="qTitle">שאלה</h3>
-        <p id="qDesc" class="desc">...</p>
-        <div id="qProgress" style="font-size:0.8rem; color:#64748b; text-align:left;">1/5</div>
-    </div>
-
-    <button class="btn-toggle" onclick="toggleNormalMode()" id="btnNormal">
-        <span>📐</span> מעבדת האנך (Normal Lab)
-    </button>
-
-    <div class="card" id="normalCard" style="display:none;">
-        <h3 style="color:var(--purple); margin:0;">כיוון האנך</h3>
-        <div class="control-row">
-            <label style="color:var(--purple); width:60px;">Slope</label>
-            <input type="range" id="inpNormalSlope" min="-10" max="10" step="0.05" oninput="sysUpdate()">
-            <div class="val-display" id="valNormalSlope" style="color:var(--purple)">1</div>
-        </div>
-        <div id="formulaBox" class="formula-box">
-            \( m_1 \cdot m_2 = \) <span id="resProduct">?</span>
+    <div id="graph-container">
+        <canvas id="cvs"></canvas>
+        <div style="position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.9); padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; pointer-events: none; direction: ltr;">
+            <div id="debug-info">f(x) = ...</div>
         </div>
     </div>
 
-    <div class="card" style="border-right: 4px solid #f97316; background:#fff7ed;">
-        <h3 style="margin:0;">הזזת הנקודה (X)</h3>
-        <div class="control-row" style="margin-top:5px;">
-            <input type="range" id="inpX" min="-5" max="5" step="0.1" oninput="sysUpdate()">
-            <div class="val-display" id="valX" style="color:#f97316;">0</div>
+    <div id="sidebar">
+        
+        <div class="sidebar-header">
+            <div id="question-nav">
+                <label style="font-weight: bold; display:block; margin-bottom:5px;">בחר שאלה:</label>
+                <select id="questionsMenu"></select>
+            </div>
+
+            <div id="success-msg">
+                <div>🎉 <b>כל הכבוד! הצלחת!</b></div>
+                <button id="btn-next" onclick="nextQuestion()">עבור לשאלה הבאה &larr;</button>
+            </div>
         </div>
-    </div>
 
-    <div class="card">
-        <h3 style="margin:0;">פרמטרים</h3>
-        <div class="control-row" id="rowA"><label>a</label><input type="range" id="inpA" min="-2" max="2" step="0.1" oninput="sysUpdate()"><div class="val-display" id="valA">0</div></div>
-        <div class="control-row" id="rowB"><label>b</label><input type="range" id="inpB" min="-4" max="4" step="0.1" oninput="sysUpdate()"><div class="val-display" id="valB">0</div></div>
-        <div class="control-row" id="rowC"><label>c</label><input type="range" id="inpC" min="-5" max="5" step="0.1" oninput="sysUpdate()"><div class="val-display" id="valC">0</div></div>
-        <div class="control-row" id="rowD"><label>d</label><input type="range" id="inpD" min="-5" max="5" step="0.1" oninput="sysUpdate()"><div class="val-display" id="valD">0</div></div>
-    </div>
+        <div class="scroll-content">
+            
+            <div class="card" style="border-right: 4px solid var(--primary);">
+                <h3 id="qTitle">טוען...</h3>
+                <p id="qDesc">...</p>
+            </div>
 
-    <button id="btnNext" class="btn-next" onclick="nextQuestion()">הצלחת! המשך לשאלה הבאה</button>
-    <div style="height:20px;"></div>
-</aside>
+            <div class="card" style="background: #fff7ed; border-color: #fdba74;">
+                <h3 style="color:#c2410c">הזזת הנקודה (X)</h3>
+                <div class="control-row">
+                    <input type="range" id="inpX" min="-5" max="5" step="0.1" oninput="updateSystem()">
+                    <span class="val-disp" id="valX">0</span>
+                </div>
+            </div>
+
+            <button class="toggle-btn" id="btnNormalToggle" onclick="toggleNormal()">📐 מעבדת האנך (לחץ לפתיחה)</button>
+            
+            <div class="card" id="normalControls" style="display:none; border-color: var(--purple);">
+                <h3 style="color:var(--purple)">כיוון האנך</h3>
+                <p style="font-size:0.8rem; margin-bottom:10px;">הזיזו את הסליידר כדי לשנות את השיפוע של הקו הסגול:</p>
+                <div class="control-row">
+                    <label>m2</label>
+                    <input type="range" id="inpNormalSlope" min="-10" max="10" step="0.1" value="1" oninput="updateSystem()">
+                    <span class="val-disp" id="valNormal">1</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>בניית הפונקציה</h3>
+                <div class="control-row" id="rowA"><label>a</label><input type="range" id="inpA" min="-2" max="2" step="0.1" oninput="updateSystem()"><span class="val-disp" id="valA">0</span></div>
+                <div class="control-row" id="rowB"><label>b</label><input type="range" id="inpB" min="-3" max="3" step="0.1" oninput="updateSystem()"><span class="val-disp" id="valB">0</span></div>
+                <div class="control-row" id="rowC"><label>c</label><input type="range" id="inpC" min="-5" max="5" step="0.1" oninput="updateSystem()"><span class="val-disp" id="valC">0</span></div>
+                <div class="control-row" id="rowD"><label>d</label><input type="range" id="inpD" min="-5" max="5" step="0.1" oninput="updateSystem()"><span class="val-disp" id="valD">0</span></div>
+            </div>
+
+            <div style="height: 50px;"></div> </div>
+    </div>
 
 <script>
-// === בנק השאלות (מה שביקשת) ===
+/* === מאגר השאלות === */
 const QUESTIONS = [
-    // --- שלב 1: חימום ---
     {
-        title: "היכרות עם המערכת",
-        desc: "הזיזו את הסליידרים כדי לראות איך a, b, c, d משפיעים על הפונקציה.",
-        params: [0.5, 0, -2, 0], // a, b, c, d
+        title: "שלב 1: בנייה ואז חקירה",
+        desc: "ברוכים הבאים!\nכאן עובדים בשני שלבים:\n1. השתמשו בסליידרים a, b, c, d למטה כדי **לבנות** את הפונקציה.\n2. לאחר מכן, הזיזו את ה-X (למעלה) כדי **לחקור** נקודות עליה.\n\nנסו לשחק עם הסליידרים כדי להבין.",
+        params: [0.5, 0, -2, 0], 
         goal: "free"
     },
-    // --- שלב 2: חקירת שיפועים (נגזרת) ---
     {
         title: "משיק אופקי (קיצון)",
-        desc: "מצאו נקודת קיצון: הזיזו את X עד שהמשיק יהיה אופקי לגמרי (שיפוע 0).",
+        desc: "המשימה: מצאו את נקודת הקיצון.\nהזיזו את ה-X ימינה/שמאלה עד שהקו הכתום (המשיק) יהיה אופקי לגמרי (שיפוע 0).",
         params: [0.5, 0, -2, 0], 
         goal: "slope_zero"
     },
     {
         title: "שיפוע ספציפי",
-        desc: "נתונה הפרבולה. מצאו את ה-X שבו השיפוע הוא בדיוק 2.",
-        params: [0, 1, 0, -2], // פרבולה x^2 - 2
+        desc: "נתונה הפרבולה: y = x² - 2.\nמצאו את הנקודה (X) שבה השיפוע של המשיק הוא בדיוק 2.",
+        params: [0, 1, 0, -2], 
         goal: "slope_match",
         targetSlope: 2
     },
-    // --- שלב 3: חקירת האנך ---
     {
-        title: "משיק ואנך (1)",
-        desc: "לחצו על כפתור 'מעבדת האנך'. כוונו את האנך (m2) כך שיהיה מאונך למשיק בנקודה הנוכחית.",
-        params: [0, 0.5, 0, 0],
+        title: "מעבדת האנך - היכרות",
+        desc: "1. פתחו את 'מעבדת האנך' (כפתור סגול).\n2. הזיזו את סליידר האנך (m2) עד שהקו הסגול יהיה מאונך לכתום (יוצר 90°).",
+        params: [0, 0.5, 0, 0], 
         goal: "normal_match"
     },
     {
-        title: "משיק ואנך (2)",
-        desc: "עבור הפונקציה הזו, מצאו מצב שבו המשיק הוא 1 והאנך הוא 1-. (הזיזו גם את X וגם את האנך)",
-        params: [0.1, 0, 0, 0],
+        title: "אתגר המשיק והאנך",
+        desc: "מצאו מצב שבו:\nהמשיק הוא 1, והאנך הוא 1-.\n(צריך להזיז גם את X וגם את שיפוע האנך).",
+        params: [0.1, 0, 0, 0], 
         goal: "normal_match"
     },
-    // --- שלב 4: פגיעה במטרות ---
     {
-        title: "צלף: פגיעה בנקודה",
-        desc: "הזיזו את הפרמטר d בלבד כדי שהגרף יעבור דרך הנקודה האדומה.",
+        title: "צלף: פגיעה במטרה",
+        desc: "הזיזו **רק** את הפרמטר d כדי שהקו הכחול יעבור דרך הנקודה האדומה (2,4).",
         params: [0, 1, -2, 0],
         targets: [{x: 2, y: 4}],
         goal: "hit_target",
-        locked: ["inpA", "inpB", "inpC", "inpX"] // נועלים הכל חוץ מ-d
+        locked: ["inpA", "inpB", "inpC", "inpX"]
     },
     {
-        title: "אתגר כפול",
-        desc: "הזיזו את b ואת d כדי לפגוע בשתי הנקודות האדומות בו זמנית.",
+        title: "האתגר הכפול",
+        desc: "עליכם לפגוע בשתי הנקודות יחד!\nשנו את b (רוחב) ואת d (גובה) עד שהקו יעבור בשתיהן.",
         params: [0, 0, 0, 0],
-        targets: [{x: -2, y: 4}, {x: 2, y: 4}],
+        targets: [{x: -1, y: 2}, {x: 2, y: 5}], 
         goal: "hit_target",
         locked: ["inpA", "inpC"]
     }
 ];
 
-// === משתני מערכת ===
-const cvs = document.getElementById('cvs');
-const ctx = cvs.getContext('2d');
-let width, height, scale = 40, originX, originY;
+/* === משתנים גלובליים === */
+let cvs, ctx, width, height, scale = 40, originX, originY;
 let a=0, b=0, c=0, d=0, xVal=0;
 let showNormal = false;
-let normalSlope = 1;
 let currQIndex = 0;
 let isWin = false;
 
-// === אתחול ===
+/* === אתחול === */
 window.onload = function() {
+    cvs = document.getElementById('cvs');
+    ctx = cvs.getContext('2d');
+    
+    // בניית התפריט
+    const menu = document.getElementById('questionsMenu');
+    QUESTIONS.forEach((q, idx) => {
+        let opt = document.createElement('option');
+        opt.value = idx;
+        opt.text = `${idx+1}. ${q.title}`;
+        menu.appendChild(opt);
+    });
+    menu.onchange = (e) => loadQuestion(parseInt(e.target.value));
+
+    // התאמה לגודל מסך
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
+    
+    // טעינת שאלה ראשונה
     loadQuestion(0);
-    animate();
+    
+    // התחלת אנימציה
+    requestAnimationFrame(loop);
 };
 
 function resizeCanvas() {
-    const container = document.getElementById('graphContainer');
+    const container = document.getElementById('graph-container');
     width = cvs.width = container.offsetWidth;
     height = cvs.height = container.offsetHeight;
     originX = width / 2;
     originY = height / 2;
-    scale = (width < 500) ? 30 : 40;
-    sysUpdate();
+    scale = (width < 500) ? 30 : 40; // זום קצת החוצה בנייד
+    updateSystem(); // עדכון חישובים
 }
 
 function loadQuestion(idx) {
     currQIndex = idx;
     isWin = false;
-    const q = QUESTIONS[currQIndex];
-    
-    // עדכון טקסטים
+    document.getElementById('questionsMenu').value = idx;
+    document.getElementById('success-msg').style.display = 'none';
+
+    const q = QUESTIONS[idx];
     document.getElementById('qTitle').innerText = q.title;
     document.getElementById('qDesc').innerText = q.desc;
-    document.getElementById('qProgress').innerText = `שלב ${currQIndex + 1} מתוך ${QUESTIONS.length}`;
-    
-    // איפוס כפתור סיום
-    const btnNext = document.getElementById('btnNext');
-    btnNext.className = "btn-next";
-    btnNext.innerHTML = (idx === QUESTIONS.length - 1) ? "סיימת את כל השאלות!" : "הצלחת! המשך לשאלה הבאה";
-    
+
     // טעינת פרמטרים
     [a, b, c, d] = q.params;
-    xVal = 0; // איפוס נקודת X
-    
-    // עדכון סליידרים
+    xVal = 0;
+
+    // עדכון ה-HTML
     document.getElementById('inpA').value = a;
     document.getElementById('inpB').value = b;
     document.getElementById('inpC').value = c;
@@ -292,242 +318,261 @@ function loadQuestion(idx) {
     document.getElementById('inpX').value = xVal;
 
     // ניהול נעילות
-    const inputs = ['inpA', 'inpB', 'inpC', 'inpD', 'inpX'];
-    inputs.forEach(id => {
-        const el = document.getElementById(id);
-        const row = el.closest('.control-row');
-        el.disabled = false;
-        if(row) row.style.opacity = "1";
+    const allInputs = ['inpA', 'inpB', 'inpC', 'inpD', 'inpX'];
+    allInputs.forEach(id => {
+        document.getElementById(id).disabled = false;
+        document.getElementById(id).parentElement.style.opacity = "1";
     });
 
     if (q.locked) {
         q.locked.forEach(id => {
-            const el = document.getElementById(id);
-            if(el) {
-                el.disabled = true;
-                const row = el.closest('.control-row');
-                if(row) row.style.opacity = "0.5";
-            }
+            document.getElementById(id).disabled = true;
+            document.getElementById(id).parentElement.style.opacity = "0.5";
         });
     }
 
-    sysUpdate();
+    updateSystem();
 }
 
-function nextQuestion() {
-    if (!isWin && QUESTIONS[currQIndex].goal !== 'free') return;
-    if (currQIndex < QUESTIONS.length - 1) {
-        loadQuestion(currQIndex + 1);
-    } else {
-        alert("כל הכבוד! סיימת את כל השאלות.");
-    }
-}
-
-function toggleNormalMode() {
+function toggleNormal() {
     showNormal = !showNormal;
-    const btn = document.getElementById('btnNormal');
-    const card = document.getElementById('normalCard');
-    
-    if(showNormal) {
+    const btn = document.getElementById('btnNormalToggle');
+    const panel = document.getElementById('normalControls');
+    if (showNormal) {
         btn.classList.add('active');
-        card.style.display = 'block';
-        card.classList.add('active-normal');
-        normalSlope = 1;
-        document.getElementById('inpNormalSlope').value = 1;
+        btn.innerText = "📐 מעבדת האנך (פתוח)";
+        panel.style.display = 'block';
     } else {
         btn.classList.remove('active');
-        card.style.display = 'none';
+        btn.innerText = "📐 מעבדת האנך (לחץ לפתיחה)";
+        panel.style.display = 'none';
     }
-    sysUpdate();
+    updateSystem();
 }
 
-// === לוגיקה וחישובים ===
-function sysUpdate() {
+function updateSystem() {
     // קריאת ערכים
     a = parseFloat(document.getElementById('inpA').value);
     b = parseFloat(document.getElementById('inpB').value);
     c = parseFloat(document.getElementById('inpC').value);
     d = parseFloat(document.getElementById('inpD').value);
     xVal = parseFloat(document.getElementById('inpX').value);
-    
-    if(showNormal) {
-        normalSlope = parseFloat(document.getElementById('inpNormalSlope').value);
-        document.getElementById('valNormalSlope').innerText = normalSlope.toFixed(2);
-    }
 
-    // תצוגת מספרים בסליידרים
+    // עדכון טקסטים ליד הסליידרים
     document.getElementById('valA').innerText = a;
     document.getElementById('valB').innerText = b;
     document.getElementById('valC').innerText = c;
     document.getElementById('valD').innerText = d;
     document.getElementById('valX').innerText = xVal.toFixed(1);
-
-    // חישובי פונקציה
-    let y = a*xVal**3 + b*xVal**2 + c*xVal + d;
-    let m = 3*a*xVal**2 + 2*b*xVal + c;
-
-    // HUD עליון
-    document.getElementById('funcEq').innerHTML = `f(x) = ${formatPoly(a,b,c,d)}`;
-    document.getElementById('derivEq').innerHTML = `f'(x) = ${formatPoly(0, 3*a, 2*b, c)}`;
-
-    // HUD מרחף
-    const hud = document.getElementById('floating-hud');
-    hud.style.display = 'block';
-    document.getElementById('hudX').innerText = xVal.toFixed(2);
-    document.getElementById('hudY').innerText = y.toFixed(2);
-    document.getElementById('hudM').innerText = m.toFixed(2);
     
-    let n = -m * xVal + y;
-    let sign = n >= 0 ? "+" : "-";
-    document.getElementById('hudTanEq').innerText = `y = ${m.toFixed(2)}x ${sign} ${Math.abs(n).toFixed(2)}`;
-    
-    // מיקום HUD
-    let sx = originX + xVal * scale;
-    let sy = originY - y * scale;
-    let hLeft = sx + 20; let hTop = sy - 60;
-    if (hLeft + 160 > width) hLeft = sx - 180;
-    if (hTop < 10) hTop = sy + 20;
-    hud.style.left = hLeft + 'px'; hud.style.top = hTop + 'px';
-
-    // חישוב מכפלת שיפועים לאנך
-    if(showNormal) {
-        let prod = m * normalSlope;
-        document.getElementById('resProduct').innerText = prod.toFixed(2);
-        const box = document.getElementById('formulaBox');
-        if (Math.abs(prod + 1) < 0.15) box.classList.add('success');
-        else box.classList.remove('success');
-    }
-
-    checkWinCondition(m, y);
+    // בדיקת ניצחון
+    checkWin();
 }
 
-function checkWinCondition(m, y) {
-    const q = QUESTIONS[currQIndex];
-    let won = false;
-
-    if (q.goal === 'free') {
-        won = true;
-    } 
-    else if (q.goal === 'slope_zero') {
-        if (Math.abs(m) < 0.1) won = true;
-    }
-    else if (q.goal === 'slope_match') {
-        if (Math.abs(m - q.targetSlope) < 0.15) won = true;
-    }
-    else if (q.goal === 'normal_match') {
-        // צריך שהאנך יהיה פעיל וגם המכפלה תהיה קרובה ל 1-
-        if (showNormal && Math.abs(m * normalSlope + 1) < 0.15) won = true;
-    }
-    else if (q.goal === 'hit_target') {
-        // בדיקה שעובר דרך כל המטרות
-        let allHit = true;
-        q.targets.forEach(t => {
-            let ty = a*t.x**3 + b*t.x**2 + c*t.x + d;
-            if (Math.abs(ty - t.y) > 0.3) allHit = false; // טולרנס
-        });
-        if (allHit) won = true;
-    }
-
-    isWin = won;
-    const btn = document.getElementById('btnNext');
-    if (won) {
-        btn.classList.add('enabled');
-        if (q.goal !== 'free') btn.innerText = "✨ מעולה! לחץ כאן לשאלה הבאה";
-    } else {
-        btn.classList.remove('enabled');
-        btn.innerText = "השלם את המשימה כדי להמשיך";
-    }
-}
-
-function formatPoly(a,b,c,d) {
-    let p = [];
-    if(Math.abs(a)>0.001) p.push(`${parseFloat(a.toFixed(2))}x³`);
-    if(Math.abs(b)>0.001) p.push(`${parseFloat(b.toFixed(2))}x²`);
-    if(Math.abs(c)>0.001) p.push(`${parseFloat(c.toFixed(2))}x`);
-    if(Math.abs(d)>0.001) p.push(`${parseFloat(d.toFixed(2))}`);
-    if(p.length===0) return "0";
-    return p.join(" + ").replace(/\+ -/g, "- ");
-}
-
-// === ציור ===
-function animate() {
+/* === לוגיקה גרפית === */
+function loop() {
     draw();
-    requestAnimationFrame(animate);
+    requestAnimationFrame(loop);
 }
 
-// --- לולאת הציור הראשית ---
 function draw() {
-    // 1. ניקוי הלוח
+    // ניקוי
     ctx.clearRect(0, 0, width, height);
 
-    // 2. ציור רשת צירים (גריד)
+    // גריד
     drawGrid();
 
-    // 3. ציור הפונקציה עצמה (החלק החסר!)
-    drawFunction();
-
-    // 4. ציור המשיק והנקודה (אם יש)
-    drawTangent();
-    
-    // 5. ציור אנך (אם הפיצ'ר פעיל)
-    if (showNormal) { 
-       drawNormal(); 
+    // מטרות (נקודות אדומות)
+    const q = QUESTIONS[currQIndex];
+    if (q.targets) {
+        q.targets.forEach(t => {
+            let tx = originX + t.x * scale;
+            let ty = originY - t.y * scale;
+            ctx.fillStyle = '#ef4444'; 
+            ctx.beginPath(); ctx.arc(tx, ty, 6, 0, Math.PI*2); ctx.fill();
+            
+            // בדיקה אם פגענו
+            let yAtT = a*t.x**3 + b*t.x**2 + c*t.x + d;
+            if (Math.abs(yAtT - t.y) < 0.2) { // פגיעה!
+                ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.arc(tx, ty, 10, 0, Math.PI*2); ctx.stroke();
+            }
+        });
     }
 
-    // 6. ציור מטרות (הנקודות האדומות)
-    drawTargets();
-}
-
-// --- הפונקציה שמציירת את הגרף הכחול ---
-function drawFunction() {
+    // הפונקציה (הקו הכחול)
+    ctx.lineWidth = 3; 
+    ctx.strokeStyle = "#2563eb";
     ctx.beginPath();
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = "#2563eb"; // כחול יפה ובולט
-
-    let startX = 0;
-    
-    // רץ על כל פיקסל לרוחב המסך
-    for (let px = 0; px < width; px++) {
+    let started = false;
+    for (let px = 0; px < width; px+=2) {
+        let mx = (px - originX) / scale;
+        let my = a*mx**3 + b*mx**2 + c*mx + d;
+        let py = originY - my * scale;
         
-        // המרה מפיקסלים לערך מתמטי (X)
-        // (px - originX) / scale
-        // אבל נכתוב את זה בצורה בטוחה:
-        let mathX = (px - originX) / scale;
-
-        // חישוב ה-Y המתמטי לפי הנוסחה: ax^3 + bx^2 + cx + d
-        // אנו משתמשים במשתנים הגלובליים a,b,c,d שמתעדכנים מהסליידרים
-        let mathY = (a * (mathX ** 3)) + (b * (mathX ** 2)) + (c * mathX) + d;
-
-        // המרה חזרה לפיקסל במסך (Y)
-        // ציר Y הפוך במסך (למעלה זה מינוס)
-        let py = originY - (mathY * scale);
-
-        // אם זו הנקודה הראשונה - רק מזיזים את המכחול
-        if (px === 0) {
-            ctx.moveTo(px, py);
+        if (py > -height && py < height*2) {
+            if (!started) { ctx.moveTo(px, py); started = true; }
+            else { ctx.lineTo(px, py); }
         } else {
-            // נקודות הבאות - מותחים קו
-            // בדיקת גבולות כדי לא לצייר קווים משוגעים מחוץ למסך
-            if (py > -height && py < height * 2) {
-                ctx.lineTo(px, py);
-            } else {
-                ctx.moveTo(px, py); // "הרמת עט" אם יצאנו מהגבולות
-            }
+            started = false; // שבירת קו אם יוצאים מהגבול
         }
     }
     ctx.stroke();
+
+    // נקודת X נוכחית
+    let curY = a*xVal**3 + b*xVal**2 + c*xVal + d;
+    let px = originX + xVal * scale;
+    let py = originY - curY * scale;
+
+    // חישוב שיפוע משיק
+    let slope = 3*a*xVal**2 + 2*b*xVal + c;
+
+    // ציור משיק (כתום)
+    drawLinearFunc(px, py, slope, "#f97316", false);
+
+    // ציור אנך (סגול)
+    if (showNormal) {
+        let normalSlope = parseFloat(document.getElementById('inpNormalSlope').value);
+        document.getElementById('valNormal').innerText = normalSlope.toFixed(2);
+        
+        drawLinearFunc(px, py, normalSlope, "#9333ea", true); // true = מקווקו
+        
+        // ציור משולש שיפוע לאנך
+        drawSlopeTriangle(px, py, normalSlope);
+
+        // סימון זווית ישרה אם קרוב ל-90 מעלות
+        if (Math.abs(slope * normalSlope + 1) < 0.15) {
+            drawRightAngleMarker(px, py, Math.atan(slope));
+        }
+    }
+
+    // הנקודה עצמה
+    ctx.fillStyle = "#2563eb"; 
+    ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "white"; 
+    ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI*2); ctx.fill();
+
+    // דיבאג טקסט על המסך
+    document.getElementById('debug-info').innerText = 
+        `x: ${xVal.toFixed(1)}, y: ${curY.toFixed(1)}, m: ${slope.toFixed(2)}`;
 }
 
-
+// פונקציית עזר לציור קו ישר (משיק או אנך)
+function drawLinearFunc(cx, cy, m, color, dashed) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    if (dashed) ctx.setLineDash([5, 5]);
+    else ctx.setLineDash([]);
     
+    ctx.beginPath();
+    // ציור קו ארוך שיוצא מהמרכז לשני הצדדים
+    let len = 1000; // אורך בפיקסלים
+    // חישוב הזווית כדי לצייר קו
+    // זווית בראדיאנים. במחשב Y הפוך אז שמים מינוס
+    let angle = Math.atan(-m); 
+    
+    ctx.moveTo(cx - Math.cos(angle)*len, cy - Math.sin(angle)*len);
+    ctx.lineTo(cx + Math.cos(angle)*len, cy + Math.sin(angle)*len);
+    ctx.stroke();
+    ctx.setLineDash([]);
+}
 
-function drawRightAngle(x, y, angle) {
-    const s = 14;
-    ctx.save(); ctx.translate(x,y); ctx.rotate(-angle);
-    ctx.beginPath(); ctx.strokeStyle = '#16a34a'; ctx.lineWidth = 2;
-    ctx.moveTo(s,0); ctx.lineTo(s,-s); ctx.lineTo(0,-s); ctx.stroke();
-    ctx.beginPath(); ctx.fillStyle='#16a34a'; ctx.arc(s/2,-s/2,2,0,Math.PI*2); ctx.fill();
+// ציור משולש שיפוע
+function drawSlopeTriangle(cx, cy, m) {
+    // נזוז יחידה אחת ימינה (בסקאלה של הגרף)
+    let stepPx = 1 * scale; 
+    let risePx = -m * scale; // Y הפוך
+    
+    // נקודות המשולש: התחלה, ימינה, ואז למעלה/למטה
+    let p1x = cx, p1y = cy;
+    let p2x = cx + stepPx, p2y = cy; // אופקי
+    let p3x = p2x, p3y = cy + risePx; // אנכי
+
+    ctx.fillStyle = "rgba(147, 51, 234, 0.2)";
+    ctx.strokeStyle = "rgba(147, 51, 234, 0.8)";
+    ctx.beginPath();
+    ctx.moveTo(p1x, p1y);
+    ctx.lineTo(p2x, p2y);
+    ctx.lineTo(p3x, p3y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    
+    // כיתוב
+    ctx.font = "12px sans-serif";
+    ctx.fillStyle = "#9333ea";
+    ctx.textAlign = "center";
+    ctx.fillText("1", (p1x+p2x)/2, p2y + 15);
+    ctx.fillText(m.toFixed(1), p2x + 10, (p2y+p3y)/2);
+}
+
+function drawRightAngleMarker(x, y, angle) {
+    const s = 12;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(-angle); // מסובבים לפי המשיק
+    ctx.beginPath();
+    ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 2;
+    ctx.moveTo(s, 0);
+    ctx.lineTo(s, -s);
+    ctx.lineTo(0, -s);
+    ctx.stroke();
     ctx.restore();
+}
+
+function drawGrid() {
+    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    for(let x=originX%scale; x<width; x+=scale) { ctx.moveTo(x,0); ctx.lineTo(x,height); }
+    for(let y=originY%scale; y<height; y+=scale) { ctx.moveTo(0,y); ctx.lineTo(width,y); }
+    ctx.stroke();
+    
+    // צירים ראשיים
+    ctx.strokeStyle = '#64748b'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, originY); ctx.lineTo(width, originY);
+    ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
+    ctx.stroke();
+}
+
+function checkWin() {
+    const q = QUESTIONS[currQIndex];
+    if (q.goal === 'free') return; // אין ניצחון בחקירה חופשית
+
+    let m = 3*a*xVal**2 + 2*b*xVal + c;
+    let curY = a*xVal**3 + b*xVal**2 + c*xVal + d;
+    let win = false;
+
+    if (q.goal === 'slope_zero' && Math.abs(m) < 0.1) win = true;
+    else if (q.goal === 'slope_match' && Math.abs(m - q.targetSlope) < 0.15) win = true;
+    else if (q.goal === 'normal_match') {
+        let nm = parseFloat(document.getElementById('inpNormalSlope').value);
+        if (showNormal && Math.abs(m * nm + 1) < 0.15) win = true;
+    }
+    else if (q.goal === 'hit_target') {
+        let allHit = true;
+        q.targets.forEach(t => {
+            let ty = a*t.x**3 + b*t.x**2 + c*t.x + d;
+            if (Math.abs(ty - t.y) > 0.3) allHit = false;
+        });
+        if (allHit) win = true;
+    }
+
+    if (win && !isWin) {
+        isWin = true;
+        document.getElementById('success-msg').style.display = 'block';
+    } else if (!win) {
+        isWin = false;
+        document.getElementById('success-msg').style.display = 'none';
+    }
+}
+
+function nextQuestion() {
+    if (currQIndex < QUESTIONS.length - 1) {
+        loadQuestion(currQIndex + 1);
+    } else {
+        alert("סיימת את כל המשימות!");
+    }
 }
 </script>
 </body>
