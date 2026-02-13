@@ -86,24 +86,37 @@
         /* === דף נתונים (HUD) === */
         #paper-hud {
             position: absolute; 
-            top: 15px; 
-            right: 15px; 
-            background: rgba(255, 255, 255, 0.92);
-            padding: 12px; 
+            top: 10px; 
+            right: 10px; 
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px; 
             border-radius: 8px;
             border: 1px solid #94a3b8;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             pointer-events: none; 
             direction: ltr; 
             text-align: left;
-            min-width: 160px;
+            min-width: 150px;
+            max-width: 200px;
         }
 
-        .hud-title { font-size: 0.8rem; color: #64748b; font-weight: bold; margin-bottom: 4px; border-bottom: 1px solid #e2e8f0; display:block; text-align:right;}
-        .hud-row { font-family: 'Times New Roman', serif; font-size: 1.1rem; margin-bottom: 4px; color: #0f172a; display:flex; justify-content:space-between; }
-        .hud-label { font-weight:bold; color:var(--primary); margin-right:5px; font-family:'Rubik'; font-size:0.9rem;}
+        .hud-title { font-size: 0.75rem; color: #64748b; font-weight: bold; margin-bottom: 2px; border-bottom: 1px solid #e2e8f0; display:block; text-align:right;}
+        .hud-row { font-family: 'Times New Roman', serif; font-size: 1rem; margin-bottom: 2px; color: #0f172a; display:flex; justify-content:space-between; }
+        .hud-label { font-weight:bold; color:var(--primary); margin-right:5px; font-family:'Rubik'; font-size:0.85rem;}
 
-        /* כפתורים */
+        /* תיבת הסבר קבועה */
+        .info-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-right: 4px solid #3b82f6;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #1e3a8a;
+            line-height: 1.4;
+        }
+
+        /* כפתור */
         .btn-next {
             margin-top: auto; padding: 12px; 
             background: var(--primary); color: white; 
@@ -111,44 +124,6 @@
             font-size: 1rem; font-weight: bold; cursor: pointer;
             width: 100%;
         }
-
-        .btn-info {
-            background: #e0f2fe; color: #0369a1;
-            border: 1px solid #bae6fd;
-            padding: 8px; border-radius: 6px;
-            font-weight: bold; cursor: pointer;
-            margin-bottom: 5px;
-            display: flex; align-items: center; justify-content: center; gap: 5px;
-        }
-        .btn-info:hover { background: #bae6fd; }
-
-        /* === חלון הסבר (MODAL) === */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 1000;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
-            backdrop-filter: blur(2px);
-        }
-        .modal-overlay.open { opacity: 1; pointer-events: auto; }
-        
-        .modal-content {
-            background: white; width: 90%; max-width: 450px;
-            padding: 25px; border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            text-align: center;
-            position: relative;
-        }
-        .modal-content h3 { margin-top: 0; color: var(--primary); font-size: 1.5rem; }
-        .modal-content p { font-size: 1.1rem; line-height: 1.6; color: #334155; margin-bottom: 20px; }
-        .modal-btn {
-            background: var(--primary); color: white; border: none;
-            padding: 10px 24px; font-size: 1.1rem; border-radius: 50px;
-            cursor: pointer; font-weight: bold;
-            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
-        }
-        .modal-btn:hover { transform: translateY(-2px); }
 
         /* הודעת הצלחה */
         #toast { 
@@ -180,9 +155,10 @@
                 overflow-y: auto; 
             }
 
+            /* הקטנת HUD במובייל כדי שלא יסתיר את הגרף */
             #paper-hud {
                 top: 5px; right: 5px; 
-                transform: scale(0.85); transform-origin: top right;
+                transform: scale(0.8); transform-origin: top right;
                 padding: 8px;
             }
             .card { margin-bottom: 8px; padding: 8px; }
@@ -191,22 +167,6 @@
     </style>
 </head>
 <body>
-
-<div id="introModal" class="modal-overlay">
-    <div class="modal-content">
-        <h3>💡 רגע לפני שמתחילים!</h3>
-        <p>
-            במשחק הזה אתם לא רק פותרים - <strong>אתם היוצרים!</strong>
-            <br><br>
-            בכל שאלה, השתמשו בסליידרים של הפרמטרים 
-            (<strong>a, b, c, d</strong>)
-            כדי <strong>לבנות בעצמכם</strong> את הפונקציה שאתם רוצים לחקור.
-            <br><br>
-            רק אחרי שהפונקציה מוכנה, הזיזו את ה-<strong>X</strong> כדי למצוא את התשובה.
-        </p>
-        <button class="modal-btn" onclick="toggleIntro(false)">הבנתי, בוא נתחיל</button>
-    </div>
-</div>
 
 <div id="toast">🎉 כל הכבוד!</div>
 
@@ -217,30 +177,28 @@
         <span class="hud-title">פונקציה</span>
         <div class="hud-row" id="mathFunc">f(x) = ...</div>
         
-        <span class="hud-title" style="margin-top:8px;">הנקודה (השלשה הקדושה)</span>
+        <span class="hud-title" style="margin-top:6px;">הנקודה (השלשה)</span>
         <div class="hud-row"><span class="hud-label">x:</span> <span id="dispX">0</span></div>
         <div class="hud-row"><span class="hud-label">f(x):</span> <span id="dispY">0</span></div>
         <div class="hud-row"><span class="hud-label">f'(x):</span> <span id="dispM">0</span></div>
 
-        <div style="margin-top:8px; border-top:1px dashed #cbd5e1; padding-top:4px;">
+        <div style="margin-top:6px; border-top:1px dashed #cbd5e1; padding-top:4px;">
             <span class="hud-title">משוואת המשיק</span>
-            <div class="hud-row" id="lineEq" style="color:#f97316; font-weight:bold;">y = ...</div>
+            <div class="hud-row" id="lineEq" style="color:#f97316; font-weight:bold; font-size:0.9rem;">y = ...</div>
         </div>
     </div>
 </main>
 
 <aside>
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h2>מעבדת חקירה</h2>
+    <div class="info-box">
+        <strong>💡 איך עובדים?</strong><br>
+        1. קודם <b>בונים את הפונקציה</b> בעזרת הפרמטרים למטה.<br>
+        2. רק כשהיא מוכנה, מזיזים את ה-<b>X</b> כדי לפתור.
     </div>
-    
-    <button class="btn-info" onclick="toggleIntro(true)">
-        <span style="font-size:1.2rem;">🎓</span> איך משתמשים?
-    </button>
 
     <div class="card" style="border-right: 4px solid var(--primary);">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3>שאלה <span id="qIndexBadge">1/5</span></h3>
+            <h3 style="margin:0; font-size:1rem;">שאלה <span id="qIndexBadge">1/5</span></h3>
         </div>
         <select id="qSelect" onchange="gameLoadQuestion(this.value)" style="width:100%; margin: 5px 0; padding: 5px;"></select>
         <p id="qDesc" style="font-size:0.85rem; margin-top:2px;">...</p>
@@ -255,7 +213,7 @@
     </div>
 
     <div class="card">
-        <h3 style="margin:0 0 5px 0; font-size:0.9rem;">פרמטרים (בניית הפונקציה)</h3>
+        <h3 style="margin:0 0 5px 0; font-size:0.9rem;">פרמטרים (בנייה)</h3>
         <div class="control-row"><label>a (x³)</label><input type="range" id="inpA" min="-2" max="2" step="0.1" oninput="sysUpdate()"><div class="val-display" id="valA">0</div></div>
         <div class="control-row"><label>b (x²)</label><input type="range" id="inpB" min="-4" max="4" step="0.1" oninput="sysUpdate()"><div class="val-display" id="valB">0</div></div>
         <div class="control-row"><label>c (x)</label><input type="range" id="inpC" min="-5" max="5" step="0.1" oninput="sysUpdate()"><div class="val-display" id="valC">0</div></div>
@@ -282,17 +240,7 @@ window.onload = function() {
     initUI();
     gameLoadQuestion(0);
     animate();
-    
-    // פתיחה אוטומטית של ההסבר בהתחלה
-    setTimeout(() => toggleIntro(true), 500);
 };
-
-// פונקציה לפתיחה/סגירה של המודל
-function toggleIntro(show) {
-    const modal = document.getElementById('introModal');
-    if (show) modal.classList.add('open');
-    else modal.classList.remove('open');
-}
 
 function initResize() {
     const container = document.getElementById('graphContainer');
