@@ -1,149 +1,52 @@
-/* script.js - לוגיקה מלאה: גרף, נגזרת, יומן, מטרות, חם/קר, סאונד */
+/* script.js - כולל יומן משוואות ומטרות ויזואליות
+   עדכונים לפי הבקשות שלך:
+   ✅ "כל הכבוד" לא באמצע: מציגים הודעה קטנה בפינה + לא חוסם נקודה
+   ✅ בצד הגרף: מציגים f(x), f'(x), m=f'(x0), נקודה (x0,y0), ומשוואת המשיק
+   ✅ לכל נקודת מטרה אדומה: מציגים גם (x,y) ליד התווית
+   ✅ מעדכן תמיד את הנגזרת ליד הפונקציה
+   ✅ בתרגיל "שתי נקודות": הצלחה רק אם *באותו רגע* הפונקציה פוגעת בשתיהן.
+      אם זזים ומאבדים נקודה – היא מתבטלת (solvedTargets מתאפס/מתעדכן בזמן אמת)
+*/
 
+// --------- Globals ----------
 let cvs, ctx, W, H, mainArea;
-
-// קואורדינטות
 let baseScale = 40,
   scale = 40;
 let ox,
-  oy; // origin on canvas
-
-// מצב
-let px = 0; // x של הנקודה הנגררת (רק במצב move_x)
-let cf = [0, 1, 0, 0]; // [a,b,c,d]  f(x) = ax^3 + bx^2 + cx + d
+  oy; // origin screen coords
+let px = 0; // draggable x
+let cf = [0, 1, 0, 0]; // [a,b,c,d]
 let currentQ = 0;
 let isDrag = false;
 
-// אודיו
-let audioCtx = null;
-let isMuted = false;
+// audio
+let audioCtx = null,
+  isMuted = false;
 
-// מטרות שנפתרו
-let solvedTargets = [];
+// targets
+let solvedTargets = []; // indices hit currently (dynamic)
 
-// ----- helpers DOM (כדי לא לקרוס אם חסר אלמנט) -----
-function $(id) {
-  return document.getElementById(id);
-}
-function setText(id, txt) {
-  const el = $(id);
-  if (el) el.innerText = txt;
-}
-function setHTML(id, html) {
-  const el = $(id);
-  if (el) el.innerHTML = html;
-}
-function setStyle(id, prop, value) {
-  const el = $(id);
-  if (el) el.style[prop] = value;
-}
+// success UI
+let successShown = false;
 
-// ----- מתמטיקה -----
-function f(x) {
-  return cf[0] * x ** 3 + cf[1] * x ** 2 + cf[2] * x + cf[3];
-}
-function df(x) {
-  return 3 * cf[0] * x ** 2 + 2 * cf[1] * x + cf[2];
-}
-
-// פורמט פונקציה (כולל סימנים)
-function formatPoly(a, b, c, d) {
-  const parts = [];
-  const pushTerm = (coef, term) => {
-    if (Math.abs(coef) < 0.001) return;
-    const n = Number(coef.toFixed(1));
-    parts.push({ n, term });
-  };
-
-  pushTerm(a, "x³");
-  pushTerm(b, "x²");
-  pushTerm(c, "x");
-
-  // קבוע
-  if (Math.abs(d) > 0.001 || parts.length === 0) {
-    parts.push({ n: Number(d.toFixed(1)), term: "" });
-  }
-
-  // בנייה עם +/-
-  let out = "f(x) = ";
-  parts.forEach((p, i) => {
-    const sign = p.n >= 0 ? "+" : "-";
-    const absN = Math.abs(p.n);
-
-    if (i === 0) {
-      out += `${p.n}${p.term}`;
-    } else {
-      out += ` ${sign} ${absN}${p.term}`;
-    }
-  });
-
-  return out.replace(/\+ -/g, "- ");
-}
-
-function formatDeriv(a, b, c) {
-  // f'(x) = 3ax^2 + 2bx + c
-  const A = 3 * a;
-  const B = 2 * b;
-  const C = c;
-
-  const parts = [];
-  const pushTerm = (coef, term) => {
-    if (Math.abs(coef) < 0.001) return;
-    const n = Number(coef.toFixed(1));
-    parts.push({ n, term });
-  };
-
-  pushTerm(A, "x²");
-  pushTerm(B, "x");
-  // קבוע
-  if (Math.abs(C) > 0.001 || parts.length === 0) {
-    parts.push({ n: Number(C.toFixed(1)), term: "" });
-  }
-
-  let out = "f'(x) = ";
-  parts.forEach((p, i) => {
-    const sign = p.n >= 0 ? "+" : "-";
-    const absN = Math.abs(p.n);
-
-    if (i === 0) {
-      out += `${p.n}${p.term}`;
-    } else {
-      out += ` ${sign} ${absN}${p.term}`;
-    }
-  });
-
-  return out.replace(/\+ -/g, "- ");
-}
-
-// ----- אתחול -----
+// ---------- Boot ----------
 window.onload = () => {
-  cvs = $("cvs");
-  if (!cvs) {
-    console.error("Missing canvas #cvs");
-    return;
-  }
-
+  cvs = document.getElementById("cvs");
   ctx = cvs.getContext("2d");
-  mainArea = $("mainArea") || cvs.parentElement;
+  mainArea = document.getElementById("mainArea");
 
   window.addEventListener("resize", resize);
   resize();
-
   setupEvents();
   initMenu();
-  initSoundUI();
   loadQ(0);
 
-  // אם תרצה אנימציה עתידית:
-  // requestAnimationFrame(animate);
-};
+  // אם יש כפתור סאונד קיים:
+  const btn = document.getElementById("btnSound");
+  if (btn) btn.innerText = isMuted ? "🔇" : "🔊";
 
-// ----- UI -----
-function initSoundUI() {
-  const btn = $("btnSound");
-  if (!btn) return;
-  btn.innerText = isMuted ? "🔇" : "🔊";
-}
+  requestAnimationFrame(animate);
+};
 
 function resize() {
   W = cvs.width = mainArea.clientWidth;
@@ -153,6 +56,7 @@ function resize() {
   draw();
 }
 
+// ---------- Input ----------
 function setupEvents() {
   const start = (e) => {
     isDrag = true;
@@ -190,98 +94,150 @@ function setupEvents() {
 }
 
 function handleInput(e) {
-  const q = window.bagrutData[currentQ];
-  if (!q) return;
+  const q = bagrutData[currentQ];
 
-  // רק במצב "move_x" גוררים נקודה
   if (q.type === "move_x") {
     const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
     const rect = cvs.getBoundingClientRect();
     px = (clientX - rect.left - ox) / scale;
     px = Math.max(-10, Math.min(10, px));
-
-    const slider = $("mainX");
-    if (slider) slider.value = px;
-
+    const s = document.getElementById("mainX");
+    if (s) s.value = px;
     updateGame();
   }
 }
 
 function updateFromSlider() {
-  const slider = $("mainX");
-  if (!slider) return;
-  px = parseFloat(slider.value);
+  px = parseFloat(document.getElementById("mainX").value);
   updateGame();
 }
 
 function manual() {
-  const q = window.bagrutData[currentQ];
-  if (!q) return;
+  const q = bagrutData[currentQ];
 
-  // מי נעול? מי פתוח?
-  if (!q.locked || !q.locked.includes("a")) cf[0] = parseFloat($("mA")?.value ?? cf[0]);
-  if (!q.locked || !q.locked.includes("b")) cf[1] = parseFloat($("mB")?.value ?? cf[1]);
-  if (!q.locked || !q.locked.includes("c")) cf[2] = parseFloat($("mC")?.value ?? cf[2]);
-  if (!q.locked || !q.locked.includes("d")) cf[3] = parseFloat($("mD")?.value ?? cf[3]);
+  if (!q.locked || !q.locked.includes("a"))
+    cf[0] = parseFloat(document.getElementById("mA").value);
+  if (!q.locked || !q.locked.includes("b"))
+    cf[1] = parseFloat(document.getElementById("mB").value);
+  if (!q.locked || !q.locked.includes("c"))
+    cf[2] = parseFloat(document.getElementById("mC").value);
+  if (!q.locked || !q.locked.includes("d"))
+    cf[3] = parseFloat(document.getElementById("mD").value);
 
-  // החזרת סליידרים נעולים למצבם (שלא “יברחו”)
+  // אם נעול, נחזיר את הסליידר לערך האמיתי כדי שלא "ירוץ" ויזואלית
   if (q.locked) {
-    if (q.locked.includes("a") && $("mA")) $("mA").value = cf[0];
-    if (q.locked.includes("b") && $("mB")) $("mB").value = cf[1];
-    if (q.locked.includes("c") && $("mC")) $("mC").value = cf[2];
-    if (q.locked.includes("d") && $("mD")) $("mD").value = cf[3];
+    if (q.locked.includes("a")) document.getElementById("mA").value = cf[0];
+    if (q.locked.includes("b")) document.getElementById("mB").value = cf[1];
+    if (q.locked.includes("c")) document.getElementById("mC").value = cf[2];
+    if (q.locked.includes("d")) document.getElementById("mD").value = cf[3];
   }
 
   updateGame();
 }
 
-// ----- עדכון מרכזי -----
+function toggleMute() {
+  isMuted = !isMuted;
+  const btn = document.getElementById("btnSound");
+  if (btn) btn.innerText = isMuted ? "🔇" : "🔊";
+}
+
+// ---------- Math ----------
+function f(x) {
+  return cf[0] * x ** 3 + cf[1] * x ** 2 + cf[2] * x + cf[3];
+}
+function df(x) {
+  return 3 * cf[0] * x ** 2 + 2 * cf[1] * x + cf[2];
+}
+function d2f(x) {
+  return 6 * cf[0] * x + 2 * cf[1];
+}
+
+function formatPoly(a, b, c, d) {
+  const terms = [];
+  if (Math.abs(a) > 0.001) terms.push(`${Number(a.toFixed(2))}x³`);
+  if (Math.abs(b) > 0.001) terms.push(`${Number(b.toFixed(2))}x²`);
+  if (Math.abs(c) > 0.001) terms.push(`${Number(c.toFixed(2))}x`);
+  if (Math.abs(d) > 0.001 || terms.length === 0)
+    terms.push(`${Number(d.toFixed(2))}`);
+  return "f(x) = " + terms.join(" + ").replace(/\+ -/g, "- ");
+}
+
+function formatDeriv(a, b, c) {
+  // f'(x) = 3ax^2 + 2bx + c
+  const A = 3 * a,
+    B = 2 * b,
+    C = c;
+  const terms = [];
+  if (Math.abs(A) > 0.001) terms.push(`${Number(A.toFixed(2))}x²`);
+  if (Math.abs(B) > 0.001) terms.push(`${Number(B.toFixed(2))}x`);
+  if (Math.abs(C) > 0.001 || terms.length === 0)
+    terms.push(`${Number(C.toFixed(2))}`);
+  return "f'(x) = " + terms.join(" + ").replace(/\+ -/g, "- ");
+}
+
+// ---------- Game Update ----------
 function updateGame() {
-  // טקסט ערכי פרמטרים
-  setText("valA", cf[0].toFixed(1));
-  setText("valB", cf[1].toFixed(1));
-  setText("valC", cf[2].toFixed(1));
-  setText("valD", cf[3].toFixed(1));
+  // טקסטי מקדמים
+  const va = document.getElementById("valA");
+  const vb = document.getElementById("valB");
+  const vc = document.getElementById("valC");
+  const vd = document.getElementById("valD");
+  if (va) va.innerText = cf[0].toFixed(1);
+  if (vb) vb.innerText = cf[1].toFixed(1);
+  if (vc) vc.innerText = cf[2].toFixed(1);
+  if (vd) vd.innerText = cf[3].toFixed(1);
 
-  // הצגת פונקציה + נגזרת
-  setText("eqn", formatPoly(cf[0], cf[1], cf[2], cf[3]));
-  setText("derivEqn", formatDeriv(cf[0], cf[1], cf[2])); // ✅ חדש: נגזרת ליד הפונקציה
+  // טקסט פונקציה + נגזרת (צד הגרף)
+  const eqn = document.getElementById("eqn");
+  const deq = document.getElementById("derivEqn");
+  if (eqn) eqn.innerText = formatPoly(cf[0], cf[1], cf[2], cf[3]);
+  if (deq) deq.innerText = formatDeriv(cf[0], cf[1], cf[2]);
 
-  // בדיקת ניצחון + חם/קר
+  // עדכון תצוגת "מד חם-קר" + הצלחה
   checkWinCondition();
 
-  // ציור
+  // עדכון תצוגות צד (נקודה/שיפוע/משיק) בכל מצב
+  updateSidePanel();
+
   draw();
 }
 
-// ----- חם/קר (ליד ה-bar) -----
-function setHeatFeedback(pct) {
-  // pct: 0..100
-  // טקסט "קר/פושר/חם/רותח"
-  let label = "קר ❄️";
-  if (pct > 25) label = "מתחמם 🙂";
-  if (pct > 50) label = "חם 🔥";
-  if (pct > 75) label = "רותח 🚀";
+function updateSidePanel() {
+  // מציג:
+  // point: (x0, y0)
+  // m = f'(x0)
+  // tangent: y = m x + b
+  const x0 = px;
+  const y0 = f(px);
+  const m = df(px);
+  const b = y0 - m * x0;
 
-  // אלמנט טקסט אופציונלי
-  setText("proximityText", `${label}  (${Math.round(pct)}%)`);
+  const elPoint = document.getElementById("sidePoint");
+  const elSlope = document.getElementById("sideSlope");
+  const elTangent = document.getElementById("sideTangent");
+  const elFx = document.getElementById("sideFx");
+  const elDfx = document.getElementById("sideDfx");
 
-  // אפשר גם לשנות שקיפות/Glow של הבר (לא חובה)
-  const bar = $("proximityBar");
-  if (bar) {
-    bar.style.opacity = 0.6 + 0.4 * (pct / 100);
-  }
+  if (elFx) elFx.innerText = formatPoly(cf[0], cf[1], cf[2], cf[3]);
+  if (elDfx) elDfx.innerText = formatDeriv(cf[0], cf[1], cf[2]);
+
+  if (elPoint) elPoint.innerText = `נקודה: (x₀,y₀)=(${x0.toFixed(2)}, ${y0.toFixed(2)})`;
+  if (elSlope) elSlope.innerText = `שיפוע: m=f'(x₀)=${m.toFixed(3)}`;
+  if (elTangent)
+    elTangent.innerText = `משיק: y=${m.toFixed(2)}x${b >= 0 ? "+" : ""}${b.toFixed(2)}`;
 }
 
-// ----- תנאי ניצחון -----
+// ---------- Win / Hot-Cold ----------
 function checkWinCondition() {
-  const q = window.bagrutData[currentQ];
-  if (!q) return;
-
+  const q = bagrutData[currentQ];
   let dist = 100;
 
+  // כל פעם נחשב "חם/קר" וגם נסנכרן solvedTargets דינמית
   if (q.goal === "hit_targets") {
-    // מצב בנייה: כמה רחוקים מכל המטרות
+    // דינמי: לא "ננעלים" על נקודה שנפתרה.
+    // בכל frame: מי בתוך סף -> נחשב כ-hit, מי לא -> מתבטל.
+    const hitNow = [];
+
     let totalError = 0;
 
     q.targets.forEach((t, i) => {
@@ -289,66 +245,94 @@ function checkWinCondition() {
       const diff = Math.abs(val - t.y);
       totalError += diff;
 
-      // אם המטרה הושגה ועוד לא נרשמה
-      if (diff < 0.2 && !solvedTargets.includes(i)) {
-        solvedTargets.push(i);
-        addJournalEntry(`f(${t.x}) = ${t.y}`);
-        playTone(600 + i * 100, 0.12);
-      }
+      if (diff < 0.2) hitNow.push(i);
+    });
+
+    // זה הקטע החשוב לשאלה 5: הצלחה רק אם *כל* הנקודות hitNow בו זמנית
+    solvedTargets = hitNow.slice();
+
+    // journal: נרשום f(x)=y רק כשהגענו לראשונה לאותה נקודה (ועדיין לא קיים ביומן)
+    solvedTargets.forEach((i) => {
+      const t = q.targets[i];
+      addJournalEntry(`f(${t.x}) = ${t.y}`);
+      playTone(600 + i * 120, 0.07);
     });
 
     dist = totalError * 10;
 
-    // הצלחה מלאה
     if (solvedTargets.length === q.targets.length) {
-      const last = $("journalList")?.lastChild?.innerText ?? "";
-      if (q.solvedEq && last !== "✅ " + q.solvedEq) {
-        addJournalEntry("✅ " + q.solvedEq);
-      }
+      if (q.solvedEq) addJournalEntry("✅ " + q.solvedEq);
       triggerSuccess();
+    } else {
+      // אם לא פגענו בכל הנקודות יחד — אין הצלחה
+      hideSuccessIfNeeded();
     }
   } else {
-    // מצב חקירה: מזיזים X
+    // move_x
     const m = df(px);
+    const y = f(px);
 
     if (q.goal === "min_point") {
-      // מינימום: m≈0 וגם f''>0
-      const d2 = 6 * cf[0] * px + 2 * cf[1];
+      const d2 = d2f(px);
       dist = Math.abs(m) + (d2 > 0 ? 0 : 5);
     } else if (q.goal === "slope_zero") {
       dist = Math.abs(m);
     }
 
     if (dist < 0.15) triggerSuccess();
+    else hideSuccessIfNeeded();
   }
 
-  // proximity 0..100
+  // חם/קר מד קרבה
   const p = Math.max(0, Math.min(100, (1 - dist / 5) * 100));
-  setStyle("proximityBar", "width", p + "%");
-  setHeatFeedback(p);
+  const bar = document.getElementById("proximityBar");
+  if (bar) bar.style.width = p + "%";
+
+  // "חם יותר" כשהקרוב — מוסיפים גם טקסט אם קיים
+  const hot = document.getElementById("hotColdText");
+  if (hot) {
+    if (p > 85) hot.innerText = "🔥 חם מאוד!";
+    else if (p > 60) hot.innerText = "🙂 מתחמם…";
+    else if (p > 35) hot.innerText = "😐 פושר…";
+    else hot.innerText = "❄️ קר…";
+  }
 }
 
-// ----- הצלחה -----
 function triggerSuccess() {
-  const banner = $("successBanner");
-  if (!banner) {
-    // גם אם אין banner, לפחות צליל:
-    playTone(800, 0.25);
-    return;
-  }
-
-  if (!banner.classList.contains("show")) {
-    banner.classList.add("show");
-    playTone(800, 0.25);
+  // במקום באמצע: נציג בפינה (מומלץ: אלמנט #successToast)
+  const toast = document.getElementById("successToast");
+  if (toast) {
+    if (!successShown) {
+      toast.classList.add("show");
+      toast.innerText = "כל הכבוד! ✅";
+      playTone(820, 0.18);
+      successShown = true;
+    }
+  } else {
+    // fallback לישן אם קיים
+    const banner = document.getElementById("successBanner");
+    if (banner && !banner.classList.contains("show")) {
+      banner.classList.add("show");
+      playTone(820, 0.18);
+      successShown = true;
+    }
   }
 }
 
-// ----- יומן -----
+function hideSuccessIfNeeded() {
+  if (!successShown) return;
+  const toast = document.getElementById("successToast");
+  if (toast) toast.classList.remove("show");
+  const banner = document.getElementById("successBanner");
+  if (banner) banner.classList.remove("show");
+  successShown = false;
+}
+
+// ---------- Journal ----------
 function addJournalEntry(text) {
-  const list = $("journalList");
+  const list = document.getElementById("journalList");
   if (!list) return;
 
-  // מניעת כפילויות
   const exists = Array.from(list.children).some((c) => c.innerText === text);
   if (exists) return;
 
@@ -359,22 +343,20 @@ function addJournalEntry(text) {
   list.scrollTop = list.scrollHeight;
 }
 
-// ----- ציור -----
+// ---------- Drawing ----------
 function draw() {
-  if (!ctx) return;
-
   ctx.clearRect(0, 0, W, H);
   drawGrid();
 
-  const q = window.bagrutData[currentQ];
-  if (!q) return;
-
-  // מטרות
+  // targets
+  const q = bagrutData[currentQ];
   if (q.targets) {
-    q.targets.forEach((t, i) => drawTarget(t.x, t.y, t.label, solvedTargets.includes(i)));
+    q.targets.forEach((t, i) => {
+      drawTarget(t.x, t.y, t.label, solvedTargets.includes(i));
+    });
   }
 
-  // גרף הפונקציה
+  // function curve
   ctx.beginPath();
   ctx.strokeStyle = "#2563eb";
   ctx.lineWidth = 3;
@@ -388,18 +370,22 @@ function draw() {
   }
   ctx.stroke();
 
-  // אם זה מצב move_x — מציירים נקודה, משיק, נורמל, זווית וכו'
-  if (q.type !== "find_param") {
-    const y = f(px);
-    const m = df(px);
+  // point and tangent tools
+  const y = f(px);
+  const m = df(px);
 
+  // מצבי נקודה (move_x): מציגים משיק/נורמל/סימונים
+  // מצבי פרמטר (find_param): ברירת מחדל לא מציג נקודה,
+  // אבל אתה ביקשת שעדיין יופיעו נוסחאות בצד – זה כבר קורה ב-sidePanel
+  if (q.type !== "find_param") {
     drawTangent(px, y, m);
     drawNormal(px, y, m);
     drawRightAngleMarker(px, y, m);
 
-    // נקודה
+    // player point
     const sx = ox + px * scale;
     const sy = oy - y * scale;
+
     ctx.fillStyle = "#2563eb";
     ctx.beginPath();
     ctx.arc(sx, sy, 6, 0, Math.PI * 2);
@@ -409,6 +395,10 @@ function draw() {
     ctx.stroke();
 
     updateTrinityDisplay(px, y, m);
+  } else {
+    // במצב פרמטרים: מסתירים tooltip אם רוצים
+    const tooltip = document.getElementById("holyTrinity");
+    if (tooltip) tooltip.style.display = "none";
   }
 }
 
@@ -416,6 +406,7 @@ function drawTarget(x, y, label, isHit) {
   const sx = ox + x * scale;
   const sy = oy - y * scale;
 
+  // outer ring
   ctx.beginPath();
   ctx.arc(sx, sy, 8, 0, Math.PI * 2);
 
@@ -434,9 +425,11 @@ function drawTarget(x, y, label, isHit) {
     ctx.setLineDash([]);
   }
 
+  // label + coordinates
   ctx.fillStyle = "#64748b";
   ctx.font = "12px Rubik";
-  ctx.fillText(label, sx + 10, sy - 10);
+  const coord = `(${x},${y})`;
+  ctx.fillText(`${label} ${coord}`, sx + 10, sy - 10);
 }
 
 function drawGrid() {
@@ -454,7 +447,6 @@ function drawGrid() {
   }
   ctx.stroke();
 
-  // צירים
   ctx.strokeStyle = "#94a3b8";
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -468,7 +460,6 @@ function drawGrid() {
 function drawTangent(x1, y1, m) {
   const sx = ox + x1 * scale;
   const sy = oy - y1 * scale;
-
   ctx.strokeStyle = "#f97316";
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -480,7 +471,6 @@ function drawTangent(x1, y1, m) {
 function drawNormal(x1, y1, m) {
   const sx = ox + x1 * scale;
   const sy = oy - y1 * scale;
-
   ctx.strokeStyle = "#d946ef";
   ctx.setLineDash([5, 5]);
   ctx.lineWidth = 2;
@@ -505,13 +495,10 @@ function drawRightAngleMarker(x1, y1, m) {
   const size = 12;
 
   const angle = Math.atan(-m);
-
   const p1x = sx + size * Math.cos(angle);
   const p1y = sy + size * Math.sin(angle);
-
   const p2x = sx + size * Math.cos(angle - Math.PI / 2);
   const p2y = sy + size * Math.sin(angle - Math.PI / 2);
-
   const p3x = p1x + (p2x - sx);
   const p3y = p1y + (p2y - sy);
 
@@ -525,15 +512,20 @@ function drawRightAngleMarker(x1, y1, m) {
 }
 
 function updateTrinityDisplay(x, y, m) {
-  const tooltip = $("holyTrinity");
+  const tooltip = document.getElementById("holyTrinity");
   if (!tooltip) return;
 
-  setText("valX", `x = ${x.toFixed(2)}`);
-  setText("valY", `y = ${y.toFixed(2)}`);
-  setText("valM", `m = ${m.toFixed(2)}`);
+  const vx = document.getElementById("valX");
+  const vy = document.getElementById("valY");
+  const vm = document.getElementById("valM");
+  const le = document.getElementById("lineEqn");
+
+  if (vx) vx.innerText = `x = ${x.toFixed(2)}`;
+  if (vy) vy.innerText = `y = ${y.toFixed(2)}`;
+  if (vm) vm.innerText = `m = ${m.toFixed(2)}`;
 
   const b = y - m * x;
-  setText("lineEqn", `משיק: y=${m.toFixed(1)}x${b >= 0 ? "+" : ""}${b.toFixed(1)}`);
+  if (le) le.innerText = `משיק: y=${m.toFixed(1)}x${b >= 0 ? "+" : ""}${b.toFixed(1)}`;
 
   const sx = ox + x * scale;
   const sy = oy - y * scale;
@@ -542,13 +534,12 @@ function updateTrinityDisplay(x, y, m) {
   tooltip.style.display = "flex";
 }
 
-// ----- תפריט / טעינת שאלה -----
+// ---------- Menu / Load Questions ----------
 function initMenu() {
-  const sel = $("qSelect");
+  const sel = document.getElementById("qSelect");
   if (!sel) return;
-
   sel.innerHTML = "";
-  window.bagrutData.forEach((q, i) => {
+  bagrutData.forEach((q, i) => {
     const opt = document.createElement("option");
     opt.value = i;
     opt.text = q.t;
@@ -558,99 +549,95 @@ function initMenu() {
 
 function loadQ(idx) {
   currentQ = idx;
-  const q = window.bagrutData[idx];
-  if (!q) return;
+  const q = bagrutData[idx];
 
-  const sel = $("qSelect");
+  const sel = document.getElementById("qSelect");
   if (sel) sel.value = idx;
 
-  setText("qCounter", `שאלה ${idx + 1}`);
-  setText("qText", q.d);
+  const counter = document.getElementById("qCounter");
+  if (counter) counter.innerText = `שאלה ${idx + 1}`;
 
-  // איפוס יומן + הצלחה
-  if ($("journalList")) $("journalList").innerHTML = "";
-  $("successBanner")?.classList.remove("show");
+  const qt = document.getElementById("qText");
+  if (qt) qt.innerText = q.d;
+
+  const journal = document.getElementById("journalList");
+  if (journal) journal.innerHTML = "";
+
+  // איפוס solvedTargets + success
   solvedTargets = [];
+  hideSuccessIfNeeded();
 
-  // איפוס פרמטרים
+  // reset params
   cf = [...q.p];
-  if ($("mA")) $("mA").value = cf[0];
-  if ($("mB")) $("mB").value = cf[1];
-  if ($("mC")) $("mC").value = cf[2];
-  if ($("mD")) $("mD").value = cf[3];
+  const mA = document.getElementById("mA");
+  const mB = document.getElementById("mB");
+  const mC = document.getElementById("mC");
+  const mD = document.getElementById("mD");
+  if (mA) mA.value = cf[0];
+  if (mB) mB.value = cf[1];
+  if (mC) mC.value = cf[2];
+  if (mD) mD.value = cf[3];
 
-  // enable all sliders
+  // unlock all then lock needed
   ["mA", "mB", "mC", "mD"].forEach((id) => {
-    if ($(id)) $(id).disabled = false;
+    const el = document.getElementById(id);
+    if (el) el.disabled = false;
   });
 
-  // lock sliders
   if (q.locked) {
-    if (q.locked.includes("a") && $("mA")) $("mA").disabled = true;
-    if (q.locked.includes("b") && $("mB")) $("mB").disabled = true;
-    if (q.locked.includes("c") && $("mC")) $("mC").disabled = true;
-    if (q.locked.includes("d") && $("mD")) $("mD").disabled = true;
+    if (q.locked.includes("a") && mA) mA.disabled = true;
+    if (q.locked.includes("b") && mB) mB.disabled = true;
+    if (q.locked.includes("c") && mC) mC.disabled = true;
+    if (q.locked.includes("d") && mD) mD.disabled = true;
   }
 
-  // מצב move_x: מציגים X וטריניטי
+  // X slider visibility
+  const xCont = document.getElementById("sliderXContainer");
+  const tri = document.getElementById("holyTrinity");
+
   if (q.type === "move_x") {
     px = -1;
-    if ($("mainX")) $("mainX").value = px;
-    setStyle("sliderXContainer", "display", "flex");
-    setStyle("holyTrinity", "display", "flex");
+    const sx = document.getElementById("mainX");
+    if (sx) sx.value = px;
+    if (xCont) xCont.style.display = "flex";
+    if (tri) tri.style.display = "flex";
   } else {
-    // מצב פרמטרים: מסתירים X וטריניטי
-    setStyle("sliderXContainer", "display", "none");
-    setStyle("holyTrinity", "display", "none");
+    if (xCont) xCont.style.display = "none";
+    if (tri) tri.style.display = "none";
   }
 
   updateGame();
 }
 
 function loadQuestionFromSelect() {
-  const sel = $("qSelect");
-  if (!sel) return;
-  loadQ(parseInt(sel.value, 10));
+  loadQ(parseInt(document.getElementById("qSelect").value));
 }
-
 function nextQuestion() {
-  if (currentQ < window.bagrutData.length - 1) loadQ(currentQ + 1);
+  if (currentQ < bagrutData.length - 1) loadQ(currentQ + 1);
 }
 
-// ----- אודיו -----
+// ---------- Audio ----------
 function initAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 }
 
-function toggleMute() {
-  isMuted = !isMuted;
-  const btn = $("btnSound");
-  if (btn) btn.innerText = isMuted ? "🔇" : "🔊";
-}
-
 function playTone(freq, duration) {
-  if (isMuted) return;
-  if (!audioCtx) return;
-
+  if (isMuted || !audioCtx) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
-
   osc.connect(gain);
   gain.connect(audioCtx.destination);
-
   osc.frequency.value = freq;
-
   gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-
   osc.start();
   osc.stop(audioCtx.currentTime + duration);
 }
 
-// אם תרצה אנימציה בעתיד
-function animate() {}
-
-// זום
+// ---------- Animation / Zoom ----------
+function animate() {
+  /* requestAnimationFrame(animate); */
+}
 function zoomIn() {
   scale *= 1.1;
   draw();
