@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>מערכת חקר פונקציות מתקדמת</title>
+    <title>מערכת חקר פונקציות - גרסת מעבדה מלאה</title>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --primary: #2563eb; --accent: #16a34a; --hot: #ef4444; --cold: #3b82f6; --bg: #f8fafc; --panel: #ffffff; }
+        :root { --primary: #2563eb; --accent: #16a34a; --orange: #f97316; --purple: #9333ea; --bg: #f8fafc; --panel: #ffffff; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; padding: 0; font-family: 'Rubik', sans-serif; background: var(--bg); height: 100vh; display: flex; overflow: hidden; }
         
@@ -16,42 +16,46 @@
         #graph-area { flex: 1; position: relative; cursor: crosshair; background: white; }
         canvas { display: block; width: 100%; height: 100%; }
 
-        /* HUD - התצוגה הצפה על הגרף */
-        #hud {
-            position: absolute; top: 10px; right: 10px;
-            background: rgba(255,255,255,0.95);
-            padding: 12px; border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border: 1px solid #cbd5e1;
-            pointer-events: none; /* כדי שאפשר יהיה ללחוץ דרכו */
-            min-width: 160px;
+        /* השלשה הקדושה - צפה על הנקודה */
+        #holy-trinity {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.92);
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid var(--primary);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            pointer-events: none;
+            z-index: 1000;
+            min-width: 130px;
+            transform: translate(20px, -50%);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
-        .hud-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-family: 'Times New Roman', serif; font-size: 1.1rem; }
-        .hud-label { font-weight: bold; color: var(--primary); font-family: 'Rubik'; font-size: 0.9rem; }
-        
+        .trinity-header { font-weight: bold; color: var(--primary); font-size: 0.75rem; text-align: center; border-bottom: 1px solid #eee; margin-bottom: 4px; }
+        .trinity-row { display: flex; justify-content: space-between; font-family: 'Courier New', monospace; font-size: 0.9rem; }
+        .trinity-label { font-weight: bold; color: #64748b; }
+
         /* סרגל צד */
         #sidebar { width: 360px; background: var(--panel); border-right: 1px solid #cbd5e1; display: flex; flex-direction: column; z-index: 10; box-shadow: -2px 0 10px rgba(0,0,0,0.05); }
-        .scroll-content { flex: 1; overflow-y: auto; padding: 15px; }
+        .scroll-content { flex: 1; overflow-y: auto; padding: 20px; }
         
-        /* כרטיסיות */
-        .card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 15px; }
-        .card h3 { margin: 0 0 8px 0; font-size: 1rem; color: #1e293b; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px; }
-        
-        /* דף נוסחאות */
-        #formula-sheet {
-            background: #fffbeb; border: 1px solid #fcd34d; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem;
-        }
-        .formula-row { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 2px; }
+        .card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+        .card h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #1e293b; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px; }
 
         /* סליידרים */
-        .control-row { display: flex; align-items: center; margin-bottom: 10px; }
-        .control-row label { width: 30px; font-weight: bold; font-family: monospace; }
-        input[type=range] { flex: 1; margin: 0 10px; cursor: pointer; }
-        .val-disp { width: 40px; text-align: left; font-family: monospace; color: var(--primary); font-weight: bold; }
+        .control-row { margin-bottom: 15px; }
+        .label-wrap { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .label-wrap label { font-weight: bold; color: #475569; }
+        .val-disp { color: var(--primary); font-family: monospace; font-weight: bold; }
+        input[type=range] { width: 100%; cursor: pointer; height: 6px; border-radius: 5px; background: #e2e8f0; outline: none; }
 
-        /* כפתור */
-        #btn-next { background: var(--accent); color: white; border: none; padding: 12px; font-weight: bold; border-radius: 8px; width: 100%; cursor: pointer; font-size: 1rem; margin-top: auto; }
-        #btn-next:hover { background: #15803d; }
+        #btn-next { 
+            background: var(--accent); color: white; border: none; padding: 15px; 
+            font-weight: bold; border-radius: 10px; width: 100%; cursor: pointer; 
+            font-size: 1.1rem; transition: all 0.2s; margin-top: auto;
+        }
+        #btn-next:hover { background: #15803d; transform: translateY(-2px); }
 
         @media (max-width: 768px) { body { flex-direction: column; } #graph-area { height: 50%; } #sidebar { width: 100%; height: 50%; } }
     </style>
@@ -61,77 +65,89 @@
     <div id="graph-area">
         <canvas id="cvs"></canvas>
         
-        <div id="hud">
-            <div class="hud-label" style="text-align:center; border-bottom:1px solid #eee; margin-bottom:5px;">השלשה הקדושה</div>
-            <div class="hud-row"><span class="hud-label">x :</span> <span id="dispX">0</span></div>
-            <div class="hud-row"><span class="hud-label">f(x):</span> <span id="dispY">0</span></div>
-            <div class="hud-row"><span class="hud-label">f'(x):</span> <span id="dispM">0</span></div>
-            <div style="margin-top:8px; border-top:1px dashed #ccc; padding-top:5px;">
-                <div class="hud-label">משוואת המשיק:</div>
-                <div id="tanEq" style="direction:ltr; font-weight:bold; color:#f97316;">y = mx + n</div>
-            </div>
+        <div id="holy-trinity">
+            <div class="trinity-header">השלשה הקדושה</div>
+            <div class="trinity-row"><span class="trinity-label">x:</span><span id="dX">0</span></div>
+            <div class="trinity-row"><span class="trinity-label">f(x):</span><span id="dY">0</span></div>
+            <div class="trinity-row"><span class="trinity-label">f'(x):</span><span id="dM">0</span></div>
         </div>
     </div>
 
     <div id="sidebar">
         <div class="scroll-content">
-            <div class="card" style="border-right: 4px solid var(--primary);">
+            <div class="card" style="border-right: 5px solid var(--primary); background: #f8faff;">
                 <h3>🎯 משימה <span id="qNum">1</span></h3>
-                <select id="qSelect" style="width:100%; padding:5px; margin-bottom:5px;"></select>
-                <p id="qDesc" style="font-size:0.9rem; color:#475569;">...</p>
-            </div>
-
-            <div id="formula-sheet">
-                <h3 style="color:#d97706; margin-top:0;">📚 דף נוסחאות</h3>
-                <div class="formula-row"><span>נגזרת</span> <span>\( f'(x) = nx^{n-1} \)</span></div>
-                <div class="formula-row"><span>שיפוע</span> <span>\( m = f'(x_0) \)</span></div>
-                <div class="formula-row"><span>משוואת משיק</span> <span>\( y-y_1 = m(x-x_1) \)</span></div>
-                <div class="formula-row"><span>שיפוע נורמל</span> <span>\( m_n = -1/m \)</span></div>
-            </div>
-
-            <div class="card" style="background:#f0f9ff; border-color:#bae6fd;">
-                <h3>הזזת הנקודה (X)</h3>
-                <div class="control-row">
-                    <input type="range" id="inpX" min="-5" max="5" step="0.1">
-                    <span class="val-disp" id="valX">0</span>
-                </div>
+                <select id="qSelect" style="width:100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1; margin-bottom:10px;"></select>
+                <p id="qDesc" style="line-height:1.5; color:#475569; font-size:0.95rem;">טוען משימה...</p>
             </div>
 
             <div class="card">
-                <h3>בניית הפונקציה</h3>
-                <div class="control-row"><label>a</label><input type="range" id="inpA" min="-2" max="2" step="0.1"><span class="val-disp" id="valA">0</span></div>
-                <div class="control-row"><label>b</label><input type="range" id="inpB" min="-3" max="3" step="0.1"><span class="val-disp" id="valB">0</span></div>
-                <div class="control-row"><label>c</label><input type="range" id="inpC" min="-5" max="5" step="0.1"><span class="val-disp" id="valC">0</span></div>
-                <div class="control-row"><label>d</label><input type="range" id="inpD" min="-5" max="5" step="0.1"><span class="val-disp" id="valD">0</span></div>
+                <h3>מעבדת פונקציה</h3>
+                <div class="control-row">
+                    <div class="label-wrap"><label>פרמטר a</label><span class="val-disp" id="vA">0</span></div>
+                    <input type="range" id="inpA" min="-1" max="1" step="0.01">
+                </div>
+                <div class="control-row">
+                    <div class="label-wrap"><label>פרמטר b</label><span class="val-disp" id="vB">0</span></div>
+                    <input type="range" id="inpB" min="-3" max="3" step="0.1">
+                </div>
+                <div class="control-row">
+                    <div class="label-wrap"><label>פרמטר c</label><span class="val-disp" id="vC">0</span></div>
+                    <input type="range" id="inpC" min="-5" max="5" step="0.1">
+                </div>
+                <div class="control-row">
+                    <div class="label-wrap"><label>פרמטר d</label><span class="val-disp" id="vD">0</span></div>
+                    <input type="range" id="inpD" min="-5" max="5" step="0.1">
+                </div>
             </div>
 
-            <button id="btn-next" onclick="nextQuestion()">עבור לשאלה הבאה &larr;</button>
+            <div class="card" style="background: #fffbeb; border-color: #fef3c7;">
+                <h3>חקר הנקודה</h3>
+                <div class="control-row">
+                    <div class="label-wrap"><label>מיקום x</label><span class="val-disp" id="vX">0</span></div>
+                    <input type="range" id="inpX" min="-8" max="8" step="0.05">
+                </div>
+            </div>
+
+            <button id="btn-next" onclick="nextQuestion()">המשימה הבאה &larr;</button>
         </div>
     </div>
+
     <script src="questions.js"></script>
     <script src="sounds.js"></script>
 
     <script>
         const cvs = document.getElementById('cvs');
         const ctx = cvs.getContext('2d');
-        let width, height, scale = 40, originX, originY;
+        const trinity = document.getElementById('holy-trinity');
         
+        let width, height, scale = 45;
+        let originX, originY;
         let a=0, b=0, c=0, d=0, xVal=0;
         let currQIndex = 0;
         let isSolved = false;
 
-        // אתחול
-        window.onload = function() {
-            if (typeof QUESTIONS === 'undefined') { alert('שגיאה: קובץ questions.js לא נמצא'); return; }
-            
-            initInputs();
-            initResize();
+        window.onload = () => {
+            if (typeof QUESTIONS === 'undefined') {
+                alert("שגיאה: קובץ questions.js לא נטען כראוי.");
+                return;
+            }
+            initUI();
+            window.addEventListener('resize', resize);
+            resize();
             loadQuestion(0);
             animate();
         };
 
-        function initInputs() {
-            // מילוי ה-Select
+        function resize() {
+            width = cvs.width = document.getElementById('graph-area').clientWidth;
+            height = cvs.height = document.getElementById('graph-area').clientHeight;
+            originX = width / 2;
+            originY = height / 2;
+            update();
+        }
+
+        function initUI() {
             const sel = document.getElementById('qSelect');
             QUESTIONS.forEach((q, i) => {
                 let opt = document.createElement('option');
@@ -141,22 +157,9 @@
             });
             sel.onchange = (e) => loadQuestion(e.target.value);
 
-            // חיבור סליידרים
             ['inpA','inpB','inpC','inpD','inpX'].forEach(id => {
-                document.getElementById(id).oninput = updateValues;
+                document.getElementById(id).oninput = update;
             });
-        }
-
-        function initResize() {
-            const resize = () => {
-                width = cvs.width = document.getElementById('graph-area').clientWidth;
-                height = cvs.height = document.getElementById('graph-area').clientHeight;
-                originX = width / 2;
-                originY = height / 2;
-                updateValues();
-            };
-            window.addEventListener('resize', resize);
-            resize();
         }
 
         function loadQuestion(idx) {
@@ -164,12 +167,10 @@
             const q = QUESTIONS[currQIndex];
             isSolved = false;
             
-            // עדכון UI
             document.getElementById('qSelect').value = currQIndex;
             document.getElementById('qNum').innerText = currQIndex + 1;
             document.getElementById('qDesc').innerText = q.desc;
-            
-            // טעינת פרמטרים
+
             if(q.params) {
                 [a, b, c, d] = q.params;
                 document.getElementById('inpA').value = a;
@@ -178,201 +179,202 @@
                 document.getElementById('inpD').value = d;
             }
             
+            // איפוס X לכל שאלה
             xVal = 0;
             document.getElementById('inpX').value = 0;
 
-            // נעילת סליידרים
-            ['inpA','inpB','inpC','inpD','inpX'].forEach(id => document.getElementById(id).disabled = false);
-            if (q.locked) q.locked.forEach(id => document.getElementById(id).disabled = true);
-            
-            playSound('pop'); // צליל קטן
-            updateValues();
+            // נעילה/פתיחה של סליידרים
+            ['inpA','inpB','inpC','inpD','inpX'].forEach(id => {
+                document.getElementById(id).disabled = (q.locked && q.locked.includes(id));
+            });
+
+            playSound('pop');
+            update();
         }
 
-        function nextQuestion() {
-            if (currQIndex < QUESTIONS.length - 1) loadQuestion(currQIndex + 1);
-            else alert("סיימת את כל השאלות!");
-        }
-
-        function updateValues() {
+        function update() {
             a = parseFloat(document.getElementById('inpA').value);
             b = parseFloat(document.getElementById('inpB').value);
             c = parseFloat(document.getElementById('inpC').value);
             d = parseFloat(document.getElementById('inpD').value);
             xVal = parseFloat(document.getElementById('inpX').value);
 
-            // עדכון מספרי בסליידרים
-            document.getElementById('valA').innerText = a;
-            document.getElementById('valB').innerText = b;
-            document.getElementById('valC').innerText = c;
-            document.getElementById('valD').innerText = d;
-            document.getElementById('valX').innerText = xVal.toFixed(1);
+            document.getElementById('vA').innerText = a.toFixed(2);
+            document.getElementById('vB').innerText = b.toFixed(1);
+            document.getElementById('vC').innerText = c.toFixed(1);
+            document.getElementById('vD').innerText = d.toFixed(1);
+            document.getElementById('vX').innerText = xVal.toFixed(2);
 
-            // עדכון HUD (השלשה הקדושה)
-            let y = func(xVal);
-            let m = deriv(xVal);
-            document.getElementById('dispX').innerText = xVal.toFixed(2);
-            document.getElementById('dispY').innerText = y.toFixed(2);
-            document.getElementById('dispM').innerText = m.toFixed(2);
+            let y = f(xVal);
+            let m = df(xVal);
 
-            // עדכון משוואת משיק
-            let n = y - m*xVal;
-            let nStr = n >= 0 ? `+ ${Math.abs(n).toFixed(2)}` : `- ${Math.abs(n).toFixed(2)}`;
-            document.getElementById('tanEq').innerText = `y = ${m.toFixed(2)}x ${nStr}`;
+            // עדכון השלשה הקדושה
+            document.getElementById('dX').innerText = xVal.toFixed(2);
+            document.getElementById('dY').innerText = y.toFixed(2);
+            document.getElementById('dM').innerText = m.toFixed(2);
+
+            // מיקום השלשה הקדושה על המסך
+            let screenX = originX + xVal * scale;
+            let screenY = originY - y * scale;
+            trinity.style.left = screenX + 'px';
+            trinity.style.top = screenY + 'px';
 
             checkWin(m, y);
         }
 
-        // מתמטיקה
-        function func(x) { return a*Math.pow(x,3) + b*Math.pow(x,2) + c*x + d; }
-        function deriv(x) { return 3*a*Math.pow(x,2) + 2*b*x + c; }
+        function f(x) { return a*x*x*x + b*x*x + c*x + d; }
+        function df(x) { return 3*a*x*x + 2*b*x + c; }
 
         function checkWin(m, y) {
             if (isSolved) return;
             const q = QUESTIONS[currQIndex];
-            let win = false;
+            let success = false;
 
-            if (q.goal === 'slope_zero' && Math.abs(m) < 0.1) win = true;
-            if (q.goal === 'slope_equals' && Math.abs(m - q.targetM) < 0.15) win = true;
-            
+            if (q.goal === 'slope_zero' && Math.abs(m) < 0.05) success = true;
+            if (q.goal === 'slope_equals' && Math.abs(m - q.targetM) < 0.1) success = true;
             if (q.goal === 'hit_target') {
-                let allHit = true;
-                q.targets.forEach(t => {
-                    if (Math.abs(func(t.x) - t.y) > 0.3) allHit = false;
-                });
-                if(allHit) win = true;
+                success = q.targets.every(t => Math.abs(f(t.x) - t.y) < 0.25);
             }
 
-            if (win) {
+            if (success) {
                 isSolved = true;
-                playSound('win'); // צליל ניצחון מקובץ sounds.js
+                playSound('win');
             }
         }
 
-        // === לולאת הציור ===
+        function nextQuestion() {
+            if (currQIndex < QUESTIONS.length - 1) loadQuestion(currQIndex + 1);
+            else alert("סיימת את כל המשימות בהצלחה!");
+        }
+
         function animate() {
-            draw();
+            ctx.clearRect(0, 0, width, height);
+            drawGrid();
+            drawMissions();
+            drawFunction();
+            drawLinesAndPoints();
             requestAnimationFrame(animate);
         }
 
-        function draw() {
-            ctx.clearRect(0, 0, width, height);
+        function drawGrid() {
+            ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
+            ctx.beginPath();
+            for(let x = originX % scale; x < width; x += scale) { ctx.moveTo(x, 0); ctx.lineTo(x, height); }
+            for(let y = originY % scale; y < height; y += scale) { ctx.moveTo(0, y); ctx.lineTo(width, y); }
+            ctx.stroke();
 
-            // 1. רשת
-            drawGrid();
+            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, originY); ctx.lineTo(width, originY);
+            ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
+            ctx.stroke();
+            
+            // מספרי צירים
+            ctx.fillStyle = '#94a3b8'; ctx.font = '10px Arial';
+            ctx.fillText('0', originX + 5, originY - 5);
+        }
 
-            // 2. מטרות (אם יש) + חם/קר
+        function drawMissions() {
             const q = QUESTIONS[currQIndex];
             if (q.targets) {
                 q.targets.forEach(t => {
                     let tx = originX + t.x * scale;
                     let ty = originY - t.y * scale;
                     
-                    // חישוב מרחק לחם/קר
-                    let currentY = func(t.x);
-                    let dist = Math.abs(currentY - t.y);
+                    // אפקט "חם/קר"
+                    let dist = Math.abs(f(t.x) - t.y);
+                    let color = dist < 0.3 ? '#ef4444' : '#3b82f6';
                     
-                    // צבע המטרה משתנה
-                    let intensity = Math.max(0, 1 - dist/3); // 1 = קרוב, 0 = רחוק
-                    let r = Math.floor(intensity * 255);
-                    let bVal = Math.floor((1-intensity) * 255);
-                    ctx.fillStyle = `rgb(${r}, 0, ${bVal})`;
-                    
+                    ctx.fillStyle = color;
                     ctx.beginPath(); ctx.arc(tx, ty, 8, 0, Math.PI*2); ctx.fill();
-                    // הילה
-                    ctx.fillStyle = `rgba(${r}, 0, ${bVal}, 0.2)`;
-                    ctx.beginPath(); ctx.arc(tx, ty, 20, 0, Math.PI*2); ctx.fill();
+                    
+                    // תווית X,Y למטרה
+                    ctx.fillStyle = '#1e293b';
+                    ctx.fillText(`(${t.x}, ${t.y})`, tx + 12, ty - 12);
                 });
             }
+        }
 
-            // 3. הפונקציה
-            ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 3; ctx.beginPath();
-            for (let px = 0; px < width; px+=3) {
+        function drawFunction() {
+            ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 3;
+            ctx.beginPath();
+            for(let px=0; px<width; px+=2) {
                 let x = (px - originX) / scale;
-                let y = func(x);
+                let y = f(x);
                 let py = originY - y * scale;
                 if(px===0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
             }
             ctx.stroke();
+        }
 
-            // 4. נקודה נוכחית ומשיק
-            let y0 = func(xVal);
-            let m = deriv(xVal);
-            let px = originX + xVal * scale;
-            let py = originY - y0 * scale;
+        function drawLinesAndPoints() {
+            let y0 = f(xVal), m = df(xVal);
+            let px = originX + xVal * scale, py = originY - y0 * scale;
 
-            // ציור המשיק (כתום)
-            let tanLen = 1000;
+            // 1. משיק (כתום)
             ctx.strokeStyle = '#f97316'; ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(px - tanLen, py + tanLen*m);
-            ctx.lineTo(px + tanLen, py - tanLen*m);
+            ctx.moveTo(px - 1000, py + 1000*m);
+            ctx.lineTo(px + 1000, py - 1000*m);
             ctx.stroke();
 
-            // 5. נורמל (מעבדת האנך) + משולש
-            if (q.showNormal) {
-                let normalM = -1/m;
-                
-                // ציור הקו
-                ctx.strokeStyle = '#9333ea'; // סגול
-                ctx.setLineDash([5, 5]);
+            // 2. מעבדת האנך (נורמל - סגול)
+            const q = QUESTIONS[currQIndex];
+            if (q.showNormal || isSolved) {
+                let nm = (Math.abs(m) < 0.001) ? 10000 : -1/m; // טיפול בשיפוע 0
+                ctx.strokeStyle = '#9333ea'; ctx.setLineDash([5, 5]);
                 ctx.beginPath();
-                ctx.moveTo(px - tanLen, py + tanLen*normalM);
-                ctx.lineTo(px + tanLen, py - tanLen*normalM);
+                ctx.moveTo(px - 1000, py + 1000*nm);
+                ctx.lineTo(px + 1000, py - 1000*nm);
                 ctx.stroke();
                 ctx.setLineDash([]);
 
-                // חישוב חיתוך עם הצירים למשולש
-                // משוואת הנורמל: Y - y0 = nm * (X - x0)
-                // חיתוך עם ציר X (Y=0):
-                // -y0 = nm * (X - x0)  => X = x0 - y0/nm
-                let xInt = xVal - y0/normalM;
-                let xIntPx = originX + xInt * scale;
-                
-                // חיתוך עם ציר Y (X=0):
-                let yInt = y0 + normalM * (0 - xVal);
-                let yIntPx = originY - yInt * scale;
+                // 3. משולש האנך עם הצירים
+                if (Math.abs(m) > 0.05) {
+                    let nm_slope = -1/m;
+                    // משוואה: y - y0 = nm(x - x0)
+                    // חיתוך X (y=0): x = x0 - y0/nm
+                    let xInt = xVal - y0/nm_slope;
+                    let yInt = y0 - nm_slope*xVal;
+                    
+                    let xIntPx = originX + xInt * scale;
+                    let yIntPx = originY - yInt * scale;
 
-                // מילוי המשולש (אם הנקודות הגיוניות במסך)
-                ctx.fillStyle = 'rgba(147, 51, 234, 0.15)';
-                ctx.beginPath();
-                ctx.moveTo(originX, originY); // ראשית הצירים (0,0)
-                ctx.lineTo(xIntPx, originY); // חיתוך X
-                ctx.lineTo(originX, yIntPx); // חיתוך Y
-                ctx.closePath();
-                ctx.fill();
+                    ctx.fillStyle = 'rgba(147, 51, 234, 0.15)';
+                    ctx.beginPath();
+                    ctx.moveTo(originX, originY);
+                    ctx.lineTo(xIntPx, originY);
+                    ctx.lineTo(originX, yIntPx);
+                    ctx.closePath(); ctx.fill();
+
+                    // נקודות חיתוך על הצירים
+                    ctx.fillStyle = '#9333ea';
+                    ctx.beginPath(); ctx.arc(xIntPx, originY, 4, 0, 7); ctx.fill();
+                    ctx.beginPath(); ctx.arc(originX, yIntPx, 4, 0, 7); ctx.fill();
+                }
             }
 
-            // הנקודה הכחולה
+            // 4. חיתוך משיק עם צירים (נקודות עזר)
+            let tan_yInt = y0 - m*xVal;
+            let tan_xInt = xVal - y0/m;
+            ctx.fillStyle = '#f97316';
+            if (Math.abs(m) > 0.01) {
+                ctx.beginPath(); ctx.arc(originX + tan_xInt*scale, originY, 3, 0, 7); ctx.fill();
+            }
+            ctx.beginPath(); ctx.arc(originX, originY - tan_yInt*scale, 3, 0, 7); ctx.fill();
+
+            // 5. נקודה כחולה ראשית
             ctx.fillStyle = '#2563eb';
-            ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI*2); ctx.fill();
+            ctx.shadowBlur = 10; ctx.shadowColor = 'rgba(37, 99, 235, 0.5)';
+            ctx.beginPath(); ctx.arc(px, py, 7, 0, Math.PI*2); ctx.fill();
+            ctx.shadowBlur = 0;
 
-            // 6. בלון הצלחה (Success Balloon)
+            // 6. חיווי הצלחה
             if (isSolved) {
-                ctx.fillStyle = '#22c55e'; // ירוק
-                // משולש קטן
-                ctx.beginPath(); ctx.moveTo(px, py-10); ctx.lineTo(px-5, py-20); ctx.lineTo(px+5, py-20); ctx.fill();
-                // הבלון עצמו
-                ctx.beginPath();
-                ctx.roundRect(px - 40, py - 50, 80, 30, 5);
-                ctx.fill();
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 14px Rubik';
+                ctx.fillStyle = '#16a34a'; ctx.font = 'bold 16px Rubik';
                 ctx.textAlign = 'center';
-                ctx.fillText("כל הכבוד!", px, py - 30);
+                ctx.fillText("✨ בול פגיעה! ✨", px, py - 35);
             }
-        }
-
-        function drawGrid() {
-            ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1; ctx.beginPath();
-            for(let i=0; i<width/2; i+=scale) { ctx.moveTo(originX+i,0); ctx.lineTo(originX+i,height); ctx.moveTo(originX-i,0); ctx.lineTo(originX-i,height); }
-            for(let i=0; i<height/2; i+=scale) { ctx.moveTo(0,originY+i); ctx.lineTo(width,originY+i); ctx.moveTo(0,originY-i); ctx.lineTo(width,originY-i); }
-            ctx.stroke();
-            // צירים ראשיים
-            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2; ctx.beginPath();
-            ctx.moveTo(0, originY); ctx.lineTo(width, originY);
-            ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
-            ctx.stroke();
         }
     </script>
 </body>
