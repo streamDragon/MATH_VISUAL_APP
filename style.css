@@ -39,7 +39,7 @@ body {
 .func-line { color: var(--primary); margin-bottom: 4px; }
 .deriv-line { color: #64748b; font-size: 1rem; }
 
-/* The Holy Trinity */
+/* The Holy Trinity Panel */
 .trinity-panel {
     display: flex;
     gap: 15px;
@@ -93,14 +93,50 @@ canvas { width: 100%; height: 100%; cursor: crosshair; }
     transform: translate(10px, -50%);
 }
 
-/* Question Box */
+/* Question Box & Navigation */
 .question-box {
     background: #eff6ff;
     padding: 15px;
     border-radius: 10px;
     border-right: 5px solid var(--primary);
     margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
 }
+
+.question-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dae1e7;
+}
+
+.nav-btn {
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: bold;
+    color: #475569;
+    transition: all 0.2s;
+}
+.nav-btn:hover:not(:disabled) { background: #e2e8f0; color: #1e293b; }
+.nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.nav-select {
+    flex-grow: 1;
+    margin: 0 10px;
+    padding: 5px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    font-family: inherit;
+    font-size: 0.95rem;
+}
+
 #successMessage {
     display: none;
     background: #dcfce7;
