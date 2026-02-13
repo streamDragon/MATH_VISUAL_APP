@@ -42,7 +42,6 @@
                     <select id="selectQuestion" class="nav-select"></select>
                     <button id="btnNext" class="nav-btn">הבא ➡️</button>
                 </div>
-
                 <h2 id="questionTitle">טוען שאלה...</h2>
                 <div id="questionText">אנא המתן...</div>
                 <div id="successMessage"></div>
@@ -50,13 +49,12 @@
             
             <div id="canvasContainer">
                 <canvas id="graphCanvas"></canvas>
-                <div id="floatingLabel" class="floating-label" style="display:none;"></div>
             </div>
         </div>
 
         <div class="sidebar">
             <div class="panel controls">
-                <h3>🎛️ פרמטרים</h3>
+                <h3>🎛️ בנה את הפונקציה</h3>
                 <div class="control-group">
                     <label>a <small>(מקדם x³)</small> <span id="valA">1</span></label>
                     <input type="range" id="paramA" min="-2" max="2" step="0.1" value="1">
@@ -76,17 +74,19 @@
             </div>
 
             <div class="panel x-control">
-                <h3>📍 חקירה</h3>
+                <h3>📍 טייל על הגרף</h3>
                 <div class="control-group">
                     <label>מיקום ה-X <span id="valX">0</span></label>
                     <input type="range" id="paramX" min="-6" max="6" step="0.1" value="0">
                 </div>
-                <div class="tangent-info" dir="ltr" id="tangentEqn">y - y1 = m(x - x1)</div>
+                <div class="tangent-info" dir="ltr" id="tangentEqn"></div>
             </div>
 
             <div class="panel journal">
-                <h3>📜 יומן הצלחות</h3>
-                <ul id="journalList"></ul>
+                <h3>📜 יומן משוואות</h3>
+                <div class="journal-scroll">
+                    <ul id="journalList"></ul>
+                </div>
             </div>
         </div>
     </div>
