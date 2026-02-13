@@ -692,3 +692,40 @@ function setElValue(id, value) {
   const el = document.getElementById(id);
   if (el) el.value = value;
 }
+// ---------------------------------------------------------
+// הוסף את החלק הזה בסוף קובץ script.js
+// מנגנון שינוי גודל (רספונסיביות)
+// ---------------------------------------------------------
+
+function handleResize() {
+    // 1. מזהה את האלמנט שעוטף את הגרף (לפי ה-ID שנתנו ב-HTML החדש)
+    const container = document.getElementById('graph-panel');
+    
+    // אם הוא לא מוצא את הקונטיינר (למשל אם ה-HTML עדיין ישן), הוא משתמש בכל החלון
+    const w = container ? container.clientWidth : window.innerWidth;
+    const h = container ? container.clientHeight : window.innerHeight;
+
+    // 2. מעדכן את הגודל של הקנבס שיתאים בול לקופסה
+    if (canvas) {
+        canvas.width = w;
+        canvas.height = h;
+    }
+
+    // 3. מעדכן את המשתנים הגלובליים שלך (width, height) כדי שהנוסחאות יעבדו
+    width = w;
+    height = h;
+
+    // 4. מצייר מחדש את הגרף (אחרת המסך יהיה ריק אחרי שינוי גודל)
+    // אני מניח שלפונקציה שמציירת הכל קוראים draw() או update()
+    if (typeof draw === 'function') {
+        draw();
+    } else if (typeof update === 'function') {
+        update();
+    }
+}
+
+// מפעיל את הפונקציה כל פעם שמשנים את גודל החלון
+window.addEventListener('resize', handleResize);
+
+// מפעיל פעם אחת בכוח אחרי שניה (כדי לוודא שהכל נטען והסתדר)
+setTimeout(handleResize, 500);
