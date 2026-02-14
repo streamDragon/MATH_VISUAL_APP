@@ -1,7 +1,7 @@
-/* mobile.css - גרסה סופית ומתוקנת */
+/* mobile.css - גרסה סופית עם תמיכה במגע ועכבר */
 @media (max-width: 768px) {
     
-    /* נועל את כל הגוף כדי שלא יזוז, רק החלקים הפנימיים יגללו */
+    /* נעילת גוף האתר */
     body {
         position: fixed;
         width: 100%;
@@ -9,69 +9,72 @@
         flex-direction: column !important;
         overflow: hidden;
         background: #f8fafc;
+        /* מונע בחירת טקסט בזמן גרירה */
+        user-select: none; 
+        -webkit-user-select: none;
     }
 
-    /* 1. הקטנת הגרף ל-40% כדי להשאיר מקום לשאלות */
+    /* אזור הגרף - תומך במגע ועכבר */
     #graph-area {
         height: 40vh !important;
         flex: none !important;
         border-bottom: 1px solid #cbd5e1;
         background: white;
+        /* קריטי לגרירה חלקה: מונע פעולות דפדפן ברירת מחדל כמו גלילה/זום */
+        touch-action: none; 
+        cursor: grab; /* סמן יד לתפיסה */
     }
 
-/* --- עיצוב קומפקטי ומיושר לשלשה הקדושה --- */
+    #graph-area:active {
+        cursor: grabbing; /* סמן יד תופסת בזמן לחיצה */
+    }
+
+    /* השלשה הקדושה - שקופה למחצה */
     #holy-trinity {
-        /* מיקום ועיצוב הבועה */
-        transform: translate(-50%, -160%) !important; /* גבוה מעל האצבע */
-        background: rgba(255, 255, 255, 0.95) !important;
-        border: 1px solid #2563eb !important;
-        border-radius: 6px !important;
+        /* מיקום גבוה מעל האצבע */
+        transform: translate(-50%, -160%) !important; 
+        
+        /* רקע לבן עם 85% אטימות (שקיפות) */
+        background: rgba(255, 255, 255, 0.85) !important; 
+        /* אפקט טשטוש לרקע שמתחת (זכוכית חלבית) - עובד ברוב המכשירים המודרניים */
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+
+        border: 1px solid rgba(37, 99, 235, 0.5) !important; /* מסגרת כחולה חצי שקופה */
+        border-radius: 8px !important;
         padding: 4px 8px !important;
         width: auto !important;
-        min-width: 180px !important; /* רוחב מינימלי שלא יתכווץ מדי */
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+        min-width: 180px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
         
-        /* הופך את הבועה לרשת (Grid) מסודרת */
+        /* עיצוב רשת קומפקטי */
         display: grid !important;
-        grid-template-columns: 1fr 1fr 1fr !important; /* 3 עמודות שוות */
-        gap: 2px 8px !important; /* רווח בין האלמנטים */
-        direction: ltr !important; /* קריטי! מסדר את המספרים משמאל לימין */
+        grid-template-columns: 1fr 1fr 1fr !important;
+        gap: 2px 8px !important;
+        direction: ltr !important;
         text-align: center !important;
+        pointer-events: none; /* כדי שהלחיצה תעבור דרכה לגרף */
     }
 
-    /* מעלים את הכותרת "השלשה הקדושה" - חוסך מקום */
-    .trinity-header { 
-        display: none !important; 
-    }
+    /* הסתרת כותרת */
+    .trinity-header { display: none !important; }
 
-    /* עיצוב השורות של X, Y, M */
+    /* עיצוב תאים */
     .trinity-row {
         display: flex !important;
-        flex-direction: column-reverse !important; /* השם (x) מתחת למספר */
+        flex-direction: column-reverse !important;
         align-items: center !important;
         margin: 0 !important;
         line-height: 1 !important;
     }
 
-    /* המספרים עצמם */
-    .trinity-val {
-        font-size: 0.85rem !important;
-        font-weight: 700 !important;
-        color: #1e293b !important;
-    }
+    .trinity-val { font-size: 0.85rem !important; font-weight: 700 !important; color: #1e293b !important; }
+    .trinity-label { font-size: 0.6rem !important; color: #64748b !important; margin: 0 !important; font-family: monospace !important; }
 
-    /* התוויות (x, f(x)...) - קטנות ואפורות */
-    .trinity-label {
-        font-size: 0.6rem !important;
-        color: #64748b !important;
-        margin: 0 !important;
-        font-family: monospace !important;
-    }
-
-    /* נוסחת המשיק - תופסת את כל הרוחב למטה */
+    /* נוסחה בתחתית */
     .trinity-formula {
-        grid-column: 1 / -1 !important; /* נמתח על כל 3 העמודות */
-        border-top: 1px dashed #cbd5e1 !important;
+        grid-column: 1 / -1 !important;
+        border-top: 1px dashed rgba(203, 213, 225, 0.5) !important; /* קו מפריד חצי שקוף */
         margin-top: 4px !important;
         padding-top: 2px !important;
         font-size: 0.75rem !important;
@@ -80,20 +83,13 @@
         text-align: center !important;
     }
 
-
-
-    
-
-
-    
-
-    /* 3. פאנל השליטה - מקבל 60% מהמסך */
+    /* פאנל שליטה תחתון */
     #sidebar {
         height: 60vh !important;
         width: 100% !important;
         border-right: none !important;
-        border-radius: 20px 20px 0 0; /* פינות עגולות למעלה */
-        margin-top: -15px; /* עולה קצת על הגרף לעיצוב יפה */
+        border-radius: 20px 20px 0 0;
+        margin-top: -15px;
         position: relative;
         z-index: 50;
         background: white;
@@ -102,15 +98,13 @@
         flex-direction: column;
     }
 
-    /* תיקון קריטי: ריווח תחתון ענק כדי שהכפתור לא יסתיר כלום */
     .scroll-content {
-        padding: 20px 20px 100px 20px !important; /* ה-100px בסוף זה הסוד! */
+        padding: 20px 20px 100px 20px !important;
         overflow-y: auto !important;
         height: 100% !important;
         -webkit-overflow-scrolling: touch;
     }
 
-    /* עיצוב כרטיסיות נקי יותר */
     .card {
         padding: 10px 14px !important;
         margin-bottom: 10px !important;
@@ -121,20 +115,18 @@
     }
 
     h3 { font-size: 0.95rem !important; margin-bottom: 8px !important; }
-    
-    /* סליידרים קלים למגע */
     input[type=range] { margin: 8px 0 !important; }
 
-    /* 4. הכפתור הירוק - צף ותמיד נגיש */
+    /* כפתור צף */
     #btn-next {
         position: fixed;
         bottom: 20px;
         left: 20px;
         right: 20px;
-        width: auto !important; /* שיתפוס רוחב אוטומטי בהתאם לשוליים */
+        width: auto !important;
         padding: 12px !important;
         font-size: 1rem !important;
-        border-radius: 50px !important; /* כפתור עגול יותר */
+        border-radius: 50px !important;
         box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3) !important;
         z-index: 1000;
         margin: 0 !important;
