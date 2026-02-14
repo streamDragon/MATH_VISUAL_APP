@@ -19,29 +19,73 @@
         background: white;
     }
 
-    /* 2. השלשה הקדושה - קטנה יותר ולא מסתירה */
+/* --- עיצוב קומפקטי ומיושר לשלשה הקדושה --- */
     #holy-trinity {
-        transform: translate(-50%, -140%) !important; /* מרים אותה גבוה יותר */
-        font-size: 0.75rem !important; /* טקסט קטן */
-        padding: 5px 10px !important; /* פחות שוליים פנימיים */
-        min-width: auto !important;
-        width: max-content !important;
+        /* מיקום ועיצוב הבועה */
+        transform: translate(-50%, -160%) !important; /* גבוה מעל האצבע */
         background: rgba(255, 255, 255, 0.95) !important;
         border: 1px solid #2563eb !important;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
-        border-radius: 8px !important;
+        border-radius: 6px !important;
+        padding: 4px 8px !important;
+        width: auto !important;
+        min-width: 180px !important; /* רוחב מינימלי שלא יתכווץ מדי */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+        
+        /* הופך את הבועה לרשת (Grid) מסודרת */
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr !important; /* 3 עמודות שוות */
+        gap: 2px 8px !important; /* רווח בין האלמנטים */
+        direction: ltr !important; /* קריטי! מסדר את המספרים משמאל לימין */
+        text-align: center !important;
     }
-    
+
+    /* מעלים את הכותרת "השלשה הקדושה" - חוסך מקום */
     .trinity-header { 
-        font-size: 0.7rem !important; 
-        margin-bottom: 2px !important;
-        padding-bottom: 2px !important;
+        display: none !important; 
     }
+
+    /* עיצוב השורות של X, Y, M */
+    .trinity-row {
+        display: flex !important;
+        flex-direction: column-reverse !important; /* השם (x) מתחת למספר */
+        align-items: center !important;
+        margin: 0 !important;
+        line-height: 1 !important;
+    }
+
+    /* המספרים עצמם */
+    .trinity-val {
+        font-size: 0.85rem !important;
+        font-weight: 700 !important;
+        color: #1e293b !important;
+    }
+
+    /* התוויות (x, f(x)...) - קטנות ואפורות */
+    .trinity-label {
+        font-size: 0.6rem !important;
+        color: #64748b !important;
+        margin: 0 !important;
+        font-family: monospace !important;
+    }
+
+    /* נוסחת המשיק - תופסת את כל הרוחב למטה */
+    .trinity-formula {
+        grid-column: 1 / -1 !important; /* נמתח על כל 3 העמודות */
+        border-top: 1px dashed #cbd5e1 !important;
+        margin-top: 4px !important;
+        padding-top: 2px !important;
+        font-size: 0.75rem !important;
+        color: #f97316 !important;
+        font-weight: bold !important;
+        text-align: center !important;
+    }
+
+
+
     
-    .trinity-row { 
-        margin-bottom: 0 !important; 
-        line-height: 1.2 !important;
-    }
+
+
+    
 
     /* 3. פאנל השליטה - מקבל 60% מהמסך */
     #sidebar {
