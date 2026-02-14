@@ -8,9 +8,10 @@ function playSound(type) {
     osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
     
+    const now = audioCtx.currentTime;
+
     if (type === 'win') {
-        // צליל הצלחה - עולה
-        const now = audioCtx.currentTime;
+        // צליל ניצחון (עולה)
         osc.type = 'sine';
         osc.frequency.setValueAtTime(440, now);
         osc.frequency.exponentialRampToValueAtTime(880, now + 0.3);
@@ -19,8 +20,7 @@ function playSound(type) {
         osc.start();
         osc.stop(now + 0.4);
     } else if (type === 'pop') {
-        // צליל מעבר שאלה
-        const now = audioCtx.currentTime;
+        // צליל קליק (פופ)
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(600, now);
         osc.frequency.linearRampToValueAtTime(200, now + 0.1);
