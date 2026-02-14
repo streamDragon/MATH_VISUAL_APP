@@ -1,1 +1,70 @@
+/* קובץ תיקון לתצוגת טלפון בלבד */
+@media (max-width: 768px) {
+    
+    body {
+        flex-direction: column !important; /* הגרף מעל הסרגל */
+        height: 100vh;
+        overflow: hidden;
+    }
 
+    /* הגדלת אזור הגרף */
+    #graph-area {
+        height: 40vh !important;
+        flex: none !important;
+        border-bottom: 2px solid #cbd5e1;
+    }
+
+    /* סידור סרגל הכלים שיחליק למטה */
+    #sidebar {
+        width: 100% !important;
+        height: 60vh !important;
+        border-right: none !important;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+    }
+
+    .scroll-content {
+        padding: 15px !important;
+    }
+
+    /* טיפול ב"שלשה הקדושה" - שלא תוסתר ע"י האצבע */
+    #holy-trinity {
+        transform: translate(-50%, -130%) !important; /* מרימה אותה גבוה מעל הנקודה */
+        font-size: 0.8rem !important;
+        padding: 8px !important;
+        min-width: 120px !important;
+        background: rgba(255, 255, 255, 0.98) !important;
+        border-width: 1px !important;
+    }
+
+    /* הגדלת כפתורים וסליידרים למגע נוח */
+    input[type=range] {
+        height: 15px !important; /* שטח מגע גדול יותר */
+        margin: 10px 0 !important;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+        width: 25px !important;
+        height: 25px !important;
+    }
+
+    .card {
+        padding: 12px !important;
+        margin-bottom: 10px !important;
+    }
+
+    h3 {
+        font-size: 1rem !important;
+    }
+
+    #btn-next {
+        padding: 12px !important;
+        font-size: 1rem !important;
+        position: sticky;
+        bottom: 0;
+    }
+
+    /* מניעת זום של האייפון בזמן לחיצה */
+    input, select {
+        font-size: 16px !important;
+    }
+}
