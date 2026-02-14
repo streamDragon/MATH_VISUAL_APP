@@ -13,24 +13,35 @@
     body { margin: 0; padding: 0; font-family: 'Rubik', sans-serif; background: var(--bg); height: 100vh; display: flex; overflow: hidden; }
 
     /* אזור הגרף */
-    #graph-area { flex: 1; position: relative; cursor: crosshair; background: white; }
+    #graph-area { 
+        flex: 1; 
+        position: relative; 
+        cursor: crosshair; /* ברירת מחדל למחשב */
+        background: white; 
+        touch-action: none; /* קריטי! מונע גלילה של המסך כשגוררים את הגרף */
+    }
     canvas { display: block; width: 100%; height: 100%; }
 
-    /* HUD - השלשה הקדושה (צפה ליד הנקודה) */
-    #hud {
+    /* === עיצוב בסיס לשלשה הקדושה (למחשב) === */
+    /* בטלפון ה-mobile.css ידרוס את זה */
+    #holy-trinity {
       position: absolute;
       background: rgba(255,255,255,0.95);
       padding: 10px;
       border-radius: 8px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       border: 1px solid #cbd5e1;
-      pointer-events: none;
+      pointer-events: none; /* כדי שהלחיצה תעבור דרכו */
       min-width: 175px;
       z-index: 100;
-      transform: translate(15px, -50%); /* לצד הנקודה */
+      transform: translate(15px, -50%); /* מיקום ברירת מחדל ליד הנקודה */
     }
-    .hud-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-family: 'Times New Roman', serif; font-size: 1.05rem; }
-    .hud-label { font-weight: bold; color: var(--primary); font-family: 'Rubik'; font-size: 0.85rem; }
+    
+    /* מחלקות תואמות ל-mobile.css החדש */
+    .trinity-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-family: 'Times New Roman', serif; font-size: 1.05rem; }
+    .trinity-label { font-weight: bold; color: var(--primary); font-family: 'Rubik'; font-size: 0.85rem; margin-left: 5px; }
+    .trinity-val { font-weight: bold; color: #1e293b; }
+    .trinity-formula { border-top: 1px dashed #ccc; margin-top: 5px; padding-top: 5px; direction: ltr; font-weight: bold; color: #f97316; text-align: center; }
 
     /* סרגל צד */
     #sidebar { width: 360px; background: var(--panel); border-right: 1px solid #cbd5e1; display: flex; flex-direction: column; z-index: 10; box-shadow: -2px 0 10px rgba(0,0,0,0.05); }
@@ -60,9 +71,10 @@
     .check-row { display:flex; align-items:center; gap:10px; font-size:0.9rem; color:#334155; }
     .check-row input { transform: scale(1.1); }
 
-    @media (max-width: 768px) { body { flex-direction: column; } #graph-area { height: 50%; } #sidebar { width: 100%; height: 50%; } }
+    /* שינוי: הסרנו את ה-media query מכאן כי הוא נמצא עכשיו ב-mobile.css */
   </style>
-<link rel="stylesheet" href="mobile.css">
+  
+  <link rel="stylesheet" href="mobile.css">
   
 </head>
 
@@ -71,15 +83,25 @@
   <div id="graph-area">
     <canvas id="cvs"></canvas>
 
-    <div id="hud">
-      <div class="hud-label" style="text-align:center; border-bottom:1px solid #eee; margin-bottom:5px;">השלשה הקדושה</div>
-      <div class="hud-row"><span class="hud-label">x :</span> <span id="dispX">0</span></div>
-      <div class="hud-row"><span class="hud-label">f(x):</span> <span id="dispY">0</span></div>
-      <div class="hud-row"><span class="hud-label">f'(x):</span> <span id="dispM">0</span></div>
-      <div style="margin-top:8px; border-top:1px dashed #ccc; padding-top:5px;">
-        <div class="hud-label">משוואת המשיק:</div>
-        <div id="tanEq" style="direction:ltr; font-weight:bold; color:#f97316;">y = mx + n</div>
+    <div id="holy-trinity">
+      <div class="trinity-header" style="text-align:center; border-bottom:1px solid #eee; margin-bottom:5px; font-size:0.8rem; display:none;">השלשה הקדושה</div>
+      
+      <div class="trinity-row">
+          <span class="trinity-label">x</span>
+          <span id="dispX" class="trinity-val">0</span>
       </div>
+      
+      <div class="trinity-row">
+          <span class="trinity-label">f(x)</span>
+          <span id="dispY" class="trinity-val">0</span>
+      </div>
+      
+      <div class="trinity-row">
+          <span class="trinity-label">f'(x)</span>
+          <span id="dispM" class="trinity-val">0</span>
+      </div>
+
+      <div class="trinity-formula" id="tanEq">y = mx + n</div>
     </div>
   </div>
 
@@ -99,7 +121,6 @@
         <div class="formula-row"><span>שיפוע נורמל</span> <span>\( m_n = -1/m \)</span></div>
       </div>
 
-      <!-- מעבדת האנך חזרה (UI) -->
       <div class="card" style="background:#faf5ff; border-color:#e9d5ff;">
         <h3>🧪 מעבדת האנך</h3>
         <div class="check-row">
@@ -138,7 +159,8 @@
     const cvs = document.getElementById('cvs');
     const ctx = cvs.getContext('2d');
 
-    const hud = document.getElementById('hud');
+    /* שינוי: עדכון הפניה לאלמנט החדש */
+    const holyTrinity = document.getElementById('holy-trinity');
     const chkNormalLab = document.getElementById('chkNormalLab');
 
     let width, height, scale = 40, originX, originY;
@@ -147,7 +169,7 @@
     let currQIndex = 0;
     let isSolved = false;
 
-    // polyfill קטן ל-roundRect (למקרה דפדפנים ישנים)
+    // polyfill קטן ל-roundRect
     if (!CanvasRenderingContext2D.prototype.roundRect) {
       CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
         r = Math.min(r, w/2, h/2);
@@ -167,6 +189,7 @@
 
       initInputs();
       initResize();
+      initDragInteractions(); // הפעלה של הגרירה
       loadQuestion(0);
       animate();
     };
@@ -189,10 +212,71 @@
       chkNormalLab.onchange = () => { /* רק redraw */ };
     }
 
+    /* --- תוספת חדשה: לוגיקת גרירה על הקנבס --- */
+    function initDragInteractions() {
+        let isDragging = false;
+
+        // פונקציה שמחשבת את המיקום ומעדכנת
+        const handleDrag = (clientX) => {
+            const rect = cvs.getBoundingClientRect();
+            const mouseX = clientX - rect.left;
+            
+            // המרה מפיקסלים לערך X בגרף
+            let graphX = (mouseX - originX) / scale;
+            
+            // הגבלה לתחום הסליידר (-5 עד 5)
+            graphX = Math.max(-5, Math.min(5, graphX));
+            
+            // עדכון המשתנה והסליידר
+            xVal = graphX;
+            document.getElementById('inpX').value = xVal;
+            
+            updateValues();
+        };
+
+        // אירועי עכבר (מחשב)
+        cvs.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            cvs.style.cursor = 'grabbing';
+            handleDrag(e.clientX);
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+            cvs.style.cursor = 'crosshair'; // או grab
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                handleDrag(e.clientX);
+            }
+        });
+
+        // אירועי מגע (טלפון)
+        cvs.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            handleDrag(e.touches[0].clientX);
+        }, {passive: false});
+
+        window.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+
+        cvs.addEventListener('touchmove', (e) => {
+            if (isDragging) {
+                // מניעת גלילת מסך בזמן גרירת הגרף
+                e.preventDefault(); 
+                handleDrag(e.touches[0].clientX);
+            }
+        }, {passive: false});
+    }
+    /* --- סוף תוספת גרירה --- */
+
     function initResize() {
       const resize = () => {
-        width = cvs.width = document.getElementById('graph-area').clientWidth;
-        height = cvs.height = document.getElementById('graph-area').clientHeight;
+        const area = document.getElementById('graph-area');
+        width = cvs.width = area.clientWidth;
+        height = cvs.height = area.clientHeight;
         originX = width / 2;
         originY = height / 2;
         updateValues();
@@ -241,6 +325,7 @@
       b = parseFloat(document.getElementById('inpB').value);
       c = parseFloat(document.getElementById('inpC').value);
       d = parseFloat(document.getElementById('inpD').value);
+      // שינוי: ה-inpX יכול להתעדכן גם מגרירה, לכן נקרא שוב
       xVal = parseFloat(document.getElementById('inpX').value);
 
       document.getElementById('valA').innerText = a.toFixed(1);
@@ -267,7 +352,7 @@
     function func(x) { return a*Math.pow(x,3) + b*Math.pow(x,2) + c*x + d; }
     function deriv(x) { return 3*a*Math.pow(x,2) + 2*b*x + c; }
 
-    // --- Win Conditions (כולל hit_targets) ---
+    // --- Win Conditions ---
     function checkWin(m, y) {
       if (isSolved) return;
       const q = QUESTIONS[currQIndex];
@@ -286,13 +371,11 @@
       }
 
       if (q.goal === 'hit_targets' && q.targets) {
-        // חייבים "באותו רגע" להיות על כולם
         const allHit = q.targets.every(t => Math.abs(func(t.x) - t.y) <= 0.3);
         if (allHit) win = true;
       }
 
       if (q.goal === 'tangent_through_point' && q.point) {
-        // בדיקה האם המשיק בנקודה xVal עובר דרך q.point
         const x0 = xVal, y0 = func(x0), mm = deriv(x0);
         const xp = q.point.x, yp = q.point.y;
         const yOnTangentAtXp = mm*(xp - x0) + y0;
@@ -354,26 +437,22 @@
         const currentY = func(t.x);
         const dist = Math.abs(currentY - t.y);
 
-        // hot/cold צבע
         const intensity = Math.max(0, Math.min(1, 1 - dist/3));
         const r = Math.floor(intensity * 255);
         const bVal = Math.floor((1-intensity) * 255);
 
-        // נקודה + הילה
         ctx.fillStyle = `rgb(${r},0,${bVal})`;
         ctx.beginPath(); ctx.arc(tx, ty, 8, 0, Math.PI*2); ctx.fill();
 
         ctx.fillStyle = `rgba(${r},0,${bVal},0.18)`;
         ctx.beginPath(); ctx.arc(tx, ty, 20, 0, Math.PI*2); ctx.fill();
 
-        // תוויות X,Y ליד המטרה
         ctx.fillStyle = '#0f172a';
         ctx.font = '12px Rubik';
         ctx.textAlign = 'right';
         ctx.fillText(`X=${Number(t.x).toFixed(2)}`, tx - 10, ty - 14);
         ctx.fillText(`Y=${Number(t.y).toFixed(2)}`, tx - 10, ty + 18);
 
-        // אם יש label
         if (t.label) {
           ctx.fillStyle = '#64748b';
           ctx.font = '12px Rubik';
@@ -408,10 +487,10 @@
       const px = originX + xVal * scale;
       const py = originY - y0 * scale;
 
-      // --- הצמדת HUD לנקודה (עם clamp למסך) ---
+      // --- הצמדת השלשה לנקודה ---
       positionHudNearPoint(px, py);
 
-      // --- משיק (כתום) ---
+      // --- משיק ---
       const tanLen = 1000;
       ctx.strokeStyle = '#f97316';
       ctx.lineWidth = 2;
@@ -421,106 +500,75 @@
       ctx.lineTo(px + tanLen, py - tanLen*m);
       ctx.stroke();
 
-      // נקודות חיתוך צירים למשיק
       drawAxisIntersectionsForLine({ x0: xVal, y0, slope: m }, '#f97316');
 
-      // --- מעבדת האנך (נורמל + משולש + נקודות) ---
-      const labOn = chkNormalLab.checked || q.showNormal; // אם שאלה דורשת/או ה-toggle דלוק
+      const labOn = chkNormalLab.checked || q.showNormal;
       if (labOn) {
         drawNormalLab(xVal, y0, m, px, py);
       }
 
-      // --- נקודה כחולה ---
       ctx.fillStyle = '#2563eb';
       ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI*2); ctx.fill();
     }
 
     function positionHudNearPoint(px, py) {
-      // transform כבר עושה offset ימינה; כאן אנחנו רק מצמידים left/top ומוודאים שלא יוצא מהמסך
-      hud.style.left = px + "px";
-      hud.style.top = py + "px";
+      // שינוי שם המשתנה ל-holyTrinity
+      holyTrinity.style.left = px + "px";
+      holyTrinity.style.top = py + "px";
 
-      // clamp קטן (אחרי שהדפדפן יודע גדלים)
-      const rect = hud.getBoundingClientRect();
+      const rect = holyTrinity.getBoundingClientRect();
       const ga = document.getElementById('graph-area').getBoundingClientRect();
 
-      // חישוב מיקום הרצוי בפיקסלים בתוך graph-area
       let left = px, top = py;
-
       const hudW = rect.width;
       const hudH = rect.height;
-
-      // כי יש transform translate(15px,-50%) – נחשב מרווח ביטחון:
       const pad = 8;
 
-      // גבולות בתוך graph-area
       const minX = pad;
       const maxX = (ga.width - hudW - pad);
-      const minY = pad + hudH * 0.5;          // בגלל -50%
+      const minY = pad + hudH * 0.5;
       const maxY = ga.height - pad;
 
-      // clamp
       left = Math.max(minX, Math.min(left, maxX));
       top  = Math.max(minY, Math.min(top,  maxY));
 
-      hud.style.left = left + "px";
-      hud.style.top  = top + "px";
+      holyTrinity.style.left = left + "px";
+      holyTrinity.style.top  = top + "px";
     }
 
     function drawNormalLab(x0, y0, m, px, py) {
       ctx.save();
-
-      // מקרים מיוחדים:
-      // אם m≈0 => הנורמל אנכי (x=x0)
-      // אם m גדול מאוד => הנורמל ≈0 (אופקי)
       const eps = 1e-6;
-
       ctx.strokeStyle = '#9333ea';
       ctx.lineWidth = 2;
       ctx.setLineDash([5,5]);
 
       if (Math.abs(m) < 0.001) {
-        // נורמל אנכי: x = x0
         ctx.beginPath();
         ctx.moveTo(px, 0);
         ctx.lineTo(px, height);
         ctx.stroke();
-
-        // חיתוך עם ציר X: (x0,0) (בדיוק על הציר)
         drawHelperDot(px, originY, '#9333ea');
-
-        // חיתוך עם ציר Y: אם x0=0 אז כל הציר. אחרת אין חיתוך עם ציר Y.
         if (Math.abs(x0) < 1e-6) {
-          // כל הציר Y - נשים נקודה בראשית
           drawHelperDot(originX, originY, '#9333ea');
         }
-
         ctx.restore();
         return;
       }
 
-      // slope normal
       const nm = -1 / m;
-
-      // קו נורמל
       ctx.beginPath();
       ctx.moveTo(px - 1000, py + 1000*nm);
       ctx.lineTo(px + 1000, py - 1000*nm);
       ctx.stroke();
-
       ctx.setLineDash([]);
 
-      // נקודות חיתוך עם הצירים לנורמל + משולש צבוע
-      // משוואת נורמל: y - y0 = nm(x - x0)
-      // חיתוך X-axis (y=0): -y0 = nm(x - x0) -> x = x0 - y0/nm
-      // חיתוך Y-axis (x=0): y = y0 + nm(0 - x0) = y0 - nm*x0
       const xInt = x0 - (y0 / nm);
       const yInt = y0 - nm * x0;
 
       const xIntPx = originX + xInt * scale;
       const yIntPx = originY - yInt * scale;
 
-      // משולש עם הצירים: (0,0), (xInt,0), (0,yInt)
       ctx.fillStyle = 'rgba(147, 51, 234, 0.18)';
       ctx.beginPath();
       ctx.moveTo(originX, originY);
@@ -529,36 +577,25 @@
       ctx.closePath();
       ctx.fill();
 
-      // נקודות עזר על הצירים
       drawHelperDot(xIntPx, originY, '#9333ea');
       drawHelperDot(originX, yIntPx, '#9333ea');
-
-      // גם חיתוכי צירים לנורמל “כקו” (ליתר ביטחון)
       drawAxisIntersectionsForLine({ x0, y0, slope: nm }, '#9333ea');
-
       ctx.restore();
     }
 
     function drawAxisIntersectionsForLine(line, color) {
       const { x0, y0, slope } = line;
-
       const eps = 1e-6;
 
-      // Line in point-slope: y = slope(x - x0) + y0
-      // y-axis (x=0): y = slope(0-x0)+y0
       const yAtYaxis = slope * (0 - x0) + y0;
       const yAxisPx = originY - yAtYaxis * scale;
 
-      // x-axis (y=0): 0 = slope(x - x0) + y0 => x = x0 - y0/slope (if slope != 0)
       if (Math.abs(slope) > eps) {
         const xAtXaxis = x0 - (y0 / slope);
         const xAxisPx = originX + xAtXaxis * scale;
-
-        // נקודה על ציר X
         if (isOnScreen(xAxisPx, originY)) drawHelperDot(xAxisPx, originY, color);
       }
 
-      // נקודה על ציר Y
       if (isOnScreen(originX, yAxisPx)) drawHelperDot(originX, yAxisPx, color);
     }
 
@@ -583,15 +620,12 @@
       const py = originY - y0 * scale;
 
       ctx.fillStyle = '#22c55e';
-
-      // משולש קטן
       ctx.beginPath();
       ctx.moveTo(px, py-10);
       ctx.lineTo(px-5, py-20);
       ctx.lineTo(px+5, py-20);
       ctx.fill();
 
-      // בלון
       ctx.beginPath();
       ctx.roundRect(px - 48, py - 58, 96, 32, 6);
       ctx.fill();
