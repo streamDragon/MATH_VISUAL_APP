@@ -1,107 +1,92 @@
-/* mobile.css - גרסה סופית ונקייה */
+/* mobile.css - גרסה שקופה ומותאמת */
 
 @media (max-width: 800px) {
     
-    /* 1. סידור המסך המלא - שיטת הפלקס */
+    /* === 1. הגדרות שלד המסך === */
+    html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        /* מכריח את הגוף לתפוס את כל הגובה האפשרי בתוך ה-IFrame */
+        height: 100vh !important; 
+        overflow: hidden !important; /* מונע גלילה כפולה */
+        background: transparent !important; /* רקע שקוף כדי להשתלב באתר */
+    }
+
     body {
         display: flex !important;
         flex-direction: column !important;
-        height: 100vh !important;       /* למכשירים ישנים */
-        height: 100dvh !important;      /* למובייל מודרני - מתחשב בשורת הכתובת */
-        width: 100vw !important;
-        overflow: hidden !important;    /* מונע גלילה של כל העמוד */
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #f0f2f5 !important;
     }
 
-    /* 2. הגרף - לוקח את כל המקום הפנוי */
+    /* === 2. הגרף === */
     #graph-area {
-        flex: 1 1 auto !important; /* תופס את כל הגובה שנשאר */
+        flex: 1 !important; /* לוקח את כל המקום הפנוי */
         width: 100% !important;
         position: relative !important;
-        
-        /* תיקון לאינטראקציה עם עכבר ומגע */
-        touch-action: none !important; 
-        pointer-events: auto !important; /* מוודא שהעכבר יכול ללחוץ */
         z-index: 1 !important;
+        touch-action: none !important; /* קריטי למובייל */
     }
 
-    /* 3. הפאנל למטה (Sidebar) */
-    #sidebar {
-        flex: 0 0 55% !important; /* תופס בדיוק 55% מהגובה */
-        width: 100% !important;
-        background: white !important;
-        
-        /* עיצוב הכרטיסייה */
-        border-radius: 25px 25px 0 0 !important;
-        box-shadow: 0 -5px 20px rgba(0,0,0,0.15) !important;
-        
-        /* גלילה פנימית בתוך הפאנל אם התוכן ארוך */
-        overflow-y: auto !important; 
-        overflow-x: hidden !important;
-        
-        /* מיקום */
-        position: relative !important;
-        z-index: 100 !important;
-        padding-top: 15px !important;
-        
-        /* תיקון חפיפה קטנה לאסתטיקה */
-        margin-top: -15px !important; 
-    }
-
-    /* 4. השלשה הקדושה - נקייה ומסודרת */
+    /* === 3. השלשה הקדושה - שקופה מאוד === */
     #holy-trinity {
-        /* מיקום צף על גבי הגרף */
         position: absolute !important;
-        top: 20px !important;
+        top: 15px !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
         
-        /* עיצוב */
-        background: rgba(255, 255, 255, 0.95) !important;
-        border: 1px solid #e0e0e0 !important;
-        border-radius: 12px !important;
+        /* === השינוי הגדול: שקיפות === */
+        background: rgba(255, 255, 255, 0.4) !important; /* 40% לבן בלבד */
+        backdrop-filter: blur(5px) !important; /* מטשטש את הגרף מאחורה כדי שהמספרים יבלטו */
+        -webkit-backdrop-filter: blur(5px); /* תמיכה באייפון */
+        
+        border: 1px solid rgba(255,255,255, 0.6) !important;
+        border-radius: 15px !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
         
-        /* גודל */
-        width: 90% !important;
-        max-width: 350px !important;
-        padding: 8px 15px !important;
+        width: 85% !important;
+        max-width: 320px !important;
+        padding: 5px 10px !important;
         
-        /* סידור פנימי */
         display: flex !important;
-        justify-content: space-between !important;
+        justify-content: space-around !important;
         align-items: center !important;
         z-index: 10 !important;
-        pointer-events: none !important; /* כדי שהאצבע תעבור דרכו אם גוררים */
+        pointer-events: none !important; /* שהאצבע תעבור דרך זה */
     }
 
-    /* הסתרת הכותרת הישנה */
     .trinity-header { display: none !important; }
 
-    /* עיצוב המספרים בתוך השלשה */
     .trinity-row {
         display: flex !important;
-        flex-direction: column-reverse !important; /* כותרת למטה, מספר למעלה */
+        flex-direction: column-reverse !important;
         align-items: center !important;
-        text-align: center !important;
+        padding: 2px 5px !important;
     }
 
     .trinity-val {
-        font-size: 1.1rem !important;
+        font-size: 1.2rem !important;
         font-weight: 700 !important;
-        color: #333 !important;
-        font-family: monospace !important; /* פונט מספרים ברור */
+        color: #222 !important; /* שחור כהה לקריאות */
+        text-shadow: 0 0 2px rgba(255,255,255,0.8) !important; /* הילה לבנה מסביב לטקסט */
     }
 
     .trinity-label {
-        font-size: 0.75rem !important;
-        color: #666 !important;
-        margin-top: 2px !important;
+        font-size: 0.7rem !important;
+        color: #444 !important;
+        font-weight: bold !important;
     }
-    
-    /* הסתרת אלמנטים מיותרים במובייל */
-    /* אם יש אלמנטים נוספים שמפריעים, נחביא אותם כאן */
-    /* .some-other-class { display: none !important; } */
+
+    /* === 4. הפאנל התחתון === */
+    #sidebar {
+        height: 55vh !important; /* גובה קבוע לחלק התחתון */
+        flex: none !important;   /* שלא יתכווץ */
+        width: 100% !important;
+        background: #ffffff !important;
+        border-radius: 25px 25px 0 0 !important;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.1) !important;
+        overflow-y: auto !important;
+        position: relative !important;
+        z-index: 100 !important;
+        margin-top: -15px !important;
+    }
 }
