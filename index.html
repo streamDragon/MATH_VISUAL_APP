@@ -480,7 +480,7 @@
                 name: '', size: 10, color: '#1976d2', face:'o'
             });
 
-            tangent = board.create('tangent', [p], { strokeColor:'#ff9800', strokeWidth:2, dash:2 });
+            tangent = board.create('tangent', [p], { strokeColor:'#ef6c00', strokeWidth:4, dash:0, strokeOpacity:0.95 });
 
             normalLine = board.create('line', [p, function() {
                 let normalDir = getNormalDirection(getSlope(p.X()));
@@ -614,10 +614,14 @@
             if (!Number.isFinite(tangentSlope)) {
                 return { dx: 1, dy: 0, normalSlope: 0, type: 'horizontal' };
             }
-            // Rotate tangent vector (1, m) by 90deg -> normal vector (-m, 1).
-            // This keeps perpendicularity exact and avoids instability near m=0.
-            let dx = -tangentSlope;
-            let dy = 1;
+            // Rotate normalized tangent vector by 90deg for stable perpendicular geometry.
+            let tx = 1;
+            let ty = tangentSlope;
+            let tLen = Math.sqrt(tx * tx + ty * ty) || 1;
+            tx /= tLen;
+            ty /= tLen;
+            let dx = -ty;
+            let dy = tx;
             if (Math.abs(dx) < 1e-9) {
                 return { dx: 0, dy: 1, normalSlope: Infinity, type: 'vertical' };
             }
