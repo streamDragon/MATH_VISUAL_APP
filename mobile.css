@@ -86,6 +86,15 @@ body.embed-mode #sidebar {
     font-weight: 700;
 }
 
+#build-badge {
+    font-size: 0.7rem;
+    color: #334155;
+    background: #e2e8f0;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    padding: 2px 6px;
+}
+
 #top-formulas {
     display: flex;
     flex-wrap: wrap;

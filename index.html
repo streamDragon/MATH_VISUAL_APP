@@ -98,6 +98,7 @@
                 <span id="top-question">טוען...</span>
                 <span id="top-step-status">שלב 1/1: ...</span>
                 <span id="progress-hint">חפש → מצא → בדוק</span>
+                <span id="build-badge">build: --</span>
             </div>
             <div id="top-formulas">
                 <span class="formula-chip" id="top-formula-f">f(x) = ...</span>
@@ -221,6 +222,7 @@
     </div>
 
     <script>
+        const APP_BUILD = '2026-02-15-c81b30b';
         let board, p, curve, tangent, normalLine, triangle, labelText, testLine, testAnchor, testDir;
         let normalOrigin, normalXAxisPoint, normalYAxisPoint;
         let guideNormalBasePoint, guideNormalDirPoint, guideNormalLine, guideNormalIntersect;
@@ -465,6 +467,8 @@
             if (window.self !== window.top) {
                 document.body.classList.add('embed-mode');
             }
+            let buildBadge = document.getElementById('build-badge');
+            if (buildBadge) buildBadge.innerText = `build: ${APP_BUILD}`;
 
             board = JXG.JSXGraph.initBoard('graph-area', {
                 boundingbox: [-5, 8, 5, -8], axis: true, keepaspectratio: true, showCopyright: false,
