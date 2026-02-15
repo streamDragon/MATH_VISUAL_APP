@@ -8,56 +8,45 @@
     <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap" rel="stylesheet">
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
+    
     <link rel="stylesheet" href="mobile.css">
 </head>
 <body>
 
     <button id="sound-toggle" onclick="toggleSound()">🔊</button>
+    
+    <div id="win-overlay">
+        <h1>🏆 כל הכבוד!</h1>
+        <p>פיצחת את המשימה.</p>
+    </div>
 
     <div id="graph-area"></div>
 
-    <div id="hud-container">
-        <div id="holy-trinity">
-            <div class="trinity-item"><span id="val-x" class="trinity-val">0</span><span class="trinity-label">X</span></div>
-            <div class="trinity-item"><span id="val-y" class="trinity-val">0</span><span class="trinity-label">Y</span></div>
-            <div class="trinity-item"><span id="val-m" class="trinity-val">0</span><span class="trinity-label">שיפוע</span></div>
-        </div>
-        <div id="win-overlay" style="display:none; position:absolute; top:80px; background:white; padding:20px; border:2px solid green; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,0.3);">
-            <h2 style="margin:0; color:green;">🏆 כל הכבוד!</h2>
-        </div>
-    </div>
-
     <div id="sidebar">
         
-        <div style="text-align:center;">
-            <h2 id="q-title" style="margin:0 0 5px 0; color:#333;">טוען...</h2>
-            <div id="q-desc" style="font-size:0.95rem; color:#555; line-height:1.4;"></div>
+        <div style="text-align:center; margin-bottom:10px;">
+            <h2 id="q-title" style="margin:0; font-size:1.3rem;">טוען...</h2>
+            <div id="q-desc" style="font-size:0.95rem; color:#555;"></div>
         </div>
 
-        <div class="task-selector">
-            <span class="task-label">בחר שלב במשחק:</span>
-            <div class="nav-buttons" id="nav-container">
-                </div>
-        </div>
+        <div class="nav-grid" id="nav-container"></div>
 
         <div class="info-box yellow-box">
-            <div class="box-title">📝 דף נוסחאות</div>
-            <div class="formula-display" id="formula-func">f(x) = ...</div>
-            <div class="formula-display" id="formula-deriv" style="color:#d32f2f;">f'(x) = ...</div>
+            <div class="info-title">📜 דף נוסחאות</div>
+            <div class="math-line" id="formula-f">f(x) = ...</div>
+            <div class="math-line" id="formula-tag" style="color:#d32f2f;">f'(x) = ...</div>
         </div>
 
         <div class="info-box purple-box">
-            <div class="box-title">📐 מעבדת האנך</div>
+            <div class="info-title">📐 מעבדת האנך</div>
             <label>
                 <input type="checkbox" id="chk-normal" onchange="toggleNormal()">
-                הצג אנך + משולש
+                הצג אנך ומשולש
             </label>
         </div>
 
-        <div class="slider-container">
+        <div class="section-title">בניית הפונקציה (פרמטרים)</div>
+        <div style="background:#fff; padding:5px; border-radius:5px;">
             <div class="slider-row"><span class="slider-lbl">a</span><input type="range" id="inpA" min="-2" max="2" step="0.1" class="slider-inp"></div>
             <div class="slider-row"><span class="slider-lbl">b</span><input type="range" id="inpB" min="-3" max="3" step="0.1" class="slider-inp"></div>
             <div class="slider-row"><span class="slider-lbl">c</span><input type="range" id="inpC" min="-5" max="5" step="0.1" class="slider-inp"></div>
@@ -66,83 +55,88 @@
 
     </div>
 
-    <script src="sounds.js"></script>
     <script src="questions.js"></script>
-
+    
     <script>
-        let board, p, tangent, curve;
-        let normalLine, trianglePoly; // משתנים לאנך ולמשולש
-        let targets = [];
+        let board, p, curve, tangent, normalLine, triangle;
+        let targets = []; // מערך למטרות הירוקות
         let params = { a:0, b:0, c:0, d:0 };
+        let labelText; // השלשה הקדושה (טקסט צף)
         let currentQ = 0;
         let soundEnabled = true;
 
         function init() {
+            // בדיקה שקובץ השאלות נטען
             if (typeof QUESTIONS === 'undefined') {
                 alert("שגיאה: הקובץ questions.js לא נמצא.");
                 return;
             }
 
+            // יצירת הגרף
             board = JXG.JSXGraph.initBoard('graph-area', {
                 boundingbox: [-5, 8, 5, -8], axis: true, showCopyright: false,
-                pan: { enabled: false }, zoom: { enabled: true }
+                pan: {enabled:false}, zoom: {enabled:true}
             });
 
             // הפונקציה
             curve = board.create('functiongraph', [
-                function(x) { return params.a*Math.pow(x,3) + params.b*Math.pow(x,2) + params.c*x + params.d; }
+                x => params.a*x**3 + params.b*x**2 + params.c*x + params.d
             ], { strokeWidth: 3, strokeColor: '#007bff' });
 
-            // נקודה גוררת
-            p = board.create('glider', [0, 0, curve], { name: '', size: 9, color: '#007bff' });
-            
-            // המשיק
-            tangent = board.create('tangent', [p], { strokeColor: '#ff9f43', strokeWidth: 2, dash:2 });
-
-            // --- מעבדת האנך (חדש!) ---
-            // 1. האנך: קו שעובר ב-P עם שיפוע הופכי ונגדי
-            normalLine = board.create('line', [p, function() {
-                let m = 3*params.a*p.X()*p.X() + 2*params.b*p.X() + params.c;
-                let normalM = -1/m;
-                // יוצרים נקודה שניה כדי להגדיר קו: (x+1, y+m')
-                return [p.X()+1, p.Y()+normalM];
-            }], { strokeColor: '#ab47bc', strokeWidth: 2, visible: false });
-
-            // 2. משולש (אופציונלי - בין המשיק לאנך לציר X למשל, או פשוט האנך)
-            // לצורך פשטות: נצייר משולש בין הנקודה, החיתוך של האנך עם ציר X, וההיטל על הציר
-            trianglePoly = board.create('polygon', [[0,0],[0,0],[0,0]], { 
-                fillColor: '#ab47bc', fillOpacity: 0.2, borders: {visible:false}, visible:false 
+            // הנקודה הגוררת
+            p = board.create('glider', [0, 0, curve], { 
+                name: '', size: 9, color: '#007bff' 
             });
 
-            // אירועים
-            p.on('drag', updateAll);
-            board.on('up', updateAll);
-            
+            // השלשה הקדושה - טקסט שזז עם הנקודה
+            labelText = board.create('text', [
+                () => p.X() + 0.5, // מיקום X
+                () => p.Y() + 0.5, // מיקום Y
+                function() {
+                    let m = getSlope(p.X());
+                    return `X: ${p.X().toFixed(2)}<br>Y: ${p.Y().toFixed(2)}<br>m: ${m.toFixed(2)}`;
+                }
+            ], { 
+                anchor: p, fontSize: 14, cssClass: 'jxgbox', strokeColor:'black' 
+            });
+
+            // משיק
+            tangent = board.create('tangent', [p], { strokeColor:'#ff9800', dash:2 });
+
+            // אנך ומשולש (מוסתרים בהתחלה)
+            normalLine = board.create('line', [p, function() {
+                let m = getSlope(p.X());
+                // אם השיפוע 0, יש בעיה בנוסחה הרגילה, אבל JSXGraph מטפל בזה לרוב.
+                return [p.X() + 1, p.Y() + (-1/m)]; 
+            }], { strokeColor: '#8e24aa', strokeWidth: 2, visible: false });
+
+            triangle = board.create('polygon', [[0,0], [0,0], [0,0]], {
+                fillColor: '#8e24aa', fillOpacity: 0.2, visible: false, borders: {visible:false}
+            });
+
+            // האזנה לשינויים
+            p.on('drag', updateInfo);
+            board.on('up', updateInfo); // עדכון כשעוזבים את העכבר
+
             ['inpA','inpB','inpC','inpD'].forEach(id => {
                 document.getElementById(id).addEventListener('input', updateParams);
             });
 
-            // יצירת כפתורי ניווט
-            const nav = document.getElementById('nav-container');
+            // בניית כפתורים למשימות
+            let nav = document.getElementById('nav-container');
             QUESTIONS.forEach((q, i) => {
                 let btn = document.createElement('button');
-                btn.className = 'q-btn'; 
-                btn.innerText = i + 1;
-                btn.onclick = () => loadQuestion(i);
+                btn.className = 'q-btn'; btn.innerText = i+1;
+                btn.onclick = () => loadQ(i);
                 nav.appendChild(btn);
             });
-
-            loadQuestion(0);
+            
+            // טעינת שאלה ראשונה
+            loadQ(0);
         }
 
-        // פונקציה לבניית טקסט יפה (בלי מקדמים 0 וכו')
-        function buildFuncText(a, b, c, d) {
-            let terms = [];
-            if (a !== 0) terms.push((a==1?'':a==-1?'-':a) + "x³");
-            if (b !== 0) terms.push((b>0 && terms.length?'+':'') + (b==1 && terms.length?'':b==-1?'-':b) + "x²");
-            if (c !== 0) terms.push((c>0 && terms.length?'+':'') + (c==1 && terms.length?'':c==-1?'-':c) + "x");
-            if (d !== 0 || terms.length === 0) terms.push((d>0 && terms.length?'+':'') + d);
-            return "f(x) = " + terms.join("");
+        function getSlope(x) {
+            return 3*params.a*x*x + 2*params.b*x + params.c;
         }
 
         function updateParams() {
@@ -151,85 +145,85 @@
             params.c = parseFloat(document.getElementById('inpC').value);
             params.d = parseFloat(document.getElementById('inpD').value);
             board.update();
-            updateAll();
+            updateInfo();
+        }
+
+        function updateInfo() {
+            let x = p.X();
+            let m = getSlope(x);
+            let y = p.Y();
+
+            // עדכון תיבת הנוסחאות
+            let a = params.a, b = params.b, c = params.c, d = params.d;
+            
+            // בניית מחרוזת הפונקציה בצורה יפה
+            let fStr = `${a!=0?a+'x³':''} ${b>0?'+':''}${b!=0?b+'x²':''} ${c>0?'+':''}${c!=0?c+'x':''} ${d>0?'+':''}${d!=0?d:''}`;
+            if(fStr.trim() === '') fStr = "0";
+            // ניקוי סימני פלוס מיותרים בהתחלה
+            fStr = fStr.replace(/^\s*\+\s*/, '').replace(/\s\+/g, ' +').replace(/\s-/g, ' -');
+            document.getElementById('formula-f').innerText = "f(x) = " + fStr;
+
+            // בניית מחרוזת הנגזרת
+            let da = (3*a).toFixed(2).replace('.00','');
+            let db = (2*b).toFixed(2).replace('.00','');
+            let dc = c.toFixed(2).replace('.00','');
+            document.getElementById('formula-tag').innerText = `f'(x) = ${da}x² + ${db}x + ${dc}`;
+
+            // עדכון משולש האנך
+            if(document.getElementById('chk-normal').checked) {
+                if (Math.abs(m) > 0.01) {
+                    let xIntercept = x + y*m;
+                    triangle.dataX = [x, x, xIntercept];
+                    triangle.dataY = [0, y, 0];
+                } else {
+                    triangle.dataX = [x, x, x];
+                    triangle.dataY = [0, y, 0];
+                }
+            }
+
+            // --- לוגיקת בדיקת ניצחון (הוחזרה!) ---
+            checkWin(m, x, y);
         }
 
         function toggleNormal() {
             let show = document.getElementById('chk-normal').checked;
             normalLine.setAttribute({visible: show});
-            trianglePoly.setAttribute({visible: show});
-            updateAll(); // כדי לעדכן מיקום מיידי
+            triangle.setAttribute({visible: show});
+            board.update();
         }
 
-        function updateAll() {
-            let x = p.X();
-            let y = params.a*Math.pow(x,3) + params.b*Math.pow(x,2) + params.c*x + params.d;
-            let m = 3*params.a*x*x + 2*params.b*x + params.c;
-
-            // עדכון HUD
-            document.getElementById('val-x').innerText = x.toFixed(2);
-            document.getElementById('val-y').innerText = y.toFixed(2);
-            document.getElementById('val-m').innerText = m.toFixed(2);
-
-            // עדכון תיבת הנוסחאות בצהוב
-            document.getElementById('formula-func').innerText = buildFuncText(params.a, params.b, params.c, params.d);
-            // נגזרת פשוטה לתצוגה
-            let da = (3*params.a).toFixed(2).replace('.00','');
-            let db = (2*params.b).toFixed(2).replace('.00','');
-            let dc = params.c.toFixed(2).replace('.00','');
-            document.getElementById('formula-deriv').innerText = `f'(x) = ${da}x² + ${db}x + ${dc}`;
-
-            // לוגיקה למעבדת האנך (אם דלוקה)
-            if (document.getElementById('chk-normal').checked) {
-                // חישוב חיתוך האנך עם ציר X
-                // משוואת האנך: Y - y1 = (-1/m)(X - x1)  =>  ב-Y=0:  -y1 = (-1/m)(X - x1) => X = x1 + y1*m
-                if (Math.abs(m) > 0.01) {
-                    let normalXIntercept = x + y*m; 
-                    trianglePoly.dataX = [x, x, normalXIntercept];
-                    trianglePoly.dataY = [0, y, 0];
-                } else {
-                    // מקרה קצה שיפוע 0 - אנך מאונך (אינסוף)
-                    trianglePoly.dataX = [x, x, x];
-                    trianglePoly.dataY = [0, y, 0];
-                }
-            }
-
-            checkWin(m, x, y);
-        }
-
-        function loadQuestion(idx) {
+        function loadQ(idx) {
             currentQ = idx;
             let q = QUESTIONS[idx];
-            
-            // סימון כפתור פעיל
-            document.querySelectorAll('.q-btn').forEach((b, i) => {
-                b.classList.toggle('active', i === idx);
-            });
-
             document.getElementById('q-title').innerText = q.title;
             document.getElementById('q-desc').innerText = q.desc;
-            document.getElementById('win-overlay').style.display = 'none';
-            document.getElementById('holy-trinity').className = ''; 
-
-            // איפוס סליידרים
-            params.a = q.params[0]; params.b = q.params[1]; 
-            params.c = q.params[2]; params.d = q.params[3];
-            document.getElementById('inpA').value = params.a;
-            document.getElementById('inpB').value = params.b;
-            document.getElementById('inpC').value = params.c;
-            document.getElementById('inpD').value = params.d;
             
-            // נעילה לפי הצורך
+            // איפוס מצב ניצחון
+            document.getElementById('win-overlay').style.display = 'none';
+            if (labelText) labelText.setAttribute({cssClass: 'jxgbox'}); // החזרת צבע רגיל
+
+            // עדכון כפתורים
+            document.querySelectorAll('.q-btn').forEach((b,i) => {
+                b.classList.toggle('active', i===idx);
+            });
+
+            // איפוס פרמטרים
+            params.a = q.params[0]; document.getElementById('inpA').value = params.a;
+            params.b = q.params[1]; document.getElementById('inpB').value = params.b;
+            params.c = q.params[2]; document.getElementById('inpC').value = params.c;
+            params.d = q.params[3]; document.getElementById('inpD').value = params.d;
+            
+            // נעילת סליידרים אם צריך
             ['inpA','inpB','inpC','inpD'].forEach(id => document.getElementById(id).disabled = false);
             if(q.locked) q.locked.forEach(id => document.getElementById(id).disabled = true);
 
-            // מטרות
+            // יצירת מטרות (Targets)
             board.removeObject(targets);
             targets = [];
             if(q.targets) {
                 q.targets.forEach(t => {
                     let pt = board.create('point', [t.x, t.y], { 
-                        name:'', fixed:true, color:'#00e676', size:5, face:'o'
+                        name:'', fixed:true, color:'#00e676', size:6, face:'o', strokeWidth:2, strokeColor:'green'
                     });
                     targets.push(pt);
                 });
@@ -240,33 +234,39 @@
         }
 
         function checkWin(m, x, y) {
+            if (!QUESTIONS || !QUESTIONS[currentQ]) return;
+            
             let q = QUESTIONS[currentQ];
             let win = false;
 
+            // בדיקת סוגי ניצחון
             if (q.goal === 'slope_zero' && Math.abs(m) < 0.1) win = true;
-            if (q.goal === 'slope_equals' && Math.abs(m - q.targetM) < 0.1) win = true;
-            if (q.goal === 'hit_target') {
+            else if (q.goal === 'slope_equals' && Math.abs(m - q.targetM) < 0.1) win = true;
+            else if (q.goal === 'hit_target') {
                 let hitAll = true;
-                q.targets.forEach(t => {
-                     // בודקים אם הפונקציה עוברת קרוב לנקודה
-                    let yCalc = params.a*Math.pow(t.x,3) + params.b*Math.pow(t.x,2) + params.c*t.x + params.d;
-                    if (Math.abs(yCalc - t.y) > 0.3) hitAll = false;
-                });
+                if (q.targets) {
+                    q.targets.forEach(t => {
+                        // חישוב ה-Y של הפונקציה בנקודת ה-X של המטרה
+                        let yCalc = params.a*Math.pow(t.x,3) + params.b*Math.pow(t.x,2) + params.c*t.x + params.d;
+                        // בדיקה אם הפונקציה עוברת קרוב למטרה
+                        if (Math.abs(yCalc - t.y) > 0.4) hitAll = false;
+                    });
+                } else { hitAll = false; }
                 if(hitAll) win = true;
             }
 
-            const hud = document.getElementById('holy-trinity');
+            // טיפול בניצחון
             if (win) {
-                hud.classList.add('winning');
                 document.getElementById('win-overlay').style.display = 'block';
-                if(soundEnabled) { /* אפשר להוסיף סאונד כאן אם רוצים */ }
+                // שינוי צבע הקופסה הצפה
+                labelText.setAttribute({cssClass: 'jxgbox winning-box'});
             } else {
-                hud.classList.remove('winning');
                 document.getElementById('win-overlay').style.display = 'none';
+                labelText.setAttribute({cssClass: 'jxgbox'});
             }
         }
 
-        function toggleSound() {
+        function toggleSound() { 
             soundEnabled = !soundEnabled;
             document.getElementById('sound-toggle').innerText = soundEnabled ? "🔊" : "🔇";
         }
