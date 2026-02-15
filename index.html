@@ -19,17 +19,22 @@
 
     <div id="holy-trinity">
         <div class="trinity-row">
-            <span id="val-x" class="trinity-val">0</span>
+            <span id="val-x" class="trinity-val">0.00</span>
             <span class="trinity-label">X</span>
         </div>
         <div class="trinity-row">
-            <span id="val-y" class="trinity-val">0</span>
+            <span id="val-y" class="trinity-val">0.00</span>
             <span class="trinity-label">f(x)</span>
         </div>
         <div class="trinity-row">
-            <span id="val-m" class="trinity-val">0</span>
+            <span id="val-m" class="trinity-val">0.00</span>
             <span class="trinity-label">f'(x)</span>
         </div>
+    </div>
+
+    <div id="win-overlay" class="win-overlay">
+        <h1>🏆 כל הכבוד!</h1>
+        <p>הצלחת את המשימה</p>
     </div>
 
     <div id="sidebar">
@@ -84,31 +89,41 @@
     <script src="questions.js"></script>
 
     <script>
-        // לוגיקה זהה, רק הוספתי עדכון של המספרים ליד הסליידרים שיהיה יפה
         let board, p, tangent, normal, curve;
         let params = { a:0, b:0, c:0, d:0 };
         let currentQ = 0;
+        let isWinning = false;
 
         function init() {
+            // אתחול לוח גרפי
             board = JXG.JSXGraph.initBoard('graph-area', {
                 boundingbox: [-5, 8, 5, -8], axis: true, showCopyright: false,
-                pan: { enabled: false }, zoom: { enabled: true } // זום במחשב זה נחמד
+                pan: { enabled: false }, zoom: { enabled: true }
             });
 
+            // יצירת פונקציה
             curve = board.create('functiongraph', [
                 function(x) { return params.a*Math.pow(x,3) + params.b*Math.pow(x,2) + params.c*x + params.d; }
             ], { strokeWidth: 3, strokeColor: '#007bff' });
 
+            // יצירת גליידר (נקודה על גרף)
             p = board.create('glider', [0, 0, curve], { name: '', size: 6, color: '#007bff' });
+            
+            // משיק ונורמל
             tangent = board.create('tangent', [p], { strokeColor: '#ff9f43', strokeWidth: 2, dash:2 });
             normal = board.create('normal', [p], { strokeColor: '#a55eea', strokeWidth: 2, visible: false });
 
-            p.on('drag', updateAll);
+            // האזנה לאירועים
+            p.on('drag', () => { resumeAudio(); updateAll(); });
+            board.on('down', resumeAudio); // הפעלת סאונד בנגיעה ראשונה
             board.on('up', updateAll);
+            
             ['inpA','inpB','inpC','inpD'].forEach(id => {
-                document.getElementById(id).addEventListener('input', updateParams);
+                let el = document.getElementById(id);
+                el.addEventListener('input', () => { resumeAudio(); updateParams(); });
             });
 
+            // בניית כפתורי ניווט
             const nav = document.getElementById('questions-nav');
             QUESTIONS.forEach((q, i) => {
                 let btn = document.createElement('div');
@@ -122,13 +137,19 @@
             loadQuestion(0);
         }
 
+        // פונקציה חשובה להפעלת סאונד בדפדפנים
+        function resumeAudio() {
+            if (typeof audioCtx !== 'undefined' && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
         function updateParams() {
             params.a = parseFloat(document.getElementById('inpA').value);
             params.b = parseFloat(document.getElementById('inpB').value);
             params.c = parseFloat(document.getElementById('inpC').value);
             params.d = parseFloat(document.getElementById('inpD').value);
             
-            // עדכון תוויות מספרים ליד הסליידרים
             document.getElementById('lblA').innerText = params.a;
             document.getElementById('lblB').innerText = params.b;
             document.getElementById('lblC').innerText = params.c;
@@ -152,10 +173,15 @@
 
         function loadQuestion(idx) {
             currentQ = idx;
+            isWinning = false;
+            document.getElementById('win-overlay').classList.remove('show');
+            document.getElementById('holy-trinity').classList.remove('winning', 'hot');
+
             let q = QUESTIONS[idx];
             document.getElementById('q-title').innerText = q.title;
             document.getElementById('q-desc').innerText = q.desc;
             
+            // טעינת פרמטרים
             params.a = q.params[0]; params.b = q.params[1]; 
             params.c = q.params[2]; params.d = q.params[3];
             
@@ -167,9 +193,11 @@
             
             if(q.locked) q.locked.forEach(id => document.getElementById(id).disabled = true);
             
+            // איפוס מיקום וכלים
             p.setCoords(0, params.d);
             normal.setAttribute({ visible: q.showNormal || false });
             
+            // יצירת מטרות
             board.removeObject(board.objectsList.filter(o => o.name === 'TARGET'));
             if(q.targets) {
                 q.targets.forEach(t => {
@@ -177,39 +205,65 @@
                 });
             }
 
+            // עדכון כפתורים
             document.querySelectorAll('.q-btn').forEach((b, i) => {
                 b.classList.toggle('active', i === idx);
             });
 
-            updateParams(); // מרענן הכל כולל תוויות
+            updateParams();
             playSound('pop');
         }
 
         function checkWin(m, x, y) {
             let q = QUESTIONS[currentQ];
             let win = false;
-            if (q.goal === 'slope_zero' && Math.abs(m) < 0.1) win = true;
-            if (q.goal === 'slope_equals' && Math.abs(m - q.targetM) < 0.1) win = true;
+            let close = false; // משתנה ל"חם"
+
+            // לוגיקה לבדיקת ניצחון וגם קרבה (חם/קר)
+            if (q.goal === 'slope_zero') {
+                if (Math.abs(m) < 0.1) win = true;
+                else if (Math.abs(m) < 0.5) close = true;
+            }
+            if (q.goal === 'slope_equals') {
+                if (Math.abs(m - q.targetM) < 0.1) win = true;
+                else if (Math.abs(m - q.targetM) < 0.5) close = true;
+            }
             if (q.goal === 'hit_target') {
                 let allHit = true;
+                let anyClose = false;
                 q.targets.forEach(t => {
                     let yCalc = params.a*Math.pow(t.x,3) + params.b*Math.pow(t.x,2) + params.c*t.x + params.d;
-                    if(Math.abs(yCalc - t.y) > 0.2) allHit = false;
+                    let diff = Math.abs(yCalc - t.y);
+                    if(diff > 0.2) allHit = false;
+                    if(diff < 1.0) anyClose = true;
                 });
                 if(allHit) win = true;
+                else if(anyClose) close = true;
             }
-            
+
+            // עדכון ממשק משתמש
             const hud = document.getElementById('holy-trinity');
-            if(win) {
-                hud.style.background = "rgba(46, 204, 113, 0.8)";
-                // פעם אחת בלבד כשנכנסים למצב ניצחון
-                if(!hud.classList.contains('winning')) {
-                   playSound('win');
-                   hud.classList.add('winning');
+            
+            if (win) {
+                if (!isWinning) { // רק בפעם הראשונה
+                    playSound('win');
+                    hud.classList.add('winning');
+                    document.getElementById('win-overlay').classList.add('show');
+                    isWinning = true;
+                    
+                    // הסתרת הודעת הניצחון אחרי 3 שניות
+                    setTimeout(() => {
+                        document.getElementById('win-overlay').classList.remove('show');
+                    }, 3000);
                 }
             } else {
-                hud.style.background = window.innerWidth > 768 ? "rgba(255, 255, 255, 0.8)" : "rgba(255, 255, 255, 0.6)";
+                isWinning = false;
                 hud.classList.remove('winning');
+                document.getElementById('win-overlay').classList.remove('show');
+                
+                // אפקט "חם"
+                if (close) hud.classList.add('hot');
+                else hud.classList.remove('hot');
             }
         }
 
