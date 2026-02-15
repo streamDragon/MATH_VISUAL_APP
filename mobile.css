@@ -1,143 +1,95 @@
-/* === הגדרות בסיס === */
 html, body {
-    margin: 0; padding: 0; width: 100%; height: 100vh;
-    overflow: hidden; background: #f0f2f5; font-family: 'Assistant', sans-serif;
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    overflow: hidden; background: #f4f6f8; font-family: 'Assistant', sans-serif;
 }
-body { 
-    display: flex; 
-    flex-direction: column; /* במובייל - אחד מתחת לשני */
+body { display: flex; flex-direction: column; }
+
+/* === כפתור סאונד === */
+#sound-toggle {
+    position: absolute; top: 10px; left: 10px; z-index: 999;
+    background: white; border: 1px solid #ccc; border-radius: 50%;
+    width: 32px; height: 32px; cursor: pointer;
+    display: flex; justify-content: center; align-items: center;
 }
 
 /* === אזור הגרף === */
 #graph-area {
-    flex: 1; width: 100%; position: relative; z-index: 1;
-    cursor: crosshair; touch-action: none;
-    order: 1; /* במובייל הגרף למעלה */
-}
-.jsxgraph-copyright { display: none !important; }
-
-/* === כפתור סאונד === */
-#sound-toggle {
-    position: absolute; top: 10px; left: 10px;
-    z-index: 1000; background: white; border: 1px solid #ccc;
-    border-radius: 50%; width: 35px; height: 35px;
-    font-size: 18px; cursor: pointer;
-    display: flex; justify-content: center; align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    width: 100%; flex: 1; position: relative;
+    order: 1; /* במובייל: גרף למעלה */
 }
 
-/* === ה"האד" (HUD) העליון - השלשה הקדושה === */
-#hud-container {
-    position: absolute; top: 0; left: 0; width: 100%;
-    pointer-events: none; z-index: 500;
-    display: flex; justify-content: center;
+/* טקסט צף ליד הנקודה (השלשה הקדושה) */
+.jxgbox {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid #333 !important;
+    border-radius: 4px !important;
+    padding: 5px !important;
+    font-family: monospace !important;
+    font-size: 14px !important;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
 }
 
-#holy-trinity {
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid #ccc; border-top: none;
-    border-radius: 0 0 15px 15px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    display: flex; gap: 20px; padding: 8px 30px;
-    pointer-events: auto;
-}
-#holy-trinity.winning { background: #b9f6ca !important; border-bottom: 3px solid #00c853; }
-
-.trinity-item { text-align: center; }
-.trinity-val { font-size: 1.3rem; font-weight: 800; color: #333; font-family: monospace; display:block; }
-.trinity-label { font-size: 0.8rem; color: #666; font-weight: bold; }
-
-/* === תפריט צד (Sidebar) === */
+/* === תפריט צד === */
 #sidebar {
-    background: white;
-    padding: 15px;
-    box-sizing: border-box;
-    overflow-y: auto;
-    z-index: 100;
+    background: white; border-top: 4px solid #007bff;
+    padding: 15px; overflow-y: auto;
     box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-    display: flex; flex-direction: column; gap: 12px;
-    
-    /* במובייל: */
-    height: 45vh; width: 100%; order: 2;
-    border-top: 5px solid #007bff;
+    z-index: 100;
+    display: flex; flex-direction: column; gap: 10px;
+    height: 40vh; width: 100%;
+    order: 2; /* במובייל: תפריט למטה */
+    box-sizing: border-box;
 }
 
-/* === קופסאות המידע (הצהובה והסגולה) === */
+/* === קופסאות מידע === */
 .info-box {
-    border-radius: 8px; padding: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: 6px; padding: 10px;
+    margin-bottom: 5px; border: 1px solid rgba(0,0,0,0.1);
+}
+.info-title {
+    font-weight: bold; font-size: 0.95rem; margin-bottom: 5px;
+    display: flex; align-items: center; gap: 5px;
 }
 
-/* הקופסה הצהובה - נוסחאות */
-.yellow-box {
-    background-color: #fff9c4; /* צהוב */
-    border-right: 4px solid #fbc02d;
-}
-.box-title {
-    font-weight: bold; font-size: 1rem; margin-bottom: 5px;
-    color: #5d4037; display: flex; align-items: center; gap: 5px;
-}
-.formula-display {
-    font-family: 'Times New Roman', serif; font-size: 1.1rem;
-    direction: ltr; text-align: left; margin-bottom: 3px;
+/* צהוב - נוסחאות */
+.yellow-box { background: #fffde7; border-right: 4px solid #fbc02d; color: #3e2723; }
+.math-line { font-family: 'Times New Roman', serif; direction: ltr; text-align: left; font-size: 1.1rem; }
+
+/* סגול - מעבדת האנך */
+.purple-box { background: #f3e5f5; border-right: 4px solid #8e24aa; color: #4a148c; }
+.purple-box label { cursor: pointer; font-weight: bold; }
+
+/* כותרות לסליידרים */
+.section-title {
+    font-weight: bold; color: #0277bd; margin-top: 5px; 
+    border-bottom: 2px solid #e1f5fe; padding-bottom: 3px;
 }
 
-/* הקופסה הסגולה - מעבדת האנך */
-.purple-box {
-    background-color: #f3e5f5; /* סגול */
-    border-right: 4px solid #ab47bc;
-}
-.purple-box label {
-    font-weight: bold; color: #4a148c; cursor: pointer;
-    display: flex; align-items: center; gap: 8px;
-}
-
-/* === ניווט משימות === */
-.task-selector {
-    background: #e3f2fd; border-radius: 8px; padding: 10px;
-    text-align: center; border: 1px solid #bbdefb;
-}
-.task-label { font-weight: bold; color: #1565c0; margin-bottom: 5px; display: block; font-size: 0.9rem; }
-.nav-buttons { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; }
-.q-btn {
-    background: white; border: 1px solid #90caf9; border-radius: 4px;
-    width: 30px; height: 30px; cursor: pointer; font-weight: bold; color: #1565c0;
-    transition: 0.2s;
-}
-.q-btn.active { background: #1565c0; color: white; border-color: #1565c0; }
-
-/* === סליידרים === */
-.slider-container {
-    background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #eee;
-}
-.slider-row { display: flex; align-items: center; margin-bottom: 8px; }
-.slider-lbl { width: 20px; font-weight: bold; }
+/* סליידרים */
+.slider-row { display: flex; align-items: center; margin-bottom: 5px; }
+.slider-lbl { width: 25px; font-weight: bold; }
 .slider-inp { flex: 1; cursor: pointer; }
 
-/* === התאמה למחשב (Desktop) - קריטי! === */
+/* ניווט */
+.nav-grid { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
+.q-btn {
+    border: 1px solid #ccc; background: #eee; border-radius: 4px;
+    width: 30px; height: 30px; cursor: pointer;
+}
+.q-btn.active { background: #007bff; color: white; border-color: #0056b3; }
+
+/* === תצוגת מחשב === */
 @media (min-width: 768px) {
-    body { 
-        flex-direction: row; /* מסדרים צד לצד */
-    }
+    body { flex-direction: row; } /* צד לצד */
     
     #sidebar {
-        width: 350px; /* רוחב קבוע לתפריט */
-        min-width: 350px;
-        height: 100vh;
-        order: 1; /* במחשב (עברית) התפריט מימין */
-        border-top: none;
-        border-left: 1px solid #ccc; /* קו הפרדה משמאל */
+        width: 320px; height: 100vh;
+        border-top: none; border-left: 1px solid #ccc;
+        order: 1; /* בעברית - ימין */
     }
     
     #graph-area {
         flex: 1; height: 100vh;
-        order: 2; /* הגרף משמאל */
-    }
-
-    #hud-container {
-        justify-content: center; /* ממורכז מעל הגרף */
-        width: calc(100% - 350px); /* רוחב הגרף בלבד */
-        left: 0;
+        order: 2; /* משמאל */
     }
 }
