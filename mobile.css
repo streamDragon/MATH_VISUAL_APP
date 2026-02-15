@@ -962,8 +962,10 @@ h2 {
     }
 
     #graph-area {
-        min-height: 40vh;
-        height: auto;
+        height: min(52dvh, 92vw);
+        min-height: 300px;
+        max-height: 56dvh;
+        aspect-ratio: 1 / 1;
     }
 
     #sidebar {
@@ -1061,6 +1063,9 @@ h2 {
     }
 
     #graph-area {
-        min-height: 38vh;
+        height: min(50dvh, 94vw);
+        min-height: 280px;
+        max-height: 54dvh;
+        aspect-ratio: 1 / 1;
     }
 }

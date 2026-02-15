@@ -467,8 +467,9 @@
             }
 
             board = JXG.JSXGraph.initBoard('graph-area', {
-                boundingbox: [-5, 8, 5, -8], axis: true, showCopyright: false,
-                pan: {enabled:false}, zoom: {enabled:true}
+                boundingbox: [-5, 8, 5, -8], axis: true, keepaspectratio: true, showCopyright: false,
+                pan: {enabled:false},
+                zoom: {enabled:true, needshift: false, factorX: 1.15, factorY: 1.15}
             });
 
             curve = board.create('functiongraph', [
@@ -582,6 +583,28 @@
             refreshTestLineControlVisibility();
             updateSoundButton();
             openStartGuideModal();
+
+            queueBoardResize();
+            window.addEventListener('resize', queueBoardResize);
+            window.addEventListener('orientationchange', queueBoardResize);
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', queueBoardResize);
+            }
+        }
+
+        let boardResizeRaf = null;
+        function queueBoardResize() {
+            if (!board) return;
+            if (boardResizeRaf !== null) cancelAnimationFrame(boardResizeRaf);
+            boardResizeRaf = requestAnimationFrame(() => {
+                boardResizeRaf = null;
+                let graphArea = document.getElementById('graph-area');
+                if (!graphArea) return;
+                let w = Math.max(260, Math.round(graphArea.clientWidth));
+                let h = Math.max(260, Math.round(graphArea.clientHeight));
+                board.resizeContainer(w, h, true);
+                board.fullUpdate();
+            });
         }
 
         function getSlope(x) {
