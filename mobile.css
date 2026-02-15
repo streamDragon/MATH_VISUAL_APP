@@ -1,190 +1,143 @@
 /* === הגדרות בסיס === */
 html, body {
     margin: 0; padding: 0; width: 100%; height: 100vh;
-    overflow: hidden; background: #f8f9fa; font-family: 'Assistant', sans-serif;
+    overflow: hidden; background: #f0f2f5; font-family: 'Assistant', sans-serif;
 }
-body { display: flex; flex-direction: column; }
+body { 
+    display: flex; 
+    flex-direction: column; /* במובייל - אחד מתחת לשני */
+}
 
 /* === אזור הגרף === */
 #graph-area {
     flex: 1; width: 100%; position: relative; z-index: 1;
-    cursor: crosshair;
-    touch-action: none;
+    cursor: crosshair; touch-action: none;
+    order: 1; /* במובייל הגרף למעלה */
 }
 .jsxgraph-copyright { display: none !important; }
 
 /* === כפתור סאונד === */
 #sound-toggle {
-    position: absolute; top: 10px; right: 10px;
-    z-index: 1000;
-    background: white; border: 2px solid #333;
-    border-radius: 50%; width: 40px; height: 40px;
-    font-size: 20px; cursor: pointer;
+    position: absolute; top: 10px; left: 10px;
+    z-index: 1000; background: white; border: 1px solid #ccc;
+    border-radius: 50%; width: 35px; height: 35px;
+    font-size: 18px; cursor: pointer;
     display: flex; justify-content: center; align-items: center;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* === תצוגת הנוסחאות (חדש!) === */
-#formulas-container {
-    position: absolute; top: 60px; left: 50%; 
-    transform: translateX(-50%);
-    width: 90%; max-width: 500px;
-    background: rgba(255, 255, 255, 0.95); /* כמעט אטום לגמרי */
-    border: 1px solid #ccc;
-    border-radius: 15px;
-    padding: 10px;
-    text-align: center;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-    z-index: 400;
-    pointer-events: none; /* כדי שאפשר יהיה לגעת בגרף שמתחת */
-}
-.formula-line {
-    font-family: 'Times New Roman', serif;
-    font-size: 1.2rem;
-    margin: 5px 0;
-    color: #333;
-    font-weight: bold;
-}
-.formula-label { color: #007bff; font-style: italic; margin-right: 5px; }
-.deriv-label { color: #d63031; font-style: italic; margin-right: 5px; }
-
-/* === השלשה הקדושה + משוואת המשיק === */
+/* === ה"האד" (HUD) העליון - השלשה הקדושה === */
 #hud-container {
     position: absolute; top: 0; left: 0; width: 100%;
     pointer-events: none; z-index: 500;
-    display: flex; flex-direction: column; align-items: center;
+    display: flex; justify-content: center;
 }
 
 #holy-trinity {
-    /* תיקון שקיפות: צבע לבן מלא + מסגרת */
-    background: #ffffff; 
-    border: 1px solid #ddd;
-    border-top: none;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #ccc; border-top: none;
     border-radius: 0 0 15px 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    display: flex; justify-content: center; gap: 20px;
-    padding: 10px 30px;
-    transition: background 0.3s, transform 0.2s;
-    pointer-events: auto; 
-}
-
-/* צבעים ברורים יותר לחם/קר */
-#holy-trinity.hot { 
-    background: #fff9c4 !important; 
-    border: 2px solid #fbc02d; 
-    box-shadow: 0 0 20px rgba(253, 216, 53, 0.6);
-}
-#holy-trinity.winning { 
-    background: #b9f6ca !important; 
-    border: 2px solid #00c853; 
-    box-shadow: 0 0 25px rgba(0, 230, 118, 0.6);
-}
-
-.trinity-item { text-align: center; min-width: 60px; }
-.trinity-val { font-size: 1.4rem; font-weight: 900; color: #000; font-family: monospace; display: block; }
-.trinity-label { font-size: 0.85rem; color: #444; font-weight: bold; text-transform: uppercase; margin-top: 2px; }
-
-/* משוואת המשיק */
-#tangent-eq {
-    margin-top: 8px;
-    background: #2d3436; /* רקע כהה חזק */
-    color: #fff; /* טקסט לבן */
-    padding: 8px 20px;
-    border-radius: 25px;
-    font-family: monospace;
-    font-size: 1.1rem;
-    font-weight: bold;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    display: flex; gap: 20px; padding: 8px 30px;
     pointer-events: auto;
-    opacity: 0;
-    transition: opacity 0.3s;
 }
-#tangent-eq.show { opacity: 1; }
+#holy-trinity.winning { background: #b9f6ca !important; border-bottom: 3px solid #00c853; }
 
-/* === הודעת ניצחון === */
-#win-overlay {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    background: white; padding: 30px 50px; border-radius: 20px;
-    border: 4px solid #2ecc71;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    text-align: center; z-index: 1000;
-    pointer-events: none; opacity: 0;
-    transition: transform 0.4s, opacity 0.4s;
-}
-#win-overlay.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-#win-overlay h1 { margin: 0; color: #2ecc71; font-size: 3rem; }
+.trinity-item { text-align: center; }
+.trinity-val { font-size: 1.3rem; font-weight: 800; color: #333; font-family: monospace; display:block; }
+.trinity-label { font-size: 0.8rem; color: #666; font-weight: bold; }
 
 /* === תפריט צד (Sidebar) === */
 #sidebar {
-    height: 40vh; flex: none; width: 100%;
-    background: white; border-radius: 20px 20px 0 0;
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.15);
-    padding: 15px; box-sizing: border-box; overflow-y: auto;
-    z-index: 100; position: relative;
-    border-top: 4px solid #007bff;
+    background: white;
+    padding: 15px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    display: flex; flex-direction: column; gap: 12px;
+    
+    /* במובייל: */
+    height: 45vh; width: 100%; order: 2;
+    border-top: 5px solid #007bff;
 }
 
-#q-short-inst {
-    background: #e3f2fd; color: #0d47a1; padding: 12px;
-    border-radius: 8px; text-align: center; font-weight: bold;
-    margin: 10px 0; border: 1px solid #90caf9;
+/* === קופסאות המידע (הצהובה והסגולה) === */
+.info-box {
+    border-radius: 8px; padding: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.05);
 }
 
-.theory-btn {
-    width: 100%; padding: 12px; margin-bottom: 12px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white; border: none; border-radius: 10px;
-    font-size: 1rem; font-weight: bold; cursor: pointer;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+/* הקופסה הצהובה - נוסחאות */
+.yellow-box {
+    background-color: #fff9c4; /* צהוב */
+    border-right: 4px solid #fbc02d;
+}
+.box-title {
+    font-weight: bold; font-size: 1rem; margin-bottom: 5px;
+    color: #5d4037; display: flex; align-items: center; gap: 5px;
+}
+.formula-display {
+    font-family: 'Times New Roman', serif; font-size: 1.1rem;
+    direction: ltr; text-align: left; margin-bottom: 3px;
 }
 
+/* הקופסה הסגולה - מעבדת האנך */
+.purple-box {
+    background-color: #f3e5f5; /* סגול */
+    border-right: 4px solid #ab47bc;
+}
+.purple-box label {
+    font-weight: bold; color: #4a148c; cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+}
+
+/* === ניווט משימות === */
+.task-selector {
+    background: #e3f2fd; border-radius: 8px; padding: 10px;
+    text-align: center; border: 1px solid #bbdefb;
+}
+.task-label { font-weight: bold; color: #1565c0; margin-bottom: 5px; display: block; font-size: 0.9rem; }
+.nav-buttons { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; }
 .q-btn {
-    background: #e0e0e0; border: none; border-radius: 6px;
-    padding: 8px 14px; cursor: pointer; font-weight: bold;
-    transition: all 0.2s;
-    font-size: 1rem;
+    background: white; border: 1px solid #90caf9; border-radius: 4px;
+    width: 30px; height: 30px; cursor: pointer; font-weight: bold; color: #1565c0;
+    transition: 0.2s;
 }
-.q-btn:hover { background: #d6d6d6; transform: translateY(-2px); }
-.q-btn.active { background: #007bff; color: white; box-shadow: 0 2px 5px rgba(0,123,255,0.4); }
+.q-btn.active { background: #1565c0; color: white; border-color: #1565c0; }
 
-/* חלון תיאוריה */
-.theory-overlay {
-    display: none; position: fixed; top: 0; left: 0;
-    width: 100vw; height: 100vh; background: rgba(255,255,255,0.98);
-    z-index: 9999; overflow-y: auto; flex-direction: column;
+/* === סליידרים === */
+.slider-container {
+    background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #eee;
 }
-.theory-content { padding: 20px; max-width: 700px; margin: 0 auto; line-height: 1.6; }
-.close-theory {
-    align-self: flex-start; margin: 20px;
-    background: #ff4757; color: white; border: none;
-    padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer;
-}
+.slider-row { display: flex; align-items: center; margin-bottom: 8px; }
+.slider-lbl { width: 20px; font-weight: bold; }
+.slider-inp { flex: 1; cursor: pointer; }
 
-/* === התאמה למחשב (Desktop) === */
+/* === התאמה למחשב (Desktop) - קריטי! === */
 @media (min-width: 768px) {
-    body { flex-direction: row; }
+    body { 
+        flex-direction: row; /* מסדרים צד לצד */
+    }
     
-    #graph-area { height: 100vh; order: 1; flex: 1; }
-    
-    #sound-toggle { top: 20px; right: 20px; }
-    
-    #formulas-container { top: 20px; width: auto; min-width: 300px; }
-
     #sidebar {
-        width: 380px !important; min-width: 380px; flex: none;
-        height: 100vh; margin-top: 0;
-        border-radius: 0; border-right: 1px solid #ccc; order: 2;
-        border-top: none; border-left: 4px solid #007bff;
+        width: 350px; /* רוחב קבוע לתפריט */
+        min-width: 350px;
+        height: 100vh;
+        order: 1; /* במחשב (עברית) התפריט מימין */
+        border-top: none;
+        border-left: 1px solid #ccc; /* קו הפרדה משמאל */
     }
     
+    #graph-area {
+        flex: 1; height: 100vh;
+        order: 2; /* הגרף משמאל */
+    }
+
     #hud-container {
-        top: 20px; left: 20px; width: auto; align-items: flex-start;
+        justify-content: center; /* ממורכז מעל הגרף */
+        width: calc(100% - 350px); /* רוחב הגרף בלבד */
+        left: 0;
     }
-    #holy-trinity {
-        border-radius: 12px; padding: 15px 30px; border: 1px solid #ccc;
-    }
-    
-    .theory-overlay { background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
-    .theory-content { background: white; border-radius: 20px; width: 650px; max-height: 85vh; padding: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
 }
