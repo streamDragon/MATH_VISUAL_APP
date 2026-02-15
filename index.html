@@ -31,7 +31,7 @@
     <div id="sidebar">
         <h2 id="q-title" style="margin:0; text-align:center;">טוען...</h2>
         
-        <div id="q-short-inst">בצע את ההוראה כאן</div>
+        <div id="q-short-inst"></div>
         
         <button class="theory-btn" onclick="openTheoryModal()">💡 הסבר מלא ואינטואיציה</button>
 
@@ -73,6 +73,13 @@
         let isWinning = false;
 
         function init() {
+            // בדיקה שהשאלות נטענו לפני שממשיכים
+            if (typeof QUESTIONS === 'undefined') {
+                console.error("קובץ השאלות לא נטען!");
+                document.getElementById('q-title').innerText = "שגיאה בטעינת שאלות";
+                return;
+            }
+
             board = JXG.JSXGraph.initBoard('graph-area', {
                 boundingbox: [-5, 8, 5, -8], axis: true, showCopyright: false,
                 pan: { enabled: false }, zoom: { enabled: true }
@@ -87,7 +94,7 @@
             p = board.create('glider', [0, 0, curve], { name: '', size: 8, color: '#007bff' });
             tangent = board.create('tangent', [p], { strokeColor: '#ff9f43', strokeWidth: 2, dash:2 });
 
-            // אירועים (כולל הפעלת סאונד)
+            // אירועים
             p.on('drag', () => { initAudio(); updateAll(); });
             board.on('down', initAudio); 
             board.on('up', updateAll);
@@ -100,9 +107,11 @@
             const nav = document.getElementById('questions-nav');
             QUESTIONS.forEach((q, i) => {
                 let btn = document.createElement('button');
-                btn.className = 'q-btn'; // עיצוב יבוא מה-CSS
+                btn.className = 'q-btn'; 
                 btn.innerText = i + 1;
-                btn.style.padding = "8px 12px"; // סגנון זמני אם אין ב-CSS
+                // סגנון בסיסי לכפתורים אם אין ב-CSS
+                btn.style.margin = "2px";
+                btn.style.padding = "5px 10px";
                 btn.onclick = () => loadQuestion(i);
                 nav.appendChild(btn);
             });
@@ -154,7 +163,7 @@
             ['inpA','inpB','inpC','inpD'].forEach(id => document.getElementById(id).disabled = false);
             if(q.locked) q.locked.forEach(id => document.getElementById(id).disabled = true);
 
-            // ניקוי ויצירת נקודות ירוקות (תיקון חשוב!)
+            // יצירת נקודות ירוקות - החלק החשוב!
             board.removeObject(targets);
             targets = [];
             if(q.targets) {
