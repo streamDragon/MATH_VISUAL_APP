@@ -625,6 +625,35 @@ h2 {
 }
 
 @media (max-width: 980px) {
+    html,
+    body {
+        height: auto;
+        min-height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    body {
+        display: block;
+    }
+
+    #graph-area-wrapper {
+        display: block;
+        height: auto;
+        min-height: 0;
+    }
+
+    #graph-area {
+        min-height: 52vh;
+    }
+
+    #sidebar {
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+        padding-bottom: 22px;
+    }
+
     #top-strip {
         flex-wrap: wrap;
         align-items: flex-start;
@@ -680,5 +709,6 @@ h2 {
     #sidebar {
         height: auto;
         min-height: 40vh;
+        overflow: visible;
     }
 }
