@@ -1,4 +1,5 @@
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+﻿const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let soundEnabled = true;
 
 function initAudio() {
     if (audioCtx.state === 'suspended') {
@@ -6,14 +7,26 @@ function initAudio() {
     }
 }
 
+function updateSoundButton() {
+    const btn = document.getElementById('sound-toggle');
+    if (!btn) return;
+    btn.innerText = soundEnabled ? '🔊' : '🔇';
+}
+
+function toggleSound() {
+    soundEnabled = !soundEnabled;
+    updateSoundButton();
+}
+
 function playSound(type) {
-    initAudio(); // מוודא שהסאונד פעיל
-    
+    if (!soundEnabled) return;
+    initAudio();
+
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
     osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
-    
+
     const now = audioCtx.currentTime;
 
     if (type === 'win') {
