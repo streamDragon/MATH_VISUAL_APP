@@ -67,7 +67,7 @@
 
     <script>
         let board, p, tangent, curve;
-        let targets = []; // מערך לשמירת הנקודות הירוקות
+        let targets = []; // שמירת הנקודות הירוקות
         let params = { a:0, b:0, c:0, d:0 };
         let currentQ = 0;
         let isWinning = false;
@@ -83,29 +83,26 @@
                 function(x) { return params.a*Math.pow(x,3) + params.b*Math.pow(x,2) + params.c*x + params.d; }
             ], { strokeWidth: 3, strokeColor: '#007bff' });
 
-            // הנקודה הנגררת
-            p = board.create('glider', [0, 0, curve], { name: '', size: 6, color: '#007bff' });
+            // הנקודה
+            p = board.create('glider', [0, 0, curve], { name: '', size: 8, color: '#007bff' });
             tangent = board.create('tangent', [p], { strokeColor: '#ff9f43', strokeWidth: 2, dash:2 });
 
-            // אירועים
+            // אירועים (כולל הפעלת סאונד)
             p.on('drag', () => { initAudio(); updateAll(); });
-            board.on('down', initAudio); // קריטי למוזיקה!
+            board.on('down', initAudio); 
             board.on('up', updateAll);
             
             ['inpA','inpB','inpC','inpD'].forEach(id => {
                 document.getElementById(id).addEventListener('input', () => { initAudio(); updateParams(); });
             });
 
-            // כפתורי ניווט
+            // יצירת כפתורי ניווט
             const nav = document.getElementById('questions-nav');
             QUESTIONS.forEach((q, i) => {
                 let btn = document.createElement('button');
-                btn.className = 'q-btn';
+                btn.className = 'q-btn'; // עיצוב יבוא מה-CSS
                 btn.innerText = i + 1;
-                btn.style.padding = "8px 15px";
-                btn.style.border = "1px solid #ccc";
-                btn.style.borderRadius = "5px";
-                btn.style.background = "white";
+                btn.style.padding = "8px 12px"; // סגנון זמני אם אין ב-CSS
                 btn.onclick = () => loadQuestion(i);
                 nav.appendChild(btn);
             });
@@ -141,11 +138,11 @@
             
             // איפוס ממשק
             document.getElementById('win-overlay').classList.remove('show');
-            document.getElementById('holy-trinity').className = ''; // איפוס צבעים
+            document.getElementById('holy-trinity').className = ''; 
             document.getElementById('q-title').innerText = q.title;
             document.getElementById('q-short-inst').innerText = q.shortInst || q.desc;
             
-            // טעינת פרמטרים
+            // פרמטרים
             params.a = q.params[0]; params.b = q.params[1]; 
             params.c = q.params[2]; params.d = q.params[3];
             document.getElementById('inpA').value = params.a;
@@ -153,17 +150,17 @@
             document.getElementById('inpC').value = params.c;
             document.getElementById('inpD').value = params.d;
             
-            // ניהול נעילות
+            // נעילות
             ['inpA','inpB','inpC','inpD'].forEach(id => document.getElementById(id).disabled = false);
             if(q.locked) q.locked.forEach(id => document.getElementById(id).disabled = true);
 
-            // ניקוי מטרות ישנות ויצירת חדשות (התיקון לנקודה הירוקה!)
+            // ניקוי ויצירת נקודות ירוקות (תיקון חשוב!)
             board.removeObject(targets);
             targets = [];
             if(q.targets) {
                 q.targets.forEach(t => {
                     let pt = board.create('point', [t.x, t.y], { 
-                        name:'', fixed:true, color:'#00e676', size:5, face:'o', strokeWidth:2, strokeColor:'black' 
+                        name:'', fixed:true, color:'#00e676', size:6, face:'o', strokeWidth:2, strokeColor:'black' 
                     });
                     targets.push(pt);
                 });
@@ -177,7 +174,7 @@
         function checkWin(m, x, y) {
             let q = QUESTIONS[currentQ];
             let win = false;
-            let hot = false; // האם אנחנו קרובים?
+            let hot = false;
 
             if (q.goal === 'slope_zero') {
                 if (Math.abs(m) < 0.1) win = true;
@@ -192,7 +189,7 @@
                 q.targets.forEach(t => {
                     let yCalc = params.a*Math.pow(t.x,3) + params.b*Math.pow(t.x,2) + params.c*t.x + params.d;
                     let diff = Math.abs(yCalc - t.y);
-                    if(diff < 0.25) hitCount++;
+                    if(diff < 0.3) hitCount++;
                     if(diff < 1.0) hot = true;
                 });
                 if(hitCount === q.targets.length) win = true;
