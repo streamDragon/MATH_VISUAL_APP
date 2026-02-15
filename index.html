@@ -12,10 +12,30 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <link rel="stylesheet" href="mobile.css">
+    
+    <style>
+        /* עיצוב להודעת שגיאה אם הקבצים לא נמצאים */
+        .error-msg {
+            color: red;
+            background: #ffe6e6;
+            padding: 20px;
+            border: 2px solid red;
+            margin: 20px;
+            text-align: center;
+            font-weight: bold;
+            display: none; /* מוסתר כברירת מחדל */
+        }
+    </style>
 </head>
 <body>
 
     <div id="graph-area"></div>
+
+    <div id="error-box" class="error-msg">
+        <h3>🚨 שגיאה בטעינת הקבצים</h3>
+        <p>הקובץ index.html לא מוצא את questions.js.</p>
+        <p>וודא ששני הקבצים נמצאים באותה תיקייה בדיוק ושלא שינית את השם שלהם.</p>
+    </div>
 
     <div id="holy-trinity">
         <div><span id="val-x" class="trinity-val">0</span><br><span class="trinity-label">X</span></div>
@@ -29,7 +49,7 @@
     </div>
 
     <div id="sidebar">
-        <h2 id="q-title" style="margin:0; text-align:center;">טוען...</h2>
+        <h2 id="q-title" style="margin:0; text-align:center;">טוען נתונים...</h2>
         
         <div id="q-short-inst"></div>
         
@@ -67,34 +87,33 @@
 
     <script>
         let board, p, tangent, curve;
-        let targets = []; // שמירת הנקודות הירוקות
+        let targets = [];
         let params = { a:0, b:0, c:0, d:0 };
         let currentQ = 0;
         let isWinning = false;
 
         function init() {
-            // בדיקה שהשאלות נטענו לפני שממשיכים
+            // === בדיקת חירום ===
+            // זה יבדוק אם השאלות נטענו. אם לא - הוא יציג לך הודעה אדומה ברורה
             if (typeof QUESTIONS === 'undefined') {
-                console.error("קובץ השאלות לא נטען!");
-                document.getElementById('q-title').innerText = "שגיאה בטעינת שאלות";
-                return;
+                document.getElementById('error-box').style.display = 'block';
+                document.getElementById('q-title').innerText = "שגיאה!";
+                return; // עוצר הכל
             }
 
+            // אם הכל תקין - ממשיכים
             board = JXG.JSXGraph.initBoard('graph-area', {
                 boundingbox: [-5, 8, 5, -8], axis: true, showCopyright: false,
                 pan: { enabled: false }, zoom: { enabled: true }
             });
 
-            // הפונקציה
             curve = board.create('functiongraph', [
                 function(x) { return params.a*Math.pow(x,3) + params.b*Math.pow(x,2) + params.c*x + params.d; }
             ], { strokeWidth: 3, strokeColor: '#007bff' });
 
-            // הנקודה
             p = board.create('glider', [0, 0, curve], { name: '', size: 8, color: '#007bff' });
             tangent = board.create('tangent', [p], { strokeColor: '#ff9f43', strokeWidth: 2, dash:2 });
 
-            // אירועים
             p.on('drag', () => { initAudio(); updateAll(); });
             board.on('down', initAudio); 
             board.on('up', updateAll);
@@ -103,15 +122,11 @@
                 document.getElementById(id).addEventListener('input', () => { initAudio(); updateParams(); });
             });
 
-            // יצירת כפתורי ניווט
             const nav = document.getElementById('questions-nav');
             QUESTIONS.forEach((q, i) => {
                 let btn = document.createElement('button');
                 btn.className = 'q-btn'; 
                 btn.innerText = i + 1;
-                // סגנון בסיסי לכפתורים אם אין ב-CSS
-                btn.style.margin = "2px";
-                btn.style.padding = "5px 10px";
                 btn.onclick = () => loadQuestion(i);
                 nav.appendChild(btn);
             });
@@ -145,13 +160,11 @@
             isWinning = false;
             let q = QUESTIONS[idx];
             
-            // איפוס ממשק
             document.getElementById('win-overlay').classList.remove('show');
             document.getElementById('holy-trinity').className = ''; 
             document.getElementById('q-title').innerText = q.title;
             document.getElementById('q-short-inst').innerText = q.shortInst || q.desc;
             
-            // פרמטרים
             params.a = q.params[0]; params.b = q.params[1]; 
             params.c = q.params[2]; params.d = q.params[3];
             document.getElementById('inpA').value = params.a;
@@ -159,11 +172,9 @@
             document.getElementById('inpC').value = params.c;
             document.getElementById('inpD').value = params.d;
             
-            // נעילות
             ['inpA','inpB','inpC','inpD'].forEach(id => document.getElementById(id).disabled = false);
             if(q.locked) q.locked.forEach(id => document.getElementById(id).disabled = true);
 
-            // יצירת נקודות ירוקות - החלק החשוב!
             board.removeObject(targets);
             targets = [];
             if(q.targets) {
@@ -177,7 +188,7 @@
 
             p.setCoords(0, params.d);
             updateParams();
-            playSound('pop');
+            if(typeof playSound === 'function') playSound('pop');
         }
 
         function checkWin(m, x, y) {
@@ -210,7 +221,7 @@
                 hud.classList.add('winning');
                 hud.classList.remove('hot');
                 if (!isWinning) {
-                    playSound('win');
+                    if(typeof playSound === 'function') playSound('win');
                     document.getElementById('win-overlay').classList.add('show');
                     isWinning = true;
                     setTimeout(() => document.getElementById('win-overlay').classList.remove('show'), 2500);
@@ -232,6 +243,7 @@
             document.getElementById('theory-modal').style.display = 'none';
         }
 
+        // הפעלה
         window.onload = init;
     </script>
 </body>
