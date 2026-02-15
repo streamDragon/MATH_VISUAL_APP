@@ -1,4 +1,4 @@
-﻿const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let soundEnabled = true;
 
 function initAudio() {
@@ -10,7 +10,7 @@ function initAudio() {
 function updateSoundButton() {
     const btn = document.getElementById('sound-toggle');
     if (!btn) return;
-    btn.innerText = soundEnabled ? '🔊' : '🔇';
+    btn.innerText = soundEnabled ? '\uD83D\uDD0A' : '\uD83D\uDD07';
 }
 
 function toggleSound() {
@@ -47,3 +47,15 @@ function playSound(type) {
         osc.stop(now + 0.1);
     }
 }
+
+function playButtonClickSound() {
+    playSound('pop');
+}
+
+function attachButtonClickSounds() {
+    document.querySelectorAll('button').forEach((btn) => {
+        btn.addEventListener('click', playButtonClickSound);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', attachButtonClickSounds);

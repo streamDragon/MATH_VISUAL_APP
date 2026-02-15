@@ -37,10 +37,19 @@
 
         <div class="info-box purple-box">
             <div class="info-title">📐 מעבדת האנך</div>
-            <label>
-                <input type="checkbox" id="chk-normal" onchange="toggleNormal()">
-                הצג אנך ומשולש
-            </label>
+            <button id="btn-lab" onclick="toggleLabPanel()">כניסה למעבדה</button>
+            <div id="lab-panel" class="lab-panel hidden">
+                <label>
+                    <input type="checkbox" id="chk-normal" onchange="toggleNormal()">
+                    הצג אנך ומשולש
+                </label>
+                <label>
+                    <input type="checkbox" id="chk-test-line" onchange="toggleTestLine()">
+                    הצג ישר בדיקה
+                </label>
+                <div class="lab-readout">זווית מול המשיק: <span id="angle-readout">--</span></div>
+                <div class="lab-status" id="lab-status">הפעל ישר בדיקה כדי להתחיל.</div>
+            </div>
         </div>
 
         <div class="section-title">בניית הפונקציה</div>
@@ -58,7 +67,7 @@
     </div>
 
     <script>
-        let board, p, curve, tangent, normalLine, triangle, labelText;
+        let board, p, curve, tangent, normalLine, triangle, labelText, testLine, testAnchor, testDir;
         let targets = [];
         let params = { a:0, b:0, c:0, d:0 };
         let currentQ = 0;
@@ -90,6 +99,16 @@
                 fillColor: '#8e24aa', fillOpacity: 0.2, visible: false, borders: {visible:false}
             });
 
+            testAnchor = board.create('point', [1, 1], {
+                name: 'A', size: 4, color: '#00897b', visible: false
+            });
+            testDir = board.create('point', [2, 2], {
+                name: 'B', size: 4, color: '#00695c', visible: false
+            });
+            testLine = board.create('line', [testAnchor, testDir], {
+                strokeColor: '#00897b', strokeWidth: 2, visible: false
+            });
+
             labelText = board.create('text', [
                 () => p.X() + 0.5,
                 () => p.Y() + 0.5,
@@ -100,6 +119,8 @@
             ], { anchor: p, fontSize: 13, cssClass: 'jxgbox', strokeColor:'black' });
 
             p.on('drag', updateInfo);
+            testAnchor.on('drag', updateInfo);
+            testDir.on('drag', updateInfo);
             board.on('up', updateInfo);
 
             ['inpA','inpB','inpC','inpD'].forEach(id => {
@@ -172,13 +193,94 @@
                 triangle.dataY = [y, y, y + normalSlope];
             }
 
+            updateLabReadout(m);
+
             checkWin(m, x, y);
+        }
+
+        function normalizeAngleDeg(a) {
+            let angle = a % 180;
+            if (angle < 0) angle += 180;
+            if (angle > 90) angle = 180 - angle;
+            return angle;
+        }
+
+        function lineSlope(linePointA, linePointB) {
+            let dx = linePointB.X() - linePointA.X();
+            let dy = linePointB.Y() - linePointA.Y();
+            if (Math.abs(dx) < 1e-6) return Infinity;
+            return dy / dx;
+        }
+
+        function distancePointToLine(px, py, ax, ay, bx, by) {
+            let A = py - ay;
+            let B = bx - ax;
+            let C = by - ay;
+            let D = px - ax;
+            return Math.abs(A * B - C * D) / Math.sqrt(B * B + C * C);
+        }
+
+        function updateLabReadout(tangentSlope) {
+            let testEnabled = document.getElementById('chk-test-line').checked;
+            let angleEl = document.getElementById('angle-readout');
+            let statusEl = document.getElementById('lab-status');
+
+            if (!testEnabled) {
+                angleEl.innerText = '--';
+                statusEl.innerText = 'הפעל ישר בדיקה כדי להתחיל.';
+                statusEl.className = 'lab-status';
+                return;
+            }
+
+            let testSlope = lineSlope(testAnchor, testDir);
+            let tanAngle = Math.atan(tangentSlope) * 180 / Math.PI;
+            let testAngle = (testSlope === Infinity) ? 90 : Math.atan(testSlope) * 180 / Math.PI;
+            let rel = normalizeAngleDeg(testAngle - tanAngle);
+            angleEl.innerText = rel.toFixed(1) + '°';
+
+            let distToP = distancePointToLine(
+                p.X(), p.Y(),
+                testAnchor.X(), testAnchor.Y(),
+                testDir.X(), testDir.Y()
+            );
+            let isParallel = rel < 3 || Math.abs(rel - 180) < 3;
+            let isPerpendicular = Math.abs(rel - 90) < 3;
+            let passThroughP = distToP < 0.2;
+
+            if (isPerpendicular && passThroughP) {
+                statusEl.innerText = 'כל הכבוד! הישר אנך למשיק בנקודה.';
+                statusEl.className = 'lab-status success';
+                playSound('win');
+            } else if (isParallel && passThroughP) {
+                statusEl.innerText = 'כל הכבוד! הישר משיק בנקודה.';
+                statusEl.className = 'lab-status success';
+            } else {
+                statusEl.innerText = 'גרור את A ו-B כדי לשנות שיפוע, וסמן מיקום ב-X/Y.';
+                statusEl.className = 'lab-status';
+            }
         }
 
         function toggleNormal() {
             let show = document.getElementById('chk-normal').checked;
             normalLine.setAttribute({visible: show});
             triangle.setAttribute({visible: show});
+            board.update();
+            updateInfo();
+        }
+
+        function toggleLabPanel() {
+            let panel = document.getElementById('lab-panel');
+            panel.classList.toggle('hidden');
+            let btn = document.getElementById('btn-lab');
+            btn.innerText = panel.classList.contains('hidden') ? 'כניסה למעבדה' : 'סגירת המעבדה';
+            updateInfo();
+        }
+
+        function toggleTestLine() {
+            let show = document.getElementById('chk-test-line').checked;
+            testAnchor.setAttribute({visible: show});
+            testDir.setAttribute({visible: show});
+            testLine.setAttribute({visible: show});
             board.update();
             updateInfo();
         }
