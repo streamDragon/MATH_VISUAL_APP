@@ -26,7 +26,7 @@ const QUESTIONS = [
         desc: "השתמש בפרמטר d כדי לפגוע במטרה.",
         mode: "find_param",
         goal: "hit_target",
-        targets: [{ x: 2, y: 3 }], // הנקודה הירוקה
+        targets: [{ x: 2, y: 3 }], // הנה הנקודה הירוקה!
         params: [0.1, 0, -1, 0],
         locked: ["inpA", "inpB", "inpC"],
         theory: "<h3>↕️ הזזה אנכית</h3><p>הפרמטר d הוא כמו מעלית. הוא מזיז את כל הגרף למעלה או למטה בלי לשנות את הצורה שלו.</p>"
@@ -49,7 +49,7 @@ const QUESTIONS = [
        desc: "עליך לגרום לפונקציה לחתוך את הציר הראשי בגובה 2.",
        mode: "find_param",
        goal: "hit_target",
-       targets: [{ x: 0, y: 2 }], // הנקודה הירוקה
+       targets: [{ x: 0, y: 2 }], // הנה הנקודה הירוקה!
        params: [0.2, 0, -2, 0],
        locked: ["inpA", "inpB", "inpC"],
        theory: "<h3>נקודת החיתוך</h3><p>החיתוך עם ציר ה-Y תמיד נקבע על ידי המספר החופשי (d).</p>"
