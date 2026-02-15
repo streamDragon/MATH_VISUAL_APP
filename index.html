@@ -226,6 +226,7 @@
         let board, p, curve, tangent, normalLine, triangle, labelText, testLine, testAnchor, testDir;
         let normalOrigin, normalXAxisPoint, normalYAxisPoint;
         let rightAngleP1, rightAngleP2, rightAngleP3, rightAngleP4, rightAngleMarker;
+        let rightAngleArmCorner, rightAngleArmT, rightAngleArmN, rightAngleArmLineT, rightAngleArmLineN;
         let guideNormalBasePoint, guideNormalDirPoint, guideNormalLine, guideNormalIntersect, guideNormalLabel;
         let targets = [];
         let params = { a:0, b:0, c:0, d:0 };
@@ -529,6 +530,25 @@
                 borders: { strokeColor: '#111827', strokeWidth: 2 },
                 layer: 9
             });
+            rightAngleArmCorner = board.create('point', [0, 0], { name: '', fixed: true, visible: false });
+            rightAngleArmT = board.create('point', [0, 0], { name: '', fixed: true, visible: false });
+            rightAngleArmN = board.create('point', [0, 0], { name: '', fixed: true, visible: false });
+            rightAngleArmLineT = board.create('line', [rightAngleArmCorner, rightAngleArmT], {
+                strokeColor: '#0f172a',
+                strokeWidth: 3,
+                visible: false,
+                straightFirst: false,
+                straightLast: false,
+                layer: 10
+            });
+            rightAngleArmLineN = board.create('line', [rightAngleArmCorner, rightAngleArmN], {
+                strokeColor: '#0f172a',
+                strokeWidth: 3,
+                visible: false,
+                straightFirst: false,
+                straightLast: false,
+                layer: 10
+            });
 
             testAnchor = board.create('point', [1, 1], {
                 name: 'A', size: 4, color: '#00897b', visible: false
@@ -828,6 +848,8 @@
         function updateRightAngleMarker(x, y, tangentSlope, visible) {
             if (!visible) {
                 rightAngleMarker.setAttribute({ visible: false });
+                rightAngleArmLineT.setAttribute({ visible: false });
+                rightAngleArmLineN.setAttribute({ visible: false });
                 return;
             }
             let tUnit = getTangentUnitVector(tangentSlope);
@@ -841,7 +863,24 @@
                 y + tUnit.y * (inset + side) + nUnit.y * side
             ]);
             rightAngleP4.setPosition(JXG.COORDS_BY_USER, [x + nUnit.x * side + tUnit.x * inset, y + nUnit.y * side + tUnit.y * inset]);
+
+            let armInset = 0.18;
+            let armLen = 0.26;
+            rightAngleArmCorner.setPosition(JXG.COORDS_BY_USER, [
+                x + (tUnit.x + nUnit.x) * armInset,
+                y + (tUnit.y + nUnit.y) * armInset
+            ]);
+            rightAngleArmT.setPosition(JXG.COORDS_BY_USER, [
+                rightAngleArmCorner.X() + tUnit.x * armLen,
+                rightAngleArmCorner.Y() + tUnit.y * armLen
+            ]);
+            rightAngleArmN.setPosition(JXG.COORDS_BY_USER, [
+                rightAngleArmCorner.X() + nUnit.x * armLen,
+                rightAngleArmCorner.Y() + nUnit.y * armLen
+            ]);
             rightAngleMarker.setAttribute({ visible: true });
+            rightAngleArmLineT.setAttribute({ visible: true });
+            rightAngleArmLineN.setAttribute({ visible: true });
         }
 
         function getTangentUnitVector(m) {
@@ -1313,6 +1352,8 @@
                 normalXAxisPoint.setAttribute({ visible: false });
                 normalYAxisPoint.setAttribute({ visible: false });
                 rightAngleMarker.setAttribute({ visible: false });
+                rightAngleArmLineT.setAttribute({ visible: false });
+                rightAngleArmLineN.setAttribute({ visible: false });
             } else {
                 document.getElementById('chk-normal').checked = !!defaultNormalOn;
             }
@@ -1322,6 +1363,8 @@
                 guideNormalLine.setAttribute({ visible: false });
                 guideNormalIntersect.setAttribute({ visible: false });
                 guideNormalLabel.setAttribute({ visible: false });
+            } else {
+                document.getElementById('chk-test-line').checked = true;
             }
             refreshTestLineControlVisibility();
             updateInfo();
