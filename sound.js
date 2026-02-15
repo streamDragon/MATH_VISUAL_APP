@@ -1,5 +1,6 @@
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let soundEnabled = true;
+let lastWarmColdTs = 0;
 
 function initAudio() {
     if (audioCtx.state === 'suspended') {
@@ -50,6 +51,42 @@ function playSound(type) {
 
 function playButtonClickSound() {
     playSound('pop');
+}
+
+function resetWarmColdFeedback() {
+    lastWarmColdTs = 0;
+}
+
+function playWarmColdFeedback(score, delta) {
+    if (!soundEnabled) return;
+    initAudio();
+
+    const nowMs = performance.now();
+    const minInterval = 170;
+    if (nowMs - lastWarmColdTs < minInterval) return;
+    lastWarmColdTs = nowMs;
+
+    const level = Math.max(0, Math.min(1, score));
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    const t = audioCtx.currentTime;
+    const movingCloser = delta >= 0;
+    const baseFreq = 220 + level * 760;
+    const endFreq = movingCloser ? baseFreq * 1.12 : baseFreq * 0.85;
+
+    osc.type = movingCloser ? 'sine' : 'triangle';
+    osc.frequency.setValueAtTime(baseFreq, t);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(90, endFreq), t + 0.09);
+
+    const peak = 0.03 + level * 0.08;
+    gainNode.gain.setValueAtTime(peak, t);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, t + 0.11);
+
+    osc.start(t);
+    osc.stop(t + 0.12);
 }
 
 function attachButtonClickSounds() {

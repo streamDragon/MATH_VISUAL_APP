@@ -21,7 +21,19 @@
         <p>פיצחת את המשימה.</p>
     </div>
 
-    <div id="graph-area"></div>
+    <div id="graph-area-wrapper">
+        <div id="top-strip">
+            <div id="top-question-wrap">
+                <span id="top-question-index">שאלה 1/4</span>
+                <span id="top-question">טוען...</span>
+            </div>
+            <div id="top-formulas">
+                <span class="formula-chip" id="top-formula-f">f(x) = ...</span>
+                <span class="formula-chip" id="top-formula-tag">f'(x) = ...</span>
+            </div>
+        </div>
+        <div id="graph-area"></div>
+    </div>
 
     <div id="sidebar">
         <div style="text-align:center;">
@@ -30,9 +42,14 @@
         </div>
 
         <div class="info-box yellow-box">
-            <div class="info-title">📜 דף נוסחאות</div>
-            <div class="math-line" id="formula-f">f(x) = ...</div>
-            <div class="math-line" id="formula-tag" style="color:#d32f2f;">f'(x) = ...</div>
+            <button id="btn-formulas" onclick="toggleFormulaPanel()">📜 דף נוסחאות</button>
+            <div id="formulas-panel" class="formulas-panel hidden">
+                <div class="math-line" id="formula-f">f(x) = ...</div>
+                <div class="math-line" id="formula-tag" style="color:#d32f2f;">f'(x) = ...</div>
+                <div class="formula-static">משיק בנקודה: y - y₀ = m(x - x₀)</div>
+                <div class="formula-static">אנך למשיק: mₙ = -1 / mₜ</div>
+                <div class="formula-static">זווית בין ישרים: tan(θ)=|(m2-m1)/(1+m1m2)|</div>
+            </div>
         </div>
 
         <div class="info-box purple-box">
@@ -63,6 +80,17 @@
                         <span id="test-intercept-val">0.0</span>
                     </div>
                 </div>
+                <div class="lab-metrics">
+                    <div class="lab-metric-row"><span>m משיק:</span><b id="metric-tangent">--</b></div>
+                    <div class="lab-metric-row"><span>m אנך יעד:</span><b id="metric-normal">--</b></div>
+                    <div class="lab-metric-row"><span>m ישר בדיקה:</span><b id="metric-test">--</b></div>
+                    <div class="lab-metric-row"><span>שגיאת זווית:</span><b id="metric-angle-error">--</b></div>
+                    <div class="lab-metric-row"><span>מרחק מהנקודה:</span><b id="metric-distance">--</b></div>
+                </div>
+                <div class="lab-heat-wrap">
+                    <div class="lab-heat-label">מד חם/קר</div>
+                    <div class="lab-heat-bar"><div id="lab-heat-fill"></div></div>
+                </div>
                 <div class="lab-readout">זווית מול המשיק: <span id="angle-readout">--</span></div>
                 <div class="lab-status" id="lab-status">הפעל ישר בדיקה כדי להתחיל.</div>
             </div>
@@ -89,6 +117,8 @@
         let params = { a:0, b:0, c:0, d:0 };
         let currentQ = 0;
         let wasWin = false;
+        let prevLabScore = null;
+        let wasLabSuccess = false;
 
         function init() {
             board = JXG.JSXGraph.initBoard('graph-area', {
@@ -230,10 +260,14 @@
             let m = getSlope(x);
 
             let fTerms = [{val: params.a, pow:3}, {val: params.b, pow:2}, {val: params.c, pow:1}, {val: params.d, pow:0}];
-            document.getElementById('formula-f').innerText = 'f(x) = ' + formatPoly(fTerms);
+            let fxText = 'f(x) = ' + formatPoly(fTerms);
+            document.getElementById('formula-f').innerText = fxText;
+            document.getElementById('top-formula-f').innerText = fxText;
 
             let dTerms = [{val: 3*params.a, pow:2}, {val: 2*params.b, pow:1}, {val: params.c, pow:0}];
-            document.getElementById('formula-tag').innerText = "f'(x) = " + formatPoly(dTerms);
+            let dText = "f'(x) = " + formatPoly(dTerms);
+            document.getElementById('formula-tag').innerText = dText;
+            document.getElementById('top-formula-tag').innerText = dText;
 
             updateNormalGeometry(x, y, m);
 
@@ -310,11 +344,25 @@
             let testEnabled = document.getElementById('chk-test-line').checked;
             let angleEl = document.getElementById('angle-readout');
             let statusEl = document.getElementById('lab-status');
+            let tangentEl = document.getElementById('metric-tangent');
+            let normalEl = document.getElementById('metric-normal');
+            let testEl = document.getElementById('metric-test');
+            let angleErrEl = document.getElementById('metric-angle-error');
+            let distEl = document.getElementById('metric-distance');
 
             if (!testEnabled) {
                 angleEl.innerText = '--';
                 statusEl.innerText = 'הפעל ישר בדיקה כדי להתחיל.';
                 statusEl.className = 'lab-status';
+                tangentEl.innerText = '--';
+                normalEl.innerText = '--';
+                testEl.innerText = '--';
+                angleErrEl.innerText = '--';
+                distEl.innerText = '--';
+                setLabHeat(0);
+                prevLabScore = null;
+                wasLabSuccess = false;
+                if (typeof resetWarmColdFeedback === 'function') resetWarmColdFeedback();
                 return;
             }
 
@@ -332,20 +380,45 @@
             let isParallel = rel < 3 || Math.abs(rel - 180) < 3;
             let isPerpendicular = Math.abs(rel - 90) < 3;
             let passThroughP = distToP < 0.2;
+            let angleError = Math.abs(rel - 90);
+            let angleScore = Math.max(0, 1 - angleError / 45);
+            let distScore = Math.max(0, 1 - distToP / 2);
+            let labScore = 0.65 * angleScore + 0.35 * distScore;
+            let delta = (prevLabScore === null) ? 0 : (labScore - prevLabScore);
+
+            tangentEl.innerText = Number.isFinite(tangentSlope) ? tangentSlope.toFixed(2) : '∞';
+            normalEl.innerText = Math.abs(tangentSlope) < 1e-6 ? '∞' : (-1 / tangentSlope).toFixed(2);
+            testEl.innerText = Number.isFinite(testSlope) ? testSlope.toFixed(2) : '∞';
+            angleErrEl.innerText = angleError.toFixed(1) + '°';
+            distEl.innerText = distToP.toFixed(2);
+            setLabHeat(labScore);
+            if (typeof playWarmColdFeedback === 'function') playWarmColdFeedback(labScore, delta);
+            prevLabScore = labScore;
 
             if (isPerpendicular && passThroughP) {
                 statusEl.innerText = 'כל הכבוד! הישר אנך למשיק בנקודה.';
                 statusEl.className = 'lab-status success';
-                playSound('win');
+                if (!wasLabSuccess) playSound('win');
+                wasLabSuccess = true;
             } else if (isParallel && passThroughP) {
                 statusEl.innerText = 'כל הכבוד! הישר משיק בנקודה.';
                 statusEl.className = 'lab-status success';
+                wasLabSuccess = false;
             } else {
                 statusEl.innerText = document.getElementById('chk-test-slider').checked
                     ? 'השתמש בסליידרים m ו-b כדי לשנות שיפוע וגובה.'
                     : 'גרור את A ו-B כדי לשנות שיפוע, וסמן מיקום ב-X/Y.';
                 statusEl.className = 'lab-status';
+                wasLabSuccess = false;
             }
+        }
+
+        function setLabHeat(score) {
+            let fill = document.getElementById('lab-heat-fill');
+            let clamped = Math.max(0, Math.min(1, score));
+            fill.style.width = (clamped * 100).toFixed(0) + '%';
+            let hue = 210 - clamped * 185;
+            fill.style.background = `hsl(${hue}, 82%, 50%)`;
         }
 
         function updateTestControlLabels() {
@@ -414,6 +487,13 @@
             updateInfo();
         }
 
+        function toggleFormulaPanel() {
+            let panel = document.getElementById('formulas-panel');
+            panel.classList.toggle('hidden');
+            let btn = document.getElementById('btn-formulas');
+            btn.innerText = panel.classList.contains('hidden') ? '📜 דף נוסחאות' : '📜 סגירת דף נוסחאות';
+        }
+
         function toggleTestLine() {
             let show = document.getElementById('chk-test-line').checked;
             testLine.setAttribute({visible: show});
@@ -433,8 +513,13 @@
             let q = QUESTIONS[idx];
             document.getElementById('q-title').innerText = q.title;
             document.getElementById('q-desc').innerText = q.desc;
+            document.getElementById('top-question-index').innerText = `שאלה ${idx + 1}/${QUESTIONS.length}`;
+            document.getElementById('top-question').innerText = q.title;
             document.getElementById('win-overlay').style.display = 'none';
             wasWin = false;
+            prevLabScore = null;
+            wasLabSuccess = false;
+            if (typeof resetWarmColdFeedback === 'function') resetWarmColdFeedback();
 
             document.querySelectorAll('.q-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
 
