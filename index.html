@@ -107,6 +107,20 @@
                     <div id="step-mission-box" class="info-box blue-box">
                         <div class="info-title">משימה נוכחית</div>
                         <div id="mission-step-text">שלב 1/1: ...</div>
+                        <div id="template-setup-panel" class="hidden">
+                            <div class="section-title">בחירת תבנית פונקציה</div>
+                            <select id="template-select"></select>
+                            <button id="btn-apply-template" onclick="applySelectedTemplate(true)">בחר תבנית והמשך</button>
+                            <div id="template-status-text"></div>
+                        </div>
+                        <div id="read-answer-panel" class="hidden">
+                            <div id="read-answer-prompt"></div>
+                            <div class="read-answer-row">
+                                <input id="read-answer-input" type="number" step="0.1" placeholder="הזן תשובה">
+                                <button onclick="submitReadAnswer()">בדוק תשובה</button>
+                            </div>
+                            <div id="read-answer-feedback"></div>
+                        </div>
                         <div id="step-result-panel" class="hidden">
                             <div id="step-math-line"></div>
                             <div class="step-actions">
@@ -145,40 +159,31 @@
                         <input type="checkbox" id="chk-normal" onchange="toggleNormal()">
                         הצג אנך ומשולש
                     </label>
-                    <div class="normal-help-text">האנך חייב להיות בזווית 90° למשיק בנקודת המגע.</div>
+                    <div id="normal-help-row" class="normal-help-text">האנך חייב להיות בזווית 90° למשיק בנקודת המגע.</div>
                     <label id="test-line-row">
                         <input type="checkbox" id="chk-test-line" onchange="toggleTestLine()">
-                        הצג ישר בדיקה
-                    </label>
-                    <label id="chk-test-slider-wrap" class="hidden">
-                        <input type="checkbox" id="chk-test-slider" onchange="toggleTestLineSliderMode()">
-                        שליטה עם סליידרים (שיפוע וגובה)
+                        הצג אנך מתכוונן
                     </label>
                     <div id="test-line-controls" class="lab-slider-controls hidden">
                         <div class="lab-mini-row">
-                            <span>m</span>
-                            <input type="range" id="test-slope" min="-8" max="8" step="0.1" value="1">
-                            <span id="test-slope-val">1.0</span>
-                        </div>
-                        <div class="lab-mini-row">
-                            <span>b</span>
-                            <input type="range" id="test-intercept" min="-8" max="8" step="0.1" value="0">
-                            <span id="test-intercept-val">0.0</span>
+                            <span>הסט</span>
+                            <input type="range" id="normal-shift" min="-5" max="5" step="0.1" value="0">
+                            <span id="normal-shift-val">0.0</span>
                         </div>
                     </div>
                     <div class="lab-metrics">
                         <div class="lab-metric-row"><span>m משיק:</span><b id="metric-tangent">--</b></div>
-                        <div class="lab-metric-row"><span>m אנך יעד:</span><b id="metric-normal">--</b></div>
-                        <div class="lab-metric-row"><span>m ישר בדיקה:</span><b id="metric-test">--</b></div>
-                        <div class="lab-metric-row"><span>שגיאת זווית:</span><b id="metric-angle-error">--</b></div>
-                        <div class="lab-metric-row"><span>מרחק מהנקודה:</span><b id="metric-distance">--</b></div>
+                        <div class="lab-metric-row"><span>m אנך:</span><b id="metric-normal">--</b></div>
+                        <div class="lab-metric-row"><span>הסט נוכחי:</span><b id="metric-test">--</b></div>
+                        <div class="lab-metric-row"><span>x של I:</span><b id="metric-angle-error">--</b></div>
+                        <div class="lab-metric-row"><span>y של I:</span><b id="metric-distance">--</b></div>
                     </div>
                     <div class="lab-heat-wrap">
-                        <div class="lab-heat-label">מד חם/קר</div>
+                        <div class="lab-heat-label">קרוב לאנך האמיתי</div>
                         <div class="lab-heat-bar"><div id="lab-heat-fill"></div></div>
                     </div>
-                    <div class="lab-readout">זווית מול המשיק: <span id="angle-readout">--</span></div>
-                    <div class="lab-status" id="lab-status">הפעל ישר בדיקה כדי להתחיל.</div>
+                    <div class="lab-readout">I = <span id="angle-readout">--</span></div>
+                    <div class="lab-status" id="lab-status">הפעל אנך מתכוונן כדי להתחיל.</div>
                 </div>
             </div>
 
@@ -198,6 +203,7 @@
     <script>
         let board, p, curve, tangent, normalLine, triangle, labelText, testLine, testAnchor, testDir;
         let normalOrigin, normalXAxisPoint, normalYAxisPoint;
+        let guideNormalBasePoint, guideNormalDirPoint, guideNormalLine, guideNormalIntersect;
         let targets = [];
         let params = { a:0, b:0, c:0, d:0 };
         let currentQ = 0;
@@ -214,9 +220,66 @@
         let stepToastTimer = null;
         let drawerOpen = false;
         let activeAccordion = 'steps';
+        let activeTemplate = null;
+        let templateChosen = false;
+        let readAnswerValidated = false;
 
         function getCurrentQuestion() {
             return QUESTIONS[currentQ];
+        }
+
+        function getTemplateById(templateId) {
+            if (!Array.isArray(FUNCTION_TEMPLATES)) return null;
+            return FUNCTION_TEMPLATES.find((t) => t.id === templateId) || null;
+        }
+
+        function getDefaultTemplate() {
+            if (!Array.isArray(FUNCTION_TEMPLATES) || FUNCTION_TEMPLATES.length === 0) return null;
+            return FUNCTION_TEMPLATES[0];
+        }
+
+        function templateDefaultsToArray(template) {
+            let d = template?.defaults || {};
+            return [d.a || 0, d.b || 0, d.c || 0, d.d || 0];
+        }
+
+        function populateTemplateSelect() {
+            let select = document.getElementById('template-select');
+            if (!select) return;
+            select.innerHTML = '';
+            (FUNCTION_TEMPLATES || []).forEach((t) => {
+                let opt = document.createElement('option');
+                opt.value = t.id;
+                opt.textContent = t.title;
+                select.appendChild(opt);
+            });
+            if (activeTemplate) select.value = activeTemplate.id;
+        }
+
+        function applyTemplateById(templateId, markChosen) {
+            let tpl = getTemplateById(templateId) || getDefaultTemplate();
+            if (!tpl) return;
+            activeTemplate = tpl;
+            let arr = templateDefaultsToArray(tpl);
+            params.a = arr[0];
+            params.b = arr[1];
+            params.c = arr[2];
+            params.d = arr[3];
+            document.getElementById('inpA').value = params.a;
+            document.getElementById('inpB').value = params.b;
+            document.getElementById('inpC').value = params.c;
+            document.getElementById('inpD').value = params.d;
+            if (markChosen) templateChosen = true;
+            let status = document.getElementById('template-status-text');
+            if (status) status.innerText = `נבחרה תבנית: ${tpl.title}`;
+            board.update();
+            updateInfo();
+        }
+
+        function applySelectedTemplate(markChosen) {
+            let select = document.getElementById('template-select');
+            if (!select) return;
+            applyTemplateById(select.value, markChosen);
         }
 
         function getQuestionSteps(q) {
@@ -250,7 +313,14 @@
                 let val = questionParamValues[paramSpec.key];
                 return paramSpec.evaluate(x, val);
             }
-            return params.a*x**3 + params.b*x**2 + params.c*x + params.d;
+            let kind = activeTemplate?.kind || 'poly3';
+            if (kind === 'poly2') return params.a*x*x + params.b*x + params.c;
+            if (kind === 'line') return params.c*x + params.d;
+            if (kind === 'quad_shift') {
+                let k = params.c;
+                return (x - k) * (x - k) + params.d;
+            }
+            return params.a*x*x*x + params.b*x*x + params.c*x + params.d;
         }
 
         function evaluateDerivativeAt(x) {
@@ -259,6 +329,13 @@
             if (paramSpec && typeof paramSpec.derivative === 'function') {
                 let val = questionParamValues[paramSpec.key];
                 return paramSpec.derivative(x, val);
+            }
+            let kind = activeTemplate?.kind || 'poly3';
+            if (kind === 'poly2') return 2*params.a*x + params.b;
+            if (kind === 'line') return params.c;
+            if (kind === 'quad_shift') {
+                let k = params.c;
+                return 2 * (x - k);
             }
             return 3*params.a*x*x + 2*params.b*x + params.c;
         }
@@ -277,6 +354,7 @@
             if (q?.defaults && typeof q.defaults === 'object') {
                 return [q.defaults.a || 0, q.defaults.b || 0, q.defaults.c || 0, q.defaults.d || 0];
             }
+            if (activeTemplate) return templateDefaultsToArray(activeTemplate);
             return [0.2, 0, 0, 0];
         }
 
@@ -365,6 +443,14 @@
             testLine = board.create('line', [testAnchor, testDir], {
                 strokeColor: '#00897b', strokeWidth: 2, visible: false
             });
+            guideNormalBasePoint = board.create('point', [0, 0], { name: '', fixed: true, visible: false });
+            guideNormalDirPoint = board.create('point', [0, 1], { name: '', fixed: true, visible: false });
+            guideNormalLine = board.create('line', [guideNormalBasePoint, guideNormalDirPoint], {
+                strokeColor: '#00897b', strokeWidth: 2, visible: false
+            });
+            guideNormalIntersect = board.create('point', [0, 0], {
+                name: 'I', size: 4, color: '#00897b', visible: false, fixed: true
+            });
 
             labelText = board.create('text', [
                 () => p.X() + 0.5,
@@ -380,11 +466,9 @@
 
             p.on('drag', updateInfo);
             testAnchor.on('drag', () => {
-                syncTestLineControlsFromPoints();
                 updateInfo();
             });
             testDir.on('drag', () => {
-                syncTestLineControlsFromPoints();
                 updateInfo();
             });
             board.on('up', updateInfo);
@@ -396,14 +480,9 @@
                 });
             });
 
-            ['test-slope', 'test-intercept'].forEach(id => {
-                document.getElementById(id).addEventListener('input', () => {
-                    if (document.getElementById('chk-test-slider').checked) {
-                        updateTestLineFromControls();
-                    } else {
-                        updateTestControlLabels();
-                    }
-                });
+            document.getElementById('normal-shift').addEventListener('input', () => {
+                updateNormalShiftLabel();
+                updateInfo();
             });
 
             let nav = document.getElementById('nav-container');
@@ -421,10 +500,15 @@
             });
             topSelect.addEventListener('change', (ev) => loadQ(parseInt(ev.target.value, 10)));
 
+            activeTemplate = getDefaultTemplate();
+            if (activeTemplate) {
+                applyTemplateById(activeTemplate.id, false);
+            }
+
             loadQ(0);
             openAccordion('steps');
             setDrawerOpen(false);
-            syncTestLineControlsFromPoints();
+            updateNormalShiftLabel();
             refreshTestLineControlVisibility();
             updateSoundButton();
         }
@@ -483,10 +567,24 @@
                 fxText = 'f(x) = ' + fBody;
                 dText = "f'(x) = " + dBody;
             } else {
-                let fTerms = [{val: params.a, pow:3}, {val: params.b, pow:2}, {val: params.c, pow:1}, {val: params.d, pow:0}];
-                fxText = 'f(x) = ' + formatPoly(fTerms);
-                let dTerms = [{val: 3*params.a, pow:2}, {val: 2*params.b, pow:1}, {val: params.c, pow:0}];
-                dText = "f'(x) = " + formatPoly(dTerms);
+                let kind = activeTemplate?.kind || 'poly3';
+                if (kind === 'poly2') {
+                    let fTerms = [{val: params.a, pow:2}, {val: params.b, pow:1}, {val: params.c, pow:0}];
+                    let dTerms = [{val: 2*params.a, pow:1}, {val: params.b, pow:0}];
+                    fxText = 'f(x) = ' + formatPoly(fTerms);
+                    dText = "f'(x) = " + formatPoly(dTerms);
+                } else if (kind === 'line') {
+                    fxText = `f(x) = ${formatNumber(params.c)}x + ${formatNumber(params.d)}`;
+                    dText = `f'(x) = ${formatNumber(params.c)}`;
+                } else if (kind === 'quad_shift') {
+                    fxText = `f(x) = (x - ${formatNumber(params.c)})^2 + ${formatNumber(params.d)}`;
+                    dText = `f'(x) = 2(x - ${formatNumber(params.c)})`;
+                } else {
+                    let fTerms = [{val: params.a, pow:3}, {val: params.b, pow:2}, {val: params.c, pow:1}, {val: params.d, pow:0}];
+                    let dTerms = [{val: 3*params.a, pow:2}, {val: 2*params.b, pow:1}, {val: params.c, pow:0}];
+                    fxText = 'f(x) = ' + formatPoly(fTerms);
+                    dText = "f'(x) = " + formatPoly(dTerms);
+                }
             }
             document.getElementById('formula-f').innerText = fxText;
             document.getElementById('top-formula-f').innerText = fxText;
@@ -494,6 +592,7 @@
             document.getElementById('top-formula-tag').innerText = dText;
 
             updateNormalGeometry(x, y, m);
+            updateGuideNormalGeometry(x, y, m);
 
             updateLabReadout(m);
 
@@ -542,26 +641,36 @@
             triangle.setAttribute({ visible: true });
         }
 
-        function normalizeAngleDeg(a) {
-            let angle = a % 180;
-            if (angle < 0) angle += 180;
-            if (angle > 90) angle = 180 - angle;
-            return angle;
+        function getTangentUnitVector(m) {
+            if (!Number.isFinite(m)) return { x: 0, y: 1 };
+            let vx = 1;
+            let vy = m;
+            let len = Math.sqrt(vx * vx + vy * vy) || 1;
+            return { x: vx / len, y: vy / len };
         }
 
-        function lineSlope(linePointA, linePointB) {
-            let dx = linePointB.X() - linePointA.X();
-            let dy = linePointB.Y() - linePointA.Y();
-            if (Math.abs(dx) < 1e-6) return Infinity;
-            return dy / dx;
+        function getGuideNormalBase(x, y, m) {
+            let shift = parseFloat(document.getElementById('normal-shift').value || '0');
+            let tUnit = getTangentUnitVector(m);
+            return {
+                x: x + shift * tUnit.x,
+                y: y + shift * tUnit.y,
+                shift: shift
+            };
         }
 
-        function distancePointToLine(px, py, ax, ay, bx, by) {
-            let A = py - ay;
-            let B = bx - ax;
-            let C = by - ay;
-            let D = px - ax;
-            return Math.abs(A * B - C * D) / Math.sqrt(B * B + C * C);
+        function updateGuideNormalGeometry(x, y, m) {
+            let enabled = document.getElementById('chk-test-line').checked;
+            guideNormalLine.setAttribute({ visible: enabled });
+            guideNormalIntersect.setAttribute({ visible: enabled });
+            if (!enabled) return;
+
+            let base = getGuideNormalBase(x, y, m);
+            let normalDx = Math.abs(m) < 1e-6 ? 0 : 1;
+            let normalDy = Math.abs(m) < 1e-6 ? 1 : (-1 / m);
+            guideNormalBasePoint.setPosition(JXG.COORDS_BY_USER, [base.x, base.y]);
+            guideNormalDirPoint.setPosition(JXG.COORDS_BY_USER, [base.x + normalDx, base.y + normalDy]);
+            guideNormalIntersect.setPosition(JXG.COORDS_BY_USER, [base.x, base.y]);
         }
 
         function updateLabReadout(tangentSlope) {
@@ -576,7 +685,7 @@
 
             if (!testEnabled) {
                 angleEl.innerText = '--';
-                statusEl.innerText = 'הפעל ישר בדיקה כדי להתחיל.';
+                statusEl.innerText = 'הפעל אנך מתכוונן כדי להתחיל.';
                 statusEl.className = 'lab-status';
                 tangentEl.innerText = '--';
                 normalEl.innerText = '--';
@@ -590,48 +699,29 @@
                 return;
             }
 
-            let testSlope = lineSlope(testAnchor, testDir);
-            let tanAngle = Math.atan(tangentSlope) * 180 / Math.PI;
-            let testAngle = (testSlope === Infinity) ? 90 : Math.atan(testSlope) * 180 / Math.PI;
-            let rel = normalizeAngleDeg(testAngle - tanAngle);
-            angleEl.innerText = rel.toFixed(1) + '°';
-
-            let distToP = distancePointToLine(
-                p.X(), p.Y(),
-                testAnchor.X(), testAnchor.Y(),
-                testDir.X(), testDir.Y()
-            );
-            let isParallel = rel < 3 || Math.abs(rel - 180) < 3;
-            let isPerpendicular = Math.abs(rel - 90) < 3;
-            let passThroughP = distToP < 0.2;
-            let angleError = Math.abs(rel - 90);
-            let angleScore = Math.max(0, 1 - angleError / 45);
-            let distScore = Math.max(0, 1 - distToP / 2);
-            let labScore = 0.65 * angleScore + 0.35 * distScore;
+            let x = p.X();
+            let y = p.Y();
+            let base = getGuideNormalBase(x, y, tangentSlope);
+            let labScore = Math.max(0, 1 - Math.abs(base.shift) / 5);
             let delta = (prevLabScore === null) ? 0 : (labScore - prevLabScore);
 
             tangentEl.innerText = Number.isFinite(tangentSlope) ? tangentSlope.toFixed(2) : '∞';
             normalEl.innerText = Math.abs(tangentSlope) < 1e-6 ? '∞' : (-1 / tangentSlope).toFixed(2);
-            testEl.innerText = Number.isFinite(testSlope) ? testSlope.toFixed(2) : '∞';
-            angleErrEl.innerText = angleError.toFixed(1) + '°';
-            distEl.innerText = distToP.toFixed(2);
+            testEl.innerText = base.shift.toFixed(2);
+            angleErrEl.innerText = base.x.toFixed(2);
+            distEl.innerText = base.y.toFixed(2);
+            angleEl.innerText = `(${base.x.toFixed(2)}, ${base.y.toFixed(2)})`;
             setLabHeat(labScore);
             if (typeof playWarmColdFeedback === 'function') playWarmColdFeedback(labScore, delta);
             prevLabScore = labScore;
 
-            if (isPerpendicular && passThroughP) {
-                statusEl.innerText = 'כל הכבוד! הישר אנך למשיק בנקודה.';
+            if (Math.abs(base.shift) < 0.15) {
+                statusEl.innerText = 'כל הכבוד! האנך המתכוונן חופף לאנך האמיתי.';
                 statusEl.className = 'lab-status success';
                 if (!wasLabSuccess) playSound('win');
                 wasLabSuccess = true;
-            } else if (isParallel && passThroughP) {
-                statusEl.innerText = 'כל הכבוד! הישר משיק בנקודה.';
-                statusEl.className = 'lab-status success';
-                wasLabSuccess = false;
             } else {
-                statusEl.innerText = document.getElementById('chk-test-slider').checked
-                    ? 'השתמש בסליידרים m ו-b כדי לשנות שיפוע וגובה.'
-                    : 'גרור את A ו-B כדי לשנות שיפוע, וסמן מיקום ב-X/Y.';
+                statusEl.innerText = 'הזז את הסליידר כדי לקדם את האנך לאורך המשיק.';
                 statusEl.className = 'lab-status';
                 wasLabSuccess = false;
             }
@@ -645,58 +735,15 @@
             fill.style.background = `hsl(${hue}, 82%, 50%)`;
         }
 
-        function updateTestControlLabels() {
-            let m = parseFloat(document.getElementById('test-slope').value);
-            let b = parseFloat(document.getElementById('test-intercept').value);
-            document.getElementById('test-slope-val').innerText = m.toFixed(1);
-            document.getElementById('test-intercept-val').innerText = b.toFixed(1);
-        }
-
-        function syncTestLineControlsFromPoints() {
-            if (document.getElementById('chk-test-slider').checked) return;
-            let m = lineSlope(testAnchor, testDir);
-            if (!Number.isFinite(m)) return;
-            let b = testAnchor.Y() - m * testAnchor.X();
-            document.getElementById('test-slope').value = Math.max(-8, Math.min(8, m)).toFixed(1);
-            document.getElementById('test-intercept').value = Math.max(-8, Math.min(8, b)).toFixed(1);
-            updateTestControlLabels();
-        }
-
-        function updateTestLineFromControls() {
-            let m = parseFloat(document.getElementById('test-slope').value);
-            let b = parseFloat(document.getElementById('test-intercept').value);
-            let x1 = -5;
-            let x2 = 5;
-            testAnchor.setPosition(JXG.COORDS_BY_USER, [x1, m * x1 + b]);
-            testDir.setPosition(JXG.COORDS_BY_USER, [x2, m * x2 + b]);
-            updateTestControlLabels();
-            board.update();
-            updateInfo();
+        function updateNormalShiftLabel() {
+            let shift = parseFloat(document.getElementById('normal-shift').value || '0');
+            document.getElementById('normal-shift-val').innerText = shift.toFixed(1);
         }
 
         function refreshTestLineControlVisibility() {
             let testEnabled = document.getElementById('chk-test-line').checked;
-            let sliderMode = document.getElementById('chk-test-slider').checked;
             let lineToolVisible = !document.getElementById('test-line-row').classList.contains('hidden');
-            document.getElementById('chk-test-slider-wrap').classList.toggle('hidden', !(lineToolVisible && testEnabled));
-            document.getElementById('test-line-controls').classList.toggle('hidden', !(lineToolVisible && testEnabled && sliderMode));
-        }
-
-        function toggleTestLineSliderMode() {
-            let show = document.getElementById('chk-test-line').checked;
-            let sliderMode = document.getElementById('chk-test-slider').checked;
-            refreshTestLineControlVisibility();
-            if (!show) return;
-
-            testAnchor.setAttribute({visible: show && !sliderMode, fixed: sliderMode});
-            testDir.setAttribute({visible: show && !sliderMode, fixed: sliderMode});
-            if (sliderMode) {
-                updateTestLineFromControls();
-            } else {
-                syncTestLineControlsFromPoints();
-                board.update();
-                updateInfo();
-            }
+            document.getElementById('test-line-controls').classList.toggle('hidden', !(lineToolVisible && testEnabled));
         }
 
         function toggleNormal() {
@@ -797,6 +844,64 @@
             stepToastTimer = setTimeout(() => toast.classList.add('hidden'), 1200);
         }
 
+        function updateSpecialPanels() {
+            let q = getCurrentQuestion();
+            let setupPanel = document.getElementById('template-setup-panel');
+            let readPanel = document.getElementById('read-answer-panel');
+            setupPanel.classList.toggle('hidden', q?.goal !== 'choose_function_template');
+            readPanel.classList.add('hidden');
+
+            if (q?.goal === 'choose_function_template') {
+                populateTemplateSelect();
+                document.getElementById('template-status-text').innerText = templateChosen && activeTemplate
+                    ? `נבחרה תבנית: ${activeTemplate.title}`
+                    : 'בחר תבנית ולחץ המשך.';
+                return;
+            }
+
+            if (q?.goal === 'read_slope' || q?.goal === 'read_y') {
+                readPanel.classList.remove('hidden');
+                let data = getQuestionGoalData(q);
+                let x0 = data.fixedX0 ?? 0;
+                let prompt = q.goal === 'read_slope'
+                    ? `קבע x=${formatNumber(x0)} והזן m = f'(${formatNumber(x0)})`
+                    : `קבע x=${formatNumber(x0)} והזן y = f(${formatNumber(x0)})`;
+                document.getElementById('read-answer-prompt').innerText = prompt;
+                if (!readAnswerValidated) document.getElementById('read-answer-feedback').innerText = '';
+            }
+        }
+
+        function submitReadAnswer() {
+            let q = getCurrentQuestion();
+            if (!q || (q.goal !== 'read_slope' && q.goal !== 'read_y')) return;
+            let data = getQuestionGoalData(q);
+            let x0 = data.fixedX0 ?? 0;
+            let tol = data.answerTolerance ?? 0.2;
+            let xOk = Math.abs(p.X() - x0) <= 0.12;
+            if (!xOk) {
+                document.getElementById('read-answer-feedback').innerText = `קודם מקמים את הנקודה ב-x=${formatNumber(x0)}.`;
+                readAnswerValidated = false;
+                return;
+            }
+
+            let inputVal = parseFloat(document.getElementById('read-answer-input').value);
+            if (!Number.isFinite(inputVal)) {
+                document.getElementById('read-answer-feedback').innerText = 'הזן מספר תקין.';
+                readAnswerValidated = false;
+                return;
+            }
+
+            let expected = q.goal === 'read_slope' ? getSlope(x0) : evaluateFunctionAt(x0);
+            if (Math.abs(inputVal - expected) <= tol) {
+                readAnswerValidated = true;
+                document.getElementById('read-answer-feedback').innerText = 'נכון מאוד.';
+                updateInfo();
+            } else {
+                readAnswerValidated = false;
+                document.getElementById('read-answer-feedback').innerText = `עדיין לא. נסה שוב (טווח דיוק ±${formatNumber(tol)}).`;
+            }
+        }
+
         function getStepGoalParams(goal) {
             if (!goal || typeof goal !== 'object') return {};
             return goal.params || {};
@@ -810,12 +915,8 @@
             if (goalType === 'slope_equals') return Math.abs(m - (goalParams.targetM ?? 0)) < (goalParams.toleranceM ?? 0.1);
             if (goalType === 'y_equals') return Math.abs(y - (goalParams.targetY ?? 0)) < (goalParams.toleranceY ?? 0.2);
             if (goalType === 'hit_target' && Array.isArray(goalParams.targets)) {
-                let hitAll = true;
-                goalParams.targets.forEach((t) => {
-                    let dist = Math.sqrt((x - t.x)**2 + (y - t.y)**2);
-                    if (dist > (goalParams.tolerance ?? 0.5)) hitAll = false;
-                });
-                return hitAll;
+                let tol = goalParams.toleranceY ?? goalParams.tolerance ?? 0.25;
+                return goalParams.targets.every((t) => Math.abs(evaluateFunctionAt(t.x) - t.y) <= tol);
             }
             if (goalType === 'hit_targets' && Array.isArray(goalParams.targets)) {
                 let tol = goalParams.toleranceY ?? goalParams.tolerance ?? 0.25;
@@ -825,10 +926,10 @@
                 });
             }
             if (goalType === 'read_slope') {
-                return Math.abs(x - (goalParams.fixedX0 ?? 0)) <= 0.12;
+                return Math.abs(x - (goalParams.fixedX0 ?? 0)) <= 0.12 && readAnswerValidated;
             }
             if (goalType === 'read_y') {
-                return Math.abs(x - (goalParams.fixedX0 ?? 0)) <= 0.12;
+                return Math.abs(x - (goalParams.fixedX0 ?? 0)) <= 0.12 && readAnswerValidated;
             }
             if (goalType === 'tangent_through_point' && goalParams.point) {
                 let px = goalParams.point.x;
@@ -836,7 +937,7 @@
                 let yOnTangent = m * (px - x) + y;
                 return Math.abs(yOnTangent - py) <= (goalParams.tolerance ?? 0.25);
             }
-            if (goalType === 'choose_function_template') return false;
+            if (goalType === 'choose_function_template') return templateChosen;
             return false;
         }
 
@@ -856,13 +957,11 @@
             if (goalType === 'hit_target') {
                 if (Array.isArray(goalParams.targets) && goalParams.targets.length > 0) {
                     let t = goalParams.targets[0];
-                    let dx = x - t.x;
-                    let dy = y - t.y;
-                    return Math.sqrt(dx * dx + dy * dy) <= (goalParams.toleranceY ?? goalParams.tolerance ?? 0.5);
+                    let yOnCurve = evaluateFunctionAt(t.x);
+                    return Math.abs(yOnCurve - t.y) <= (goalParams.toleranceY ?? goalParams.tolerance ?? 0.5);
                 }
-                let dx = x - goalParams.x;
-                let dy = y - goalParams.y;
-                return Math.sqrt(dx * dx + dy * dy) <= (goalParams.toleranceY ?? goalParams.tolerance ?? 0.5);
+                let yOnCurve = evaluateFunctionAt(goalParams.x);
+                return Math.abs(yOnCurve - goalParams.y) <= (goalParams.toleranceY ?? goalParams.tolerance ?? 0.5);
             }
             return evalLegacyGoal(goalType, goalParams, m, x, y);
         }
@@ -1001,6 +1100,7 @@
 
             document.getElementById('lab-box').classList.toggle('hidden', !showToolsBox);
             document.getElementById('normal-toggle-row').classList.toggle('hidden', !allowNormal);
+            document.getElementById('normal-help-row').classList.toggle('hidden', !allowNormal);
             document.getElementById('test-line-row').classList.toggle('hidden', !allowLineTool);
             if (!allowNormal) {
                 document.getElementById('chk-normal').checked = false;
@@ -1014,10 +1114,8 @@
 
             if (!allowLineTool) {
                 document.getElementById('chk-test-line').checked = false;
-                document.getElementById('chk-test-slider').checked = false;
-                testLine.setAttribute({ visible: false });
-                testAnchor.setAttribute({ visible: false });
-                testDir.setAttribute({ visible: false });
+                guideNormalLine.setAttribute({ visible: false });
+                guideNormalIntersect.setAttribute({ visible: false });
             }
             refreshTestLineControlVisibility();
             updateInfo();
@@ -1115,13 +1213,8 @@
 
         function toggleTestLine() {
             let show = document.getElementById('chk-test-line').checked;
-            testLine.setAttribute({visible: show});
-            if (!show) {
-                testAnchor.setAttribute({visible: false});
-                testDir.setAttribute({visible: false});
-            } else {
-                toggleTestLineSliderMode();
-            }
+            guideNormalLine.setAttribute({visible: show});
+            guideNormalIntersect.setAttribute({visible: show});
             refreshTestLineControlVisibility();
             board.update();
             updateInfo();
@@ -1146,11 +1239,21 @@
 
             document.querySelectorAll('.q-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
 
-            let qParams = getQuestionParamsArray(q);
-            params.a = qParams[0]; document.getElementById('inpA').value = params.a;
-            params.b = qParams[1]; document.getElementById('inpB').value = params.b;
-            params.c = qParams[2]; document.getElementById('inpC').value = params.c;
-            params.d = qParams[3]; document.getElementById('inpD').value = params.d;
+            if (q.goal === 'choose_function_template') {
+                if (!activeTemplate) activeTemplate = getDefaultTemplate();
+                if (activeTemplate) applyTemplateById(activeTemplate.id, false);
+            } else if (Array.isArray(q.params) || (q.defaults && typeof q.defaults === 'object')) {
+                let qParams = getQuestionParamsArray(q);
+                params.a = qParams[0]; document.getElementById('inpA').value = params.a;
+                params.b = qParams[1]; document.getElementById('inpB').value = params.b;
+                params.c = qParams[2]; document.getElementById('inpC').value = params.c;
+                params.d = qParams[3]; document.getElementById('inpD').value = params.d;
+            } else {
+                document.getElementById('inpA').value = params.a;
+                document.getElementById('inpB').value = params.b;
+                document.getElementById('inpC').value = params.c;
+                document.getElementById('inpD').value = params.d;
+            }
 
             let paramSpec = getQuestionParamSpec(q);
             questionParamValues = {};
@@ -1159,8 +1262,20 @@
                 questionParamValues[paramSpec.key] = initial;
                 paramSpec.applied = false;
             }
+            readAnswerValidated = false;
+            let readInput = document.getElementById('read-answer-input');
+            if (readInput) readInput.value = '';
+            let readFeedback = document.getElementById('read-answer-feedback');
+            if (readFeedback) readFeedback.innerText = '';
 
             ['inpA','inpB','inpC','inpD'].forEach(id => document.getElementById(id).disabled = false);
+            if (activeTemplate?.params && Array.isArray(activeTemplate.params)) {
+                const allowed = new Set(activeTemplate.params);
+                const map = { inpA: 'a', inpB: 'b', inpC: 'c', inpD: 'd' };
+                Object.keys(map).forEach((id) => {
+                    document.getElementById(id).disabled = !allowed.has(map[id]);
+                });
+            }
             if(q.locked) q.locked.forEach(id => {
                 let el = document.getElementById(id);
                 if (el) el.disabled = true;
@@ -1192,6 +1307,7 @@
             document.getElementById('btn-apply-solution').classList.add('hidden');
             document.getElementById('btn-next-step').classList.add('hidden');
             renderMission();
+            updateSpecialPanels();
 
             p.setCoords(0, evaluateFunctionAt(0));
             board.update();

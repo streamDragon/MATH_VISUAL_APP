@@ -395,6 +395,71 @@ h2 {
     font-weight: 700;
 }
 
+#template-setup-panel,
+#read-answer-panel {
+    margin-top: 8px;
+    padding: 8px;
+    background: #ffffff;
+    border: 1px solid #b7d3fb;
+    border-radius: 8px;
+}
+
+#template-select {
+    width: 100%;
+    margin-top: 4px;
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-family: 'Assistant', sans-serif;
+}
+
+#btn-apply-template {
+    margin-top: 6px;
+    width: 100%;
+    border: 1px solid #9ec5ff;
+    border-radius: 8px;
+    background: #e9f2ff;
+    color: #12356a;
+    font-weight: 700;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+#template-status-text {
+    margin-top: 5px;
+    font-size: 0.82rem;
+    color: #12356a;
+}
+
+.read-answer-row {
+    margin-top: 6px;
+    display: flex;
+    gap: 6px;
+}
+
+.read-answer-row input {
+    flex: 1;
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-family: 'Assistant', sans-serif;
+}
+
+.read-answer-row button {
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #0f172a;
+    font-weight: 700;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+#read-answer-feedback {
+    margin-top: 4px;
+    font-size: 0.82rem;
+}
+
 #step-result-panel {
     margin-top: 8px;
     padding: 8px;
@@ -741,8 +806,7 @@ h2 {
     transition: width 0.2s linear, background 0.2s linear;
 }
 
-#test-slope-val,
-#test-intercept-val {
+#normal-shift-val {
     min-width: 38px;
     text-align: left;
     font-family: monospace;
