@@ -483,9 +483,8 @@
             tangent = board.create('tangent', [p], { strokeColor:'#ff9800', strokeWidth:2, dash:2 });
 
             normalLine = board.create('line', [p, function() {
-                let m = getSlope(p.X());
-                if (Math.abs(m) < 0.001) return [p.X(), p.Y() + 1];
-                return [p.X() + 1, p.Y() + (-1/m)];
+                let normalDir = getNormalDirection(getSlope(p.X()));
+                return [p.X() + normalDir.dx, p.Y() + normalDir.dy];
             }], { strokeColor: '#8e24aa', strokeWidth: 2, visible: false, dash:3 });
 
             normalOrigin = board.create('point', [0, 0], {
@@ -611,6 +610,20 @@
             return evaluateDerivativeAt(x);
         }
 
+        function getNormalDirection(tangentSlope) {
+            if (!Number.isFinite(tangentSlope)) {
+                return { dx: 1, dy: 0, normalSlope: 0, type: 'horizontal' };
+            }
+            // Rotate tangent vector (1, m) by 90deg -> normal vector (-m, 1).
+            // This keeps perpendicularity exact and avoids instability near m=0.
+            let dx = -tangentSlope;
+            let dy = 1;
+            if (Math.abs(dx) < 1e-9) {
+                return { dx: 0, dy: 1, normalSlope: Infinity, type: 'vertical' };
+            }
+            return { dx: dx, dy: dy, normalSlope: dy / dx, type: 'regular' };
+        }
+
         function updateParams() {
             params.a = parseFloat(document.getElementById('inpA').value);
             params.b = parseFloat(document.getElementById('inpB').value);
@@ -699,17 +712,14 @@
         }
 
         function getNormalLineData(x, y, tangentSlope) {
-            if (Math.abs(tangentSlope) < 1e-6) {
-                return { type: 'vertical' };
-            }
-
-            let normalSlope = -1 / tangentSlope;
-            let intercept = y - normalSlope * x;
+            let normalDir = getNormalDirection(tangentSlope);
+            if (normalDir.type !== 'regular') return { type: normalDir.type };
+            let intercept = y - normalDir.normalSlope * x;
             return {
                 type: 'regular',
-                slope: normalSlope,
+                slope: normalDir.normalSlope,
                 intercept: intercept,
-                xIntercept: -intercept / normalSlope,
+                xIntercept: -intercept / normalDir.normalSlope,
                 yIntercept: intercept
             };
         }
@@ -765,10 +775,9 @@
             if (!enabled) return;
 
             let base = getGuideNormalBase(x, y, m);
-            let normalDx = Math.abs(m) < 1e-6 ? 0 : 1;
-            let normalDy = Math.abs(m) < 1e-6 ? 1 : (-1 / m);
+            let normalDir = getNormalDirection(m);
             guideNormalBasePoint.setPosition(JXG.COORDS_BY_USER, [base.x, base.y]);
-            guideNormalDirPoint.setPosition(JXG.COORDS_BY_USER, [base.x + normalDx, base.y + normalDy]);
+            guideNormalDirPoint.setPosition(JXG.COORDS_BY_USER, [base.x + normalDir.dx, base.y + normalDir.dy]);
             guideNormalIntersect.setPosition(JXG.COORDS_BY_USER, [base.x, base.y]);
         }
 
@@ -805,7 +814,8 @@
             let delta = (prevLabScore === null) ? 0 : (labScore - prevLabScore);
 
             tangentEl.innerText = Number.isFinite(tangentSlope) ? tangentSlope.toFixed(2) : '∞';
-            normalEl.innerText = Math.abs(tangentSlope) < 1e-6 ? '∞' : (-1 / tangentSlope).toFixed(2);
+            let normalDir = getNormalDirection(tangentSlope);
+            normalEl.innerText = !Number.isFinite(normalDir.normalSlope) ? '∞' : normalDir.normalSlope.toFixed(2);
             testEl.innerText = base.shift.toFixed(2);
             angleErrEl.innerText = base.x.toFixed(2);
             distEl.innerText = base.y.toFixed(2);
