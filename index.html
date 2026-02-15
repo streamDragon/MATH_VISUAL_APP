@@ -18,130 +18,99 @@
     <div id="graph-area"></div>
 
     <div id="holy-trinity">
-        <div class="trinity-row">
-            <span id="val-x" class="trinity-val">0.00</span>
-            <span class="trinity-label">X</span>
-        </div>
-        <div class="trinity-row">
-            <span id="val-y" class="trinity-val">0.00</span>
-            <span class="trinity-label">f(x)</span>
-        </div>
-        <div class="trinity-row">
-            <span id="val-m" class="trinity-val">0.00</span>
-            <span class="trinity-label">f'(x)</span>
-        </div>
+        <div><span id="val-x" class="trinity-val">0</span><br><span class="trinity-label">X</span></div>
+        <div><span id="val-y" class="trinity-val">0</span><br><span class="trinity-label">f(x)</span></div>
+        <div><span id="val-m" class="trinity-val">0</span><br><span class="trinity-label">f'(x)</span></div>
     </div>
 
-    <div id="win-overlay" class="win-overlay">
+    <div id="win-overlay">
         <h1>🏆 כל הכבוד!</h1>
         <p>הצלחת את המשימה</p>
     </div>
 
     <div id="sidebar">
-        <h2 id="q-title" style="margin:0 0 5px 0; text-align:center;">טוען...</h2>
-        <p id="q-desc" style="text-align:center; color:#555; margin-bottom:15px; font-size:0.9rem;">תיאור קצר</p>
+        <h2 id="q-title" style="margin:0; text-align:center;">טוען...</h2>
         
-        <button class="theory-btn" onclick="openTheoryModal()">
-            💡 לחץ להסבר מלא ואינטואיציה
-        </button>
+        <div id="q-short-inst">בצע את ההוראה כאן</div>
+        
+        <button class="theory-btn" onclick="openTheoryModal()">💡 הסבר מלא ואינטואיציה</button>
 
-        <details>
-            <summary>ניווט בין שאלות</summary>
-            <div class="nav-container" id="questions-nav"></div>
-        </details>
+        <div class="nav-container" id="questions-nav" style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:15px;"></div>
 
-        <details open>
-            <summary>בניית הפונקציה</summary>
-            <div style="padding:15px;">
-                <div style="display:flex; align-items:center; margin-bottom:15px;">
-                    <span style="width:30px; font-weight:bold;">a</span>
-                    <input type="range" id="inpA" min="-2" max="2" step="0.1" style="flex:1;">
-                    <span id="lblA" style="width:35px; text-align:left; font-size:0.8rem; margin-right:5px;">0</span>
-                </div>
-                <div style="display:flex; align-items:center; margin-bottom:15px;">
-                    <span style="width:30px; font-weight:bold;">b</span>
-                    <input type="range" id="inpB" min="-3" max="3" step="0.1" style="flex:1;">
-                    <span id="lblB" style="width:35px; text-align:left; font-size:0.8rem; margin-right:5px;">0</span>
-                </div>
-                <div style="display:flex; align-items:center; margin-bottom:15px;">
-                    <span style="width:30px; font-weight:bold;">c</span>
-                    <input type="range" id="inpC" min="-5" max="5" step="0.1" style="flex:1;">
-                    <span id="lblC" style="width:35px; text-align:left; font-size:0.8rem; margin-right:5px;">0</span>
-                </div>
-                <div style="display:flex; align-items:center; margin-bottom:15px;">
-                    <span style="width:30px; font-weight:bold;">d</span>
-                    <input type="range" id="inpD" min="-5" max="5" step="0.1" style="flex:1;">
-                    <span id="lblD" style="width:35px; text-align:left; font-size:0.8rem; margin-right:5px;">0</span>
-                </div>
+        <div>
+            <div style="display:flex; margin-bottom:10px;">
+                <span style="width:20px; font-weight:bold;">a</span>
+                <input type="range" id="inpA" min="-2" max="2" step="0.1" style="flex:1;">
             </div>
-        </details>
+            <div style="display:flex; margin-bottom:10px;">
+                <span style="width:20px; font-weight:bold;">b</span>
+                <input type="range" id="inpB" min="-3" max="3" step="0.1" style="flex:1;">
+            </div>
+            <div style="display:flex; margin-bottom:10px;">
+                <span style="width:20px; font-weight:bold;">c</span>
+                <input type="range" id="inpC" min="-5" max="5" step="0.1" style="flex:1;">
+            </div>
+            <div style="display:flex; margin-bottom:10px;">
+                <span style="width:20px; font-weight:bold;">d</span>
+                <input type="range" id="inpD" min="-5" max="5" step="0.1" style="flex:1;">
+            </div>
+        </div>
     </div>
 
     <div id="theory-modal" class="theory-overlay">
-        <div class="theory-content">
-            <button class="close-theory" onclick="closeTheoryModal()">✖ סגור</button>
-            <h2 style="text-align: center; margin-top:10px;">הסבר מעמיק</h2>
-            <div id="theory-body"></div>
-        </div>
+        <button class="close-theory" onclick="closeTheoryModal()">✖ סגור וחזור</button>
+        <div class="theory-content" id="theory-body"></div>
     </div>
 
     <script src="sound.js"></script>
     <script src="questions.js"></script>
 
     <script>
-        let board, p, tangent, normal, curve;
+        let board, p, tangent, curve;
+        let targets = []; // מערך לשמירת הנקודות הירוקות
         let params = { a:0, b:0, c:0, d:0 };
         let currentQ = 0;
         let isWinning = false;
 
         function init() {
-            // אתחול לוח גרפי
             board = JXG.JSXGraph.initBoard('graph-area', {
                 boundingbox: [-5, 8, 5, -8], axis: true, showCopyright: false,
                 pan: { enabled: false }, zoom: { enabled: true }
             });
 
-            // יצירת פונקציה
+            // הפונקציה
             curve = board.create('functiongraph', [
                 function(x) { return params.a*Math.pow(x,3) + params.b*Math.pow(x,2) + params.c*x + params.d; }
             ], { strokeWidth: 3, strokeColor: '#007bff' });
 
-            // יצירת גליידר (נקודה על גרף)
+            // הנקודה הנגררת
             p = board.create('glider', [0, 0, curve], { name: '', size: 6, color: '#007bff' });
-            
-            // משיק ונורמל
             tangent = board.create('tangent', [p], { strokeColor: '#ff9f43', strokeWidth: 2, dash:2 });
-            normal = board.create('normal', [p], { strokeColor: '#a55eea', strokeWidth: 2, visible: false });
 
-            // האזנה לאירועים
-            p.on('drag', () => { resumeAudio(); updateAll(); });
-            board.on('down', resumeAudio); // הפעלת סאונד בנגיעה ראשונה
+            // אירועים
+            p.on('drag', () => { initAudio(); updateAll(); });
+            board.on('down', initAudio); // קריטי למוזיקה!
             board.on('up', updateAll);
             
             ['inpA','inpB','inpC','inpD'].forEach(id => {
-                let el = document.getElementById(id);
-                el.addEventListener('input', () => { resumeAudio(); updateParams(); });
+                document.getElementById(id).addEventListener('input', () => { initAudio(); updateParams(); });
             });
 
-            // בניית כפתורי ניווט
+            // כפתורי ניווט
             const nav = document.getElementById('questions-nav');
             QUESTIONS.forEach((q, i) => {
-                let btn = document.createElement('div');
+                let btn = document.createElement('button');
                 btn.className = 'q-btn';
-                btn.innerText = i;
+                btn.innerText = i + 1;
+                btn.style.padding = "8px 15px";
+                btn.style.border = "1px solid #ccc";
+                btn.style.borderRadius = "5px";
+                btn.style.background = "white";
                 btn.onclick = () => loadQuestion(i);
-                if(i===0) btn.classList.add('active');
                 nav.appendChild(btn);
             });
 
             loadQuestion(0);
-        }
-
-        // פונקציה חשובה להפעלת סאונד בדפדפנים
-        function resumeAudio() {
-            if (typeof audioCtx !== 'undefined' && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
         }
 
         function updateParams() {
@@ -149,19 +118,13 @@
             params.b = parseFloat(document.getElementById('inpB').value);
             params.c = parseFloat(document.getElementById('inpC').value);
             params.d = parseFloat(document.getElementById('inpD').value);
-            
-            document.getElementById('lblA').innerText = params.a;
-            document.getElementById('lblB').innerText = params.b;
-            document.getElementById('lblC').innerText = params.c;
-            document.getElementById('lblD').innerText = params.d;
-
             board.update();
             updateAll();
         }
 
         function updateAll() {
             let x = p.X();
-            let y = params.a*x*x*x + params.b*x*x + params.c*x + params.d;
+            let y = params.a*Math.pow(x,3) + params.b*Math.pow(x,2) + params.c*x + params.d;
             let m = 3*params.a*x*x + 2*params.b*x + params.c;
 
             document.getElementById('val-x').innerText = x.toFixed(2);
@@ -174,42 +137,39 @@
         function loadQuestion(idx) {
             currentQ = idx;
             isWinning = false;
-            document.getElementById('win-overlay').classList.remove('show');
-            document.getElementById('holy-trinity').classList.remove('winning', 'hot');
-
             let q = QUESTIONS[idx];
+            
+            // איפוס ממשק
+            document.getElementById('win-overlay').classList.remove('show');
+            document.getElementById('holy-trinity').className = ''; // איפוס צבעים
             document.getElementById('q-title').innerText = q.title;
-            document.getElementById('q-desc').innerText = q.desc;
+            document.getElementById('q-short-inst').innerText = q.shortInst || q.desc;
             
             // טעינת פרמטרים
             params.a = q.params[0]; params.b = q.params[1]; 
             params.c = q.params[2]; params.d = q.params[3];
+            document.getElementById('inpA').value = params.a;
+            document.getElementById('inpB').value = params.b;
+            document.getElementById('inpC').value = params.c;
+            document.getElementById('inpD').value = params.d;
             
-            ['inpA','inpB','inpC','inpD'].forEach((id, i) => {
-                let el = document.getElementById(id);
-                el.value = q.params[i];
-                el.disabled = false;
-            });
-            
+            // ניהול נעילות
+            ['inpA','inpB','inpC','inpD'].forEach(id => document.getElementById(id).disabled = false);
             if(q.locked) q.locked.forEach(id => document.getElementById(id).disabled = true);
-            
-            // איפוס מיקום וכלים
-            p.setCoords(0, params.d);
-            normal.setAttribute({ visible: q.showNormal || false });
-            
-            // יצירת מטרות
-            board.removeObject(board.objectsList.filter(o => o.name === 'TARGET'));
+
+            // ניקוי מטרות ישנות ויצירת חדשות (התיקון לנקודה הירוקה!)
+            board.removeObject(targets);
+            targets = [];
             if(q.targets) {
                 q.targets.forEach(t => {
-                    board.create('point', [t.x, t.y], { name:'TARGET', fixed:true, color:'#2ecc71', size:8, face:'x' });
+                    let pt = board.create('point', [t.x, t.y], { 
+                        name:'', fixed:true, color:'#00e676', size:5, face:'o', strokeWidth:2, strokeColor:'black' 
+                    });
+                    targets.push(pt);
                 });
             }
 
-            // עדכון כפתורים
-            document.querySelectorAll('.q-btn').forEach((b, i) => {
-                b.classList.toggle('active', i === idx);
-            });
-
+            p.setCoords(0, params.d);
             updateParams();
             playSound('pop');
         }
@@ -217,72 +177,56 @@
         function checkWin(m, x, y) {
             let q = QUESTIONS[currentQ];
             let win = false;
-            let close = false; // משתנה ל"חם"
+            let hot = false; // האם אנחנו קרובים?
 
-            // לוגיקה לבדיקת ניצחון וגם קרבה (חם/קר)
             if (q.goal === 'slope_zero') {
                 if (Math.abs(m) < 0.1) win = true;
-                else if (Math.abs(m) < 0.5) close = true;
+                else if (Math.abs(m) < 0.6) hot = true;
             }
             if (q.goal === 'slope_equals') {
                 if (Math.abs(m - q.targetM) < 0.1) win = true;
-                else if (Math.abs(m - q.targetM) < 0.5) close = true;
+                else if (Math.abs(m - q.targetM) < 0.6) hot = true;
             }
             if (q.goal === 'hit_target') {
-                let allHit = true;
-                let anyClose = false;
+                let hitCount = 0;
                 q.targets.forEach(t => {
                     let yCalc = params.a*Math.pow(t.x,3) + params.b*Math.pow(t.x,2) + params.c*t.x + params.d;
                     let diff = Math.abs(yCalc - t.y);
-                    if(diff > 0.2) allHit = false;
-                    if(diff < 1.0) anyClose = true;
+                    if(diff < 0.25) hitCount++;
+                    if(diff < 1.0) hot = true;
                 });
-                if(allHit) win = true;
-                else if(anyClose) close = true;
+                if(hitCount === q.targets.length) win = true;
             }
 
-            // עדכון ממשק משתמש
             const hud = document.getElementById('holy-trinity');
             
             if (win) {
-                if (!isWinning) { // רק בפעם הראשונה
+                hud.classList.add('winning');
+                hud.classList.remove('hot');
+                if (!isWinning) {
                     playSound('win');
-                    hud.classList.add('winning');
                     document.getElementById('win-overlay').classList.add('show');
                     isWinning = true;
-                    
-                    // הסתרת הודעת הניצחון אחרי 3 שניות
-                    setTimeout(() => {
-                        document.getElementById('win-overlay').classList.remove('show');
-                    }, 3000);
+                    setTimeout(() => document.getElementById('win-overlay').classList.remove('show'), 2500);
                 }
             } else {
-                isWinning = false;
                 hud.classList.remove('winning');
-                document.getElementById('win-overlay').classList.remove('show');
-                
-                // אפקט "חם"
-                if (close) hud.classList.add('hot');
+                isWinning = false;
+                if(hot) hud.classList.add('hot');
                 else hud.classList.remove('hot');
             }
         }
 
         function openTheoryModal() {
-            let q = QUESTIONS[currentQ];
-            let content = q.theory || "<p>אין הסבר מיוחד לשאלה זו.</p>";
-            document.getElementById('theory-body').innerHTML = content;
-            document.getElementById('theory-modal').style.display = window.innerWidth > 768 ? 'flex' : 'block';
+            document.getElementById('theory-body').innerHTML = QUESTIONS[currentQ].theory;
+            document.getElementById('theory-modal').style.display = 'flex';
             if(window.MathJax) MathJax.typesetPromise();
         }
-
         function closeTheoryModal() {
             document.getElementById('theory-modal').style.display = 'none';
         }
 
         window.onload = init;
-        window.onresize = function() {
-            board.resizeContainer(board.containerObj.clientWidth, board.containerObj.clientHeight);
-        };
     </script>
 </body>
 </html>
