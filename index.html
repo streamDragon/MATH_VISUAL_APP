@@ -12,30 +12,10 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <link rel="stylesheet" href="mobile.css">
-    
-    <style>
-        /* עיצוב להודעת שגיאה אם הקבצים לא נמצאים */
-        .error-msg {
-            color: red;
-            background: #ffe6e6;
-            padding: 20px;
-            border: 2px solid red;
-            margin: 20px;
-            text-align: center;
-            font-weight: bold;
-            display: none; /* מוסתר כברירת מחדל */
-        }
-    </style>
 </head>
 <body>
 
     <div id="graph-area"></div>
-
-    <div id="error-box" class="error-msg">
-        <h3>🚨 שגיאה בטעינת הקבצים</h3>
-        <p>הקובץ index.html לא מוצא את questions.js.</p>
-        <p>וודא ששני הקבצים נמצאים באותה תיקייה בדיוק ושלא שינית את השם שלהם.</p>
-    </div>
 
     <div id="holy-trinity">
         <div><span id="val-x" class="trinity-val">0</span><br><span class="trinity-label">X</span></div>
@@ -49,14 +29,10 @@
     </div>
 
     <div id="sidebar">
-        <h2 id="q-title" style="margin:0; text-align:center;">טוען נתונים...</h2>
-        
+        <h2 id="q-title" style="margin:0; text-align:center;">טוען...</h2>
         <div id="q-short-inst"></div>
-        
         <button class="theory-btn" onclick="openTheoryModal()">💡 הסבר מלא ואינטואיציה</button>
-
         <div class="nav-container" id="questions-nav" style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:15px;"></div>
-
         <div>
             <div style="display:flex; margin-bottom:10px;">
                 <span style="width:20px; font-weight:bold;">a</span>
@@ -93,15 +69,12 @@
         let isWinning = false;
 
         function init() {
-            // === בדיקת חירום ===
-            // זה יבדוק אם השאלות נטענו. אם לא - הוא יציג לך הודעה אדומה ברורה
+            // בדיקה אם קובץ השאלות נטען
             if (typeof QUESTIONS === 'undefined') {
-                document.getElementById('error-box').style.display = 'block';
-                document.getElementById('q-title').innerText = "שגיאה!";
-                return; // עוצר הכל
+                alert("שגיאה: הקובץ questions.js לא נמצא או לא נטען.");
+                return;
             }
 
-            // אם הכל תקין - ממשיכים
             board = JXG.JSXGraph.initBoard('graph-area', {
                 boundingbox: [-5, 8, 5, -8], axis: true, showCopyright: false,
                 pan: { enabled: false }, zoom: { enabled: true }
@@ -114,12 +87,12 @@
             p = board.create('glider', [0, 0, curve], { name: '', size: 8, color: '#007bff' });
             tangent = board.create('tangent', [p], { strokeColor: '#ff9f43', strokeWidth: 2, dash:2 });
 
-            p.on('drag', () => { initAudio(); updateAll(); });
-            board.on('down', initAudio); 
+            p.on('drag', () => { initAudioWrapper(); updateAll(); });
+            board.on('down', initAudioWrapper); 
             board.on('up', updateAll);
             
             ['inpA','inpB','inpC','inpD'].forEach(id => {
-                document.getElementById(id).addEventListener('input', () => { initAudio(); updateParams(); });
+                document.getElementById(id).addEventListener('input', () => { initAudioWrapper(); updateParams(); });
             });
 
             const nav = document.getElementById('questions-nav');
@@ -132,6 +105,14 @@
             });
 
             loadQuestion(0);
+        }
+
+        // עטיפה בטוחה לפונקציות סאונד למקרה שהקובץ לא נטען
+        function initAudioWrapper() {
+            if(typeof initAudio === 'function') initAudio();
+        }
+        function playSoundWrapper(type) {
+            if(typeof playSound === 'function') playSound(type);
         }
 
         function updateParams() {
@@ -188,7 +169,7 @@
 
             p.setCoords(0, params.d);
             updateParams();
-            if(typeof playSound === 'function') playSound('pop');
+            playSoundWrapper('pop');
         }
 
         function checkWin(m, x, y) {
@@ -221,7 +202,7 @@
                 hud.classList.add('winning');
                 hud.classList.remove('hot');
                 if (!isWinning) {
-                    if(typeof playSound === 'function') playSound('win');
+                    playSoundWrapper('win');
                     document.getElementById('win-overlay').classList.add('show');
                     isWinning = true;
                     setTimeout(() => document.getElementById('win-overlay').classList.remove('show'), 2500);
@@ -243,7 +224,6 @@
             document.getElementById('theory-modal').style.display = 'none';
         }
 
-        // הפעלה
         window.onload = init;
     </script>
 </body>
