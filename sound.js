@@ -53,8 +53,10 @@ function playButtonClickSound() {
 }
 
 function attachButtonClickSounds() {
-    document.querySelectorAll('button').forEach((btn) => {
-        btn.addEventListener('click', playButtonClickSound);
+    document.addEventListener('click', (event) => {
+        if (event.target && event.target.closest('button')) {
+            playButtonClickSound();
+        }
     });
 }
 
