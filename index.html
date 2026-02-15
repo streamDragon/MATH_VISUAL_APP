@@ -47,6 +47,22 @@
                     <input type="checkbox" id="chk-test-line" onchange="toggleTestLine()">
                     הצג ישר בדיקה
                 </label>
+                <label id="chk-test-slider-wrap" class="hidden">
+                    <input type="checkbox" id="chk-test-slider" onchange="toggleTestLineSliderMode()">
+                    שליטה עם סליידרים (שיפוע וגובה)
+                </label>
+                <div id="test-line-controls" class="lab-slider-controls hidden">
+                    <div class="lab-mini-row">
+                        <span>m</span>
+                        <input type="range" id="test-slope" min="-8" max="8" step="0.1" value="1">
+                        <span id="test-slope-val">1.0</span>
+                    </div>
+                    <div class="lab-mini-row">
+                        <span>b</span>
+                        <input type="range" id="test-intercept" min="-8" max="8" step="0.1" value="0">
+                        <span id="test-intercept-val">0.0</span>
+                    </div>
+                </div>
                 <div class="lab-readout">זווית מול המשיק: <span id="angle-readout">--</span></div>
                 <div class="lab-status" id="lab-status">הפעל ישר בדיקה כדי להתחיל.</div>
             </div>
@@ -68,6 +84,7 @@
 
     <script>
         let board, p, curve, tangent, normalLine, triangle, labelText, testLine, testAnchor, testDir;
+        let normalOrigin, normalXAxisPoint, normalYAxisPoint;
         let targets = [];
         let params = { a:0, b:0, c:0, d:0 };
         let currentQ = 0;
@@ -95,8 +112,21 @@
                 return [p.X() + 1, p.Y() + (-1/m)];
             }], { strokeColor: '#8e24aa', strokeWidth: 2, visible: false, dash:3 });
 
-            triangle = board.create('polygon', [[0,0], [0,0], [0,0]], {
-                fillColor: '#8e24aa', fillOpacity: 0.2, visible: false, borders: {visible:false}
+            normalOrigin = board.create('point', [0, 0], {
+                name: '', fixed: true, visible: false
+            });
+            normalXAxisPoint = board.create('point', [0, 0], {
+                name: '', fixed: true, visible: false, color: '#8e24aa', size: 4
+            });
+            normalYAxisPoint = board.create('point', [0, 0], {
+                name: '', fixed: true, visible: false, color: '#8e24aa', size: 4
+            });
+
+            triangle = board.create('polygon', [normalOrigin, normalXAxisPoint, normalYAxisPoint], {
+                fillColor: '#8e24aa',
+                fillOpacity: 0.2,
+                visible: false,
+                borders: { strokeColor: '#8e24aa', strokeWidth: 1, dash: 1 }
             });
 
             testAnchor = board.create('point', [1, 1], {
@@ -119,14 +149,30 @@
             ], { anchor: p, fontSize: 13, cssClass: 'jxgbox', strokeColor:'black' });
 
             p.on('drag', updateInfo);
-            testAnchor.on('drag', updateInfo);
-            testDir.on('drag', updateInfo);
+            testAnchor.on('drag', () => {
+                syncTestLineControlsFromPoints();
+                updateInfo();
+            });
+            testDir.on('drag', () => {
+                syncTestLineControlsFromPoints();
+                updateInfo();
+            });
             board.on('up', updateInfo);
 
             ['inpA','inpB','inpC','inpD'].forEach(id => {
                 document.getElementById(id).addEventListener('input', () => {
                     updateParams();
                     board.update();
+                });
+            });
+
+            ['test-slope', 'test-intercept'].forEach(id => {
+                document.getElementById(id).addEventListener('input', () => {
+                    if (document.getElementById('chk-test-slider').checked) {
+                        updateTestLineFromControls();
+                    } else {
+                        updateTestControlLabels();
+                    }
                 });
             });
 
@@ -139,6 +185,8 @@
             });
 
             loadQ(0);
+            syncTestLineControlsFromPoints();
+            refreshTestLineControlVisibility();
             updateSoundButton();
         }
 
@@ -187,15 +235,53 @@
             let dTerms = [{val: 3*params.a, pow:2}, {val: 2*params.b, pow:1}, {val: params.c, pow:0}];
             document.getElementById('formula-tag').innerText = "f'(x) = " + formatPoly(dTerms);
 
-            if(document.getElementById('chk-normal').checked) {
-                triangle.dataX = [x, x+1, x+1];
-                let normalSlope = (Math.abs(m) > 0.001) ? -1/m : 0;
-                triangle.dataY = [y, y, y + normalSlope];
-            }
+            updateNormalGeometry(x, y, m);
 
             updateLabReadout(m);
 
             checkWin(m, x, y);
+        }
+
+        function getNormalLineData(x, y, tangentSlope) {
+            if (Math.abs(tangentSlope) < 1e-6) {
+                return { type: 'vertical' };
+            }
+
+            let normalSlope = -1 / tangentSlope;
+            let intercept = y - normalSlope * x;
+            return {
+                type: 'regular',
+                slope: normalSlope,
+                intercept: intercept,
+                xIntercept: -intercept / normalSlope,
+                yIntercept: intercept
+            };
+        }
+
+        function updateNormalGeometry(x, y, tangentSlope) {
+            let show = document.getElementById('chk-normal').checked;
+            normalLine.setAttribute({ visible: show });
+
+            if (!show) {
+                triangle.setAttribute({ visible: false });
+                normalXAxisPoint.setAttribute({ visible: false });
+                normalYAxisPoint.setAttribute({ visible: false });
+                return;
+            }
+
+            let normalData = getNormalLineData(x, y, tangentSlope);
+            if (normalData.type !== 'regular' || !Number.isFinite(normalData.xIntercept) || !Number.isFinite(normalData.yIntercept)) {
+                triangle.setAttribute({ visible: false });
+                normalXAxisPoint.setAttribute({ visible: false });
+                normalYAxisPoint.setAttribute({ visible: false });
+                return;
+            }
+
+            normalXAxisPoint.setPosition(JXG.COORDS_BY_USER, [normalData.xIntercept, 0]);
+            normalYAxisPoint.setPosition(JXG.COORDS_BY_USER, [0, normalData.yIntercept]);
+            normalXAxisPoint.setAttribute({ visible: true });
+            normalYAxisPoint.setAttribute({ visible: true });
+            triangle.setAttribute({ visible: true });
         }
 
         function normalizeAngleDeg(a) {
@@ -255,17 +341,69 @@
                 statusEl.innerText = 'כל הכבוד! הישר משיק בנקודה.';
                 statusEl.className = 'lab-status success';
             } else {
-                statusEl.innerText = 'גרור את A ו-B כדי לשנות שיפוע, וסמן מיקום ב-X/Y.';
+                statusEl.innerText = document.getElementById('chk-test-slider').checked
+                    ? 'השתמש בסליידרים m ו-b כדי לשנות שיפוע וגובה.'
+                    : 'גרור את A ו-B כדי לשנות שיפוע, וסמן מיקום ב-X/Y.';
                 statusEl.className = 'lab-status';
             }
         }
 
-        function toggleNormal() {
-            let show = document.getElementById('chk-normal').checked;
-            normalLine.setAttribute({visible: show});
-            triangle.setAttribute({visible: show});
+        function updateTestControlLabels() {
+            let m = parseFloat(document.getElementById('test-slope').value);
+            let b = parseFloat(document.getElementById('test-intercept').value);
+            document.getElementById('test-slope-val').innerText = m.toFixed(1);
+            document.getElementById('test-intercept-val').innerText = b.toFixed(1);
+        }
+
+        function syncTestLineControlsFromPoints() {
+            if (document.getElementById('chk-test-slider').checked) return;
+            let m = lineSlope(testAnchor, testDir);
+            if (!Number.isFinite(m)) return;
+            let b = testAnchor.Y() - m * testAnchor.X();
+            document.getElementById('test-slope').value = Math.max(-8, Math.min(8, m)).toFixed(1);
+            document.getElementById('test-intercept').value = Math.max(-8, Math.min(8, b)).toFixed(1);
+            updateTestControlLabels();
+        }
+
+        function updateTestLineFromControls() {
+            let m = parseFloat(document.getElementById('test-slope').value);
+            let b = parseFloat(document.getElementById('test-intercept').value);
+            let x1 = -5;
+            let x2 = 5;
+            testAnchor.setPosition(JXG.COORDS_BY_USER, [x1, m * x1 + b]);
+            testDir.setPosition(JXG.COORDS_BY_USER, [x2, m * x2 + b]);
+            updateTestControlLabels();
             board.update();
             updateInfo();
+        }
+
+        function refreshTestLineControlVisibility() {
+            let testEnabled = document.getElementById('chk-test-line').checked;
+            let sliderMode = document.getElementById('chk-test-slider').checked;
+            document.getElementById('chk-test-slider-wrap').classList.toggle('hidden', !testEnabled);
+            document.getElementById('test-line-controls').classList.toggle('hidden', !(testEnabled && sliderMode));
+        }
+
+        function toggleTestLineSliderMode() {
+            let show = document.getElementById('chk-test-line').checked;
+            let sliderMode = document.getElementById('chk-test-slider').checked;
+            refreshTestLineControlVisibility();
+            if (!show) return;
+
+            testAnchor.setAttribute({visible: show && !sliderMode, fixed: sliderMode});
+            testDir.setAttribute({visible: show && !sliderMode, fixed: sliderMode});
+            if (sliderMode) {
+                updateTestLineFromControls();
+            } else {
+                syncTestLineControlsFromPoints();
+                board.update();
+                updateInfo();
+            }
+        }
+
+        function toggleNormal() {
+            updateInfo();
+            board.update();
         }
 
         function toggleLabPanel() {
@@ -278,9 +416,14 @@
 
         function toggleTestLine() {
             let show = document.getElementById('chk-test-line').checked;
-            testAnchor.setAttribute({visible: show});
-            testDir.setAttribute({visible: show});
             testLine.setAttribute({visible: show});
+            if (!show) {
+                testAnchor.setAttribute({visible: false});
+                testDir.setAttribute({visible: false});
+            } else {
+                toggleTestLineSliderMode();
+            }
+            refreshTestLineControlVisibility();
             board.update();
             updateInfo();
         }

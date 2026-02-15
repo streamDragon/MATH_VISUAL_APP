@@ -189,6 +189,67 @@ h2 {
     border-color: #0056b3;
 }
 
+.lab-panel {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.lab-readout {
+    font-weight: 700;
+}
+
+.lab-status {
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(74, 20, 140, 0.25);
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.lab-status.success {
+    background: #e8f5e9;
+    border-color: #2e7d32;
+    color: #1b5e20;
+}
+
+.lab-slider-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(74, 20, 140, 0.2);
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.lab-mini-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lab-mini-row span {
+    min-width: 18px;
+    font-weight: 700;
+}
+
+.lab-mini-row input[type="range"] {
+    flex: 1;
+}
+
+#test-slope-val,
+#test-intercept-val {
+    min-width: 38px;
+    text-align: left;
+    font-family: monospace;
+}
+
 @media (min-width: 768px) {
     body {
         flex-direction: row;
