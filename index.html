@@ -15,12 +15,17 @@
 </head>
 <body>
 
+    <button id="sound-toggle" onclick="toggleSound()">🔊</button>
+
     <div id="graph-area"></div>
 
-    <div id="holy-trinity">
-        <div><span id="val-x" class="trinity-val">0</span><br><span class="trinity-label">X</span></div>
-        <div><span id="val-y" class="trinity-val">0</span><br><span class="trinity-label">f(x)</span></div>
-        <div><span id="val-m" class="trinity-val">0</span><br><span class="trinity-label">f'(x)</span></div>
+    <div id="hud-container">
+        <div id="holy-trinity">
+            <div class="trinity-item"><span id="val-x" class="trinity-val">0</span><span class="trinity-label">X</span></div>
+            <div class="trinity-item"><span id="val-y" class="trinity-val">0</span><span class="trinity-label">f(x)</span></div>
+            <div class="trinity-item"><span id="val-m" class="trinity-val">0</span><span class="trinity-label">f'(x)</span></div>
+        </div>
+        <div id="tangent-eq">y = mx + n</div>
     </div>
 
     <div id="win-overlay">
@@ -29,32 +34,36 @@
     </div>
 
     <div id="sidebar">
-        <h2 id="q-title" style="margin:0; text-align:center;">טוען...</h2>
+        <h2 id="q-title" style="margin:0; text-align:center; font-size:1.5rem;">טוען...</h2>
+        
         <div id="q-short-inst"></div>
-        <button class="theory-btn" onclick="openTheoryModal()">💡 הסבר מלא ואינטואיציה</button>
-        <div class="nav-container" id="questions-nav" style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:15px;"></div>
-        <div>
-            <div style="display:flex; margin-bottom:10px;">
-                <span style="width:20px; font-weight:bold;">a</span>
+        
+        <button class="theory-btn" onclick="openTheoryModal()">💡 נוסחאות והסברים</button>
+
+        <div class="nav-container" id="questions-nav" style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:15px; justify-content:center;"></div>
+
+        <div style="background:#f8f9fa; padding:10px; border-radius:10px;">
+            <div style="display:flex; margin-bottom:10px; align-items:center;">
+                <span style="width:25px; font-weight:bold;">a</span>
                 <input type="range" id="inpA" min="-2" max="2" step="0.1" style="flex:1;">
             </div>
-            <div style="display:flex; margin-bottom:10px;">
-                <span style="width:20px; font-weight:bold;">b</span>
+            <div style="display:flex; margin-bottom:10px; align-items:center;">
+                <span style="width:25px; font-weight:bold;">b</span>
                 <input type="range" id="inpB" min="-3" max="3" step="0.1" style="flex:1;">
             </div>
-            <div style="display:flex; margin-bottom:10px;">
-                <span style="width:20px; font-weight:bold;">c</span>
+            <div style="display:flex; margin-bottom:10px; align-items:center;">
+                <span style="width:25px; font-weight:bold;">c</span>
                 <input type="range" id="inpC" min="-5" max="5" step="0.1" style="flex:1;">
             </div>
-            <div style="display:flex; margin-bottom:10px;">
-                <span style="width:20px; font-weight:bold;">d</span>
+            <div style="display:flex; margin-bottom:10px; align-items:center;">
+                <span style="width:25px; font-weight:bold;">d</span>
                 <input type="range" id="inpD" min="-5" max="5" step="0.1" style="flex:1;">
             </div>
         </div>
     </div>
 
     <div id="theory-modal" class="theory-overlay">
-        <button class="close-theory" onclick="closeTheoryModal()">✖ סגור וחזור</button>
+        <button class="close-theory" onclick="closeTheoryModal()">✖ סגור</button>
         <div class="theory-content" id="theory-body"></div>
     </div>
 
@@ -67,11 +76,11 @@
         let params = { a:0, b:0, c:0, d:0 };
         let currentQ = 0;
         let isWinning = false;
+        let soundEnabled = true; // משתנה לשליטה בסאונד
 
         function init() {
-            // בדיקה אם קובץ השאלות נטען
             if (typeof QUESTIONS === 'undefined') {
-                alert("שגיאה: הקובץ questions.js לא נמצא או לא נטען.");
+                alert("שגיאה: הקובץ questions.js לא נמצא.");
                 return;
             }
 
@@ -84,17 +93,19 @@
                 function(x) { return params.a*Math.pow(x,3) + params.b*Math.pow(x,2) + params.c*x + params.d; }
             ], { strokeWidth: 3, strokeColor: '#007bff' });
 
-            p = board.create('glider', [0, 0, curve], { name: '', size: 8, color: '#007bff' });
+            p = board.create('glider', [0, 0, curve], { name: '', size: 9, color: '#007bff' });
             tangent = board.create('tangent', [p], { strokeColor: '#ff9f43', strokeWidth: 2, dash:2 });
 
-            p.on('drag', () => { initAudioWrapper(); updateAll(); });
-            board.on('down', initAudioWrapper); 
+            // אירועים
+            p.on('drag', () => { playSoundWrapper('drag'); updateAll(); });
+            board.on('down', () => playSoundWrapper('drag')); 
             board.on('up', updateAll);
             
             ['inpA','inpB','inpC','inpD'].forEach(id => {
-                document.getElementById(id).addEventListener('input', () => { initAudioWrapper(); updateParams(); });
+                document.getElementById(id).addEventListener('input', () => { updateParams(); });
             });
 
+            // בניית כפתורי ניווט
             const nav = document.getElementById('questions-nav');
             QUESTIONS.forEach((q, i) => {
                 let btn = document.createElement('button');
@@ -107,12 +118,25 @@
             loadQuestion(0);
         }
 
-        // עטיפה בטוחה לפונקציות סאונד למקרה שהקובץ לא נטען
-        function initAudioWrapper() {
-            if(typeof initAudio === 'function') initAudio();
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('sound-toggle');
+            btn.innerText = soundEnabled ? "🔊" : "🔇";
+            btn.style.opacity = soundEnabled ? "1" : "0.5";
         }
+
         function playSoundWrapper(type) {
-            if(typeof playSound === 'function') playSound(type);
+            // אם סאונד כבוי, לא עושים כלום
+            if (!soundEnabled) return;
+            // ניסיון לנגן רק אם הפונקציה קיימת
+            if(typeof playSound === 'function') {
+                // ל'drag' לא תמיד יש צליל, אבל נשאיר את הקריאה
+                if(type !== 'drag') playSound(type); 
+                else initAudioWrapper(); // רק מוודא שהאודיו אותחל
+            }
+        }
+        function initAudioWrapper() {
+            if(soundEnabled && typeof initAudio === 'function') initAudio();
         }
 
         function updateParams() {
@@ -127,12 +151,23 @@
         function updateAll() {
             let x = p.X();
             let y = params.a*Math.pow(x,3) + params.b*Math.pow(x,2) + params.c*x + params.d;
-            let m = 3*params.a*x*x + 2*params.b*x + params.c;
+            let m = 3*params.a*x*x + 2*params.b*x + params.c; // נגזרת
 
+            // עדכון השלשה הקדושה
             document.getElementById('val-x').innerText = x.toFixed(2);
             document.getElementById('val-y').innerText = y.toFixed(2);
             document.getElementById('val-m').innerText = m.toFixed(2);
             
+            // עדכון משוואת המשיק: y = mx + n
+            // n = y - mx
+            let n = y - (m * x);
+            let nStr = n >= 0 ? `+ ${n.toFixed(2)}` : `- ${Math.abs(n).toFixed(2)}`;
+            let tangentStr = `y = ${m.toFixed(2)}x ${nStr}`;
+            
+            let eqEl = document.getElementById('tangent-eq');
+            eqEl.innerText = tangentStr;
+            eqEl.classList.add('show');
+
             checkWin(m, x, y);
         }
 
@@ -141,6 +176,11 @@
             isWinning = false;
             let q = QUESTIONS[idx];
             
+            // סימון כפתור פעיל
+            document.querySelectorAll('.q-btn').forEach((b, i) => {
+                b.classList.toggle('active', i === idx);
+            });
+
             document.getElementById('win-overlay').classList.remove('show');
             document.getElementById('holy-trinity').className = ''; 
             document.getElementById('q-title').innerText = q.title;
@@ -191,16 +231,18 @@
                     let yCalc = params.a*Math.pow(t.x,3) + params.b*Math.pow(t.x,2) + params.c*t.x + params.d;
                     let diff = Math.abs(yCalc - t.y);
                     if(diff < 0.3) hitCount++;
-                    if(diff < 1.0) hot = true;
+                    if(diff < 1.5) hot = true;
                 });
                 if(hitCount === q.targets.length) win = true;
             }
 
             const hud = document.getElementById('holy-trinity');
             
+            // איפוס מחלקות קודם
+            hud.classList.remove('winning', 'hot');
+
             if (win) {
                 hud.classList.add('winning');
-                hud.classList.remove('hot');
                 if (!isWinning) {
                     playSoundWrapper('win');
                     document.getElementById('win-overlay').classList.add('show');
@@ -208,10 +250,8 @@
                     setTimeout(() => document.getElementById('win-overlay').classList.remove('show'), 2500);
                 }
             } else {
-                hud.classList.remove('winning');
                 isWinning = false;
                 if(hot) hud.classList.add('hot');
-                else hud.classList.remove('hot');
             }
         }
 
