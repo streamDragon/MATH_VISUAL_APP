@@ -31,20 +31,22 @@
                 <button id="btn-close-overlay" onclick="closeQuestionOverlay()">סגור</button>
             </div>
             <div class="overlay-section">
-                <div class="overlay-label">מהות השאלה</div>
-                <div id="overlay-essence"></div>
+                <button class="overlay-toggle" onclick="toggleOverlaySection('essence')">מהות השאלה</button>
+                <div id="overlay-essence" class="overlay-content"></div>
             </div>
             <div class="overlay-section">
-                <div class="overlay-label">מטרת הלמידה</div>
-                <div id="overlay-goal"></div>
+                <button class="overlay-toggle" onclick="toggleOverlaySection('goal')">מטרת הלמידה</button>
+                <div id="overlay-goal" class="overlay-content hidden"></div>
             </div>
             <div class="overlay-section">
-                <div class="overlay-label">חומר לימוד רלוונטי</div>
-                <div id="overlay-material"></div>
+                <button class="overlay-toggle" onclick="toggleOverlaySection('material')">חומר לימוד רלוונטי</button>
+                <div id="overlay-material" class="overlay-content hidden"></div>
             </div>
             <div class="overlay-section">
-                <div class="overlay-label">איך עובדים באפליקציה</div>
-                <ul id="overlay-howto"></ul>
+                <button class="overlay-toggle" onclick="toggleOverlaySection('howto')">איך עובדים באפליקציה</button>
+                <div id="overlay-howto-wrap" class="overlay-content hidden">
+                    <ul id="overlay-howto"></ul>
+                </div>
             </div>
             <div class="overlay-actions">
                 <button onclick="closeQuestionOverlay()">התחל תרגול</button>
@@ -65,6 +67,7 @@
             <div id="top-actions">
                 <select id="top-question-select" title="בחירת שאלה"></select>
                 <button id="btn-overlay-open" onclick="openQuestionOverlay()">הסבר שאלה</button>
+                <button id="btn-top-builder" onclick="openBuilderFromTop()">בניית פונקציה</button>
             </div>
         </div>
         <div id="graph-area"></div>
@@ -165,6 +168,10 @@
         let builderPanelOpen = false;
 
         function init() {
+            if (window.self !== window.top) {
+                document.body.classList.add('embed-mode');
+            }
+
             board = JXG.JSXGraph.initBoard('graph-area', {
                 boundingbox: [-5, 8, 5, -8], axis: true, showCopyright: false,
                 pan: {enabled:false}, zoom: {enabled:true}
@@ -553,21 +560,57 @@
 
         function renderQuestionOverlay(q) {
             document.getElementById('overlay-title').innerText = q.title;
-            document.getElementById('overlay-essence').innerText = q.overlay?.essence || q.desc || '';
-            document.getElementById('overlay-goal').innerText = q.overlay?.goal || '';
-            document.getElementById('overlay-material').innerText = q.overlay?.material || '';
+            document.getElementById('overlay-essence').innerText = q.overlay?.essence || q.desc || 'מטרת המשימה: להבין את הדרישה ולפתור בצורה מדויקת.';
+            document.getElementById('overlay-goal').innerText = q.overlay?.goal || 'המטרה היא לקשר בין צורת הפונקציה, שיפוע המשיק והנגזרת.';
+            document.getElementById('overlay-material').innerText = q.overlay?.material || 'נגזרות, שיפוע משיק, עלייה/ירידה, והשפעת פרמטרים על גרף.';
 
             let howTo = document.getElementById('overlay-howto');
             howTo.innerHTML = '';
             let steps = Array.isArray(q.overlay?.howTo) ? q.overlay.howTo : [];
+            if (steps.length === 0) {
+                steps = [
+                    'קרא את כותרת השאלה והיעד.',
+                    'שנה ערך אחד בכל פעם ובדוק את ההשפעה על הגרף.',
+                    'היעזר במעבדת האנך ובדף הנוסחאות לפי הצורך.'
+                ];
+            }
             steps.forEach(step => {
                 let li = document.createElement('li');
                 li.innerText = step;
                 howTo.appendChild(li);
             });
+            resetOverlaySections();
+        }
+
+        function resetOverlaySections() {
+            document.getElementById('overlay-essence').classList.remove('hidden');
+            document.getElementById('overlay-goal').classList.add('hidden');
+            document.getElementById('overlay-material').classList.add('hidden');
+            document.getElementById('overlay-howto-wrap').classList.add('hidden');
+        }
+
+        function toggleOverlaySection(section) {
+            const ids = {
+                essence: 'overlay-essence',
+                goal: 'overlay-goal',
+                material: 'overlay-material',
+                howto: 'overlay-howto-wrap'
+            };
+            const selected = ids[section];
+            Object.values(ids).forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (id !== selected) {
+                    el.classList.add('hidden');
+                }
+            });
+            const target = document.getElementById(selected);
+            if (target) target.classList.toggle('hidden');
         }
 
         function openQuestionOverlay() {
+            let q = QUESTIONS[currentQ];
+            if (q) renderQuestionOverlay(q);
             document.getElementById('question-overlay').classList.remove('hidden');
         }
 
@@ -596,6 +639,18 @@
         function toggleBuilderPanel() {
             builderPanelOpen = !builderPanelOpen;
             updateBuilderVisibility(QUESTIONS[currentQ]);
+        }
+
+        function openBuilderFromTop() {
+            let q = QUESTIONS[currentQ];
+            if (!q) return;
+            let locked = new Set(q.locked || []);
+            let editableCount = ['inpA','inpB','inpC','inpD'].filter(id => !locked.has(id)).length;
+            if (editableCount === 0) return;
+            builderPanelOpen = true;
+            updateBuilderVisibility(q);
+            let panel = document.getElementById('builder-panel');
+            if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         function toggleTestLine() {
