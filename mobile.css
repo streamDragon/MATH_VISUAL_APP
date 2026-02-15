@@ -909,7 +909,7 @@ h2 {
         left: 0;
         right: 0;
         bottom: 0;
-        max-height: 68vh;
+        max-height: 60vh;
         height: auto;
         z-index: 1700;
         border-radius: 14px 14px 0 0;
@@ -927,7 +927,7 @@ h2 {
     }
 
     #drawer-content {
-        max-height: calc(68vh - 48px);
+        max-height: calc(60vh - 48px);
     }
 
     #top-strip {
@@ -951,6 +951,20 @@ h2 {
 
     #top-question-select {
         max-width: 100%;
+    }
+
+    body.panel-focus #top-formulas,
+    body.panel-focus #top-actions,
+    body.panel-focus #top-step-status {
+        display: none;
+    }
+
+    #sidebar.accordion-focus .accordion-item {
+        display: none;
+    }
+
+    #sidebar.accordion-focus .accordion-item.active-acc {
+        display: block;
     }
 
     #step-toast {

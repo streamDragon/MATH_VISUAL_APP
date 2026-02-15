@@ -96,12 +96,12 @@
     <div id="sidebar" class="drawer-collapsed">
         <button id="drawer-handle" onclick="toggleDrawer()">כלים ומשימות</button>
         <div id="drawer-content">
-            <div style="text-align:center;">
+            <div id="drawer-question-head" style="text-align:center;">
                 <h2 id="q-title">טוען...</h2>
                 <div id="q-desc" style="font-size:0.9rem; color:#555;"></div>
             </div>
 
-            <div class="accordion-item">
+            <div id="acc-item-steps" class="accordion-item">
                 <button class="acc-btn" onclick="openAccordion('steps')">שלבים/משימות</button>
                 <div id="acc-steps" class="acc-panel">
                     <div id="step-mission-box" class="info-box blue-box">
@@ -136,7 +136,7 @@
                 </div>
             </div>
 
-            <div class="accordion-item">
+            <div id="acc-item-formulas" class="accordion-item">
                 <button id="btn-formulas" class="acc-btn" onclick="toggleFormulaPanel()">נוסחאות</button>
                 <div id="formulas-panel" class="acc-panel hidden">
                     <div class="formula-group-title">הפונקציה שלנו עכשיו</div>
@@ -152,7 +152,7 @@
                 </div>
             </div>
 
-            <div id="lab-box" class="accordion-item">
+            <div id="acc-item-tools" class="accordion-item">
                 <button id="btn-lab" class="acc-btn" onclick="toggleLabPanel()">כלים</button>
                 <div id="lab-panel" class="acc-panel hidden">
                     <label id="normal-toggle-row">
@@ -187,7 +187,7 @@
                 </div>
             </div>
 
-            <div class="accordion-item">
+            <div id="acc-item-params" class="accordion-item">
                 <button id="btn-builder" class="acc-btn" onclick="toggleBuilderPanel()">פרמטרים</button>
                 <div id="builder-panel" class="acc-panel hidden" style="background:#fff; padding:8px; border-radius:5px; border:1px solid #eee;">
                     <div class="section-title">בניית הפונקציה</div>
@@ -363,12 +363,45 @@
             return (getSlope(x + h) - getSlope(x - h)) / (2 * h);
         }
 
+        function accordionItemId(name) {
+            if (name === 'steps') return 'acc-item-steps';
+            if (name === 'formulas') return 'acc-item-formulas';
+            if (name === 'tools') return 'acc-item-tools';
+            if (name === 'params') return 'acc-item-params';
+            return '';
+        }
+
+        function applyTopStripFocusMode() {
+            let isMobile = window.matchMedia('(max-width: 980px)').matches;
+            let focusMode = isMobile && drawerOpen && !!activeAccordion;
+            document.body.classList.toggle('panel-focus', focusMode);
+            document.getElementById('drawer-question-head').classList.toggle('hidden', focusMode);
+        }
+
+        function syncAccordionFocusVisibility() {
+            let sidebar = document.getElementById('sidebar');
+            let focus = !!activeAccordion;
+            sidebar.classList.toggle('accordion-focus', focus);
+            ['acc-item-steps', 'acc-item-formulas', 'acc-item-tools', 'acc-item-params'].forEach((id) => {
+                let el = document.getElementById(id);
+                if (!el) return;
+                el.classList.remove('active-acc');
+            });
+            let activeId = accordionItemId(activeAccordion);
+            if (focus && activeId) {
+                let activeEl = document.getElementById(activeId);
+                if (activeEl) activeEl.classList.add('active-acc');
+            }
+        }
+
         function closeAllAccordions() {
             activeAccordion = '';
             document.getElementById('acc-steps').classList.add('hidden');
             document.getElementById('formulas-panel').classList.add('hidden');
             document.getElementById('lab-panel').classList.add('hidden');
             document.getElementById('builder-panel').classList.add('hidden');
+            syncAccordionFocusVisibility();
+            applyTopStripFocusMode();
         }
 
         function openAccordion(name) {
@@ -378,6 +411,8 @@
             if (name === 'formulas') document.getElementById('formulas-panel').classList.remove('hidden');
             if (name === 'tools') document.getElementById('lab-panel').classList.remove('hidden');
             if (name === 'params') document.getElementById('builder-panel').classList.remove('hidden');
+            syncAccordionFocusVisibility();
+            applyTopStripFocusMode();
         }
 
         function setDrawerOpen(open) {
@@ -385,6 +420,7 @@
             document.getElementById('sidebar').classList.toggle('drawer-open', drawerOpen);
             document.getElementById('sidebar').classList.toggle('drawer-collapsed', !drawerOpen);
             document.getElementById('drawer-handle').innerText = drawerOpen ? 'סגור כלים ומשימות' : 'כלים ומשימות';
+            applyTopStripFocusMode();
         }
 
         function toggleDrawer() {
