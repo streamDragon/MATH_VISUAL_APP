@@ -559,6 +559,72 @@ h2 {
     text-decoration: none;
 }
 
+#normal-lab-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(7, 20, 39, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2720;
+    padding: 14px;
+}
+
+#normal-lab-card {
+    width: min(760px, 100%);
+    max-height: 88vh;
+    overflow: auto;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 2px solid #2f6fed;
+    box-shadow: 0 16px 48px rgba(4, 21, 43, 0.35);
+    padding: 14px;
+}
+
+.normal-lab-body {
+    line-height: 1.5;
+    color: #0f172a;
+    font-size: 0.95rem;
+}
+
+.normal-lab-body p {
+    margin: 0 0 8px 0;
+}
+
+.normal-lab-list-wrap {
+    margin-top: 8px;
+    background: #f8fbff;
+    border: 1px solid #d9e4f7;
+    border-radius: 10px;
+    padding: 8px 10px;
+}
+
+.normal-lab-list-title {
+    font-weight: 700;
+    color: #0b4aa8;
+    margin-bottom: 4px;
+}
+
+#normal-lab-questions {
+    margin: 0;
+    padding-right: 18px;
+}
+
+#btn-normal-guide {
+    width: 100%;
+    border: 1px solid #9ec5ff;
+    border-radius: 8px;
+    background: #e9f2ff;
+    color: #12356a;
+    font-weight: 700;
+    padding: 7px 10px;
+    cursor: pointer;
+}
+
+#btn-normal-guide:hover {
+    background: #dbeafe;
+}
+
 #start-guide-modal {
     position: fixed;
     inset: 0;

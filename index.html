@@ -69,6 +69,28 @@
         </div>
     </div>
 
+    <div id="normal-lab-modal" class="hidden" onclick="onNormalLabBackdropClick(event)">
+        <div id="normal-lab-card">
+            <div class="overlay-head">
+                <h3>הסבר מעבדת האנך</h3>
+                <button onclick="closeNormalLabGuide()">סגור</button>
+            </div>
+            <div class="normal-lab-body">
+                <p><b>מה זה אנך?</b> אנך הוא ישר שיוצר זווית של 90° עם ישר אחר. כאן האנך מוגדר ביחס למשיק לגרף בנקודת המגע.</p>
+                <p><b>מה זה אנך מתכוונן?</b> זה קו אנך "ניסוי" שמוזז לאורך המשיק בעזרת הסליידר. המטרה היא להביא אותו למיקום הנכון בדיוק בנקודת המגע.</p>
+                <p><b>מה רואים בכלים?</b> מוצגים שיפוע המשיק, שיפוע האנך, ונקודת <code>I</code> (חיתוך האנך המתכוונן עם המשיק).</p>
+                <p><b>איך עובדים נכון?</b> קודם מסמנים "הצג אנך מתכוונן", מזיזים את הסליידר, ומשווים לסימון הזווית הישרה ולמצב "קרוב לאנך האמיתי".</p>
+                <div class="normal-lab-list-wrap">
+                    <div class="normal-lab-list-title">שאלות שבהן יש שימוש במעבדת האנך:</div>
+                    <ul id="normal-lab-questions"></ul>
+                </div>
+            </div>
+            <div class="overlay-actions">
+                <button onclick="closeNormalLabGuide()">הבנתי</button>
+            </div>
+        </div>
+    </div>
+
     <div id="step-toast" class="hidden"></div>
 
     <div id="start-guide-modal" class="hidden" onclick="onStartGuideBackdropClick(event)">
@@ -176,6 +198,7 @@
             <div id="acc-item-tools" class="accordion-item">
                 <button id="btn-lab" class="acc-btn" onclick="toggleLabPanel()">כלים</button>
                 <div id="lab-panel" class="acc-panel hidden">
+                    <button id="btn-normal-guide" onclick="openNormalLabGuide()">הסבר מעבדת האנך</button>
                     <label id="normal-toggle-row">
                         <input type="checkbox" id="chk-normal" onchange="toggleNormal()">
                         הצג אנך ומשולש
@@ -222,7 +245,7 @@
     </div>
 
     <script>
-        const APP_BUILD = '2026-02-15-i-point-and-fit';
+        const APP_BUILD = '2026-02-15-normal-lab-guide';
         let board, p, curve, tangent, normalLine, triangle, labelText, testLine, testAnchor, testDir;
         let normalOrigin, normalXAxisPoint, normalYAxisPoint;
         let rightAngleP1, rightAngleP2, rightAngleP3, rightAngleP4, rightAngleMarker;
@@ -1002,6 +1025,41 @@
             openAccordion('tools');
             setDrawerOpen(true);
             updateInfo();
+        }
+
+        function getNormalLabQuestionTitles() {
+            return (QUESTIONS || [])
+                .map((q, idx) => ({ q, idx }))
+                .filter(({ q }) => (q?.ui?.allowNormal || q?.ui?.allowLineTool))
+                .map(({ q, idx }) => `שאלה ${idx + 1}: ${q.title}`);
+        }
+
+        function openNormalLabGuide() {
+            let listEl = document.getElementById('normal-lab-questions');
+            if (listEl) {
+                listEl.innerHTML = '';
+                let titles = getNormalLabQuestionTitles();
+                if (titles.length === 0) {
+                    let li = document.createElement('li');
+                    li.innerText = 'כרגע אין שאלות פעילות עם מעבדת אנך.';
+                    listEl.appendChild(li);
+                } else {
+                    titles.forEach((title) => {
+                        let li = document.createElement('li');
+                        li.innerText = title;
+                        listEl.appendChild(li);
+                    });
+                }
+            }
+            document.getElementById('normal-lab-modal').classList.remove('hidden');
+        }
+
+        function closeNormalLabGuide() {
+            document.getElementById('normal-lab-modal').classList.add('hidden');
+        }
+
+        function onNormalLabBackdropClick(event) {
+            if (event.target.id === 'normal-lab-modal') closeNormalLabGuide();
         }
 
         function toggleFormulaPanel() {
