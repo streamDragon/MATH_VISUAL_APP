@@ -54,11 +54,30 @@
         </div>
     </div>
 
+    <div id="video-modal" class="hidden" onclick="onVideoBackdropClick(event)">
+        <div id="video-modal-card">
+            <div class="overlay-head">
+                <h3 id="video-modal-title">וידאו הסבר</h3>
+                <button onclick="closeVideoModal()">סגור</button>
+            </div>
+            <div id="video-embed-wrap">
+                <iframe id="video-iframe" src="" title="Video explanation" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+            <div class="overlay-actions">
+                <a id="video-open-link" href="#" target="_blank" rel="noopener noreferrer">פתח בלשונית חדשה</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="step-toast" class="hidden"></div>
+
     <div id="graph-area-wrapper">
         <div id="top-strip">
             <div id="top-question-wrap">
                 <span id="top-question-index">שאלה 1/4</span>
                 <span id="top-question">טוען...</span>
+                <span id="top-step-status">שלב 1/1: ...</span>
+                <span id="progress-hint">חפש → מצא → בדוק</span>
             </div>
             <div id="top-formulas">
                 <span class="formula-chip" id="top-formula-f">f(x) = ...</span>
@@ -67,92 +86,112 @@
             <div id="top-actions">
                 <select id="top-question-select" title="בחירת שאלה"></select>
                 <button id="btn-overlay-open" onclick="openQuestionOverlay()">הסבר שאלה</button>
+                <button id="btn-video" class="hidden" onclick="openVideoForCurrentQuestion()">וידאו הסבר</button>
                 <button id="btn-top-builder" onclick="openBuilderFromTop()">בניית פונקציה</button>
             </div>
         </div>
         <div id="graph-area"></div>
     </div>
 
-    <div id="sidebar">
-        <div style="text-align:center;">
-            <h2 id="q-title">טוען...</h2>
-            <div id="q-desc" style="font-size:0.9rem; color:#555;"></div>
-        </div>
-
-        <div class="info-box yellow-box">
-            <button id="btn-formulas" onclick="toggleFormulaPanel()">📜 דף נוסחאות</button>
-            <div id="formulas-panel" class="formulas-panel hidden">
-                <div class="formula-group-title">הפונקציה שלנו עכשיו</div>
-                <div class="math-line" id="formula-f">f(x) = ...</div>
-                <div class="math-line" id="formula-tag" style="color:#d32f2f;">f'(x) = ...</div>
-
-                <div class="formula-group-title">דף נוסחאות 4 יחידות - פונקציות</div>
-                <div class="formula-static">נגזרת פולינום: (ax^3+bx^2+cx+d)' = 3ax^2+2bx+c</div>
-                <div class="formula-static">משוואת משיק: y - y0 = m(x - x0)</div>
-                <div class="formula-static">שיפוע אנך למשיק: m_n = -1 / m_t</div>
-                <div class="formula-static">זווית בין ישרים: tan(theta)=|(m2-m1)/(1+m1*m2)|</div>
-                <div class="formula-static">קשר שיפוע-זווית: m = tan(alpha)</div>
-                <div class="formula-static">קיצון: f'(x)=0 ובדיקת סימן נגזרת לפני/אחרי</div>
-                <div class="formula-static">עלייה/ירידה: f'(x)>0 עולה, f'(x)<0 יורדת</div>
+    <div id="sidebar" class="drawer-collapsed">
+        <button id="drawer-handle" onclick="toggleDrawer()">כלים ומשימות</button>
+        <div id="drawer-content">
+            <div style="text-align:center;">
+                <h2 id="q-title">טוען...</h2>
+                <div id="q-desc" style="font-size:0.9rem; color:#555;"></div>
             </div>
-        </div>
 
-        <div class="info-box purple-box">
-            <div class="info-title">📐 מעבדת האנך</div>
-            <button id="btn-lab" onclick="toggleLabPanel()">כניסה למעבדה</button>
-            <div id="lab-panel" class="lab-panel hidden">
-                <label>
-                    <input type="checkbox" id="chk-normal" onchange="toggleNormal()">
-                    הצג אנך ומשולש
-                </label>
-                <label>
-                    <input type="checkbox" id="chk-test-line" onchange="toggleTestLine()">
-                    הצג ישר בדיקה
-                </label>
-                <label id="chk-test-slider-wrap" class="hidden">
-                    <input type="checkbox" id="chk-test-slider" onchange="toggleTestLineSliderMode()">
-                    שליטה עם סליידרים (שיפוע וגובה)
-                </label>
-                <div id="test-line-controls" class="lab-slider-controls hidden">
-                    <div class="lab-mini-row">
-                        <span>m</span>
-                        <input type="range" id="test-slope" min="-8" max="8" step="0.1" value="1">
-                        <span id="test-slope-val">1.0</span>
+            <div class="accordion-item">
+                <button class="acc-btn" onclick="openAccordion('steps')">שלבים/משימות</button>
+                <div id="acc-steps" class="acc-panel">
+                    <div id="step-mission-box" class="info-box blue-box">
+                        <div class="info-title">משימה נוכחית</div>
+                        <div id="mission-step-text">שלב 1/1: ...</div>
+                        <div id="step-result-panel" class="hidden">
+                            <div id="step-math-line"></div>
+                            <div class="step-actions">
+                                <button id="btn-apply-solution" class="hidden" onclick="applyStepSolution()">עדכן פונקציה</button>
+                                <button id="btn-next-step" class="hidden" onclick="goToNextStep()">הבא</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="lab-mini-row">
-                        <span>b</span>
-                        <input type="range" id="test-intercept" min="-8" max="8" step="0.1" value="0">
-                        <span id="test-intercept-val">0.0</span>
+                    <div style="margin-top:8px;">
+                        <div class="section-title" style="margin-bottom:5px;">בחירת שאלה:</div>
+                        <div class="nav-grid" id="nav-container"></div>
                     </div>
                 </div>
-                <div class="lab-metrics">
-                    <div class="lab-metric-row"><span>m משיק:</span><b id="metric-tangent">--</b></div>
-                    <div class="lab-metric-row"><span>m אנך יעד:</span><b id="metric-normal">--</b></div>
-                    <div class="lab-metric-row"><span>m ישר בדיקה:</span><b id="metric-test">--</b></div>
-                    <div class="lab-metric-row"><span>שגיאת זווית:</span><b id="metric-angle-error">--</b></div>
-                    <div class="lab-metric-row"><span>מרחק מהנקודה:</span><b id="metric-distance">--</b></div>
-                </div>
-                <div class="lab-heat-wrap">
-                    <div class="lab-heat-label">מד חם/קר</div>
-                    <div class="lab-heat-bar"><div id="lab-heat-fill"></div></div>
-                </div>
-                <div class="lab-readout">זווית מול המשיק: <span id="angle-readout">--</span></div>
-                <div class="lab-status" id="lab-status">הפעל ישר בדיקה כדי להתחיל.</div>
             </div>
-        </div>
 
-        <button id="btn-builder" onclick="toggleBuilderPanel()">בנה את הפונקציה המתאימה לך</button>
-        <div id="builder-panel" class="hidden" style="background:#fff; padding:8px; border-radius:5px; border:1px solid #eee;">
-            <div class="section-title">בניית הפונקציה</div>
-            <div class="slider-row"><span class="slider-lbl">a</span><input type="range" id="inpA" min="-5" max="5" step="0.1" class="slider-inp"></div>
-            <div class="slider-row"><span class="slider-lbl">b</span><input type="range" id="inpB" min="-5" max="5" step="0.1" class="slider-inp"></div>
-            <div class="slider-row"><span class="slider-lbl">c</span><input type="range" id="inpC" min="-5" max="5" step="0.1" class="slider-inp"></div>
-            <div class="slider-row"><span class="slider-lbl">d</span><input type="range" id="inpD" min="-5" max="5" step="0.1" class="slider-inp"></div>
-        </div>
+            <div class="accordion-item">
+                <button id="btn-formulas" class="acc-btn" onclick="toggleFormulaPanel()">נוסחאות</button>
+                <div id="formulas-panel" class="acc-panel hidden">
+                    <div class="formula-group-title">הפונקציה שלנו עכשיו</div>
+                    <div class="math-line" id="formula-f">f(x) = ...</div>
+                    <div class="math-line" id="formula-tag" style="color:#d32f2f;">f'(x) = ...</div>
 
-        <div style="margin-top:auto;">
-             <div class="section-title" style="margin-bottom:5px;">שלבים:</div>
-             <div class="nav-grid" id="nav-container"></div>
+                    <div class="formula-group-title">דף נוסחאות 4 יחידות - פונקציות</div>
+                    <div class="formula-static">נגזרת פולינום: (ax^3+bx^2+cx+d)' = 3ax^2+2bx+c</div>
+                    <div class="formula-static">משוואת משיק: y - y0 = m(x - x0)</div>
+                    <div class="formula-static">שיפוע אנך למשיק: m_n = -1 / m_t</div>
+                    <div class="formula-static">קיצון: f'(x)=0 ובדיקת סימן נגזרת לפני/אחרי</div>
+                    <div class="formula-static">עלייה/ירידה: f'(x)>0 עולה, f'(x)<0 יורדת</div>
+                </div>
+            </div>
+
+            <div id="lab-box" class="accordion-item">
+                <button id="btn-lab" class="acc-btn" onclick="toggleLabPanel()">כלים</button>
+                <div id="lab-panel" class="acc-panel hidden">
+                    <label id="normal-toggle-row">
+                        <input type="checkbox" id="chk-normal" onchange="toggleNormal()">
+                        הצג אנך ומשולש
+                    </label>
+                    <div class="normal-help-text">האנך חייב להיות בזווית 90° למשיק בנקודת המגע.</div>
+                    <label id="test-line-row">
+                        <input type="checkbox" id="chk-test-line" onchange="toggleTestLine()">
+                        הצג ישר בדיקה
+                    </label>
+                    <label id="chk-test-slider-wrap" class="hidden">
+                        <input type="checkbox" id="chk-test-slider" onchange="toggleTestLineSliderMode()">
+                        שליטה עם סליידרים (שיפוע וגובה)
+                    </label>
+                    <div id="test-line-controls" class="lab-slider-controls hidden">
+                        <div class="lab-mini-row">
+                            <span>m</span>
+                            <input type="range" id="test-slope" min="-8" max="8" step="0.1" value="1">
+                            <span id="test-slope-val">1.0</span>
+                        </div>
+                        <div class="lab-mini-row">
+                            <span>b</span>
+                            <input type="range" id="test-intercept" min="-8" max="8" step="0.1" value="0">
+                            <span id="test-intercept-val">0.0</span>
+                        </div>
+                    </div>
+                    <div class="lab-metrics">
+                        <div class="lab-metric-row"><span>m משיק:</span><b id="metric-tangent">--</b></div>
+                        <div class="lab-metric-row"><span>m אנך יעד:</span><b id="metric-normal">--</b></div>
+                        <div class="lab-metric-row"><span>m ישר בדיקה:</span><b id="metric-test">--</b></div>
+                        <div class="lab-metric-row"><span>שגיאת זווית:</span><b id="metric-angle-error">--</b></div>
+                        <div class="lab-metric-row"><span>מרחק מהנקודה:</span><b id="metric-distance">--</b></div>
+                    </div>
+                    <div class="lab-heat-wrap">
+                        <div class="lab-heat-label">מד חם/קר</div>
+                        <div class="lab-heat-bar"><div id="lab-heat-fill"></div></div>
+                    </div>
+                    <div class="lab-readout">זווית מול המשיק: <span id="angle-readout">--</span></div>
+                    <div class="lab-status" id="lab-status">הפעל ישר בדיקה כדי להתחיל.</div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button id="btn-builder" class="acc-btn" onclick="toggleBuilderPanel()">פרמטרים</button>
+                <div id="builder-panel" class="acc-panel hidden" style="background:#fff; padding:8px; border-radius:5px; border:1px solid #eee;">
+                    <div class="section-title">בניית הפונקציה</div>
+                    <div class="slider-row"><span class="slider-lbl">a</span><input type="range" id="inpA" min="-5" max="5" step="0.1" class="slider-inp"></div>
+                    <div class="slider-row"><span class="slider-lbl">b</span><input type="range" id="inpB" min="-5" max="5" step="0.1" class="slider-inp"></div>
+                    <div class="slider-row"><span class="slider-lbl">c</span><input type="range" id="inpC" min="-5" max="5" step="0.1" class="slider-inp"></div>
+                    <div class="slider-row"><span class="slider-lbl">d</span><input type="range" id="inpD" min="-5" max="5" step="0.1" class="slider-inp"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -166,6 +205,113 @@
         let prevLabScore = null;
         let wasLabSuccess = false;
         let builderPanelOpen = false;
+        let currentStepIndex = 0;
+        let activeSteps = [];
+        let stepCompleted = false;
+        let pendingStepSolve = null;
+        let questionSolved = false;
+        let questionParamValues = {};
+        let stepToastTimer = null;
+        let drawerOpen = false;
+        let activeAccordion = 'steps';
+
+        function getCurrentQuestion() {
+            return QUESTIONS[currentQ];
+        }
+
+        function getQuestionSteps(q) {
+            if (Array.isArray(q.steps) && q.steps.length > 0) return q.steps;
+            let fallbackGoal = q.goal || 'free';
+            let firstLine = (q.desc || 'בצע את המשימה').split('\n')[0];
+            let goalData = getQuestionGoalData(q);
+            return [{
+                instruction: firstLine,
+                goal: {
+                    type: fallbackGoal,
+                    params: Object.assign({}, goalData, {
+                        targetM: q.targetM,
+                        targets: q.targets || goalData.targets
+                    })
+                },
+                onComplete: {
+                    toastText: 'יפה! השלמת את המשימה.'
+                }
+            }];
+        }
+
+        function getQuestionParamSpec(q) {
+            return q.parameter || null;
+        }
+
+        function evaluateFunctionAt(x) {
+            let q = getCurrentQuestion();
+            let paramSpec = getQuestionParamSpec(q);
+            if (paramSpec && typeof paramSpec.evaluate === 'function') {
+                let val = questionParamValues[paramSpec.key];
+                return paramSpec.evaluate(x, val);
+            }
+            return params.a*x**3 + params.b*x**2 + params.c*x + params.d;
+        }
+
+        function evaluateDerivativeAt(x) {
+            let q = getCurrentQuestion();
+            let paramSpec = getQuestionParamSpec(q);
+            if (paramSpec && typeof paramSpec.derivative === 'function') {
+                let val = questionParamValues[paramSpec.key];
+                return paramSpec.derivative(x, val);
+            }
+            return 3*params.a*x*x + 2*params.b*x + params.c;
+        }
+
+        function formatNumber(value) {
+            if (!Number.isFinite(value)) return '0';
+            return value.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
+        }
+
+        function getQuestionGoalData(q) {
+            return q?.data || {};
+        }
+
+        function getQuestionParamsArray(q) {
+            if (Array.isArray(q?.params) && q.params.length >= 4) return q.params;
+            if (q?.defaults && typeof q.defaults === 'object') {
+                return [q.defaults.a || 0, q.defaults.b || 0, q.defaults.c || 0, q.defaults.d || 0];
+            }
+            return [0.2, 0, 0, 0];
+        }
+
+        function getSecondDerivativeAt(x) {
+            let h = 0.001;
+            return (getSlope(x + h) - getSlope(x - h)) / (2 * h);
+        }
+
+        function closeAllAccordions() {
+            activeAccordion = '';
+            document.getElementById('acc-steps').classList.add('hidden');
+            document.getElementById('formulas-panel').classList.add('hidden');
+            document.getElementById('lab-panel').classList.add('hidden');
+            document.getElementById('builder-panel').classList.add('hidden');
+        }
+
+        function openAccordion(name) {
+            closeAllAccordions();
+            activeAccordion = name;
+            if (name === 'steps') document.getElementById('acc-steps').classList.remove('hidden');
+            if (name === 'formulas') document.getElementById('formulas-panel').classList.remove('hidden');
+            if (name === 'tools') document.getElementById('lab-panel').classList.remove('hidden');
+            if (name === 'params') document.getElementById('builder-panel').classList.remove('hidden');
+        }
+
+        function setDrawerOpen(open) {
+            drawerOpen = !!open;
+            document.getElementById('sidebar').classList.toggle('drawer-open', drawerOpen);
+            document.getElementById('sidebar').classList.toggle('drawer-collapsed', !drawerOpen);
+            document.getElementById('drawer-handle').innerText = drawerOpen ? 'סגור כלים ומשימות' : 'כלים ומשימות';
+        }
+
+        function toggleDrawer() {
+            setDrawerOpen(!drawerOpen);
+        }
 
         function init() {
             if (window.self !== window.top) {
@@ -178,7 +324,7 @@
             });
 
             curve = board.create('functiongraph', [
-                x => params.a*x**3 + params.b*x**2 + params.c*x + params.d
+                x => evaluateFunctionAt(x)
             ], { strokeWidth: 4, strokeColor: '#1976d2' });
 
             p = board.create('glider', [0, 0, curve], {
@@ -224,8 +370,11 @@
                 () => p.X() + 0.5,
                 () => p.Y() + 0.5,
                 function() {
+                    let x = p.X();
+                    let y = p.Y();
                     let m = getSlope(p.X());
-                    return `X: ${p.X().toFixed(2)}<br>Y: ${p.Y().toFixed(2)}<br>m: ${m.toFixed(2)}`;
+                    let b = y - m * x;
+                    return `x = ${x.toFixed(2)}<br>f(x) = ${y.toFixed(2)}<br>f'(x) = m = ${m.toFixed(2)}<br>y = ${m.toFixed(2)}x + ${b.toFixed(2)}`;
                 }
             ], { anchor: p, fontSize: 13, cssClass: 'jxgbox', strokeColor:'black' });
 
@@ -273,13 +422,15 @@
             topSelect.addEventListener('change', (ev) => loadQ(parseInt(ev.target.value, 10)));
 
             loadQ(0);
+            openAccordion('steps');
+            setDrawerOpen(false);
             syncTestLineControlsFromPoints();
             refreshTestLineControlVisibility();
             updateSoundButton();
         }
 
         function getSlope(x) {
-            return 3*params.a*x*x + 2*params.b*x + params.c;
+            return evaluateDerivativeAt(x);
         }
 
         function updateParams() {
@@ -316,14 +467,29 @@
             let x = p.X();
             let y = p.Y();
             let m = getSlope(x);
-
-            let fTerms = [{val: params.a, pow:3}, {val: params.b, pow:2}, {val: params.c, pow:1}, {val: params.d, pow:0}];
-            let fxText = 'f(x) = ' + formatPoly(fTerms);
+            let q = getCurrentQuestion();
+            let paramSpec = getQuestionParamSpec(q);
+            let fxText;
+            let dText;
+            if (paramSpec) {
+                let paramVal = questionParamValues[paramSpec.key];
+                let symbolicMode = paramSpec.showSymbolic !== false && !paramSpec.applied;
+                let fBody = symbolicMode
+                    ? paramSpec.symbolicF
+                    : (typeof paramSpec.numericF === 'function' ? paramSpec.numericF(paramVal) : paramSpec.symbolicF.replaceAll(paramSpec.key, formatNumber(paramVal)));
+                let dBody = symbolicMode
+                    ? paramSpec.symbolicD
+                    : (typeof paramSpec.numericD === 'function' ? paramSpec.numericD(paramVal) : paramSpec.symbolicD.replaceAll(paramSpec.key, formatNumber(paramVal)));
+                fxText = 'f(x) = ' + fBody;
+                dText = "f'(x) = " + dBody;
+            } else {
+                let fTerms = [{val: params.a, pow:3}, {val: params.b, pow:2}, {val: params.c, pow:1}, {val: params.d, pow:0}];
+                fxText = 'f(x) = ' + formatPoly(fTerms);
+                let dTerms = [{val: 3*params.a, pow:2}, {val: 2*params.b, pow:1}, {val: params.c, pow:0}];
+                dText = "f'(x) = " + formatPoly(dTerms);
+            }
             document.getElementById('formula-f').innerText = fxText;
             document.getElementById('top-formula-f').innerText = fxText;
-
-            let dTerms = [{val: 3*params.a, pow:2}, {val: 2*params.b, pow:1}, {val: params.c, pow:0}];
-            let dText = "f'(x) = " + formatPoly(dTerms);
             document.getElementById('formula-tag').innerText = dText;
             document.getElementById('top-formula-tag').innerText = dText;
 
@@ -331,7 +497,7 @@
 
             updateLabReadout(m);
 
-            checkWin(m, x, y);
+            evaluateCurrentStep(m, x, y);
         }
 
         function getNormalLineData(x, y, tangentSlope) {
@@ -511,8 +677,9 @@
         function refreshTestLineControlVisibility() {
             let testEnabled = document.getElementById('chk-test-line').checked;
             let sliderMode = document.getElementById('chk-test-slider').checked;
-            document.getElementById('chk-test-slider-wrap').classList.toggle('hidden', !testEnabled);
-            document.getElementById('test-line-controls').classList.toggle('hidden', !(testEnabled && sliderMode));
+            let lineToolVisible = !document.getElementById('test-line-row').classList.contains('hidden');
+            document.getElementById('chk-test-slider-wrap').classList.toggle('hidden', !(lineToolVisible && testEnabled));
+            document.getElementById('test-line-controls').classList.toggle('hidden', !(lineToolVisible && testEnabled && sliderMode));
         }
 
         function toggleTestLineSliderMode() {
@@ -538,18 +705,22 @@
         }
 
         function toggleLabPanel() {
-            let panel = document.getElementById('lab-panel');
-            panel.classList.toggle('hidden');
-            let btn = document.getElementById('btn-lab');
-            btn.innerText = panel.classList.contains('hidden') ? 'כניסה למעבדה' : 'סגירת המעבדה';
+            if (activeAccordion === 'tools' && !document.getElementById('lab-panel').classList.contains('hidden')) {
+                closeAllAccordions();
+                return;
+            }
+            openAccordion('tools');
+            setDrawerOpen(true);
             updateInfo();
         }
 
         function toggleFormulaPanel() {
-            let panel = document.getElementById('formulas-panel');
-            panel.classList.toggle('hidden');
-            let btn = document.getElementById('btn-formulas');
-            btn.innerText = panel.classList.contains('hidden') ? '📜 דף נוסחאות' : '📜 סגירת דף נוסחאות';
+            if (activeAccordion === 'formulas' && !document.getElementById('formulas-panel').classList.contains('hidden')) {
+                closeAllAccordions();
+                return;
+            }
+            openAccordion('formulas');
+            setDrawerOpen(true);
         }
 
         function onOverlayBackdropClick(event) {
@@ -618,6 +789,287 @@
             document.getElementById('question-overlay').classList.add('hidden');
         }
 
+        function showStepToast(text) {
+            let toast = document.getElementById('step-toast');
+            toast.innerText = text || 'יפה! מצאת את מה שצריך.';
+            toast.classList.remove('hidden');
+            if (stepToastTimer) clearTimeout(stepToastTimer);
+            stepToastTimer = setTimeout(() => toast.classList.add('hidden'), 1200);
+        }
+
+        function getStepGoalParams(goal) {
+            if (!goal || typeof goal !== 'object') return {};
+            return goal.params || {};
+        }
+
+        function evalLegacyGoal(goalType, goalParams, m, x, y) {
+            if (goalType === 'slope_zero') return Math.abs(m) < (goalParams.toleranceM ?? 0.1);
+            if (goalType === 'min_point') {
+                return Math.abs(m) < (goalParams.toleranceM ?? 0.1) && getSecondDerivativeAt(x) > 0;
+            }
+            if (goalType === 'slope_equals') return Math.abs(m - (goalParams.targetM ?? 0)) < (goalParams.toleranceM ?? 0.1);
+            if (goalType === 'y_equals') return Math.abs(y - (goalParams.targetY ?? 0)) < (goalParams.toleranceY ?? 0.2);
+            if (goalType === 'hit_target' && Array.isArray(goalParams.targets)) {
+                let hitAll = true;
+                goalParams.targets.forEach((t) => {
+                    let dist = Math.sqrt((x - t.x)**2 + (y - t.y)**2);
+                    if (dist > (goalParams.tolerance ?? 0.5)) hitAll = false;
+                });
+                return hitAll;
+            }
+            if (goalType === 'hit_targets' && Array.isArray(goalParams.targets)) {
+                let tol = goalParams.toleranceY ?? goalParams.tolerance ?? 0.25;
+                return goalParams.targets.every((t) => {
+                    let yOnCurve = evaluateFunctionAt(t.x);
+                    return Math.abs(yOnCurve - t.y) <= tol;
+                });
+            }
+            if (goalType === 'read_slope') {
+                return Math.abs(x - (goalParams.fixedX0 ?? 0)) <= 0.12;
+            }
+            if (goalType === 'read_y') {
+                return Math.abs(x - (goalParams.fixedX0 ?? 0)) <= 0.12;
+            }
+            if (goalType === 'tangent_through_point' && goalParams.point) {
+                let px = goalParams.point.x;
+                let py = goalParams.point.y;
+                let yOnTangent = m * (px - x) + y;
+                return Math.abs(yOnTangent - py) <= (goalParams.tolerance ?? 0.25);
+            }
+            if (goalType === 'choose_function_template') return false;
+            return false;
+        }
+
+        function isCurrentStepDone(goal, m, x, y) {
+            if (!goal) return false;
+            if (goal.type === 'free') return false;
+            let goalType = goal.type;
+            let goalParams = getStepGoalParams(goal);
+            if (goalType === 'slope_at_x') {
+                let xOk = Math.abs(x - goalParams.x) <= (goalParams.toleranceX ?? 0.2);
+                if (!xOk) return false;
+                if (typeof goalParams.targetSlope === 'number') {
+                    return Math.abs(m - goalParams.targetSlope) <= (goalParams.toleranceSlope ?? 0.15);
+                }
+                return true;
+            }
+            if (goalType === 'hit_target') {
+                if (Array.isArray(goalParams.targets) && goalParams.targets.length > 0) {
+                    let t = goalParams.targets[0];
+                    let dx = x - t.x;
+                    let dy = y - t.y;
+                    return Math.sqrt(dx * dx + dy * dy) <= (goalParams.toleranceY ?? goalParams.tolerance ?? 0.5);
+                }
+                let dx = x - goalParams.x;
+                let dy = y - goalParams.y;
+                return Math.sqrt(dx * dx + dy * dy) <= (goalParams.toleranceY ?? goalParams.tolerance ?? 0.5);
+            }
+            return evalLegacyGoal(goalType, goalParams, m, x, y);
+        }
+
+        function solveStepEquation(step, m, x, y) {
+            let solve = step?.onComplete?.solve;
+            if (!solve) return null;
+            let q = getCurrentQuestion();
+            let paramSpec = getQuestionParamSpec(q);
+            if (!paramSpec) return null;
+
+            if (solve.type === 'solve_for_a_from_slope') {
+                let targetX = solve.x;
+                let targetSlope = solve.slope;
+                let value = (targetSlope - solve.constant) / solve.coeff;
+                let constText = solve.constant >= 0 ? `+${formatNumber(solve.constant)}` : `${formatNumber(solve.constant)}`;
+                let eq = solve.equationText || `f'(${formatNumber(targetX)})=${formatNumber(targetSlope)} => ${formatNumber(solve.coeff)}a${constText}=${formatNumber(targetSlope)}`;
+                return {
+                    paramKey: paramSpec.key,
+                    value: value,
+                    equationText: eq
+                };
+            }
+
+            if (solve.type === 'solve_for_a_from_target') {
+                let val = (solve.y - solve.constant) / solve.coeff;
+                let constText = solve.constant >= 0 ? `+${formatNumber(solve.constant)}` : `${formatNumber(solve.constant)}`;
+                let eq = solve.equationText || `f(${formatNumber(solve.x)})=${formatNumber(solve.y)} => ${formatNumber(solve.coeff)}a${constText}=${formatNumber(solve.y)}`;
+                return {
+                    paramKey: paramSpec.key,
+                    value: val,
+                    equationText: eq
+                };
+            }
+
+            return null;
+        }
+
+        function renderMission() {
+            let total = activeSteps.length || 1;
+            let step = activeSteps[currentStepIndex];
+            let instruction = (step?.instruction || 'בצע את המשימה').replace(/\s+/g, ' ').trim();
+            let missionText = `שלב ${currentStepIndex + 1}/${total}: ${instruction}`;
+            document.getElementById('mission-step-text').innerText = missionText;
+            document.getElementById('top-step-status').innerText = missionText;
+        }
+
+        function showStepResult(step, solveData, m, x, y) {
+            let panel = document.getElementById('step-result-panel');
+            let mathLine = document.getElementById('step-math-line');
+            let applyBtn = document.getElementById('btn-apply-solution');
+            let nextBtn = document.getElementById('btn-next-step');
+            let mathText = step?.onComplete?.showMath || '';
+            if (typeof mathText === 'function') {
+                mathText = mathText({ m, x, y, solveData });
+            }
+            if (!mathText && solveData?.equationText) mathText = solveData.equationText;
+            if (!mathText) mathText = 'השלב הושלם.';
+
+            mathLine.innerText = mathText;
+            panel.classList.remove('hidden');
+
+            let needsApply = !!(step?.onComplete?.applyButton && solveData);
+            applyBtn.classList.toggle('hidden', !needsApply);
+            nextBtn.classList.add('hidden');
+
+            if (!needsApply) {
+                let isLast = currentStepIndex >= activeSteps.length - 1;
+                nextBtn.classList.toggle('hidden', isLast);
+                if (isLast) markQuestionSolved();
+            }
+        }
+
+        function markQuestionSolved() {
+            questionSolved = true;
+            let box = document.querySelector('.jxgbox');
+            document.getElementById('win-overlay').style.display = 'none';
+            if (box) box.classList.add('winning-box');
+            showStepToast('כל הכבוד! השלמת את המשימה.');
+            if (!wasWin) playSound('win');
+            wasWin = true;
+        }
+
+        function evaluateCurrentStep(m, x, y) {
+            if (questionSolved) return;
+            let step = activeSteps[currentStepIndex];
+            if (!step || stepCompleted) return;
+
+            if (!isCurrentStepDone(step.goal || { type: 'free' }, m, x, y)) return;
+            stepCompleted = true;
+            showStepToast(step?.onComplete?.toastText || 'יפה! מצאת את הצעד הנכון.');
+            pendingStepSolve = solveStepEquation(step, m, x, y);
+            showStepResult(step, pendingStepSolve, m, x, y);
+        }
+
+        function applyStepSolution() {
+            if (!pendingStepSolve) return;
+            let q = getCurrentQuestion();
+            let paramSpec = getQuestionParamSpec(q);
+            if (!paramSpec) return;
+
+            questionParamValues[pendingStepSolve.paramKey] = pendingStepSolve.value;
+            paramSpec.applied = true;
+
+            document.getElementById('btn-apply-solution').classList.add('hidden');
+            let isLast = currentStepIndex >= activeSteps.length - 1;
+            document.getElementById('btn-next-step').classList.toggle('hidden', isLast);
+            if (isLast) markQuestionSolved();
+
+            board.update();
+            updateInfo();
+        }
+
+        function goToNextStep() {
+            if (currentStepIndex >= activeSteps.length - 1) return;
+            currentStepIndex += 1;
+            stepCompleted = false;
+            pendingStepSolve = null;
+            document.getElementById('step-result-panel').classList.add('hidden');
+            document.getElementById('btn-apply-solution').classList.add('hidden');
+            document.getElementById('btn-next-step').classList.add('hidden');
+            renderMission();
+            updateInfo();
+        }
+
+        function isUiEnabled(q, key, fallback) {
+            if (!q.ui || typeof q.ui[key] === 'undefined') return fallback;
+            return !!q.ui[key];
+        }
+
+        function applyQuestionUi(q) {
+            let allowNormal = isUiEnabled(q, 'allowNormal', false);
+            let defaultNormalOn = isUiEnabled(q, 'defaultNormalOn', false);
+            let allowLineTool = isUiEnabled(q, 'allowLineTool', false);
+            let showToolsBox = allowNormal || allowLineTool;
+
+            document.getElementById('lab-box').classList.toggle('hidden', !showToolsBox);
+            document.getElementById('normal-toggle-row').classList.toggle('hidden', !allowNormal);
+            document.getElementById('test-line-row').classList.toggle('hidden', !allowLineTool);
+            if (!allowNormal) {
+                document.getElementById('chk-normal').checked = false;
+                normalLine.setAttribute({ visible: false });
+                triangle.setAttribute({ visible: false });
+                normalXAxisPoint.setAttribute({ visible: false });
+                normalYAxisPoint.setAttribute({ visible: false });
+            } else {
+                document.getElementById('chk-normal').checked = !!defaultNormalOn;
+            }
+
+            if (!allowLineTool) {
+                document.getElementById('chk-test-line').checked = false;
+                document.getElementById('chk-test-slider').checked = false;
+                testLine.setAttribute({ visible: false });
+                testAnchor.setAttribute({ visible: false });
+                testDir.setAttribute({ visible: false });
+            }
+            refreshTestLineControlVisibility();
+            updateInfo();
+        }
+
+        function getYouTubeEmbedUrl(url) {
+            try {
+                let u = new URL(url);
+                if (u.hostname.includes('youtu.be')) {
+                    let id = u.pathname.split('/').filter(Boolean)[0];
+                    if (id) return `https://www.youtube.com/embed/${id}`;
+                }
+                if (u.hostname.includes('youtube.com')) {
+                    if (u.pathname.startsWith('/embed/')) return url;
+                    let id = u.searchParams.get('v');
+                    if (id) return `https://www.youtube.com/embed/${id}`;
+                }
+            } catch (err) {
+                return '';
+            }
+            return '';
+        }
+
+        function configureVideoButton(q) {
+            let btn = document.getElementById('btn-video');
+            let hasVideo = !!q.videoUrl;
+            btn.classList.toggle('hidden', !hasVideo);
+        }
+
+        function openVideoForCurrentQuestion() {
+            let q = getCurrentQuestion();
+            if (!q?.videoUrl) return;
+            let embedUrl = getYouTubeEmbedUrl(q.videoUrl);
+            if (!embedUrl) {
+                window.open(q.videoUrl, '_blank', 'noopener');
+                return;
+            }
+            document.getElementById('video-modal-title').innerText = `${q.title} - וידאו הסבר`;
+            document.getElementById('video-iframe').src = embedUrl;
+            document.getElementById('video-open-link').href = q.videoUrl;
+            document.getElementById('video-modal').classList.remove('hidden');
+        }
+
+        function closeVideoModal() {
+            document.getElementById('video-modal').classList.add('hidden');
+            document.getElementById('video-iframe').src = '';
+        }
+
+        function onVideoBackdropClick(event) {
+            if (event.target.id === 'video-modal') closeVideoModal();
+        }
+
         function updateBuilderVisibility(q) {
             let allIds = ['inpA','inpB','inpC','inpD'];
             let locked = new Set(q.locked || []);
@@ -626,18 +1078,24 @@
 
             let btn = document.getElementById('btn-builder');
             let panel = document.getElementById('builder-panel');
-            btn.classList.toggle('hidden', !shouldAllowBuilder);
+            btn.closest('.accordion-item').classList.toggle('hidden', !shouldAllowBuilder);
             if (!shouldAllowBuilder) {
                 panel.classList.add('hidden');
                 builderPanelOpen = false;
                 return;
             }
-            panel.classList.toggle('hidden', !builderPanelOpen);
-            btn.innerText = builderPanelOpen ? 'הסתר בניית פונקציה' : 'בנה את הפונקציה המתאימה לך';
+            if (activeAccordion === 'params') panel.classList.remove('hidden');
+            btn.innerText = 'פרמטרים';
         }
 
         function toggleBuilderPanel() {
-            builderPanelOpen = !builderPanelOpen;
+            if (activeAccordion === 'params' && !document.getElementById('builder-panel').classList.contains('hidden')) {
+                closeAllAccordions();
+                return;
+            }
+            builderPanelOpen = true;
+            openAccordion('params');
+            setDrawerOpen(true);
             updateBuilderVisibility(QUESTIONS[currentQ]);
         }
 
@@ -648,6 +1106,8 @@
             let editableCount = ['inpA','inpB','inpC','inpD'].filter(id => !locked.has(id)).length;
             if (editableCount === 0) return;
             builderPanelOpen = true;
+            openAccordion('params');
+            setDrawerOpen(true);
             updateBuilderVisibility(q);
             let panel = document.getElementById('builder-panel');
             if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -676,27 +1136,47 @@
             document.getElementById('top-question').innerText = q.title;
             document.getElementById('top-question-select').value = String(idx);
             document.getElementById('win-overlay').style.display = 'none';
+            let box = document.querySelector('.jxgbox');
+            if (box) box.classList.remove('winning-box');
             wasWin = false;
+            questionSolved = false;
             prevLabScore = null;
             wasLabSuccess = false;
             if (typeof resetWarmColdFeedback === 'function') resetWarmColdFeedback();
 
             document.querySelectorAll('.q-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
 
-            params.a = q.params[0]; document.getElementById('inpA').value = params.a;
-            params.b = q.params[1]; document.getElementById('inpB').value = params.b;
-            params.c = q.params[2]; document.getElementById('inpC').value = params.c;
-            params.d = q.params[3]; document.getElementById('inpD').value = params.d;
+            let qParams = getQuestionParamsArray(q);
+            params.a = qParams[0]; document.getElementById('inpA').value = params.a;
+            params.b = qParams[1]; document.getElementById('inpB').value = params.b;
+            params.c = qParams[2]; document.getElementById('inpC').value = params.c;
+            params.d = qParams[3]; document.getElementById('inpD').value = params.d;
+
+            let paramSpec = getQuestionParamSpec(q);
+            questionParamValues = {};
+            if (paramSpec) {
+                let initial = Number.isFinite(paramSpec.initialValue) ? paramSpec.initialValue : 1;
+                questionParamValues[paramSpec.key] = initial;
+                paramSpec.applied = false;
+            }
 
             ['inpA','inpB','inpC','inpD'].forEach(id => document.getElementById(id).disabled = false);
-            if(q.locked) q.locked.forEach(id => document.getElementById(id).disabled = true);
+            if(q.locked) q.locked.forEach(id => {
+                let el = document.getElementById(id);
+                if (el) el.disabled = true;
+            });
             builderPanelOpen = false;
             updateBuilderVisibility(q);
+            applyQuestionUi(q);
+            configureVideoButton(q);
+            openAccordion('steps');
+            setDrawerOpen(false);
 
             board.removeObject(targets);
             targets = [];
-            if(q.targets) {
-                q.targets.forEach(t => {
+            let visualTargets = q.targets || q.data?.targets;
+            if(visualTargets) {
+                visualTargets.forEach(t => {
                     let pt = board.create('point', [t.x, t.y], {
                         name:'', fixed:true, color:'#00e676', size:5, face:'o'
                     });
@@ -704,42 +1184,20 @@
                 });
             }
 
-            p.setCoords(0, params.d);
+            activeSteps = getQuestionSteps(q);
+            currentStepIndex = 0;
+            stepCompleted = false;
+            pendingStepSolve = null;
+            document.getElementById('step-result-panel').classList.add('hidden');
+            document.getElementById('btn-apply-solution').classList.add('hidden');
+            document.getElementById('btn-next-step').classList.add('hidden');
+            renderMission();
+
+            p.setCoords(0, evaluateFunctionAt(0));
             board.update();
             updateInfo();
             renderQuestionOverlay(q);
             openQuestionOverlay();
-        }
-
-        function checkWin(m, x, y) {
-            if (!QUESTIONS[currentQ]) return;
-            let q = QUESTIONS[currentQ];
-            let win = false;
-
-            if (q.goal === 'slope_zero' && Math.abs(m) < 0.1) win = true;
-            else if (q.goal === 'slope_equals' && Math.abs(m - q.targetM) < 0.1) win = true;
-            else if (q.goal === 'downward_parabola') {
-                win = Math.abs(params.a) < 0.05 && params.b < -0.2;
-            }
-            else if (q.goal === 'hit_target' && q.targets) {
-                let hitAll = true;
-                q.targets.forEach(t => {
-                    let dist = Math.sqrt((x - t.x)**2 + (y - t.y)**2);
-                    if (dist > 0.5) hitAll = false;
-                });
-                if(hitAll) win = true;
-            }
-
-            let box = document.querySelector('.jxgbox');
-            if (win) {
-                document.getElementById('win-overlay').style.display = 'block';
-                if(box) box.classList.add('winning-box');
-                if (!wasWin) playSound('win');
-            } else {
-                document.getElementById('win-overlay').style.display = 'none';
-                if(box) box.classList.remove('winning-box');
-            }
-            wasWin = win;
         }
 
         window.onload = init;

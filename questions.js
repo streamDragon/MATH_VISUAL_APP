@@ -1,72 +1,231 @@
+/* questions.js - בנק תצורות + שאלות גנריות לחקר פונקציות */
+
+const FUNCTION_TEMPLATES = [
+  {
+    id: "quad_abcd",
+    title: "פרבולה כללית: f(x)=ax^2+bx+c",
+    kind: "poly2",
+    defaults: { a: 1, b: 0, c: 0, d: 0 },
+    params: ["a", "b", "c"],
+    domain: { xMin: -10, xMax: 10 },
+  },
+  {
+    id: "cubic_abcd",
+    title: "פולינום ממעלה 3: f(x)=ax^3+bx^2+cx+d",
+    kind: "poly3",
+    defaults: { a: 0.2, b: 0, c: 0, d: 0 },
+    params: ["a", "b", "c", "d"],
+    domain: { xMin: -6, xMax: 6 },
+  },
+  {
+    id: "line_ab",
+    title: "קו ישר: f(x)=mx+n",
+    kind: "line",
+    defaults: { a: 0, b: 0, c: 1, d: 0 },
+    params: ["c", "d"],
+    domain: { xMin: -10, xMax: 10 },
+  },
+  {
+    id: "shifted_quad_k",
+    title: "פרבולה מוזזת: f(x)=(x-k)^2 + d",
+    kind: "quad_shift",
+    defaults: { a: 0, b: 0, c: 0, d: 0 },
+    params: ["c", "d"],
+    domain: { xMin: -10, xMax: 10 },
+  },
+];
+
 const QUESTIONS = [
-    {
-        title: '1. חימום מנועים',
-        desc: 'שחק עם הסליידרים. נסה ליצור פונקציה שעולה תמיד.',
-        params: [0.1, 0, 1, 0],
-        goal: 'free',
-        locked: [],
-        overlay: {
-            essence: 'היכרות עם המבנה הכללי של פונקציה פולינומית ממעלה שלישית וההשפעה של הפרמטרים a,b,c,d על צורת הגרף.',
-            goal: 'ליצור פונקציה שעולה ברוב התחום ולזהות איך השינוי בכל סליידר משפיע על שיפוע המשיק.',
-            material: 'פונקציה פולינומית, נגזרת, קשר בין סימן הנגזרת לעלייה/ירידה, שיפוע משיק.',
-            howTo: [
-                'הזז את הסליידרים a,b,c,d.',
-                'גרור את הנקודה על הגרף וצפה בערך m בתיבה.',
-                'בדוק מתי m חיובי ברוב התחום.'
-            ]
-        }
+  {
+    id: 0,
+    title: "בחירת פונקציה",
+    desc:
+      "לפני שמתחילים: בחר תצורת פונקציה (תבנית) ושנה את הפרמטרים.\n" +
+      "לאחר הבחירה – כל השאלות הבאות יהיו על הפונקציה שבחרת.",
+    mode: "setup",
+    goal: "choose_function_template",
+  },
+  {
+    id: 1,
+    title: "קיצון: משיק אופקי",
+    desc:
+      "מצא נקודה שבה המשיק אופקי: f'(x0)=0.\n" +
+      "גרור את x0 עד שמתקבל שיפוע 0.",
+    mode: "move_x",
+    goal: "slope_zero",
+    data: {
+      toleranceM: 0.15,
+      requireSecondDerivCheck: false,
     },
-    {
-        title: '2. נקודת קיצון',
-        desc: 'מצא נקודה שבה המשיק הוא אופקי (שיפוע 0).',
-        params: [0.3, 0, -2, 1],
-        goal: 'slope_zero',
-        targetM: 0,
-        locked: ['inpA', 'inpB', 'inpC', 'inpD'],
-        overlay: {
-            essence: 'חקירת פונקציה קבועה וחיפוש נקודה שבה השיפוע מתאפס.',
-            goal: 'למצוא נקודה על הגרף שבה m קרוב ל-0 (משיק אופקי), שמרמזת על נקודת קיצון.',
-            material: 'תנאי הכרחי לקיצון: f\'(x)=0, משמעות גאומטרית של משיק אופקי.',
-            howTo: [
-                'הפונקציה קבועה בשאלה זו ולכן אין צורך לשנות סליידרים.',
-                'גרור את הנקודה על הגרף עד ש־m קרוב ל־0.',
-                'בדוק שההתראה הירוקה מופיעה.'
-            ]
-        }
+    ui: { allowNormal: true, defaultNormalOn: false, allowLineTool: false },
+  },
+  {
+    id: 2,
+    title: "מינימום: משיק אופקי + בדיקת f''(x0)>0",
+    desc:
+      "מצא נקודת מינימום: f'(x0)=0 וגם f''(x0)>0.\n" +
+      "גרור את x0 עד שהשיפוע אפס, וודא שהעקמומיות חיובית.",
+    mode: "move_x",
+    goal: "min_point",
+    data: {
+      toleranceM: 0.15,
+      requireSecondDerivCheck: true,
     },
-    {
-        title: '3. צליפה למטרה',
-        desc: 'כוון את הגרף כך שיעבור בנקודה הירוקה (2,3).',
-        params: [0, 0, 1, 0],
-        goal: 'hit_target',
-        targets: [{ x: 2, y: 3 }],
-        locked: ['inpA', 'inpB'],
-        overlay: {
-            essence: 'התאמת פונקציה למטרה גאומטרית: מעבר דרך נקודה נתונה.',
-            goal: 'לכוון את הפרמטרים הפתוחים כך שהנקודה הנגררת תתלכד עם יעד נתון.',
-            material: 'התמרת גרפים, משמעות פרמטרים c,d בפונקציה, מרחק בין נקודות במישור.',
-            howTo: [
-                'השאר את a,b נעולים ושנה רק את c,d.',
-                'גרור את הנקודה על הגרף לכיוון היעד הירוק.',
-                'הצלחת כאשר המרחק מהיעד קטן מספיק.'
-            ]
-        }
+    ui: { allowNormal: true, defaultNormalOn: true, allowLineTool: false },
+  },
+  {
+    id: 3,
+    title: "מצא x0 לפי שיפוע נתון",
+    desc:
+      "נתון שיפוע m=2.\n" +
+      "מצא ערך x0 כך ש־f'(x0)=2.",
+    mode: "move_x",
+    goal: "slope_equals",
+    data: {
+      targetM: 2,
+      toleranceM: 0.15,
     },
-    {
-        title: '4. פרבולה בוכה',
-        desc: "צור פרבולה 'בוכה' (a=0, b שלילי).",
-        params: [0, 1, 0, 0],
-        goal: 'downward_parabola',
-        locked: [],
-        overlay: {
-            essence: 'מעבר זמני ממעלה שלישית למעלה שנייה ובדיקת כיוון פתיחת פרבולה.',
-            goal: 'להגיע למצב a=0 ו־b<0 כדי לקבל פרבולה הפוכה (פתוחה כלפי מטה).',
-            material: 'פונקציה ריבועית y=bx^2+cx+d, השפעת סימן המקדם המוביל על צורת הפרבולה.',
-            howTo: [
-                'כוון את a לאפס בדיוק.',
-                'כוון את b לערך שלילי.',
-                'בדוק שהגרף נראה כפרבולה הפוכה.'
-            ]
-        }
-    }
+    ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
+  },
+  {
+    id: 4,
+    title: "שיפוע שלילי",
+    desc:
+      "מצא x0 כך ש־f'(x0)=-1.\n" +
+      "זה בודק שליטה בשיפוע ולא רק בקיצון.",
+    mode: "move_x",
+    goal: "slope_equals",
+    data: {
+      targetM: -1,
+      toleranceM: 0.15,
+    },
+    ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
+  },
+  {
+    id: 5,
+    title: "מצא x0 לפי ערך פונקציה",
+    desc:
+      "מצא x0 כך ש־f(x0)=3.\n" +
+      "גרור את x0 עד שהנקודה (x0,y0) מגיעה ל־y=3.",
+    mode: "move_x",
+    goal: "y_equals",
+    data: {
+      targetY: 3,
+      toleranceY: 0.2,
+    },
+    ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
+  },
+  {
+    id: 6,
+    title: "קרא שיפוע בנקודה",
+    desc:
+      "קבע x0=1 (גרור ל־1 בדיוק).\n" +
+      "כעת התשובה היא השיפוע m=f'(1). האפליקציה תבקש ממך להזין את m.",
+    mode: "move_x",
+    goal: "read_slope",
+    data: {
+      fixedX0: 1,
+      answerTolerance: 0.2,
+    },
+    ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
+  },
+  {
+    id: 7,
+    title: "קרא ערך פונקציה בנקודה",
+    desc:
+      "קבע x0=-2.\n" +
+      "כעת התשובה היא y=f(-2). האפליקציה תבקש ממך להזין את y.",
+    mode: "move_x",
+    goal: "read_y",
+    data: {
+      fixedX0: -2,
+      answerTolerance: 0.25,
+    },
+    ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
+  },
+  {
+    id: 8,
+    title: "מצא פרמטר אחד: מעבר בנקודה",
+    desc:
+      "שנה פרמטר אחד (למשל d או c – בהתאם לתבנית שבחרת) כך שהגרף יעבור בנקודה (0,2).",
+    mode: "find_param",
+    goal: "hit_target",
+    data: {
+      targets: [{ x: 0, y: 2, label: "A" }],
+      toleranceY: 0.2,
+      preferredEditableParams: ["d", "c"],
+    },
+    locks: ["inpX"],
+    ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
+  },
+  {
+    id: 9,
+    title: "מצא פרמטר: מעבר בנקודה כללית",
+    desc:
+      "שנה פרמטר אחד כך שהגרף יעבור בנקודה (2,0).",
+    mode: "find_param",
+    goal: "hit_target",
+    data: {
+      targets: [{ x: 2, y: 0, label: "B" }],
+      toleranceY: 0.2,
+      preferredEditableParams: ["c", "d", "b"],
+    },
+    locks: ["inpX"],
+    ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
+  },
+  {
+    id: 10,
+    title: "שתי נקודות יחד (פרמטר אחד/שניים)",
+    desc:
+      "כוון את הפרמטרים המותרים כך שהפונקציה תפגע בשתי הנקודות יחד.\n" +
+      "הצלחה רק אם *באותו רגע* היא עוברת בשתיהן.",
+    mode: "find_param",
+    goal: "hit_targets",
+    data: {
+      targets: [
+        { x: -1, y: 1, label: "A" },
+        { x: 2, y: 4, label: "B" },
+      ],
+      toleranceY: 0.2,
+      preferredEditableParams: ["c", "d", "b"],
+    },
+    ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
+  },
+  {
+    id: 11,
+    title: "משיק שעובר דרך נקודה חיצונית",
+    desc:
+      "מצא x0 כך שהמשיק לגרף בנקודה x0 יעבור דרך הנקודה החיצונית P=(0,1).\n" +
+      "רמז: משיק: y = m(x-x0)+f(x0). בדוק האם (0,1) מקיימת את זה.",
+    mode: "move_x",
+    goal: "tangent_through_point",
+    data: {
+      point: { x: 0, y: 1 },
+      tolerance: 0.25,
+    },
+    ui: { allowNormal: true, defaultNormalOn: false, allowLineTool: true },
+  },
+  {
+    id: 12,
+    title: "נורמל אנכי/אופקי",
+    desc:
+      "מצא x0 כך שהנורמל יהיה אנכי (כלומר המשיק אופקי).\n" +
+      "זה אותו רעיון של f'(x0)=0, אבל עם ניסוח אחר.",
+    mode: "move_x",
+    goal: "slope_zero",
+    data: {
+      toleranceM: 0.15,
+    },
+    ui: { allowNormal: true, defaultNormalOn: true, allowLineTool: false },
+  },
+  {
+    id: 13,
+    title: "חקירה חופשית",
+    desc:
+      "כל הסליידרים פתוחים.\n" +
+      "המטרה: להבין איך כל פרמטר משפיע על צורה, שיפועים, וקיצון.",
+    mode: "free",
+    goal: "free",
+    ui: { allowNormal: true, defaultNormalOn: false, allowLineTool: true },
+  },
 ];
