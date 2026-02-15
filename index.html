@@ -222,9 +222,10 @@
     </div>
 
     <script>
-        const APP_BUILD = '2026-02-15-c81b30b';
+        const APP_BUILD = '2026-02-15-right-angle-marker';
         let board, p, curve, tangent, normalLine, triangle, labelText, testLine, testAnchor, testDir;
         let normalOrigin, normalXAxisPoint, normalYAxisPoint;
+        let rightAngleTPoint, rightAngleNPoint, rightAngleCornerPoint, rightAngleMarker;
         let guideNormalBasePoint, guideNormalDirPoint, guideNormalLine, guideNormalIntersect;
         let targets = [];
         let params = { a:0, b:0, c:0, d:0 };
@@ -508,6 +509,22 @@
                 borders: { strokeColor: '#8e24aa', strokeWidth: 1, dash: 1 }
             });
 
+            rightAngleTPoint = board.create('point', [0, 0], {
+                name: '', fixed: true, visible: false
+            });
+            rightAngleNPoint = board.create('point', [0, 0], {
+                name: '', fixed: true, visible: false
+            });
+            rightAngleCornerPoint = board.create('point', [0, 0], {
+                name: '', fixed: true, visible: false
+            });
+            rightAngleMarker = board.create('polygon', [p, rightAngleTPoint, rightAngleCornerPoint, rightAngleNPoint], {
+                fillColor: '#ffffff',
+                fillOpacity: 0.78,
+                visible: false,
+                borders: { strokeColor: '#5e35b1', strokeWidth: 2 }
+            });
+
             testAnchor = board.create('point', [1, 1], {
                 name: 'A', size: 4, color: '#00897b', visible: false
             });
@@ -735,6 +752,7 @@
         function updateNormalGeometry(x, y, tangentSlope) {
             let show = document.getElementById('chk-normal').checked;
             normalLine.setAttribute({ visible: show });
+            updateRightAngleMarker(x, y, tangentSlope, show);
 
             if (!show) {
                 triangle.setAttribute({ visible: false });
@@ -756,6 +774,23 @@
             normalXAxisPoint.setAttribute({ visible: true });
             normalYAxisPoint.setAttribute({ visible: true });
             triangle.setAttribute({ visible: true });
+        }
+
+        function updateRightAngleMarker(x, y, tangentSlope, visible) {
+            if (!visible) {
+                rightAngleMarker.setAttribute({ visible: false });
+                return;
+            }
+            let tUnit = getTangentUnitVector(tangentSlope);
+            let nUnit = { x: -tUnit.y, y: tUnit.x };
+            let size = 0.42;
+            rightAngleTPoint.setPosition(JXG.COORDS_BY_USER, [x + tUnit.x * size, y + tUnit.y * size]);
+            rightAngleNPoint.setPosition(JXG.COORDS_BY_USER, [x + nUnit.x * size, y + nUnit.y * size]);
+            rightAngleCornerPoint.setPosition(JXG.COORDS_BY_USER, [
+                x + (tUnit.x + nUnit.x) * size,
+                y + (tUnit.y + nUnit.y) * size
+            ]);
+            rightAngleMarker.setAttribute({ visible: true });
         }
 
         function getTangentUnitVector(m) {
@@ -1225,6 +1260,7 @@
                 triangle.setAttribute({ visible: false });
                 normalXAxisPoint.setAttribute({ visible: false });
                 normalYAxisPoint.setAttribute({ visible: false });
+                rightAngleMarker.setAttribute({ visible: false });
             } else {
                 document.getElementById('chk-normal').checked = !!defaultNormalOn;
             }
