@@ -1,6 +1,5 @@
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-// פונקציה להפעלת הסאונד (חייבת לקרות בלחיצה ראשונה)
 function initAudio() {
     if (audioCtx.state === 'suspended') {
         audioCtx.resume();
