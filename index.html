@@ -95,20 +95,21 @@
 
     <div id="start-guide-modal" class="hidden" onclick="onStartGuideBackdropClick(event)">
         <div id="start-guide-card">
-            <h3>ברוכים הבאים למעבדת הפונקציות</h3>
+            <div class="start-guide-hero">
+                <div class="start-guide-badge">Function Lab</div>
+                <h3>ברוכים הבאים למעבדת הפונקציות</h3>
+                <p>לומדים גרפים, משיק ואנך בצורה אינטראקטיבית ומהירה.</p>
+            </div>
             <div class="start-guide-body">
-                באתר הזה עובדים בשיטה חזותית:
-                גוררים נקודה על הגרף, רואים איך השיפוע משתנה, ואז פותרים משימות לפי שלבים.
-                <br><br>
-                איך עובדים:
-                1. קוראים את המשימה למעלה.
-                2. פותחים כלי אחד בכל פעם (נוסחאות / כלים / פרמטרים / שלבים).
-                3. מזיזים נקודה או פרמטרים עד שהמשימה הושלמה.
-                4. בשאלות פרמטרים – המערכת פותרת את האלגברה ומעדכנת פונקציה.
+                מתחילים בשלושה צעדים:
+                <br>1. בוחרים שאלה.
+                <br>2. מזיזים נקודה/סליידרים על הגרף.
+                <br>3. בודקים אם פתרתם נכון.
             </div>
             <div class="start-guide-actions">
-                <button onclick="closeStartGuide(true)">דילוג</button>
-                <button onclick="openStartGuideTutorial()">כניסה להסבר</button>
+                <button onclick="startAppFromSplash('skip')">דילוג</button>
+                <button onclick="startAppFromSplash('tutorial')">כניסה להסבר</button>
+                <button class="start-primary" onclick="startAppFromSplash('start')">התחל</button>
             </div>
         </div>
     </div>
@@ -245,7 +246,7 @@
     </div>
 
     <script>
-        const APP_BUILD = '2026-02-15-normal-lab-guide';
+        const APP_BUILD = '2026-02-15-splash-intro';
         let board, p, curve, tangent, normalLine, triangle, labelText, testLine, testAnchor, testDir;
         let normalOrigin, normalXAxisPoint, normalYAxisPoint;
         let rightAngleP1, rightAngleP2, rightAngleP3, rightAngleP4, rightAngleMarker;
@@ -1489,6 +1490,15 @@
         function openStartGuideTutorial() {
             closeStartGuide(false);
             openQuestionOverlay();
+        }
+
+        function startAppFromSplash(mode) {
+            if (typeof playIntroTheme === 'function') playIntroTheme();
+            if (mode === 'tutorial') {
+                openStartGuideTutorial();
+                return;
+            }
+            closeStartGuide(true);
         }
 
         function onStartGuideBackdropClick(event) {

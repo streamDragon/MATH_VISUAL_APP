@@ -1,6 +1,7 @@
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let soundEnabled = true;
 let lastWarmColdTs = 0;
+let introPlayed = false;
 
 function initAudio() {
     if (audioCtx.state === 'suspended') {
@@ -51,6 +52,30 @@ function playSound(type) {
 
 function playButtonClickSound() {
     playSound('pop');
+}
+
+function playIntroTheme() {
+    if (!soundEnabled || introPlayed) return;
+    initAudio();
+    introPlayed = true;
+
+    const now = audioCtx.currentTime;
+    const notes = [392, 523.25, 659.25];
+    notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        const start = now + i * 0.12;
+        const stop = start + 0.18;
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, start);
+        gainNode.gain.setValueAtTime(0.0001, start);
+        gainNode.gain.exponentialRampToValueAtTime(0.08, start + 0.02);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, stop);
+        osc.start(start);
+        osc.stop(stop);
+    });
 }
 
 function resetWarmColdFeedback() {
