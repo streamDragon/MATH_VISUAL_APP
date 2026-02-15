@@ -19,63 +19,51 @@
 
     <div id="graph-area"></div>
 
-    <div id="formulas-container">
-        <div class="formula-line">
-            <span class="formula-label">f(x) = </span>
-            <span id="func-eq"></span>
-        </div>
-        <div class="formula-line">
-            <span class="deriv-label">f'(x) = </span>
-            <span id="deriv-eq"></span>
-        </div>
-    </div>
-
     <div id="hud-container">
         <div id="holy-trinity">
             <div class="trinity-item"><span id="val-x" class="trinity-val">0</span><span class="trinity-label">X</span></div>
-            <div class="trinity-item"><span id="val-y" class="trinity-val">0</span><span class="trinity-label">f(x)</span></div>
-            <div class="trinity-item"><span id="val-m" class="trinity-val">0</span><span class="trinity-label">f'(x)</span></div>
+            <div class="trinity-item"><span id="val-y" class="trinity-val">0</span><span class="trinity-label">Y</span></div>
+            <div class="trinity-item"><span id="val-m" class="trinity-val">0</span><span class="trinity-label">שיפוע</span></div>
         </div>
-        <div id="tangent-eq">y = mx + n</div>
-    </div>
-
-    <div id="win-overlay">
-        <h1>🏆 כל הכבוד!</h1>
-        <p>הצלחת את המשימה</p>
+        <div id="win-overlay" style="display:none; position:absolute; top:80px; background:white; padding:20px; border:2px solid green; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+            <h2 style="margin:0; color:green;">🏆 כל הכבוד!</h2>
+        </div>
     </div>
 
     <div id="sidebar">
-        <h2 id="q-title" style="margin:0; text-align:center; font-size:1.5rem;">טוען...</h2>
         
-        <div id="q-short-inst"></div>
-        
-        <button class="theory-btn" onclick="openTheoryModal()">💡 נוסחאות והסברים</button>
-
-        <div class="nav-container" id="questions-nav" style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:15px; justify-content:center;"></div>
-
-        <div style="background:#f8f9fa; padding:15px; border-radius:12px; border:1px solid #e9ecef;">
-            <div style="display:flex; margin-bottom:12px; align-items:center;">
-                <span style="width:25px; font-weight:bold; font-size:1.1rem;">a</span>
-                <input type="range" id="inpA" min="-2" max="2" step="0.1" style="flex:1; cursor:pointer;">
-            </div>
-            <div style="display:flex; margin-bottom:12px; align-items:center;">
-                <span style="width:25px; font-weight:bold; font-size:1.1rem;">b</span>
-                <input type="range" id="inpB" min="-3" max="3" step="0.1" style="flex:1; cursor:pointer;">
-            </div>
-            <div style="display:flex; margin-bottom:12px; align-items:center;">
-                <span style="width:25px; font-weight:bold; font-size:1.1rem;">c</span>
-                <input type="range" id="inpC" min="-5" max="5" step="0.1" style="flex:1; cursor:pointer;">
-            </div>
-            <div style="display:flex; margin-bottom:12px; align-items:center;">
-                <span style="width:25px; font-weight:bold; font-size:1.1rem;">d</span>
-                <input type="range" id="inpD" min="-5" max="5" step="0.1" style="flex:1; cursor:pointer;">
-            </div>
+        <div style="text-align:center;">
+            <h2 id="q-title" style="margin:0 0 5px 0; color:#333;">טוען...</h2>
+            <div id="q-desc" style="font-size:0.95rem; color:#555; line-height:1.4;"></div>
         </div>
-    </div>
 
-    <div id="theory-modal" class="theory-overlay">
-        <button class="close-theory" onclick="closeTheoryModal()">✖ סגור</button>
-        <div class="theory-content" id="theory-body"></div>
+        <div class="task-selector">
+            <span class="task-label">בחר שלב במשחק:</span>
+            <div class="nav-buttons" id="nav-container">
+                </div>
+        </div>
+
+        <div class="info-box yellow-box">
+            <div class="box-title">📝 דף נוסחאות</div>
+            <div class="formula-display" id="formula-func">f(x) = ...</div>
+            <div class="formula-display" id="formula-deriv" style="color:#d32f2f;">f'(x) = ...</div>
+        </div>
+
+        <div class="info-box purple-box">
+            <div class="box-title">📐 מעבדת האנך</div>
+            <label>
+                <input type="checkbox" id="chk-normal" onchange="toggleNormal()">
+                הצג אנך + משולש
+            </label>
+        </div>
+
+        <div class="slider-container">
+            <div class="slider-row"><span class="slider-lbl">a</span><input type="range" id="inpA" min="-2" max="2" step="0.1" class="slider-inp"></div>
+            <div class="slider-row"><span class="slider-lbl">b</span><input type="range" id="inpB" min="-3" max="3" step="0.1" class="slider-inp"></div>
+            <div class="slider-row"><span class="slider-lbl">c</span><input type="range" id="inpC" min="-5" max="5" step="0.1" class="slider-inp"></div>
+            <div class="slider-row"><span class="slider-lbl">d</span><input type="range" id="inpD" min="-5" max="5" step="0.1" class="slider-inp"></div>
+        </div>
+
     </div>
 
     <script src="sounds.js"></script>
@@ -83,10 +71,10 @@
 
     <script>
         let board, p, tangent, curve;
+        let normalLine, trianglePoly; // משתנים לאנך ולמשולש
         let targets = [];
         let params = { a:0, b:0, c:0, d:0 };
         let currentQ = 0;
-        let isWinning = false;
         let soundEnabled = true;
 
         function init() {
@@ -100,23 +88,42 @@
                 pan: { enabled: false }, zoom: { enabled: true }
             });
 
+            // הפונקציה
             curve = board.create('functiongraph', [
                 function(x) { return params.a*Math.pow(x,3) + params.b*Math.pow(x,2) + params.c*x + params.d; }
             ], { strokeWidth: 3, strokeColor: '#007bff' });
 
+            // נקודה גוררת
             p = board.create('glider', [0, 0, curve], { name: '', size: 9, color: '#007bff' });
+            
+            // המשיק
             tangent = board.create('tangent', [p], { strokeColor: '#ff9f43', strokeWidth: 2, dash:2 });
 
+            // --- מעבדת האנך (חדש!) ---
+            // 1. האנך: קו שעובר ב-P עם שיפוע הופכי ונגדי
+            normalLine = board.create('line', [p, function() {
+                let m = 3*params.a*p.X()*p.X() + 2*params.b*p.X() + params.c;
+                let normalM = -1/m;
+                // יוצרים נקודה שניה כדי להגדיר קו: (x+1, y+m')
+                return [p.X()+1, p.Y()+normalM];
+            }], { strokeColor: '#ab47bc', strokeWidth: 2, visible: false });
+
+            // 2. משולש (אופציונלי - בין המשיק לאנך לציר X למשל, או פשוט האנך)
+            // לצורך פשטות: נצייר משולש בין הנקודה, החיתוך של האנך עם ציר X, וההיטל על הציר
+            trianglePoly = board.create('polygon', [[0,0],[0,0],[0,0]], { 
+                fillColor: '#ab47bc', fillOpacity: 0.2, borders: {visible:false}, visible:false 
+            });
+
             // אירועים
-            p.on('drag', () => { playSoundWrapper('drag'); updateAll(); });
-            board.on('down', () => playSoundWrapper('drag')); 
+            p.on('drag', updateAll);
             board.on('up', updateAll);
             
             ['inpA','inpB','inpC','inpD'].forEach(id => {
-                document.getElementById(id).addEventListener('input', () => { updateParams(); });
+                document.getElementById(id).addEventListener('input', updateParams);
             });
 
-            const nav = document.getElementById('questions-nav');
+            // יצירת כפתורי ניווט
+            const nav = document.getElementById('nav-container');
             QUESTIONS.forEach((q, i) => {
                 let btn = document.createElement('button');
                 btn.className = 'q-btn'; 
@@ -128,22 +135,14 @@
             loadQuestion(0);
         }
 
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            const btn = document.getElementById('sound-toggle');
-            btn.innerText = soundEnabled ? "🔊" : "🔇";
-            btn.style.opacity = soundEnabled ? "1" : "0.5";
-        }
-
-        function playSoundWrapper(type) {
-            if (!soundEnabled) return;
-            if(typeof playSound === 'function') {
-                if(type !== 'drag') playSound(type); 
-                else initAudioWrapper(); 
-            }
-        }
-        function initAudioWrapper() {
-            if(soundEnabled && typeof initAudio === 'function') initAudio();
+        // פונקציה לבניית טקסט יפה (בלי מקדמים 0 וכו')
+        function buildFuncText(a, b, c, d) {
+            let terms = [];
+            if (a !== 0) terms.push((a==1?'':a==-1?'-':a) + "x³");
+            if (b !== 0) terms.push((b>0 && terms.length?'+':'') + (b==1 && terms.length?'':b==-1?'-':b) + "x²");
+            if (c !== 0) terms.push((c>0 && terms.length?'+':'') + (c==1 && terms.length?'':c==-1?'-':c) + "x");
+            if (d !== 0 || terms.length === 0) terms.push((d>0 && terms.length?'+':'') + d);
+            return "f(x) = " + terms.join("");
         }
 
         function updateParams() {
@@ -153,76 +152,13 @@
             params.d = parseFloat(document.getElementById('inpD').value);
             board.update();
             updateAll();
-            updateFormulasDisplay(); // עדכון הטקסט של הפונקציות למעלה
         }
 
-        // פונקציה שבונה את המחרוזת היפה של הפונקציה (למשל 2x^2 - 4)
-        function buildPolyString(a, b, c, d) {
-            let terms = [];
-            
-            if (a !== 0) terms.push((a===1?'':(a===-1?'-':a)) + "x<sup>3</sup>");
-            
-            if (b !== 0) {
-                let sign = (b > 0 && terms.length > 0) ? " + " : (b < 0 ? " - " : "");
-                if (terms.length === 0 && b < 0) sign = "-"; 
-                let val = Math.abs(b);
-                terms.push(sign + (val===1?'':val) + "x<sup>2</sup>");
-            }
-            
-            if (c !== 0) {
-                let sign = (c > 0 && terms.length > 0) ? " + " : (c < 0 ? " - " : "");
-                if (terms.length === 0 && c < 0) sign = "-";
-                let val = Math.abs(c);
-                terms.push(sign + (val===1?'':val) + "x");
-            }
-            
-            if (d !== 0 || terms.length === 0) {
-                let sign = (d > 0 && terms.length > 0) ? " + " : (d < 0 ? " - " : "");
-                if (terms.length === 0 && d < 0) sign = "-";
-                terms.push(sign + Math.abs(d));
-            }
-            
-            return terms.join("");
-        }
-        
-        // בונה את הנגזרת
-        function buildDerivString(a, b, c) {
-            // הנגזרת של ax^3 + bx^2 + cx + d היא: 3ax^2 + 2bx + c
-            let na = 3*a;
-            let nb = 2*b;
-            let nc = c;
-            
-            let terms = [];
-            
-            // איבר ריבועי
-            if (na !== 0) {
-                // מעגל ל-2 ספרות כדי שיהיה קריא
-                let val = parseFloat(na.toFixed(2));
-                terms.push(val + "x<sup>2</sup>");
-            }
-            
-            // איבר לינארי
-            if (nb !== 0) {
-                let val = parseFloat(nb.toFixed(2));
-                let sign = (val > 0 && terms.length > 0) ? " + " : (val < 0 ? " " : ""); 
-                // אם שלילי, המינוס כבר בתוך המספר, אבל צריך רווח אם הוא לא ראשון
-                if(val < 0 && terms.length > 0) sign = " ";
-                terms.push(sign + val + "x");
-            }
-            
-            // מספר חופשי
-            if (nc !== 0 || terms.length === 0) {
-                let val = parseFloat(nc.toFixed(2));
-                let sign = (val > 0 && terms.length > 0) ? " + " : (val < 0 ? " " : "");
-                terms.push(sign + val);
-            }
-            
-            return terms.join("");
-        }
-
-        function updateFormulasDisplay() {
-            document.getElementById('func-eq').innerHTML = buildPolyString(params.a, params.b, params.c, params.d);
-            document.getElementById('deriv-eq').innerHTML = buildDerivString(params.a, params.b, params.c);
+        function toggleNormal() {
+            let show = document.getElementById('chk-normal').checked;
+            normalLine.setAttribute({visible: show});
+            trianglePoly.setAttribute({visible: show});
+            updateAll(); // כדי לעדכן מיקום מיידי
         }
 
         function updateAll() {
@@ -230,37 +166,52 @@
             let y = params.a*Math.pow(x,3) + params.b*Math.pow(x,2) + params.c*x + params.d;
             let m = 3*params.a*x*x + 2*params.b*x + params.c;
 
-            // עדכון השלשה הקדושה
+            // עדכון HUD
             document.getElementById('val-x').innerText = x.toFixed(2);
             document.getElementById('val-y').innerText = y.toFixed(2);
             document.getElementById('val-m').innerText = m.toFixed(2);
-            
-            // עדכון משוואת המשיק: y = mx + n
-            let n = y - (m * x);
-            let nStr = n >= 0 ? `+ ${n.toFixed(2)}` : `- ${Math.abs(n).toFixed(2)}`;
-            let tangentStr = `y = ${m.toFixed(2)}x ${nStr}`;
-            
-            let eqEl = document.getElementById('tangent-eq');
-            eqEl.innerText = tangentStr;
-            eqEl.classList.add('show');
+
+            // עדכון תיבת הנוסחאות בצהוב
+            document.getElementById('formula-func').innerText = buildFuncText(params.a, params.b, params.c, params.d);
+            // נגזרת פשוטה לתצוגה
+            let da = (3*params.a).toFixed(2).replace('.00','');
+            let db = (2*params.b).toFixed(2).replace('.00','');
+            let dc = params.c.toFixed(2).replace('.00','');
+            document.getElementById('formula-deriv').innerText = `f'(x) = ${da}x² + ${db}x + ${dc}`;
+
+            // לוגיקה למעבדת האנך (אם דלוקה)
+            if (document.getElementById('chk-normal').checked) {
+                // חישוב חיתוך האנך עם ציר X
+                // משוואת האנך: Y - y1 = (-1/m)(X - x1)  =>  ב-Y=0:  -y1 = (-1/m)(X - x1) => X = x1 + y1*m
+                if (Math.abs(m) > 0.01) {
+                    let normalXIntercept = x + y*m; 
+                    trianglePoly.dataX = [x, x, normalXIntercept];
+                    trianglePoly.dataY = [0, y, 0];
+                } else {
+                    // מקרה קצה שיפוע 0 - אנך מאונך (אינסוף)
+                    trianglePoly.dataX = [x, x, x];
+                    trianglePoly.dataY = [0, y, 0];
+                }
+            }
 
             checkWin(m, x, y);
         }
 
         function loadQuestion(idx) {
             currentQ = idx;
-            isWinning = false;
             let q = QUESTIONS[idx];
             
+            // סימון כפתור פעיל
             document.querySelectorAll('.q-btn').forEach((b, i) => {
                 b.classList.toggle('active', i === idx);
             });
 
-            document.getElementById('win-overlay').classList.remove('show');
-            document.getElementById('holy-trinity').className = ''; 
             document.getElementById('q-title').innerText = q.title;
-            document.getElementById('q-short-inst').innerText = q.shortInst || q.desc;
-            
+            document.getElementById('q-desc').innerText = q.desc;
+            document.getElementById('win-overlay').style.display = 'none';
+            document.getElementById('holy-trinity').className = ''; 
+
+            // איפוס סליידרים
             params.a = q.params[0]; params.b = q.params[1]; 
             params.c = q.params[2]; params.d = q.params[3];
             document.getElementById('inpA').value = params.a;
@@ -268,73 +219,56 @@
             document.getElementById('inpC').value = params.c;
             document.getElementById('inpD').value = params.d;
             
+            // נעילה לפי הצורך
             ['inpA','inpB','inpC','inpD'].forEach(id => document.getElementById(id).disabled = false);
             if(q.locked) q.locked.forEach(id => document.getElementById(id).disabled = true);
 
+            // מטרות
             board.removeObject(targets);
             targets = [];
             if(q.targets) {
                 q.targets.forEach(t => {
                     let pt = board.create('point', [t.x, t.y], { 
-                        name:'', fixed:true, color:'#00e676', size:6, face:'o', strokeWidth:2, strokeColor:'black' 
+                        name:'', fixed:true, color:'#00e676', size:5, face:'o'
                     });
                     targets.push(pt);
                 });
             }
 
             p.setCoords(0, params.d);
-            updateParams(); // זה גם מעדכן את נוסחאות
-            playSoundWrapper('pop');
+            updateParams();
         }
 
         function checkWin(m, x, y) {
             let q = QUESTIONS[currentQ];
             let win = false;
-            let hot = false;
 
-            if (q.goal === 'slope_zero') {
-                if (Math.abs(m) < 0.1) win = true;
-                else if (Math.abs(m) < 0.6) hot = true;
-            }
-            if (q.goal === 'slope_equals') {
-                if (Math.abs(m - q.targetM) < 0.1) win = true;
-                else if (Math.abs(m - q.targetM) < 0.6) hot = true;
-            }
+            if (q.goal === 'slope_zero' && Math.abs(m) < 0.1) win = true;
+            if (q.goal === 'slope_equals' && Math.abs(m - q.targetM) < 0.1) win = true;
             if (q.goal === 'hit_target') {
-                let hitCount = 0;
+                let hitAll = true;
                 q.targets.forEach(t => {
+                     // בודקים אם הפונקציה עוברת קרוב לנקודה
                     let yCalc = params.a*Math.pow(t.x,3) + params.b*Math.pow(t.x,2) + params.c*t.x + params.d;
-                    let diff = Math.abs(yCalc - t.y);
-                    if(diff < 0.3) hitCount++;
-                    if(diff < 1.5) hot = true;
+                    if (Math.abs(yCalc - t.y) > 0.3) hitAll = false;
                 });
-                if(hitCount === q.targets.length) win = true;
+                if(hitAll) win = true;
             }
 
             const hud = document.getElementById('holy-trinity');
-            hud.classList.remove('winning', 'hot');
-
             if (win) {
                 hud.classList.add('winning');
-                if (!isWinning) {
-                    playSoundWrapper('win');
-                    document.getElementById('win-overlay').classList.add('show');
-                    isWinning = true;
-                    setTimeout(() => document.getElementById('win-overlay').classList.remove('show'), 2500);
-                }
+                document.getElementById('win-overlay').style.display = 'block';
+                if(soundEnabled) { /* אפשר להוסיף סאונד כאן אם רוצים */ }
             } else {
-                isWinning = false;
-                if(hot) hud.classList.add('hot');
+                hud.classList.remove('winning');
+                document.getElementById('win-overlay').style.display = 'none';
             }
         }
 
-        function openTheoryModal() {
-            document.getElementById('theory-body').innerHTML = QUESTIONS[currentQ].theory;
-            document.getElementById('theory-modal').style.display = 'flex';
-            if(window.MathJax) MathJax.typesetPromise();
-        }
-        function closeTheoryModal() {
-            document.getElementById('theory-modal').style.display = 'none';
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('sound-toggle').innerText = soundEnabled ? "🔊" : "🔇";
         }
 
         window.onload = init;
