@@ -11,7 +11,6 @@ function playSound(type) {
     const now = audioCtx.currentTime;
 
     if (type === 'win') {
-        // צליל ניצחון (עולה)
         osc.type = 'sine';
         osc.frequency.setValueAtTime(440, now);
         osc.frequency.exponentialRampToValueAtTime(880, now + 0.3);
@@ -20,7 +19,6 @@ function playSound(type) {
         osc.start();
         osc.stop(now + 0.4);
     } else if (type === 'pop') {
-        // צליל קליק (פופ)
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(600, now);
         osc.frequency.linearRampToValueAtTime(200, now + 0.1);
