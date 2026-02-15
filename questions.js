@@ -7,6 +7,12 @@ const FUNCTION_TEMPLATES = [
     kind: "poly2",
     defaults: { a: 1, b: 0, c: 0, d: 0 },
     params: ["a", "b", "c"],
+    paramDescriptions: {
+      a: "מקדם של x^2",
+      b: "מקדם של x",
+      c: "איבר חופשי",
+      d: "לא בשימוש בתבנית זו",
+    },
     domain: { xMin: -10, xMax: 10 },
   },
   {
@@ -15,7 +21,27 @@ const FUNCTION_TEMPLATES = [
     kind: "poly3",
     defaults: { a: 0.2, b: 0, c: 0, d: 0 },
     params: ["a", "b", "c", "d"],
+    paramDescriptions: {
+      a: "מקדם של x^3",
+      b: "מקדם של x^2",
+      c: "מקדם של x",
+      d: "איבר חופשי",
+    },
     domain: { xMin: -6, xMax: 6 },
+  },
+  {
+    id: "quartic_abcd",
+    title: "פולינום ממעלה 4: f(x)=ax^4+bx^3+cx^2+dx",
+    kind: "poly4",
+    defaults: { a: 0.05, b: 0, c: -1, d: 0.5 },
+    params: ["a", "b", "c", "d"],
+    paramDescriptions: {
+      a: "מקדם של x^4",
+      b: "מקדם של x^3",
+      c: "מקדם של x^2",
+      d: "מקדם של x",
+    },
+    domain: { xMin: -5, xMax: 5 },
   },
   {
     id: "line_ab",
@@ -23,6 +49,12 @@ const FUNCTION_TEMPLATES = [
     kind: "line",
     defaults: { a: 0, b: 0, c: 1, d: 0 },
     params: ["c", "d"],
+    paramDescriptions: {
+      a: "לא בשימוש בתבנית זו",
+      b: "לא בשימוש בתבנית זו",
+      c: "שיפוע m",
+      d: "חיתוך n עם ציר y",
+    },
     domain: { xMin: -10, xMax: 10 },
   },
   {
@@ -31,6 +63,12 @@ const FUNCTION_TEMPLATES = [
     kind: "quad_shift",
     defaults: { a: 0, b: 0, c: 0, d: 0 },
     params: ["c", "d"],
+    paramDescriptions: {
+      a: "לא בשימוש בתבנית זו",
+      b: "לא בשימוש בתבנית זו",
+      c: "הזזה אופקית k",
+      d: "הזזה אנכית d",
+    },
     domain: { xMin: -10, xMax: 10 },
   },
 ];

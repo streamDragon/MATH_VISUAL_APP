@@ -211,10 +211,10 @@
                 <button id="btn-builder" class="acc-btn" onclick="toggleBuilderPanel()">פרמטרים</button>
                 <div id="builder-panel" class="acc-panel hidden" style="background:#fff; padding:8px; border-radius:5px; border:1px solid #eee;">
                     <div class="section-title">בניית הפונקציה</div>
-                    <div class="slider-row"><span class="slider-lbl">a</span><input type="range" id="inpA" min="-5" max="5" step="0.1" class="slider-inp"></div>
-                    <div class="slider-row"><span class="slider-lbl">b</span><input type="range" id="inpB" min="-5" max="5" step="0.1" class="slider-inp"></div>
-                    <div class="slider-row"><span class="slider-lbl">c</span><input type="range" id="inpC" min="-5" max="5" step="0.1" class="slider-inp"></div>
-                    <div class="slider-row"><span class="slider-lbl">d</span><input type="range" id="inpD" min="-5" max="5" step="0.1" class="slider-inp"></div>
+                    <div class="slider-row"><span class="slider-lbl">a</span><input type="range" id="inpA" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintA"></span></div>
+                    <div class="slider-row"><span class="slider-lbl">b</span><input type="range" id="inpB" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintB"></span></div>
+                    <div class="slider-row"><span class="slider-lbl">c</span><input type="range" id="inpC" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintC"></span></div>
+                    <div class="slider-row"><span class="slider-lbl">d</span><input type="range" id="inpD" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintD"></span></div>
                 </div>
             </div>
         </div>
@@ -292,6 +292,7 @@
             if (markChosen) templateChosen = true;
             let status = document.getElementById('template-status-text');
             if (status) status.innerText = `נבחרה תבנית: ${tpl.title}`;
+            updateParamHints();
             board.update();
             updateInfo();
         }
@@ -300,6 +301,15 @@
             let select = document.getElementById('template-select');
             if (!select) return;
             applyTemplateById(select.value, markChosen);
+        }
+
+        function updateParamHints() {
+            const desc = activeTemplate?.paramDescriptions || {};
+            const map = { A: 'a', B: 'b', C: 'c', D: 'd' };
+            Object.keys(map).forEach((k) => {
+                const el = document.getElementById(`hint${k}`);
+                if (el) el.innerText = desc[map[k]] || '';
+            });
         }
 
         function getQuestionSteps(q) {
@@ -335,6 +345,7 @@
             }
             let kind = activeTemplate?.kind || 'poly3';
             if (kind === 'poly2') return params.a*x*x + params.b*x + params.c;
+            if (kind === 'poly4') return params.a*x*x*x*x + params.b*x*x*x + params.c*x*x + params.d*x;
             if (kind === 'line') return params.c*x + params.d;
             if (kind === 'quad_shift') {
                 let k = params.c;
@@ -352,6 +363,7 @@
             }
             let kind = activeTemplate?.kind || 'poly3';
             if (kind === 'poly2') return 2*params.a*x + params.b;
+            if (kind === 'poly4') return 4*params.a*x*x*x + 3*params.b*x*x + 2*params.c*x + params.d;
             if (kind === 'line') return params.c;
             if (kind === 'quad_shift') {
                 let k = params.c;
@@ -439,7 +451,9 @@
             drawerOpen = !!open;
             document.getElementById('sidebar').classList.toggle('drawer-open', drawerOpen);
             document.getElementById('sidebar').classList.toggle('drawer-collapsed', !drawerOpen);
-            document.getElementById('drawer-handle').innerText = drawerOpen ? 'סגור כלים ומשימות' : 'כלים ומשימות';
+            document.getElementById('drawer-handle').innerText = drawerOpen
+                ? '▲ סגור כלים ומשימות'
+                : '▼ פתח כלים ומשימות';
             applyTopStripFocusMode();
         }
 
@@ -594,7 +608,7 @@
                 let numStr = absVal.toFixed(1).replace('.0','');
                 if (numStr === '1' && pow > 0) numStr = '';
 
-                let xPart = pow === 3 ? 'x³' : pow === 2 ? 'x²' : pow === 1 ? 'x' : '';
+                let xPart = pow === 4 ? 'x⁴' : pow === 3 ? 'x³' : pow === 2 ? 'x²' : pow === 1 ? 'x' : '';
                 parts.push(sign + numStr + xPart);
             });
             if (parts.length === 0) return '0';
@@ -628,6 +642,11 @@
                 if (kind === 'poly2') {
                     let fTerms = [{val: params.a, pow:2}, {val: params.b, pow:1}, {val: params.c, pow:0}];
                     let dTerms = [{val: 2*params.a, pow:1}, {val: params.b, pow:0}];
+                    fxText = 'f(x) = ' + formatPoly(fTerms);
+                    dText = "f'(x) = " + formatPoly(dTerms);
+                } else if (kind === 'poly4') {
+                    let fTerms = [{val: params.a, pow:4}, {val: params.b, pow:3}, {val: params.c, pow:2}, {val: params.d, pow:1}];
+                    let dTerms = [{val: 4*params.a, pow:3}, {val: 3*params.b, pow:2}, {val: 2*params.c, pow:1}, {val: params.d, pow:0}];
                     fxText = 'f(x) = ' + formatPoly(fTerms);
                     dText = "f'(x) = " + formatPoly(dTerms);
                 } else if (kind === 'line') {
@@ -1364,6 +1383,7 @@
             updateBuilderVisibility(q);
             applyQuestionUi(q);
             configureVideoButton(q);
+            updateParamHints();
             openAccordion('steps');
             setDrawerOpen(false);
 
