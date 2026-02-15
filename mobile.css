@@ -544,6 +544,60 @@ h2 {
     text-decoration: none;
 }
 
+#start-guide-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(7, 20, 39, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2750;
+    padding: 14px;
+}
+
+#start-guide-card {
+    width: min(720px, 100%);
+    background: #ffffff;
+    border-radius: 14px;
+    border: 2px solid #2f6fed;
+    box-shadow: 0 16px 48px rgba(4, 21, 43, 0.35);
+    padding: 14px;
+}
+
+#start-guide-card h3 {
+    margin: 0 0 8px 0;
+    color: #0f172a;
+}
+
+.start-guide-body {
+    line-height: 1.5;
+    color: #0f172a;
+    font-size: 0.95rem;
+}
+
+.start-guide-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.start-guide-actions button {
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #0f172a;
+    font-weight: 700;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+#start-guide-card .start-guide-actions button:last-child {
+    border-color: #9ec5ff;
+    background: #e9f2ff;
+    color: #12356a;
+}
+
 #step-toast {
     position: fixed;
     left: 12px;

@@ -71,6 +71,26 @@
 
     <div id="step-toast" class="hidden"></div>
 
+    <div id="start-guide-modal" class="hidden" onclick="onStartGuideBackdropClick(event)">
+        <div id="start-guide-card">
+            <h3>ברוכים הבאים למעבדת הפונקציות</h3>
+            <div class="start-guide-body">
+                באתר הזה עובדים בשיטה חזותית:
+                גוררים נקודה על הגרף, רואים איך השיפוע משתנה, ואז פותרים משימות לפי שלבים.
+                <br><br>
+                איך עובדים:
+                1. קוראים את המשימה למעלה.
+                2. פותחים כלי אחד בכל פעם (נוסחאות / כלים / פרמטרים / שלבים).
+                3. מזיזים נקודה או פרמטרים עד שהמשימה הושלמה.
+                4. בשאלות פרמטרים – המערכת פותרת את האלגברה ומעדכנת פונקציה.
+            </div>
+            <div class="start-guide-actions">
+                <button onclick="closeStartGuide(true)">דילוג</button>
+                <button onclick="openStartGuideTutorial()">כניסה להסבר</button>
+            </div>
+        </div>
+    </div>
+
     <div id="graph-area-wrapper">
         <div id="top-strip">
             <div id="top-question-wrap">
@@ -541,12 +561,13 @@
                 applyTemplateById(activeTemplate.id, false);
             }
 
-            loadQ(0);
+            loadQ(0, { autoOpenOverlay: false });
             openAccordion('steps');
             setDrawerOpen(false);
             updateNormalShiftLabel();
             refreshTestLineControlVisibility();
             updateSoundButton();
+            openStartGuideModal();
         }
 
         function getSlope(x) {
@@ -1204,6 +1225,28 @@
             if (event.target.id === 'video-modal') closeVideoModal();
         }
 
+        function openStartGuideModal() {
+            document.getElementById('start-guide-modal').classList.remove('hidden');
+        }
+
+        function closeStartGuide(skipOverlay) {
+            document.getElementById('start-guide-modal').classList.add('hidden');
+            if (skipOverlay) {
+                closeQuestionOverlay();
+            }
+        }
+
+        function openStartGuideTutorial() {
+            closeStartGuide(false);
+            openQuestionOverlay();
+        }
+
+        function onStartGuideBackdropClick(event) {
+            if (event.target.id === 'start-guide-modal') {
+                closeStartGuide(true);
+            }
+        }
+
         function updateBuilderVisibility(q) {
             let allIds = ['inpA','inpB','inpC','inpD'];
             let locked = new Set(q.locked || []);
@@ -1256,7 +1299,8 @@
             updateInfo();
         }
 
-        function loadQ(idx) {
+        function loadQ(idx, options = {}) {
+            const autoOpenOverlay = options.autoOpenOverlay !== false;
             currentQ = idx;
             let q = QUESTIONS[idx];
             document.getElementById('q-title').innerText = q.title;
@@ -1349,7 +1393,8 @@
             board.update();
             updateInfo();
             renderQuestionOverlay(q);
-            openQuestionOverlay();
+            if (autoOpenOverlay) openQuestionOverlay();
+            else closeQuestionOverlay();
         }
 
         window.onload = init;
