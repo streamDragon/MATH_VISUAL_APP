@@ -1,92 +1,172 @@
-/* mobile.css - גרסה שקופה ומותאמת */
-
-@media (max-width: 800px) {
-    
-    /* === 1. הגדרות שלד המסך === */
-    html, body {
-        margin: 0 !important;
-        padding: 0 !important;
-        width: 100% !important;
-        /* מכריח את הגוף לתפוס את כל הגובה האפשרי בתוך ה-IFrame */
-        height: 100vh !important; 
-        overflow: hidden !important; /* מונע גלילה כפולה */
-        background: transparent !important; /* רקע שקוף כדי להשתלב באתר */
-    }
-
-    body {
-        display: flex !important;
-        flex-direction: column !important;
-    }
-
-    /* === 2. הגרף === */
-    #graph-area {
-        flex: 1 !important; /* לוקח את כל המקום הפנוי */
-        width: 100% !important;
-        position: relative !important;
-        z-index: 1 !important;
-        touch-action: none !important; /* קריטי למובייל */
-    }
-
-    /* === 3. השלשה הקדושה - שקופה מאוד === */
-    #holy-trinity {
-        position: absolute !important;
-        top: 15px !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        
-        /* === השינוי הגדול: שקיפות === */
-        background: rgba(255, 255, 255, 0.4) !important; /* 40% לבן בלבד */
-        backdrop-filter: blur(5px) !important; /* מטשטש את הגרף מאחורה כדי שהמספרים יבלטו */
-        -webkit-backdrop-filter: blur(5px); /* תמיכה באייפון */
-        
-        border: 1px solid rgba(255,255,255, 0.6) !important;
-        border-radius: 15px !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
-        
-        width: 85% !important;
-        max-width: 320px !important;
-        padding: 5px 10px !important;
-        
-        display: flex !important;
-        justify-content: space-around !important;
-        align-items: center !important;
-        z-index: 10 !important;
-        pointer-events: none !important; /* שהאצבע תעבור דרך זה */
-    }
-
-    .trinity-header { display: none !important; }
-
-    .trinity-row {
-        display: flex !important;
-        flex-direction: column-reverse !important;
-        align-items: center !important;
-        padding: 2px 5px !important;
-    }
-
-    .trinity-val {
-        font-size: 1.2rem !important;
-        font-weight: 700 !important;
-        color: #222 !important; /* שחור כהה לקריאות */
-        text-shadow: 0 0 2px rgba(255,255,255,0.8) !important; /* הילה לבנה מסביב לטקסט */
-    }
-
-    .trinity-label {
-        font-size: 0.7rem !important;
-        color: #444 !important;
-        font-weight: bold !important;
-    }
-
-    /* === 4. הפאנל התחתון === */
-    #sidebar {
-        height: 55vh !important; /* גובה קבוע לחלק התחתון */
-        flex: none !important;   /* שלא יתכווץ */
-        width: 100% !important;
-        background: #ffffff !important;
-        border-radius: 25px 25px 0 0 !important;
-        box-shadow: 0 -5px 20px rgba(0,0,0,0.1) !important;
-        overflow-y: auto !important;
-        position: relative !important;
-        z-index: 100 !important;
-        margin-top: -15px !important;
-    }
+/* === הגדרות בסיס === */
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+    background: #f8f9fa !important; /* רקע כללי */
+    font-family: 'Assistant', sans-serif;
 }
+
+body {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* === אזור הגרף === */
+#graph-area {
+    flex: 1 !important;
+    width: 100% !important;
+    position: relative !important;
+    z-index: 1 !important;
+    touch-action: none !important;
+}
+.jsxgraph-copyright { display: none !important; }
+
+/* === השלשה הקדושה (HUD שקוף) === */
+#holy-trinity {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.3) !important; 
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(255,255,255,0.4) !important;
+    display: flex !important;
+    justify-content: space-evenly !important;
+    align-items: center !important;
+    padding: 10px 0 !important;
+    z-index: 10 !important;
+    pointer-events: none !important;
+}
+
+.trinity-val {
+    font-size: 1.3rem !important;
+    font-weight: 800 !important;
+    color: #1a1a1a !important;
+    font-family: monospace;
+}
+
+.trinity-label {
+    font-size: 0.75rem !important;
+    color: #333 !important;
+    font-weight: bold;
+}
+
+/* === תפריט תחתון === */
+#sidebar {
+    height: 55vh !important;
+    flex: none !important;
+    width: 100% !important;
+    background: white !important;
+    border-radius: 20px 20px 0 0 !important;
+    box-shadow: 0 -5px 30px rgba(0,0,0,0.1) !important;
+    overflow-y: auto !important;
+    z-index: 100 !important;
+    padding: 20px !important;
+    box-sizing: border-box !important;
+    margin-top: -15px;
+}
+
+/* === כפתור התיאוריה === */
+.theory-btn {
+    width: 100%;
+    margin: 15px 0;
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+/* === מסך תיאוריה מלא (Overlay) === */
+.theory-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #ffffff;
+    z-index: 9999; /* מעל הכל */
+    overflow-y: auto;
+    padding-bottom: 50px;
+    animation: fadeIn 0.3s;
+}
+
+.theory-content {
+    padding: 20px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.close-theory {
+    position: sticky;
+    top: 15px;
+    background: #ff4757;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    float: left;
+}
+
+.theory-section {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border-right: 4px solid #764ba2;
+}
+
+/* === אקורדיון וניווט === */
+details {
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #e9ecef;
+}
+
+summary {
+    padding: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    list-style: none;
+}
+summary::after { content: '+'; color: #007bff; font-weight: bold; font-size: 1.2rem; }
+details[open] summary::after { content: '-'; color: #dc3545; }
+
+.nav-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    gap: 8px;
+    padding: 10px;
+}
+
+.q-btn {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+    cursor: pointer;
+    background: white;
+}
+.q-btn.active { background: #007bff; color: white; border-color: #007bff; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
