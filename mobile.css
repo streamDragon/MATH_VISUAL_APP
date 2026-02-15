@@ -13,21 +13,55 @@ body { display: flex; flex-direction: column; }
 }
 .jsxgraph-copyright { display: none !important; }
 
-/* === השלשה הקדושה (HUD) === */
-#holy-trinity {
-    position: absolute; top: 0; left: 0; width: 100%;
-    background: rgba(255, 255, 255, 0.8);
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-    display: flex; justify-content: space-evenly; align-items: center;
-    padding: 10px 0; z-index: 10;
-    pointer-events: none;
-    transition: background 0.3s;
+/* === כפתור סאונד (חדש!) === */
+#sound-toggle {
+    position: absolute; top: 10px; right: 10px;
+    z-index: 1000;
+    background: white; border: 1px solid #ccc;
+    border-radius: 50%; width: 40px; height: 40px;
+    font-size: 20px; cursor: pointer;
+    display: flex; justify-content: center; align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
-#holy-trinity.hot { background: rgba(255, 241, 118, 0.9) !important; box-shadow: 0 0 15px #fdd835; }
-#holy-trinity.winning { background: rgba(105, 240, 174, 0.9) !important; box-shadow: 0 0 20px #00e676; }
 
-.trinity-val { font-size: 1.4rem; font-weight: 800; color: #1a1a1a; font-family: monospace; }
-.trinity-label { font-size: 0.8rem; color: #555; font-weight: bold; }
+/* === השלשה הקדושה + משוואת המשיק === */
+#hud-container {
+    position: absolute; top: 0; left: 0; width: 100%;
+    pointer-events: none; z-index: 500;
+    display: flex; flex-direction: column; align-items: center;
+}
+
+#holy-trinity {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: flex; justify-content: center; gap: 20px;
+    padding: 10px 30px;
+    transition: background 0.3s, box-shadow 0.3s;
+    pointer-events: auto; /* כדי שאפשר יהיה לסמן טקסט אם רוצים */
+}
+
+/* צבעים לחם/קר */
+#holy-trinity.hot { background: rgba(255, 241, 118, 0.95) !important; box-shadow: 0 0 20px #fdd835; border: 2px solid #fbc02d; }
+#holy-trinity.winning { background: rgba(105, 240, 174, 0.95) !important; box-shadow: 0 0 25px #00e676; border: 2px solid #00c853; }
+
+.trinity-item { text-align: center; }
+.trinity-val { font-size: 1.3rem; font-weight: 800; color: #1a1a1a; font-family: monospace; display: block; }
+.trinity-label { font-size: 0.75rem; color: #666; font-weight: bold; text-transform: uppercase; }
+
+/* משוואת המשיק (חדש!) */
+#tangent-eq {
+    margin-top: 5px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-family: monospace;
+    font-size: 1rem;
+    font-weight: bold;
+    opacity: 0; transition: opacity 0.3s; /* מוסתר עד שיש תזוזה */
+}
+#tangent-eq.show { opacity: 1; }
 
 /* === הודעת ניצחון === */
 #win-overlay {
@@ -35,7 +69,7 @@ body { display: flex; flex-direction: column; }
     transform: translate(-50%, -50%) scale(0);
     background: white; padding: 20px 40px; border-radius: 20px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-    text-align: center; z-index: 500;
+    text-align: center; z-index: 1000;
     pointer-events: none; opacity: 0;
     transition: transform 0.4s, opacity 0.4s;
 }
@@ -44,13 +78,11 @@ body { display: flex; flex-direction: column; }
 
 /* === תפריט צד (Sidebar) === */
 #sidebar {
-    height: 50vh; 
-    flex: none; /* שלא יתכווץ! */
-    width: 100%;
+    height: 45vh; flex: none; width: 100%;
     background: white; border-radius: 20px 20px 0 0;
     box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
     padding: 15px; box-sizing: border-box; overflow-y: auto;
-    z-index: 100;
+    z-index: 100; position: relative;
 }
 
 #q-short-inst {
@@ -60,18 +92,28 @@ body { display: flex; flex-direction: column; }
 }
 
 .theory-btn {
-    width: 100%; padding: 12px; margin-bottom: 10px;
+    width: 100%; padding: 10px; margin-bottom: 10px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white; border: none; border-radius: 12px;
-    font-size: 1rem; font-weight: bold; cursor: pointer;
+    color: white; border: none; border-radius: 8px;
+    font-size: 0.95rem; font-weight: bold; cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+.q-btn {
+    background: #eee; border: none; border-radius: 5px;
+    padding: 5px 12px; cursor: pointer; font-weight: bold;
+    transition: background 0.2s;
+}
+.q-btn:hover { background: #ddd; }
+.q-btn.active { background: #007bff; color: white; }
+
+/* חלון תיאוריה */
 .theory-overlay {
     display: none; position: fixed; top: 0; left: 0;
     width: 100vw; height: 100vh; background: rgba(255,255,255,0.98);
     z-index: 9999; overflow-y: auto; flex-direction: column;
 }
-.theory-content { padding: 20px; max-width: 700px; margin: 0 auto; }
+.theory-content { padding: 20px; max-width: 700px; margin: 0 auto; line-height: 1.6; }
 .close-theory {
     align-self: flex-start; margin: 20px;
     background: #ff4757; color: white; border: none;
@@ -82,26 +124,23 @@ body { display: flex; flex-direction: column; }
 @media (min-width: 768px) {
     body { flex-direction: row; }
     
-    #graph-area { 
-        height: 100vh; 
-        order: 1; 
-        flex: 1; /* לוקח את כל המקום שנשאר */
-    }
+    #graph-area { height: 100vh; order: 1; flex: 1; }
     
+    #sound-toggle { top: 20px; right: 20px; }
+
     #sidebar {
-        width: 350px !important; /* רוחב קבוע */
-        min-width: 350px;       /* שלא ימעך */
-        flex: none;             /* שלא יושפע מהפלקס */
-        height: 100vh; 
-        margin-top: 0;
+        width: 350px !important; min-width: 350px; flex: none;
+        height: 100vh; margin-top: 0;
         border-radius: 0; border-right: 1px solid #ddd; order: 2;
     }
     
-    #holy-trinity {
-        width: auto; top: 20px; left: 20px;
-        border-radius: 10px; padding: 10px 20px; gap: 20px;
-        pointer-events: none; 
+    #hud-container {
+        top: 20px; left: 20px; width: auto; align-items: flex-start;
     }
+    #holy-trinity {
+        border-radius: 10px; padding: 15px 25px;
+    }
+    
     .theory-overlay { background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-    .theory-content { background: white; border-radius: 20px; width: 600px; max-height: 80vh; }
+    .theory-content { background: white; border-radius: 20px; width: 600px; max-height: 80vh; padding: 40px; }
 }
