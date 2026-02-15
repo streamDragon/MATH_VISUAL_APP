@@ -21,6 +21,37 @@
         <p>פיצחת את המשימה.</p>
     </div>
 
+    <div id="question-overlay" class="hidden" onclick="onOverlayBackdropClick(event)">
+        <div id="question-overlay-card">
+            <div class="overlay-head">
+                <div class="overlay-title-wrap">
+                    <div class="overlay-mini">כרטיס משימה</div>
+                    <h3 id="overlay-title">שאלה</h3>
+                </div>
+                <button id="btn-close-overlay" onclick="closeQuestionOverlay()">סגור</button>
+            </div>
+            <div class="overlay-section">
+                <div class="overlay-label">מהות השאלה</div>
+                <div id="overlay-essence"></div>
+            </div>
+            <div class="overlay-section">
+                <div class="overlay-label">מטרת הלמידה</div>
+                <div id="overlay-goal"></div>
+            </div>
+            <div class="overlay-section">
+                <div class="overlay-label">חומר לימוד רלוונטי</div>
+                <div id="overlay-material"></div>
+            </div>
+            <div class="overlay-section">
+                <div class="overlay-label">איך עובדים באפליקציה</div>
+                <ul id="overlay-howto"></ul>
+            </div>
+            <div class="overlay-actions">
+                <button onclick="closeQuestionOverlay()">התחל תרגול</button>
+            </div>
+        </div>
+    </div>
+
     <div id="graph-area-wrapper">
         <div id="top-strip">
             <div id="top-question-wrap">
@@ -30,6 +61,10 @@
             <div id="top-formulas">
                 <span class="formula-chip" id="top-formula-f">f(x) = ...</span>
                 <span class="formula-chip" id="top-formula-tag">f'(x) = ...</span>
+            </div>
+            <div id="top-actions">
+                <select id="top-question-select" title="בחירת שאלה"></select>
+                <button id="btn-overlay-open" onclick="openQuestionOverlay()">הסבר שאלה</button>
             </div>
         </div>
         <div id="graph-area"></div>
@@ -44,11 +79,18 @@
         <div class="info-box yellow-box">
             <button id="btn-formulas" onclick="toggleFormulaPanel()">📜 דף נוסחאות</button>
             <div id="formulas-panel" class="formulas-panel hidden">
+                <div class="formula-group-title">הפונקציה שלנו עכשיו</div>
                 <div class="math-line" id="formula-f">f(x) = ...</div>
                 <div class="math-line" id="formula-tag" style="color:#d32f2f;">f'(x) = ...</div>
-                <div class="formula-static">משיק בנקודה: y - y₀ = m(x - x₀)</div>
-                <div class="formula-static">אנך למשיק: mₙ = -1 / mₜ</div>
-                <div class="formula-static">זווית בין ישרים: tan(θ)=|(m2-m1)/(1+m1m2)|</div>
+
+                <div class="formula-group-title">דף נוסחאות 4 יחידות - פונקציות</div>
+                <div class="formula-static">נגזרת פולינום: (ax^3+bx^2+cx+d)' = 3ax^2+2bx+c</div>
+                <div class="formula-static">משוואת משיק: y - y0 = m(x - x0)</div>
+                <div class="formula-static">שיפוע אנך למשיק: m_n = -1 / m_t</div>
+                <div class="formula-static">זווית בין ישרים: tan(theta)=|(m2-m1)/(1+m1*m2)|</div>
+                <div class="formula-static">קשר שיפוע-זווית: m = tan(alpha)</div>
+                <div class="formula-static">קיצון: f'(x)=0 ובדיקת סימן נגזרת לפני/אחרי</div>
+                <div class="formula-static">עלייה/ירידה: f'(x)>0 עולה, f'(x)<0 יורדת</div>
             </div>
         </div>
 
@@ -96,8 +138,9 @@
             </div>
         </div>
 
-        <div class="section-title">בניית הפונקציה</div>
-        <div style="background:#fff; padding:8px; border-radius:5px; border:1px solid #eee;">
+        <button id="btn-builder" onclick="toggleBuilderPanel()">בנה את הפונקציה המתאימה לך</button>
+        <div id="builder-panel" class="hidden" style="background:#fff; padding:8px; border-radius:5px; border:1px solid #eee;">
+            <div class="section-title">בניית הפונקציה</div>
             <div class="slider-row"><span class="slider-lbl">a</span><input type="range" id="inpA" min="-5" max="5" step="0.1" class="slider-inp"></div>
             <div class="slider-row"><span class="slider-lbl">b</span><input type="range" id="inpB" min="-5" max="5" step="0.1" class="slider-inp"></div>
             <div class="slider-row"><span class="slider-lbl">c</span><input type="range" id="inpC" min="-5" max="5" step="0.1" class="slider-inp"></div>
@@ -119,6 +162,7 @@
         let wasWin = false;
         let prevLabScore = null;
         let wasLabSuccess = false;
+        let builderPanelOpen = false;
 
         function init() {
             board = JXG.JSXGraph.initBoard('graph-area', {
@@ -207,12 +251,19 @@
             });
 
             let nav = document.getElementById('nav-container');
+            let topSelect = document.getElementById('top-question-select');
             QUESTIONS.forEach((q, i) => {
                 let btn = document.createElement('button');
                 btn.className = 'q-btn'; btn.innerText = i+1;
                 btn.onclick = () => loadQ(i);
                 nav.appendChild(btn);
+
+                let opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = `${i + 1}. ${q.title.replace(/^\d+\.\s*/, '')}`;
+                topSelect.appendChild(opt);
             });
+            topSelect.addEventListener('change', (ev) => loadQ(parseInt(ev.target.value, 10)));
 
             loadQ(0);
             syncTestLineControlsFromPoints();
@@ -494,6 +545,59 @@
             btn.innerText = panel.classList.contains('hidden') ? '📜 דף נוסחאות' : '📜 סגירת דף נוסחאות';
         }
 
+        function onOverlayBackdropClick(event) {
+            if (event.target.id === 'question-overlay') {
+                closeQuestionOverlay();
+            }
+        }
+
+        function renderQuestionOverlay(q) {
+            document.getElementById('overlay-title').innerText = q.title;
+            document.getElementById('overlay-essence').innerText = q.overlay?.essence || q.desc || '';
+            document.getElementById('overlay-goal').innerText = q.overlay?.goal || '';
+            document.getElementById('overlay-material').innerText = q.overlay?.material || '';
+
+            let howTo = document.getElementById('overlay-howto');
+            howTo.innerHTML = '';
+            let steps = Array.isArray(q.overlay?.howTo) ? q.overlay.howTo : [];
+            steps.forEach(step => {
+                let li = document.createElement('li');
+                li.innerText = step;
+                howTo.appendChild(li);
+            });
+        }
+
+        function openQuestionOverlay() {
+            document.getElementById('question-overlay').classList.remove('hidden');
+        }
+
+        function closeQuestionOverlay() {
+            document.getElementById('question-overlay').classList.add('hidden');
+        }
+
+        function updateBuilderVisibility(q) {
+            let allIds = ['inpA','inpB','inpC','inpD'];
+            let locked = new Set(q.locked || []);
+            let editableCount = allIds.filter(id => !locked.has(id)).length;
+            let shouldAllowBuilder = editableCount > 0;
+
+            let btn = document.getElementById('btn-builder');
+            let panel = document.getElementById('builder-panel');
+            btn.classList.toggle('hidden', !shouldAllowBuilder);
+            if (!shouldAllowBuilder) {
+                panel.classList.add('hidden');
+                builderPanelOpen = false;
+                return;
+            }
+            panel.classList.toggle('hidden', !builderPanelOpen);
+            btn.innerText = builderPanelOpen ? 'הסתר בניית פונקציה' : 'בנה את הפונקציה המתאימה לך';
+        }
+
+        function toggleBuilderPanel() {
+            builderPanelOpen = !builderPanelOpen;
+            updateBuilderVisibility(QUESTIONS[currentQ]);
+        }
+
         function toggleTestLine() {
             let show = document.getElementById('chk-test-line').checked;
             testLine.setAttribute({visible: show});
@@ -515,6 +619,7 @@
             document.getElementById('q-desc').innerText = q.desc;
             document.getElementById('top-question-index').innerText = `שאלה ${idx + 1}/${QUESTIONS.length}`;
             document.getElementById('top-question').innerText = q.title;
+            document.getElementById('top-question-select').value = String(idx);
             document.getElementById('win-overlay').style.display = 'none';
             wasWin = false;
             prevLabScore = null;
@@ -530,6 +635,8 @@
 
             ['inpA','inpB','inpC','inpD'].forEach(id => document.getElementById(id).disabled = false);
             if(q.locked) q.locked.forEach(id => document.getElementById(id).disabled = true);
+            builderPanelOpen = false;
+            updateBuilderVisibility(q);
 
             board.removeObject(targets);
             targets = [];
@@ -545,6 +652,8 @@
             p.setCoords(0, params.d);
             board.update();
             updateInfo();
+            renderQuestionOverlay(q);
+            openQuestionOverlay();
         }
 
         function checkWin(m, x, y) {
@@ -554,6 +663,9 @@
 
             if (q.goal === 'slope_zero' && Math.abs(m) < 0.1) win = true;
             else if (q.goal === 'slope_equals' && Math.abs(m - q.targetM) < 0.1) win = true;
+            else if (q.goal === 'downward_parabola') {
+                win = Math.abs(params.a) < 0.05 && params.b < -0.2;
+            }
             else if (q.goal === 'hit_target' && q.targets) {
                 let hitAll = true;
                 q.targets.forEach(t => {
