@@ -1,7 +1,14 @@
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+// פונקציה להפעלת הסאונד (חייבת לקרות בלחיצה ראשונה)
+function initAudio() {
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
+
 function playSound(type) {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+    initAudio(); // מוודא שהסאונד פעיל
     
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
