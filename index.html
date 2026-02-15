@@ -19,6 +19,17 @@
 
     <div id="graph-area"></div>
 
+    <div id="formulas-container">
+        <div class="formula-line">
+            <span class="formula-label">f(x) = </span>
+            <span id="func-eq"></span>
+        </div>
+        <div class="formula-line">
+            <span class="deriv-label">f'(x) = </span>
+            <span id="deriv-eq"></span>
+        </div>
+    </div>
+
     <div id="hud-container">
         <div id="holy-trinity">
             <div class="trinity-item"><span id="val-x" class="trinity-val">0</span><span class="trinity-label">X</span></div>
@@ -42,22 +53,22 @@
 
         <div class="nav-container" id="questions-nav" style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:15px; justify-content:center;"></div>
 
-        <div style="background:#f8f9fa; padding:10px; border-radius:10px;">
-            <div style="display:flex; margin-bottom:10px; align-items:center;">
-                <span style="width:25px; font-weight:bold;">a</span>
-                <input type="range" id="inpA" min="-2" max="2" step="0.1" style="flex:1;">
+        <div style="background:#f8f9fa; padding:15px; border-radius:12px; border:1px solid #e9ecef;">
+            <div style="display:flex; margin-bottom:12px; align-items:center;">
+                <span style="width:25px; font-weight:bold; font-size:1.1rem;">a</span>
+                <input type="range" id="inpA" min="-2" max="2" step="0.1" style="flex:1; cursor:pointer;">
             </div>
-            <div style="display:flex; margin-bottom:10px; align-items:center;">
-                <span style="width:25px; font-weight:bold;">b</span>
-                <input type="range" id="inpB" min="-3" max="3" step="0.1" style="flex:1;">
+            <div style="display:flex; margin-bottom:12px; align-items:center;">
+                <span style="width:25px; font-weight:bold; font-size:1.1rem;">b</span>
+                <input type="range" id="inpB" min="-3" max="3" step="0.1" style="flex:1; cursor:pointer;">
             </div>
-            <div style="display:flex; margin-bottom:10px; align-items:center;">
-                <span style="width:25px; font-weight:bold;">c</span>
-                <input type="range" id="inpC" min="-5" max="5" step="0.1" style="flex:1;">
+            <div style="display:flex; margin-bottom:12px; align-items:center;">
+                <span style="width:25px; font-weight:bold; font-size:1.1rem;">c</span>
+                <input type="range" id="inpC" min="-5" max="5" step="0.1" style="flex:1; cursor:pointer;">
             </div>
-            <div style="display:flex; margin-bottom:10px; align-items:center;">
-                <span style="width:25px; font-weight:bold;">d</span>
-                <input type="range" id="inpD" min="-5" max="5" step="0.1" style="flex:1;">
+            <div style="display:flex; margin-bottom:12px; align-items:center;">
+                <span style="width:25px; font-weight:bold; font-size:1.1rem;">d</span>
+                <input type="range" id="inpD" min="-5" max="5" step="0.1" style="flex:1; cursor:pointer;">
             </div>
         </div>
     </div>
@@ -76,7 +87,7 @@
         let params = { a:0, b:0, c:0, d:0 };
         let currentQ = 0;
         let isWinning = false;
-        let soundEnabled = true; // משתנה לשליטה בסאונד
+        let soundEnabled = true;
 
         function init() {
             if (typeof QUESTIONS === 'undefined') {
@@ -105,7 +116,6 @@
                 document.getElementById(id).addEventListener('input', () => { updateParams(); });
             });
 
-            // בניית כפתורי ניווט
             const nav = document.getElementById('questions-nav');
             QUESTIONS.forEach((q, i) => {
                 let btn = document.createElement('button');
@@ -126,13 +136,10 @@
         }
 
         function playSoundWrapper(type) {
-            // אם סאונד כבוי, לא עושים כלום
             if (!soundEnabled) return;
-            // ניסיון לנגן רק אם הפונקציה קיימת
             if(typeof playSound === 'function') {
-                // ל'drag' לא תמיד יש צליל, אבל נשאיר את הקריאה
                 if(type !== 'drag') playSound(type); 
-                else initAudioWrapper(); // רק מוודא שהאודיו אותחל
+                else initAudioWrapper(); 
             }
         }
         function initAudioWrapper() {
@@ -146,12 +153,82 @@
             params.d = parseFloat(document.getElementById('inpD').value);
             board.update();
             updateAll();
+            updateFormulasDisplay(); // עדכון הטקסט של הפונקציות למעלה
+        }
+
+        // פונקציה שבונה את המחרוזת היפה של הפונקציה (למשל 2x^2 - 4)
+        function buildPolyString(a, b, c, d) {
+            let terms = [];
+            
+            if (a !== 0) terms.push((a===1?'':(a===-1?'-':a)) + "x<sup>3</sup>");
+            
+            if (b !== 0) {
+                let sign = (b > 0 && terms.length > 0) ? " + " : (b < 0 ? " - " : "");
+                if (terms.length === 0 && b < 0) sign = "-"; 
+                let val = Math.abs(b);
+                terms.push(sign + (val===1?'':val) + "x<sup>2</sup>");
+            }
+            
+            if (c !== 0) {
+                let sign = (c > 0 && terms.length > 0) ? " + " : (c < 0 ? " - " : "");
+                if (terms.length === 0 && c < 0) sign = "-";
+                let val = Math.abs(c);
+                terms.push(sign + (val===1?'':val) + "x");
+            }
+            
+            if (d !== 0 || terms.length === 0) {
+                let sign = (d > 0 && terms.length > 0) ? " + " : (d < 0 ? " - " : "");
+                if (terms.length === 0 && d < 0) sign = "-";
+                terms.push(sign + Math.abs(d));
+            }
+            
+            return terms.join("");
+        }
+        
+        // בונה את הנגזרת
+        function buildDerivString(a, b, c) {
+            // הנגזרת של ax^3 + bx^2 + cx + d היא: 3ax^2 + 2bx + c
+            let na = 3*a;
+            let nb = 2*b;
+            let nc = c;
+            
+            let terms = [];
+            
+            // איבר ריבועי
+            if (na !== 0) {
+                // מעגל ל-2 ספרות כדי שיהיה קריא
+                let val = parseFloat(na.toFixed(2));
+                terms.push(val + "x<sup>2</sup>");
+            }
+            
+            // איבר לינארי
+            if (nb !== 0) {
+                let val = parseFloat(nb.toFixed(2));
+                let sign = (val > 0 && terms.length > 0) ? " + " : (val < 0 ? " " : ""); 
+                // אם שלילי, המינוס כבר בתוך המספר, אבל צריך רווח אם הוא לא ראשון
+                if(val < 0 && terms.length > 0) sign = " ";
+                terms.push(sign + val + "x");
+            }
+            
+            // מספר חופשי
+            if (nc !== 0 || terms.length === 0) {
+                let val = parseFloat(nc.toFixed(2));
+                let sign = (val > 0 && terms.length > 0) ? " + " : (val < 0 ? " " : "");
+                terms.push(sign + val);
+            }
+            
+            return terms.join("");
+        }
+
+        function updateFormulasDisplay() {
+            document.getElementById('func-eq').innerHTML = buildPolyString(params.a, params.b, params.c, params.d);
+            document.getElementById('deriv-eq').innerHTML = buildDerivString(params.a, params.b, params.c);
         }
 
         function updateAll() {
             let x = p.X();
             let y = params.a*Math.pow(x,3) + params.b*Math.pow(x,2) + params.c*x + params.d;
-            let m = 3*params.a*x*x + 2*params.b*x + params.c; // נגזרת
+            let m = 3*params.a*x*x + 2*params.b*x + params.c;
 
             // עדכון השלשה הקדושה
             document.getElementById('val-x').innerText = x.toFixed(2);
@@ -159,7 +236,6 @@
             document.getElementById('val-m').innerText = m.toFixed(2);
             
             // עדכון משוואת המשיק: y = mx + n
-            // n = y - mx
             let n = y - (m * x);
             let nStr = n >= 0 ? `+ ${n.toFixed(2)}` : `- ${Math.abs(n).toFixed(2)}`;
             let tangentStr = `y = ${m.toFixed(2)}x ${nStr}`;
@@ -176,7 +252,6 @@
             isWinning = false;
             let q = QUESTIONS[idx];
             
-            // סימון כפתור פעיל
             document.querySelectorAll('.q-btn').forEach((b, i) => {
                 b.classList.toggle('active', i === idx);
             });
@@ -208,7 +283,7 @@
             }
 
             p.setCoords(0, params.d);
-            updateParams();
+            updateParams(); // זה גם מעדכן את נוסחאות
             playSoundWrapper('pop');
         }
 
@@ -237,8 +312,6 @@
             }
 
             const hud = document.getElementById('holy-trinity');
-            
-            // איפוס מחלקות קודם
             hud.classList.remove('winning', 'hot');
 
             if (win) {
