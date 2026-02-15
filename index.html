@@ -222,11 +222,11 @@
     </div>
 
     <script>
-        const APP_BUILD = '2026-02-15-right-angle-marker';
+        const APP_BUILD = '2026-02-15-i-point-and-fit';
         let board, p, curve, tangent, normalLine, triangle, labelText, testLine, testAnchor, testDir;
         let normalOrigin, normalXAxisPoint, normalYAxisPoint;
-        let rightAngleTPoint, rightAngleNPoint, rightAngleCornerPoint, rightAngleMarker;
-        let guideNormalBasePoint, guideNormalDirPoint, guideNormalLine, guideNormalIntersect;
+        let rightAngleP1, rightAngleP2, rightAngleP3, rightAngleP4, rightAngleMarker;
+        let guideNormalBasePoint, guideNormalDirPoint, guideNormalLine, guideNormalIntersect, guideNormalLabel;
         let targets = [];
         let params = { a:0, b:0, c:0, d:0 };
         let currentQ = 0;
@@ -296,6 +296,7 @@
             let status = document.getElementById('template-status-text');
             if (status) status.innerText = `נבחרה תבנית: ${tpl.title}`;
             updateParamHints();
+            fitBoardToCurrentFunction();
             board.update();
             updateInfo();
         }
@@ -509,20 +510,24 @@
                 borders: { strokeColor: '#8e24aa', strokeWidth: 1, dash: 1 }
             });
 
-            rightAngleTPoint = board.create('point', [0, 0], {
+            rightAngleP1 = board.create('point', [0, 0], {
                 name: '', fixed: true, visible: false
             });
-            rightAngleNPoint = board.create('point', [0, 0], {
+            rightAngleP2 = board.create('point', [0, 0], {
                 name: '', fixed: true, visible: false
             });
-            rightAngleCornerPoint = board.create('point', [0, 0], {
+            rightAngleP3 = board.create('point', [0, 0], {
                 name: '', fixed: true, visible: false
             });
-            rightAngleMarker = board.create('polygon', [p, rightAngleTPoint, rightAngleCornerPoint, rightAngleNPoint], {
-                fillColor: '#ffffff',
-                fillOpacity: 0.78,
+            rightAngleP4 = board.create('point', [0, 0], {
+                name: '', fixed: true, visible: false
+            });
+            rightAngleMarker = board.create('polygon', [rightAngleP1, rightAngleP2, rightAngleP3, rightAngleP4], {
+                fillColor: '#fff176',
+                fillOpacity: 0.92,
                 visible: false,
-                borders: { strokeColor: '#5e35b1', strokeWidth: 2 }
+                borders: { strokeColor: '#111827', strokeWidth: 2 },
+                layer: 9
             });
 
             testAnchor = board.create('point', [1, 1], {
@@ -540,7 +545,18 @@
                 strokeColor: '#00897b', strokeWidth: 2, visible: false
             });
             guideNormalIntersect = board.create('point', [0, 0], {
-                name: 'I', size: 4, color: '#00897b', visible: false, fixed: true
+                name: 'I', size: 6, color: '#00695c', visible: false, fixed: true
+            });
+            guideNormalLabel = board.create('text', [
+                () => guideNormalIntersect.X() + 0.25,
+                () => guideNormalIntersect.Y() + 0.3,
+                () => `I(${formatNumber(guideNormalIntersect.X())}, ${formatNumber(guideNormalIntersect.Y())})`
+            ], {
+                visible: false,
+                fixed: true,
+                fontSize: 12,
+                strokeColor: '#0f172a',
+                cssStyle: 'background:rgba(255,255,255,.86);padding:2px 5px;border:1px solid #94a3b8;border-radius:6px;'
             });
 
             labelText = board.create('text', [
@@ -655,6 +671,39 @@
             params.c = parseFloat(document.getElementById('inpC').value);
             params.d = parseFloat(document.getElementById('inpD').value);
             updateInfo();
+        }
+
+        function fitBoardToCurrentFunction() {
+            if (!board) return;
+            let xMin = activeTemplate?.domain?.xMin ?? -5;
+            let xMax = activeTemplate?.domain?.xMax ?? 5;
+            if (!Number.isFinite(xMin) || !Number.isFinite(xMax) || xMax <= xMin) {
+                xMin = -5;
+                xMax = 5;
+            }
+
+            let yMin = Infinity;
+            let yMax = -Infinity;
+            let samples = 90;
+            for (let i = 0; i <= samples; i++) {
+                let x = xMin + ((xMax - xMin) * i) / samples;
+                let y = evaluateFunctionAt(x);
+                if (!Number.isFinite(y)) continue;
+                yMin = Math.min(yMin, y);
+                yMax = Math.max(yMax, y);
+            }
+
+            if (!Number.isFinite(yMin) || !Number.isFinite(yMax)) {
+                yMin = -5;
+                yMax = 5;
+            }
+
+            let xSpan = Math.max(6, xMax - xMin);
+            let ySpan = Math.max(4, yMax - yMin);
+            let xPad = Math.max(0.8, xSpan * 0.08);
+            let yPad = Math.max(0.9, ySpan * 0.18);
+            board.setBoundingBox([xMin - xPad, yMax + yPad, xMax + xPad, yMin - yPad], false);
+            board.fullUpdate();
         }
 
         function formatPoly(coeffs) {
@@ -783,13 +832,15 @@
             }
             let tUnit = getTangentUnitVector(tangentSlope);
             let nUnit = { x: -tUnit.y, y: tUnit.x };
-            let size = 0.42;
-            rightAngleTPoint.setPosition(JXG.COORDS_BY_USER, [x + tUnit.x * size, y + tUnit.y * size]);
-            rightAngleNPoint.setPosition(JXG.COORDS_BY_USER, [x + nUnit.x * size, y + nUnit.y * size]);
-            rightAngleCornerPoint.setPosition(JXG.COORDS_BY_USER, [
-                x + (tUnit.x + nUnit.x) * size,
-                y + (tUnit.y + nUnit.y) * size
+            let inset = 0.17;
+            let side = 0.34;
+            rightAngleP1.setPosition(JXG.COORDS_BY_USER, [x + tUnit.x * inset, y + tUnit.y * inset]);
+            rightAngleP2.setPosition(JXG.COORDS_BY_USER, [x + tUnit.x * (inset + side), y + tUnit.y * (inset + side)]);
+            rightAngleP3.setPosition(JXG.COORDS_BY_USER, [
+                x + tUnit.x * (inset + side) + nUnit.x * side,
+                y + tUnit.y * (inset + side) + nUnit.y * side
             ]);
+            rightAngleP4.setPosition(JXG.COORDS_BY_USER, [x + nUnit.x * side + tUnit.x * inset, y + nUnit.y * side + tUnit.y * inset]);
             rightAngleMarker.setAttribute({ visible: true });
         }
 
@@ -815,6 +866,7 @@
             let enabled = document.getElementById('chk-test-line').checked;
             guideNormalLine.setAttribute({ visible: enabled });
             guideNormalIntersect.setAttribute({ visible: enabled });
+            guideNormalLabel.setAttribute({ visible: enabled });
             if (!enabled) return;
 
             let base = getGuideNormalBase(x, y, m);
@@ -1269,6 +1321,7 @@
                 document.getElementById('chk-test-line').checked = false;
                 guideNormalLine.setAttribute({ visible: false });
                 guideNormalIntersect.setAttribute({ visible: false });
+                guideNormalLabel.setAttribute({ visible: false });
             }
             refreshTestLineControlVisibility();
             updateInfo();
@@ -1390,6 +1443,7 @@
             let show = document.getElementById('chk-test-line').checked;
             guideNormalLine.setAttribute({visible: show});
             guideNormalIntersect.setAttribute({visible: show});
+            guideNormalLabel.setAttribute({visible: show});
             refreshTestLineControlVisibility();
             board.update();
             updateInfo();
@@ -1487,6 +1541,7 @@
             updateSpecialPanels();
 
             p.setCoords(0, evaluateFunctionAt(0));
+            fitBoardToCurrentFunction();
             board.update();
             updateInfo();
             renderQuestionOverlay(q);
