@@ -170,6 +170,16 @@ body.embed-mode #graph-area {
     font-weight: 800;
 }
 
+#prestart-hint {
+    font-size: 0.74rem;
+    color: #92400e;
+    background: #fff7d6;
+    border: 1px solid #f6d375;
+    border-radius: 8px;
+    padding: 3px 6px;
+    max-width: 100%;
+}
+
 #build-badge {
     font-size: 0.7rem;
     color: #1e293b;
@@ -1320,7 +1330,8 @@ h2 {
 
     body.panel-focus #top-formulas,
     body.panel-focus #top-actions,
-    body.panel-focus #top-step-status {
+    body.panel-focus #top-step-status,
+    body.panel-focus #prestart-hint {
         display: none;
     }
 

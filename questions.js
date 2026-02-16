@@ -40,7 +40,7 @@ const FUNCTION_TEMPLATES = [
       b: "מקדם של x^3",
       c: "מקדם של x^2",
       d: "מקדם של x",
-      e: "free term",
+      e: "איבר חופשי",
     },
     domain: { xMin: -5, xMax: 5 },
   },
@@ -80,12 +80,13 @@ const QUESTIONS = [
     title: "בחירת פונקציה",
     desc:
       "לפני שמתחילים: בחר תצורת פונקציה (תבנית) ושנה את הפרמטרים.\n" +
-      "לאחר הבחירה – כל השאלות הבאות יהיו על הפונקציה שבחרת.",
+      "לאחר מכן אפשר לעבור שאלה: כל שאלה נטענת עם פונקציה התחלתית שונה לגיוון, ותמיד אפשר לערוך פרמטרים כרצונך.",
     mode: "setup",
     goal: "choose_function_template",
   },
   {
     id: 1,
+    startTemplateId: "quad_abcd",
     title: "קיצון: משיק אופקי",
     desc:
       "מצא נקודה שבה המשיק אופקי: f'(x0)=0.\n" +
@@ -100,6 +101,7 @@ const QUESTIONS = [
   },
   {
     id: 2,
+    startTemplateId: "cubic_abcd",
     title: "מינימום: משיק אופקי + בדיקת f''(x0)>0",
     desc:
       "מצא נקודת מינימום: f'(x0)=0 וגם f''(x0)>0.\n" +
@@ -114,6 +116,7 @@ const QUESTIONS = [
   },
   {
     id: 3,
+    startTemplateId: "quartic_abcd",
     title: "מצא x0 לפי שיפוע נתון",
     desc:
       "נתון שיפוע m=2.\n" +
@@ -128,6 +131,7 @@ const QUESTIONS = [
   },
   {
     id: 4,
+    startTemplateId: "line_ab",
     title: "שיפוע שלילי",
     desc:
       "מצא x0 כך ש־f'(x0)=-1.\n" +
@@ -142,6 +146,7 @@ const QUESTIONS = [
   },
   {
     id: 5,
+    startTemplateId: "shifted_quad_k",
     title: "מצא x0 לפי ערך פונקציה",
     desc:
       "מצא x0 כך ש־f(x0)=3.\n" +
@@ -156,6 +161,7 @@ const QUESTIONS = [
   },
   {
     id: 6,
+    startTemplateId: "quad_abcd",
     title: "קרא שיפוע בנקודה",
     desc:
       "קבע x0=1 (גרור ל־1 בדיוק).\n" +
@@ -170,6 +176,7 @@ const QUESTIONS = [
   },
   {
     id: 7,
+    startTemplateId: "cubic_abcd",
     title: "קרא ערך פונקציה בנקודה",
     desc:
       "קבע x0=-2.\n" +
@@ -184,6 +191,7 @@ const QUESTIONS = [
   },
   {
     id: 8,
+    startTemplateId: "quartic_abcd",
     title: "מצא פרמטר אחד: מעבר בנקודה",
     desc:
       "שנה פרמטר אחד (למשל d או c – בהתאם לתבנית שבחרת) כך שהגרף יעבור בנקודה (0,2).",
@@ -199,6 +207,7 @@ const QUESTIONS = [
   },
   {
     id: 9,
+    startTemplateId: "line_ab",
     title: "מצא פרמטר: מעבר בנקודה כללית",
     desc:
       "שנה פרמטר אחד כך שהגרף יעבור בנקודה (2,0).",
@@ -214,6 +223,7 @@ const QUESTIONS = [
   },
   {
     id: 10,
+    startTemplateId: "shifted_quad_k",
     title: "שתי נקודות יחד (פרמטר אחד/שניים)",
     desc:
       "כוון את הפרמטרים המותרים כך שהפונקציה תפגע בשתי הנקודות יחד.\n" +
@@ -232,6 +242,7 @@ const QUESTIONS = [
   },
   {
     id: 11,
+    startTemplateId: "quad_abcd",
     title: "משיק שעובר דרך נקודה חיצונית",
     desc:
       "מצא x0 כך שהמשיק לגרף בנקודה x0 יעבור דרך הנקודה החיצונית P=(0,1).\n" +
@@ -246,6 +257,7 @@ const QUESTIONS = [
   },
   {
     id: 12,
+    startTemplateId: "cubic_abcd",
     title: "נורמל אנכי/אופקי",
     desc:
       "מצא x0 כך שהנורמל יהיה אנכי (כלומר המשיק אופקי).\n" +
@@ -259,6 +271,7 @@ const QUESTIONS = [
   },
   {
     id: 13,
+    startTemplateId: "quartic_abcd",
     title: "חקירה חופשית",
     desc:
       "כל הסליידרים פתוחים.\n" +
