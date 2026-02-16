@@ -148,7 +148,6 @@
                 <select id="top-question-select" title="בחירת שאלה"></select>
                 <button id="btn-top-questions" onclick="toggleQuestionsFromTop()">שאלות ▼</button>
                 <button id="btn-top-init-builder" onclick="openInitialBuilderFromTop()">בנייה ראשונית</button>
-                <button id="btn-top-quartic" onclick="openQuarticBuilderFromTop()">מעלה 4</button>
                 <button id="btn-start-guide" onclick="openStartGuideModal()">איך עובדים?</button>
                 <button id="btn-normal-top" class="hidden" onclick="openNormalLabGuide()">הסבר אנך</button>
                 <button id="btn-overlay-open" onclick="openQuestionOverlay()">הסבר שאלה</button>
@@ -1836,10 +1835,10 @@
         }
 
         function applyQuestionUi(q) {
-            let allowNormal = isUiEnabled(q, 'allowNormal', false);
+            let allowNormal = true;
             let defaultNormalOn = isUiEnabled(q, 'defaultNormalOn', false);
             let allowLineTool = isUiEnabled(q, 'allowLineTool', false);
-            let showToolsBox = allowNormal || allowLineTool;
+            let showToolsBox = true;
 
             document.getElementById('acc-item-tools').classList.toggle('hidden', !showToolsBox);
             document.getElementById('btn-normal-top').classList.toggle('hidden', !showToolsBox);
@@ -1962,7 +1961,7 @@
             document.body.classList.toggle('session-started', sessionStarted);
             let prestartHint = document.getElementById('prestart-hint');
             if (prestartHint) prestartHint.classList.toggle('hidden', sessionStarted);
-            ['btn-top-init-builder', 'btn-top-quartic'].forEach((id) => {
+            ['btn-top-init-builder'].forEach((id) => {
                 let el = document.getElementById(id);
                 if (!el) return;
                 el.classList.toggle('hidden', sessionStarted);
@@ -2031,17 +2030,6 @@
             setDrawerOpen(true);
             let setupPanel = document.getElementById('template-setup-panel');
             if (setupPanel) setupPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-
-        function openQuarticBuilderFromTop() {
-            if (sessionStarted) return;
-            loadQ(0, { autoOpenOverlay: false });
-            applyTemplateById('quartic_abcd', true);
-            openAccordion('params');
-            setDrawerOpen(true);
-            updateBuilderVisibility(QUESTIONS[currentQ]);
-            let panel = document.getElementById('builder-panel');
-            if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         function toggleTestLine() {

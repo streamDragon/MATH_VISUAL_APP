@@ -41,12 +41,14 @@ body.embed-mode #top-strip {
 
 body.embed-mode #top-question-wrap {
     grid-area: question;
+    align-self: start;
     gap: 3px;
     padding: 6px 8px;
 }
 
 body.embed-mode #top-formulas {
     grid-area: formulas;
+    align-self: start;
     padding: 6px 8px;
 }
 
@@ -361,16 +363,6 @@ body.embed-mode .formula-chip {
     background: #c1daff;
 }
 
-#btn-top-quartic {
-    border: 1px solid #64b5f6;
-    background: linear-gradient(120deg, #e3f2fd, #cfe8ff);
-    color: #0c4a8a;
-}
-
-#btn-top-quartic:hover {
-    background: #badcff;
-}
-
 #btn-normal-top {
     border: 1px solid #cab8ff;
     background: linear-gradient(120deg, #f2ecff, #e8deff);
@@ -402,7 +394,6 @@ body.embed-mode .formula-chip {
 }
 
 body.session-started #btn-top-init-builder,
-body.session-started #btn-top-quartic,
 body.session-started #prestart-hint {
     display: none !important;
 }
