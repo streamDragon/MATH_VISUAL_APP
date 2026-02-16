@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>מעבדת הפונקציות - המלא והשלם</title>
 
     <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="mobile.css?v=2026-02-16-r3">
-    <script src="questions.js?v=2026-02-16-r3"></script>
-    <script src="sound.js?v=2026-02-16-r3"></script>
+    <link rel="stylesheet" href="mobile.css?v=__BUILD_ID__">
+    <script src="questions.js?v=__BUILD_ID__"></script>
+    <script src="sound.js?v=__BUILD_ID__"></script>
 </head>
 <body>
 
@@ -269,7 +272,7 @@
     </div>
 
     <script>
-        const APP_BUILD = '2026-02-16-sites-responsive-r3';
+        const APP_BUILD = '__BUILD_ID__';
         const GUIDE_HIT_LIMIT = 8;
         const BUILDER_FOCUSED_GOALS = new Set([
             'choose_function_template',
@@ -303,6 +306,30 @@
         let templateChosen = false;
         let readAnswerValidated = false;
         let sessionStarted = false;
+
+        async function ensureLatestBuild() {
+            try {
+                let res = await fetch(`version.json?t=${Date.now()}`, { cache: 'no-store' });
+                if (!res.ok) return;
+                let data = await res.json();
+                let latestBuild = (data && typeof data.build === 'string') ? data.build.trim() : '';
+                if (!latestBuild || latestBuild === APP_BUILD) return;
+
+                let url = new URL(window.location.href);
+                if (url.searchParams.get('v') === latestBuild) return;
+
+                let loopGuardKey = 'math_visual_last_forced_build';
+                if (sessionStorage.getItem(loopGuardKey) === latestBuild) return;
+                sessionStorage.setItem(loopGuardKey, latestBuild);
+
+                url.searchParams.set('v', latestBuild);
+                window.location.replace(url.toString());
+            } catch (err) {
+                // If version check fails, keep current page running.
+            }
+        }
+
+        ensureLatestBuild();
 
         function getCurrentQuestion() {
             return QUESTIONS[currentQ];
