@@ -158,6 +158,10 @@ body.embed-mode #graph-area {
     -webkit-box-orient: vertical;
     overflow: hidden;
     max-width: 100%;
+    background: #eaf3ff;
+    border: 1px solid #bfd8ff;
+    border-radius: 8px;
+    padding: 3px 6px;
 }
 
 #progress-hint {
@@ -174,6 +178,37 @@ body.embed-mode #graph-area {
     border-radius: 999px;
     padding: 2px 7px;
     width: fit-content;
+}
+
+#top-brief-card {
+    margin-top: 4px;
+    background: linear-gradient(125deg, #fffbe8 0%, #fff3cf 100%);
+    border: 1px solid #f6d375;
+    border-right: 6px solid #f59e0b;
+    border-radius: 12px;
+    padding: 7px 9px;
+    box-shadow: 0 1px 5px rgba(124, 82, 0, 0.12);
+}
+
+#top-brief-head {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #92400e;
+    margin-bottom: 3px;
+}
+
+#top-brief-main {
+    font-size: 0.86rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.35;
+    margin-bottom: 2px;
+}
+
+#top-brief-detail {
+    font-size: 0.79rem;
+    color: #334155;
+    line-height: 1.35;
 }
 
 #top-question-select {
@@ -226,6 +261,16 @@ body.embed-mode #graph-area {
 
 #btn-top-init-builder:hover {
     background: #c1daff;
+}
+
+#btn-top-quartic {
+    border: 1px solid #64b5f6;
+    background: linear-gradient(120deg, #e3f2fd, #cfe8ff);
+    color: #0c4a8a;
+}
+
+#btn-top-quartic:hover {
+    background: #badcff;
 }
 
 #btn-normal-top {
@@ -1249,6 +1294,19 @@ h2 {
         font-size: 0.92rem;
     }
 
+    #top-brief-card {
+        margin-top: 3px;
+        padding: 6px 8px;
+    }
+
+    #top-brief-main {
+        font-size: 0.82rem;
+    }
+
+    #top-brief-detail {
+        font-size: 0.75rem;
+    }
+
     #top-question-select {
         max-width: 100%;
         min-width: 0;
@@ -1295,9 +1353,22 @@ h2 {
         font-size: 0.72rem;
     }
 
+    #top-step-status {
+        font-size: 0.73rem;
+        padding: 3px 5px;
+    }
+
     .formula-chip {
         font-size: 0.88rem;
         padding: 4px 7px;
+    }
+
+    #top-brief-main {
+        font-size: 0.79rem;
+    }
+
+    #top-brief-detail {
+        font-size: 0.72rem;
     }
 
     #top-actions button,

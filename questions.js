@@ -40,6 +40,7 @@ const FUNCTION_TEMPLATES = [
       b: "מקדם של x^3",
       c: "מקדם של x^2",
       d: "מקדם של x",
+      e: "free term",
     },
     domain: { xMin: -5, xMax: 5 },
   },

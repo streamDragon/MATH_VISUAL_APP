@@ -122,6 +122,11 @@
                 <span id="top-step-status">שלב 1/1: ...</span>
                 <span id="progress-hint">חפש → מצא → בדוק</span>
                 <span id="build-badge">build: --</span>
+                <div id="top-brief-card">
+                    <div id="top-brief-head">המשימה עכשיו</div>
+                    <div id="top-brief-main">טוען משימה...</div>
+                    <div id="top-brief-detail">טוען הסבר קצר...</div>
+                </div>
             </div>
             <div id="top-formulas">
                 <span class="formula-chip" id="top-formula-f">f(x) = ...</span>
@@ -131,6 +136,7 @@
                 <select id="top-question-select" title="בחירת שאלה"></select>
                 <button id="btn-top-questions" onclick="toggleQuestionsFromTop()">שאלות ▼</button>
                 <button id="btn-top-init-builder" onclick="openInitialBuilderFromTop()">בנייה ראשונית</button>
+                <button id="btn-top-quartic" onclick="openQuarticBuilderFromTop()">מעלה 4</button>
                 <button id="btn-start-guide" onclick="openStartGuideModal()">איך עובדים?</button>
                 <button id="btn-normal-top" class="hidden" onclick="openNormalLabGuide()">הסבר אנך</button>
                 <button id="btn-overlay-open" onclick="openQuestionOverlay()">הסבר שאלה</button>
@@ -255,7 +261,7 @@
     </div>
 
     <script>
-        const APP_BUILD = '2026-02-16-top-clearer-v2';
+        const APP_BUILD = '2026-02-16-top-brief-clear-v3';
         const GUIDE_HIT_LIMIT = 8;
         let board, p, curve, tangent, normalLine, triangle, labelText, testLine, testAnchor, testDir;
         let normalOrigin, normalXAxisPoint, normalYAxisPoint;
@@ -1495,6 +1501,35 @@
             let missionText = `שלב ${currentStepIndex + 1}/${total}: ${instruction}`;
             document.getElementById('mission-step-text').innerText = missionText;
             document.getElementById('top-step-status').innerText = missionText;
+            updateTopBriefCard(step);
+        }
+
+        function getShortText(input, fallback) {
+            if (!input || typeof input !== 'string') return fallback;
+            let normalized = input.replace(/\s+/g, ' ').trim();
+            if (!normalized) return fallback;
+            return normalized;
+        }
+
+        function getQuestionShortDesc(q) {
+            let desc = (q?.desc || '').split('\n').map((line) => getShortText(line, '')).filter(Boolean);
+            return {
+                first: desc[0] || 'הזז את הנקודה ופתור את המשימה.',
+                second: desc[1] || 'בדוק את השיפוע/הערך על הגרף לפי ההנחיה.'
+            };
+        }
+
+        function updateTopBriefCard(step) {
+            let q = getCurrentQuestion();
+            let shortDesc = getQuestionShortDesc(q);
+            let essence = getShortText(q?.overlay?.essence, shortDesc.first);
+            let goal = getShortText(q?.overlay?.goal, shortDesc.second);
+            let stepInstruction = getShortText(step?.instruction, essence);
+
+            let main = document.getElementById('top-brief-main');
+            let detail = document.getElementById('top-brief-detail');
+            if (main) main.innerText = `מה לעשות: ${stepInstruction}`;
+            if (detail) detail.innerText = `למה: ${goal}`;
         }
 
         function showStepResult(step, solveData, m, x, y) {
@@ -1743,6 +1778,16 @@
             setDrawerOpen(true);
             let setupPanel = document.getElementById('template-setup-panel');
             if (setupPanel) setupPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function openQuarticBuilderFromTop() {
+            loadQ(0, { autoOpenOverlay: false });
+            applyTemplateById('quartic_abcd', true);
+            openAccordion('params');
+            setDrawerOpen(true);
+            updateBuilderVisibility(QUESTIONS[currentQ]);
+            let panel = document.getElementById('builder-panel');
+            if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         function toggleTestLine() {
