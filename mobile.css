@@ -42,7 +42,7 @@ body.embed-mode #graph-area {
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    padding: 10px 12px 10px 52px;
+    padding: 10px 12px;
     background: #ffffff;
     border-bottom: 1px solid #dbe2ea;
     box-shadow: 0 1px 6px rgba(20, 36, 58, 0.08);
@@ -137,6 +137,20 @@ body.embed-mode #graph-area {
     background: #f3f7ff;
 }
 
+#btn-start-guide {
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #0f172a;
+    font-weight: 700;
+    padding: 4px 9px;
+    cursor: pointer;
+}
+
+#btn-start-guide:hover {
+    background: #f3f7ff;
+}
+
 #btn-video {
     border: 1px solid #ffd08a;
     border-radius: 8px;
@@ -180,9 +194,10 @@ body.embed-mode #graph-area {
 }
 
 #sound-toggle {
-    position: absolute;
-    top: 10px;
+    position: fixed;
+    bottom: 12px;
     left: 10px;
+    top: auto;
     z-index: 999;
     background: white;
     border: 1px solid #ccc;
@@ -193,6 +208,7 @@ body.embed-mode #graph-area {
     display: flex;
     justify-content: center;
     align-items: center;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
 }
 
 #win-overlay {
@@ -1006,7 +1022,7 @@ h2 {
     }
 
     #top-strip {
-        padding: 10px 14px 10px 52px;
+        padding: 10px 14px;
     }
 
     #top-question {
@@ -1160,7 +1176,7 @@ h2 {
 
 @media (max-width: 640px) {
     #top-strip {
-        padding: 8px 10px 8px 44px;
+        padding: 8px 10px;
     }
 
     #top-question {

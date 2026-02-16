@@ -129,6 +129,7 @@
             </div>
             <div id="top-actions">
                 <select id="top-question-select" title="בחירת שאלה"></select>
+                <button id="btn-start-guide" onclick="openStartGuideModal()">איך עובדים?</button>
                 <button id="btn-overlay-open" onclick="openQuestionOverlay()">הסבר שאלה</button>
                 <button id="btn-video" class="hidden" onclick="openVideoForCurrentQuestion()">וידאו הסבר</button>
                 <button id="btn-top-builder" onclick="openBuilderFromTop()">בניית פונקציה</button>
@@ -189,6 +190,8 @@
 
                     <div class="formula-group-title">דף נוסחאות 4 יחידות - פונקציות</div>
                     <div class="formula-static">נגזרת פולינום: (ax^3+bx^2+cx+d)' = 3ax^2+2bx+c</div>
+                    <div class="formula-static">שיפוע קו ישר: m = (y2 - y1) / (x2 - x1)</div>
+                    <div class="formula-static">משוואת קו ישר: y = mx + n</div>
                     <div class="formula-static">משוואת משיק: y - y0 = m(x - x0)</div>
                     <div class="formula-static">שיפוע אנך למשיק: m_n = -1 / m_t</div>
                     <div class="formula-static">קיצון: f'(x)=0 ובדיקת סימן נגזרת לפני/אחרי</div>
@@ -240,20 +243,23 @@
                     <div class="slider-row"><span class="slider-lbl">b</span><input type="range" id="inpB" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintB"></span></div>
                     <div class="slider-row"><span class="slider-lbl">c</span><input type="range" id="inpC" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintC"></span></div>
                     <div class="slider-row"><span class="slider-lbl">d</span><input type="range" id="inpD" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintD"></span></div>
+                    <div class="slider-row"><span class="slider-lbl">e</span><input type="range" id="inpE" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintE"></span></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const APP_BUILD = '2026-02-15-splash-intro';
+        const APP_BUILD = '2026-02-16-splash-start-quartic-hits';
+        const GUIDE_HIT_LIMIT = 8;
         let board, p, curve, tangent, normalLine, triangle, labelText, testLine, testAnchor, testDir;
         let normalOrigin, normalXAxisPoint, normalYAxisPoint;
         let rightAngleP1, rightAngleP2, rightAngleP3, rightAngleP4, rightAngleMarker;
         let rightAngleArmCorner, rightAngleArmT, rightAngleArmN, rightAngleArmLineT, rightAngleArmLineN;
         let guideNormalBasePoint, guideNormalDirPoint, guideNormalLine, guideNormalIntersect, guideNormalLabel;
+        let guideNormalHitPoints = [];
         let targets = [];
-        let params = { a:0, b:0, c:0, d:0 };
+        let params = { a:0, b:0, c:0, d:0, e:0 };
         let currentQ = 0;
         let wasWin = false;
         let prevLabScore = null;
@@ -288,7 +294,7 @@
 
         function templateDefaultsToArray(template) {
             let d = template?.defaults || {};
-            return [d.a || 0, d.b || 0, d.c || 0, d.d || 0];
+            return [d.a || 0, d.b || 0, d.c || 0, d.d || 0, d.e || 0];
         }
 
         function populateTemplateSelect() {
@@ -313,10 +319,12 @@
             params.b = arr[1];
             params.c = arr[2];
             params.d = arr[3];
+            params.e = arr[4];
             document.getElementById('inpA').value = params.a;
             document.getElementById('inpB').value = params.b;
             document.getElementById('inpC').value = params.c;
             document.getElementById('inpD').value = params.d;
+            document.getElementById('inpE').value = params.e;
             if (markChosen) templateChosen = true;
             let status = document.getElementById('template-status-text');
             if (status) status.innerText = `נבחרה תבנית: ${tpl.title}`;
@@ -334,11 +342,22 @@
 
         function updateParamHints() {
             const desc = activeTemplate?.paramDescriptions || {};
-            const map = { A: 'a', B: 'b', C: 'c', D: 'd' };
+            const map = { A: 'a', B: 'b', C: 'c', D: 'd', E: 'e' };
             Object.keys(map).forEach((k) => {
                 const el = document.getElementById(`hint${k}`);
-                if (el) el.innerText = desc[map[k]] || '';
+                if (!el) return;
+                if (map[k] === 'e' && activeTemplate?.kind === 'poly4') {
+                    el.innerText = desc[map[k]] || 'איבר חופשי';
+                    return;
+                }
+                el.innerText = desc[map[k]] || '';
             });
+        }
+
+        function getActiveTemplateParams() {
+            if (!activeTemplate) return [];
+            if (activeTemplate.kind === 'poly4') return ['a', 'b', 'c', 'd', 'e'];
+            return Array.isArray(activeTemplate.params) ? activeTemplate.params : [];
         }
 
         function getQuestionSteps(q) {
@@ -374,7 +393,7 @@
             }
             let kind = activeTemplate?.kind || 'poly3';
             if (kind === 'poly2') return params.a*x*x + params.b*x + params.c;
-            if (kind === 'poly4') return params.a*x*x*x*x + params.b*x*x*x + params.c*x*x + params.d*x;
+            if (kind === 'poly4') return params.a*x*x*x*x + params.b*x*x*x + params.c*x*x + params.d*x + params.e;
             if (kind === 'line') return params.c*x + params.d;
             if (kind === 'quad_shift') {
                 let k = params.c;
@@ -413,10 +432,10 @@
         function getQuestionParamsArray(q) {
             if (Array.isArray(q?.params) && q.params.length >= 4) return q.params;
             if (q?.defaults && typeof q.defaults === 'object') {
-                return [q.defaults.a || 0, q.defaults.b || 0, q.defaults.c || 0, q.defaults.d || 0];
+                return [q.defaults.a || 0, q.defaults.b || 0, q.defaults.c || 0, q.defaults.d || 0, q.defaults.e || 0];
             }
             if (activeTemplate) return templateDefaultsToArray(activeTemplate);
-            return [0.2, 0, 0, 0];
+            return [0.2, 0, 0, 0, 0];
         }
 
         function getSecondDerivativeAt(x) {
@@ -602,6 +621,13 @@
                 strokeColor: '#0f172a',
                 cssStyle: 'background:rgba(255,255,255,.86);padding:2px 5px;border:1px solid #94a3b8;border-radius:6px;'
             });
+            guideNormalHitPoints = Array.from({ length: GUIDE_HIT_LIMIT }, () => board.create('point', [0, 0], {
+                name: '',
+                size: 4,
+                color: '#0f766e',
+                visible: false,
+                fixed: true
+            }));
 
             labelText = board.create('text', [
                 () => p.X() + 0.5,
@@ -624,7 +650,7 @@
             });
             board.on('up', updateInfo);
 
-            ['inpA','inpB','inpC','inpD'].forEach(id => {
+            ['inpA','inpB','inpC','inpD','inpE'].forEach(id => {
                 document.getElementById(id).addEventListener('input', () => {
                     updateParams();
                     board.update();
@@ -714,6 +740,7 @@
             params.b = parseFloat(document.getElementById('inpB').value);
             params.c = parseFloat(document.getElementById('inpC').value);
             params.d = parseFloat(document.getElementById('inpD').value);
+            params.e = parseFloat(document.getElementById('inpE').value);
             updateInfo();
         }
 
@@ -799,7 +826,7 @@
                     fxText = 'f(x) = ' + formatPoly(fTerms);
                     dText = "f'(x) = " + formatPoly(dTerms);
                 } else if (kind === 'poly4') {
-                    let fTerms = [{val: params.a, pow:4}, {val: params.b, pow:3}, {val: params.c, pow:2}, {val: params.d, pow:1}];
+                    let fTerms = [{val: params.a, pow:4}, {val: params.b, pow:3}, {val: params.c, pow:2}, {val: params.d, pow:1}, {val: params.e, pow:0}];
                     let dTerms = [{val: 4*params.a, pow:3}, {val: 3*params.b, pow:2}, {val: 2*params.c, pow:1}, {val: params.d, pow:0}];
                     fxText = 'f(x) = ' + formatPoly(fTerms);
                     dText = "f'(x) = " + formatPoly(dTerms);
@@ -925,18 +952,125 @@
             };
         }
 
+        function getCurrentBoardBounds() {
+            let bb = board.getBoundingBox();
+            return {
+                left: Math.min(bb[0], bb[2]),
+                right: Math.max(bb[0], bb[2]),
+                top: Math.max(bb[1], bb[3]),
+                bottom: Math.min(bb[1], bb[3])
+            };
+        }
+
+        function isVisiblePoint(x, y, bounds) {
+            return Number.isFinite(x) && Number.isFinite(y) &&
+                x >= bounds.left - 0.25 && x <= bounds.right + 0.25 &&
+                y >= bounds.bottom - 0.25 && y <= bounds.top + 0.25;
+        }
+
+        function addUniqueHit(hits, x, y, bounds) {
+            if (!isVisiblePoint(x, y, bounds)) return;
+            let exists = hits.some((pnt) => Math.hypot(pnt.x - x, pnt.y - y) < 0.1);
+            if (!exists) hits.push({ x, y });
+        }
+
+        function collectGuideIntersections(base, normalDir) {
+            let bounds = getCurrentBoardBounds();
+            let hits = [];
+            addUniqueHit(hits, base.x, base.y, bounds);
+
+            if (normalDir.type === 'vertical') {
+                addUniqueHit(hits, base.x, 0, bounds);
+                let yOnCurve = evaluateFunctionAt(base.x);
+                addUniqueHit(hits, base.x, yOnCurve, bounds);
+                return hits;
+            }
+
+            if (!Number.isFinite(normalDir.normalSlope)) return hits;
+
+            let lineSlope = normalDir.normalSlope;
+            let lineIntercept = base.y - lineSlope * base.x;
+            addUniqueHit(hits, 0, lineIntercept, bounds);
+            if (Math.abs(lineSlope) > 1e-9) addUniqueHit(hits, -lineIntercept / lineSlope, 0, bounds);
+
+            let left = bounds.left;
+            let right = bounds.right;
+            let samples = 260;
+            let g = (xVal) => evaluateFunctionAt(xVal) - (lineSlope * xVal + lineIntercept);
+            let gxPrev = left;
+            let gyPrev = g(gxPrev);
+            for (let i = 1; i <= samples; i++) {
+                let gx = left + (right - left) * (i / samples);
+                let gy = g(gx);
+                if (!Number.isFinite(gyPrev) || !Number.isFinite(gy)) {
+                    gxPrev = gx;
+                    gyPrev = gy;
+                    continue;
+                }
+                if (Math.abs(gyPrev) < 1e-4) {
+                    let yRoot = lineSlope * gxPrev + lineIntercept;
+                    addUniqueHit(hits, gxPrev, yRoot, bounds);
+                }
+                if (gyPrev === 0 || gy === 0 || gyPrev * gy < 0) {
+                    let lo = gxPrev;
+                    let hi = gx;
+                    let vlo = gyPrev;
+                    for (let j = 0; j < 26; j++) {
+                        let mid = (lo + hi) / 2;
+                        let vmid = g(mid);
+                        if (!Number.isFinite(vmid)) break;
+                        if (Math.abs(vmid) < 1e-6) {
+                            lo = mid;
+                            hi = mid;
+                            break;
+                        }
+                        if (vlo * vmid <= 0) {
+                            hi = mid;
+                        } else {
+                            lo = mid;
+                            vlo = vmid;
+                        }
+                    }
+                    let rootX = (lo + hi) / 2;
+                    let rootY = lineSlope * rootX + lineIntercept;
+                    addUniqueHit(hits, rootX, rootY, bounds);
+                }
+                gxPrev = gx;
+                gyPrev = gy;
+            }
+
+            return hits;
+        }
+
+        function renderGuideIntersections(hits, enabled) {
+            guideNormalHitPoints.forEach((pt, idx) => {
+                let hit = hits[idx + 1];
+                if (!enabled || !hit) {
+                    pt.setAttribute({ visible: false });
+                    return;
+                }
+                pt.setPosition(JXG.COORDS_BY_USER, [hit.x, hit.y]);
+                pt.setAttribute({ visible: true });
+            });
+        }
+
         function updateGuideNormalGeometry(x, y, m) {
             let enabled = document.getElementById('chk-test-line').checked;
             guideNormalLine.setAttribute({ visible: enabled });
             guideNormalIntersect.setAttribute({ visible: enabled });
             guideNormalLabel.setAttribute({ visible: enabled });
-            if (!enabled) return;
+            if (!enabled) {
+                renderGuideIntersections([], false);
+                return;
+            }
 
             let base = getGuideNormalBase(x, y, m);
             let normalDir = getNormalDirection(m);
             guideNormalBasePoint.setPosition(JXG.COORDS_BY_USER, [base.x, base.y]);
             guideNormalDirPoint.setPosition(JXG.COORDS_BY_USER, [base.x + normalDir.dx, base.y + normalDir.dy]);
             guideNormalIntersect.setPosition(JXG.COORDS_BY_USER, [base.x, base.y]);
+            let hits = collectGuideIntersections(base, normalDir).slice(0, GUIDE_HIT_LIMIT + 1);
+            renderGuideIntersections(hits, true);
         }
 
         function updateLabReadout(tangentSlope) {
@@ -1400,7 +1534,7 @@
             let allowLineTool = isUiEnabled(q, 'allowLineTool', false);
             let showToolsBox = allowNormal || allowLineTool;
 
-            document.getElementById('lab-box').classList.toggle('hidden', !showToolsBox);
+            document.getElementById('acc-item-tools').classList.toggle('hidden', !showToolsBox);
             document.getElementById('normal-toggle-row').classList.toggle('hidden', !allowNormal);
             document.getElementById('normal-help-row').classList.toggle('hidden', !allowNormal);
             document.getElementById('test-line-row').classList.toggle('hidden', !allowLineTool);
@@ -1508,7 +1642,7 @@
         }
 
         function updateBuilderVisibility(q) {
-            let allIds = ['inpA','inpB','inpC','inpD'];
+            let allIds = ['inpA','inpB','inpC','inpD','inpE'];
             let locked = new Set(q.locked || []);
             let editableCount = allIds.filter(id => !locked.has(id)).length;
             let shouldAllowBuilder = editableCount > 0;
@@ -1540,7 +1674,7 @@
             let q = QUESTIONS[currentQ];
             if (!q) return;
             let locked = new Set(q.locked || []);
-            let editableCount = ['inpA','inpB','inpC','inpD'].filter(id => !locked.has(id)).length;
+            let editableCount = ['inpA','inpB','inpC','inpD','inpE'].filter(id => !locked.has(id)).length;
             if (editableCount === 0) return;
             builderPanelOpen = true;
             openAccordion('params');
@@ -1589,11 +1723,13 @@
                 params.b = qParams[1]; document.getElementById('inpB').value = params.b;
                 params.c = qParams[2]; document.getElementById('inpC').value = params.c;
                 params.d = qParams[3]; document.getElementById('inpD').value = params.d;
+                params.e = qParams[4] || 0; document.getElementById('inpE').value = params.e;
             } else {
                 document.getElementById('inpA').value = params.a;
                 document.getElementById('inpB').value = params.b;
                 document.getElementById('inpC').value = params.c;
                 document.getElementById('inpD').value = params.d;
+                document.getElementById('inpE').value = params.e;
             }
 
             let paramSpec = getQuestionParamSpec(q);
@@ -1609,10 +1745,11 @@
             let readFeedback = document.getElementById('read-answer-feedback');
             if (readFeedback) readFeedback.innerText = '';
 
-            ['inpA','inpB','inpC','inpD'].forEach(id => document.getElementById(id).disabled = false);
-            if (activeTemplate?.params && Array.isArray(activeTemplate.params)) {
-                const allowed = new Set(activeTemplate.params);
-                const map = { inpA: 'a', inpB: 'b', inpC: 'c', inpD: 'd' };
+            ['inpA','inpB','inpC','inpD','inpE'].forEach(id => document.getElementById(id).disabled = false);
+            let activeParams = getActiveTemplateParams();
+            if (activeParams.length > 0) {
+                const allowed = new Set(activeParams);
+                const map = { inpA: 'a', inpB: 'b', inpC: 'c', inpD: 'd', inpE: 'e' };
                 Object.keys(map).forEach((id) => {
                     document.getElementById(id).disabled = !allowed.has(map[id]);
                 });
