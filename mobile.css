@@ -1328,7 +1328,6 @@ h2 {
         padding: 5px 9px;
     }
 
-    body.panel-focus #top-formulas,
     body.panel-focus #top-actions,
     body.panel-focus #top-step-status,
     body.panel-focus #prestart-hint {

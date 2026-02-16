@@ -77,6 +77,7 @@ const FUNCTION_TEMPLATES = [
 const QUESTIONS = [
   {
     id: 0,
+    startTemplateId: "quartic_abcd",
     title: "בחירת פונקציה",
     desc:
       "לפני שמתחילים: בחר תצורת פונקציה (תבנית) ושנה את הפרמטרים.\n" +

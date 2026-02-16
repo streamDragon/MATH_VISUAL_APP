@@ -301,7 +301,7 @@
 
         function getDefaultTemplate() {
             if (!Array.isArray(FUNCTION_TEMPLATES) || FUNCTION_TEMPLATES.length === 0) return null;
-            return FUNCTION_TEMPLATES[0];
+            return getTemplateById('quartic_abcd') || FUNCTION_TEMPLATES[0];
         }
 
         function templateDefaultsToArray(template) {
@@ -392,9 +392,9 @@
         }
 
         function getQuestionStartTemplate(q, idx) {
-            if (q?.goal === 'choose_function_template') return activeTemplate || getDefaultTemplate();
             let requested = getTemplateById(q?.startTemplateId);
             if (requested) return requested;
+            if (q?.goal === 'choose_function_template') return activeTemplate || getDefaultTemplate();
             let all = FUNCTION_TEMPLATES || [];
             if (all.length === 0) return null;
             return all[Math.max(0, idx - 1) % all.length];
@@ -1850,8 +1850,8 @@
             document.querySelectorAll('.q-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
 
             if (q.goal === 'choose_function_template') {
-                if (!activeTemplate) activeTemplate = getDefaultTemplate();
-                if (activeTemplate) applyTemplateById(activeTemplate.id, false);
+                let startTemplate = getQuestionStartTemplate(q, idx);
+                if (startTemplate) applyTemplateById(startTemplate.id, false);
             } else {
                 let startTemplate = getQuestionStartTemplate(q, idx);
                 if (startTemplate) applyTemplateById(startTemplate.id, false);
