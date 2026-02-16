@@ -53,20 +53,21 @@ body.embed-mode #top-formulas {
 body.embed-mode #top-actions {
     grid-area: actions;
     display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
+    flex-wrap: wrap;
+    overflow-x: visible;
     justify-content: flex-start;
     gap: 6px;
     padding: 6px 8px;
 }
 
 body.embed-mode #top-actions > * {
-    flex: 0 0 auto;
+    flex: 0 1 auto;
 }
 
 body.embed-mode #top-question-select {
     min-width: 165px;
-    max-width: 230px;
+    max-width: 100%;
+    flex: 1 1 220px;
 }
 
 body.embed-mode #top-brief-card,
@@ -164,6 +165,7 @@ body.embed-mode .formula-chip {
     border-radius: 999px;
     font-weight: 700;
     padding: 6px 11px;
+    white-space: nowrap;
     cursor: pointer;
     box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
     transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
@@ -1414,6 +1416,8 @@ h2 {
         flex-direction: column;
         height: 100dvh;
         min-height: 0;
+        padding-bottom: 48px;
+        box-sizing: border-box;
     }
 
     #graph-area {
@@ -1498,12 +1502,16 @@ h2 {
     }
 
     body.embed-mode #top-actions {
-        flex-wrap: nowrap;
-        overflow-x: auto;
+        flex-wrap: wrap;
+        overflow-x: visible;
+        row-gap: 6px;
     }
 
-    body.embed-mode #top-actions > * {
-        flex: 0 0 auto;
+    body.embed-mode #top-question-select {
+        width: 100%;
+        max-width: 100%;
+        flex: 1 1 100%;
+        order: -1;
     }
 
     body.panel-focus #top-actions,
