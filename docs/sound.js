@@ -60,22 +60,34 @@ function playIntroTheme() {
     introPlayed = true;
 
     const now = audioCtx.currentTime;
-    const notes = [392, 523.25, 659.25];
+    const notes = [261.63, 329.63, 392, 523.25];
     notes.forEach((freq, i) => {
         const osc = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
         osc.connect(gainNode);
         gainNode.connect(audioCtx.destination);
-        const start = now + i * 0.12;
-        const stop = start + 0.18;
-        osc.type = 'triangle';
+        const start = now + i * 0.1;
+        const stop = start + 0.22;
+        osc.type = i % 2 === 0 ? 'triangle' : 'sine';
         osc.frequency.setValueAtTime(freq, start);
         gainNode.gain.setValueAtTime(0.0001, start);
-        gainNode.gain.exponentialRampToValueAtTime(0.08, start + 0.02);
+        gainNode.gain.exponentialRampToValueAtTime(0.06, start + 0.025);
         gainNode.gain.exponentialRampToValueAtTime(0.0001, stop);
         osc.start(start);
         osc.stop(stop);
     });
+
+    const bassOsc = audioCtx.createOscillator();
+    const bassGain = audioCtx.createGain();
+    bassOsc.connect(bassGain);
+    bassGain.connect(audioCtx.destination);
+    bassOsc.type = 'sine';
+    bassOsc.frequency.setValueAtTime(130.81, now);
+    bassGain.gain.setValueAtTime(0.0001, now);
+    bassGain.gain.exponentialRampToValueAtTime(0.03, now + 0.05);
+    bassGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.42);
+    bassOsc.start(now);
+    bassOsc.stop(now + 0.45);
 }
 
 function resetWarmColdFeedback() {
