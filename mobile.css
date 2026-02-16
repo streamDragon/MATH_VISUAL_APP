@@ -67,7 +67,12 @@ body.embed-mode #top-actions > * {
 body.embed-mode #top-question-select {
     min-width: 165px;
     max-width: 100%;
-    flex: 1 1 220px;
+    flex: 1 1 320px;
+    font-weight: 800;
+}
+
+body.embed-mode #btn-top-questions {
+    display: none !important;
 }
 
 body.embed-mode #top-brief-card,
