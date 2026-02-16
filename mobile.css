@@ -151,6 +151,20 @@ body.embed-mode #graph-area {
     background: #f3f7ff;
 }
 
+#btn-normal-top {
+    border: 1px solid #d7d2fe;
+    border-radius: 8px;
+    background: #f4f3ff;
+    color: #312e81;
+    font-weight: 700;
+    padding: 4px 9px;
+    cursor: pointer;
+}
+
+#btn-normal-top:hover {
+    background: #e9e7ff;
+}
+
 #btn-video {
     border: 1px solid #ffd08a;
     border-radius: 8px;

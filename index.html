@@ -130,6 +130,7 @@
             <div id="top-actions">
                 <select id="top-question-select" title="בחירת שאלה"></select>
                 <button id="btn-start-guide" onclick="openStartGuideModal()">איך עובדים?</button>
+                <button id="btn-normal-top" class="hidden" onclick="openNormalLabGuide()">הסבר אנך</button>
                 <button id="btn-overlay-open" onclick="openQuestionOverlay()">הסבר שאלה</button>
                 <button id="btn-video" class="hidden" onclick="openVideoForCurrentQuestion()">וידאו הסבר</button>
                 <button id="btn-top-builder" onclick="openBuilderFromTop()">בניית פונקציה</button>
@@ -190,6 +191,8 @@
 
                     <div class="formula-group-title">דף נוסחאות 4 יחידות - פונקציות</div>
                     <div class="formula-static">נגזרת פולינום: (ax^3+bx^2+cx+d)' = 3ax^2+2bx+c</div>
+                    <div class="formula-static">פולינום מעלה 4: f(x)=ax^4+bx^3+cx^2+dx+e</div>
+                    <div class="formula-static">נגזרת מעלה 4: f'(x)=4ax^3+3bx^2+2cx+d</div>
                     <div class="formula-static">שיפוע קו ישר: m = (y2 - y1) / (x2 - x1)</div>
                     <div class="formula-static">משוואת קו ישר: y = mx + n</div>
                     <div class="formula-static">משוואת משיק: y - y0 = m(x - x0)</div>
@@ -1535,6 +1538,7 @@
             let showToolsBox = allowNormal || allowLineTool;
 
             document.getElementById('acc-item-tools').classList.toggle('hidden', !showToolsBox);
+            document.getElementById('btn-normal-top').classList.toggle('hidden', !showToolsBox);
             document.getElementById('normal-toggle-row').classList.toggle('hidden', !allowNormal);
             document.getElementById('normal-help-row').classList.toggle('hidden', !allowNormal);
             document.getElementById('test-line-row').classList.toggle('hidden', !allowLineTool);

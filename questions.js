@@ -31,10 +31,10 @@ const FUNCTION_TEMPLATES = [
   },
   {
     id: "quartic_abcd",
-    title: "פולינום ממעלה 4: f(x)=ax^4+bx^3+cx^2+dx",
+    title: "פולינום ממעלה 4: f(x)=ax^4+bx^3+cx^2+dx+e",
     kind: "poly4",
-    defaults: { a: 0.05, b: 0, c: -1, d: 0.5 },
-    params: ["a", "b", "c", "d"],
+    defaults: { a: 0.05, b: 0, c: -1, d: 0.5, e: 0 },
+    params: ["a", "b", "c", "d", "e"],
     paramDescriptions: {
       a: "מקדם של x^4",
       b: "מקדם של x^3",
@@ -267,3 +267,4 @@ const QUESTIONS = [
     ui: { allowNormal: true, defaultNormalOn: false, allowLineTool: true },
   },
 ];
+
