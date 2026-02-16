@@ -133,6 +133,7 @@
                 <span id="progress-hint">חפש → מצא → בדוק</span>
                 <span id="prestart-hint">לפני התרגול בונים פונקציה, ואז לוחצים "התחל תרגול" כדי להסתיר כפתורי התחלה.</span>
                 <span id="build-badge">build: --</span>
+                <span id="learner-progress-chip">רמה 1 | XP 0 | רצף 0 | 0/0</span>
                 <div id="top-brief-card">
                     <div id="top-brief-head">המשימה עכשיו</div>
                     <div id="top-brief-main">טוען משימה...</div>
@@ -273,6 +274,11 @@
 
     <script>
         const APP_BUILD = '__BUILD_ID__';
+        const PROGRESS_STORAGE_KEY = 'math_visual_progress_v1';
+        const XP_FIRST_SOLVE = 30;
+        const XP_REPEAT_SOLVE = 8;
+        const XP_REPEAT_DAILY_LIMIT = 3;
+        const XP_PER_LEVEL = 120;
         const GUIDE_HIT_LIMIT = 8;
         const BUILDER_FOCUSED_GOALS = new Set([
             'choose_function_template',
@@ -306,6 +312,7 @@
         let templateChosen = false;
         let readAnswerValidated = false;
         let sessionStarted = false;
+        let learnerProgress = null;
 
         async function ensureLatestBuild() {
             try {
@@ -330,6 +337,143 @@
         }
 
         ensureLatestBuild();
+
+        function createDefaultProgress() {
+            return {
+                totalXp: 0,
+                streakDays: 0,
+                lastSolveDay: '',
+                uniqueSolved: [],
+                repeatDay: '',
+                repeatCount: 0
+            };
+        }
+
+        function getProgressLevel(totalXp) {
+            return Math.floor(Math.max(0, totalXp) / XP_PER_LEVEL) + 1;
+        }
+
+        function toDayToken(dateObj) {
+            let y = dateObj.getFullYear();
+            let m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            let d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function dayTokenToDate(token) {
+            if (!token || typeof token !== 'string') return null;
+            let m = token.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (!m) return null;
+            let y = Number(m[1]);
+            let mo = Number(m[2]) - 1;
+            let d = Number(m[3]);
+            let dt = new Date(y, mo, d);
+            if (Number.isNaN(dt.getTime())) return null;
+            return dt;
+        }
+
+        function dayDiff(fromToken, toToken) {
+            let fromDate = dayTokenToDate(fromToken);
+            let toDate = dayTokenToDate(toToken);
+            if (!fromDate || !toDate) return null;
+            let msPerDay = 24 * 60 * 60 * 1000;
+            let fromUtc = Date.UTC(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
+            let toUtc = Date.UTC(toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
+            return Math.floor((toUtc - fromUtc) / msPerDay);
+        }
+
+        function loadLearnerProgress() {
+            try {
+                let raw = localStorage.getItem(PROGRESS_STORAGE_KEY);
+                if (!raw) return createDefaultProgress();
+                let parsed = JSON.parse(raw);
+                let base = createDefaultProgress();
+                return Object.assign(base, parsed);
+            } catch (err) {
+                return createDefaultProgress();
+            }
+        }
+
+        function saveLearnerProgress() {
+            if (!learnerProgress) return;
+            try {
+                localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(learnerProgress));
+            } catch (err) {
+                // Keep running even if storage fails.
+            }
+        }
+
+        function getQuestionProgressKey() {
+            let q = getCurrentQuestion();
+            if (q && typeof q.id === 'string' && q.id.trim()) return q.id.trim();
+            let title = (q?.title || '').replace(/\s+/g, ' ').trim();
+            return `${currentQ}:${title}`;
+        }
+
+        function updateLearnerProgressChip() {
+            let chip = document.getElementById('learner-progress-chip');
+            if (!chip || !learnerProgress) return;
+            let level = getProgressLevel(learnerProgress.totalXp);
+            let solved = Array.isArray(learnerProgress.uniqueSolved) ? learnerProgress.uniqueSolved.length : 0;
+            let totalQuestions = Array.isArray(QUESTIONS) ? QUESTIONS.length : 0;
+            chip.innerText = `רמה ${level} | XP ${learnerProgress.totalXp} | רצף ${learnerProgress.streakDays} | ${Math.min(solved, totalQuestions)}/${totalQuestions}`;
+        }
+
+        function initLearnerProgress() {
+            learnerProgress = loadLearnerProgress();
+            if (!Array.isArray(learnerProgress.uniqueSolved)) learnerProgress.uniqueSolved = [];
+            if (!Number.isFinite(learnerProgress.totalXp)) learnerProgress.totalXp = 0;
+            if (!Number.isFinite(learnerProgress.streakDays)) learnerProgress.streakDays = 0;
+            if (!Number.isFinite(learnerProgress.repeatCount)) learnerProgress.repeatCount = 0;
+            if (typeof learnerProgress.lastSolveDay !== 'string') learnerProgress.lastSolveDay = '';
+            if (typeof learnerProgress.repeatDay !== 'string') learnerProgress.repeatDay = '';
+            saveLearnerProgress();
+            updateLearnerProgressChip();
+        }
+
+        function registerQuestionSolvedProgress() {
+            if (!learnerProgress) initLearnerProgress();
+
+            let now = new Date();
+            let today = toDayToken(now);
+            let prevLevel = getProgressLevel(learnerProgress.totalXp);
+            let gainedXp = 0;
+
+            let qKey = getQuestionProgressKey();
+            let uniqueSet = new Set(learnerProgress.uniqueSolved || []);
+            let isFirstSolve = !uniqueSet.has(qKey);
+
+            if (isFirstSolve) {
+                uniqueSet.add(qKey);
+                learnerProgress.uniqueSolved = Array.from(uniqueSet);
+                gainedXp = XP_FIRST_SOLVE;
+            } else {
+                if (learnerProgress.repeatDay !== today) {
+                    learnerProgress.repeatDay = today;
+                    learnerProgress.repeatCount = 0;
+                }
+                if (learnerProgress.repeatCount < XP_REPEAT_DAILY_LIMIT) {
+                    learnerProgress.repeatCount += 1;
+                    gainedXp = XP_REPEAT_SOLVE;
+                }
+            }
+
+            if (learnerProgress.lastSolveDay !== today) {
+                let diff = dayDiff(learnerProgress.lastSolveDay, today);
+                if (diff === 1) learnerProgress.streakDays += 1;
+                else learnerProgress.streakDays = 1;
+                learnerProgress.lastSolveDay = today;
+            }
+
+            learnerProgress.totalXp += gainedXp;
+            let newLevel = getProgressLevel(learnerProgress.totalXp);
+            let leveledUp = newLevel > prevLevel;
+
+            saveLearnerProgress();
+            updateLearnerProgressChip();
+
+            return { gainedXp, leveledUp, level: newLevel };
+        }
 
         function getCurrentQuestion() {
             return QUESTIONS[currentQ];
@@ -798,6 +942,7 @@
             updateNormalShiftLabel();
             refreshTestLineControlVisibility();
             updateSoundButton();
+            initLearnerProgress();
             syncSessionUiState();
             openStartGuideModal();
 
@@ -1634,7 +1779,11 @@
             let box = document.querySelector('.jxgbox');
             document.getElementById('win-overlay').style.display = 'none';
             if (box) box.classList.add('winning-box');
-            showStepToast('כל הכבוד! השלמת את המשימה.');
+            let progressAward = registerQuestionSolvedProgress();
+            let message = 'כל הכבוד! השלמת את המשימה.';
+            if (progressAward.gainedXp > 0) message += ` +${progressAward.gainedXp} XP`;
+            if (progressAward.leveledUp) message += ` | עלית לרמה ${progressAward.level}!`;
+            showStepToast(message);
             if (!wasWin) playSound('win');
             wasWin = true;
         }
@@ -1916,6 +2065,7 @@
             document.getElementById('top-question-index').innerText = `שאלה ${idx + 1}/${QUESTIONS.length}`;
             document.getElementById('top-question').innerText = q.title;
             document.getElementById('top-question-select').value = String(idx);
+            updateLearnerProgressChip();
             document.getElementById('win-overlay').style.display = 'none';
             let box = document.querySelector('.jxgbox');
             if (box) box.classList.remove('winning-box');

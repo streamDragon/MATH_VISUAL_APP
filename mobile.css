@@ -261,6 +261,23 @@ body.embed-mode .formula-chip {
     width: fit-content;
 }
 
+#learner-progress-chip {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    max-width: 100%;
+    font-size: 0.74rem;
+    color: #0b3f2c;
+    background: linear-gradient(120deg, #e9fff2, #d6f8e6);
+    border: 1px solid #8dd7ab;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 #top-brief-card {
     margin-top: 4px;
     background: linear-gradient(125deg, #fffbe8 0%, #fff3cf 100%);
@@ -1581,6 +1598,11 @@ h2 {
     #top-step-status {
         font-size: 0.73rem;
         padding: 3px 5px;
+    }
+
+    #learner-progress-chip {
+        font-size: 0.68rem;
+        max-width: 100%;
     }
 
     .formula-chip {
