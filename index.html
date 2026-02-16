@@ -129,11 +129,13 @@
             </div>
             <div id="top-actions">
                 <select id="top-question-select" title="בחירת שאלה"></select>
+                <button id="btn-top-questions" onclick="toggleQuestionsFromTop()">שאלות ▼</button>
+                <button id="btn-top-init-builder" onclick="openInitialBuilderFromTop()">בנייה ראשונית</button>
                 <button id="btn-start-guide" onclick="openStartGuideModal()">איך עובדים?</button>
                 <button id="btn-normal-top" class="hidden" onclick="openNormalLabGuide()">הסבר אנך</button>
                 <button id="btn-overlay-open" onclick="openQuestionOverlay()">הסבר שאלה</button>
                 <button id="btn-video" class="hidden" onclick="openVideoForCurrentQuestion()">וידאו הסבר</button>
-                <button id="btn-top-builder" onclick="openBuilderFromTop()">בניית פונקציה</button>
+                <button id="btn-top-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
             </div>
         </div>
         <div id="graph-area"></div>
@@ -253,7 +255,7 @@
     </div>
 
     <script>
-        const APP_BUILD = '2026-02-16-splash-start-quartic-hits';
+        const APP_BUILD = '2026-02-16-top-clearer-v2';
         const GUIDE_HIT_LIMIT = 8;
         let board, p, curve, tangent, normalLine, triangle, labelText, testLine, testAnchor, testDir;
         let normalOrigin, normalXAxisPoint, normalYAxisPoint;
@@ -485,6 +487,7 @@
             document.getElementById('builder-panel').classList.add('hidden');
             syncAccordionFocusVisibility();
             applyTopStripFocusMode();
+            updateTopQuestionsToggleLabel();
         }
 
         function openAccordion(name) {
@@ -496,6 +499,7 @@
             if (name === 'params') document.getElementById('builder-panel').classList.remove('hidden');
             syncAccordionFocusVisibility();
             applyTopStripFocusMode();
+            updateTopQuestionsToggleLabel();
         }
 
         function setDrawerOpen(open) {
@@ -506,10 +510,37 @@
                 ? '▲ סגור כלים ומשימות'
                 : '▼ פתח כלים ומשימות';
             applyTopStripFocusMode();
+            updateTopQuestionsToggleLabel();
         }
 
         function toggleDrawer() {
             setDrawerOpen(!drawerOpen);
+        }
+
+        function updateTopQuestionsToggleLabel() {
+            let btn = document.getElementById('btn-top-questions');
+            if (!btn) return;
+            let stepsOpen = isTopQuestionsPanelOpen();
+            btn.innerText = stepsOpen ? 'שאלות ▲' : 'שאלות ▼';
+        }
+
+        function isTopQuestionsPanelOpen() {
+            let panelVisible = !document.getElementById('acc-steps').classList.contains('hidden');
+            let isMobile = window.matchMedia('(max-width: 980px)').matches;
+            return panelVisible && (!isMobile || drawerOpen);
+        }
+
+        function toggleQuestionsFromTop() {
+            let stepsOpen = isTopQuestionsPanelOpen();
+            if (stepsOpen) {
+                closeAllAccordions();
+                setDrawerOpen(false);
+                return;
+            }
+            openAccordion('steps');
+            setDrawerOpen(true);
+            let stepsPanel = document.getElementById('acc-steps');
+            if (stepsPanel) stepsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         function init() {
@@ -802,6 +833,24 @@
             return str;
         }
 
+        function formatPolyFull(coeffs) {
+            let parts = [];
+            coeffs.forEach((term, idx) => {
+                let val = Number.isFinite(term.val) ? term.val : 0;
+                let pow = term.pow;
+                let absVal = Math.abs(val);
+                let numStr = absVal.toFixed(1).replace('.0','');
+                let xPart = pow === 4 ? 'x⁴' : pow === 3 ? 'x³' : pow === 2 ? 'x²' : pow === 1 ? 'x' : '';
+                let body = `${numStr}${xPart}`;
+                if (idx === 0) {
+                    parts.push((val < 0 ? '-' : '') + body);
+                } else {
+                    parts.push((val < 0 ? ' - ' : ' + ') + body);
+                }
+            });
+            return parts.join('');
+        }
+
         function updateInfo() {
             let x = p.X();
             let y = p.Y();
@@ -831,8 +880,8 @@
                 } else if (kind === 'poly4') {
                     let fTerms = [{val: params.a, pow:4}, {val: params.b, pow:3}, {val: params.c, pow:2}, {val: params.d, pow:1}, {val: params.e, pow:0}];
                     let dTerms = [{val: 4*params.a, pow:3}, {val: 3*params.b, pow:2}, {val: 2*params.c, pow:1}, {val: params.d, pow:0}];
-                    fxText = 'f(x) = ' + formatPoly(fTerms);
-                    dText = "f'(x) = " + formatPoly(dTerms);
+                    fxText = 'f(x) = ' + formatPolyFull(fTerms);
+                    dText = "f'(x) = " + formatPolyFull(dTerms);
                 } else if (kind === 'line') {
                     fxText = `f(x) = ${formatNumber(params.c)}x + ${formatNumber(params.d)}`;
                     dText = `f'(x) = ${formatNumber(params.c)}`;
@@ -1686,6 +1735,14 @@
             updateBuilderVisibility(q);
             let panel = document.getElementById('builder-panel');
             if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function openInitialBuilderFromTop() {
+            loadQ(0, { autoOpenOverlay: false });
+            openAccordion('steps');
+            setDrawerOpen(true);
+            let setupPanel = document.getElementById('template-setup-panel');
+            if (setupPanel) setupPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         function toggleTestLine() {
