@@ -870,7 +870,7 @@
 
                 let sign = (val < 0) ? ' - ' : (parts.length > 0 ? ' + ' : '');
                 let absVal = Math.abs(val);
-                let numStr = absVal.toFixed(1).replace('.0','');
+                let numStr = formatNumber(absVal);
                 if (numStr === '1' && pow > 0) numStr = '';
 
                 let xPart = pow === 4 ? 'x⁴' : pow === 3 ? 'x³' : pow === 2 ? 'x²' : pow === 1 ? 'x' : '';
@@ -889,7 +889,7 @@
                 let val = Number.isFinite(term.val) ? term.val : 0;
                 let pow = term.pow;
                 let absVal = Math.abs(val);
-                let numStr = absVal.toFixed(1).replace('.0','');
+                let numStr = formatNumber(absVal);
                 let xPart = pow === 4 ? 'x⁴' : pow === 3 ? 'x³' : pow === 2 ? 'x²' : pow === 1 ? 'x' : '';
                 let body = `${numStr}${xPart}`;
                 if (idx === 0) {
@@ -1786,7 +1786,7 @@
             document.body.classList.toggle('session-started', sessionStarted);
             let prestartHint = document.getElementById('prestart-hint');
             if (prestartHint) prestartHint.classList.toggle('hidden', sessionStarted);
-            ['btn-top-init-builder', 'btn-top-quartic', 'btn-start-guide'].forEach((id) => {
+            ['btn-top-init-builder', 'btn-top-quartic'].forEach((id) => {
                 let el = document.getElementById(id);
                 if (!el) return;
                 el.classList.toggle('hidden', sessionStarted);

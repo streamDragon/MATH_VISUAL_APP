@@ -379,7 +379,6 @@ body.embed-mode .formula-chip {
 
 body.session-started #btn-top-init-builder,
 body.session-started #btn-top-quartic,
-body.session-started #btn-start-guide,
 body.session-started #prestart-hint {
     display: none !important;
 }
