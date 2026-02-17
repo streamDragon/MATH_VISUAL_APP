@@ -33,6 +33,12 @@
 <body>
 
     <button id="sound-toggle" onclick="toggleSound()">🔊</button>
+    <div id="side-quick-actions" aria-label="קיצורי דרך">
+        <button id="btn-side-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
+        <button id="btn-side-questions" onclick="toggleQuestionsFromTop()">שאלות</button>
+        <button id="btn-side-overlay" onclick="openQuestionOverlay()">הסבר שאלה</button>
+        <button id="btn-side-normal" class="hidden" onclick="openNormalLabGuide()">מעבדת האנך</button>
+    </div>
 
     <div id="win-overlay">
         <h1>🏆 כל הכבוד!</h1>
@@ -1920,6 +1926,7 @@
 
             document.getElementById('acc-item-tools').classList.toggle('hidden', !showToolsBox);
             document.getElementById('btn-normal-top').classList.toggle('hidden', !showToolsBox);
+            document.getElementById('btn-side-normal').classList.toggle('hidden', !showToolsBox);
             document.getElementById('normal-toggle-row').classList.toggle('hidden', !allowNormal);
             document.getElementById('normal-help-row').classList.toggle('hidden', !allowNormal);
             document.getElementById('test-line-row').classList.toggle('hidden', !allowLineTool);
@@ -2087,8 +2094,10 @@
             let btn = document.getElementById('btn-builder');
             let panel = document.getElementById('builder-panel');
             let topBuilderBtn = document.getElementById('btn-top-builder');
+            let sideBuilderBtn = document.getElementById('btn-side-builder');
             btn.closest('.accordion-item').classList.toggle('hidden', !shouldAllowBuilder);
             if (topBuilderBtn) topBuilderBtn.classList.toggle('hidden', !shouldAllowBuilder);
+            if (sideBuilderBtn) sideBuilderBtn.classList.toggle('hidden', !shouldAllowBuilder);
             if (!shouldAllowBuilder) {
                 panel.classList.add('hidden');
                 builderPanelOpen = false;
