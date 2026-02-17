@@ -143,6 +143,7 @@
                 </div>
             </div>
             <div class="overlay-actions">
+                <button id="btn-open-normal-lab-now" onclick="openNormalLabWorkspaceFromGuide()">פתח מעבדת אנך עכשיו</button>
                 <button onclick="closeNormalLabGuide()">הבנתי</button>
             </div>
         </div>
@@ -225,6 +226,13 @@
             <div id="top-formulas">
                 <span class="formula-chip" id="top-formula-f">f(x) = ...</span>
                 <span class="formula-chip" id="top-formula-tag">f'(x) = ...</span>
+            </div>
+            <div id="top-clarity-panel">
+                <div id="top-clarity-title">שאלה: טוען...</div>
+                <div id="top-clarity-goal">מטרת התרגיל: טוען...</div>
+                <div id="top-clarity-action">מה התלמיד עושה עכשיו: טוען...</div>
+                <div id="top-clarity-tip">רוצים להבין למה זה עובד? לחצו על כפתור ההעמקה.</div>
+                <button id="btn-top-deep-dive" onclick="openQuestionOverlay()">להעמקה והסבר מלא</button>
             </div>
             <div id="top-actions">
                 <span id="top-question-select-label">כאן בוחרים שאלה:</span>
@@ -1601,6 +1609,29 @@
             document.getElementById('normal-lab-modal').classList.remove('hidden');
         }
 
+        function openNormalLabWorkspaceFromGuide() {
+            closeNormalLabGuide();
+            openAccordion('tools');
+            setDrawerOpen(true);
+
+            let q = getCurrentQuestion();
+            let allowNormal = !!q?.ui?.allowNormal;
+            let allowLineTool = !!q?.ui?.allowLineTool;
+            if (!allowNormal && !allowLineTool) {
+                showStepToast('בשאלה הזו מעבדת האנך לא פעילה. אפשר לעבור לשאלה שמתאימה למעבדה.');
+                return;
+            }
+
+            if (allowNormal) document.getElementById('chk-normal').checked = true;
+            if (allowLineTool) document.getElementById('chk-test-line').checked = true;
+            refreshTestLineControlVisibility();
+
+            let labPanel = document.getElementById('lab-panel');
+            if (labPanel) labPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            updateInfo();
+            board.update();
+        }
+
         function closeNormalLabGuide() {
             document.getElementById('normal-lab-modal').classList.add('hidden');
         }
@@ -1873,17 +1904,70 @@
             };
         }
 
+        function getGoalClarityCopy(q, stepInstruction, shortDesc) {
+            let goal = q?.goal || '';
+            let data = q?.data || {};
+            let target = shortDesc.first;
+            let action = stepInstruction || shortDesc.second;
+
+            if (goal === 'choose_function_template') {
+                target = 'לבנות פונקציה שמתאימה לרמה שלכם ולחומר שנלמד עכשיו.';
+                action = 'בחרו צורת פונקציה, אשרו, ואז שנו פרמטרים כדי לראות מיד איך הגרף והנגזרת משתנים.';
+            } else if (goal === 'slope_zero') {
+                target = 'למצוא נקודה שבה שיפוע המשיק הוא אפס (m=0).';
+                action = 'גררו את הנקודה הכחולה עד שבתיבת הנתונים מופיע f\'(x)=m קרוב לאפס.';
+            } else if (goal === 'min_point') {
+                target = 'לזהות נקודת מינימום אמיתית על הגרף.';
+                action = 'הביאו את השיפוע ל־0, ואז בדקו לפי ההנחיה שהנקודה אכן מינימום.';
+            } else if (goal === 'slope_equals') {
+                let targetM = Number.isFinite(data.targetM) ? formatNumber(data.targetM) : 'הערך הנתון';
+                target = `למצוא x שבו השיפוע שווה ${targetM}.`;
+                action = 'גררו את הנקודה עד שהערך f\'(x)=m מתאים לערך המבוקש.';
+            } else if (goal === 'y_equals') {
+                let targetY = Number.isFinite(data.targetY) ? formatNumber(data.targetY) : 'הערך הנתון';
+                target = `למצוא x שבו ערך הפונקציה f(x) שווה ${targetY}.`;
+                action = 'הזיזו את הנקודה עד ש־f(x) מגיע לערך המבוקש.';
+            } else if (goal === 'read_slope') {
+                target = 'לקרוא שיפוע מדויק מהגרף בנקודה שנקבעת בשאלה.';
+                action = 'מקמים את הנקודה על ה־x המבוקש, קוראים את m, ומזינים את התשובה בשדה הבדיקה.';
+            } else if (goal === 'read_y') {
+                target = 'לקרוא ערך פונקציה מדויק מהגרף בנקודה שנקבעת בשאלה.';
+                action = 'מקמים את הנקודה על ה־x המבוקש, קוראים את y, ומזינים את התשובה בשדה הבדיקה.';
+            } else if (goal === 'hit_target' || goal === 'hit_targets') {
+                target = 'לכוון את הפרמטרים כך שהגרף יעבור בנקודות היעד של השאלה.';
+                action = 'פותחים עריכת פרמטרים, משנים סליידרים בהדרגה, ובודקים שהגרף פוגע ביעד.';
+            } else if (goal === 'tangent_through_point') {
+                target = 'למצוא נקודה שבה המשיק לגרף עובר דרך נקודה חיצונית נתונה.';
+                action = 'גררו את הנקודה על הגרף עד שהמשיק הכתום חולף דרך הנקודה הנתונה.';
+            } else if (goal === 'free') {
+                target = 'לחקור איך פרמטרים משנים את צורת הגרף, השיפועים והקיצון.';
+                action = 'שנו פרמטר אחד בכל פעם, והשוו את השינוי על f(x) ועל f\'(x).';
+            }
+
+            return { target, action };
+        }
+
         function updateTopBriefCard(step) {
             let q = getCurrentQuestion();
             let shortDesc = getQuestionShortDesc(q);
             let essence = getShortText(q?.overlay?.essence, shortDesc.first);
             let goal = getShortText(q?.overlay?.goal, shortDesc.second);
             let stepInstruction = getShortText(step?.instruction, essence);
+            let clarity = getGoalClarityCopy(q, stepInstruction, shortDesc);
 
             let main = document.getElementById('top-brief-main');
             let detail = document.getElementById('top-brief-detail');
             if (main) main.innerText = `מה לעשות: ${stepInstruction}`;
             if (detail) detail.innerText = `למה: ${goal}`;
+
+            let clarityTitle = document.getElementById('top-clarity-title');
+            let clarityGoal = document.getElementById('top-clarity-goal');
+            let clarityAction = document.getElementById('top-clarity-action');
+            let clarityTip = document.getElementById('top-clarity-tip');
+            if (clarityTitle) clarityTitle.innerText = `שאלה ${currentQ + 1}: ${q?.title || 'תרגיל'}`;
+            if (clarityGoal) clarityGoal.innerText = `מטרת התרגיל: ${clarity.target}`;
+            if (clarityAction) clarityAction.innerText = `מה מצופה מהתלמיד עכשיו: ${clarity.action}`;
+            if (clarityTip) clarityTip.innerText = 'רוצים להבין גם את ההסבר המלא, הרקע והדרך? לחצו "להעמקה והסבר מלא".';
         }
 
         function showStepResult(step, solveData, m, x, y) {

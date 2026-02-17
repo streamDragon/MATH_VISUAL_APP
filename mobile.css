@@ -37,6 +37,7 @@ body.embed-mode #top-strip {
     grid-template-columns: 1fr;
     grid-template-areas:
         "formulas"
+        "clarity"
         "actions";
     gap: 6px;
     padding: 6px 8px;
@@ -63,6 +64,12 @@ body.embed-mode #top-actions {
     justify-content: flex-start;
     gap: 5px;
     padding: 5px 7px;
+}
+
+body.embed-mode #top-clarity-panel {
+    grid-area: clarity;
+    padding: 6px 8px;
+    gap: 4px;
 }
 
 body.embed-mode #side-quick-actions {
@@ -154,6 +161,64 @@ body.embed-mode .formula-chip {
     border-radius: 14px;
     padding: 8px 10px;
     box-shadow: 0 2px 8px rgba(40, 72, 126, 0.08);
+}
+
+#top-clarity-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+    flex: 1 1 360px;
+    background: rgba(255, 255, 255, 0.93);
+    border: 1px solid rgba(175, 196, 232, 0.85);
+    border-radius: 14px;
+    padding: 8px 10px;
+    box-shadow: 0 2px 8px rgba(40, 72, 126, 0.08);
+}
+
+#top-clarity-title {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #0f172a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#top-clarity-goal,
+#top-clarity-action,
+#top-clarity-tip {
+    font-size: 0.79rem;
+    line-height: 1.34;
+    color: #1e293b;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+#top-clarity-goal,
+#top-clarity-action {
+    -webkit-line-clamp: 2;
+}
+
+#top-clarity-tip {
+    -webkit-line-clamp: 1;
+    color: #92400e;
+}
+
+#btn-top-deep-dive {
+    border: 1px solid #c7d2e4;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #0f172a;
+    font-weight: 700;
+    padding: 5px 10px;
+    cursor: pointer;
+    width: fit-content;
+}
+
+#btn-top-deep-dive:hover {
+    background: #f3f7ff;
 }
 
 #top-actions {
@@ -1081,6 +1146,12 @@ h2 {
     padding-right: 18px;
 }
 
+#btn-open-normal-lab-now {
+    border: 1px solid #8cc2ff;
+    background: linear-gradient(120deg, #e8f4ff, #d9eeff);
+    color: #0f356f;
+}
+
 #btn-normal-guide {
     width: 100%;
     border: 1px solid #9ec5ff;
@@ -1821,7 +1892,8 @@ h2 {
     }
 
     #top-question-wrap,
-    #top-formulas {
+    #top-formulas,
+    #top-clarity-panel {
         width: 100%;
         border-radius: 12px;
         padding: 7px 8px;
@@ -1850,6 +1922,16 @@ h2 {
 
     #top-brief-detail {
         font-size: 0.75rem;
+    }
+
+    #top-clarity-title {
+        font-size: 0.84rem;
+    }
+
+    #top-clarity-goal,
+    #top-clarity-action,
+    #top-clarity-tip {
+        font-size: 0.74rem;
     }
 
     #top-question-select {
