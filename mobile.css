@@ -441,17 +441,22 @@ body.session-started #prestart-hint {
     bottom: 12px;
     left: 10px;
     top: auto;
-    z-index: 999;
+    z-index: 1905;
     background: white;
     border: 1px solid #ccc;
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
     box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
+}
+
+body.embed-mode #sound-toggle {
+    bottom: 56px;
+    left: 8px;
 }
 
 #side-quick-actions {
@@ -1644,6 +1649,11 @@ h2 {
     #top-strip {
         gap: 8px;
         padding: 9px 10px;
+    }
+
+    #sound-toggle {
+        bottom: 56px;
+        left: 8px;
     }
 
     #side-quick-actions {

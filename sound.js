@@ -1,9 +1,26 @@
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let audioCtx = null;
 let soundEnabled = true;
 let lastWarmColdTs = 0;
 let introPlayed = false;
+const SOUND_PREF_KEY = 'math_visual_sound_enabled_v1';
+
+try {
+    const AudioCtor = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtor) audioCtx = new AudioCtor();
+} catch (err) {
+    audioCtx = null;
+}
+
+try {
+    const saved = localStorage.getItem(SOUND_PREF_KEY);
+    if (saved === '0') soundEnabled = false;
+    if (saved === '1') soundEnabled = true;
+} catch (err) {
+    // Keep defaults if storage is unavailable.
+}
 
 function initAudio() {
+    if (!audioCtx) return;
     if (audioCtx.state === 'suspended') {
         audioCtx.resume();
     }
@@ -12,16 +29,32 @@ function initAudio() {
 function updateSoundButton() {
     const btn = document.getElementById('sound-toggle');
     if (!btn) return;
+    if (!audioCtx) {
+        btn.innerText = '\uD83D\uDD07';
+        btn.title = 'אין תמיכה בסאונד במכשיר/בדפדפן זה';
+        return;
+    }
     btn.innerText = soundEnabled ? '\uD83D\uDD0A' : '\uD83D\uDD07';
+    btn.title = soundEnabled ? 'כבה סאונד' : 'הפעל סאונד';
 }
 
 function toggleSound() {
+    if (!audioCtx) {
+        updateSoundButton();
+        return;
+    }
     soundEnabled = !soundEnabled;
+    try {
+        localStorage.setItem(SOUND_PREF_KEY, soundEnabled ? '1' : '0');
+    } catch (err) {
+        // Keep running if storage fails.
+    }
+    if (soundEnabled) initAudio();
     updateSoundButton();
 }
 
 function playSound(type) {
-    if (!soundEnabled) return;
+    if (!audioCtx || !soundEnabled) return;
     initAudio();
 
     const osc = audioCtx.createOscillator();
@@ -55,7 +88,7 @@ function playButtonClickSound() {
 }
 
 function playIntroTheme() {
-    if (!soundEnabled || introPlayed) return;
+    if (!audioCtx || !soundEnabled || introPlayed) return;
     initAudio();
     introPlayed = true;
 
@@ -95,7 +128,7 @@ function resetWarmColdFeedback() {
 }
 
 function playWarmColdFeedback(score, delta) {
-    if (!soundEnabled) return;
+    if (!audioCtx || !soundEnabled) return;
     initAudio();
 
     const nowMs = performance.now();

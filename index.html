@@ -1922,7 +1922,7 @@
         function applyQuestionUi(q) {
             let allowNormal = true;
             let defaultNormalOn = isUiEnabled(q, 'defaultNormalOn', false);
-            let allowLineTool = isUiEnabled(q, 'allowLineTool', false);
+            let allowLineTool = true;
             let showToolsBox = true;
 
             document.getElementById('acc-item-tools').classList.toggle('hidden', !showToolsBox);
