@@ -226,7 +226,10 @@
                         <div id="template-setup-panel" class="hidden">
                             <div class="section-title">בחירת תבנית פונקציה</div>
                             <select id="template-select"></select>
-                            <button id="btn-apply-template" onclick="applySelectedTemplate(true)">בחר תבנית והמשך</button>
+                            <div id="template-setup-actions">
+                                <button id="btn-apply-template" onclick="applySelectedTemplateAndContinue('collapse')">בחר תבנית והמשך</button>
+                                <button id="btn-apply-template-params" onclick="applySelectedTemplateAndContinue('params')">בחר תבנית + שחק עם פרמטרים</button>
+                            </div>
                             <div id="template-status-text"></div>
                         </div>
                         <div id="read-answer-panel" class="hidden">
@@ -582,10 +585,24 @@
             updateInfo();
         }
 
-        function applySelectedTemplate(markChosen) {
+        function applySelectedTemplate(markChosen = true) {
             let select = document.getElementById('template-select');
             if (!select) return;
-            applyTemplateById(select.value, markChosen);
+            applyTemplateById(select.value, !!markChosen);
+        }
+
+        function collapseSetupAfterTemplatePick() {
+            closeAllAccordions();
+            setDrawerOpen(false);
+        }
+
+        function applySelectedTemplateAndContinue(nextAction) {
+            applySelectedTemplate(true);
+            if (nextAction === 'params') {
+                openBuilderFromTop();
+                return;
+            }
+            collapseSetupAfterTemplatePick();
         }
 
         function updateParamHints() {
@@ -1649,7 +1666,7 @@
                 populateTemplateSelect();
                 document.getElementById('template-status-text').innerText = templateChosen && activeTemplate
                     ? `נבחרה תבנית: ${activeTemplate.title}`
-                    : 'בחר תבנית ולחץ המשך.';
+                    : 'בחר תבנית, ואז המשך או עבור מיד לעריכת פרמטרים.';
                 return;
             }
 

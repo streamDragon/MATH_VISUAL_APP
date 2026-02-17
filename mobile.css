@@ -739,8 +739,15 @@ h2 {
     font-family: 'Assistant', sans-serif;
 }
 
-#btn-apply-template {
+#template-setup-actions {
     margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#btn-apply-template,
+#btn-apply-template-params {
     width: 100%;
     border: 1px solid #9ec5ff;
     border-radius: 8px;
@@ -749,6 +756,12 @@ h2 {
     font-weight: 700;
     padding: 6px 10px;
     cursor: pointer;
+}
+
+#btn-apply-template-params {
+    border-color: #9fd5b8;
+    background: #ebfaef;
+    color: #15603a;
 }
 
 #template-status-text {
