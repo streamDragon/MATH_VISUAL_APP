@@ -25,31 +25,34 @@ body.embed-mode #sidebar {
 }
 
 body.embed-mode #graph-area {
-    min-height: clamp(320px, 58vh, 620px);
+    height: min(48dvh, 92vw);
+    min-height: 270px;
+    max-height: 52dvh;
+    aspect-ratio: 1 / 1;
 }
 
 /* Compact layout specifically for embedded iframes (e.g. Google Sites). */
 body.embed-mode #top-strip {
     display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(230px, 1fr);
+    grid-template-columns: 1fr;
     grid-template-areas:
-        "question formulas"
-        "actions actions";
-    gap: 8px;
-    padding: 8px 10px;
+        "formulas"
+        "actions";
+    gap: 6px;
+    padding: 6px 8px;
 }
 
 body.embed-mode #top-question-wrap {
-    grid-area: question;
-    align-self: start;
-    gap: 3px;
-    padding: 6px 8px;
+    display: none;
 }
 
 body.embed-mode #top-formulas {
     grid-area: formulas;
-    align-self: start;
-    padding: 6px 8px;
+    align-self: stretch;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 5px 7px;
 }
 
 body.embed-mode #top-actions {
@@ -58,8 +61,8 @@ body.embed-mode #top-actions {
     flex-wrap: wrap;
     overflow-x: visible;
     justify-content: flex-start;
-    gap: 6px;
-    padding: 6px 8px;
+    gap: 5px;
+    padding: 5px 7px;
 }
 
 body.embed-mode #top-actions > * {
@@ -67,9 +70,10 @@ body.embed-mode #top-actions > * {
 }
 
 body.embed-mode #top-question-select {
-    min-width: 165px;
+    min-width: 150px;
     max-width: 100%;
-    flex: 1 1 320px;
+    width: 100%;
+    flex: 1 1 100%;
     font-weight: 800;
 }
 
@@ -80,24 +84,13 @@ body.embed-mode #btn-top-questions {
 body.embed-mode #top-brief-card,
 body.embed-mode #top-step-status,
 body.embed-mode #progress-hint,
-body.embed-mode #prestart-hint,
-body.embed-mode #build-badge {
+body.embed-mode #prestart-hint {
     display: none;
 }
 
 body.embed-mode .formula-chip {
-    font-size: 0.88rem;
-    padding: 4px 8px;
-}
-
-@media (max-width: 1220px) {
-    body.embed-mode #top-strip {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-            "question"
-            "formulas"
-            "actions";
-    }
+    font-size: 0.84rem;
+    padding: 3px 7px;
 }
 
 #graph-area-wrapper {
@@ -1475,7 +1468,10 @@ h2 {
     }
 
     body.embed-mode #graph-area {
-        min-height: clamp(320px, 56vh, 580px);
+        height: min(48dvh, 86vw);
+        min-height: 300px;
+        max-height: 52dvh;
+        aspect-ratio: 1 / 1;
     }
 
     body.embed-mode #sidebar {
@@ -1485,7 +1481,7 @@ h2 {
         bottom: 0;
         width: 100%;
         height: auto;
-        max-height: 54vh;
+        max-height: 50vh;
         min-height: 48px;
         border-right: none;
         border-top: 4px solid #007bff;
@@ -1501,7 +1497,7 @@ h2 {
     }
 
     body.embed-mode #drawer-content {
-        max-height: calc(54vh - 48px);
+        max-height: calc(50vh - 48px);
     }
 
     body.embed-mode #sidebar.drawer-collapsed #drawer-content {
@@ -1544,6 +1540,12 @@ h2 {
         min-height: 300px;
         max-height: 56dvh;
         aspect-ratio: 1 / 1;
+    }
+
+    body.embed-mode #graph-area {
+        height: min(46dvh, 94vw);
+        min-height: 250px;
+        max-height: 50dvh;
     }
 
     #sidebar {

@@ -8,6 +8,21 @@
     <meta http-equiv="Expires" content="0">
     <title>מעבדת הפונקציות - המלא והשלם</title>
 
+    <script>
+        (function ensureBuildQueryParam() {
+            try {
+                const build = '__BUILD_ID__';
+                if (!build || build === '__BUILD_ID__') return;
+                const url = new URL(window.location.href);
+                if (url.searchParams.get('v')) return;
+                url.searchParams.set('v', build);
+                window.location.replace(url.toString());
+            } catch (err) {
+                // Keep running if URL parsing fails.
+            }
+        })();
+    </script>
+
     <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap" rel="stylesheet">
@@ -351,13 +366,13 @@
                 if (!latestBuild || latestBuild === APP_BUILD) return;
 
                 let url = new URL(window.location.href);
-                if (url.searchParams.get('v') === latestBuild) return;
-
-                let loopGuardKey = 'math_visual_last_forced_build';
-                if (sessionStorage.getItem(loopGuardKey) === latestBuild) return;
-                sessionStorage.setItem(loopGuardKey, latestBuild);
+                let transition = `${APP_BUILD}->${latestBuild}`;
+                let loopGuardKey = 'math_visual_last_forced_transition';
+                if (sessionStorage.getItem(loopGuardKey) === transition) return;
+                sessionStorage.setItem(loopGuardKey, transition);
 
                 url.searchParams.set('v', latestBuild);
+                url.searchParams.set('cb', Date.now().toString(36));
                 window.location.replace(url.toString());
             } catch (err) {
                 // If version check fails, keep current page running.
@@ -1005,14 +1020,9 @@
             if (!Number.isFinite(tangentSlope)) {
                 return { dx: 1, dy: 0, normalSlope: 0, type: 'horizontal' };
             }
-            // Rotate normalized tangent vector by 90deg for stable perpendicular geometry.
-            let tx = 1;
-            let ty = tangentSlope;
-            let tLen = Math.sqrt(tx * tx + ty * ty) || 1;
-            tx /= tLen;
-            ty /= tLen;
-            let dx = -ty;
-            let dy = tx;
+            // Known-good rule from previous fix: rotate tangent (1, m) -> normal (-m, 1).
+            let dx = -tangentSlope;
+            let dy = 1;
             if (Math.abs(dx) < 1e-9) {
                 return { dx: 0, dy: 1, normalSlope: Infinity, type: 'vertical' };
             }
@@ -1039,11 +1049,13 @@
 
             let yMin = Infinity;
             let yMax = -Infinity;
+            let ySamples = [];
             let samples = 90;
             for (let i = 0; i <= samples; i++) {
                 let x = xMin + ((xMax - xMin) * i) / samples;
                 let y = evaluateFunctionAt(x);
                 if (!Number.isFinite(y)) continue;
+                ySamples.push(y);
                 yMin = Math.min(yMin, y);
                 yMax = Math.max(yMax, y);
             }
@@ -1053,11 +1065,48 @@
                 yMax = 5;
             }
 
+            if (ySamples.length >= 16) {
+                let sorted = ySamples.slice().sort((a, b) => a - b);
+                let qLow = sorted[Math.floor((sorted.length - 1) * 0.08)];
+                let qHigh = sorted[Math.floor((sorted.length - 1) * 0.92)];
+                let rawSpan = yMax - yMin;
+                let trimmedSpan = qHigh - qLow;
+                if (Number.isFinite(qLow) && Number.isFinite(qHigh) && trimmedSpan > 0.5 && trimmedSpan < rawSpan * 0.85) {
+                    yMin = qLow;
+                    yMax = qHigh;
+                }
+            }
+
+            let focusYs = [];
+            if (p && typeof p.Y === 'function') {
+                let py = p.Y();
+                if (Number.isFinite(py)) focusYs.push(py);
+            }
+            (targets || []).forEach((pt) => {
+                if (!pt || typeof pt.Y !== 'function') return;
+                let vy = pt.Y();
+                if (Number.isFinite(vy)) focusYs.push(vy);
+            });
+            if (focusYs.length > 0) {
+                yMin = Math.min(yMin, ...focusYs);
+                yMax = Math.max(yMax, ...focusYs);
+            }
+
+            let isEmbed = document.body.classList.contains('embed-mode');
             let xSpan = Math.max(6, xMax - xMin);
             let ySpan = Math.max(4, yMax - yMin);
-            let xPad = Math.max(0.8, xSpan * 0.08);
-            let yPad = Math.max(0.9, ySpan * 0.18);
-            board.setBoundingBox([xMin - xPad, yMax + yPad, xMax + xPad, yMin - yPad], false);
+            let maxYSpan = isEmbed ? 48 : 72;
+            if (ySpan > maxYSpan) {
+                let centerY = (yMin + yMax) / 2;
+                yMin = centerY - maxYSpan / 2;
+                yMax = centerY + maxYSpan / 2;
+                ySpan = maxYSpan;
+            }
+
+            let xPad = Math.max(0.7, xSpan * (isEmbed ? 0.06 : 0.08));
+            let yPad = Math.max(0.8, ySpan * (isEmbed ? 0.12 : 0.16));
+            // Keep axis scale ratio so perpendicular lines stay visually perpendicular.
+            board.setBoundingBox([xMin - xPad, yMax + yPad, xMax + xPad, yMin - yPad], true);
             board.fullUpdate();
         }
 
