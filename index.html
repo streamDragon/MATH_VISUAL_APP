@@ -143,25 +143,25 @@
     <div id="initial-builder-modal" class="hidden" onclick="onInitialBuilderBackdropClick(event)">
         <div id="initial-builder-card">
             <div class="overlay-head">
-                <h3>בנייה ראשונית - מה עושים עכשיו?</h3>
+                <h3>התחלה פשוטה - מעצבים פונקציה שמתאימה לכם</h3>
                 <button onclick="closeInitialBuilderModal()">סגור</button>
             </div>
             <div class="initial-builder-body">
-                <p><b>נשארים למעלה:</b> אין גלילה אוטומטית. קודם בוחרים תבנית, ואז מכוונים פרמטרים.</p>
+                <p><b>מה עושים כאן?</b> בוחרים צורה של פונקציה לפי מה שלומדים עכשיו בכיתה, ואז מעצבים אותה בעזרת הפרמטרים.</p>
                 <ol>
-                    <li>בחירת תבנית פונקציה (פרבולה/קובית/מעלה 4 ועוד).</li>
-                    <li>כיוון פרמטרים <code>a,b,c,d,e</code> כדי לשנות את צורת הגרף.</li>
-                    <li>כשלחוצים על "התחל תרגול", כפתורי ההתחלה מוסתרים.</li>
+                    <li>בחרו צורת פונקציה שמתאימה לרמה שלכם.</li>
+                    <li>שנו את <code>a,b,c,d,e</code> וראו מיד איך הגרף משתנה.</li>
+                    <li>עברו ל־"עריכת פרמטרים" כדי לראות ברור מה מעצבים.</li>
                 </ol>
                 <div class="initial-builder-param-grid">
-                    <span><b>a</b> משנה את האיבר המוביל</span>
-                    <span><b>b,c,d</b> משנים שיפועים וצורה</span>
-                    <span><b>e</b> מזיז למעלה/למטה</span>
+                    <span><b>a</b> משפיע על הפתיחה והכיוון של הגרף</span>
+                    <span><b>b,c,d</b> משנים את הצורה והשיפוע</span>
+                    <span><b>e</b> מזיז את הגרף למעלה או למטה</span>
                 </div>
-                <div class="initial-builder-note">אין צורך בכפתור "מעלה 4" נפרד, כי אפשר להגיע לזה דרך הפרמטרים.</div>
+                <div class="initial-builder-note">הכי חשוב: להסתכל כל הזמן על שתי השורות של <code>f(x)</code> ו־<code>f'(x)</code> ולראות מה השתנה.</div>
             </div>
             <div class="overlay-actions initial-builder-actions">
-                <button onclick="openInitialBuilderWorkspace('steps')">בחירת תבנית</button>
+                <button onclick="openInitialBuilderWorkspace('steps')">בחירת צורה</button>
                 <button onclick="openInitialBuilderWorkspace('params')">עריכת פרמטרים</button>
                 <button class="start-primary" onclick="closeInitialBuilderModal()">סגור חלון</button>
             </div>
@@ -2100,6 +2100,7 @@
         }
 
         function toggleBuilderPanel() {
+            closeInitialBuilderModal();
             if (activeAccordion === 'params' && !document.getElementById('builder-panel').classList.contains('hidden')) {
                 closeAllAccordions();
                 return;
@@ -2111,6 +2112,7 @@
         }
 
         function openBuilderFromTop() {
+            closeInitialBuilderModal();
             let q = QUESTIONS[currentQ];
             if (!q) return;
             if (document.getElementById('btn-top-builder').classList.contains('hidden')) return;
