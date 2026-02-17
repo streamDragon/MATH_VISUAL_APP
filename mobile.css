@@ -82,6 +82,10 @@ body.embed-mode #top-question-select {
     font-weight: 800;
 }
 
+body.embed-mode #top-question-select-label {
+    order: -1;
+}
+
 body.embed-mode #btn-top-questions {
     display: none !important;
 }
@@ -319,6 +323,17 @@ body.embed-mode .formula-chip {
     color: #0f172a;
     font-weight: 700;
     font-family: 'Assistant', sans-serif;
+}
+
+#top-question-select-label {
+    font-size: 0.78rem;
+    color: #0b4aa8;
+    font-weight: 800;
+    background: #eaf3ff;
+    border: 1px solid #bfd8ff;
+    border-radius: 999px;
+    padding: 4px 9px;
+    white-space: nowrap;
 }
 
 #btn-overlay-open {
@@ -1689,6 +1704,11 @@ h2 {
         max-width: 100%;
         flex: 1 1 100%;
         order: -1;
+    }
+
+    #top-question-select-label {
+        font-size: 0.72rem;
+        padding: 3px 8px;
     }
 
     body.panel-focus #top-actions,

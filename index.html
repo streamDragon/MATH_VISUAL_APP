@@ -195,6 +195,7 @@
                 <span class="formula-chip" id="top-formula-tag">f'(x) = ...</span>
             </div>
             <div id="top-actions">
+                <span id="top-question-select-label">כאן בוחרים שאלה:</span>
                 <select id="top-question-select" title="בחירת שאלה"></select>
                 <button id="btn-top-questions" onclick="toggleQuestionsFromTop()">שאלות ▼</button>
                 <button id="btn-top-init-builder" onclick="openInitialBuilderFromTop()">בנייה ראשונית</button>
@@ -975,7 +976,7 @@
 
                 let opt = document.createElement('option');
                 opt.value = i;
-                opt.textContent = `${i + 1}. ${q.title.replace(/^\d+\.\s*/, '')}`;
+                opt.textContent = `שאלה ${i + 1}`;
                 topSelect.appendChild(opt);
             });
             topSelect.addEventListener('change', (ev) => loadQ(parseInt(ev.target.value, 10)));
