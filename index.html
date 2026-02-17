@@ -79,6 +79,7 @@
                 <button onclick="closeNormalLabGuide()">סגור</button>
             </div>
             <div class="normal-lab-body">
+                <p><b>הבדל חשוב:</b> "מעבדת האנך" היא אזור הכלים, ו"הסבר מעבדת האנך" הוא חלון ההדרכה.</p>
                 <p><b>מה זה אנך?</b> אנך הוא ישר שיוצר זווית של 90° עם ישר אחר. כאן האנך מוגדר ביחס למשיק לגרף בנקודת המגע.</p>
                 <p><b>מה זה אנך מתכוונן?</b> זה קו אנך "ניסוי" שמוזז לאורך המשיק בעזרת הסליידר. המטרה היא להביא אותו למיקום הנכון בדיוק בנקודת המגע.</p>
                 <p><b>מה רואים בכלים?</b> מוצגים שיפוע המשיק, שיפוע האנך, ונקודת <code>I</code> (חיתוך האנך המתכוונן עם המשיק).</p>
@@ -124,6 +125,34 @@
         </div>
     </div>
 
+    <div id="initial-builder-modal" class="hidden" onclick="onInitialBuilderBackdropClick(event)">
+        <div id="initial-builder-card">
+            <div class="overlay-head">
+                <h3>בנייה ראשונית - מה עושים עכשיו?</h3>
+                <button onclick="closeInitialBuilderModal()">סגור</button>
+            </div>
+            <div class="initial-builder-body">
+                <p><b>נשארים למעלה:</b> אין גלילה אוטומטית. קודם בוחרים תבנית, ואז מכוונים פרמטרים.</p>
+                <ol>
+                    <li>בחירת תבנית פונקציה (פרבולה/קובית/מעלה 4 ועוד).</li>
+                    <li>כיוון פרמטרים <code>a,b,c,d,e</code> כדי לשנות את צורת הגרף.</li>
+                    <li>כשלחוצים על "התחל תרגול", כפתורי ההתחלה מוסתרים.</li>
+                </ol>
+                <div class="initial-builder-param-grid">
+                    <span><b>a</b> משנה את האיבר המוביל</span>
+                    <span><b>b,c,d</b> משנים שיפועים וצורה</span>
+                    <span><b>e</b> מזיז למעלה/למטה</span>
+                </div>
+                <div class="initial-builder-note">אין צורך בכפתור "מעלה 4" נפרד, כי אפשר להגיע לזה דרך הפרמטרים.</div>
+            </div>
+            <div class="overlay-actions initial-builder-actions">
+                <button onclick="openInitialBuilderWorkspace('steps')">בחירת תבנית</button>
+                <button onclick="openInitialBuilderWorkspace('params')">עריכת פרמטרים</button>
+                <button class="start-primary" onclick="closeInitialBuilderModal()">סגור חלון</button>
+            </div>
+        </div>
+    </div>
+
     <div id="graph-area-wrapper">
         <div id="top-strip">
             <div id="top-question-wrap">
@@ -149,7 +178,7 @@
                 <button id="btn-top-questions" onclick="toggleQuestionsFromTop()">שאלות ▼</button>
                 <button id="btn-top-init-builder" onclick="openInitialBuilderFromTop()">בנייה ראשונית</button>
                 <button id="btn-start-guide" onclick="openStartGuideModal()">איך עובדים?</button>
-                <button id="btn-normal-top" class="hidden" onclick="openNormalLabGuide()">הסבר אנך</button>
+                <button id="btn-normal-top" class="hidden" onclick="openNormalLabGuide()">מעבדת האנך</button>
                 <button id="btn-overlay-open" onclick="openQuestionOverlay()">הסבר שאלה</button>
                 <button id="btn-video" class="hidden" onclick="openVideoForCurrentQuestion()">וידאו הסבר</button>
                 <button id="btn-top-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
@@ -1950,6 +1979,30 @@
             }
         }
 
+        function openInitialBuilderModal() {
+            document.getElementById('initial-builder-modal').classList.remove('hidden');
+        }
+
+        function closeInitialBuilderModal() {
+            document.getElementById('initial-builder-modal').classList.add('hidden');
+        }
+
+        function onInitialBuilderBackdropClick(event) {
+            if (event.target.id === 'initial-builder-modal') closeInitialBuilderModal();
+        }
+
+        function openInitialBuilderWorkspace(target) {
+            if (sessionStarted) return;
+            loadQ(0, { autoOpenOverlay: false });
+            closeInitialBuilderModal();
+            if (target === 'params') {
+                openBuilderFromTop();
+                return;
+            }
+            openAccordion('steps');
+            setDrawerOpen(true);
+        }
+
         function shouldAllowBuilderForQuestion(q) {
             if (!q) return false;
             if (q.ui && typeof q.ui.allowBuilder !== 'undefined') return !!q.ui.allowBuilder;
@@ -2019,17 +2072,11 @@
             openAccordion('params');
             setDrawerOpen(true);
             updateBuilderVisibility(q);
-            let panel = document.getElementById('builder-panel');
-            if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         function openInitialBuilderFromTop() {
             if (sessionStarted) return;
-            loadQ(0, { autoOpenOverlay: false });
-            openAccordion('steps');
-            setDrawerOpen(true);
-            let setupPanel = document.getElementById('template-setup-panel');
-            if (setupPanel) setupPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            openInitialBuilderModal();
         }
 
         function toggleTestLine() {
