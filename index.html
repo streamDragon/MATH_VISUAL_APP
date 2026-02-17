@@ -36,6 +36,7 @@
     <div id="side-quick-actions" aria-label="קיצורי דרך">
         <button id="btn-side-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
         <button id="btn-side-questions" onclick="toggleQuestionsFromTop()">שאלות</button>
+        <button id="btn-side-feedback" onclick="openFeedbackModal()">פידבק</button>
         <button id="btn-side-overlay" onclick="openQuestionOverlay()">הסבר שאלה</button>
         <button id="btn-side-normal" class="hidden" onclick="openNormalLabGuide()">מעבדת האנך</button>
     </div>
@@ -89,6 +90,37 @@
             </div>
             <div class="overlay-actions">
                 <a id="video-open-link" href="#" target="_blank" rel="noopener noreferrer">פתח בלשונית חדשה</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="feedback-modal" class="hidden" onclick="onFeedbackBackdropClick(event)">
+        <div id="feedback-modal-card">
+            <div class="overlay-head">
+                <h3>פינת פידבק</h3>
+                <button onclick="closeFeedbackModal()">סגור</button>
+            </div>
+            <div class="feedback-body">
+                <p class="feedback-intro">יש רעיון לשיפור? משהו לא עובד? כתבו הודעה קצרה ונשמור אותה כאן.</p>
+                <div class="feedback-row">
+                    <label for="feedback-name">שם (לא חובה)</label>
+                    <input id="feedback-name" type="text" maxlength="40" placeholder="לדוגמה: נועה">
+                </div>
+                <div class="feedback-row">
+                    <label for="feedback-text">הודעה</label>
+                    <textarea id="feedback-text" maxlength="300" placeholder="מה כדאי לשפר?"></textarea>
+                </div>
+                <div id="feedback-status"></div>
+                <div class="feedback-actions">
+                    <button id="btn-send-feedback" onclick="submitFeedback()">שלח פידבק</button>
+                    <button id="btn-copy-feedback" onclick="copyFeedbackSummary()">העתק משובים</button>
+                    <button id="btn-clear-feedback" onclick="clearFeedbackMessages()">נקה מקומי</button>
+                </div>
+                <div class="feedback-list-head">
+                    <b>משובים שנשמרו בדפדפן הזה:</b>
+                    <span id="feedback-count">0</span>
+                </div>
+                <div id="feedback-list"></div>
             </div>
         </div>
     </div>
@@ -203,6 +235,7 @@
                 <button id="btn-normal-top" class="hidden" onclick="openNormalLabGuide()">מעבדת האנך</button>
                 <button id="btn-overlay-open" onclick="openQuestionOverlay()">הסבר שאלה</button>
                 <button id="btn-video" class="hidden" onclick="openVideoForCurrentQuestion()">וידאו הסבר</button>
+                <button id="btn-feedback" onclick="openFeedbackModal()">פידבק</button>
                 <button id="btn-top-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
             </div>
         </div>
@@ -333,6 +366,8 @@
         const XP_REPEAT_DAILY_LIMIT = 3;
         const XP_PER_LEVEL = 120;
         const GUIDE_HIT_LIMIT = 8;
+        const FEEDBACK_STORAGE_KEY = 'math_visual_feedback_v1';
+        const FEEDBACK_MAX_ITEMS = 120;
         const BUILDER_FOCUSED_GOALS = new Set([
             'choose_function_template',
             'hit_target',
@@ -366,6 +401,7 @@
         let readAnswerValidated = false;
         let sessionStarted = false;
         let learnerProgress = null;
+        let feedbackMessages = [];
 
         async function ensureLatestBuild() {
             try {
@@ -836,6 +872,7 @@
             }
             let buildBadge = document.getElementById('build-badge');
             if (buildBadge) buildBadge.innerText = `build: ${APP_BUILD}`;
+            loadFeedbackMessages();
 
             board = JXG.JSXGraph.initBoard('graph-area', {
                 boundingbox: [-5, 8, 5, -8], axis: true, keepaspectratio: true, showCopyright: false,
@@ -2018,6 +2055,168 @@
 
         function onVideoBackdropClick(event) {
             if (event.target.id === 'video-modal') closeVideoModal();
+        }
+
+        function loadFeedbackMessages() {
+            try {
+                let raw = localStorage.getItem(FEEDBACK_STORAGE_KEY);
+                let parsed = raw ? JSON.parse(raw) : [];
+                feedbackMessages = Array.isArray(parsed) ? parsed : [];
+            } catch (err) {
+                feedbackMessages = [];
+            }
+        }
+
+        function saveFeedbackMessages() {
+            try {
+                if (feedbackMessages.length > FEEDBACK_MAX_ITEMS) {
+                    feedbackMessages = feedbackMessages.slice(-FEEDBACK_MAX_ITEMS);
+                }
+                localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(feedbackMessages));
+            } catch (err) {
+                // If localStorage is blocked, continue without persistence.
+            }
+        }
+
+        function formatFeedbackTime(iso) {
+            let d = new Date(iso);
+            if (!Number.isFinite(d.getTime())) return '';
+            let day = String(d.getDate()).padStart(2, '0');
+            let month = String(d.getMonth() + 1).padStart(2, '0');
+            let year = d.getFullYear();
+            let hour = String(d.getHours()).padStart(2, '0');
+            let min = String(d.getMinutes()).padStart(2, '0');
+            return `${day}/${month}/${year} ${hour}:${min}`;
+        }
+
+        function setFeedbackStatus(text, isError) {
+            let status = document.getElementById('feedback-status');
+            if (!status) return;
+            status.innerText = text || '';
+            status.classList.toggle('error', !!isError);
+            status.classList.toggle('ok', !!text && !isError);
+        }
+
+        function renderFeedbackList() {
+            let wrap = document.getElementById('feedback-list');
+            let countEl = document.getElementById('feedback-count');
+            if (!wrap || !countEl) return;
+
+            countEl.innerText = String(feedbackMessages.length);
+            wrap.innerHTML = '';
+
+            let latest = feedbackMessages.slice().reverse().slice(0, 8);
+            if (latest.length === 0) {
+                let empty = document.createElement('div');
+                empty.className = 'feedback-empty';
+                empty.innerText = 'עדיין אין משובים שמורים.';
+                wrap.appendChild(empty);
+                return;
+            }
+
+            latest.forEach((item) => {
+                let card = document.createElement('div');
+                card.className = 'feedback-item';
+
+                let head = document.createElement('div');
+                head.className = 'feedback-item-head';
+                let qNum = Number.isFinite(item.questionIndex) ? `שאלה ${item.questionIndex}` : 'ללא שאלה';
+                let author = item.name ? ` | ${item.name}` : '';
+                head.innerText = `${qNum}${author} | ${formatFeedbackTime(item.ts)}`;
+
+                let body = document.createElement('div');
+                body.className = 'feedback-item-body';
+                body.innerText = item.text || '';
+
+                card.appendChild(head);
+                card.appendChild(body);
+                wrap.appendChild(card);
+            });
+        }
+
+        function openFeedbackModal() {
+            loadFeedbackMessages();
+            renderFeedbackList();
+            setFeedbackStatus('');
+            document.getElementById('feedback-modal').classList.remove('hidden');
+        }
+
+        function closeFeedbackModal() {
+            document.getElementById('feedback-modal').classList.add('hidden');
+        }
+
+        function onFeedbackBackdropClick(event) {
+            if (event.target.id === 'feedback-modal') closeFeedbackModal();
+        }
+
+        function submitFeedback() {
+            let nameEl = document.getElementById('feedback-name');
+            let textEl = document.getElementById('feedback-text');
+            if (!nameEl || !textEl) return;
+
+            let name = (nameEl.value || '').trim().slice(0, 40);
+            let text = (textEl.value || '').replace(/\s+/g, ' ').trim();
+            if (text.length < 4) {
+                setFeedbackStatus('כתבו לפחות כמה מילים כדי לשלוח פידבק.', true);
+                return;
+            }
+
+            let q = getCurrentQuestion();
+            feedbackMessages.push({
+                id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                ts: new Date().toISOString(),
+                name,
+                text,
+                questionIndex: currentQ + 1,
+                questionTitle: q?.title || '',
+                build: APP_BUILD
+            });
+            saveFeedbackMessages();
+            renderFeedbackList();
+            textEl.value = '';
+            setFeedbackStatus('תודה, המשוב נשמר.');
+        }
+
+        async function copyFeedbackSummary() {
+            loadFeedbackMessages();
+            if (feedbackMessages.length === 0) {
+                setFeedbackStatus('אין משובים להעתקה כרגע.', true);
+                return;
+            }
+
+            let lines = feedbackMessages.map((item, idx) => {
+                let question = Number.isFinite(item.questionIndex) ? `שאלה ${item.questionIndex}` : 'ללא שאלה';
+                let author = item.name || 'אנונימי';
+                return `${idx + 1}. ${formatFeedbackTime(item.ts)} | ${question} | ${author} | ${item.text}`;
+            });
+            let payload = lines.join('\n');
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(payload);
+                } else {
+                    let ta = document.createElement('textarea');
+                    ta.value = payload;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                }
+                setFeedbackStatus('המשובים הועתקו ללוח.');
+            } catch (err) {
+                setFeedbackStatus('לא הצלחתי להעתיק. נסה שוב.', true);
+            }
+        }
+
+        function clearFeedbackMessages() {
+            if (feedbackMessages.length === 0) {
+                setFeedbackStatus('אין משובים לניקוי.');
+                return;
+            }
+            if (!window.confirm('למחוק את כל המשובים המקומיים בדפדפן הזה?')) return;
+            feedbackMessages = [];
+            saveFeedbackMessages();
+            renderFeedbackList();
+            setFeedbackStatus('המשובים המקומיים נמחקו.');
         }
 
         function openStartGuideModal() {

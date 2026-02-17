@@ -883,6 +883,153 @@ h2 {
     text-decoration: none;
 }
 
+#btn-feedback,
+#btn-side-feedback {
+    border: 1px solid #f5c16b;
+    background: #fff7e8;
+    color: #8a4b00;
+}
+
+#feedback-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(7, 20, 39, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2710;
+    padding: 14px;
+}
+
+#feedback-modal-card {
+    width: min(760px, 100%);
+    max-height: 88vh;
+    overflow: auto;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 2px solid #2f6fed;
+    box-shadow: 0 16px 48px rgba(4, 21, 43, 0.35);
+    padding: 14px;
+}
+
+.feedback-body {
+    color: #0f172a;
+    font-size: 0.95rem;
+}
+
+.feedback-intro {
+    margin: 0 0 8px 0;
+    line-height: 1.45;
+}
+
+.feedback-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.feedback-row label {
+    font-weight: 700;
+    color: #0b4aa8;
+}
+
+.feedback-row input,
+.feedback-row textarea {
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    padding: 7px 9px;
+    font-family: 'Assistant', sans-serif;
+}
+
+.feedback-row textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+#feedback-status {
+    min-height: 20px;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+}
+
+#feedback-status.ok {
+    color: #14532d;
+}
+
+#feedback-status.error {
+    color: #b91c1c;
+}
+
+.feedback-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.feedback-actions button {
+    border: 1px solid #c7d2e4;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #0f172a;
+    font-weight: 700;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+#btn-send-feedback {
+    border-color: #9fd5b8;
+    background: #ebfaef;
+    color: #15603a;
+}
+
+.feedback-list-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+}
+
+#feedback-count {
+    color: #0b4aa8;
+    font-weight: 800;
+}
+
+#feedback-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 230px;
+    overflow: auto;
+}
+
+.feedback-item {
+    border: 1px solid #d9e4f7;
+    border-radius: 9px;
+    background: #f8fbff;
+    padding: 7px 8px;
+}
+
+.feedback-item-head {
+    font-size: 0.8rem;
+    color: #334155;
+    margin-bottom: 4px;
+}
+
+.feedback-item-body {
+    line-height: 1.4;
+}
+
+.feedback-empty {
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 8px;
+    color: #64748b;
+    text-align: center;
+}
+
 #normal-lab-modal {
     position: fixed;
     inset: 0;
