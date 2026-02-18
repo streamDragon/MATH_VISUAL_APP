@@ -1972,6 +1972,10 @@ h2 {
         transition: transform 0.22s ease;
     }
 
+    body.graph-priority-mode #sidebar {
+        max-height: 44vh;
+    }
+
     #sidebar.drawer-open {
         transform: translateY(0);
     }
@@ -1983,6 +1987,15 @@ h2 {
     #drawer-content {
         max-height: calc(60vh - var(--safe-bottom));
         padding-bottom: calc(12px + var(--mobile-banner-offset));
+    }
+
+    body.graph-priority-mode #drawer-content {
+        max-height: calc(44vh - var(--safe-bottom));
+    }
+
+    body.graph-priority-mode #graph-area {
+        height: min(60dvh, 94vw);
+        max-height: 64dvh;
     }
 
     #top-strip {
@@ -2215,6 +2228,35 @@ h2 {
         min-height: 280px;
         max-height: 54dvh;
         aspect-ratio: 1 / 1;
+    }
+
+    body.graph-priority-mode #graph-area {
+        height: min(58dvh, 96vw);
+        max-height: 62dvh;
+    }
+}
+
+@media (min-width: 981px) and (max-height: 760px) {
+    #top-strip {
+        gap: 8px;
+        padding: 8px 10px;
+    }
+
+    #top-question-wrap,
+    #top-formulas,
+    #top-actions {
+        padding: 6px 8px;
+    }
+
+    #top-step-status,
+    #progress-hint,
+    #prestart-hint,
+    #top-brief-card {
+        display: none;
+    }
+
+    #graph-area {
+        min-height: 220px;
     }
 }
 

@@ -36,7 +36,7 @@
 
     <button id="sound-toggle" onclick="toggleSound()">🔊</button>
     <button id="btn-tools-menu" onclick="toggleDrawer()" aria-expanded="false">☰ כלים ומשימות</button>
-    <div id="side-quick-actions" aria-label="קיצורי דרך">
+    <div id="side-quick-actions" class="hidden" aria-label="קיצורי דרך" style="display:none !important;" aria-hidden="true">
         <button id="btn-side-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
         <button id="btn-side-questions" onclick="toggleQuestionsFromTop()">שאלות</button>
         <button id="btn-side-feedback" onclick="openFeedbackModal()">כיכר השוק</button>
@@ -230,7 +230,7 @@
                 <span class="formula-chip" id="top-formula-f">f(x) = ...</span>
                 <span class="formula-chip" id="top-formula-tag">f'(x) = ...</span>
             </div>
-            <div id="top-clarity-panel">
+            <div id="top-clarity-panel" class="hidden" style="display:none !important;">
                 <div id="top-clarity-title">שאלה: טוען...</div>
                 <div id="top-clarity-goal">מטרת התרגיל: טוען...</div>
                 <div id="top-clarity-action">מה התלמיד עושה עכשיו: טוען...</div>
@@ -256,7 +256,7 @@
     <div id="sidebar" class="drawer-collapsed">
         <button id="drawer-handle" onclick="toggleDrawer()">כלים ומשימות</button>
         <div id="drawer-content">
-            <div id="drawer-question-head" style="text-align:center;">
+            <div id="drawer-question-head" style="text-align:center; display:none;">
                 <h2 id="q-title">טוען...</h2>
                 <div id="q-desc" style="font-size:0.9rem; color:#555;"></div>
             </div>
@@ -863,8 +863,11 @@
         function applyTopStripFocusMode() {
             let isMobile = window.matchMedia('(max-width: 980px)').matches;
             let focusMode = isMobile && drawerOpen && !!activeAccordion && activeAccordion !== 'params';
+            let graphPriorityMode = isMobile && drawerOpen && (activeAccordion === 'params' || activeAccordion === 'tools');
             document.body.classList.toggle('panel-focus', focusMode);
-            document.getElementById('drawer-question-head').classList.toggle('hidden', focusMode);
+            document.body.classList.toggle('graph-priority-mode', graphPriorityMode);
+            let questionHead = document.getElementById('drawer-question-head');
+            if (questionHead) questionHead.classList.toggle('hidden', focusMode);
         }
 
         function syncAccordionFocusVisibility() {
@@ -893,6 +896,7 @@
             syncAccordionFocusVisibility();
             applyTopStripFocusMode();
             updateTopQuestionsToggleLabel();
+            queueBoardResize();
         }
 
         function openAccordion(name, options = {}) {
@@ -912,6 +916,7 @@
             syncAccordionFocusVisibility();
             applyTopStripFocusMode();
             updateTopQuestionsToggleLabel();
+            queueBoardResize();
         }
 
         function setDrawerOpen(open) {
@@ -942,6 +947,7 @@
             if (sideQuickActions) sideQuickActions.classList.toggle('hidden', isEmbed);
             applyTopStripFocusMode();
             updateTopQuestionsToggleLabel();
+            queueBoardResize();
         }
 
         function toggleDrawer() {
@@ -1193,6 +1199,7 @@
 
         let boardResizeRaf = null;
         function queueBoardResize() {
+            applyTopStripFocusMode();
             if (!board) return;
             if (boardResizeRaf !== null) cancelAnimationFrame(boardResizeRaf);
             boardResizeRaf = requestAnimationFrame(() => {
