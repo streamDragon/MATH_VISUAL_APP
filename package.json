@@ -1,6 +1,8 @@
 {
   "scripts": {
-    "cap:sync": "node -e \"const {spawnSync}=require('child_process');const path=require('path');const root=path.dirname(process.env.npm_package_json||process.cwd());const cap=path.join(root,'node_modules','@capacitor','cli','bin','capacitor');const r=spawnSync(process.execPath,[cap,'sync'],{stdio:'inherit',cwd:root});process.exit(typeof r.status==='number'?r.status:1);\""
+    "sync:web": "node -e \"const {spawnSync}=require('child_process');const path=require('path');const root=path.dirname(process.env.npm_package_json||process.cwd());const script=path.join(root,'scripts','sync-web.mjs');const r=spawnSync(process.execPath,[script],{stdio:'inherit',cwd:root});process.exit(typeof r.status==='number'?r.status:1);\"",
+    "cap:sync": "node -e \"const {spawnSync}=require('child_process');const path=require('path');const root=path.dirname(process.env.npm_package_json||process.cwd());const run=(args)=>spawnSync(process.execPath,args,{stdio:'inherit',cwd:root});let r=run([path.join(root,'scripts','sync-web.mjs')]);if((r.status??1)!==0)process.exit(r.status??1);r=run([path.join(root,'node_modules','@capacitor','cli','bin','capacitor'),'sync']);process.exit(typeof r.status==='number'?r.status:1);\"",
+    "cap:open:android": "node -e \"const {spawnSync}=require('child_process');const path=require('path');const root=path.dirname(process.env.npm_package_json||process.cwd());const run=(args)=>spawnSync(process.execPath,args,{stdio:'inherit',cwd:root});let r=run([path.join(root,'scripts','sync-web.mjs')]);if((r.status??1)!==0)process.exit(r.status??1);r=run([path.join(root,'node_modules','@capacitor','cli','bin','capacitor'),'sync']);if((r.status??1)!==0)process.exit(r.status??1);r=run([path.join(root,'node_modules','@capacitor','cli','bin','capacitor'),'open','android']);process.exit(typeof r.status==='number'?r.status:1);\""
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.0.0",
