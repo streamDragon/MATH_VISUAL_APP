@@ -132,11 +132,11 @@ function playWarmColdFeedback(score, delta) {
     initAudio();
 
     const nowMs = performance.now();
-    const minInterval = 170;
+    const level = Math.max(0, Math.min(1, score));
+    const minInterval = 300 - level * 210;
     if (nowMs - lastWarmColdTs < minInterval) return;
     lastWarmColdTs = nowMs;
 
-    const level = Math.max(0, Math.min(1, score));
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
     osc.connect(gainNode);
@@ -144,19 +144,20 @@ function playWarmColdFeedback(score, delta) {
 
     const t = audioCtx.currentTime;
     const movingCloser = delta >= 0;
-    const baseFreq = 220 + level * 760;
-    const endFreq = movingCloser ? baseFreq * 1.12 : baseFreq * 0.85;
+    const baseFreq = 180 + level * 980;
+    const endFreq = movingCloser ? baseFreq * 1.14 : baseFreq * 0.82;
+    const duration = 0.075 + (1 - level) * 0.055;
 
     osc.type = movingCloser ? 'sine' : 'triangle';
     osc.frequency.setValueAtTime(baseFreq, t);
-    osc.frequency.exponentialRampToValueAtTime(Math.max(90, endFreq), t + 0.09);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(90, endFreq), t + duration * 0.9);
 
-    const peak = 0.03 + level * 0.08;
+    const peak = 0.025 + level * 0.09;
     gainNode.gain.setValueAtTime(peak, t);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, t + 0.11);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, t + duration);
 
     osc.start(t);
-    osc.stop(t + 0.12);
+    osc.stop(t + duration + 0.01);
 }
 
 function attachButtonClickSounds() {
