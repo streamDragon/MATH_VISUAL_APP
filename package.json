@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "cap:sync": "node -e \"const {spawnSync}=require('child_process');const path=require('path');const root=path.dirname(process.env.npm_package_json||process.cwd());const cap=path.join(root,'node_modules','@capacitor','cli','bin','capacitor');const r=spawnSync(process.execPath,[cap,'sync'],{stdio:'inherit',cwd:root});process.exit(typeof r.status==='number'?r.status:1);\""
+  },
+  "dependencies": {
+    "@capacitor-community/admob": "^8.0.0",
+    "@capacitor/android": "^8.1.0",
+    "@capacitor/cli": "^8.1.0",
+    "@capacitor/core": "^8.1.0"
+  }
+}
