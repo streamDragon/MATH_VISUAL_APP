@@ -45,12 +45,15 @@ body.embed-mode #sidebar {
     max-width: 100%;
 }
 
+body.embed-mode #graph-area-wrapper {
+    flex: 0 0 auto;
+}
+
 body.embed-mode #graph-area {
-    flex: 1 1 auto;
-    height: auto;
-    min-height: 260px;
-    max-height: none;
-    aspect-ratio: auto;
+    height: min(44dvh, 92vw);
+    min-height: 240px;
+    max-height: 54dvh;
+    aspect-ratio: 1 / 1;
 }
 
 /* Compact layout specifically for embedded iframes (e.g. Google Sites). */
@@ -2200,11 +2203,10 @@ h2 {
     }
 
     body.embed-mode #graph-area {
-        flex: 1 1 auto;
-        min-height: 320px;
-        height: auto;
-        max-height: none;
-        aspect-ratio: auto;
+        height: min(44dvh, 82vw);
+        min-height: 260px;
+        max-height: 56dvh;
+        aspect-ratio: 1 / 1;
     }
 
     body.embed-mode #sidebar {
@@ -2276,11 +2278,10 @@ h2 {
     }
 
     body.embed-mode #graph-area {
-        flex: 1 1 auto;
+        height: min(42dvh, 94vw);
         min-height: 220px;
-        height: auto;
-        max-height: none;
-        aspect-ratio: auto;
+        max-height: 48dvh;
+        aspect-ratio: 1 / 1;
     }
 
     #sidebar {
@@ -2669,10 +2670,10 @@ body.embed-mode #sidebar.drawer-open #drawer-content {
     max-height: none;
 }
 
-@media (min-width: 1100px) {
+@media (min-width: 760px) {
     body.embed-mode.builder-workspace-mode {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(260px, 22vw);
+        grid-template-columns: minmax(0, 1fr) clamp(220px, 28vw, 300px);
         gap: 10px;
         align-items: start;
     }
@@ -2683,9 +2684,9 @@ body.embed-mode #sidebar.drawer-open #drawer-content {
     }
 
     body.embed-mode.builder-workspace-mode #graph-area {
-        min-height: 360px;
-        height: min(62dvh, 76vw);
-        max-height: 74dvh;
+        min-height: 300px;
+        height: min(58dvh, 74vw);
+        max-height: 66dvh;
     }
 
     body.embed-mode.builder-workspace-mode #sidebar {
@@ -2729,21 +2730,21 @@ body.embed-mode #sidebar.drawer-open #drawer-content {
     }
 
     body.embed-mode.builder-workspace-mode .slider-row {
-        gap: 6px;
-        margin-bottom: 5px;
+        gap: 4px;
+        margin-bottom: 4px;
     }
 
     body.embed-mode.builder-workspace-mode .slider-lbl {
-        min-width: 18px;
-        font-size: 0.9rem;
+        min-width: 16px;
+        font-size: 0.82rem;
     }
 
     body.embed-mode.builder-workspace-mode .slider-inp {
-        height: 16px;
+        height: 14px;
     }
 
     body.embed-mode.builder-workspace-mode .slider-hint {
-        min-width: 62px;
-        font-size: 0.66rem;
+        min-width: 48px;
+        font-size: 0.62rem;
     }
 }
