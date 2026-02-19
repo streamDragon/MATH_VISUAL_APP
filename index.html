@@ -1775,6 +1775,12 @@
             let noteEl = document.getElementById('hot-cold-note');
             if (!widget || !bandEl || !fillEl || !noteEl) return;
 
+            // Mobile-first safety: hide visual meter on very small screens to preserve graph space.
+            if (window.matchMedia('(max-width: 600px)').matches) {
+                widget.classList.add('hidden');
+                return;
+            }
+
             if (!active) {
                 widget.classList.add('hidden');
                 widget.classList.remove('hot', 'warm', 'cold');
@@ -1977,19 +1983,36 @@
             }
         }
 
+        function getMobileBannerOffsetPx() {
+            let raw = getComputedStyle(document.body).getPropertyValue('--mobile-banner-offset') || '0px';
+            let parsed = parseFloat(raw);
+            return Number.isFinite(parsed) ? parsed : 0;
+        }
+
         function spawnStepSuccessStars(x, y) {
             let layer = ensureStarLayer();
             let pt = boardToScreenPoint(x, y);
             if (!layer || !pt) return;
 
-            for (let i = 0; i < 3; i++) {
+            let graphRect = layer.getBoundingClientRect();
+            let isCompactMobile = window.matchMedia('(max-width: 600px)').matches;
+            let bottomUnsafe = (isCompactMobile ? 72 : 52) + getMobileBannerOffsetPx();
+            let safeTopPx = isCompactMobile ? 28 : 16;
+            let safeBottomPx = Math.max(safeTopPx + 28, graphRect.height - bottomUnsafe);
+            let clampedY = Math.min(Math.max(pt.y, safeTopPx), safeBottomPx);
+            let starCount = isCompactMobile ? 2 : 3;
+            let xSpread = isCompactMobile ? 22 : 34;
+            let ySpread = isCompactMobile ? 12 : 16;
+            let yLift = isCompactMobile ? 18 : 8;
+
+            for (let i = 0; i < starCount; i++) {
                 let delay = i * 70;
                 setTimeout(() => {
                     let star = document.createElement('div');
                     star.className = 'success-star';
                     star.innerText = '★';
-                    star.style.left = `${pt.x + (Math.random() - 0.5) * 34}px`;
-                    star.style.top = `${pt.y - 8 - Math.random() * 16}px`;
+                    star.style.left = `${pt.x + (Math.random() - 0.5) * xSpread}px`;
+                    star.style.top = `${clampedY - yLift - Math.random() * ySpread}px`;
                     layer.appendChild(star);
                     setTimeout(() => star.remove(), 820);
                 }, delay);
@@ -2018,12 +2041,25 @@
         function triggerVictoryConfetti() {
             let fire = ensureConfettiFx();
             if (!fire) return;
+            let isCompactMobile = window.matchMedia('(max-width: 600px)').matches;
             let palette = ['#1d4ed8', '#f59e0b', '#f43f5e', '#22c55e', '#facc15'];
-            let burst = { particleCount: 90, spread: 76, startVelocity: 48, scalar: 1.05, colors: palette };
-            fire({ ...burst, origin: { x: 0.22, y: 0.52 } });
-            fire({ ...burst, origin: { x: 0.78, y: 0.52 } });
+            let burst = {
+                particleCount: isCompactMobile ? 42 : 90,
+                spread: isCompactMobile ? 62 : 76,
+                startVelocity: isCompactMobile ? 36 : 48,
+                scalar: isCompactMobile ? 0.88 : 1.05,
+                colors: palette
+            };
+            let originY = isCompactMobile ? 0.34 : 0.52;
+            fire({ ...burst, origin: { x: 0.22, y: originY } });
+            fire({ ...burst, origin: { x: 0.78, y: originY } });
             setTimeout(() => {
-                fire({ ...burst, particleCount: 120, spread: 92, origin: { x: 0.5, y: 0.35 } });
+                fire({
+                    ...burst,
+                    particleCount: isCompactMobile ? 58 : 120,
+                    spread: isCompactMobile ? 74 : 92,
+                    origin: { x: 0.5, y: isCompactMobile ? 0.24 : 0.35 }
+                });
             }, 180);
         }
 

@@ -810,7 +810,7 @@ body.embed-mode #sound-toggle {
 #fx-layer-stars {
     position: absolute;
     inset: 0;
-    pointer-events: none;
+    pointer-events: none !important;
     overflow: hidden;
     z-index: 8;
 }
@@ -845,8 +845,9 @@ body.embed-mode #sound-toggle {
     inset: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none;
-    z-index: 2900;
+    pointer-events: none !important;
+    /* Safety: keep celebration effects below controls (buttons/ad area). */
+    z-index: 90;
 }
 
 .jxgbox {
@@ -2359,6 +2360,13 @@ h2 {
     body.graph-priority-mode #graph-area {
         height: min(58dvh, 96vw);
         max-height: 62dvh;
+    }
+}
+
+@media (max-width: 600px) {
+    /* Mobile-first safety: avoid losing graph space on very small screens. */
+    #hot-cold-widget {
+        display: none !important;
     }
 }
 
