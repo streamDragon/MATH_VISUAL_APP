@@ -266,6 +266,7 @@
                 <span id="top-question-select-label">כאן בוחרים שאלה:</span>
                 <select id="top-question-select" title="בחירת שאלה"></select>
                 <button id="btn-top-questions" onclick="toggleQuestionsFromTop()">שאלות ▼</button>
+                <button id="btn-replay-opening" onclick="replayOpeningSplash()">פתיח+שיר</button>
                 <button id="btn-top-init-builder" onclick="openInitialBuilderFromTop()">בנייה ראשונית</button>
                 <button id="btn-start-guide" onclick="openStartGuideModal()">איך עובדים?</button>
                 <button id="btn-normal-top" class="hidden" onclick="openNormalLabGuide()">מעבדת האנך</button>
@@ -1078,8 +1079,6 @@
         }
 
         function hideOpeningSplash() {
-            if (openingSplashDone) return;
-            openingSplashDone = true;
             if (openingSplashExitTimer) {
                 clearTimeout(openingSplashExitTimer);
                 openingSplashExitTimer = null;
@@ -1090,6 +1089,7 @@
             }
             let splash = document.getElementById('opening-splash');
             if (!splash) return;
+            openingSplashDone = true;
             splash.classList.remove('is-visible');
             splash.classList.add('is-exiting');
             openingSplashHideTimer = setTimeout(() => {
@@ -1112,9 +1112,27 @@
             });
         }
 
-        function startOpeningSplash() {
+        function startOpeningSplash(forceReplay) {
+            if (openingSplashDone && !forceReplay) return;
+            openingSplashDone = false;
             let splash = document.getElementById('opening-splash');
             if (!splash) return;
+            if (openingSplashExitTimer) {
+                clearTimeout(openingSplashExitTimer);
+                openingSplashExitTimer = null;
+            }
+            if (openingSplashHideTimer) {
+                clearTimeout(openingSplashHideTimer);
+                openingSplashHideTimer = null;
+            }
+            splash.classList.remove('hidden', 'is-exiting');
+            let progressFill = document.querySelector('#opening-splash-progress span');
+            if (progressFill) {
+                progressFill.style.animation = 'none';
+                // Force reflow so the CSS animation restarts on replay.
+                void progressFill.offsetWidth;
+                progressFill.style.animation = '';
+            }
             splash.classList.remove('hidden');
             requestAnimationFrame(() => splash.classList.add('is-visible'));
 
@@ -1131,6 +1149,10 @@
                 openingSplashExitTimer = null;
                 hideOpeningSplash();
             }, OPENING_SPLASH_DURATION_MS);
+        }
+
+        function replayOpeningSplash() {
+            startOpeningSplash(true);
         }
 
         function init() {
@@ -1963,7 +1985,13 @@
                 if (list.length === 0) return { active: false, score: 0 };
                 let tol = goalParams.toleranceY ?? goalParams.tolerance ?? 0.25;
                 let avgError = list.reduce((sum, t) => sum + Math.abs(evaluateFunctionAt(t.x) - t.y), 0) / list.length;
-                return { active: true, score: normalizeDistanceToScore(avgError, Math.max(1, tol * 8)) };
+                let curveScore = normalizeDistanceToScore(avgError, Math.max(1, tol * 8));
+                let nearestDx = list.reduce((best, t) => {
+                    let dx = Math.abs(x - t.x);
+                    return Math.min(best, dx);
+                }, Number.POSITIVE_INFINITY);
+                let xScore = normalizeDistanceToScore(nearestDx, Math.max(0.8, (goalParams.toleranceX ?? 0.2) * 8));
+                return { active: true, score: clamp01(curveScore * 0.78 + xScore * 0.22) };
             }
             if (goalType === 'read_slope' || goalType === 'read_y') {
                 return getReadGoalScore(goalType, goalParams, m, x, y);
