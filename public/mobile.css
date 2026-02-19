@@ -46,10 +46,11 @@ body.embed-mode #sidebar {
 }
 
 body.embed-mode #graph-area {
-    height: min(48dvh, 92vw);
-    min-height: 270px;
-    max-height: 52dvh;
-    aspect-ratio: 1 / 1;
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 260px;
+    max-height: none;
+    aspect-ratio: auto;
 }
 
 /* Compact layout specifically for embedded iframes (e.g. Google Sites). */
@@ -774,10 +775,10 @@ body.session-started #prestart-hint {
 
 #sound-toggle {
     position: fixed;
-    top: calc(8px + var(--safe-top));
+    top: calc(8px + var(--safe-top)) !important;
     left: calc(10px + var(--safe-left));
     right: auto;
-    bottom: auto;
+    bottom: auto !important;
     z-index: 1935;
     background: linear-gradient(165deg, #ffffff 0%, #e6efff 100%);
     border: 1px solid #9db7ea;
@@ -815,9 +816,9 @@ body.session-started #prestart-hint {
 }
 
 body.embed-mode #sound-toggle {
-    top: calc(8px + var(--safe-top));
+    top: calc(8px + var(--safe-top)) !important;
     left: calc(124px + var(--safe-left));
-    bottom: auto;
+    bottom: auto !important;
 }
 
 #side-quick-actions {
@@ -2199,10 +2200,11 @@ h2 {
     }
 
     body.embed-mode #graph-area {
-        height: min(48dvh, 86vw);
-        min-height: 300px;
-        max-height: 52dvh;
-        aspect-ratio: 1 / 1;
+        flex: 1 1 auto;
+        min-height: 320px;
+        height: auto;
+        max-height: none;
+        aspect-ratio: auto;
     }
 
     body.embed-mode #sidebar {
@@ -2274,9 +2276,11 @@ h2 {
     }
 
     body.embed-mode #graph-area {
-        height: min(46dvh, 94vw);
-        min-height: 250px;
-        max-height: 50dvh;
+        flex: 1 1 auto;
+        min-height: 220px;
+        height: auto;
+        max-height: none;
+        aspect-ratio: auto;
     }
 
     #sidebar {
