@@ -34,6 +34,21 @@
 </head>
 <body>
 
+    <div id="opening-splash" class="hidden" aria-label="מסך פתיחה">
+        <div id="opening-splash-backdrop" aria-hidden="true">
+            <img id="opening-splash-poster" src="opening-poster.png" alt="">
+        </div>
+        <div id="opening-splash-shade" aria-hidden="true"></div>
+        <div id="opening-splash-content">
+            <div id="opening-splash-progress" aria-hidden="true"><span></span></div>
+            <p id="opening-splash-audio-hint" class="hidden">אם אין מוזיקה, לחצו על "הפעל מוזיקה".</p>
+            <div id="opening-splash-actions">
+                <button id="opening-splash-audio-btn" class="hidden" onclick="retrySplashMusic()">הפעל מוזיקה</button>
+                <button onclick="skipOpeningSplash()">דלג לפתיחה</button>
+            </div>
+        </div>
+    </div>
+
     <button id="sound-toggle" onclick="toggleSound()">🔊</button>
     <button id="btn-tools-menu" onclick="toggleDrawer()" aria-expanded="false">☰ כלים ומשימות</button>
     <div id="side-quick-actions" class="hidden" aria-label="קיצורי דרך" style="display:none !important;" aria-hidden="true">
@@ -392,6 +407,9 @@
         const XP_PER_LEVEL = 120;
         const GUIDE_HIT_LIMIT = 8;
         const FEEDBACK_STORAGE_KEY = 'math_visual_feedback_v1';
+        const OPENING_SPLASH_DURATION_MS = 4000;
+        const OPENING_MUSIC_DURATION_SECONDS = 30;
+        const OPENING_MUSIC_FILE = 'opening-theme.mp3';
         const BUILDER_FOCUSED_GOALS = new Set([
             'choose_function_template',
             'hit_target',
@@ -431,6 +449,9 @@
         let adMobBannerShown = false;
         let adMobListenersBound = false;
         let confettiFx = null;
+        let openingSplashDone = false;
+        let openingSplashExitTimer = null;
+        let openingSplashHideTimer = null;
 
         function isNativeCapacitorEnvironment(cap) {
             if (!cap) return false;
@@ -1056,6 +1077,62 @@
             if (stepsPanel) stepsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
+        function hideOpeningSplash() {
+            if (openingSplashDone) return;
+            openingSplashDone = true;
+            if (openingSplashExitTimer) {
+                clearTimeout(openingSplashExitTimer);
+                openingSplashExitTimer = null;
+            }
+            if (openingSplashHideTimer) {
+                clearTimeout(openingSplashHideTimer);
+                openingSplashHideTimer = null;
+            }
+            let splash = document.getElementById('opening-splash');
+            if (!splash) return;
+            splash.classList.remove('is-visible');
+            splash.classList.add('is-exiting');
+            openingSplashHideTimer = setTimeout(() => {
+                splash.classList.add('hidden');
+                splash.classList.remove('is-exiting');
+            }, 420);
+        }
+
+        function skipOpeningSplash() {
+            hideOpeningSplash();
+        }
+
+        function retrySplashMusic() {
+            if (typeof playTimedBackgroundTrack !== 'function') return;
+            playTimedBackgroundTrack(OPENING_MUSIC_FILE, OPENING_MUSIC_DURATION_SECONDS).then((played) => {
+                let hint = document.getElementById('opening-splash-audio-hint');
+                let btn = document.getElementById('opening-splash-audio-btn');
+                if (hint) hint.classList.toggle('hidden', played);
+                if (btn) btn.classList.toggle('hidden', played);
+            });
+        }
+
+        function startOpeningSplash() {
+            let splash = document.getElementById('opening-splash');
+            if (!splash) return;
+            splash.classList.remove('hidden');
+            requestAnimationFrame(() => splash.classList.add('is-visible'));
+
+            if (typeof playTimedBackgroundTrack === 'function') {
+                playTimedBackgroundTrack(OPENING_MUSIC_FILE, OPENING_MUSIC_DURATION_SECONDS).then((played) => {
+                    let hint = document.getElementById('opening-splash-audio-hint');
+                    let btn = document.getElementById('opening-splash-audio-btn');
+                    if (hint) hint.classList.toggle('hidden', played);
+                    if (btn) btn.classList.toggle('hidden', played);
+                });
+            }
+
+            openingSplashExitTimer = setTimeout(() => {
+                openingSplashExitTimer = null;
+                hideOpeningSplash();
+            }, OPENING_SPLASH_DURATION_MS);
+        }
+
         function init() {
             if (shouldEnableEmbedMode()) {
                 document.body.classList.add('embed-mode');
@@ -1248,7 +1325,7 @@
             updateSoundButton();
             initLearnerProgress();
             syncSessionUiState();
-            openStartGuideModal();
+            startOpeningSplash();
 
             queueBoardResize();
             window.addEventListener('resize', queueBoardResize);

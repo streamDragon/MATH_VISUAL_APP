@@ -3,6 +3,8 @@ let soundEnabled = true;
 let lastWarmColdTs = 0;
 let introPlayed = false;
 const SOUND_PREF_KEY = 'math_visual_sound_enabled_v1';
+let backgroundTrackAudio = null;
+let backgroundTrackTimer = null;
 
 try {
     const AudioCtor = window.AudioContext || window.webkitAudioContext;
@@ -50,7 +52,57 @@ function toggleSound() {
         // Keep running if storage fails.
     }
     if (soundEnabled) initAudio();
+    else stopBackgroundTrack();
     updateSoundButton();
+}
+
+function stopBackgroundTrack(resetPosition = true) {
+    if (backgroundTrackTimer) {
+        clearTimeout(backgroundTrackTimer);
+        backgroundTrackTimer = null;
+    }
+    if (!backgroundTrackAudio) return;
+    try {
+        backgroundTrackAudio.pause();
+        if (resetPosition) backgroundTrackAudio.currentTime = 0;
+    } catch (err) {
+        // Ignore cleanup errors from media element.
+    }
+    backgroundTrackAudio = null;
+}
+
+function playTimedBackgroundTrack(src, durationSeconds = 30) {
+    if (!soundEnabled || !src) return Promise.resolve(false);
+    stopBackgroundTrack(false);
+
+    const audio = new Audio(src);
+    backgroundTrackAudio = audio;
+    audio.preload = 'auto';
+    audio.loop = true;
+    audio.volume = 0.45;
+
+    const maxSeconds = Math.max(1, Number(durationSeconds) || 30);
+    const scheduleStop = () => {
+        if (backgroundTrackTimer) clearTimeout(backgroundTrackTimer);
+        backgroundTrackTimer = setTimeout(() => {
+            if (backgroundTrackAudio !== audio) return;
+            stopBackgroundTrack();
+        }, Math.round(maxSeconds * 1000));
+    };
+
+    let playAttempt = audio.play();
+    if (playAttempt && typeof playAttempt.then === 'function') {
+        return playAttempt.then(() => {
+            scheduleStop();
+            return true;
+        }).catch(() => {
+            if (backgroundTrackAudio === audio) stopBackgroundTrack();
+            return false;
+        });
+    }
+
+    scheduleStop();
+    return Promise.resolve(true);
 }
 
 function playSound(type) {
