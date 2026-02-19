@@ -72,7 +72,7 @@
         <button id="btn-side-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
         <button id="btn-side-questions" onclick="toggleQuestionsFromTop()">שאלות</button>
         <button id="btn-side-feedback" onclick="openFeedbackModal()">כיכר השוק</button>
-        <button id="btn-side-overlay" onclick="openQuestionOverlay()">הסבר שאלה</button>
+        <button id="btn-side-overlay" onclick="openQuestionOverlay()">הסבר שאלה מלא</button>
         <button id="btn-side-normal" class="hidden" onclick="openNormalLabGuide()">מעבדת האנך</button>
     </div>
 
@@ -287,7 +287,7 @@
                 <button id="btn-top-init-builder" onclick="openInitialBuilderFromTop()">בנייה ראשונית</button>
                 <button id="btn-start-guide" onclick="openStartGuideModal()">איך עובדים?</button>
                 <button id="btn-normal-top" class="hidden" onclick="openNormalLabGuide()">מעבדת האנך</button>
-                <button id="btn-overlay-open" onclick="openQuestionOverlay()">הסבר שאלה</button>
+                <button id="btn-overlay-open" onclick="openQuestionOverlay()">הסבר שאלה מלא</button>
                 <button id="btn-video" class="hidden" onclick="openVideoForCurrentQuestion()">וידאו הסבר</button>
                 <button id="btn-feedback" onclick="openFeedbackModal()">כיכר השוק</button>
                 <button id="btn-top-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
@@ -2374,21 +2374,182 @@
             }
         }
 
+        function getQuestionSuccessCriteriaText(q) {
+            let goal = q?.goal || '';
+            let data = getQuestionGoalData(q);
+            if (goal === 'slope_zero') {
+                let tol = Number.isFinite(data.toleranceM) ? formatNumber(data.toleranceM) : '0.1';
+                return `הצלחה: הערך f'(x)=m קרוב מאוד ל-0 (טווח דיוק בערך ±${tol}).`;
+            }
+            if (goal === 'min_point') {
+                return 'הצלחה: גם f\'(x)=0 וגם הגרף נמצא במינימום (בדיקה אחרי/לפני הנקודה או f\'\'(x)>0).';
+            }
+            if (goal === 'slope_equals') {
+                let targetM = Number.isFinite(data.targetM) ? formatNumber(data.targetM) : 'הערך הנתון';
+                return `הצלחה: השיפוע בנקודה שווה לערך המבוקש m=${targetM}.`;
+            }
+            if (goal === 'y_equals') {
+                let targetY = Number.isFinite(data.targetY) ? formatNumber(data.targetY) : 'הערך הנתון';
+                return `הצלחה: ערך הפונקציה f(x) שווה ל-${targetY}.`;
+            }
+            if (goal === 'read_slope') {
+                let x0 = Number.isFinite(data.fixedX0) ? formatNumber(data.fixedX0) : 'x0';
+                return `הצלחה: מזיזים לנקודה x=${x0}, קוראים את השיפוע, ומזינים תשובה מדויקת בשדה.`;
+            }
+            if (goal === 'read_y') {
+                let x0 = Number.isFinite(data.fixedX0) ? formatNumber(data.fixedX0) : 'x0';
+                return `הצלחה: מזיזים לנקודה x=${x0}, קוראים את ערך הפונקציה, ומזינים תשובה מדויקת בשדה.`;
+            }
+            if (goal === 'hit_target' || goal === 'hit_targets') {
+                let targets = Array.isArray(data.targets) ? data.targets : [];
+                if (targets.length > 0) {
+                    let labels = targets.map((t) => `(${formatNumber(t.x)}, ${formatNumber(t.y)})`).join(', ');
+                    return `הצלחה: הגרף עובר דרך נקודות היעד: ${labels}.`;
+                }
+                return 'הצלחה: הגרף עובר דרך נקודת/נקודות היעד לפי הנתון בשאלה.';
+            }
+            if (goal === 'tangent_through_point') {
+                let point = data.point;
+                if (point && Number.isFinite(point.x) && Number.isFinite(point.y)) {
+                    return `הצלחה: המשיק הכתום עובר דרך הנקודה החיצונית (${formatNumber(point.x)}, ${formatNumber(point.y)}).`;
+                }
+                return 'הצלחה: המשיק עובר דרך הנקודה החיצונית הנתונה בשאלה.';
+            }
+            if (goal === 'choose_function_template') {
+                return 'הצלחה: בחרתם תבנית מתאימה, ועדכון פרמטרים משנה את הגרף בצורה צפויה וברורה.';
+            }
+            return 'הצלחה: עונים לדרישת השאלה ומוודאים בעין ובנתונים שהפתרון יציב.';
+        }
+
+        function getQuestionMaterialText(q) {
+            let goal = q?.goal || '';
+            if (goal === 'hit_target' || goal === 'hit_targets') {
+                return 'חומר רלוונטי: הצבה בפונקציה, הבנת השפעת פרמטרים a,b,c,d,e על צורת הגרף, וקריאת נקודות על מערכת צירים.';
+            }
+            if (goal === 'read_slope' || goal === 'read_y') {
+                return 'חומר רלוונטי: קריאת ערכים מהגרף, משמעות f(x), משמעות f\'(x), וקשר בין נקודה על הגרף לבין משוואת המשיק.';
+            }
+            if (goal === 'slope_zero' || goal === 'min_point' || goal === 'slope_equals') {
+                return 'חומר רלוונטי: נגזרת כמדד לשיפוע, נקודות קיצון, סימן נגזרת לפני/אחרי נקודה, וקריאת m מתוך חלונית הנתונים.';
+            }
+            if (goal === 'tangent_through_point') {
+                return 'חומר רלוונטי: משוואת משיק y - y0 = m(x - x0), בדיקת מעבר דרך נקודה חיצונית, וקשר בין נגזרת לשיפוע המשיק.';
+            }
+            if (goal === 'choose_function_template') {
+                return 'חומר רלוונטי: צורות פונקציה נפוצות (ישר/ריבועית/ממעלה שלישית/רביעית), ותפקיד כל פרמטר בעיצוב הגרף.';
+            }
+            return 'חומר רלוונטי: נגזרות, שיפוע משיק, עלייה/ירידה, והשפעת פרמטרים על גרף הפונקציה.';
+        }
+
+        function getQuestionHowToSteps(q) {
+            let goal = q?.goal || '';
+            let data = getQuestionGoalData(q);
+            if (goal === 'choose_function_template') {
+                return [
+                    'בחרו תבנית פונקציה שמתאימה לרמה שלכם (ישר/פרבולה/פולינום).',
+                    'עברו ל"עריכת פרמטרים" ושנו בכל פעם פרמטר אחד בלבד.',
+                    'בדקו במקביל את f(x) ואת f\'(x) כדי להבין מה השתנה ולמה.',
+                    'שמרו תבנית שמרגישה לכם נוחה לפני מעבר לשאלה הבאה.'
+                ];
+            }
+            if (goal === 'slope_zero' || goal === 'min_point') {
+                return [
+                    'גררו את הנקודה הכחולה לאורך הגרף.',
+                    'עקבו אחרי ערך f\'(x)=m וחפשו מצב שבו m קרוב ל-0.',
+                    goal === 'min_point'
+                        ? 'ודאו שזה מינימום אמיתי (למשל שינוי כיוון/סימן או בדיקת f\'\').'
+                        : 'כשהשיפוע אפס, בדקו שהמשיק נראה אופקי.',
+                    'אשרו את הפתרון רק אחרי שהנתונים יציבים כמה שניות.'
+                ];
+            }
+            if (goal === 'slope_equals') {
+                let targetM = Number.isFinite(data.targetM) ? formatNumber(data.targetM) : 'הערך הנתון';
+                return [
+                    `היעד הוא להגיע לשיפוע m=${targetM}.`,
+                    'גררו את הנקודה הכחולה ובדקו את ערך f\'(x)=m בחלונית.',
+                    'התקרבו לערך המבוקש בצעדים קטנים ולא בקפיצות חדות.',
+                    'עצרו רק כשערך השיפוע תואם ליעד בצורה יציבה.'
+                ];
+            }
+            if (goal === 'y_equals') {
+                let targetY = Number.isFinite(data.targetY) ? formatNumber(data.targetY) : 'הערך הנתון';
+                return [
+                    `היעד הוא להגיע לערך פונקציה y=${targetY}.`,
+                    'גררו את הנקודה ובדקו את f(x) בחלונית הנתונים.',
+                    'שימו לב שלא מספיק להיות קרוב; צריך להיות בטווח הדיוק של השאלה.',
+                    'אחרי התאמה, בדקו שוב שלא זזתם מהנקודה הנכונה.'
+                ];
+            }
+            if (goal === 'read_slope' || goal === 'read_y') {
+                let x0 = Number.isFinite(data.fixedX0) ? formatNumber(data.fixedX0) : 'x0';
+                return [
+                    `קבעו את הנקודה בדיוק על x=${x0}.`,
+                    goal === 'read_slope' ? 'קראו את m=f\'(x) מתוך חלונית הנתונים.' : 'קראו את y=f(x) מתוך חלונית הנתונים.',
+                    'הזינו את הערך בשדה התשובה (אפשר עם ספרה או שתיים אחרי הנקודה).',
+                    'בדקו תשובה; אם צריך, תקנו קלות וחזרו על הבדיקה.'
+                ];
+            }
+            if (goal === 'hit_target' || goal === 'hit_targets') {
+                return [
+                    'פתחו את "עריכת פרמטרים" ושנו פרמטר אחד בכל צעד.',
+                    'התמקדו בנקודות היעד ובדקו את מיקום הגרף ביחס אליהן.',
+                    'אם צריך, עברו לכיוונון עדין עם צעדים קטנים של הסליידרים.',
+                    'ודאו שהגרף עובר בכל נקודה נדרשת באותו רגע.'
+                ];
+            }
+            if (goal === 'tangent_through_point') {
+                return [
+                    'גררו את הנקודה על הגרף וחפשו מיקום מתאים למשיק.',
+                    'עקבו בעין: המשיק הכתום צריך לעבור דרך הנקודה החיצונית הנתונה.',
+                    'בדקו שהמעבר נשמר גם אחרי הזזה קטנה לבדיקה עצמית.',
+                    'כאשר המעבר מדויק, זה הפתרון.'
+                ];
+            }
+            return [
+                'קראו את דרישת השאלה עד הסוף לפני שינוי כלשהו.',
+                'בצעו שינוי אחד בכל פעם ובדקו את ההשפעה על הגרף.',
+                'היעזרו בחלונית הנתונים ובנוסחאות כדי לוודא כיוון נכון.',
+                'אשרו פתרון רק אחרי בדיקה חוזרת קצרה.'
+            ];
+        }
+
+        function getRichQuestionOverlayContent(q) {
+            let shortDesc = getQuestionShortDesc(q);
+            let clarity = getGoalClarityCopy(q, shortDesc.second, shortDesc);
+            let descText = (q?.desc || '').replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
+            let success = getQuestionSuccessCriteriaText(q);
+            let essence = [
+                `מה מחפשים כאן בפועל: ${clarity.target}`,
+                descText ? `בניסוח פשוט: ${descText}` : '',
+                success
+            ].filter(Boolean).join('\n\n');
+
+            let goal = [
+                `מטרת הלמידה: ${clarity.target}`,
+                `מה עושים צעד-צעד: ${clarity.action}`,
+                'מה חשוב לדעת: גם הדרך חשובה, לא רק התוצאה הסופית.'
+            ].join('\n\n');
+
+            return {
+                essence,
+                goal,
+                material: getQuestionMaterialText(q),
+                howTo: getQuestionHowToSteps(q)
+            };
+        }
+
         function renderQuestionOverlay(q) {
+            let rich = getRichQuestionOverlayContent(q || {});
             document.getElementById('overlay-title').innerText = q.title;
-            document.getElementById('overlay-essence').innerText = q.overlay?.essence || q.desc || 'מטרת המשימה: להבין את הדרישה ולפתור בצורה מדויקת.';
-            document.getElementById('overlay-goal').innerText = q.overlay?.goal || 'המטרה היא לקשר בין צורת הפונקציה, שיפוע המשיק והנגזרת.';
-            document.getElementById('overlay-material').innerText = q.overlay?.material || 'נגזרות, שיפוע משיק, עלייה/ירידה, והשפעת פרמטרים על גרף.';
+            document.getElementById('overlay-essence').innerText = q.overlay?.essence || rich.essence;
+            document.getElementById('overlay-goal').innerText = q.overlay?.goal || rich.goal;
+            document.getElementById('overlay-material').innerText = q.overlay?.material || rich.material;
 
             let howTo = document.getElementById('overlay-howto');
             howTo.innerHTML = '';
             let steps = Array.isArray(q.overlay?.howTo) ? q.overlay.howTo : [];
             if (steps.length === 0) {
-                steps = [
-                    'קרא את כותרת השאלה והיעד.',
-                    'שנה ערך אחד בכל פעם ובדוק את ההשפעה על הגרף.',
-                    'היעזר במעבדת האנך ובדף הנוסחאות לפי הצורך.'
-                ];
+                steps = rich.howTo;
             }
             steps.forEach(step => {
                 let li = document.createElement('li');
