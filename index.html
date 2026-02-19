@@ -229,6 +229,16 @@
             <div id="top-formulas">
                 <span class="formula-chip" id="top-formula-f">f(x) = ...</span>
                 <span class="formula-chip" id="top-formula-tag">f'(x) = ...</span>
+                <div id="hot-cold-widget" class="hidden" aria-live="polite">
+                    <div id="hot-cold-head">
+                        <span id="hot-cold-title">מד קר/חם</span>
+                        <span id="hot-cold-band">קר</span>
+                    </div>
+                    <div id="hot-cold-bar">
+                        <div id="hot-cold-fill"></div>
+                    </div>
+                    <div id="hot-cold-note">מתחילים לחפש את הכיוון הנכון.</div>
+                </div>
             </div>
             <div id="top-clarity-panel" class="hidden" style="display:none !important;">
                 <div id="top-clarity-title">שאלה: טוען...</div>
@@ -353,8 +363,16 @@
 
             <div id="acc-item-params" class="accordion-item">
                 <button id="btn-builder" class="acc-btn" onclick="toggleBuilderPanel()">פרמטרים</button>
-                <div id="builder-panel" class="acc-panel hidden" style="background:#fff; padding:8px; border-radius:5px; border:1px solid #eee;">
+                <div id="builder-panel" class="acc-panel hidden">
                     <div class="section-title">בניית הפונקציה</div>
+                    <div id="builder-focus-note">הזיזו פרמטר וצפו מיד בגרף למעלה.</div>
+                    <div id="builder-live-values" aria-live="polite">
+                        <span class="builder-val-chip" id="chipA">a=0</span>
+                        <span class="builder-val-chip" id="chipB">b=0</span>
+                        <span class="builder-val-chip" id="chipC">c=0</span>
+                        <span class="builder-val-chip" id="chipD">d=0</span>
+                        <span class="builder-val-chip" id="chipE">e=0</span>
+                    </div>
                     <div class="slider-row"><span class="slider-lbl">a</span><input type="range" id="inpA" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintA"></span></div>
                     <div class="slider-row"><span class="slider-lbl">b</span><input type="range" id="inpB" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintB"></span></div>
                     <div class="slider-row"><span class="slider-lbl">c</span><input type="range" id="inpC" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintC"></span></div>
@@ -758,6 +776,30 @@
                 if (!row) return;
                 row.classList.toggle('hidden', !active.has(key));
             });
+            updateBuilderValueChips();
+        }
+
+        function updateBuilderValueChips() {
+            const items = [
+                { inputId: 'inpA', chipId: 'chipA', key: 'a' },
+                { inputId: 'inpB', chipId: 'chipB', key: 'b' },
+                { inputId: 'inpC', chipId: 'chipC', key: 'c' },
+                { inputId: 'inpD', chipId: 'chipD', key: 'd' },
+                { inputId: 'inpE', chipId: 'chipE', key: 'e' }
+            ];
+
+            items.forEach(({ inputId, chipId, key }) => {
+                let input = document.getElementById(inputId);
+                let chip = document.getElementById(chipId);
+                if (!input || !chip) return;
+                let val = parseFloat(input.value);
+                chip.innerText = `${key}=${Number.isFinite(val) ? formatNumber(val) : '0'}`;
+                let row = input.closest('.slider-row');
+                let hiddenByTemplate = !row || row.classList.contains('hidden');
+                chip.classList.toggle('hidden', hiddenByTemplate);
+                chip.classList.toggle('chip-locked', !!input.disabled);
+                if (row) row.classList.toggle('is-locked', !!input.disabled);
+            });
         }
 
         function getQuestionStartTemplate(q, idx) {
@@ -886,6 +928,22 @@
             }
         }
 
+        function syncBuilderWorkspaceMode() {
+            let panel = document.getElementById('builder-panel');
+            let inBuilderWorkspace = drawerOpen
+                && activeAccordion === 'params'
+                && panel
+                && !panel.classList.contains('hidden');
+            document.body.classList.toggle('builder-workspace-mode', !!inBuilderWorkspace);
+        }
+
+        function ensureGraphAndBuilderVisible() {
+            if (!document.body.classList.contains('embed-mode')) return;
+            let graphWrap = document.getElementById('graph-area-wrapper');
+            if (!graphWrap) return;
+            graphWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
         function closeAllAccordions(options = {}) {
             let keepOpenPanels = options.keepOpenPanels || new Set();
             activeAccordion = '';
@@ -894,6 +952,7 @@
             if (!keepOpenPanels.has('tools')) document.getElementById('lab-panel').classList.add('hidden');
             if (!keepOpenPanels.has('params')) document.getElementById('builder-panel').classList.add('hidden');
             syncAccordionFocusVisibility();
+            syncBuilderWorkspaceMode();
             applyTopStripFocusMode();
             updateTopQuestionsToggleLabel();
             queueBoardResize();
@@ -914,6 +973,7 @@
             if (name === 'tools') document.getElementById('lab-panel').classList.remove('hidden');
             if (name === 'params') document.getElementById('builder-panel').classList.remove('hidden');
             syncAccordionFocusVisibility();
+            syncBuilderWorkspaceMode();
             applyTopStripFocusMode();
             updateTopQuestionsToggleLabel();
             queueBoardResize();
@@ -945,6 +1005,7 @@
             }
             let sideQuickActions = document.getElementById('side-quick-actions');
             if (sideQuickActions) sideQuickActions.classList.toggle('hidden', isEmbed);
+            syncBuilderWorkspaceMode();
             applyTopStripFocusMode();
             updateTopQuestionsToggleLabel();
             queueBoardResize();
@@ -1236,6 +1297,7 @@
             params.c = parseFloat(document.getElementById('inpC').value);
             params.d = parseFloat(document.getElementById('inpD').value);
             params.e = parseFloat(document.getElementById('inpE').value);
+            updateBuilderValueChips();
             updateInfo();
         }
 
@@ -1706,6 +1768,52 @@
             return '#1e88e5';
         }
 
+        function updateHotColdWidget(active, score, delta, state = {}) {
+            let widget = document.getElementById('hot-cold-widget');
+            let bandEl = document.getElementById('hot-cold-band');
+            let fillEl = document.getElementById('hot-cold-fill');
+            let noteEl = document.getElementById('hot-cold-note');
+            if (!widget || !bandEl || !fillEl || !noteEl) return;
+
+            if (!active) {
+                widget.classList.add('hidden');
+                widget.classList.remove('hot', 'warm', 'cold');
+                fillEl.style.width = '0%';
+                noteEl.innerText = 'מתחילים לחפש את הכיוון הנכון.';
+                bandEl.innerText = 'קר';
+                return;
+            }
+
+            let normalized = clamp01(score);
+            let band = getHeatBand(normalized);
+            let percent = Math.round(normalized * 100);
+            let trendText = 'יציב';
+            if (delta > 0.03) trendText = 'מתקרבים';
+            else if (delta < -0.03) trendText = 'התרחקנו';
+
+            let bandLabel = 'קר';
+            let icon = '❄️';
+            if (band === 'warm') {
+                bandLabel = 'מתחמם';
+                icon = '🌤️';
+            } else if (band === 'hot') {
+                bandLabel = 'חם';
+                icon = '🔥';
+            }
+
+            widget.classList.remove('hot', 'warm', 'cold', 'hidden');
+            widget.classList.add(band);
+            fillEl.style.width = `${percent}%`;
+            fillEl.style.background = getHeatColor(normalized);
+            bandEl.innerText = `${icon} ${bandLabel} ${percent}%`;
+
+            if (state.useReadInputHeat) {
+                noteEl.innerText = `מדד קריאה: ${trendText}`;
+                return;
+            }
+            noteEl.innerText = `מדד מטרה: ${trendText}`;
+        }
+
         function clearReadAnswerHeatState() {
             let inputEl = document.getElementById('read-answer-input');
             if (!inputEl) return;
@@ -1829,6 +1937,7 @@
             if (!state.active) {
                 applyHandleHeatState(0, false);
                 applyReadAnswerHeatState(0, false);
+                updateHotColdWidget(false, 0, 0, state);
                 prevHotColdScore = null;
                 if (typeof resetWarmColdFeedback === 'function') resetWarmColdFeedback();
                 return;
@@ -1840,6 +1949,7 @@
 
             applyHandleHeatState(score, true);
             applyReadAnswerHeatState(score, !!state.useReadInputHeat);
+            updateHotColdWidget(true, score, delta, state);
             if (typeof playWarmColdFeedback === 'function') playWarmColdFeedback(score, delta);
         }
 
@@ -2784,10 +2894,12 @@
                 panel.classList.add('hidden');
                 builderPanelOpen = false;
                 if (activeAccordion === 'params') openAccordion('steps');
+                syncBuilderWorkspaceMode();
                 return;
             }
             if (activeAccordion === 'params') panel.classList.remove('hidden');
             btn.innerText = 'פרמטרים';
+            syncBuilderWorkspaceMode();
         }
 
         function toggleBuilderPanel() {
@@ -2797,8 +2909,9 @@
                 return;
             }
             builderPanelOpen = true;
-            openAccordion('params', { preserveOpenPanels: true });
+            openAccordion('params');
             setDrawerOpen(true);
+            ensureGraphAndBuilderVisible();
             updateBuilderVisibility(QUESTIONS[currentQ]);
         }
 
@@ -2811,8 +2924,9 @@
             let editableCount = ['inpA','inpB','inpC','inpD','inpE'].filter(id => !locked.has(id)).length;
             if (editableCount === 0) return;
             builderPanelOpen = true;
-            openAccordion('params', { preserveOpenPanels: true });
+            openAccordion('params');
             setDrawerOpen(true);
+            ensureGraphAndBuilderVisible();
             updateBuilderVisibility(q);
         }
 
