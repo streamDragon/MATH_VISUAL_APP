@@ -5,6 +5,7 @@
     --safe-left: env(safe-area-inset-left, 0px);
     --tap-min: 44px;
     --mobile-banner-offset: 0px;
+    --overlay-top-offset: clamp(8px, 15vh, 140px);
 }
 
 html {
@@ -1703,6 +1704,27 @@ h2 {
     border: 2px solid #2f6fed;
     box-shadow: 0 16px 48px rgba(4, 21, 43, 0.35);
     padding: 14px;
+}
+
+/* Keep modals near the top to avoid hidden content on short/tall-zoomed screens. */
+#question-overlay,
+#video-modal,
+#feedback-modal,
+#normal-lab-modal,
+#start-guide-modal,
+#initial-builder-modal {
+    align-items: flex-start;
+    overflow-y: auto;
+    padding-top: calc(var(--overlay-top-offset) + var(--safe-top));
+}
+
+#question-overlay-card,
+#video-modal-card,
+#feedback-modal-card,
+#normal-lab-card,
+#start-guide-card,
+#initial-builder-card {
+    max-height: calc(100dvh - (var(--overlay-top-offset) + var(--safe-top) + 28px));
 }
 
 .initial-builder-body {
