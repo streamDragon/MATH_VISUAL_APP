@@ -43,7 +43,7 @@
             <div id="opening-splash-progress" aria-hidden="true"><span></span></div>
             <p id="opening-splash-audio-hint" class="hidden">אם אין מוזיקה, לחצו על "הפעל מוזיקה".</p>
             <div id="opening-splash-actions">
-                <button id="opening-splash-audio-btn" class="hidden" onclick="retrySplashMusic()">הפעל מוזיקה</button>
+                <button id="opening-splash-audio-btn" onclick="retrySplashMusic()">נגן שיר</button>
                 <button onclick="skipOpeningSplash()">דלג לפתיחה</button>
             </div>
         </div>
@@ -466,6 +466,7 @@
         let openingSplashDone = false;
         let openingSplashExitTimer = null;
         let openingSplashHideTimer = null;
+        let splashMusicUnlockBound = false;
 
         function isNativeCapacitorEnvironment(cap) {
             if (!cap) return false;
@@ -1105,6 +1106,7 @@
             openingSplashDone = true;
             splash.classList.remove('is-visible');
             splash.classList.add('is-exiting');
+            unbindSplashMusicUnlock();
             openingSplashHideTimer = setTimeout(() => {
                 splash.classList.add('hidden');
                 splash.classList.remove('is-exiting');
@@ -1115,13 +1117,34 @@
             hideOpeningSplash();
         }
 
+        function maybeUnlockSplashMusic() {
+            if (openingSplashDone) return;
+            retrySplashMusic();
+        }
+
+        function bindSplashMusicUnlock() {
+            if (splashMusicUnlockBound) return;
+            splashMusicUnlockBound = true;
+            document.addEventListener('pointerdown', maybeUnlockSplashMusic, true);
+            document.addEventListener('keydown', maybeUnlockSplashMusic, true);
+        }
+
+        function unbindSplashMusicUnlock() {
+            if (!splashMusicUnlockBound) return;
+            splashMusicUnlockBound = false;
+            document.removeEventListener('pointerdown', maybeUnlockSplashMusic, true);
+            document.removeEventListener('keydown', maybeUnlockSplashMusic, true);
+        }
+
         function retrySplashMusic() {
             if (typeof playTimedBackgroundTrack !== 'function') return;
             playTimedBackgroundTrack(OPENING_MUSIC_FILE, OPENING_MUSIC_DURATION_SECONDS).then((played) => {
                 let hint = document.getElementById('opening-splash-audio-hint');
                 let btn = document.getElementById('opening-splash-audio-btn');
                 if (hint) hint.classList.toggle('hidden', played);
-                if (btn) btn.classList.toggle('hidden', played);
+                if (btn) btn.innerText = played ? 'נגן שוב' : 'נגן שיר';
+                if (played) unbindSplashMusicUnlock();
+                else bindSplashMusicUnlock();
             });
         }
 
@@ -1148,13 +1171,15 @@
             }
             splash.classList.remove('hidden');
             requestAnimationFrame(() => splash.classList.add('is-visible'));
+            bindSplashMusicUnlock();
 
             if (typeof playTimedBackgroundTrack === 'function') {
                 playTimedBackgroundTrack(OPENING_MUSIC_FILE, OPENING_MUSIC_DURATION_SECONDS).then((played) => {
                     let hint = document.getElementById('opening-splash-audio-hint');
                     let btn = document.getElementById('opening-splash-audio-btn');
                     if (hint) hint.classList.toggle('hidden', played);
-                    if (btn) btn.classList.toggle('hidden', played);
+                    if (btn) btn.innerText = played ? 'נגן שוב' : 'נגן שיר';
+                    if (played) unbindSplashMusicUnlock();
                 });
             }
 
