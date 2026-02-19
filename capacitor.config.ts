@@ -3,7 +3,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.nlpis.mathvisualapp',
   appName: 'Math Visual App',
-  webDir: 'www'
+  webDir: 'dist'
 };
 
 export default config;

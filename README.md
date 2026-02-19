@@ -3,64 +3,50 @@
 Canonical app URL:
 `https://streamdragon.github.io/MATH_VISUAL_APP/`
 
-## Recommended local workspace (important)
+## Open This Folder In VS Code / Studio
 
-For stable Git + VSCode + Android Studio integration on Windows, open and work from:
+Open:
 `C:\code\MATH_VISUAL_APP`
 
-Avoid working directly from UNC paths such as:
+Do not work from:
 `\\wsl.localhost\Ubuntu\home\nlpis\code\MATH_VISUAL_APP`
 
-UNC is a common source of:
-1. `Git: Failed to execute git` in VSCode
-2. `cmd.exe` path warnings during npm/capacitor tasks
-3. random Android Studio/Gradle path issues
+UNC paths can break npm, Gradle, and Android Studio tooling on Windows.
 
-## Web + Capacitor workflow (single source of truth)
+## Clean Project Structure
 
-Author web files in the repository root (`index.html`, css/js/json).
-Before Capacitor sync, run:
+- `index.html` - main app page
+- `public/` - static files copied as-is to build output
+- `scripts/` - build/sync helper scripts
+- `dist/` - generated web build (Vite output, do not edit manually)
+- `android/` - native Android project for Android Studio
 
-```bash
-npm run sync:web
-```
+## Single Flow (Vite -> Capacitor -> Android Studio)
 
-This script rebuilds `www/` from root web assets.
+1. Build web app:
+   `npm run build:web`
+2. Sync web build into Android project:
+   `npm run cap:sync`
+3. Open Android Studio with the synced project:
+   `npm run cap:open:android`
 
-Then sync native projects:
+For local web development:
+`npm run dev`
 
-```bash
-npm run cap:sync
-```
+## Google Play Release Flow
 
-Or sync and open Android Studio in one command:
+1. Run:
+   `npm run cap:sync`
+2. Open Android Studio (`android/` project).
+3. Build signed `.aab`:
+   `Build -> Generate Signed Bundle / APK -> Android App Bundle`
+4. Upload the `.aab` to Google Play Console.
 
-```bash
-npm run cap:open:android
-```
+## GitHub Pages Deployment
 
-## Single deployment flow (no more multiple versions)
+GitHub Actions workflow `.github/workflows/deploy-pages.yml` now:
+1. installs dependencies
+2. runs `npm run build:web`
+3. deploys `dist/` to GitHub Pages
 
-The repository now deploys GitHub Pages automatically from `main` via:
-`.github/workflows/deploy-pages.yml`
-
-On every push to `main`, the site is redeployed.
-
-## Safe auto-update mechanism
-
-To reduce stale-cache issues (especially inside Google Sites embeds):
-1. Deploy workflow stamps each release with a unique build id (`GITHUB_SHA` short).
-2. `index.html` assets are loaded with `?v=<build_id>` cache busting.
-3. `version.json` is published with the latest build id.
-4. Client runtime checks `version.json` with `no-store`; if a newer build exists, it reloads once with `?v=<latest_build>`.
-
-This means users who open an older cached copy are automatically redirected to the newest build.
-
-## One-time GitHub setting
-
-In GitHub repo settings:
-1. Open `Settings -> Pages`
-2. Under `Build and deployment`, set `Source` to `GitHub Actions`
-
-After this one-time setting, `https://streamdragon.github.io/MATH_VISUAL_APP/`
-always serves the latest `main`.
+`BUILD_ID` and `BUILD_TIME` are stamped during CI build.
