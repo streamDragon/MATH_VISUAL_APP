@@ -1713,9 +1713,10 @@ h2 {
 #normal-lab-modal,
 #start-guide-modal,
 #initial-builder-modal {
-    align-items: flex-start;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
     overflow-y: auto;
-    padding-top: calc(var(--overlay-top-offset) + var(--safe-top));
+    padding-top: calc(var(--overlay-top-offset) + var(--safe-top)) !important;
 }
 
 #question-overlay-card,
@@ -1725,6 +1726,7 @@ h2 {
 #start-guide-card,
 #initial-builder-card {
     max-height: calc(100dvh - (var(--overlay-top-offset) + var(--safe-top) + 28px));
+    margin-top: 0 !important;
 }
 
 .initial-builder-body {

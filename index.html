@@ -654,7 +654,7 @@
             if (!chip || !learnerProgress) return;
             let level = getProgressLevel(learnerProgress.totalXp);
             let solved = Array.isArray(learnerProgress.uniqueSolved) ? learnerProgress.uniqueSolved.length : 0;
-            let totalQuestions = Array.isArray(QUESTIONS) ? QUESTIONS.length : 0;
+            let totalQuestions = getQuestionsList().length;
             chip.innerText = `רמה ${level} | XP ${learnerProgress.totalXp} | רצף ${learnerProgress.streakDays} | ${Math.min(solved, totalQuestions)}/${totalQuestions}`;
         }
 
@@ -714,8 +714,51 @@
             return { gainedXp, leveledUp, level: newLevel };
         }
 
+        function getQuestionsList() {
+            if (typeof QUESTIONS !== 'undefined' && Array.isArray(QUESTIONS)) return QUESTIONS;
+            if (Array.isArray(window.QUESTIONS)) return window.QUESTIONS;
+            return [];
+        }
+
+        function loadRuntimeScript(src) {
+            return new Promise((resolve, reject) => {
+                let script = document.createElement('script');
+                script.src = `${src}${src.includes('?') ? '&' : '?'}t=${Date.now()}`;
+                script.async = false;
+                script.onload = () => resolve(true);
+                script.onerror = () => reject(new Error(`Failed loading ${src}`));
+                document.head.appendChild(script);
+            });
+        }
+
+        async function ensureQuestionsLoadedAtRuntime() {
+            if (getQuestionsList().length > 0) return true;
+            try {
+                await loadRuntimeScript('public/questions.js');
+            } catch (err) {
+                // Keep running; a visible message will be shown if questions stay missing.
+            }
+            return getQuestionsList().length > 0;
+        }
+
+        function renderNoQuestionsState() {
+            let topIndex = document.getElementById('top-question-index');
+            let topQuestion = document.getElementById('top-question');
+            let topStep = document.getElementById('top-step-status');
+            let mission = document.getElementById('mission-step-text');
+            let topSelect = document.getElementById('top-question-select');
+            if (topIndex) topIndex.innerText = 'שאלות: 0';
+            if (topQuestion) topQuestion.innerText = 'לא נטענה רשימת שאלות';
+            if (topStep) topStep.innerText = 'רענן את הדף או פתח שוב את האתר.';
+            if (mission) mission.innerText = 'לא נטענו שאלות. בצע רענון מלא (Ctrl+F5).';
+            if (topSelect) {
+                topSelect.innerHTML = '';
+                topSelect.disabled = true;
+            }
+        }
+
         function getCurrentQuestion() {
-            return QUESTIONS[currentQ];
+            return getQuestionsList()[currentQ];
         }
 
         function getTemplateById(templateId) {
@@ -1208,10 +1251,11 @@
             startOpeningSplash(true);
         }
 
-        function init() {
+        async function init() {
             if (shouldEnableEmbedMode()) {
                 document.body.classList.add('embed-mode');
             }
+            await ensureQuestionsLoadedAtRuntime();
             let buildBadge = document.getElementById('build-badge');
             if (buildBadge) buildBadge.innerText = `build: ${APP_BUILD}`;
             exposeBuildBadgeInEmbedMode();
@@ -1378,13 +1422,16 @@
             }
 
             let topSelect = document.getElementById('top-question-select');
-            QUESTIONS.forEach((q, i) => {
+            let questions = getQuestionsList();
+            topSelect.innerHTML = '';
+            questions.forEach((q, i) => {
                 let opt = document.createElement('option');
                 opt.value = i;
                 let shortDesc = getQuestionShortDesc(q);
                 opt.textContent = `שאלה ${i + 1}: ${q.title} - ${shortDesc.first}`;
                 topSelect.appendChild(opt);
             });
+            topSelect.disabled = questions.length === 0;
             topSelect.addEventListener('change', (ev) => loadQ(parseInt(ev.target.value, 10)));
 
             activeTemplate = getDefaultTemplate();
@@ -1392,7 +1439,11 @@
                 applyTemplateById(activeTemplate.id, false);
             }
 
-            loadQ(0, { autoOpenOverlay: false });
+            if (questions.length > 0) {
+                loadQ(0, { autoOpenOverlay: false });
+            } else {
+                renderNoQuestionsState();
+            }
             openAccordion('steps');
             setDrawerOpen(false);
             updateNormalShiftLabel();
@@ -2248,7 +2299,7 @@
         }
 
         function getNormalLabQuestionTitles() {
-            return (QUESTIONS || [])
+            return getQuestionsList()
                 .map((q, idx) => ({ q, idx }))
                 .filter(({ q }) => (q?.ui?.allowNormal || q?.ui?.allowLineTool))
                 .map(({ q, idx }) => `שאלה ${idx + 1}: ${q.title}`);
@@ -2371,7 +2422,7 @@
         }
 
         function openQuestionOverlay() {
-            let q = QUESTIONS[currentQ];
+            let q = getCurrentQuestion();
             if (q) renderQuestionOverlay(q);
             document.getElementById('question-overlay').classList.remove('hidden');
         }
@@ -3106,12 +3157,12 @@
             openAccordion('params');
             setDrawerOpen(true);
             ensureGraphAndBuilderVisible();
-            updateBuilderVisibility(QUESTIONS[currentQ]);
+            updateBuilderVisibility(getCurrentQuestion());
         }
 
         function openBuilderFromTop() {
             closeInitialBuilderModal();
-            let q = QUESTIONS[currentQ];
+            let q = getCurrentQuestion();
             if (!q) return;
             if (document.getElementById('btn-top-builder').classList.contains('hidden')) return;
             let locked = new Set(q.locked || []);
@@ -3140,17 +3191,24 @@
         }
 
         function loadQ(idx, options = {}) {
+            let questions = getQuestionsList();
+            if (questions.length === 0) {
+                renderNoQuestionsState();
+                return;
+            }
             const autoOpenOverlay = typeof options.autoOpenOverlay === 'boolean'
                 ? options.autoOpenOverlay
                 : !sessionStarted;
-            currentQ = idx;
-            let q = QUESTIONS[idx];
+            let safeIdx = Number.isFinite(idx) ? idx : 0;
+            safeIdx = Math.max(0, Math.min(questions.length - 1, safeIdx));
+            currentQ = safeIdx;
+            let q = questions[safeIdx];
             let shortDesc = getQuestionShortDesc(q);
-            document.getElementById('q-title').innerText = `שאלה ${idx + 1}: ${q.title}`;
+            document.getElementById('q-title').innerText = `שאלה ${safeIdx + 1}: ${q.title}`;
             document.getElementById('q-desc').innerText = q.desc;
-            document.getElementById('top-question-index').innerText = `שאלה ${idx + 1}/${QUESTIONS.length}`;
+            document.getElementById('top-question-index').innerText = `שאלה ${safeIdx + 1}/${questions.length}`;
             document.getElementById('top-question').innerText = `${q.title} - ${shortDesc.first}`;
-            document.getElementById('top-question-select').value = String(idx);
+            document.getElementById('top-question-select').value = String(safeIdx);
             updateLearnerProgressChip();
             document.getElementById('win-overlay').style.display = 'none';
             let box = document.querySelector('.jxgbox');
