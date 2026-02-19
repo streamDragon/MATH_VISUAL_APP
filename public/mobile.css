@@ -5,7 +5,7 @@
     --safe-left: env(safe-area-inset-left, 0px);
     --tap-min: 44px;
     --mobile-banner-offset: 0px;
-    --overlay-top-offset: clamp(8px, 15vh, 140px);
+    --overlay-top-offset: clamp(2px, 4vh, 48px);
 }
 
 html {
@@ -2631,4 +2631,83 @@ body.embed-mode #sidebar.drawer-open #drawer-content {
     display: block;
     pointer-events: auto;
     max-height: none;
+}
+
+@media (min-width: 1100px) {
+    body.embed-mode.builder-workspace-mode {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 22vw);
+        gap: 10px;
+        align-items: start;
+    }
+
+    body.embed-mode.builder-workspace-mode #graph-area-wrapper {
+        grid-column: 1;
+        min-width: 0;
+    }
+
+    body.embed-mode.builder-workspace-mode #graph-area {
+        min-height: 360px;
+        height: min(62dvh, 76vw);
+        max-height: 74dvh;
+    }
+
+    body.embed-mode.builder-workspace-mode #sidebar {
+        grid-column: 2;
+        display: flex !important;
+        position: sticky;
+        top: calc(8px + var(--safe-top));
+        align-self: start;
+        width: 100%;
+        max-height: calc(100dvh - var(--safe-top) - 12px);
+        border-radius: 12px;
+        border-top: 3px solid #1d4ed8;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+        overflow: hidden;
+    }
+
+    body.embed-mode.builder-workspace-mode #drawer-content {
+        max-height: calc(100dvh - var(--safe-top) - 62px);
+        overflow-y: auto;
+        padding: 8px;
+    }
+
+    body.embed-mode.builder-workspace-mode #acc-item-params {
+        margin-top: 2px;
+    }
+
+    body.embed-mode.builder-workspace-mode #builder-panel {
+        position: static;
+        top: auto;
+        padding: 8px;
+    }
+
+    body.embed-mode.builder-workspace-mode #builder-live-values {
+        gap: 4px;
+        margin-bottom: 6px;
+    }
+
+    body.embed-mode.builder-workspace-mode .builder-val-chip {
+        font-size: 0.68rem;
+        padding: 1px 6px;
+    }
+
+    body.embed-mode.builder-workspace-mode .slider-row {
+        gap: 6px;
+        margin-bottom: 5px;
+    }
+
+    body.embed-mode.builder-workspace-mode .slider-lbl {
+        min-width: 18px;
+        font-size: 0.9rem;
+    }
+
+    body.embed-mode.builder-workspace-mode .slider-inp {
+        height: 16px;
+    }
+
+    body.embed-mode.builder-workspace-mode .slider-hint {
+        min-width: 62px;
+        font-size: 0.66rem;
+    }
 }

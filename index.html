@@ -27,23 +27,25 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="mobile.css" onerror="this.onerror=null;this.href='public/mobile.css';">
-    <script src="questions.js"></script>
+    <link rel="stylesheet" href="public/mobile.css" onerror="this.onerror=null;this.href='mobile.css';">
+    <script>window.__ASSET_BASE = 'public/';</script>
+    <script src="public/questions.js"></script>
     <script>
         if (typeof QUESTIONS === 'undefined') {
-            document.write('<script src="public/questions.js"><\/script>');
+            window.__ASSET_BASE = '';
+            document.write('<script src="questions.js"><\/script>');
         }
     </script>
-    <script src="sound.js"></script>
+    <script src="public/sound.js"></script>
     <script>
         if (typeof toggleSound !== 'function') {
-            document.write('<script src="public/sound.js"><\/script>');
+            document.write('<script src="sound.js"><\/script>');
         }
     </script>
-    <script src="capacitor.js"></script>
+    <script src="public/capacitor.js"></script>
     <script>
         if (typeof Capacitor === 'undefined') {
-            document.write('<script src="public/capacitor.js"><\/script>');
+            document.write('<script src="capacitor.js"><\/script>');
         }
     </script>
 </head>
@@ -51,7 +53,7 @@
 
     <div id="opening-splash" class="hidden" aria-label="מסך פתיחה">
         <div id="opening-splash-backdrop" aria-hidden="true">
-            <img id="opening-splash-poster" src="opening-poster.png" onerror="this.onerror=null;this.src='public/opening-poster.png';" alt="">
+            <img id="opening-splash-poster" src="public/opening-poster.png" onerror="this.onerror=null;this.src='opening-poster.png';" alt="">
         </div>
         <div id="opening-splash-shade" aria-hidden="true"></div>
         <div id="opening-splash-content">
@@ -426,6 +428,7 @@
         const OPENING_SPLASH_DURATION_MS = 4000;
         const OPENING_MUSIC_DURATION_SECONDS = 30;
         const RUNTIME_ASSET_BASE = (() => {
+            if (typeof window.__ASSET_BASE === 'string') return window.__ASSET_BASE;
             try {
                 let src = document.currentScript?.src || '';
                 if (src.includes('/public/')) return 'public/';
