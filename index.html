@@ -27,16 +27,16 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="mobile.css">
-    <script src="questions.js"></script>
-    <script src="sound.js"></script>
-    <script src="capacitor.js"></script>
+    <link rel="stylesheet" href="mobile.css" onerror="this.onerror=null;this.href='public/mobile.css';">
+    <script src="questions.js" onerror="this.onerror=null;this.src='public/questions.js'"></script>
+    <script src="sound.js" onerror="this.onerror=null;this.src='public/sound.js'"></script>
+    <script src="capacitor.js" onerror="this.onerror=null;this.src='public/capacitor.js'"></script>
 </head>
 <body>
 
     <div id="opening-splash" class="hidden" aria-label="מסך פתיחה">
         <div id="opening-splash-backdrop" aria-hidden="true">
-            <img id="opening-splash-poster" src="opening-poster.png" alt="">
+            <img id="opening-splash-poster" src="opening-poster.png" onerror="this.onerror=null;this.src='public/opening-poster.png';" alt="">
         </div>
         <div id="opening-splash-shade" aria-hidden="true"></div>
         <div id="opening-splash-content">
@@ -410,7 +410,20 @@
         const FEEDBACK_STORAGE_KEY = 'math_visual_feedback_v1';
         const OPENING_SPLASH_DURATION_MS = 4000;
         const OPENING_MUSIC_DURATION_SECONDS = 30;
-        const OPENING_MUSIC_FILE = 'opening-theme.mp3';
+        const RUNTIME_ASSET_BASE = (() => {
+            try {
+                let src = document.currentScript?.src || '';
+                if (src.includes('/public/')) return 'public/';
+                let qScript = document.querySelector('script[src*="questions.js"]');
+                let qSrc = qScript ? (qScript.getAttribute('src') || '') : '';
+                if (qSrc.startsWith('public/')) return 'public/';
+                if ((qScript?.src || '').includes('/public/')) return 'public/';
+            } catch (err) {
+                // Keep default root path if script discovery fails.
+            }
+            return '';
+        })();
+        const OPENING_MUSIC_FILE = `${RUNTIME_ASSET_BASE}opening-theme.mp3`;
         const BUILDER_FOCUSED_GOALS = new Set([
             'choose_function_template',
             'hit_target',
