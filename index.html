@@ -848,11 +848,29 @@
             }
         }
 
+        async function fetchVersionMeta() {
+            let stamp = Date.now();
+            let candidates = [
+                `version.json?t=${stamp}`,
+                `public/version.json?t=${stamp}`
+            ];
+            for (let path of candidates) {
+                try {
+                    let res = await fetch(path, { cache: 'no-store' });
+                    if (!res.ok) continue;
+                    let data = await res.json();
+                    if (data && typeof data === 'object') return data;
+                } catch (err) {
+                    // Try next candidate.
+                }
+            }
+            return null;
+        }
+
         async function ensureLatestBuild() {
             try {
-                let res = await fetch(`version.json?t=${Date.now()}`, { cache: 'no-store' });
-                if (!res.ok) return;
-                let data = await res.json();
+                let data = await fetchVersionMeta();
+                if (!data) return;
                 let latestBuild = (data && typeof data.build === 'string') ? data.build.trim() : '';
                 if (!latestBuild || latestBuild === APP_BUILD) return;
 
@@ -873,9 +891,8 @@
         async function resolveVersionForDisplay() {
             if (APP_VERSION !== 'local') return APP_VERSION;
             try {
-                let res = await fetch(`version.json?t=${Date.now()}`, { cache: 'no-store' });
-                if (!res.ok) return APP_VERSION;
-                let data = await res.json();
+                let data = await fetchVersionMeta();
+                if (!data) return APP_VERSION;
                 let fileVersion = (data && typeof data.app_version === 'string') ? data.app_version.trim() : '';
                 if (!fileVersion) return APP_VERSION;
                 return fileVersion;
@@ -1324,7 +1341,8 @@
         }
 
         function getRuntimeModeLabel() {
-            let hostLabel = document.body.classList.contains('embed-mode') ? 'Sites' : 'Web';
+            let inSitesFrame = window.self !== window.top || (document.referrer || '').includes('sites.google.com');
+            let hostLabel = inSitesFrame ? 'Sites' : 'Web';
             let viewportLabel = document.body.classList.contains('viewport-mobile') ? 'mobile' : 'desktop';
             return `${hostLabel} ${viewportLabel}`;
         }
@@ -1462,9 +1480,10 @@
         function shouldEnableEmbedMode() {
             if (VIEW_CONFIG.embed === true) return true;
             if (VIEW_CONFIG.embed === false) return false;
-            if (window.self !== window.top) return true;
+            if (window.self !== window.top) return isMobileViewportNow();
             let ref = document.referrer || '';
-            return ref.includes('sites.google.com');
+            if (ref.includes('sites.google.com')) return isMobileViewportNow();
+            return false;
         }
 
         function updateTopQuestionsToggleLabel() {
