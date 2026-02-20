@@ -378,7 +378,10 @@ body.embed-mode #build-badge.embed-build-chip {
     font-weight: 800;
     color: #b91c1c;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
-    white-space: nowrap;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
@@ -1223,6 +1226,13 @@ h2 {
     font-weight: 700;
 }
 
+#mission-step-note {
+    margin-top: 4px;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    color: #144a8e;
+}
+
 #template-setup-panel,
 #read-answer-panel {
     margin-top: 8px;
@@ -1326,6 +1336,13 @@ h2 {
     background: #ffffff;
     border: 1px solid #b7d3fb;
     border-radius: 8px;
+}
+
+#step-result-title {
+    font-size: 0.86rem;
+    font-weight: 800;
+    color: #0f6f3f;
+    margin-bottom: 4px;
 }
 
 #step-math-line {
@@ -2926,7 +2943,7 @@ h2 {
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 420px) {
     /* Mobile-first safety: avoid losing graph space on very small screens. */
     #hot-cold-widget {
         display: none !important;

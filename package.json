@@ -1,6 +1,7 @@
 {
   "scripts": {
     "dev": "node ./node_modules/vite/bin/vite.js",
+    "check:questions": "node ./scripts/check-questions.mjs",
     "build:web": "node ./scripts/build-web.mjs",
     "cap:sync": "node ./scripts/cap.mjs sync",
     "cap:open:android": "node ./scripts/cap.mjs open-android"

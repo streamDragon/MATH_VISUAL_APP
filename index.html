@@ -335,6 +335,7 @@
                     <div id="step-mission-box" class="info-box blue-box">
                         <div class="info-title">משימה נוכחית</div>
                         <div id="mission-step-text">שלב 1/1: ...</div>
+                        <div id="mission-step-note">טיפ: קראו את המשימה ובצעו צעד אחד בכל פעם.</div>
                         <div id="template-setup-panel" class="hidden">
                             <div class="section-title">בחירת תבנית פונקציה</div>
                             <select id="template-select"></select>
@@ -353,6 +354,7 @@
                             <div id="read-answer-feedback"></div>
                         </div>
                         <div id="step-result-panel" class="hidden">
+                            <div id="step-result-title">✅ השלב הושלם</div>
                             <div id="step-math-line"></div>
                             <div class="step-actions">
                                 <button id="btn-apply-solution" class="hidden" onclick="applyStepSolution()">עדכן פונקציה</button>
@@ -536,6 +538,7 @@
         let openingSplashHideTimer = null;
         let splashMusicUnlockBound = false;
         let appInitialized = false;
+        let winOverlayTimer = null;
         let runtimeDisplayedVersion = APP_VERSION;
         let quickTourStepIndex = 0;
         let quickTourActive = false;
@@ -1231,13 +1234,83 @@
             return all[Math.max(0, idx - 1) % all.length];
         }
 
+        function getGoalInstructionText(q) {
+            if (!q) return 'בצע את המשימה לפי ההנחיה.';
+            let data = getQuestionGoalData(q);
+            if (q.goal === 'choose_function_template') {
+                return 'בחרו תבנית פונקציה, אשרו, ואז עברו לתרגול.';
+            }
+            if (q.goal === 'slope_zero') {
+                return 'גררו את הנקודה עד שהשיפוע f\'(x)=m קרוב לאפס.';
+            }
+            if (q.goal === 'min_point') {
+                return 'גררו עד f\'(x)=0, ואז ודאו שמדובר במינימום.';
+            }
+            if (q.goal === 'slope_equals') {
+                let targetM = Number.isFinite(data.targetM) ? formatNumber(data.targetM) : 'הערך הנתון';
+                return `גררו עד שהשיפוע שווה m=${targetM}.`;
+            }
+            if (q.goal === 'y_equals') {
+                let targetY = Number.isFinite(data.targetY) ? formatNumber(data.targetY) : 'הערך הנתון';
+                return `גררו עד שערך הפונקציה יהיה f(x)=${targetY}.`;
+            }
+            if (q.goal === 'read_slope') {
+                let x0 = Number.isFinite(data.fixedX0) ? formatNumber(data.fixedX0) : 'x0';
+                return `קבעו את הנקודה על x=${x0} (זהו x0), קראו m=f'(${x0}), והזינו בתיבה.`;
+            }
+            if (q.goal === 'read_y') {
+                let x0 = Number.isFinite(data.fixedX0) ? formatNumber(data.fixedX0) : 'x0';
+                return `קבעו את הנקודה על x=${x0} (זהו x0), קראו y=f(${x0}), והזינו בתיבה.`;
+            }
+            if (q.goal === 'hit_target' || q.goal === 'hit_targets') {
+                let targets = Array.isArray(data.targets) ? data.targets : [];
+                let preferred = Array.isArray(data.preferredEditableParams) ? data.preferredEditableParams : [];
+                let preferredText = preferred.length > 0
+                    ? ` מומלץ להתחיל מ-${preferred.join(', ')}.`
+                    : '';
+                if (targets.length > 0) {
+                    let list = targets.map((t) => `(${formatNumber(t.x)},${formatNumber(t.y)})`).join(', ');
+                    return `שנו פרמטרים כך שהגרף יעבור דרך ${list}.${preferredText}`;
+                }
+                return `שנו פרמטרים עד שהגרף יעבור דרך נקודת היעד.${preferredText}`;
+            }
+            if (q.goal === 'tangent_through_point') {
+                let point = data.point;
+                if (point && Number.isFinite(point.x) && Number.isFinite(point.y)) {
+                    return `גררו עד שהמשיק עובר דרך (${formatNumber(point.x)},${formatNumber(point.y)}).`;
+                }
+                return 'גררו עד שהמשיק עובר דרך הנקודה החיצונית.';
+            }
+            if (q.goal === 'free') {
+                return 'שנו פרמטר אחד בכל פעם והשוו בין f(x) ל-f\'(x).';
+            }
+            let firstLine = (q.desc || 'בצע את המשימה').split('\n')[0];
+            return firstLine.replace(/\s+/g, ' ').trim() || 'בצע את המשימה';
+        }
+
+        function getMissionHintText(q) {
+            if (!q) return '';
+            if (q.goal === 'read_slope' || q.goal === 'read_y') {
+                return 'טיפ: x0 הוא ערך ה-x של הנקודה הכחולה. קודם מקמים ל-x0, ואז קוראים ערך ומגישים תשובה.';
+            }
+            if (q.goal === 'hit_target' || q.goal === 'hit_targets') {
+                let shortDesc = getQuestionShortDesc(q);
+                if (shortDesc.second) return shortDesc.second;
+                return 'טיפ: הנקודות הירוקות הן יעדים. הצלחה מתקבלת רק כשהגרף הכחול עובר בהן.';
+            }
+            if (q.goal === 'tangent_through_point') {
+                return 'טיפ: הסתכלו אם הקו הכתום באמת עובר דרך הנקודה החיצונית.';
+            }
+            let shortDesc = getQuestionShortDesc(q);
+            return shortDesc.second || '';
+        }
+
         function getQuestionSteps(q) {
             if (Array.isArray(q.steps) && q.steps.length > 0) return q.steps;
             let fallbackGoal = q.goal || 'free';
-            let firstLine = (q.desc || 'בצע את המשימה').split('\n')[0];
             let goalData = getQuestionGoalData(q);
             return [{
-                instruction: firstLine,
+                instruction: getGoalInstructionText(q),
                 goal: {
                     type: fallbackGoal,
                     params: Object.assign({}, goalData, {
@@ -2403,8 +2476,8 @@
             let noteEl = document.getElementById('hot-cold-note');
             if (!widget || !bandEl || !fillEl || !noteEl) return;
 
-            // Mobile-first safety: hide visual meter on very small screens to preserve graph space.
-            if (window.matchMedia('(max-width: 600px)').matches) {
+            // Keep the widget visible on most phones; hide only on ultra-small widths.
+            if (window.matchMedia('(max-width: 420px)').matches) {
                 widget.classList.add('hidden');
                 return;
             }
@@ -3022,7 +3095,7 @@
             toast.innerText = text || 'יפה! מצאת את מה שצריך.';
             toast.classList.remove('hidden');
             if (stepToastTimer) clearTimeout(stepToastTimer);
-            stepToastTimer = setTimeout(() => toast.classList.add('hidden'), 1200);
+            stepToastTimer = setTimeout(() => toast.classList.add('hidden'), 2400);
         }
 
         function updateSpecialPanels() {
@@ -3060,7 +3133,7 @@
             let tol = data.answerTolerance ?? 0.2;
             let xOk = Math.abs(p.X() - x0) <= 0.12;
             if (!xOk) {
-                document.getElementById('read-answer-feedback').innerText = `קודם מקמים את הנקודה ב-x=${formatNumber(x0)}.`;
+                document.getElementById('read-answer-feedback').innerText = `שלב 1: מקמים את הנקודה ב-x=${formatNumber(x0)} ורק אז בודקים תשובה.`;
                 readAnswerValidated = false;
                 return;
             }
@@ -3075,11 +3148,12 @@
             let expected = q.goal === 'read_slope' ? getSlope(x0) : evaluateFunctionAt(x0);
             if (Math.abs(inputVal - expected) <= tol) {
                 readAnswerValidated = true;
-                document.getElementById('read-answer-feedback').innerText = 'נכון מאוד.';
+                document.getElementById('read-answer-feedback').innerText = `נכון מאוד. הערך הצפוי הוא בערך ${formatNumber(expected)}.`;
+                showStepToast('✅ תשובה נכונה. המשימה הושלמה.');
                 updateInfo();
             } else {
                 readAnswerValidated = false;
-                document.getElementById('read-answer-feedback').innerText = `עדיין לא. נסה שוב (טווח דיוק ±${formatNumber(tol)}).`;
+                document.getElementById('read-answer-feedback').innerText = `עדיין לא. בדקו שוב את החלונית ליד הנקודה ונסו שוב (טווח ±${formatNumber(tol)}).`;
             }
         }
 
@@ -3188,6 +3262,8 @@
             let missionText = `שלב ${currentStepIndex + 1}/${total}: ${instruction}`;
             document.getElementById('mission-step-text').innerText = missionText;
             document.getElementById('top-step-status').innerText = missionText;
+            let missionNote = document.getElementById('mission-step-note');
+            if (missionNote) missionNote.innerText = getMissionHintText(getCurrentQuestion());
             updateTopBriefCard(step);
         }
 
@@ -3274,6 +3350,7 @@
 
         function showStepResult(step, solveData, m, x, y) {
             let panel = document.getElementById('step-result-panel');
+            let titleLine = document.getElementById('step-result-title');
             let mathLine = document.getElementById('step-math-line');
             let applyBtn = document.getElementById('btn-apply-solution');
             let nextBtn = document.getElementById('btn-next-step');
@@ -3284,12 +3361,19 @@
             if (!mathText && solveData?.equationText) mathText = solveData.equationText;
             if (!mathText) mathText = 'השלב הושלם.';
 
+            if (titleLine) titleLine.innerText = '✅ השלב הושלם';
             mathLine.innerText = mathText;
             panel.classList.remove('hidden');
 
             let needsApply = !!(step?.onComplete?.applyButton && solveData);
             applyBtn.classList.toggle('hidden', !needsApply);
             nextBtn.classList.add('hidden');
+
+            let topStatus = document.getElementById('top-step-status');
+            if (topStatus) {
+                let plain = topStatus.innerText.replace(/^✅\s*/, '');
+                topStatus.innerText = `✅ ${plain}`;
+            }
 
             if (!needsApply) {
                 let isLast = currentStepIndex >= activeSteps.length - 1;
@@ -3301,13 +3385,24 @@
         function markQuestionSolved() {
             questionSolved = true;
             let box = document.querySelector('.jxgbox');
-            document.getElementById('win-overlay').style.display = 'none';
+            let winOverlay = document.getElementById('win-overlay');
+            if (winOverlay) {
+                winOverlay.style.display = 'block';
+                if (winOverlayTimer) clearTimeout(winOverlayTimer);
+                winOverlayTimer = setTimeout(() => {
+                    winOverlay.style.display = 'none';
+                }, 2200);
+            }
             if (box) box.classList.add('winning-box');
             let progressAward = registerQuestionSolvedProgress();
             let message = 'כל הכבוד! השלמת את המשימה.';
             if (progressAward.gainedXp > 0) message += ` +${progressAward.gainedXp} XP`;
             if (progressAward.leveledUp) message += ` | עלית לרמה ${progressAward.level}!`;
             showStepToast(message);
+            let missionLine = document.getElementById('mission-step-text');
+            if (missionLine) missionLine.innerText = `✅ המשימה הושלמה: ${getCurrentQuestion()?.title || ''}`;
+            let topStatus = document.getElementById('top-step-status');
+            if (topStatus) topStatus.innerText = '✅ המשימה הושלמה. כל הכבוד!';
             if (!wasWin) {
                 playSound('win');
                 triggerVictoryConfetti();
@@ -3793,10 +3888,15 @@
             document.getElementById('q-title').innerText = `שאלה ${safeIdx + 1}: ${q.title}`;
             document.getElementById('q-desc').innerText = q.desc;
             document.getElementById('top-question-index').innerText = `שאלה ${safeIdx + 1}/${questions.length}`;
-            document.getElementById('top-question').innerText = `${q.title} - ${shortDesc.first}`;
+            document.getElementById('top-question').innerText = `${q.title}`;
             document.getElementById('top-question-select').value = String(safeIdx);
             updateLearnerProgressChip();
-            document.getElementById('win-overlay').style.display = 'none';
+            let winOverlay = document.getElementById('win-overlay');
+            if (winOverlay) winOverlay.style.display = 'none';
+            if (winOverlayTimer) {
+                clearTimeout(winOverlayTimer);
+                winOverlayTimer = null;
+            }
             let box = document.querySelector('.jxgbox');
             if (box) box.classList.remove('winning-box');
             wasWin = false;
