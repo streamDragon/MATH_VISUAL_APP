@@ -1322,10 +1322,36 @@
             return '';
         }
 
+        function isInSitesContext() {
+            if (window.self !== window.top) return true;
+            let host = window.location.hostname || '';
+            if (host.includes('sites.google.com')) return true;
+            let ref = document.referrer || '';
+            return ref.includes('sites.google.com');
+        }
+
+        function isLikelyPhoneDevice() {
+            let ua = navigator.userAgent || '';
+            let mobileUa = /Android|iPhone|iPod|IEMobile|Opera Mini|Mobile|Windows Phone/i.test(ua);
+            let screenW = window.screen?.width || 0;
+            let screenH = window.screen?.height || 0;
+            let screenMin = Math.min(screenW || 0, screenH || 0);
+            let viewportMin = Math.min(window.innerWidth || 0, window.innerHeight || 0);
+            let coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+            if (screenMin > 0 && screenMin <= 560) return true;
+            if (mobileUa && (screenMin <= 820 || viewportMin <= 760 || coarsePointer)) return true;
+            return false;
+        }
+
         function isMobileViewportNow() {
             if (VIEW_CONFIG.layout === 'mobile') return true;
-            if (VIEW_CONFIG.layout === 'desktop') return false;
-            return window.matchMedia('(max-width: 980px)').matches;
+            if (VIEW_CONFIG.layout === 'desktop') {
+                if (isInSitesContext() && isLikelyPhoneDevice()) return true;
+                return false;
+            }
+            if (window.matchMedia('(max-width: 980px)').matches) return true;
+            if (isInSitesContext() && isLikelyPhoneDevice()) return true;
+            return false;
         }
 
         function isShortViewportNow() {
@@ -1341,8 +1367,7 @@
         }
 
         function getRuntimeModeLabel() {
-            let inSitesFrame = window.self !== window.top || (document.referrer || '').includes('sites.google.com');
-            let hostLabel = inSitesFrame ? 'Sites' : 'Web';
+            let hostLabel = isInSitesContext() ? 'Sites' : 'Web';
             let viewportLabel = document.body.classList.contains('viewport-mobile') ? 'mobile' : 'desktop';
             return `${hostLabel} ${viewportLabel}`;
         }
@@ -1480,9 +1505,7 @@
         function shouldEnableEmbedMode() {
             if (VIEW_CONFIG.embed === true) return true;
             if (VIEW_CONFIG.embed === false) return false;
-            if (window.self !== window.top) return isMobileViewportNow();
-            let ref = document.referrer || '';
-            if (ref.includes('sites.google.com')) return isMobileViewportNow();
+            if (isInSitesContext()) return isMobileViewportNow();
             return false;
         }
 
