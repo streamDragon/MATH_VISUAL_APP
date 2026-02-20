@@ -62,7 +62,7 @@ body.embed-mode #top-strip {
     grid-template-columns: 1fr;
     grid-template-areas:
         "formulas"
-        "clarity"
+        "overlay"
         "actions";
     gap: 6px;
     padding: 6px 8px;
@@ -79,6 +79,15 @@ body.embed-mode #top-formulas {
     flex-wrap: wrap;
     gap: 5px;
     padding: 5px 7px;
+}
+
+body.embed-mode #top-overlay-cta {
+    grid-area: overlay;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    padding: 6px 8px;
 }
 
 body.embed-mode #top-actions {
@@ -259,6 +268,28 @@ body.embed-mode #build-badge.embed-build-chip {
 
 #btn-top-deep-dive:hover {
     background: #f3f7ff;
+}
+
+#top-overlay-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+    flex: 1 1 100%;
+    order: -1;
+    background: linear-gradient(126deg, #991b1b 0%, #dc2626 54%, #f59e0b 100%);
+    border: 1px solid #7f1d1d;
+    border-radius: 14px;
+    padding: 8px 10px;
+    box-shadow: 0 8px 22px rgba(127, 29, 29, 0.28);
+}
+
+#top-overlay-cta-label {
+    color: #fff7e6;
+    font-size: 0.84rem;
+    font-weight: 800;
+    line-height: 1.3;
 }
 
 #top-actions {
@@ -454,17 +485,30 @@ body.embed-mode #build-badge.embed-build-chip {
 }
 
 #btn-overlay-open {
-    border: 2px solid #f59e0b;
-    background: linear-gradient(135deg, #fff8d6 0%, #fedf8b 46%, #f59e0b 100%);
-    color: #4a2f00;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #7f1d1d;
+    border-radius: 999px;
+    padding: 8px 14px;
+    min-height: 40px;
+    background: linear-gradient(135deg, #fff7cc 0%, #fedf76 48%, #f59e0b 100%);
+    color: #3f2300;
     font-weight: 900;
-    box-shadow: 0 6px 16px rgba(245, 158, 11, 0.32);
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 7px 18px rgba(245, 158, 11, 0.4);
+    transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
     animation: overlayBtnPulse 2.6s ease-in-out infinite;
 }
 
 #btn-overlay-open:hover {
-    background: linear-gradient(135deg, #fff4bf 0%, #fdcf62 55%, #ea8f00 100%);
-    box-shadow: 0 10px 20px rgba(234, 143, 0, 0.4);
+    background: linear-gradient(135deg, #fff1ae 0%, #fdcc58 56%, #e08700 100%);
+    box-shadow: 0 10px 24px rgba(224, 135, 0, 0.45);
+}
+
+#btn-overlay-open:active {
+    transform: translateY(0);
 }
 
 #btn-side-overlay {
@@ -733,6 +777,14 @@ body.session-started #prestart-hint {
     transform-origin: right center;
     animation: openingSplashCountdown 4s linear forwards;
     background: linear-gradient(90deg, #fde047 0%, #f59e0b 55%, #f97316 100%);
+}
+
+#opening-splash-version {
+    margin: 8px 0 0;
+    font-size: 0.86rem;
+    color: #e2e8f0;
+    font-weight: 800;
+    letter-spacing: 0.02em;
 }
 
 #opening-splash-audio-hint {
@@ -2564,6 +2616,16 @@ h2 {
         justify-content: flex-start;
     }
 
+    #top-overlay-cta {
+        width: 100%;
+        border-radius: 12px;
+        padding: 7px 8px;
+    }
+
+    #top-overlay-cta-label {
+        font-size: 0.88rem;
+    }
+
     .formula-chip {
         font-size: 0.92rem;
     }
@@ -2610,6 +2672,12 @@ h2 {
         padding: 10px 12px;
     }
 
+    #btn-overlay-open {
+        min-height: var(--tap-min);
+        font-size: 0.97rem;
+        padding: 10px 14px;
+    }
+
     body.embed-mode #top-actions {
         flex-wrap: nowrap;
         overflow-x: auto;
@@ -2622,6 +2690,22 @@ h2 {
     body.embed-mode #top-actions button {
         font-size: 0.84rem;
         min-height: 38px;
+        padding: 7px 10px;
+    }
+
+    body.embed-mode #top-overlay-cta {
+        padding: 6px 8px;
+        gap: 4px;
+    }
+
+    body.embed-mode #top-overlay-cta-label {
+        font-size: 0.78rem;
+    }
+
+    body.embed-mode #btn-overlay-open {
+        width: 100%;
+        min-height: 38px;
+        font-size: 0.84rem;
         padding: 7px 10px;
     }
 
@@ -2779,6 +2863,21 @@ h2 {
     #top-actions button,
     #top-question-select {
         font-size: 0.92rem;
+    }
+
+    #top-overlay-cta {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+
+    #top-overlay-cta-label {
+        text-align: center;
+        font-size: 0.82rem;
+    }
+
+    #btn-overlay-open {
+        width: 100%;
     }
 
     #graph-area {

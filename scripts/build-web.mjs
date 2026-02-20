@@ -43,6 +43,38 @@ async function replaceInFile(filePath, replacements) {
   }
 }
 
+async function bumpAppVersion() {
+  const sourceVersionFile = path.join(rootDir, 'public', 'version.json');
+  let versionData = {};
+
+  try {
+    const raw = await fs.readFile(sourceVersionFile, 'utf8');
+    versionData = JSON.parse(raw);
+  } catch {
+    versionData = {};
+  }
+
+  const rawVersion = typeof versionData.app_version === 'string'
+    ? versionData.app_version.trim()
+    : '';
+  const numericVersion = /^\d+$/.test(rawVersion) ? rawVersion : '';
+  const width = Math.max(2, numericVersion.length || 2);
+  const nextVersion = String((numericVersion ? Number(numericVersion) : 0) + 1).padStart(width, '0');
+
+  versionData.app_version = nextVersion;
+  if (typeof versionData.build !== 'string' || !versionData.build.trim()) {
+    versionData.build = '__BUILD_ID__';
+  }
+  if (typeof versionData.generated_at_utc !== 'string' || !versionData.generated_at_utc.trim()) {
+    versionData.generated_at_utc = '__BUILD_TIME__';
+  }
+
+  await fs.writeFile(sourceVersionFile, `${JSON.stringify(versionData, null, 2)}\n`, 'utf8');
+  return nextVersion;
+}
+
+const appVersion = await bumpAppVersion();
+
 exitOnFailure(runNode([viteBin, 'build']));
 
 const distDir = path.join(rootDir, 'dist');
@@ -50,6 +82,7 @@ await fs.mkdir(distDir, { recursive: true });
 
 await replaceInFile(path.join(distDir, 'index.html'), [
   ['__BUILD_ID__', buildId],
+  ['__APP_VERSION__', appVersion],
   ['href="mobile.css"', `href="mobile.css?v=${buildId}"`],
   ['src="questions.js"', `src="questions.js?v=${buildId}"`],
   ['src="sound.js"', `src="sound.js?v=${buildId}"`],
@@ -62,12 +95,13 @@ try {
 } catch {
   await fs.writeFile(
     versionFile,
-    '{\n  "build": "__BUILD_ID__",\n  "generated_at_utc": "__BUILD_TIME__"\n}\n',
+    '{\n  "app_version": "__APP_VERSION__",\n  "build": "__BUILD_ID__",\n  "generated_at_utc": "__BUILD_TIME__"\n}\n',
     'utf8'
   );
 }
 
 await replaceInFile(versionFile, [
+  ['__APP_VERSION__', appVersion],
   ['__BUILD_ID__', buildId],
   ['__BUILD_TIME__', buildTime]
 ]);
@@ -79,4 +113,4 @@ try {
   await fs.writeFile(noJekyllFile, '', 'utf8');
 }
 
-console.log(`[build:web] build=${buildId} time=${buildTime}`);
+console.log(`[build:web] version=${appVersion} build=${buildId} time=${buildTime}`);

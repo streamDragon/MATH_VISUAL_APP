@@ -59,6 +59,7 @@
         <div id="opening-splash-shade" aria-hidden="true"></div>
         <div id="opening-splash-content">
             <div id="opening-splash-progress" aria-hidden="true"><span></span></div>
+            <p id="opening-splash-version">גרסה: --</p>
             <p id="opening-splash-audio-hint" class="hidden">אם אין מוזיקה, לחצו על "הפעל מוזיקה".</p>
             <div id="opening-splash-actions">
                 <button id="opening-splash-audio-btn" onclick="retrySplashMusic()">נגן שיר</button>
@@ -299,6 +300,10 @@
                 <div id="top-clarity-tip">רוצים להבין למה זה עובד? לחצו על כפתור ההעמקה.</div>
                 <button id="btn-top-deep-dive" onclick="openQuestionOverlay()">להעמקה והסבר מלא</button>
             </div>
+            <div id="top-overlay-cta">
+                <span id="top-overlay-cta-label">נתקעתם? כאן מקבלים הסבר מלא לשאלה</span>
+                <button id="btn-overlay-open" onclick="openQuestionOverlay()">הסבר שאלה מלא</button>
+            </div>
             <div id="top-actions">
                 <span id="top-question-select-label">כאן בוחרים שאלה:</span>
                 <select id="top-question-select" title="בחירת שאלה"></select>
@@ -307,7 +312,6 @@
                 <button id="btn-top-init-builder" onclick="openInitialBuilderFromTop()">בנייה ראשונית</button>
                 <button id="btn-start-guide" onclick="openStartGuideModal()">סיור מודרך</button>
                 <button id="btn-normal-top" class="hidden" onclick="openNormalLabGuide()">מעבדת האנך</button>
-                <button id="btn-overlay-open" onclick="openQuestionOverlay()">הסבר שאלה מלא</button>
                 <button id="btn-video" class="hidden" onclick="openVideoForCurrentQuestion()">וידאו הסבר</button>
                 <button id="btn-feedback" onclick="openFeedbackModal()">כיכר השוק</button>
                 <button id="btn-top-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
@@ -438,6 +442,12 @@
 
     <script>
         const APP_BUILD = '__BUILD_ID__';
+        const APP_BUILD_DISPLAY = (!APP_BUILD || APP_BUILD === '__BUILD_ID__') ? 'local' : APP_BUILD;
+        const APP_VERSION = (() => {
+            const version = '__APP_VERSION__';
+            if (!version || version === '__APP_VERSION__') return 'local';
+            return version;
+        })();
         const PROGRESS_STORAGE_KEY = 'math_visual_progress_v1';
         const XP_FIRST_SOLVE = 30;
         const XP_REPEAT_SOLVE = 8;
@@ -839,6 +849,20 @@
                 window.location.replace(url.toString());
             } catch (err) {
                 // If version check fails, keep current page running.
+            }
+        }
+
+        async function resolveVersionForDisplay() {
+            if (APP_VERSION !== 'local') return APP_VERSION;
+            try {
+                let res = await fetch(`version.json?t=${Date.now()}`, { cache: 'no-store' });
+                if (!res.ok) return APP_VERSION;
+                let data = await res.json();
+                let fileVersion = (data && typeof data.app_version === 'string') ? data.app_version.trim() : '';
+                if (!fileVersion) return APP_VERSION;
+                return fileVersion;
+            } catch (err) {
+                return APP_VERSION;
             }
         }
 
@@ -1535,8 +1559,11 @@
             // Show splash immediately while the app keeps initializing in the background.
             startOpeningSplash();
             await ensureQuestionsLoadedAtRuntime();
+            let versionForDisplay = await resolveVersionForDisplay();
+            let splashVersion = document.getElementById('opening-splash-version');
+            if (splashVersion) splashVersion.innerText = `גרסה ${versionForDisplay} | build ${APP_BUILD_DISPLAY}`;
             let buildBadge = document.getElementById('build-badge');
-            if (buildBadge) buildBadge.innerText = `build: ${APP_BUILD}`;
+            if (buildBadge) buildBadge.innerText = `גרסה ${versionForDisplay}`;
             exposeBuildBadgeInEmbedMode();
             loadFeedbackMessages();
             setDrawerOpen(false);

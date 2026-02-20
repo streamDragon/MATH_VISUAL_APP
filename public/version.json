@@ -1,4 +1,5 @@
 {
+  "app_version": "01",
   "build": "__BUILD_ID__",
   "generated_at_utc": "__BUILD_TIME__"
 }
