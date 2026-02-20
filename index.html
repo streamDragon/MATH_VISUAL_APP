@@ -265,6 +265,7 @@
 
     <div id="graph-area-wrapper">
         <div id="top-strip">
+            <div id="top-version-badge">גרסה: --</div>
             <div id="top-question-wrap">
                 <span id="top-question-index">שאלה 1/4</span>
                 <span id="top-question">טוען...</span>
@@ -535,6 +536,7 @@
         let openingSplashHideTimer = null;
         let splashMusicUnlockBound = false;
         let appInitialized = false;
+        let runtimeDisplayedVersion = APP_VERSION;
         let quickTourStepIndex = 0;
         let quickTourActive = false;
         let quickTourCurrentTarget = null;
@@ -1321,6 +1323,20 @@
             document.body.classList.toggle('viewport-short', isShortViewportNow());
         }
 
+        function getRuntimeModeLabel() {
+            let hostLabel = document.body.classList.contains('embed-mode') ? 'Sites' : 'Web';
+            let viewportLabel = document.body.classList.contains('viewport-mobile') ? 'mobile' : 'desktop';
+            return `${hostLabel} ${viewportLabel}`;
+        }
+
+        function updateDisplayedVersionBadges() {
+            let versionLabel = runtimeDisplayedVersion || APP_VERSION || 'local';
+            let topVersionBadge = document.getElementById('top-version-badge');
+            if (topVersionBadge) topVersionBadge.innerText = `גרסה ${versionLabel} | ${getRuntimeModeLabel()}`;
+            let buildBadge = document.getElementById('build-badge');
+            if (buildBadge) buildBadge.innerText = `גרסה ${versionLabel}`;
+        }
+
         function applyTopStripFocusMode() {
             let isMobile = isMobileViewportNow();
             let focusMode = isMobile && drawerOpen && !!activeAccordion && activeAccordion !== 'params';
@@ -1597,10 +1613,10 @@
             startOpeningSplash();
             await ensureQuestionsLoadedAtRuntime();
             let versionForDisplay = await resolveVersionForDisplay();
+            runtimeDisplayedVersion = versionForDisplay;
             let splashVersion = document.getElementById('opening-splash-version');
             if (splashVersion) splashVersion.innerText = `גרסה ${versionForDisplay} | build ${APP_BUILD_DISPLAY}`;
-            let buildBadge = document.getElementById('build-badge');
-            if (buildBadge) buildBadge.innerText = `גרסה ${versionForDisplay}`;
+            updateDisplayedVersionBadges();
             exposeBuildBadgeInEmbedMode();
             loadFeedbackMessages();
             let defaultDrawerOpen = document.body.classList.contains('embed-mode') && document.body.classList.contains('viewport-desktop');
@@ -1810,6 +1826,7 @@
         function handleViewportResize() {
             let wasMobile = document.body.classList.contains('viewport-mobile');
             applyViewportClasses();
+            updateDisplayedVersionBadges();
             let isMobile = document.body.classList.contains('viewport-mobile');
             if (document.body.classList.contains('embed-mode') && wasMobile !== isMobile) {
                 let shouldOpen = !isMobile;
