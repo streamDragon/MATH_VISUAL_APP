@@ -203,15 +203,25 @@
                 </div>
             </div>
             <div class="start-guide-body">
-                מתחילים בשלושה צעדים:
-                <br>1. בתחילת העבודה בונים פונקציה ובוחרים פרמטרים.
-                <br>2. לוחצים "התחל תרגול" - כפתורי ההתחלה נעלמים.
-                <br>3. ממשיכים לשאלות. פרמטרים נשארים פתוחים בעיקר בשאלות ייעודיות.
+                <div class="start-guide-flow-title">איך מתחילים נכון?</div>
+                <ol class="start-guide-flow-list">
+                    <li><b>כניסה רגילה לאפליקציה</b> - מתחילים לתרגל מיד.</li>
+                    <li><b>הדגמה מודרכת</b> - האפליקציה בוחרת שאלה לפי קושי, מזיזה את הנקודה ומדגימה פתרון.</li>
+                    <li>בסוף ההדגמה נפתח גם סיור קצר של הכפתורים והמסכים.</li>
+                </ol>
+                <div class="start-demo-level-row">
+                    <label for="start-demo-level">רמת קושי להדגמה:</label>
+                    <select id="start-demo-level">
+                        <option value="easy">קל - קריאה מהגרף (x0, שיפוע/ערך)</option>
+                        <option value="medium">בינוני - מציאת x לפי שיפוע נתון</option>
+                        <option value="hard">מאתגר - משיק שעובר בנקודה חיצונית</option>
+                    </select>
+                </div>
             </div>
             <div class="start-guide-actions">
-                <button onclick="startAppFromSplash('skip')">כניסה מהירה</button>
-                <button onclick="startAppFromSplash('tutorial')">פתיחה עם הסבר</button>
-                <button class="start-primary" onclick="startAppFromSplash('start')">התחל תרגול</button>
+                <button onclick="startAppFromSplash('app')">כניסה לאפליקציה</button>
+                <button onclick="startAppFromSplash('tutorial')">סיור ממשק</button>
+                <button class="start-primary" onclick="startAppFromSplash('demo')">הדגמה מודרכת</button>
             </div>
         </div>
     </div>
@@ -336,6 +346,12 @@
                         <div class="info-title">משימה נוכחית</div>
                         <div id="mission-step-text">שלב 1/1: ...</div>
                         <div id="mission-step-note">טיפ: קראו את המשימה ובצעו צעד אחד בכל פעם.</div>
+                        <div id="mission-expanded-box">
+                            <div id="mission-expanded-title">הסבר ברור (גלוי תמיד)</div>
+                            <div id="mission-expanded-text">טוען הסבר...</div>
+                            <div id="mission-success-text">טוען תנאי הצלחה...</div>
+                            <ol id="mission-expanded-steps"></ol>
+                        </div>
                         <div id="template-setup-panel" class="hidden">
                             <div class="section-title">בחירת תבנית פונקציה</div>
                             <select id="template-select"></select>
@@ -543,7 +559,11 @@
         let quickTourStepIndex = 0;
         let quickTourActive = false;
         let quickTourCurrentTarget = null;
-        let quickTourAutoPending = false;
+        let launchChoiceAutoPending = false;
+        let guidedDemoActive = false;
+        let guidedDemoToken = 0;
+        let guidedDemoRaf = null;
+        let guidedDemoTimer = null;
 
         function setupOpeningSplashMedia() {
             let video = document.getElementById('opening-splash-video');
@@ -763,21 +783,21 @@
             if (event.target.id === 'quick-tour-modal') skipQuickTour();
         }
 
-        function maybeOpenQuickTourAfterSplash() {
-            if (quickTourAutoPending) return;
+        function maybeOpenStartChoiceAfterSplash() {
+            if (launchChoiceAutoPending) return;
             if (sessionStarted) return;
             if (quickTourActive) return;
-            quickTourAutoPending = true;
+            launchChoiceAutoPending = true;
             setTimeout(() => {
-                quickTourAutoPending = false;
+                launchChoiceAutoPending = false;
                 if (!openingSplashDone) return;
                 if (sessionStarted) return;
                 if (quickTourActive) return;
                 if (!appInitialized) {
-                    maybeOpenQuickTourAfterSplash();
+                    maybeOpenStartChoiceAfterSplash();
                     return;
                 }
-                openQuickTour({ force: false });
+                openStartGuideModal({ forceLaunchChoice: true });
             }, QUICK_TOUR_AUTO_DELAY_MS);
         }
 
@@ -1628,7 +1648,7 @@
             openingSplashHideTimer = setTimeout(() => {
                 splash.classList.add('hidden');
                 splash.classList.remove('is-exiting');
-                maybeOpenQuickTourAfterSplash();
+                maybeOpenStartChoiceAfterSplash();
             }, 420);
         }
 
@@ -1934,7 +1954,7 @@
                 window.visualViewport.addEventListener('resize', handleViewportResize);
             }
             appInitialized = true;
-            if (openingSplashDone) maybeOpenQuickTourAfterSplash();
+            if (openingSplashDone) maybeOpenStartChoiceAfterSplash();
         }
 
         let boardResizeRaf = null;
@@ -3255,6 +3275,25 @@
             return null;
         }
 
+        function renderMissionExpandedHelp() {
+            let q = getCurrentQuestion();
+            let textEl = document.getElementById('mission-expanded-text');
+            let successEl = document.getElementById('mission-success-text');
+            let listEl = document.getElementById('mission-expanded-steps');
+            if (!q || !textEl || !successEl || !listEl) return;
+
+            textEl.innerText = `מה עושים עכשיו: ${getGoalInstructionText(q)}`;
+            successEl.innerText = getQuestionSuccessCriteriaText(q);
+
+            let steps = getQuestionHowToSteps(q);
+            listEl.innerHTML = '';
+            steps.slice(0, 4).forEach((stepText) => {
+                let li = document.createElement('li');
+                li.innerText = stepText;
+                listEl.appendChild(li);
+            });
+        }
+
         function renderMission() {
             let total = activeSteps.length || 1;
             let step = activeSteps[currentStepIndex];
@@ -3264,6 +3303,7 @@
             document.getElementById('top-step-status').innerText = missionText;
             let missionNote = document.getElementById('mission-step-note');
             if (missionNote) missionNote.innerText = getMissionHintText(getCurrentQuestion());
+            renderMissionExpandedHelp();
             updateTopBriefCard(step);
         }
 
@@ -3720,8 +3760,197 @@
             setFeedbackStatus('המשובים המקומיים נמחקו.');
         }
 
-        function openStartGuideModal() {
+        function stopGuidedDemoPlayback() {
+            guidedDemoActive = false;
+            guidedDemoToken += 1;
+            if (guidedDemoRaf) {
+                cancelAnimationFrame(guidedDemoRaf);
+                guidedDemoRaf = null;
+            }
+            if (guidedDemoTimer) {
+                clearTimeout(guidedDemoTimer);
+                guidedDemoTimer = null;
+            }
+        }
+
+        function waitGuidedDemo(ms, token) {
+            return new Promise((resolve) => {
+                if (!guidedDemoActive || token !== guidedDemoToken) {
+                    resolve(false);
+                    return;
+                }
+                guidedDemoTimer = setTimeout(() => {
+                    guidedDemoTimer = null;
+                    resolve(guidedDemoActive && token === guidedDemoToken);
+                }, ms);
+            });
+        }
+
+        function easeInOutCubic(t) {
+            if (t < 0.5) return 4 * t * t * t;
+            return 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+
+        function animateGliderToX(targetX, token, durationMs = 2400) {
+            return new Promise((resolve) => {
+                if (!p || !board || !Number.isFinite(targetX)) {
+                    resolve(false);
+                    return;
+                }
+
+                if (guidedDemoRaf) {
+                    cancelAnimationFrame(guidedDemoRaf);
+                    guidedDemoRaf = null;
+                }
+
+                let startX = Number.isFinite(p.X()) ? p.X() : 0;
+                let startTime = performance.now();
+                let step = (now) => {
+                    if (!guidedDemoActive || token !== guidedDemoToken) {
+                        guidedDemoRaf = null;
+                        resolve(false);
+                        return;
+                    }
+
+                    let t = Math.min(1, (now - startTime) / Math.max(300, durationMs));
+                    let eased = easeInOutCubic(t);
+                    let x = startX + (targetX - startX) * eased;
+                    p.setPosition(JXG.COORDS_BY_USER, [x, evaluateFunctionAt(x)]);
+                    board.update();
+                    updateInfo();
+
+                    if (t >= 1) {
+                        guidedDemoRaf = null;
+                        resolve(true);
+                        return;
+                    }
+                    guidedDemoRaf = requestAnimationFrame(step);
+                };
+                guidedDemoRaf = requestAnimationFrame(step);
+            });
+        }
+
+        function getQuestionIndexById(questionId) {
+            if (!Number.isFinite(questionId)) return -1;
+            let questions = getQuestionsList();
+            return questions.findIndex((q) => q.id === questionId);
+        }
+
+        function getDemoQuestionIdByLevel(level) {
+            if (level === 'hard') return 11;
+            if (level === 'medium') return 3;
+            return 6;
+        }
+
+        function getDemoLevelLabel(level) {
+            if (level === 'hard') return 'מאתגר';
+            if (level === 'medium') return 'בינוני';
+            return 'קל';
+        }
+
+        function getDemoSearchDomain() {
+            let xMin = Number.isFinite(activeTemplate?.domain?.xMin) ? activeTemplate.domain.xMin : -10;
+            let xMax = Number.isFinite(activeTemplate?.domain?.xMax) ? activeTemplate.domain.xMax : 10;
+            if (xMin > xMax) [xMin, xMax] = [xMax, xMin];
+            return { xMin, xMax };
+        }
+
+        function findDemoTargetXForCurrentQuestion() {
+            let q = getCurrentQuestion();
+            if (!q) return null;
+            let data = getQuestionGoalData(q);
+
+            if (q.goal === 'read_slope' || q.goal === 'read_y') {
+                return Number.isFinite(data.fixedX0) ? data.fixedX0 : 0;
+            }
+
+            let { xMin, xMax } = getDemoSearchDomain();
+            let span = Math.max(0.0001, xMax - xMin);
+            let samples = Math.max(800, Math.floor(span / 0.015));
+            let bestX = 0;
+            let bestScore = -1;
+
+            for (let i = 0; i <= samples; i += 1) {
+                let x = xMin + (span * i / samples);
+                let y = evaluateFunctionAt(x);
+                let m = getSlope(x);
+                let state = getLegacyGoalScore(q.goal, data, m, x, y);
+                let score = state?.active ? state.score : 0;
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestX = x;
+                }
+            }
+
+            if (!Number.isFinite(bestX)) return null;
+            return bestX;
+        }
+
+        async function runGuidedDemoFromLaunch() {
+            stopGuidedDemoPlayback();
+            guidedDemoActive = true;
+            let token = ++guidedDemoToken;
+
+            closeStartGuide(true);
+            openAccordion('steps');
+            setDrawerOpen(true);
+
+            let levelSel = document.getElementById('start-demo-level');
+            let level = levelSel ? levelSel.value : 'easy';
+            let qId = getDemoQuestionIdByLevel(level);
+            let qIndex = getQuestionIndexById(qId);
+            if (!Number.isFinite(qIndex) || qIndex < 0) qIndex = 0;
+
+            loadQ(qIndex, { autoOpenOverlay: false });
+            let q = getCurrentQuestion();
+            showStepToast(`הדגמה ${getDemoLevelLabel(level)}: ${q?.title || 'שאלה לדוגמה'}`);
+
+            let ok = await waitGuidedDemo(650, token);
+            if (!ok) return;
+
+            let targetX = findDemoTargetXForCurrentQuestion();
+            if (!Number.isFinite(targetX)) {
+                showStepToast('לא הצלחתי לאתר יעד הדגמה אוטומטי. אפשר לפתור ידנית.');
+                stopGuidedDemoPlayback();
+                return;
+            }
+
+            ok = await animateGliderToX(targetX, token, 2600);
+            if (!ok) return;
+
+            q = getCurrentQuestion();
+            if (q && (q.goal === 'read_slope' || q.goal === 'read_y')) {
+                let data = getQuestionGoalData(q);
+                let x0 = Number.isFinite(data.fixedX0) ? data.fixedX0 : targetX;
+                let expected = q.goal === 'read_slope' ? getSlope(x0) : evaluateFunctionAt(x0);
+                let input = document.getElementById('read-answer-input');
+                if (input) {
+                    input.value = formatNumber(expected);
+                    submitReadAnswer();
+                }
+            }
+
+            updateInfo();
+            board.update();
+            showStepToast('כך עובדים: קוראים יעד, מזיזים לנקודה נכונה, ואז בודקים תשובה.');
+
+            ok = await waitGuidedDemo(520, token);
+            if (!ok) return;
             openQuickTour({ force: true });
+            stopGuidedDemoPlayback();
+        }
+
+        function openStartGuideModal(options = {}) {
+            let forceLaunchChoice = !!options.forceLaunchChoice;
+            if (sessionStarted && !forceLaunchChoice) {
+                openQuickTour({ force: true });
+                return;
+            }
+            let modal = document.getElementById('start-guide-modal');
+            if (!modal) return;
+            let levelSel = document.getElementById('start-demo-level');
+            if (levelSel && !levelSel.value) levelSel.value = 'easy';
+            modal.classList.remove('hidden');
         }
 
         function closeStartGuide(skipOverlay) {
@@ -3731,17 +3960,16 @@
             }
         }
 
-        function openStartGuideTutorial() {
-            markSessionStarted();
-            closeStartGuide(false);
-            openQuickTour({ force: true });
-        }
-
         function startAppFromSplash(mode) {
             markSessionStarted();
             if (typeof playIntroTheme === 'function') playIntroTheme();
             if (mode === 'tutorial') {
-                openStartGuideTutorial();
+                closeStartGuide(true);
+                openQuickTour({ force: true });
+                return;
+            }
+            if (mode === 'demo') {
+                runGuidedDemoFromLaunch();
                 return;
             }
             closeStartGuide(true);
@@ -3749,7 +3977,7 @@
 
         function onStartGuideBackdropClick(event) {
             if (event.target.id === 'start-guide-modal') {
-                startAppFromSplash('skip');
+                startAppFromSplash('app');
             }
         }
 
