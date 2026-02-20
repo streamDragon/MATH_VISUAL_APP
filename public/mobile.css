@@ -2994,11 +2994,23 @@ body.embed-mode #sidebar.drawer-open #drawer-content {
     max-height: none;
 }
 
+/* Fill tall Google Sites iframes: keep content stretched instead of leaving blank space below. */
+body.embed-mode:not(.builder-workspace-mode) #graph-area-wrapper {
+    flex: 1 1 auto;
+    min-height: 100dvh;
+}
+
+body.embed-mode:not(.builder-workspace-mode) #graph-area {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 300px;
+    max-height: none;
+    aspect-ratio: auto;
+}
+
 /* Viewport profile classes are applied by JS for embedded hosts like Google Sites. */
 body.embed-mode.viewport-desktop #graph-area {
-    height: min(52dvh, 76vw);
-    min-height: 300px;
-    max-height: 62dvh;
+    min-height: 360px;
 }
 
 body.embed-mode.viewport-desktop #top-actions {
@@ -3012,9 +3024,7 @@ body.embed-mode.viewport-desktop #top-question-select {
 }
 
 body.embed-mode.viewport-mobile #graph-area {
-    height: min(42dvh, 94vw);
-    min-height: 220px;
-    max-height: 48dvh;
+    min-height: 300px;
 }
 
 body.embed-mode.viewport-short #top-strip {
