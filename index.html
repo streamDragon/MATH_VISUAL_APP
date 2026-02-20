@@ -215,6 +215,25 @@
         </div>
     </div>
 
+    <div id="quick-tour-modal" class="hidden" onclick="onQuickTourBackdropClick(event)">
+        <div id="quick-tour-card">
+            <div id="quick-tour-video-wrap">
+                <video id="quick-tour-demo-video" muted loop playsinline preload="metadata" poster="public/opening-poster.png"></video>
+                <div id="quick-tour-video-label">סיור מודרך מהיר</div>
+            </div>
+            <div id="quick-tour-sample-question">שאלה לדוגמה: טוען...</div>
+            <div id="quick-tour-step-index">שלב 1/1</div>
+            <h3 id="quick-tour-title">טוען...</h3>
+            <p id="quick-tour-text">טוען הסבר...</p>
+            <div id="quick-tour-actions">
+                <button onclick="skipQuickTour()">דלג כרגע</button>
+                <button id="btn-quick-tour-next" onclick="nextQuickTourStep()">הבנתי, הבא</button>
+            </div>
+        </div>
+        <div id="quick-tour-spotlight" class="hidden" aria-hidden="true"></div>
+        <div id="quick-tour-cursor" class="hidden" aria-hidden="true"></div>
+    </div>
+
     <div id="initial-builder-modal" class="hidden" onclick="onInitialBuilderBackdropClick(event)">
         <div id="initial-builder-card">
             <div class="overlay-head">
@@ -286,7 +305,7 @@
                 <button id="btn-top-questions" onclick="toggleQuestionsFromTop()">שאלות ▼</button>
                 <button id="btn-replay-opening" onclick="replayOpeningSplash()">פתיח+שיר</button>
                 <button id="btn-top-init-builder" onclick="openInitialBuilderFromTop()">בנייה ראשונית</button>
-                <button id="btn-start-guide" onclick="openStartGuideModal()">איך עובדים?</button>
+                <button id="btn-start-guide" onclick="openStartGuideModal()">סיור מודרך</button>
                 <button id="btn-normal-top" class="hidden" onclick="openNormalLabGuide()">מעבדת האנך</button>
                 <button id="btn-overlay-open" onclick="openQuestionOverlay()">הסבר שאלה מלא</button>
                 <button id="btn-video" class="hidden" onclick="openVideoForCurrentQuestion()">וידאו הסבר</button>
@@ -428,6 +447,8 @@
         const FEEDBACK_STORAGE_KEY = 'math_visual_feedback_v1';
         const OPENING_SPLASH_DURATION_MS = 5000;
         const OPENING_MUSIC_DURATION_SECONDS = 30;
+        const QUICK_TOUR_STORAGE_KEY = 'math_visual_quick_tour_v1';
+        const QUICK_TOUR_AUTO_DELAY_MS = 320;
         const RUNTIME_ASSET_BASE = (() => {
             if (typeof window.__ASSET_BASE === 'string') return window.__ASSET_BASE;
             try {
@@ -487,6 +508,11 @@
         let openingSplashExitTimer = null;
         let openingSplashHideTimer = null;
         let splashMusicUnlockBound = false;
+        let appInitialized = false;
+        let quickTourStepIndex = 0;
+        let quickTourActive = false;
+        let quickTourCurrentTarget = null;
+        let quickTourAutoPending = false;
 
         function setupOpeningSplashMedia() {
             let video = document.getElementById('opening-splash-video');
@@ -510,6 +536,218 @@
             });
             video.src = OPENING_VIDEO_FILE;
             video.load();
+        }
+
+        function setupQuickTourMedia() {
+            let video = document.getElementById('quick-tour-demo-video');
+            if (!video) return;
+            if (video.dataset.ready === '1') return;
+            let usedFallback = false;
+            video.addEventListener('error', () => {
+                if (!usedFallback) {
+                    usedFallback = true;
+                    video.src = 'opening-theme.mp4';
+                    video.load();
+                }
+            });
+            video.src = OPENING_VIDEO_FILE;
+            video.dataset.ready = '1';
+            video.load();
+        }
+
+        function getQuickTourSteps() {
+            return [
+                {
+                    selectors: ['#top-question', '#q-title'],
+                    title: 'שלב 1: קוראים את המשימה',
+                    text: 'כאן רואים מה מבקשים בשאלה הנוכחית. תמיד מתחילים בקריאה של השורה הזו.'
+                },
+                {
+                    selectors: ['#top-question-select'],
+                    title: 'שלב 2: בוחרים שאלה',
+                    text: 'ברשימה הזו מחליפים שאלה לפי מה שאתם רוצים לתרגל כרגע.'
+                },
+                {
+                    selectors: ['#btn-top-builder', '#btn-side-builder', '#btn-builder'],
+                    title: 'שלב 3: משנים פרמטרים',
+                    text: 'לחיצה כאן פותחת את הפרמטרים a,b,c,d,e ומשנה את הגרף בזמן אמת.'
+                },
+                {
+                    selectors: ['#btn-tools-menu', '#btn-top-questions'],
+                    title: 'שלב 4: פותחים כלים ומשימות',
+                    text: 'מכאן נכנסים לחלונית המשימות, השלבים, והכלים של התרגול.'
+                },
+                {
+                    selectors: ['#btn-overlay-open', '#btn-side-overlay'],
+                    title: 'שלב 5: מבקשים הסבר מלא',
+                    text: 'אם נתקעתם, לוחצים כאן ומקבלים הסבר ברור על השאלה ומה לעשות.'
+                }
+            ];
+        }
+
+        function isElementVisibleForTour(el) {
+            if (!el) return false;
+            let style = window.getComputedStyle(el);
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            return el.getClientRects().length > 0;
+        }
+
+        function resolveQuickTourTarget(step) {
+            if (!step || !Array.isArray(step.selectors)) return null;
+            for (let selector of step.selectors) {
+                let el = document.querySelector(selector);
+                if (isElementVisibleForTour(el)) return el;
+            }
+            return null;
+        }
+
+        function positionQuickTourIndicators(target) {
+            let cursor = document.getElementById('quick-tour-cursor');
+            let spotlight = document.getElementById('quick-tour-spotlight');
+            if (!cursor || !spotlight) return;
+            if (!target) {
+                cursor.classList.add('hidden');
+                spotlight.classList.add('hidden');
+                return;
+            }
+
+            let rect = target.getBoundingClientRect();
+            let pad = 6;
+            spotlight.style.left = `${Math.max(6, Math.round(rect.left - pad))}px`;
+            spotlight.style.top = `${Math.max(6, Math.round(rect.top - pad))}px`;
+            spotlight.style.width = `${Math.max(42, Math.round(rect.width + pad * 2))}px`;
+            spotlight.style.height = `${Math.max(28, Math.round(rect.height + pad * 2))}px`;
+            spotlight.classList.remove('hidden');
+
+            let cursorX = rect.left + Math.min(rect.width - 6, Math.max(16, rect.width * 0.72));
+            let cursorY = rect.top + Math.min(rect.height - 4, Math.max(18, rect.height * 0.78));
+            cursor.style.left = `${Math.round(Math.max(10, Math.min(window.innerWidth - 10, cursorX)))}px`;
+            cursor.style.top = `${Math.round(Math.max(10, Math.min(window.innerHeight - 10, cursorY)))}px`;
+            cursor.classList.remove('hidden');
+        }
+
+        function renderQuickTourStep() {
+            if (!quickTourActive) return;
+            let steps = getQuickTourSteps();
+            if (steps.length === 0) return;
+            quickTourStepIndex = Math.max(0, Math.min(steps.length - 1, quickTourStepIndex));
+            let step = steps[quickTourStepIndex];
+
+            let titleEl = document.getElementById('quick-tour-title');
+            let textEl = document.getElementById('quick-tour-text');
+            let indexEl = document.getElementById('quick-tour-step-index');
+            let nextBtn = document.getElementById('btn-quick-tour-next');
+            if (titleEl) titleEl.innerText = step.title;
+            if (textEl) textEl.innerText = step.text;
+            if (indexEl) indexEl.innerText = `שלב ${quickTourStepIndex + 1}/${steps.length}`;
+            if (nextBtn) nextBtn.innerText = quickTourStepIndex === steps.length - 1 ? 'סיימתי, הבנתי' : 'הבנתי, הבא';
+
+            quickTourCurrentTarget = resolveQuickTourTarget(step);
+            if (quickTourCurrentTarget) {
+                quickTourCurrentTarget.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+            }
+            positionQuickTourIndicators(quickTourCurrentTarget);
+            setTimeout(() => {
+                if (!quickTourActive) return;
+                let refreshed = resolveQuickTourTarget(step);
+                quickTourCurrentTarget = refreshed;
+                positionQuickTourIndicators(refreshed);
+            }, 220);
+        }
+
+        function openQuickTour(options = {}) {
+            let force = !!options.force;
+            if (quickTourActive) return;
+            if (!force && sessionStarted) return;
+            if (!force) {
+                try {
+                    if (localStorage.getItem(QUICK_TOUR_STORAGE_KEY) === 'done') return;
+                } catch (err) {
+                    // Continue even if storage is blocked.
+                }
+            }
+            if (!appInitialized) return;
+
+            setupQuickTourMedia();
+            let modal = document.getElementById('quick-tour-modal');
+            if (!modal) return;
+            closeStartGuide(false);
+            closeQuestionOverlay();
+            quickTourStepIndex = 0;
+            quickTourCurrentTarget = null;
+            quickTourActive = true;
+
+            let sampleQuestion = document.getElementById('quick-tour-sample-question');
+            let q = getCurrentQuestion();
+            if (sampleQuestion) {
+                if (q && q.title) sampleQuestion.innerText = `שאלה לדוגמה: ${q.title}`;
+                else sampleQuestion.innerText = 'שאלה לדוגמה: מצאו נקודת קיצון בעזרת הגרף.';
+            }
+
+            modal.classList.remove('hidden');
+            renderQuickTourStep();
+            let demoVideo = document.getElementById('quick-tour-demo-video');
+            if (demoVideo) {
+                demoVideo.currentTime = 0;
+                demoVideo.play().catch(() => {});
+            }
+        }
+
+        function closeQuickTour(markSeen) {
+            let modal = document.getElementById('quick-tour-modal');
+            if (modal) modal.classList.add('hidden');
+            let cursor = document.getElementById('quick-tour-cursor');
+            if (cursor) cursor.classList.add('hidden');
+            let spotlight = document.getElementById('quick-tour-spotlight');
+            if (spotlight) spotlight.classList.add('hidden');
+            let demoVideo = document.getElementById('quick-tour-demo-video');
+            if (demoVideo) demoVideo.pause();
+            quickTourCurrentTarget = null;
+            quickTourActive = false;
+            if (markSeen !== false) {
+                try {
+                    localStorage.setItem(QUICK_TOUR_STORAGE_KEY, 'done');
+                } catch (err) {
+                    // Continue when localStorage is unavailable.
+                }
+            }
+        }
+
+        function nextQuickTourStep() {
+            if (!quickTourActive) return;
+            let steps = getQuickTourSteps();
+            if (quickTourStepIndex >= steps.length - 1) {
+                closeQuickTour(true);
+                return;
+            }
+            quickTourStepIndex += 1;
+            renderQuickTourStep();
+        }
+
+        function skipQuickTour() {
+            closeQuickTour(true);
+        }
+
+        function onQuickTourBackdropClick(event) {
+            if (event.target.id === 'quick-tour-modal') skipQuickTour();
+        }
+
+        function maybeOpenQuickTourAfterSplash() {
+            if (quickTourAutoPending) return;
+            if (sessionStarted) return;
+            if (quickTourActive) return;
+            quickTourAutoPending = true;
+            setTimeout(() => {
+                quickTourAutoPending = false;
+                if (!openingSplashDone) return;
+                if (sessionStarted) return;
+                if (quickTourActive) return;
+                if (!appInitialized) {
+                    maybeOpenQuickTourAfterSplash();
+                    return;
+                }
+                openQuickTour({ force: false });
+            }, QUICK_TOUR_AUTO_DELAY_MS);
         }
 
         function isNativeCapacitorEnvironment(cap) {
@@ -1199,6 +1437,7 @@
             openingSplashHideTimer = setTimeout(() => {
                 splash.classList.add('hidden');
                 splash.classList.remove('is-exiting');
+                maybeOpenQuickTourAfterSplash();
             }, 420);
         }
 
@@ -1498,6 +1737,8 @@
             if (window.visualViewport) {
                 window.visualViewport.addEventListener('resize', queueBoardResize);
             }
+            appInitialized = true;
+            if (openingSplashDone) maybeOpenQuickTourAfterSplash();
         }
 
         let boardResizeRaf = null;
@@ -1513,6 +1754,13 @@
                 let h = Math.max(260, Math.round(graphArea.clientHeight));
                 board.resizeContainer(w, h, true);
                 board.fullUpdate();
+                if (quickTourActive) {
+                    let steps = getQuickTourSteps();
+                    let activeStep = steps[quickTourStepIndex] || null;
+                    let target = resolveQuickTourTarget(activeStep);
+                    quickTourCurrentTarget = target;
+                    positionQuickTourIndicators(target);
+                }
             });
         }
 
@@ -3240,7 +3488,7 @@
         }
 
         function openStartGuideModal() {
-            document.getElementById('start-guide-modal').classList.remove('hidden');
+            openQuickTour({ force: true });
         }
 
         function closeStartGuide(skipOverlay) {
@@ -3253,7 +3501,7 @@
         function openStartGuideTutorial() {
             markSessionStarted();
             closeStartGuide(false);
-            openQuestionOverlay();
+            openQuickTour({ force: true });
         }
 
         function startAppFromSplash(mode) {
