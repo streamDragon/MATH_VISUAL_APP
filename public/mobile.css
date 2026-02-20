@@ -2994,6 +2994,52 @@ body.embed-mode #sidebar.drawer-open #drawer-content {
     max-height: none;
 }
 
+/* Viewport profile classes are applied by JS for embedded hosts like Google Sites. */
+body.embed-mode.viewport-desktop #graph-area {
+    height: min(52dvh, 76vw);
+    min-height: 300px;
+    max-height: 62dvh;
+}
+
+body.embed-mode.viewport-desktop #top-actions {
+    flex-wrap: wrap;
+    overflow-x: visible;
+}
+
+body.embed-mode.viewport-desktop #top-question-select {
+    width: min(280px, 34vw);
+    max-width: 280px;
+}
+
+body.embed-mode.viewport-mobile #graph-area {
+    height: min(42dvh, 94vw);
+    min-height: 220px;
+    max-height: 48dvh;
+}
+
+body.embed-mode.viewport-short #top-strip {
+    gap: 5px;
+    padding: calc(5px + var(--safe-top)) 6px 6px;
+}
+
+body.embed-mode.viewport-short #top-formulas,
+body.embed-mode.viewport-short #top-overlay-cta,
+body.embed-mode.viewport-short #top-actions {
+    padding: 4px 6px;
+}
+
+body.embed-mode.viewport-short #top-actions button,
+body.embed-mode.viewport-short #btn-overlay-open {
+    min-height: 34px;
+    font-size: 0.82rem;
+    padding: 6px 9px;
+}
+
+body.embed-mode.viewport-short #top-question-select {
+    min-height: 34px;
+    width: min(160px, 44vw);
+}
+
 @media (min-width: 760px) {
     body.embed-mode.builder-workspace-mode {
         display: grid;

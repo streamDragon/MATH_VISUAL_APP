@@ -448,6 +448,22 @@
             if (!version || version === '__APP_VERSION__') return 'local';
             return version;
         })();
+        const VIEW_CONFIG = (() => {
+            try {
+                let params = new URLSearchParams(window.location.search);
+                let embedRaw = (params.get('embed') || '').trim().toLowerCase();
+                let layoutRaw = (params.get('layout') || params.get('mode') || '').trim().toLowerCase();
+                let embed = null;
+                if (['1', 'true', 'yes', 'on'].includes(embedRaw)) embed = true;
+                if (['0', 'false', 'no', 'off'].includes(embedRaw)) embed = false;
+                let layout = '';
+                if (['mobile', 'phone', 'm'].includes(layoutRaw)) layout = 'mobile';
+                if (['desktop', 'computer', 'd'].includes(layoutRaw)) layout = 'desktop';
+                return { embed, layout };
+            } catch (err) {
+                return { embed: null, layout: '' };
+            }
+        })();
         const PROGRESS_STORAGE_KEY = 'math_visual_progress_v1';
         const XP_FIRST_SOLVE = 30;
         const XP_REPEAT_SOLVE = 8;
@@ -1287,8 +1303,26 @@
             return '';
         }
 
+        function isMobileViewportNow() {
+            if (VIEW_CONFIG.layout === 'mobile') return true;
+            if (VIEW_CONFIG.layout === 'desktop') return false;
+            return window.matchMedia('(max-width: 980px)').matches;
+        }
+
+        function isShortViewportNow() {
+            let vh = window.visualViewport?.height || window.innerHeight || 0;
+            return vh > 0 && vh <= 760;
+        }
+
+        function applyViewportClasses() {
+            let mobile = isMobileViewportNow();
+            document.body.classList.toggle('viewport-mobile', mobile);
+            document.body.classList.toggle('viewport-desktop', !mobile);
+            document.body.classList.toggle('viewport-short', isShortViewportNow());
+        }
+
         function applyTopStripFocusMode() {
-            let isMobile = window.matchMedia('(max-width: 980px)').matches;
+            let isMobile = isMobileViewportNow();
             let focusMode = isMobile && drawerOpen && !!activeAccordion && activeAccordion !== 'params';
             let graphPriorityMode = isMobile && drawerOpen && (activeAccordion === 'params' || activeAccordion === 'tools');
             document.body.classList.toggle('panel-focus', focusMode);
@@ -1410,6 +1444,8 @@
         }
 
         function shouldEnableEmbedMode() {
+            if (VIEW_CONFIG.embed === true) return true;
+            if (VIEW_CONFIG.embed === false) return false;
             if (window.self !== window.top) return true;
             let ref = document.referrer || '';
             return ref.includes('sites.google.com');
@@ -1424,7 +1460,7 @@
 
         function isTopQuestionsPanelOpen() {
             let panelVisible = !document.getElementById('acc-steps').classList.contains('hidden');
-            let isMobile = window.matchMedia('(max-width: 980px)').matches;
+            let isMobile = isMobileViewportNow();
             return panelVisible && (!isMobile || drawerOpen);
         }
 
@@ -1555,6 +1591,7 @@
             if (shouldEnableEmbedMode()) {
                 document.body.classList.add('embed-mode');
             }
+            applyViewportClasses();
             setupOpeningSplashMedia();
             // Show splash immediately while the app keeps initializing in the background.
             startOpeningSplash();
@@ -1566,7 +1603,8 @@
             if (buildBadge) buildBadge.innerText = `גרסה ${versionForDisplay}`;
             exposeBuildBadgeInEmbedMode();
             loadFeedbackMessages();
-            setDrawerOpen(false);
+            let defaultDrawerOpen = document.body.classList.contains('embed-mode') && document.body.classList.contains('viewport-desktop');
+            setDrawerOpen(defaultDrawerOpen);
             initAdMobBanner();
             setTimeout(initAdMobBanner, 1200);
             setTimeout(initAdMobBanner, 3000);
@@ -1751,7 +1789,7 @@
                 renderNoQuestionsState();
             }
             openAccordion('steps');
-            setDrawerOpen(false);
+            setDrawerOpen(defaultDrawerOpen);
             updateNormalShiftLabel();
             refreshTestLineControlVisibility();
             updateSoundButton();
@@ -1759,16 +1797,30 @@
             syncSessionUiState();
 
             queueBoardResize();
-            window.addEventListener('resize', queueBoardResize);
-            window.addEventListener('orientationchange', queueBoardResize);
+            window.addEventListener('resize', handleViewportResize);
+            window.addEventListener('orientationchange', handleViewportResize);
             if (window.visualViewport) {
-                window.visualViewport.addEventListener('resize', queueBoardResize);
+                window.visualViewport.addEventListener('resize', handleViewportResize);
             }
             appInitialized = true;
             if (openingSplashDone) maybeOpenQuickTourAfterSplash();
         }
 
         let boardResizeRaf = null;
+        function handleViewportResize() {
+            let wasMobile = document.body.classList.contains('viewport-mobile');
+            applyViewportClasses();
+            let isMobile = document.body.classList.contains('viewport-mobile');
+            if (document.body.classList.contains('embed-mode') && wasMobile !== isMobile) {
+                let shouldOpen = !isMobile;
+                if (drawerOpen !== shouldOpen) {
+                    setDrawerOpen(shouldOpen);
+                    return;
+                }
+            }
+            queueBoardResize();
+        }
+
         function queueBoardResize() {
             applyTopStripFocusMode();
             if (!board) return;
