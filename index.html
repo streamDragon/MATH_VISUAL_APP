@@ -53,6 +53,7 @@
 
     <div id="opening-splash" class="hidden" aria-label="מסך פתיחה">
         <div id="opening-splash-backdrop" aria-hidden="true">
+            <video id="opening-splash-video" class="hidden" muted loop playsinline preload="metadata" poster="public/opening-poster.png"></video>
             <img id="opening-splash-poster" src="public/opening-poster.png" onerror="this.onerror=null;this.src='opening-poster.png';" alt="">
         </div>
         <div id="opening-splash-shade" aria-hidden="true"></div>
@@ -442,6 +443,7 @@
             return '';
         })();
         const OPENING_MUSIC_FILE = `${RUNTIME_ASSET_BASE}opening-theme.mp3`;
+        const OPENING_VIDEO_FILE = `${RUNTIME_ASSET_BASE}opening-theme.mp4`;
         const BUILDER_FOCUSED_GOALS = new Set([
             'choose_function_template',
             'hit_target',
@@ -485,6 +487,30 @@
         let openingSplashExitTimer = null;
         let openingSplashHideTimer = null;
         let splashMusicUnlockBound = false;
+
+        function setupOpeningSplashMedia() {
+            let video = document.getElementById('opening-splash-video');
+            if (!video) return;
+            let usedFallback = false;
+            video.addEventListener('loadeddata', () => {
+                video.classList.remove('hidden');
+                let poster = document.getElementById('opening-splash-poster');
+                if (poster) poster.classList.add('hidden');
+            });
+            video.addEventListener('error', () => {
+                if (!usedFallback) {
+                    usedFallback = true;
+                    video.src = 'opening-theme.mp4';
+                    video.load();
+                    return;
+                }
+                video.classList.add('hidden');
+                let poster = document.getElementById('opening-splash-poster');
+                if (poster) poster.classList.remove('hidden');
+            });
+            video.src = OPENING_VIDEO_FILE;
+            video.load();
+        }
 
         function isNativeCapacitorEnvironment(cap) {
             if (!cap) return false;
@@ -1167,6 +1193,8 @@
             openingSplashDone = true;
             splash.classList.remove('is-visible');
             splash.classList.add('is-exiting');
+            let splashVideo = document.getElementById('opening-splash-video');
+            if (splashVideo) splashVideo.pause();
             unbindSplashMusicUnlock();
             openingSplashHideTimer = setTimeout(() => {
                 splash.classList.add('hidden');
@@ -1231,6 +1259,11 @@
                 progressFill.style.animationDuration = `${OPENING_SPLASH_DURATION_MS}ms`;
                 progressFill.style.animation = '';
             }
+            let splashVideo = document.getElementById('opening-splash-video');
+            if (splashVideo) {
+                splashVideo.currentTime = 0;
+                splashVideo.play().catch(() => {});
+            }
             splash.classList.remove('hidden');
             requestAnimationFrame(() => splash.classList.add('is-visible'));
             bindSplashMusicUnlock();
@@ -1259,6 +1292,7 @@
             if (shouldEnableEmbedMode()) {
                 document.body.classList.add('embed-mode');
             }
+            setupOpeningSplashMedia();
             // Show splash immediately while the app keeps initializing in the background.
             startOpeningSplash();
             await ensureQuestionsLoadedAtRuntime();

@@ -673,6 +673,7 @@ body.session-started #prestart-hint {
         rgba(4, 12, 25, 0.92);
 }
 
+#opening-splash-video,
 #opening-splash-poster {
     width: min(96vw, 96vh);
     max-width: 1080px;
@@ -683,6 +684,10 @@ body.session-started #prestart-hint {
     box-shadow:
         0 26px 60px rgba(2, 6, 23, 0.62),
         0 0 0 1px rgba(191, 219, 254, 0.18);
+}
+
+#opening-splash-video {
+    background: rgba(2, 6, 23, 0.82);
 }
 
 #opening-splash-shade {
@@ -766,6 +771,7 @@ body.session-started #prestart-hint {
 }
 
 @media (max-width: 720px) {
+    #opening-splash-video,
     #opening-splash-poster {
         width: min(98vw, 94vh);
         max-height: 94vh;
