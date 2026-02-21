@@ -279,6 +279,7 @@
             <div id="top-question-wrap">
                 <span id="top-question-index">שאלה 1/4</span>
                 <span id="top-question">טוען...</span>
+                <button id="btn-open-params-inline" onclick="openBuilderFromTop()">⚙ פרמטרים</button>
                 <span id="top-step-status">שלב 1/1: ...</span>
                 <span id="progress-hint">חפש → מצא → בדוק</span>
                 <span id="prestart-hint">לפני התרגול בונים פונקציה, ואז לוחצים "התחל תרגול" כדי להסתיר כפתורי התחלה.</span>
@@ -1562,11 +1563,12 @@
             let buildLabel = APP_BUILD_DISPLAY || 'local';
             let topVersionBadge = document.getElementById('top-version-badge');
             if (topVersionBadge) {
-                topVersionBadge.innerText = `גרסה פעילה ${versionLabel} | build ${buildLabel} | ${getRuntimeModeLabel()}`;
+                topVersionBadge.innerText = `V${versionLabel}`;
+                topVersionBadge.title = `version=${versionLabel} | build=${buildLabel} | ${getRuntimeModeLabel()}`;
             }
             let buildBadge = document.getElementById('build-badge');
             if (buildBadge) {
-                buildBadge.innerText = `גרסה פעילה: ${versionLabel}`;
+                buildBadge.innerText = `V${versionLabel}`;
                 buildBadge.title = `build: ${buildLabel}`;
             }
         }
