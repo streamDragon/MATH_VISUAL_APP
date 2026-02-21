@@ -69,6 +69,15 @@ body.embed-mode #top-strip {
     padding: 6px 8px;
 }
 
+body.embed-mode.question-intro-active #top-strip {
+    grid-template-areas:
+        "version"
+        "question"
+        "formulas"
+        "overlay"
+        "actions";
+}
+
 body.embed-mode #top-version-badge {
     grid-area: version;
     justify-self: end;
@@ -78,11 +87,18 @@ body.embed-mode #top-question-wrap {
     display: none;
 }
 
+body.embed-mode.question-intro-active #top-question-wrap {
+    grid-area: question;
+    display: flex;
+}
+
 body.embed-mode #btn-open-params-inline,
 body.embed-mode #btn-focus-steps-inline {
     display: none;
 }
 
+body.embed-mode.question-intro-active #btn-open-params-inline,
+body.embed-mode.question-intro-active #btn-focus-steps-inline,
 body.embed-mode.viewport-desktop #btn-open-params-inline,
 body.embed-mode.viewport-desktop #btn-focus-steps-inline {
     display: inline-flex;
@@ -116,6 +132,11 @@ body.embed-mode #top-actions {
     gap: 5px;
     padding: 5px 7px;
     -webkit-overflow-scrolling: touch;
+}
+
+body.embed-mode:not(.question-intro-active):not(.builder-workspace-mode) #top-overlay-cta,
+body.embed-mode:not(.question-intro-active):not(.builder-workspace-mode) #top-actions {
+    display: none;
 }
 
 body.embed-mode #top-clarity-panel {
@@ -423,6 +444,10 @@ body.builder-workspace-mode #top-actions {
     flex-wrap: wrap;
     align-items: center;
     gap: 6px;
+}
+
+body:not(.question-intro-active) #top-question-quick-row {
+    display: none;
 }
 
 #btn-open-params-inline {
@@ -3301,8 +3326,12 @@ body.embed-mode.viewport-desktop #top-version-badge {
     margin-inline-start: auto;
 }
 
-body.embed-mode.viewport-desktop #top-question-wrap {
+body.embed-mode.viewport-desktop.question-intro-active #top-question-wrap {
     display: flex;
+}
+
+body.embed-mode.viewport-desktop:not(.question-intro-active) #top-question-wrap {
+    display: none;
 }
 
 body.embed-mode.viewport-desktop #top-brief-card {

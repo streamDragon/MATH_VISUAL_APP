@@ -548,6 +548,7 @@
         let templateChosen = false;
         let readAnswerValidated = false;
         let sessionStarted = false;
+        let questionIntroActive = false;
         let learnerProgress = null;
         let feedbackMessages = [];
         const ADMOB_TEST_BANNER_ID = 'ca-app-pub-3940256099942544/6300978111';
@@ -1151,6 +1152,7 @@
         }
 
         function renderNoQuestionsState() {
+            setQuestionIntroActive(false);
             let topIndex = document.getElementById('top-question-index');
             let topQuestion = document.getElementById('top-question');
             let topStep = document.getElementById('top-step-status');
@@ -1227,12 +1229,14 @@
         }
 
         function applySelectedTemplate(markChosen = true) {
+            dismissQuestionIntro();
             let select = document.getElementById('template-select');
             if (!select) return;
             applyTemplateById(select.value, !!markChosen);
         }
 
         function confirmFunctionAndStart() {
+            dismissQuestionIntro();
             applySelectedTemplate(true);
             if (!sessionStarted) {
                 markSessionStarted();
@@ -1618,6 +1622,17 @@
             return !!(panel && !panel.classList.contains('hidden') && activeAccordion === 'params');
         }
 
+        function setQuestionIntroActive(active) {
+            questionIntroActive = !!active;
+            document.body.classList.toggle('question-intro-active', questionIntroActive);
+            syncTopInlineQuickActions();
+        }
+
+        function dismissQuestionIntro() {
+            if (!questionIntroActive) return;
+            setQuestionIntroActive(false);
+        }
+
         function syncTopInlineQuickActions() {
             let paramsBtn = document.getElementById('btn-open-params-inline');
             let focusBtn = document.getElementById('btn-focus-steps-inline');
@@ -1636,6 +1651,7 @@
                 if (!sessionStarted) label = builderOpen ? '⬅ חזרה לשלבים' : '⬅ התחילו משמאל';
                 else if (builderOpen) label = '⬅ חזרה למשימה';
                 focusBtn.innerText = label;
+                focusBtn.classList.toggle('hidden', !questionIntroActive && !builderOpen);
             }
         }
 
@@ -1658,6 +1674,7 @@
 
         function focusStepsFromTop() {
             closeInitialBuilderModal();
+            dismissQuestionIntro();
             openAccordion('steps');
             setDrawerOpen(true);
             let sidebar = document.getElementById('sidebar');
@@ -2048,23 +2065,33 @@
                 }
             ], { anchor: p, fontSize: 13, cssClass: 'jxgbox', strokeColor:'black' });
 
-            p.on('drag', updateInfo);
+            p.on('drag', () => {
+                dismissQuestionIntro();
+                updateInfo();
+            });
             testAnchor.on('drag', () => {
+                dismissQuestionIntro();
                 updateInfo();
             });
             testDir.on('drag', () => {
+                dismissQuestionIntro();
                 updateInfo();
             });
-            board.on('up', updateInfo);
+            board.on('up', () => {
+                dismissQuestionIntro();
+                updateInfo();
+            });
 
             ['inpA','inpB','inpC','inpD','inpE'].forEach(id => {
                 document.getElementById(id).addEventListener('input', () => {
+                    dismissQuestionIntro();
                     updateParams();
                     board.update();
                 });
             });
 
             document.getElementById('normal-shift').addEventListener('input', () => {
+                dismissQuestionIntro();
                 updateNormalShiftLabel();
                 updateInfo();
             });
@@ -2072,6 +2099,7 @@
             let readInput = document.getElementById('read-answer-input');
             if (readInput) {
                 readInput.addEventListener('input', () => {
+                    dismissQuestionIntro();
                     updateInfo();
                 });
             }
@@ -3292,6 +3320,7 @@
         function submitReadAnswer() {
             let q = getCurrentQuestion();
             if (!q || (q.goal !== 'read_slope' && q.goal !== 'read_y')) return;
+            dismissQuestionIntro();
             let data = getQuestionGoalData(q);
             let x0 = data.fixedX0 ?? 0;
             let tol = data.answerTolerance ?? 0.2;
@@ -4174,6 +4203,7 @@
             let startIdx = getFirstPracticeQuestionIndex();
             loadQ(startIdx >= 0 ? startIdx : 0, { autoOpenOverlay: false });
             closeInitialBuilderModal();
+            dismissQuestionIntro();
             if (target === 'params') {
                 openBuilderFromTop();
                 return;
@@ -4247,6 +4277,7 @@
                 closeAllAccordions();
                 return;
             }
+            dismissQuestionIntro();
             builderPanelOpen = true;
             openAccordion('params');
             setDrawerOpen(true);
@@ -4263,6 +4294,7 @@
                 focusStepsFromTop();
                 return;
             }
+            dismissQuestionIntro();
             builderPanelOpen = true;
             openAccordion('params');
             setDrawerOpen(true);
@@ -4415,6 +4447,7 @@
             document.getElementById('btn-next-step').classList.add('hidden');
             renderMission();
             updateSpecialPanels();
+            setQuestionIntroActive(true);
 
             p.setCoords(0, evaluateFunctionAt(0));
             fitBoardToCurrentFunction();
