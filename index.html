@@ -1069,6 +1069,57 @@
             return [];
         }
 
+        function isPreStartOnlyQuestion(q) {
+            return q?.goal === 'choose_function_template';
+        }
+
+        function getVisibleQuestionIndexes() {
+            let questions = getQuestionsList();
+            let indexes = questions.map((_, i) => i);
+            if (!sessionStarted) return indexes;
+            return indexes.filter((i) => !isPreStartOnlyQuestion(questions[i]));
+        }
+
+        function getFirstPracticeQuestionIndex() {
+            let visible = getVisibleQuestionIndexes();
+            if (visible.length > 0) return visible[0];
+            let questions = getQuestionsList();
+            return questions.length > 0 ? 0 : -1;
+        }
+
+        function getVisibleQuestionPosition(questionIndex) {
+            let visible = getVisibleQuestionIndexes();
+            return {
+                total: visible.length,
+                position: visible.indexOf(questionIndex)
+            };
+        }
+
+        function refreshTopQuestionSelect(selectedIndex = currentQ) {
+            let topSelect = document.getElementById('top-question-select');
+            if (!topSelect) return selectedIndex;
+
+            let questions = getQuestionsList();
+            let visible = getVisibleQuestionIndexes();
+            topSelect.innerHTML = '';
+
+            visible.forEach((realIdx, visibleOrder) => {
+                let q = questions[realIdx];
+                let opt = document.createElement('option');
+                opt.value = String(realIdx);
+                let shortDesc = getQuestionShortDesc(q);
+                opt.textContent = `שאלה ${visibleOrder + 1}: ${q.title} - ${shortDesc.first}`;
+                topSelect.appendChild(opt);
+            });
+
+            topSelect.disabled = visible.length === 0;
+            if (visible.length === 0) return selectedIndex;
+
+            let nextSelected = visible.includes(selectedIndex) ? selectedIndex : visible[0];
+            topSelect.value = String(nextSelected);
+            return nextSelected;
+        }
+
         function loadRuntimeScript(src) {
             return new Promise((resolve, reject) => {
                 let script = document.createElement('script');
@@ -1467,10 +1518,16 @@
 
         function updateDisplayedVersionBadges() {
             let versionLabel = runtimeDisplayedVersion || APP_VERSION || 'local';
+            let buildLabel = APP_BUILD_DISPLAY || 'local';
             let topVersionBadge = document.getElementById('top-version-badge');
-            if (topVersionBadge) topVersionBadge.innerText = `גרסה ${versionLabel} | ${getRuntimeModeLabel()}`;
+            if (topVersionBadge) {
+                topVersionBadge.innerText = `גרסה פעילה ${versionLabel} | build ${buildLabel} | ${getRuntimeModeLabel()}`;
+            }
             let buildBadge = document.getElementById('build-badge');
-            if (buildBadge) buildBadge.innerText = `גרסה ${versionLabel}`;
+            if (buildBadge) {
+                buildBadge.innerText = `גרסה פעילה: ${versionLabel}`;
+                buildBadge.title = `build: ${buildLabel}`;
+            }
         }
 
         function applyTopStripFocusMode() {
@@ -1918,15 +1975,7 @@
 
             let topSelect = document.getElementById('top-question-select');
             let questions = getQuestionsList();
-            topSelect.innerHTML = '';
-            questions.forEach((q, i) => {
-                let opt = document.createElement('option');
-                opt.value = i;
-                let shortDesc = getQuestionShortDesc(q);
-                opt.textContent = `שאלה ${i + 1}: ${q.title} - ${shortDesc.first}`;
-                topSelect.appendChild(opt);
-            });
-            topSelect.disabled = questions.length === 0;
+            refreshTopQuestionSelect(0);
             topSelect.addEventListener('change', (ev) => loadQ(parseInt(ev.target.value, 10)));
 
             activeTemplate = getDefaultTemplate();
@@ -3122,10 +3171,11 @@
             let q = getCurrentQuestion();
             let setupPanel = document.getElementById('template-setup-panel');
             let readPanel = document.getElementById('read-answer-panel');
-            setupPanel.classList.toggle('hidden', q?.goal !== 'choose_function_template');
+            let allowSetupPanel = !sessionStarted && q?.goal === 'choose_function_template';
+            setupPanel.classList.toggle('hidden', !allowSetupPanel);
             readPanel.classList.add('hidden');
 
-            if (q?.goal === 'choose_function_template') {
+            if (allowSetupPanel) {
                 populateTemplateSelect();
                 document.getElementById('template-status-text').innerText = templateChosen && activeTemplate
                     ? `נבחרה תבנית: ${activeTemplate.title}`
@@ -4021,6 +4071,8 @@
                 if (!el) return;
                 el.classList.toggle('hidden', sessionStarted);
             });
+            let selected = refreshTopQuestionSelect(currentQ);
+            if (Number.isFinite(selected) && selected !== currentQ) currentQ = selected;
             updateBuilderVisibility(getCurrentQuestion());
         }
 
@@ -4028,6 +4080,13 @@
             if (sessionStarted) return;
             sessionStarted = true;
             syncSessionUiState();
+            let q = getCurrentQuestion();
+            if (isPreStartOnlyQuestion(q)) {
+                let nextIdx = getFirstPracticeQuestionIndex();
+                if (nextIdx >= 0 && nextIdx !== currentQ) {
+                    loadQ(nextIdx, { autoOpenOverlay: false });
+                }
+            }
         }
 
         function updateBuilderVisibility(q) {
@@ -4110,14 +4169,20 @@
                 : !sessionStarted;
             let safeIdx = Number.isFinite(idx) ? idx : 0;
             safeIdx = Math.max(0, Math.min(questions.length - 1, safeIdx));
+            if (sessionStarted && isPreStartOnlyQuestion(questions[safeIdx])) {
+                let firstPractice = getFirstPracticeQuestionIndex();
+                if (firstPractice >= 0) safeIdx = firstPractice;
+            }
             currentQ = safeIdx;
             let q = questions[safeIdx];
-            let shortDesc = getQuestionShortDesc(q);
-            document.getElementById('q-title').innerText = `שאלה ${safeIdx + 1}: ${q.title}`;
+            let visiblePos = getVisibleQuestionPosition(safeIdx);
+            let displayNumber = (visiblePos.total > 0 && visiblePos.position >= 0) ? (visiblePos.position + 1) : (safeIdx + 1);
+            let displayTotal = visiblePos.total > 0 ? visiblePos.total : questions.length;
+            document.getElementById('q-title').innerText = `שאלה ${displayNumber}: ${q.title}`;
             document.getElementById('q-desc').innerText = q.desc;
-            document.getElementById('top-question-index').innerText = `שאלה ${safeIdx + 1}/${questions.length}`;
+            document.getElementById('top-question-index').innerText = `שאלה ${displayNumber}/${displayTotal}`;
             document.getElementById('top-question').innerText = `${q.title}`;
-            document.getElementById('top-question-select').value = String(safeIdx);
+            refreshTopQuestionSelect(safeIdx);
             updateLearnerProgressChip();
             let winOverlay = document.getElementById('win-overlay');
             if (winOverlay) winOverlay.style.display = 'none';
