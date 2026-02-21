@@ -87,7 +87,7 @@
         <div id="question-overlay-card">
             <div class="overlay-head">
                 <div class="overlay-title-wrap">
-                    <div class="overlay-mini">כרטיס משימה</div>
+                    <div id="overlay-mini-label" class="overlay-mini">כרטיס משימה</div>
                     <h3 id="overlay-title">שאלה</h3>
                 </div>
                 <button id="btn-close-overlay" onclick="closeQuestionOverlay()">סגור</button>
@@ -111,7 +111,7 @@
                 </div>
             </div>
             <div class="overlay-actions">
-                <button onclick="closeQuestionOverlay()">התחל תרגול</button>
+                <button id="btn-overlay-primary" onclick="onOverlayPrimaryAction()">התחל תרגול</button>
             </div>
         </div>
     </div>
@@ -1241,12 +1241,18 @@
             if (!sessionStarted) {
                 markSessionStarted();
             }
-            let firstPractice = getFirstPracticeQuestionIndex();
-            if (firstPractice >= 0) {
-                loadQ(firstPractice, { autoOpenOverlay: false, preserveCurrentFunction: true });
+            let q = getCurrentQuestion();
+            if (isPreStartOnlyQuestion(q)) {
+                let firstPractice = getFirstPracticeQuestionIndex();
+                if (firstPractice >= 0) {
+                    loadQ(firstPractice, { autoOpenOverlay: false, preserveCurrentFunction: true });
+                }
             }
             openAccordion('steps');
-            setDrawerOpen(false);
+            setDrawerOpen(true);
+            renderMission();
+            updateSpecialPanels();
+            updateInfo();
             showStepToast('הפונקציה נקבעה. אפשר להתחיל לתרגל שאלות.');
         }
 
@@ -1626,11 +1632,32 @@
             questionIntroActive = !!active;
             document.body.classList.toggle('question-intro-active', questionIntroActive);
             syncTopInlineQuickActions();
+            syncOverlayPrimaryAction();
         }
 
         function dismissQuestionIntro() {
             if (!questionIntroActive) return;
             setQuestionIntroActive(false);
+        }
+
+        function syncOverlayPrimaryAction() {
+            let btn = document.getElementById('btn-overlay-primary');
+            let mini = document.getElementById('overlay-mini-label');
+            if (btn) btn.innerText = questionIntroActive
+                ? 'קבע צורה ופתח פרמטרים'
+                : 'סגור כרטיס';
+            if (mini) mini.innerText = questionIntroActive
+                ? 'לפני שמתחילים'
+                : 'כרטיס משימה';
+        }
+
+        function onOverlayPrimaryAction() {
+            if (questionIntroActive) {
+                closeQuestionOverlay();
+                openBuilderFromTop();
+                return;
+            }
+            closeQuestionOverlay();
         }
 
         function syncTopInlineQuickActions() {
@@ -2107,7 +2134,10 @@
             let topSelect = document.getElementById('top-question-select');
             let questions = getQuestionsList();
             refreshTopQuestionSelect(0);
-            topSelect.addEventListener('change', (ev) => loadQ(parseInt(ev.target.value, 10)));
+            topSelect.addEventListener('change', (ev) => {
+                let idx = parseInt(ev.target.value, 10);
+                loadQ(idx, { autoOpenOverlay: true });
+            });
 
             activeTemplate = getDefaultTemplate();
             if (activeTemplate) {
@@ -3285,10 +3315,13 @@
         function openQuestionOverlay() {
             let q = getCurrentQuestion();
             if (q) renderQuestionOverlay(q);
+            syncOverlayPrimaryAction();
+            document.body.classList.toggle('overlay-start-mode', questionIntroActive);
             document.getElementById('question-overlay').classList.remove('hidden');
         }
 
         function closeQuestionOverlay() {
+            document.body.classList.remove('overlay-start-mode');
             document.getElementById('question-overlay').classList.add('hidden');
         }
 
@@ -3653,6 +3686,7 @@
 
         function evaluateCurrentStep(m, x, y) {
             if (!sessionStarted) return;
+            if (questionIntroActive) return;
             if (questionSolved) return;
             let step = activeSteps[currentStepIndex];
             if (!step || stepCompleted) return;
