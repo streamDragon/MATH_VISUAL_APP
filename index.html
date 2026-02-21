@@ -279,7 +279,10 @@
             <div id="top-question-wrap">
                 <span id="top-question-index">שאלה 1/4</span>
                 <span id="top-question">טוען...</span>
-                <button id="btn-open-params-inline" onclick="openBuilderFromTop()">⚙ פרמטרים</button>
+                <div id="top-question-quick-row">
+                    <button id="btn-open-params-inline" type="button" onclick="openBuilderFromTop()">⚙ פתח פרמטרים</button>
+                    <button id="btn-focus-steps-inline" type="button" onclick="focusStepsFromTop()">⬅ התחילו משמאל</button>
+                </div>
                 <span id="top-step-status">שלב 1/1: ...</span>
                 <span id="progress-hint">חפש → מצא → בדוק</span>
                 <span id="prestart-hint">לפני התרגול בונים פונקציה, ואז לוחצים "התחל תרגול" כדי להסתיר כפתורי התחלה.</span>
@@ -567,6 +570,7 @@
         let guidedDemoToken = 0;
         let guidedDemoRaf = null;
         let guidedDemoTimer = null;
+        let sidebarFocusPulseTimer = null;
 
         function setupOpeningSplashMedia() {
             let video = document.getElementById('opening-splash-video');
@@ -1110,7 +1114,10 @@
                 let opt = document.createElement('option');
                 opt.value = String(realIdx);
                 let shortDesc = getQuestionShortDesc(q);
-                opt.textContent = `שאלה ${visibleOrder + 1}: ${q.title} - ${shortDesc.first}`;
+                let compactTitle = (q?.title || '').replace(/\s+/g, ' ').trim();
+                if (compactTitle.length > 24) compactTitle = `${compactTitle.slice(0, 24).trim()}...`;
+                opt.textContent = `שאלה ${visibleOrder + 1} · ${compactTitle}`;
+                opt.title = `${q?.title || ''} - ${shortDesc.first}`;
                 topSelect.appendChild(opt);
             });
 
@@ -1599,6 +1606,39 @@
             }
         }
 
+        function canOpenBuilderForQuestion(q) {
+            if (!q) return false;
+            let locked = new Set(q.locked || []);
+            let editableCount = ['inpA','inpB','inpC','inpD','inpE'].filter((id) => !locked.has(id)).length;
+            return editableCount > 0 && shouldAllowBuilderForQuestion(q);
+        }
+
+        function isBuilderPanelExpanded() {
+            let panel = document.getElementById('builder-panel');
+            return !!(panel && !panel.classList.contains('hidden') && activeAccordion === 'params');
+        }
+
+        function syncTopInlineQuickActions() {
+            let paramsBtn = document.getElementById('btn-open-params-inline');
+            let focusBtn = document.getElementById('btn-focus-steps-inline');
+            let canBuilder = canOpenBuilderForQuestion(getCurrentQuestion());
+            let builderOpen = isBuilderPanelExpanded();
+
+            if (paramsBtn) {
+                paramsBtn.classList.toggle('hidden', !canBuilder);
+                paramsBtn.classList.toggle('is-open', builderOpen);
+                paramsBtn.innerText = builderOpen ? '✕ סגור פרמטרים' : '⚙ פתח פרמטרים';
+                paramsBtn.setAttribute('aria-expanded', builderOpen ? 'true' : 'false');
+            }
+
+            if (focusBtn) {
+                let label = '⬅ עברו למשימה';
+                if (!sessionStarted) label = builderOpen ? '⬅ חזרה לשלבים' : '⬅ התחילו משמאל';
+                else if (builderOpen) label = '⬅ חזרה למשימה';
+                focusBtn.innerText = label;
+            }
+        }
+
         function syncBuilderWorkspaceMode() {
             let panel = document.getElementById('builder-panel');
             let inBuilderWorkspace = drawerOpen
@@ -1606,6 +1646,7 @@
                 && panel
                 && !panel.classList.contains('hidden');
             document.body.classList.toggle('builder-workspace-mode', !!inBuilderWorkspace);
+            syncTopInlineQuickActions();
         }
 
         function ensureGraphAndBuilderVisible() {
@@ -1613,6 +1654,25 @@
             let graphWrap = document.getElementById('graph-area-wrapper');
             if (!graphWrap) return;
             graphWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function focusStepsFromTop() {
+            closeInitialBuilderModal();
+            openAccordion('steps');
+            setDrawerOpen(true);
+            let sidebar = document.getElementById('sidebar');
+            if (!sidebar) return;
+            sidebar.classList.remove('guided-focus');
+            if (sidebarFocusPulseTimer) {
+                clearTimeout(sidebarFocusPulseTimer);
+                sidebarFocusPulseTimer = null;
+            }
+            sidebar.classList.add('guided-focus');
+            sidebarFocusPulseTimer = setTimeout(() => {
+                sidebar.classList.remove('guided-focus');
+                sidebarFocusPulseTimer = null;
+            }, 1300);
+            sidebar.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
         }
 
         function closeAllAccordions(options = {}) {
@@ -4141,6 +4201,7 @@
             if (Number.isFinite(selected) && selected !== currentQ) currentQ = selected;
             updateBuilderVisibility(getCurrentQuestion());
             syncBuilderTemplatePanel(getCurrentQuestion());
+            syncTopInlineQuickActions();
         }
 
         function markSessionStarted() {
@@ -4157,11 +4218,8 @@
         }
 
         function updateBuilderVisibility(q) {
-            q = q || {};
-            let allIds = ['inpA','inpB','inpC','inpD','inpE'];
-            let locked = new Set(q.locked || []);
-            let editableCount = allIds.filter(id => !locked.has(id)).length;
-            let shouldAllowBuilder = editableCount > 0 && shouldAllowBuilderForQuestion(q);
+            q = q || getCurrentQuestion();
+            let shouldAllowBuilder = canOpenBuilderForQuestion(q);
 
             let btn = document.getElementById('btn-builder');
             let panel = document.getElementById('builder-panel');
@@ -4180,6 +4238,7 @@
             if (activeAccordion === 'params') panel.classList.remove('hidden');
             btn.innerText = 'פרמטרים';
             syncBuilderWorkspaceMode();
+            syncTopInlineQuickActions();
         }
 
         function toggleBuilderPanel() {
@@ -4199,10 +4258,11 @@
             closeInitialBuilderModal();
             let q = getCurrentQuestion();
             if (!q) return;
-            if (document.getElementById('btn-top-builder').classList.contains('hidden')) return;
-            let locked = new Set(q.locked || []);
-            let editableCount = ['inpA','inpB','inpC','inpD','inpE'].filter(id => !locked.has(id)).length;
-            if (editableCount === 0) return;
+            if (!canOpenBuilderForQuestion(q)) return;
+            if (isBuilderPanelExpanded()) {
+                focusStepsFromTop();
+                return;
+            }
             builderPanelOpen = true;
             openAccordion('params');
             setDrawerOpen(true);
