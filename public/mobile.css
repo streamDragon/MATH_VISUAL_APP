@@ -1282,12 +1282,17 @@ h2 {
 }
 
 #template-setup-panel,
+#builder-template-panel,
 #read-answer-panel {
     margin-top: 8px;
     padding: 8px;
     background: #ffffff;
     border: 1px solid #b7d3fb;
     border-radius: 8px;
+}
+
+body.session-started #builder-template-panel {
+    display: none !important;
 }
 
 #template-select {

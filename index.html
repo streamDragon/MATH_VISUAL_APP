@@ -352,15 +352,6 @@
                             <div id="mission-success-text">טוען תנאי הצלחה...</div>
                             <ol id="mission-expanded-steps"></ol>
                         </div>
-                        <div id="template-setup-panel" class="hidden">
-                            <div class="section-title">בחירת תבנית פונקציה</div>
-                            <select id="template-select"></select>
-                            <div id="template-setup-actions">
-                                <button id="btn-apply-template" onclick="applySelectedTemplateAndContinue('collapse')">בחר תבנית והמשך</button>
-                                <button id="btn-apply-template-params" onclick="applySelectedTemplateAndContinue('params')">בחר תבנית + שחק עם פרמטרים</button>
-                            </div>
-                            <div id="template-status-text"></div>
-                        </div>
                         <div id="read-answer-panel" class="hidden">
                             <div id="read-answer-prompt"></div>
                             <div class="read-answer-row">
@@ -441,6 +432,15 @@
                 <button id="btn-builder" class="acc-btn" onclick="toggleBuilderPanel()">פרמטרים</button>
                 <div id="builder-panel" class="acc-panel hidden">
                     <div class="section-title">בניית הפונקציה</div>
+                    <div id="builder-template-panel">
+                        <div class="section-title">הגדרה לפני תחילת תרגול</div>
+                        <select id="template-select" onchange="applySelectedTemplate(false)"></select>
+                        <div id="template-setup-actions">
+                            <button id="btn-apply-template" onclick="applySelectedTemplate(false)">החל תצורה</button>
+                            <button id="btn-apply-template-params" onclick="confirmFunctionAndStart()">קבע פונקציה והתחל תרגול</button>
+                        </div>
+                        <div id="template-status-text"></div>
+                    </div>
                     <div id="builder-focus-note">הזיזו פרמטר וצפו מיד בגרף למעלה.</div>
                     <div id="builder-live-values" aria-live="polite">
                         <span class="builder-val-chip" id="chipA">a=0</span>
@@ -1003,7 +1003,7 @@
             if (!chip || !learnerProgress) return;
             let level = getProgressLevel(learnerProgress.totalXp);
             let solved = Array.isArray(learnerProgress.uniqueSolved) ? learnerProgress.uniqueSolved.length : 0;
-            let totalQuestions = getQuestionsList().length;
+            let totalQuestions = getVisibleQuestionIndexes().length || getQuestionsList().length;
             chip.innerText = `רמה ${level} | XP ${learnerProgress.totalXp} | רצף ${learnerProgress.streakDays} | ${Math.min(solved, totalQuestions)}/${totalQuestions}`;
         }
 
@@ -1076,7 +1076,6 @@
         function getVisibleQuestionIndexes() {
             let questions = getQuestionsList();
             let indexes = questions.map((_, i) => i);
-            if (!sessionStarted) return indexes;
             return indexes.filter((i) => !isPreStartOnlyQuestion(questions[i]));
         }
 
@@ -1205,6 +1204,8 @@
             document.getElementById('inpD').value = params.d;
             document.getElementById('inpE').value = params.e;
             if (markChosen) templateChosen = true;
+            let select = document.getElementById('template-select');
+            if (select) select.value = tpl.id;
             let status = document.getElementById('template-status-text');
             if (status) status.innerText = `נבחרה תבנית: ${tpl.title}`;
             updateParamHints();
@@ -1220,18 +1221,18 @@
             applyTemplateById(select.value, !!markChosen);
         }
 
-        function collapseSetupAfterTemplatePick() {
-            closeAllAccordions();
-            setDrawerOpen(false);
-        }
-
-        function applySelectedTemplateAndContinue(nextAction) {
+        function confirmFunctionAndStart() {
             applySelectedTemplate(true);
-            if (nextAction === 'params') {
-                openBuilderFromTop();
-                return;
+            if (!sessionStarted) {
+                markSessionStarted();
             }
-            collapseSetupAfterTemplatePick();
+            let firstPractice = getFirstPracticeQuestionIndex();
+            if (firstPractice >= 0) {
+                loadQ(firstPractice, { autoOpenOverlay: false, preserveCurrentFunction: true });
+            }
+            openAccordion('steps');
+            setDrawerOpen(false);
+            showStepToast('הפונקציה נקבעה. אפשר להתחיל לתרגל שאלות.');
         }
 
         function updateParamHints() {
@@ -1984,10 +1985,12 @@
             }
 
             if (questions.length > 0) {
-                loadQ(0, { autoOpenOverlay: false });
+                let startIdx = getFirstPracticeQuestionIndex();
+                loadQ(startIdx >= 0 ? startIdx : 0, { autoOpenOverlay: false });
             } else {
                 renderNoQuestionsState();
             }
+            populateTemplateSelect();
             openAccordion('steps');
             setDrawerOpen(defaultDrawerOpen);
             updateNormalShiftLabel();
@@ -3169,19 +3172,8 @@
 
         function updateSpecialPanels() {
             let q = getCurrentQuestion();
-            let setupPanel = document.getElementById('template-setup-panel');
             let readPanel = document.getElementById('read-answer-panel');
-            let allowSetupPanel = !sessionStarted && q?.goal === 'choose_function_template';
-            setupPanel.classList.toggle('hidden', !allowSetupPanel);
             readPanel.classList.add('hidden');
-
-            if (allowSetupPanel) {
-                populateTemplateSelect();
-                document.getElementById('template-status-text').innerText = templateChosen && activeTemplate
-                    ? `נבחרה תבנית: ${activeTemplate.title}`
-                    : 'בחר תבנית, ואז המשך או עבור מיד לעריכת פרמטרים.';
-                return;
-            }
 
             if (q?.goal === 'read_slope' || q?.goal === 'read_y') {
                 readPanel.classList.remove('hidden');
@@ -3330,7 +3322,25 @@
             let textEl = document.getElementById('mission-expanded-text');
             let successEl = document.getElementById('mission-success-text');
             let listEl = document.getElementById('mission-expanded-steps');
-            if (!q || !textEl || !successEl || !listEl) return;
+            if (!textEl || !successEl || !listEl) return;
+
+            if (!sessionStarted) {
+                textEl.innerText = 'מה עושים עכשיו: פותחים את "פרמטרים", בוחרים תצורה כללית ומשחקים עם a,b,c,d,e.';
+                successEl.innerText = 'הצלחה: אחרי שבחרתם תצורה נוחה ולחצתם "קבע פונקציה והתחל תרגול".';
+                listEl.innerHTML = '';
+                [
+                    'לחצו על כפתור "פרמטרים".',
+                    'בחרו תצורה כללית (ישר/פרבולה/פולינום).',
+                    'שנו פרמטר אחד בכל פעם וצפו בגרף.',
+                    'בסיום לחצו "קבע פונקציה והתחל תרגול".'
+                ].forEach((stepText) => {
+                    let li = document.createElement('li');
+                    li.innerText = stepText;
+                    listEl.appendChild(li);
+                });
+                return;
+            }
+            if (!q) return;
 
             textEl.innerText = `מה עושים עכשיו: ${getGoalInstructionText(q)}`;
             successEl.innerText = getQuestionSuccessCriteriaText(q);
@@ -3345,6 +3355,16 @@
         }
 
         function renderMission() {
+            if (!sessionStarted) {
+                let prestartText = 'לפני התרגול: בחרו תצורה בפרמטרים ואז לחצו "קבע פונקציה והתחל תרגול".';
+                document.getElementById('mission-step-text').innerText = prestartText;
+                document.getElementById('top-step-status').innerText = prestartText;
+                let missionNote = document.getElementById('mission-step-note');
+                if (missionNote) missionNote.innerText = 'אחרי קביעת פונקציה, נתחיל משאלה 1 באופן רגיל.';
+                renderMissionExpandedHelp();
+                updateTopBriefCard({ instruction: prestartText });
+                return;
+            }
             let total = activeSteps.length || 1;
             let step = activeSteps[currentStepIndex];
             let instruction = (step?.instruction || 'בצע את המשימה').replace(/\s+/g, ' ').trim();
@@ -3501,6 +3521,7 @@
         }
 
         function evaluateCurrentStep(m, x, y) {
+            if (!sessionStarted) return;
             if (questionSolved) return;
             let step = activeSteps[currentStepIndex];
             if (!step || stepCompleted) return;
@@ -4011,18 +4032,21 @@
         }
 
         function startAppFromSplash(mode) {
-            markSessionStarted();
-            if (typeof playIntroTheme === 'function') playIntroTheme();
             if (mode === 'tutorial') {
                 closeStartGuide(true);
                 openQuickTour({ force: true });
                 return;
             }
             if (mode === 'demo') {
+                markSessionStarted();
+                if (typeof playIntroTheme === 'function') playIntroTheme();
                 runGuidedDemoFromLaunch();
                 return;
             }
             closeStartGuide(true);
+            openAccordion('params');
+            setDrawerOpen(true);
+            showStepToast('לפני תרגול: בחרו תצורה, שחקו עם הפרמטרים, ואז לחצו "קבע פונקציה והתחל תרגול".');
         }
 
         function onStartGuideBackdropClick(event) {
@@ -4045,7 +4069,8 @@
 
         function openInitialBuilderWorkspace(target) {
             if (sessionStarted) return;
-            loadQ(0, { autoOpenOverlay: false });
+            let startIdx = getFirstPracticeQuestionIndex();
+            loadQ(startIdx >= 0 ? startIdx : 0, { autoOpenOverlay: false });
             closeInitialBuilderModal();
             if (target === 'params') {
                 openBuilderFromTop();
@@ -4058,8 +4083,7 @@
         function shouldAllowBuilderForQuestion(q) {
             if (!q) return false;
             if (q.ui && typeof q.ui.allowBuilder !== 'undefined') return !!q.ui.allowBuilder;
-            if (!sessionStarted) return true;
-            return BUILDER_FOCUSED_GOALS.has(q.goal);
+            return true;
         }
 
         function syncSessionUiState() {
@@ -4167,9 +4191,10 @@
             const autoOpenOverlay = typeof options.autoOpenOverlay === 'boolean'
                 ? options.autoOpenOverlay
                 : !sessionStarted;
+            const preserveCurrentFunction = !!options.preserveCurrentFunction;
             let safeIdx = Number.isFinite(idx) ? idx : 0;
             safeIdx = Math.max(0, Math.min(questions.length - 1, safeIdx));
-            if (sessionStarted && isPreStartOnlyQuestion(questions[safeIdx])) {
+            if (isPreStartOnlyQuestion(questions[safeIdx])) {
                 let firstPractice = getFirstPracticeQuestionIndex();
                 if (firstPractice >= 0) safeIdx = firstPractice;
             }
@@ -4200,26 +4225,34 @@
             applyReadAnswerHeatState(0, false);
             applyHandleHeatState(0, false);
 
-            if (q.goal === 'choose_function_template') {
-                let startTemplate = getQuestionStartTemplate(q, idx);
-                if (startTemplate) applyTemplateById(startTemplate.id, false);
-            } else {
-                let startTemplate = getQuestionStartTemplate(q, idx);
-                if (startTemplate) applyTemplateById(startTemplate.id, false);
-                if (Array.isArray(q.params) || (q.defaults && typeof q.defaults === 'object')) {
-                    let qParams = getQuestionParamsArray(q);
-                    params.a = qParams[0]; document.getElementById('inpA').value = params.a;
-                    params.b = qParams[1]; document.getElementById('inpB').value = params.b;
-                    params.c = qParams[2]; document.getElementById('inpC').value = params.c;
-                    params.d = qParams[3]; document.getElementById('inpD').value = params.d;
-                    params.e = qParams[4] || 0; document.getElementById('inpE').value = params.e;
+            if (!preserveCurrentFunction) {
+                if (q.goal === 'choose_function_template') {
+                    let startTemplate = getQuestionStartTemplate(q, idx);
+                    if (startTemplate) applyTemplateById(startTemplate.id, false);
                 } else {
-                    document.getElementById('inpA').value = params.a;
-                    document.getElementById('inpB').value = params.b;
-                    document.getElementById('inpC').value = params.c;
-                    document.getElementById('inpD').value = params.d;
-                    document.getElementById('inpE').value = params.e;
+                    let startTemplate = getQuestionStartTemplate(q, idx);
+                    if (startTemplate) applyTemplateById(startTemplate.id, false);
+                    if (Array.isArray(q.params) || (q.defaults && typeof q.defaults === 'object')) {
+                        let qParams = getQuestionParamsArray(q);
+                        params.a = qParams[0]; document.getElementById('inpA').value = params.a;
+                        params.b = qParams[1]; document.getElementById('inpB').value = params.b;
+                        params.c = qParams[2]; document.getElementById('inpC').value = params.c;
+                        params.d = qParams[3]; document.getElementById('inpD').value = params.d;
+                        params.e = qParams[4] || 0; document.getElementById('inpE').value = params.e;
+                    } else {
+                        document.getElementById('inpA').value = params.a;
+                        document.getElementById('inpB').value = params.b;
+                        document.getElementById('inpC').value = params.c;
+                        document.getElementById('inpD').value = params.d;
+                        document.getElementById('inpE').value = params.e;
+                    }
                 }
+            } else {
+                document.getElementById('inpA').value = params.a;
+                document.getElementById('inpB').value = params.b;
+                document.getElementById('inpC').value = params.c;
+                document.getElementById('inpD').value = params.d;
+                document.getElementById('inpE').value = params.e;
             }
 
             let paramSpec = getQuestionParamSpec(q);
