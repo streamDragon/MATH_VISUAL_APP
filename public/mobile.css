@@ -1292,7 +1292,32 @@ h2 {
 }
 
 body.session-started #builder-template-panel {
-    display: none !important;
+    display: block;
+    border-style: dashed;
+    background: #f8fbff;
+}
+
+#builder-question-template-label {
+    margin: 4px 0 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #0f356f;
+}
+
+#btn-apply-question-template {
+    width: 100%;
+    border: 1px solid #86a8da;
+    border-radius: 8px;
+    background: #edf4ff;
+    color: #0f356f;
+    font-weight: 700;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+#btn-apply-question-template:disabled {
+    opacity: 0.55;
+    cursor: default;
 }
 
 #template-select {
@@ -2877,6 +2902,7 @@ body.session-started #builder-template-panel {
     .step-actions button,
     .feedback-actions button,
     .read-answer-row button,
+    #btn-apply-question-template,
     #btn-apply-template,
     #btn-apply-template-params {
         min-height: var(--tap-min);
