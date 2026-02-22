@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0, s-maxage=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Surrogate-Control" content="no-store">
+    <meta name="googlebot" content="noarchive">
+    <meta name="app-build-id" content="__BUILD_ID__">
+    <meta name="app-version" content="__APP_VERSION__">
     <title>מעבדת הפונקציות - המלא והשלם</title>
 
     <script>
@@ -27,25 +31,25 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="public/mobile.css" onerror="this.onerror=null;this.href='mobile.css';">
+    <link rel="stylesheet" href="public/mobile.css?v=__BUILD_ID__" onerror="this.onerror=null;this.href='mobile.css?v=__BUILD_ID__';">
     <script>window.__ASSET_BASE = 'public/';</script>
-    <script src="public/questions.js"></script>
+    <script src="public/questions.js?v=__BUILD_ID__"></script>
     <script>
         if (typeof QUESTIONS === 'undefined') {
             window.__ASSET_BASE = '';
-            document.write('<script src="questions.js"><\/script>');
+            document.write('<script src="questions.js?v=__BUILD_ID__"><\/script>');
         }
     </script>
-    <script src="public/sound.js"></script>
+    <script src="public/sound.js?v=__BUILD_ID__"></script>
     <script>
         if (typeof toggleSound !== 'function') {
-            document.write('<script src="sound.js"><\/script>');
+            document.write('<script src="sound.js?v=__BUILD_ID__"><\/script>');
         }
     </script>
-    <script src="public/capacitor.js"></script>
+    <script src="public/capacitor.js?v=__BUILD_ID__"></script>
     <script>
         if (typeof Capacitor === 'undefined') {
-            document.write('<script src="capacitor.js"><\/script>');
+            document.write('<script src="capacitor.js?v=__BUILD_ID__"><\/script>');
         }
     </script>
 </head>
@@ -279,6 +283,10 @@
             <div id="top-question-wrap">
                 <span id="top-question-index">שאלה 1/4</span>
                 <span id="top-question">טוען...</span>
+                <div id="top-build-cta-wrap">
+                    <button id="btn-top-build-cta" type="button" onclick="openBuilderFromMainCta()">לחצו כאן לבניית פונקציה</button>
+                    <span id="top-build-cta-note">אחר כך לוחצים בפרמטרים: "קבע פונקציה והתחל תרגול".</span>
+                </div>
                 <div id="top-question-quick-row">
                     <button id="btn-open-params-inline" type="button" onclick="openBuilderFromTop()">⚙ פתח פרמטרים</button>
                     <button id="btn-focus-steps-inline" type="button" onclick="focusStepsFromTop()">⬅ התחילו משמאל</button>
@@ -331,6 +339,10 @@
                 <button id="btn-feedback" onclick="openFeedbackModal()">כיכר השוק</button>
                 <button id="btn-top-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
             </div>
+        </div>
+        <div id="practice-question-bar" aria-live="polite">
+            <span id="practice-question-index">שאלה 1/4</span>
+            <span id="practice-question-title">טוען...</span>
         </div>
         <div id="graph-area"></div>
     </div>
@@ -572,6 +584,8 @@
         let guidedDemoRaf = null;
         let guidedDemoTimer = null;
         let sidebarFocusPulseTimer = null;
+        let buildWatchInterval = null;
+        let buildWatchEventsBound = false;
 
         function setupOpeningSplashMedia() {
             let video = document.getElementById('opening-splash-video');
@@ -879,6 +893,12 @@
             }
         }
 
+        function parseVersionNumber(token) {
+            let txt = (typeof token === 'string') ? token.trim() : '';
+            if (!/^\d+$/.test(txt)) return NaN;
+            return Number(txt);
+        }
+
         async function fetchVersionMeta() {
             let stamp = Date.now();
             let candidates = [
@@ -887,7 +907,14 @@
             ];
             for (let path of candidates) {
                 try {
-                    let res = await fetch(path, { cache: 'no-store' });
+                    let res = await fetch(path, {
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        }
+                    });
                     if (!res.ok) continue;
                     let data = await res.json();
                     if (data && typeof data === 'object') return data;
@@ -898,22 +925,88 @@
             return null;
         }
 
+        function isRemoteVersionNewer(data) {
+            if (!data || typeof data !== 'object') return false;
+            let remoteVersion = parseVersionNumber(data.app_version);
+            let localVersion = parseVersionNumber(APP_VERSION);
+            if (Number.isFinite(remoteVersion) && Number.isFinite(localVersion) && remoteVersion > localVersion) {
+                return true;
+            }
+
+            let remoteBuild = (typeof data.build === 'string') ? data.build.trim() : '';
+            let localBuild = (typeof APP_BUILD === 'string') ? APP_BUILD.trim() : '';
+            if (!remoteBuild || remoteBuild === '__BUILD_ID__') return false;
+            if (!localBuild || localBuild === '__BUILD_ID__') return true;
+            return remoteBuild !== localBuild;
+        }
+
+        function shouldForceReloadForTransition(transitionKey) {
+            let storageKey = 'math_visual_forced_reload_guard_v2';
+            let now = Date.now();
+            let windowMs = 5 * 60 * 1000;
+            let maxAttempts = 3;
+            let state = null;
+            try {
+                let raw = sessionStorage.getItem(storageKey);
+                if (raw) state = JSON.parse(raw);
+            } catch (err) {
+                state = null;
+            }
+
+            if (!state || state.key !== transitionKey || (now - (state.firstTs || 0)) > windowMs) {
+                state = { key: transitionKey, firstTs: now, count: 1 };
+            } else {
+                state.count = Number.isFinite(state.count) ? (state.count + 1) : 1;
+            }
+
+            try {
+                sessionStorage.setItem(storageKey, JSON.stringify(state));
+            } catch (err) {
+                // Continue even if storage is blocked.
+            }
+            return state.count <= maxAttempts;
+        }
+
+        async function forceHardReloadToLatestBuild(data) {
+            let remoteBuild = (typeof data?.build === 'string') ? data.build.trim() : '';
+            let remoteVersion = (typeof data?.app_version === 'string') ? data.app_version.trim() : '';
+            let transition = `${APP_VERSION || 'local'}|${APP_BUILD || 'local'}->${remoteVersion || '?'}|${remoteBuild || '?'}`;
+            if (!shouldForceReloadForTransition(transition)) return;
+
+            try {
+                if ('caches' in window) {
+                    let keys = await caches.keys();
+                    await Promise.all(keys.map((key) => caches.delete(key)));
+                }
+            } catch (err) {
+                // Ignore cache API failures.
+            }
+
+            try {
+                if ('serviceWorker' in navigator) {
+                    let regs = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(regs.map((reg) => reg.update()));
+                }
+            } catch (err) {
+                // Ignore service worker update failures.
+            }
+
+            let url = new URL(window.location.href);
+            let buildHint = (remoteBuild && remoteBuild !== '__BUILD_ID__')
+                ? remoteBuild
+                : (remoteVersion ? `v${remoteVersion}` : `ts${Date.now()}`);
+            url.searchParams.set('v', buildHint);
+            url.searchParams.set('cb', `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`);
+            url.searchParams.set('hard', Date.now().toString());
+            window.location.replace(url.toString());
+        }
+
         async function ensureLatestBuild() {
             try {
                 let data = await fetchVersionMeta();
                 if (!data) return;
-                let latestBuild = (data && typeof data.build === 'string') ? data.build.trim() : '';
-                if (!latestBuild || latestBuild === APP_BUILD) return;
-
-                let url = new URL(window.location.href);
-                let transition = `${APP_BUILD}->${latestBuild}`;
-                let loopGuardKey = 'math_visual_last_forced_transition';
-                if (sessionStorage.getItem(loopGuardKey) === transition) return;
-                sessionStorage.setItem(loopGuardKey, transition);
-
-                url.searchParams.set('v', latestBuild);
-                url.searchParams.set('cb', Date.now().toString(36));
-                window.location.replace(url.toString());
+                if (!isRemoteVersionNewer(data)) return;
+                await forceHardReloadToLatestBuild(data);
             } catch (err) {
                 // If version check fails, keep current page running.
             }
@@ -932,7 +1025,24 @@
             }
         }
 
-        ensureLatestBuild();
+        function startBuildWatchdog() {
+            ensureLatestBuild();
+            if (buildWatchInterval) clearInterval(buildWatchInterval);
+            let intervalMs = isInSitesContext() ? 45000 : 120000;
+            buildWatchInterval = setInterval(() => {
+                ensureLatestBuild();
+            }, intervalMs);
+            if (!buildWatchEventsBound) {
+                buildWatchEventsBound = true;
+                window.addEventListener('focus', () => ensureLatestBuild());
+                window.addEventListener('pageshow', () => ensureLatestBuild());
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) ensureLatestBuild();
+                });
+            }
+        }
+
+        startBuildWatchdog();
 
         function createDefaultProgress() {
             return {
@@ -1151,6 +1261,13 @@
             return getQuestionsList().length > 0;
         }
 
+        function updatePracticeQuestionBar(indexText, titleText) {
+            let idxEl = document.getElementById('practice-question-index');
+            let titleEl = document.getElementById('practice-question-title');
+            if (idxEl) idxEl.innerText = indexText || '';
+            if (titleEl) titleEl.innerText = titleText || '';
+        }
+
         function renderNoQuestionsState() {
             setQuestionIntroActive(false);
             let topIndex = document.getElementById('top-question-index');
@@ -1162,6 +1279,7 @@
             if (topQuestion) topQuestion.innerText = 'לא נטענה רשימת שאלות';
             if (topStep) topStep.innerText = 'רענן את הדף או פתח שוב את האתר.';
             if (mission) mission.innerText = 'לא נטענו שאלות. בצע רענון מלא (Ctrl+F5).';
+            updatePracticeQuestionBar('שאלות: 0', 'לא נטענה רשימת שאלות');
             if (topSelect) {
                 topSelect.innerHTML = '';
                 topSelect.disabled = true;
@@ -2136,7 +2254,7 @@
             refreshTopQuestionSelect(0);
             topSelect.addEventListener('change', (ev) => {
                 let idx = parseInt(ev.target.value, 10);
-                loadQ(idx, { autoOpenOverlay: true });
+                loadQ(idx, { autoOpenOverlay: !sessionStarted });
             });
 
             activeTemplate = getDefaultTemplate();
@@ -4254,6 +4372,7 @@
 
         function syncSessionUiState() {
             document.body.classList.toggle('session-started', sessionStarted);
+            document.body.classList.toggle('practice-clean-mode', sessionStarted);
             let prestartHint = document.getElementById('prestart-hint');
             if (prestartHint) prestartHint.classList.toggle('hidden', sessionStarted);
             ['btn-top-init-builder'].forEach((id) => {
@@ -4336,6 +4455,23 @@
             updateBuilderVisibility(q);
         }
 
+        function pulseStartConfirmButton() {
+            let btn = document.getElementById('btn-apply-template-params');
+            if (!btn) return;
+            btn.classList.remove('focus-pulse');
+            // Restart animation when the user re-opens the builder.
+            void btn.offsetWidth;
+            btn.classList.add('focus-pulse');
+            setTimeout(() => btn.classList.remove('focus-pulse'), 2400);
+        }
+
+        function openBuilderFromMainCta() {
+            if (sessionStarted) return;
+            openBuilderFromTop();
+            showStepToast('בנו פונקציה בפרמטרים ואז לחצו "קבע פונקציה והתחל תרגול".');
+            setTimeout(pulseStartConfirmButton, 120);
+        }
+
         function openInitialBuilderFromTop() {
             if (sessionStarted) return;
             openInitialBuilderModal();
@@ -4376,6 +4512,7 @@
             document.getElementById('q-desc').innerText = q.desc;
             document.getElementById('top-question-index').innerText = `שאלה ${displayNumber}/${displayTotal}`;
             document.getElementById('top-question').innerText = `${q.title}`;
+            updatePracticeQuestionBar(`שאלה ${displayNumber}/${displayTotal}`, `${q.title}`);
             refreshTopQuestionSelect(safeIdx);
             updateLearnerProgressChip();
             let winOverlay = document.getElementById('win-overlay');
@@ -4481,7 +4618,7 @@
             document.getElementById('btn-next-step').classList.add('hidden');
             renderMission();
             updateSpecialPanels();
-            setQuestionIntroActive(true);
+            setQuestionIntroActive(!sessionStarted);
 
             p.setCoords(0, evaluateFunctionAt(0));
             fitBoardToCurrentFunction();
