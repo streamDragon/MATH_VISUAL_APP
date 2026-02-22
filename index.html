@@ -440,7 +440,7 @@
                 <span id="top-question">טוען...</span>
                 <div id="top-build-cta-wrap">
                     <button id="btn-top-build-cta" type="button" onclick="openBuilderFromMainCta()">לחצו כאן לבניית פונקציה</button>
-                    <span id="top-build-cta-note">אחר כך לוחצים בפרמטרים: "קבע פונקציה והתחל תרגול".</span>
+                    <span id="top-build-cta-note">לפני התרגול אפשר לבחור כל פונקציה פולינומית. בונים פונקציה ואז לוחצים "קבע פונקציה והתחל תרגול".</span>
                 </div>
                 <div id="top-question-quick-row">
                     <button id="btn-open-params-inline" type="button" onclick="openBuilderFromTop()">⚙ פתח פרמטרים</button>
@@ -607,7 +607,7 @@
                     <div id="builder-template-panel">
                         <div class="section-title">הגדרה לפני תחילת תרגול</div>
                         <div id="builder-question-template-label">גרף פתיחה לשאלה: טוען...</div>
-                        <div id="builder-template-type-note">בחרו סוג פונקציה שאתם רוצים לחקור (ישר / פרבולה / פולינום).</div>
+                        <div id="builder-template-type-note">לפני שמתחילים תרגול אפשר לבחור כל פונקציה פולינומית: קודם בוחרים סוג פונקציה (ישר / פרבולה / פולינום), ואז מדייקים אותה בעזרת הפרמטרים.</div>
                         <select id="template-select" onchange="applySelectedTemplate(false)"></select>
                         <div id="template-setup-actions">
                             <button id="btn-apply-question-template" onclick="applyQuestionStartTemplateFromBuilder()">טען גרף פתיחה לשאלה</button>
@@ -616,7 +616,7 @@
                         </div>
                         <div id="template-status-text"></div>
                     </div>
-                    <div id="builder-focus-note">הזיזו פרמטר וצפו מיד בגרף למעלה.</div>
+                    <div id="builder-focus-note">שנו פרמטר אחד בכל פעם וצפו מיד בגרף למעלה, כדי להבין מה כל פרמטר משנה.</div>
                     <div id="builder-formula-preview" aria-live="polite">
                         <div class="builder-formula-line" id="builder-formula-fx">f(x) = ...</div>
                         <div class="builder-formula-line" id="builder-formula-dx">f'(x) = ...</div>
@@ -643,7 +643,7 @@
                     <div class="slider-row"><span class="slider-lbl">d</span><input type="range" id="inpD" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintD"></span></div>
                     <div class="slider-row"><span class="slider-lbl">e</span><input type="range" id="inpE" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintE"></span></div>
                     <div id="builder-confirm-wrap">
-                        <div id="builder-confirm-note">אחרי שקוראים את ההסבר של התרגיל ומשחקים עם הפרמטרים, מאשרים ומתחילים תרגול.</div>
+                        <div id="builder-confirm-note">כשתסיימו לבנות את הפונקציה הרצויה (גם אם היא לא גרף הפתיחה המומלץ), לחצו "קבע פונקציה והתחל תרגול".</div>
                         <button id="btn-apply-template-params" onclick="confirmFunctionAndStart()">קבע פונקציה והתחל תרגול</button>
                     </div>
                 </div>
@@ -1681,7 +1681,7 @@
             if (status && !templateChosen) {
                 status.innerText = sessionStarted
                     ? 'רוצים להתחיל את השאלה מהגרף המומלץ? לחצו "טען גרף פתיחה לשאלה הזאת".'
-                    : `המלצה: התחילו מהתצורה "${tpl.title}", שחקו עם הפרמטרים ואז קבעו פונקציה.`;
+                    : `המלצה: התחילו מהתצורה "${tpl.title}", או בחרו סוג פונקציה אחר, דייקו עם הפרמטרים ואז קבעו פונקציה.`;
             }
         }
 
@@ -5416,7 +5416,7 @@
             closeStartGuide(true);
             openAccordion('params');
             setDrawerOpen(true);
-            showStepToast('לפני תרגול: בחרו תצורה, שחקו עם הפרמטרים, ואז לחצו "קבע פונקציה והתחל תרגול".');
+            showStepToast('לפני תרגול: בחרו סוג פונקציה, דייקו עם הפרמטרים, ואז לחצו "קבע פונקציה והתחל תרגול".');
         }
 
         function onStartGuideBackdropClick(event) {
@@ -5569,7 +5569,7 @@
         function openBuilderFromMainCta() {
             if (sessionStarted) return;
             openBuilderFromTop();
-            showStepToast('בנו פונקציה בפרמטרים ואז לחצו "קבע פונקציה והתחל תרגול".');
+            showStepToast('בחרו סוג פונקציה, דייקו עם הפרמטרים, ואז לחצו "קבע פונקציה והתחל תרגול".');
             setTimeout(pulseStartConfirmButton, 120);
         }
 
