@@ -290,6 +290,123 @@ body.embed-mode.practice-clean-mode #graph-area {
     aspect-ratio: auto;
 }
 
+body.prestart-only,
+body.embed-mode.prestart-only {
+    overflow: hidden;
+    height: 100dvh;
+    min-height: 100dvh;
+}
+
+body.prestart-only #graph-area-wrapper {
+    height: 100dvh;
+    min-height: 0;
+}
+
+body.prestart-only #practice-question-bar,
+body.prestart-only #top-version-badge,
+body.prestart-only #top-formulas,
+body.prestart-only #top-overlay-cta,
+body.prestart-only #top-actions,
+body.prestart-only #btn-tools-menu,
+body.prestart-only #sound-toggle,
+body.prestart-only #side-quick-actions {
+    display: none !important;
+}
+
+body.prestart-only #top-question-wrap {
+    flex: 1 1 100%;
+    max-width: none;
+}
+
+body.prestart-only #top-strip {
+    padding: calc(8px + var(--safe-top)) 10px 8px;
+}
+
+body.prestart-only #sidebar {
+    display: none !important;
+}
+
+body.prestart-only.builder-workspace-mode::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.38);
+    z-index: 2490;
+    pointer-events: none;
+}
+
+body.prestart-only.builder-workspace-mode #sidebar {
+    display: flex !important;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(720px, 96vw);
+    height: auto;
+    max-height: min(90dvh, 860px);
+    border-right: none;
+    border-top: 4px solid #1d4ed8;
+    border-radius: 12px;
+    box-shadow: 0 16px 46px rgba(15, 23, 42, 0.32);
+    z-index: 2500;
+    overflow: hidden;
+}
+
+body.prestart-only.builder-workspace-mode #drawer-handle {
+    display: block !important;
+    border: 0;
+    border-bottom: 1px solid #1e40af;
+    background: linear-gradient(120deg, #1d4ed8, #2563eb);
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 800;
+    padding: 9px 12px;
+}
+
+body.prestart-only.builder-workspace-mode #drawer-content {
+    max-height: calc(min(90dvh, 860px) - 45px);
+    overflow-y: auto;
+    padding: 10px 12px 12px;
+}
+
+body.prestart-only.builder-workspace-mode #acc-item-steps,
+body.prestart-only.builder-workspace-mode #acc-item-formulas,
+body.prestart-only.builder-workspace-mode #acc-item-tools {
+    display: none !important;
+}
+
+body.prestart-only.builder-workspace-mode #acc-item-params {
+    display: block !important;
+    margin-top: 0;
+}
+
+body.prestart-only.builder-workspace-mode #btn-builder {
+    display: none !important;
+}
+
+body.prestart-only.builder-workspace-mode #builder-panel {
+    display: block !important;
+    margin-top: 0;
+}
+
+body.prestart-only.builder-workspace-mode #btn-apply-question-template,
+body.prestart-only.builder-workspace-mode #btn-apply-template,
+body.prestart-only.builder-workspace-mode #template-status-text,
+body.prestart-only.builder-workspace-mode #builder-focus-note,
+body.prestart-only.builder-workspace-mode #builder-live-values {
+    display: none !important;
+}
+
+body.prestart-only.builder-workspace-mode #template-setup-actions {
+    gap: 8px;
+}
+
+body.prestart-only.builder-workspace-mode #btn-apply-template-params {
+    min-height: 48px;
+    font-size: 0.98rem;
+    font-weight: 900;
+}
+
 #top-version-badge {
     display: inline-flex;
     align-items: center;

@@ -4379,6 +4379,7 @@
         function syncSessionUiState() {
             document.body.classList.toggle('session-started', sessionStarted);
             document.body.classList.toggle('practice-clean-mode', sessionStarted);
+            document.body.classList.toggle('prestart-only', !sessionStarted);
             if (sessionStarted && drawerOpen) setDrawerOpen(false);
             let prestartHint = document.getElementById('prestart-hint');
             if (prestartHint) prestartHint.classList.toggle('hidden', sessionStarted);
