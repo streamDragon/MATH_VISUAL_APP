@@ -380,6 +380,12 @@ body.prestart-only #top-actions {
     border-radius: 10px;
 }
 
+/* In Google Sites embed prestart flow, keep version visible for debugging/deploy verification. */
+body.embed-mode.prestart-only #top-version-badge {
+    display: inline-flex !important;
+    align-items: center;
+}
+
 body.prestart-only #top-actions button {
     display: none !important;
 }
