@@ -14,21 +14,100 @@
 
     <script>
         (function ensureBuildQueryParam() {
+            const GUARD_KEY = 'math_visual_head_reload_guard_v3';
+
+            function parseVersionToken(meta) {
+                if (!meta || typeof meta !== 'object') return '';
+                let build = (typeof meta.build === 'string') ? meta.build.trim() : '';
+                if (build && build !== '__BUILD_ID__') return build;
+                let version = (typeof meta.app_version === 'string') ? meta.app_version.trim() : '';
+                if (/^\d+$/.test(version)) return `v${version}`;
+                return '';
+            }
+
+            function fetchVersionMetaSync() {
+                let stamp = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+                let candidates = [
+                    `public/version.json?cb=${stamp}`,
+                    `version.json?cb=${stamp}`
+                ];
+                for (let path of candidates) {
+                    try {
+                        let xhr = new XMLHttpRequest();
+                        xhr.open('GET', path, false);
+                        xhr.setRequestHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+                        xhr.setRequestHeader('Pragma', 'no-cache');
+                        xhr.setRequestHeader('Expires', '0');
+                        xhr.send(null);
+                        if (xhr.status < 200 || xhr.status >= 300) continue;
+                        let data = JSON.parse(xhr.responseText || '{}');
+                        if (data && typeof data === 'object') return data;
+                    } catch (err) {
+                        // Try next candidate.
+                    }
+                }
+                return null;
+            }
+
+            function resolveExpectedToken() {
+                let build = '__BUILD_ID__';
+                let version = '__APP_VERSION__';
+                if (build && build !== '__BUILD_ID__') return build;
+                if (version && version !== '__APP_VERSION__') return `v${version}`;
+                return parseVersionToken(fetchVersionMetaSync());
+            }
+
             try {
-                const url = new URL(window.location.href);
-                if (url.searchParams.get('v')) return;
-                const build = '__BUILD_ID__';
-                const version = '__APP_VERSION__';
-                let token = '';
-                if (build && build !== '__BUILD_ID__') token = build;
-                else if (version && version !== '__APP_VERSION__') token = `v${version}`;
-                else token = `ts${Date.now().toString(36)}`;
-                url.searchParams.set('v', token);
-                url.searchParams.set('cb', Date.now().toString(36));
+                let url = new URL(window.location.href);
+                let currentToken = (url.searchParams.get('v') || '').trim();
+                let expectedToken = (resolveExpectedToken() || '').trim();
+                let nextToken = expectedToken || currentToken || `ts${Date.now().toString(36)}`;
+                window.__APP_ASSET_TOKEN__ = nextToken;
+
+                let shouldReplace = !currentToken || (!!expectedToken && currentToken !== expectedToken);
+                if (!shouldReplace) return;
+
+                let transitionKey = `${currentToken || '-'}=>${nextToken}`;
+                let alreadyReloaded = false;
+                try {
+                    alreadyReloaded = sessionStorage.getItem(GUARD_KEY) === transitionKey;
+                } catch (err) {
+                    alreadyReloaded = false;
+                }
+                if (alreadyReloaded) return;
+
+                try {
+                    sessionStorage.setItem(GUARD_KEY, transitionKey);
+                } catch (err) {
+                    // Continue even when storage is blocked.
+                }
+
+                url.searchParams.set('v', nextToken);
+                url.searchParams.set('cb', `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`);
+                url.searchParams.set('hard', Date.now().toString());
                 window.location.replace(url.toString());
             } catch (err) {
-                // Keep running if URL parsing fails.
+                try {
+                    let params = new URLSearchParams(window.location.search);
+                    let fallbackToken = (params.get('v') || '').trim() || `ts${Date.now().toString(36)}`;
+                    window.__APP_ASSET_TOKEN__ = fallbackToken;
+                } catch (innerErr) {
+                    window.__APP_ASSET_TOKEN__ = `ts${Date.now().toString(36)}`;
+                }
             }
+        })();
+
+        (function prepareRuntimeAssetQuery() {
+            let token = '';
+            try {
+                token = (window.__APP_ASSET_TOKEN__ || '').trim();
+                if (!token) token = (new URLSearchParams(window.location.search).get('v') || '').trim();
+            } catch (err) {
+                token = '';
+            }
+            if (!token) token = `ts${Date.now().toString(36)}`;
+            window.__APP_ASSET_TOKEN__ = token;
+            window.__APP_ASSET_QUERY = `v=${encodeURIComponent(token)}&cb=${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
         })();
     </script>
 
@@ -36,26 +115,39 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="public/mobile.css?v=__BUILD_ID__" onerror="this.onerror=null;this.href='mobile.css?v=__BUILD_ID__';">
-    <script>window.__ASSET_BASE = 'public/';</script>
-    <script src="public/questions.js?v=__BUILD_ID__"></script>
     <script>
-        if (typeof QUESTIONS === 'undefined') {
-            window.__ASSET_BASE = '';
-            document.write('<script src="questions.js?v=__BUILD_ID__"><\/script>');
-        }
-    </script>
-    <script src="public/sound.js?v=__BUILD_ID__"></script>
-    <script>
-        if (typeof toggleSound !== 'function') {
-            document.write('<script src="sound.js?v=__BUILD_ID__"><\/script>');
-        }
-    </script>
-    <script src="public/capacitor.js?v=__BUILD_ID__"></script>
-    <script>
-        if (typeof Capacitor === 'undefined') {
-            document.write('<script src="capacitor.js?v=__BUILD_ID__"><\/script>');
-        }
+        (function injectCoreAssets() {
+            let query = window.__APP_ASSET_QUERY || `v=ts${Date.now().toString(36)}`;
+            let cssLink = document.createElement('link');
+            cssLink.rel = 'stylesheet';
+            cssLink.href = `public/mobile.css?${query}`;
+            cssLink.onerror = function () {
+                this.onerror = null;
+                this.href = `mobile.css?${query}`;
+            };
+            document.head.appendChild(cssLink);
+
+            function writeScript(src) {
+                document.write('<script src="' + src + '"><\\/script>');
+            }
+
+            window.__ASSET_BASE = 'public/';
+            writeScript(`public/questions.js?${query}`);
+            if (typeof QUESTIONS === 'undefined') {
+                window.__ASSET_BASE = '';
+                writeScript(`questions.js?${query}`);
+            }
+
+            writeScript(`public/sound.js?${query}`);
+            if (typeof toggleSound !== 'function') {
+                writeScript(`sound.js?${query}`);
+            }
+
+            writeScript(`public/capacitor.js?${query}`);
+            if (typeof Capacitor === 'undefined') {
+                writeScript(`capacitor.js?${query}`);
+            }
+        })();
     </script>
 </head>
 <body class="prestart-only">
@@ -907,11 +999,28 @@
             return Number(txt);
         }
 
+        function getUrlVersionToken() {
+            try {
+                return (new URLSearchParams(window.location.search).get('v') || '').trim();
+            } catch (err) {
+                return '';
+            }
+        }
+
+        function getRemoteVersionToken(data) {
+            if (!data || typeof data !== 'object') return '';
+            let remoteBuild = (typeof data.build === 'string') ? data.build.trim() : '';
+            if (remoteBuild && remoteBuild !== '__BUILD_ID__') return remoteBuild;
+            let remoteVersion = (typeof data.app_version === 'string') ? data.app_version.trim() : '';
+            if (/^\d+$/.test(remoteVersion)) return `v${remoteVersion}`;
+            return '';
+        }
+
         async function fetchVersionMeta() {
-            let stamp = Date.now();
+            let stamp = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
             let candidates = [
-                `version.json?t=${stamp}`,
-                `public/version.json?t=${stamp}`
+                `public/version.json?cb=${stamp}`,
+                `version.json?cb=${stamp}`
             ];
             for (let path of candidates) {
                 try {
@@ -935,6 +1044,12 @@
 
         function isRemoteVersionNewer(data) {
             if (!data || typeof data !== 'object') return false;
+            let remoteToken = getRemoteVersionToken(data);
+            let urlToken = getUrlVersionToken();
+            if (remoteToken && (!urlToken || urlToken !== remoteToken)) {
+                return true;
+            }
+
             let remoteVersion = parseVersionNumber(data.app_version);
             let localVersion = parseVersionNumber(APP_VERSION);
             if (Number.isFinite(remoteVersion) && Number.isFinite(localVersion) && remoteVersion > localVersion) {
@@ -1000,9 +1115,7 @@
             }
 
             let url = new URL(window.location.href);
-            let buildHint = (remoteBuild && remoteBuild !== '__BUILD_ID__')
-                ? remoteBuild
-                : (remoteVersion ? `v${remoteVersion}` : `ts${Date.now()}`);
+            let buildHint = getRemoteVersionToken(data) || `ts${Date.now()}`;
             url.searchParams.set('v', buildHint);
             url.searchParams.set('cb', `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`);
             url.searchParams.set('hard', Date.now().toString());
@@ -1036,7 +1149,7 @@
         function startBuildWatchdog() {
             ensureLatestBuild();
             if (buildWatchInterval) clearInterval(buildWatchInterval);
-            let intervalMs = isInSitesContext() ? 45000 : 120000;
+            let intervalMs = isInSitesContext() ? 20000 : 120000;
             buildWatchInterval = setInterval(() => {
                 ensureLatestBuild();
             }, intervalMs);

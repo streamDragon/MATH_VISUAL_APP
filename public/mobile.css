@@ -307,6 +307,13 @@ body.prestart-only #top-version-badge,
 body.prestart-only #top-formulas,
 body.prestart-only #top-overlay-cta,
 body.prestart-only #top-actions,
+body.prestart-only #top-question-quick-row,
+body.prestart-only #top-step-status,
+body.prestart-only #progress-hint,
+body.prestart-only #prestart-hint,
+body.prestart-only #build-badge,
+body.prestart-only #learner-progress-chip,
+body.prestart-only #top-brief-card,
 body.prestart-only #btn-tools-menu,
 body.prestart-only #sound-toggle,
 body.prestart-only #side-quick-actions {
@@ -320,6 +327,17 @@ body.prestart-only #top-question-wrap {
 
 body.prestart-only #top-strip {
     padding: calc(8px + var(--safe-top)) 10px 8px;
+}
+
+body.prestart-only #top-build-cta-wrap {
+    margin-top: 10px;
+}
+
+body.prestart-only #btn-top-build-cta {
+    min-height: 56px;
+    font-size: 1.03rem;
+    font-weight: 900;
+    animation: prestart-cta-pulse 1.25s ease-in-out infinite;
 }
 
 body.prestart-only #sidebar {
@@ -405,6 +423,17 @@ body.prestart-only.builder-workspace-mode #btn-apply-template-params {
     min-height: 48px;
     font-size: 0.98rem;
     font-weight: 900;
+}
+
+@keyframes prestart-cta-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.22);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 12px rgba(249, 115, 22, 0);
+        transform: scale(1.02);
+    }
 }
 
 #top-version-badge {
