@@ -15,11 +15,16 @@
     <script>
         (function ensureBuildQueryParam() {
             try {
-                const build = '__BUILD_ID__';
-                if (!build || build === '__BUILD_ID__') return;
                 const url = new URL(window.location.href);
                 if (url.searchParams.get('v')) return;
-                url.searchParams.set('v', build);
+                const build = '__BUILD_ID__';
+                const version = '__APP_VERSION__';
+                let token = '';
+                if (build && build !== '__BUILD_ID__') token = build;
+                else if (version && version !== '__APP_VERSION__') token = `v${version}`;
+                else token = `ts${Date.now().toString(36)}`;
+                url.searchParams.set('v', token);
+                url.searchParams.set('cb', Date.now().toString(36));
                 window.location.replace(url.toString());
             } catch (err) {
                 // Keep running if URL parsing fails.
@@ -53,7 +58,7 @@
         }
     </script>
 </head>
-<body>
+<body class="prestart-only">
 
     <div id="opening-splash" class="hidden" aria-label="מסך פתיחה">
         <div id="opening-splash-backdrop" aria-hidden="true">
@@ -513,6 +518,7 @@
         const OPENING_MUSIC_DURATION_SECONDS = 30;
         const QUICK_TOUR_STORAGE_KEY = 'math_visual_quick_tour_v1';
         const QUICK_TOUR_AUTO_DELAY_MS = 320;
+        const AUTO_OPEN_START_GUIDE = false;
         const RUNTIME_ASSET_BASE = (() => {
             if (typeof window.__ASSET_BASE === 'string') return window.__ASSET_BASE;
             try {
@@ -807,6 +813,7 @@
         }
 
         function maybeOpenStartChoiceAfterSplash() {
+            if (!AUTO_OPEN_START_GUIDE) return;
             if (launchChoiceAutoPending) return;
             if (sessionStarted) return;
             if (quickTourActive) return;
