@@ -3733,11 +3733,16 @@
             if (!textEl || !successEl || !listEl) return;
 
             if (!sessionStarted) {
-                textEl.innerText = 'מה עושים עכשיו: פותחים את "פרמטרים", בוחרים תצורה כללית ומשחקים עם a,b,c,d,e.';
-                successEl.innerText = 'הצלחה: אחרי שבחרתם תצורה נוחה ולחצתם "קבע פונקציה והתחל תרגול".';
+                let shortDesc = getQuestionShortDesc(q);
+                let prestartEssence = getShortText(q?.overlay?.essence, shortDesc.first);
+                let prestartGoal = getShortText(q?.overlay?.goal, shortDesc.second);
+                textEl.innerText = `מה עושים עכשיו: ${prestartEssence}`;
+                successEl.innerText = `הצלחה: בניתם פונקציה שמתאימה למשימה (${prestartGoal}) ולחצתם "קבע פונקציה והתחל תרגול".`;
                 listEl.innerHTML = '';
                 [
-                    'לחצו על כפתור "פרמטרים".',
+                    'קראו את הסבר השאלה בראש המסך.',
+                    'אם רוצים, בוחרים שאלה אחרת מהרשימה למעלה.',
+                    'לחצו על הכפתור הגדול "לחצו כאן לבניית פונקציה".',
                     'בחרו תצורה כללית (ישר/פרבולה/פולינום).',
                     'שנו פרמטר אחד בכל פעם וצפו בגרף.',
                     'בסיום לחצו "קבע פונקציה והתחל תרגול".'
@@ -3764,13 +3769,17 @@
 
         function renderMission() {
             if (!sessionStarted) {
-                let prestartText = 'לפני התרגול: בחרו תצורה בפרמטרים ואז לחצו "קבע פונקציה והתחל תרגול".';
+                let q = getCurrentQuestion();
+                let shortDesc = getQuestionShortDesc(q);
+                let prestartEssence = getShortText(q?.overlay?.essence, shortDesc.first);
+                let prestartGoal = getShortText(q?.overlay?.goal, shortDesc.second);
+                let prestartText = `לפני התרגול: ${prestartEssence}`;
                 document.getElementById('mission-step-text').innerText = prestartText;
                 document.getElementById('top-step-status').innerText = prestartText;
                 let missionNote = document.getElementById('mission-step-note');
-                if (missionNote) missionNote.innerText = 'אחרי קביעת פונקציה, נתחיל משאלה 1 באופן רגיל.';
+                if (missionNote) missionNote.innerText = `מטרה: ${prestartGoal} | אחרי קביעת פונקציה מתחילים לפתור.`;
                 renderMissionExpandedHelp();
-                updateTopBriefCard({ instruction: prestartText });
+                updateTopBriefCard({ instruction: `שאלה ${currentQ + 1}: ${q?.title || 'תרגיל'} | ${prestartEssence}` });
                 return;
             }
             let total = activeSteps.length || 1;
