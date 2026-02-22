@@ -174,7 +174,7 @@
     <div id="side-quick-actions" class="hidden" aria-label="קיצורי דרך" style="display:none !important;" aria-hidden="true">
         <button id="btn-side-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
         <button id="btn-side-questions" onclick="toggleQuestionsFromTop()">שאלות</button>
-        <button id="btn-side-scan" onclick="openScanModal()">סריקת שאלה</button>
+        <button id="btn-side-scan" onclick="openScanModal()">📷 סריקת שאלה</button>
         <button id="btn-side-feedback" onclick="openFeedbackModal()">כיכר השוק</button>
         <button id="btn-side-overlay" onclick="openQuestionOverlay()">הסבר שאלה מלא</button>
         <button id="btn-side-normal" class="hidden" onclick="openNormalLabGuide()">מעבדת האנך</button>
@@ -388,7 +388,7 @@
                 <p class="scan-intro">צלמו שאלה מהטלפון או העלו קובץ תמונה. המערכת תיצור ממנה שאלה מפורקת עם שלבי תרגול ויזואליים.</p>
 
                 <div class="scan-actions-row">
-                    <button id="btn-scan-camera" onclick="triggerScanImageInput('camera')">צלם שאלה (מצלמה)</button>
+                    <button id="btn-scan-camera" onclick="triggerScanImageInput('camera')">📷 צלם שאלה (מצלמה)</button>
                     <button id="btn-scan-upload" onclick="triggerScanImageInput('file')">העלאת תמונה</button>
                     <button id="btn-scan-analyze" onclick="analyzeScannedQuestion()">נתח שאלה</button>
                     <button id="btn-scan-inject" class="hidden" onclick="injectScannedQuestion()">הוסף ל־QUESTIONS ופתח</button>
@@ -486,7 +486,7 @@
                 <span id="top-question-select-label">כאן בוחרים שאלה:</span>
                 <select id="top-question-select" title="בחירת שאלה"></select>
                 <button id="btn-top-questions" onclick="toggleQuestionsFromTop()">שאלות ▼</button>
-                <button id="btn-scan-question" onclick="openScanModal()">סריקת שאלה</button>
+                <button id="btn-scan-question" onclick="openScanModal()">📷 סריקת שאלה</button>
                 <button id="btn-replay-opening" onclick="replayOpeningSplash()">פתיח+שיר</button>
                 <button id="btn-top-init-builder" onclick="openInitialBuilderFromTop()">בנייה ראשונית</button>
                 <button id="btn-start-guide" onclick="openStartGuideModal()">סיור מודרך</button>
@@ -607,15 +607,20 @@
                     <div id="builder-template-panel">
                         <div class="section-title">הגדרה לפני תחילת תרגול</div>
                         <div id="builder-question-template-label">גרף פתיחה לשאלה: טוען...</div>
+                        <div id="builder-template-type-note">בחרו סוג פונקציה שאתם רוצים לחקור (ישר / פרבולה / פולינום).</div>
                         <select id="template-select" onchange="applySelectedTemplate(false)"></select>
                         <div id="template-setup-actions">
                             <button id="btn-apply-question-template" onclick="applyQuestionStartTemplateFromBuilder()">טען גרף פתיחה לשאלה</button>
                             <button id="btn-apply-template" onclick="applySelectedTemplate(false)">החל תצורה</button>
-                            <button id="btn-apply-template-params" onclick="confirmFunctionAndStart()">קבע פונקציה והתחל תרגול</button>
+                            <button id="btn-builder-free-explore" onclick="openFreeExploreBuilder()">בניית פונקציה לחקירה חופשית</button>
                         </div>
                         <div id="template-status-text"></div>
                     </div>
                     <div id="builder-focus-note">הזיזו פרמטר וצפו מיד בגרף למעלה.</div>
+                    <div id="builder-formula-preview" aria-live="polite">
+                        <div class="builder-formula-line" id="builder-formula-fx">f(x) = ...</div>
+                        <div class="builder-formula-line" id="builder-formula-dx">f'(x) = ...</div>
+                    </div>
                     <div id="builder-live-values" aria-live="polite">
                         <span class="builder-val-chip" id="chipA">a=0</span>
                         <span class="builder-val-chip" id="chipB">b=0</span>
@@ -623,11 +628,24 @@
                         <span class="builder-val-chip" id="chipD">d=0</span>
                         <span class="builder-val-chip" id="chipE">e=0</span>
                     </div>
+                    <div id="builder-equation-practice-box" class="hidden">
+                        <div id="builder-equation-practice-title">כתיבת פונקציה מהגרף (בשאלות פרמטרים)</div>
+                        <div id="builder-equation-practice-note">אפשר לכתוב כאן את המשוואה שאתם משערים, ובמקביל לראות מה האפליקציה בנתה מהגרף.</div>
+                        <div class="builder-equation-write-row">
+                            <input id="builder-equation-write" type="text" dir="ltr" placeholder="לדוגמה: f(x)=x^2-3x+2">
+                            <button id="btn-builder-fill-equation" type="button" onclick="fillEquationGuessFromCurrent()">מלא מהגרף</button>
+                        </div>
+                        <div id="builder-equation-auto" dir="ltr">f(x) = ...</div>
+                    </div>
                     <div class="slider-row"><span class="slider-lbl">a</span><input type="range" id="inpA" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintA"></span></div>
                     <div class="slider-row"><span class="slider-lbl">b</span><input type="range" id="inpB" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintB"></span></div>
                     <div class="slider-row"><span class="slider-lbl">c</span><input type="range" id="inpC" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintC"></span></div>
                     <div class="slider-row"><span class="slider-lbl">d</span><input type="range" id="inpD" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintD"></span></div>
                     <div class="slider-row"><span class="slider-lbl">e</span><input type="range" id="inpE" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintE"></span></div>
+                    <div id="builder-confirm-wrap">
+                        <div id="builder-confirm-note">אחרי שקוראים את ההסבר של התרגיל ומשחקים עם הפרמטרים, מאשרים ומתחילים תרגול.</div>
+                        <button id="btn-apply-template-params" onclick="confirmFunctionAndStart()">קבע פונקציה והתחל תרגול</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2714,6 +2732,12 @@
             document.getElementById('top-formula-f').innerText = fxText;
             document.getElementById('formula-tag').innerText = dText;
             document.getElementById('top-formula-tag').innerText = dText;
+            let builderFx = document.getElementById('builder-formula-fx');
+            let builderDx = document.getElementById('builder-formula-dx');
+            let builderEquationAuto = document.getElementById('builder-equation-auto');
+            if (builderFx) builderFx.innerText = fxText;
+            if (builderDx) builderDx.innerText = dText;
+            if (builderEquationAuto) builderEquationAuto.innerText = `${fxText} | ${dText}`;
 
             updateNormalGeometry(x, y, m);
             updateGuideNormalGeometry(x, y, m);
@@ -3668,6 +3692,30 @@
                 document.getElementById('read-answer-prompt').innerText = prompt;
                 if (!readAnswerValidated) document.getElementById('read-answer-feedback').innerText = '';
             }
+            syncBuilderEquationPracticeBox(q);
+        }
+
+        function shouldShowBuilderEquationPractice(q) {
+            if (!q) return false;
+            return q.mode === 'find_param'
+                || q.goal === 'hit_target'
+                || q.goal === 'hit_targets'
+                || q.goal === 'free';
+        }
+
+        function syncBuilderEquationPracticeBox(q) {
+            let box = document.getElementById('builder-equation-practice-box');
+            if (!box) return;
+            box.classList.toggle('hidden', !shouldShowBuilderEquationPractice(q || getCurrentQuestion()));
+        }
+
+        function fillEquationGuessFromCurrent() {
+            let input = document.getElementById('builder-equation-write');
+            let fx = document.getElementById('builder-formula-fx');
+            if (!input || !fx) return;
+            input.value = fx.innerText || '';
+            input.focus();
+            input.select();
         }
 
         function submitReadAnswer() {
@@ -5494,6 +5542,18 @@
             setDrawerOpen(true);
             ensureGraphAndBuilderVisible();
             updateBuilderVisibility(q);
+        }
+
+        function openFreeExploreBuilder() {
+            let questions = getQuestionsList();
+            let freeIdx = questions.findIndex((q) => q?.goal === 'free');
+            if (freeIdx < 0) {
+                showStepToast('לא נמצאה כרגע שאלה של חקירה חופשית.');
+                return;
+            }
+            loadQ(freeIdx, { autoOpenOverlay: false });
+            openBuilderFromTop();
+            showStepToast('עברתם לחקירה חופשית. בחרו סוג פונקציה ונסו פרמטרים.');
         }
 
         function pulseStartConfirmButton() {
