@@ -1,0 +1,90 @@
+
+> dev
+> node ./node_modules/vite/bin/vite.js --host 127.0.0.1
+
+Port 5173 is in use, trying another one...
+
+  [32m[1mVITE[22m v7.3.1[39m  [2mready in [0m[1m437[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5174[22m/[39m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[2m22:40:56[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.dom_dump.html[22m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/version.json?cb=mly7pyd0fl1qc[33m, use [36m/version.json?cb=mly7pyd0fl1qc[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/version.json?cb=mly7pyk8jxkie[33m, use [36m/version.json?cb=mly7pyk8jxkie[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/version.json?cb=mly7pyt63scd9[33m, use [36m/version.json?cb=mly7pyt63scd9[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/version.json?cb=mly7pywumu6a4[33m, use [36m/version.json?cb=mly7pywumu6a4[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/mobile.css?v=v27&cb=mly7pyxilwo8a[33m, use [36m/mobile.css?v=v27&cb=mly7pyxilwo8a[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/questions.js?v=v27&cb=mly7pyxilwo8a[33m, use [36m/questions.js?v=v27&cb=mly7pyxilwo8a[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/mobile.css?v=v27&cb=mly7pyxawbw67[33m, use [36m/mobile.css?v=v27&cb=mly7pyxawbw67[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/questions.js?v=v27&cb=mly7pyxawbw67[33m, use [36m/questions.js?v=v27&cb=mly7pyxawbw67[33m.[39m
+[2m22:40:59[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.dom_dump.html[22m
+[2m22:41:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.dom_dump.html[22m
+[2m22:41:35[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mindex.html[22m
+[2m22:41:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.dom_dump_after.html[22m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/version.json?cb=mly7r3rbnw7j1[33m, use [36m/version.json?cb=mly7r3rbnw7j1[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/version.json?cb=mly7r3wu0b85t[33m, use [36m/version.json?cb=mly7r3wu0b85t[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/version.json?cb=mly7r41nb3nwo[33m, use [36m/version.json?cb=mly7r41nb3nwo[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/version.json?cb=mly7r443mm9i0[33m, use [36m/version.json?cb=mly7r443mm9i0[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/mobile.css?v=v27&cb=mly7r449yjl3n[33m, use [36m/mobile.css?v=v27&cb=mly7r449yjl3n[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/questions.js?v=v27&cb=mly7r449yjl3n[33m, use [36m/questions.js?v=v27&cb=mly7r449yjl3n[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/sound.js?v=v27&cb=mly7r449yjl3n[33m, use [36m/sound.js?v=v27&cb=mly7r449yjl3n[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/capacitor.js?v=v27&cb=mly7r449yjl3n[33m, use [36m/capacitor.js?v=v27&cb=mly7r449yjl3n[33m.[39m
+[2m22:42:12[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m Failed to load source map for C:/Users/nlpis/vscode/MATH_VISUAL_APP/public/capacitor.js.
+Error: An error occurred while trying to read the map file at capacitor.js.map
+Error: ENOENT: no such file or directory, open 'C:\Users\nlpis\vscode\MATH_VISUAL_APP\public\capacitor.js.map'
+    at async open (node:internal/fs/promises:637:25)
+    at async Object.readFile (node:internal/fs/promises:1269:14)
+    at async extractSourcemapFromFile (file:///C:/Users/nlpis/vscode/MATH_VISUAL_APP/node_modules/vite/dist/node/chunks/config.js:8050:65)
+    at async loadAndTransform (file:///C:/Users/nlpis/vscode/MATH_VISUAL_APP/node_modules/vite/dist/node/chunks/config.js:22641:22)
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/version.json?cb=mly7rk4g91top8[33m, use [36m/version.json?cb=mly7rk4g91top8[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/mobile.css?v=v27&cb=mly7r3x1l8gud[33m, use [36m/mobile.css?v=v27&cb=mly7r3x1l8gud[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/capacitor.js?v=v27&cb=mly7r3x1l8gud[33m, use [36m/capacitor.js?v=v27&cb=mly7r3x1l8gud[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/questions.js?v=v27&cb=mly7r3x1l8gud[33m, use [36m/questions.js?v=v27&cb=mly7r3x1l8gud[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/sound.js?v=v27&cb=mly7r3x1l8gud[33m, use [36m/sound.js?v=v27&cb=mly7r3x1l8gud[33m.[39m
+[2m22:42:14[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m Failed to load source map for C:/Users/nlpis/vscode/MATH_VISUAL_APP/public/capacitor.js.
+Error: An error occurred while trying to read the map file at capacitor.js.map
+Error: ENOENT: no such file or directory, open 'C:\Users\nlpis\vscode\MATH_VISUAL_APP\public\capacitor.js.map'
+    at async open (node:internal/fs/promises:637:25)
+    at async Object.readFile (node:internal/fs/promises:1269:14)
+    at async extractSourcemapFromFile (file:///C:/Users/nlpis/vscode/MATH_VISUAL_APP/node_modules/vite/dist/node/chunks/config.js:8050:65)
+    at async loadAndTransform (file:///C:/Users/nlpis/vscode/MATH_VISUAL_APP/node_modules/vite/dist/node/chunks/config.js:22641:22)
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/version.json?cb=mly7rm787qkyj9[33m, use [36m/version.json?cb=mly7rm787qkyj9[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/version.json?cb=mly7rmtxc1vqrg[33m, use [36m/version.json?cb=mly7rmtxc1vqrg[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/version.json?cb=mly7rmu0nonqaf[33m, use [36m/version.json?cb=mly7rmu0nonqaf[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/version.json?cb=mly7rmxeoed0ul[33m, use [36m/version.json?cb=mly7rmxeoed0ul[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/version.json?cb=mly7rmxf6fwkj5[33m, use [36m/version.json?cb=mly7rmxf6fwkj5[33m.[39m
+[2m22:42:17[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.dom_dump_after.html[22m

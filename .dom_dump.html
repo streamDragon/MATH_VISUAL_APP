@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
+<html lang="he" dir="rtl"><head>
+  <script type="module" src="/@vite/client"></script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0, s-maxage=0">
@@ -113,8 +114,8 @@
 
     <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css">
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&amp;display=swap" rel="stylesheet">
     <script>
         (function injectCoreAssets() {
             let query = window.__APP_ASSET_QUERY || `v=ts${Date.now().toString(36)}`;
@@ -128,7 +129,7 @@
             document.head.appendChild(cssLink);
 
             function writeScript(src) {
-                document.write('<script src="' + src + '"><\/script>');
+                document.write('<script src="' + src + '"><\\/script>');
             }
 
             window.__ASSET_BASE = 'public/';
@@ -148,14 +149,14 @@
                 writeScript(`capacitor.js?${query}`);
             }
         })();
-    </script>
+    </script><link rel="stylesheet" href="public/mobile.css?v=v27&amp;cb=mly7pyxilwo8a"><script src="public/questions.js?v=v27&amp;cb=mly7pyxilwo8a"><\/script><script src="questions.js?v=v27&cb=mly7pyxilwo8a"><\/script><script src="public/sound.js?v=v27&cb=mly7pyxilwo8a"><\/script><script src="sound.js?v=v27&cb=mly7pyxilwo8a"><\/script><script src="public/capacitor.js?v=v27&cb=mly7pyxilwo8a"><\/script><script src="capacitor.js?v=v27&cb=mly7pyxilwo8a"><\/script>
 </head>
 <body class="prestart-only">
 
     <div id="opening-splash" class="hidden" aria-label="מסך פתיחה">
         <div id="opening-splash-backdrop" aria-hidden="true">
-            <video id="opening-splash-video" class="hidden" muted loop playsinline preload="metadata" poster="public/opening-poster.png"></video>
-            <img id="opening-splash-poster" src="public/opening-poster.png" onerror="this.onerror=null;this.src='opening-poster.png';" alt="">
+            <video id="opening-splash-video" class="hidden" muted loop playsinline preload="metadata" poster="/public/opening-poster.png"></video>
+            <img id="opening-splash-poster" src="/public/opening-poster.png" onerror="this.onerror=null;this.src='opening-poster.png';" alt="">
         </div>
         <div id="opening-splash-shade" aria-hidden="true"></div>
         <div id="opening-splash-content">
@@ -334,7 +335,7 @@
     <div id="quick-tour-modal" class="hidden" onclick="onQuickTourBackdropClick(event)">
         <div id="quick-tour-card">
             <div id="quick-tour-video-wrap">
-                <video id="quick-tour-demo-video" muted loop playsinline preload="metadata" poster="public/opening-poster.png"></video>
+                <video id="quick-tour-demo-video" muted loop playsinline preload="metadata" poster="/public/opening-poster.png"></video>
                 <div id="quick-tour-video-label">סיור מודרך מהיר</div>
             </div>
             <div id="quick-tour-sample-question">שאלה לדוגמה: טוען...</div>
@@ -5667,5 +5668,6 @@
 
         window.onload = init;
     </script>
-</body>
-</html>
+</head><body>
+
+</body></html>
