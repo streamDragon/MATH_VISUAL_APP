@@ -266,6 +266,30 @@ body.practice-clean-mode #side-quick-actions {
     display: none !important;
 }
 
+body.practice-clean-mode #sidebar {
+    display: none !important;
+}
+
+body.embed-mode.practice-clean-mode {
+    overflow: hidden;
+    height: 100dvh;
+    min-height: 100dvh;
+}
+
+body.embed-mode.practice-clean-mode #graph-area-wrapper {
+    height: 100dvh;
+    min-height: 100dvh;
+    padding-bottom: 0;
+}
+
+body.embed-mode.practice-clean-mode #graph-area {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    aspect-ratio: auto;
+}
+
 #top-version-badge {
     display: inline-flex;
     align-items: center;
@@ -1238,6 +1262,27 @@ body.overlay-start-mode #question-overlay-card {
     justify-content: space-between;
     gap: 8px;
     margin-bottom: 10px;
+}
+
+.overlay-title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+#overlay-question-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 32% 28%, #fff6cc 0%, #facc15 54%, #f59e0b 100%);
+    border: 2px solid #b45309;
+    color: #7c2d12;
+    font-size: 1.1rem;
+    font-weight: 900;
+    box-shadow: 0 5px 14px rgba(180, 83, 9, 0.24);
 }
 
 .overlay-mini {
@@ -3593,7 +3638,7 @@ body.embed-mode.viewport-short #top-version-badge {
 @media (min-width: 760px) {
     body.embed-mode.builder-workspace-mode {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) clamp(220px, 28vw, 300px);
+        grid-template-columns: minmax(0, 1fr) clamp(280px, 34vw, 420px);
         gap: 10px;
         align-items: start;
     }

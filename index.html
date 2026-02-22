@@ -91,6 +91,7 @@
         <div id="question-overlay-card">
             <div class="overlay-head">
                 <div class="overlay-title-wrap">
+                    <div id="overlay-question-mark" aria-hidden="true">?</div>
                     <div id="overlay-mini-label" class="overlay-mini">כרטיס משימה</div>
                     <h3 id="overlay-title">שאלה</h3>
                 </div>
@@ -1363,11 +1364,11 @@
             if (isPreStartOnlyQuestion(q)) {
                 let firstPractice = getFirstPracticeQuestionIndex();
                 if (firstPractice >= 0) {
-                    loadQ(firstPractice, { autoOpenOverlay: false, preserveCurrentFunction: true });
+                    loadQ(firstPractice, { autoOpenOverlay: true, preserveCurrentFunction: true });
                 }
             }
             openAccordion('steps');
-            setDrawerOpen(true);
+            setDrawerOpen(false);
             renderMission();
             updateSpecialPanels();
             updateInfo();
@@ -1736,6 +1737,7 @@
 
         function canOpenBuilderForQuestion(q) {
             if (!q) return false;
+            if (sessionStarted) return false;
             let locked = new Set(q.locked || []);
             let editableCount = ['inpA','inpB','inpC','inpD','inpE'].filter((id) => !locked.has(id)).length;
             return editableCount > 0 && shouldAllowBuilderForQuestion(q);
@@ -1762,17 +1764,21 @@
             let btn = document.getElementById('btn-overlay-primary');
             let mini = document.getElementById('overlay-mini-label');
             if (btn) btn.innerText = questionIntroActive
-                ? 'קבע צורה ופתח פרמטרים'
+                ? (sessionStarted ? 'הבנתי, התחל שאלה' : 'שחקו עם הפרמטרים ובנו פונקציה')
                 : 'סגור כרטיס';
             if (mini) mini.innerText = questionIntroActive
-                ? 'לפני שמתחילים'
+                ? (sessionStarted ? 'לפני תחילת השאלה' : 'לפני שמתחילים')
                 : 'כרטיס משימה';
         }
 
         function onOverlayPrimaryAction() {
             if (questionIntroActive) {
                 closeQuestionOverlay();
-                openBuilderFromTop();
+                if (sessionStarted) {
+                    dismissQuestionIntro();
+                } else {
+                    openBuilderFromMainCta();
+                }
                 return;
             }
             closeQuestionOverlay();
@@ -2076,7 +2082,7 @@
             updateDisplayedVersionBadges();
             exposeBuildBadgeInEmbedMode();
             loadFeedbackMessages();
-            let defaultDrawerOpen = document.body.classList.contains('embed-mode') && document.body.classList.contains('viewport-desktop');
+            let defaultDrawerOpen = false;
             setDrawerOpen(defaultDrawerOpen);
             initAdMobBanner();
             setTimeout(initAdMobBanner, 1200);
@@ -2254,7 +2260,7 @@
             refreshTopQuestionSelect(0);
             topSelect.addEventListener('change', (ev) => {
                 let idx = parseInt(ev.target.value, 10);
-                loadQ(idx, { autoOpenOverlay: !sessionStarted });
+                loadQ(idx, { autoOpenOverlay: true });
             });
 
             activeTemplate = getDefaultTemplate();
@@ -2264,7 +2270,7 @@
 
             if (questions.length > 0) {
                 let startIdx = getFirstPracticeQuestionIndex();
-                loadQ(startIdx >= 0 ? startIdx : 0, { autoOpenOverlay: false });
+                loadQ(startIdx >= 0 ? startIdx : 0, { autoOpenOverlay: true });
             } else {
                 renderNoQuestionsState();
             }
@@ -4373,6 +4379,7 @@
         function syncSessionUiState() {
             document.body.classList.toggle('session-started', sessionStarted);
             document.body.classList.toggle('practice-clean-mode', sessionStarted);
+            if (sessionStarted && drawerOpen) setDrawerOpen(false);
             let prestartHint = document.getElementById('prestart-hint');
             if (prestartHint) prestartHint.classList.toggle('hidden', sessionStarted);
             ['btn-top-init-builder'].forEach((id) => {
@@ -4395,7 +4402,7 @@
             if (isPreStartOnlyQuestion(q)) {
                 let nextIdx = getFirstPracticeQuestionIndex();
                 if (nextIdx >= 0 && nextIdx !== currentQ) {
-                    loadQ(nextIdx, { autoOpenOverlay: false });
+                    loadQ(nextIdx, { autoOpenOverlay: true });
                 }
             }
         }
@@ -4618,7 +4625,7 @@
             document.getElementById('btn-next-step').classList.add('hidden');
             renderMission();
             updateSpecialPanels();
-            setQuestionIntroActive(!sessionStarted);
+            setQuestionIntroActive(true);
 
             p.setCoords(0, evaluateFunctionAt(0));
             fitBoardToCurrentFunction();
