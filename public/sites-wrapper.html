@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Launching Math Visual App</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            font-family: Arial, sans-serif;
+            background: #f7fafc;
+            color: #0f172a;
+        }
+        .box {
+            width: min(560px, calc(100vw - 32px));
+            background: #ffffff;
+            border: 1px solid #dbe6f3;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+        }
+        code {
+            background: #eef2f7;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+        a {
+            color: #0b63c9;
+        }
+    </style>
+    <script>
+        (function launchSitesView() {
+            function isLikelyPhoneDevice() {
+                try {
+                    var ua = navigator.userAgent || '';
+                    var mobileUa = /Android|iPhone|iPod|IEMobile|Opera Mini|Mobile|Windows Phone/i.test(ua);
+                    var screenW = window.screen && window.screen.width ? window.screen.width : 0;
+                    var screenH = window.screen && window.screen.height ? window.screen.height : 0;
+                    var screenMin = Math.min(screenW || 0, screenH || 0);
+                    var viewportMin = Math.min(window.innerWidth || 0, window.innerHeight || 0);
+                    var coarsePointer = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+                    if (screenMin > 0 && screenMin <= 560) return true;
+                    if (mobileUa && (screenMin <= 820 || viewportMin <= 760 || coarsePointer)) return true;
+                    return false;
+                } catch (err) {
+                    return false;
+                }
+            }
+
+            try {
+                var currentUrl = new URL(window.location.href);
+                var incoming = new URLSearchParams(currentUrl.search);
+                var targetRaw = (incoming.get('target') || './').trim() || './';
+                var requestedLayout = (incoming.get('layout') || incoming.get('view') || 'auto').trim().toLowerCase();
+                var resolvedLayout = requestedLayout;
+
+                if (!resolvedLayout || ['auto', 'default', 'a'].includes(resolvedLayout)) {
+                    resolvedLayout = isLikelyPhoneDevice() ? 'mobile' : 'desktop';
+                }
+
+                var targetUrl = new URL(targetRaw, currentUrl.href);
+                var nextParams = new URLSearchParams(targetUrl.search);
+
+                incoming.forEach(function (value, key) {
+                    if (key === 'target') return;
+                    if (key === 'layout' || key === 'view') return;
+                    nextParams.set(key, value);
+                });
+
+                if (!nextParams.has('embed')) nextParams.set('embed', '1');
+                nextParams.set('layout', resolvedLayout);
+                nextParams.set('sites_wrapper', '1');
+                targetUrl.search = nextParams.toString();
+
+                if (!targetUrl.hash && currentUrl.hash) {
+                    targetUrl.hash = currentUrl.hash;
+                }
+
+                window.location.replace(targetUrl.toString());
+            } catch (err) {
+                window.__SITES_WRAPPER_ERROR__ = String(err && err.message ? err.message : err);
+            }
+        })();
+    </script>
+</head>
+<body>
+    <div class="box">
+        <p>Launching the app...</p>
+        <p>If redirection is blocked, open <a id="fallback-link" href="./?embed=1&layout=desktop">the app</a>.</p>
+        <script>
+            (function syncFallbackLink() {
+                var link = document.getElementById('fallback-link');
+                if (!link) return;
+                try {
+                    var u = new URL('./?embed=1', window.location.href);
+                    link.href = u.toString();
+                } catch (err) {
+                    // Keep default href.
+                }
+            })();
+        </script>
+        <p><small>Manual override examples: <code>?layout=force-desktop</code>, <code>?layout=force-mobile</code>.</small></p>
+    </div>
+</body>
+</html>

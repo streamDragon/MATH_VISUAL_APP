@@ -645,13 +645,16 @@
             try {
                 let params = new URLSearchParams(window.location.search);
                 let embedRaw = (params.get('embed') || '').trim().toLowerCase();
-                let layoutRaw = (params.get('layout') || params.get('mode') || '').trim().toLowerCase();
+                let layoutRaw = (params.get('layout') || params.get('view') || params.get('mode') || '').trim().toLowerCase();
                 let embed = null;
                 if (['1', 'true', 'yes', 'on'].includes(embedRaw)) embed = true;
                 if (['0', 'false', 'no', 'off'].includes(embedRaw)) embed = false;
                 let layout = '';
+                if (['auto', 'default', 'a'].includes(layoutRaw)) layout = '';
                 if (['mobile', 'phone', 'm'].includes(layoutRaw)) layout = 'mobile';
                 if (['desktop', 'computer', 'd'].includes(layoutRaw)) layout = 'desktop';
+                if (['force-mobile', 'mobile-force', 'fm'].includes(layoutRaw)) layout = 'force-mobile';
+                if (['force-desktop', 'desktop-force', 'fd'].includes(layoutRaw)) layout = 'force-desktop';
                 return { embed, layout };
             } catch (err) {
                 return { embed: null, layout: '' };
@@ -1855,6 +1858,8 @@
         }
 
         function isMobileViewportNow() {
+            if (VIEW_CONFIG.layout === 'force-mobile') return true;
+            if (VIEW_CONFIG.layout === 'force-desktop') return false;
             if (VIEW_CONFIG.layout === 'mobile') return true;
             if (VIEW_CONFIG.layout === 'desktop') {
                 if (isInSitesContext() && isLikelyPhoneDevice()) return true;
