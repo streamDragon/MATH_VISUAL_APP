@@ -290,7 +290,8 @@
     </div>
 
     <div id="step-toast" class="hidden"></div>
-    <input id="scan-question-input" class="hidden" type="file" accept="image/*" capture="environment" onchange="onScanImageSelected(event)">
+    <input id="scan-question-input-camera" class="scan-file-input" type="file" accept="image/*" capture="environment" onchange="onScanImageSelected(event, 'camera')">
+    <input id="scan-question-input-file" class="scan-file-input" type="file" accept="image/*" onchange="onScanImageSelected(event, 'file')">
 
     <div id="start-guide-modal" class="hidden" onclick="onStartGuideBackdropClick(event)">
         <div id="start-guide-card">
@@ -387,11 +388,13 @@
                 <p class="scan-intro">צלמו שאלה מהטלפון או העלו קובץ תמונה. המערכת תיצור ממנה שאלה מפורקת עם שלבי תרגול ויזואליים.</p>
 
                 <div class="scan-actions-row">
-                    <button id="btn-scan-pick" onclick="triggerScanImageInput()">מצלמה / העלאת קובץ</button>
+                    <button id="btn-scan-camera" onclick="triggerScanImageInput('camera')">צלם שאלה (מצלמה)</button>
+                    <button id="btn-scan-upload" onclick="triggerScanImageInput('file')">העלאת תמונה</button>
                     <button id="btn-scan-analyze" onclick="analyzeScannedQuestion()">נתח שאלה</button>
                     <button id="btn-scan-inject" class="hidden" onclick="injectScannedQuestion()">הוסף ל־QUESTIONS ופתח</button>
                     <button id="btn-scan-copy" class="hidden" onclick="copyScannedQuestionObject()">העתק אובייקט שאלה</button>
                 </div>
+                <div id="scan-device-hint" class="scan-device-hint">זיהוי מכשיר מתבצע בעת פתיחת החלון.</div>
 
                 <details id="scan-config-box">
                     <summary>הגדרות API (OpenAI / Proxy)</summary>
@@ -750,6 +753,7 @@
         let scannedQuestionDraft = null;
         let scannedVisionPayload = null;
         let scanInFlight = false;
+        let lastScanInputMode = '';
 
         function setupOpeningSplashMedia() {
             let video = document.getElementById('opening-splash-video');
@@ -4326,7 +4330,7 @@
 
         function setScanBusy(busy) {
             scanInFlight = !!busy;
-            ['btn-scan-pick', 'btn-scan-analyze', 'btn-scan-inject', 'btn-scan-copy'].forEach((id) => {
+            ['btn-scan-camera', 'btn-scan-upload', 'btn-scan-analyze', 'btn-scan-inject', 'btn-scan-copy'].forEach((id) => {
                 let el = document.getElementById(id);
                 if (!el) return;
                 el.disabled = !!busy;
@@ -4393,15 +4397,80 @@
             }
         }
 
-        function triggerScanImageInput() {
-            let input = document.getElementById('scan-question-input');
-            if (!input) return;
-            input.value = '';
-            input.click();
+        function resolveDefaultScanInputMode() {
+            return (isLikelyPhoneDevice() || isMobileViewportNow()) ? 'camera' : 'file';
+        }
+
+        function getScanInputElement(mode) {
+            let normalized = mode === 'camera' || mode === 'file' ? mode : resolveDefaultScanInputMode();
+            let id = normalized === 'camera' ? 'scan-question-input-camera' : 'scan-question-input-file';
+            return document.getElementById(id);
+        }
+
+        function updateScanCaptureUi() {
+            let isPhone = isLikelyPhoneDevice() || isMobileViewportNow();
+            let inSites = isInSitesContext();
+            let inIframe = false;
+            try {
+                inIframe = window.self !== window.top;
+            } catch (err) {
+                inIframe = true;
+            }
+
+            let cameraBtn = document.getElementById('btn-scan-camera');
+            let uploadBtn = document.getElementById('btn-scan-upload');
+            let hint = document.getElementById('scan-device-hint');
+
+            if (cameraBtn) {
+                cameraBtn.innerText = isPhone ? 'צלם שאלה (מצלמה)' : 'מצלמה / צילום מסמך';
+                cameraBtn.title = isPhone
+                    ? 'בטלפון בדרך כלל תיפתח המצלמה האחורית.'
+                    : 'במחשב ייתכן שתיפתח בחירת קובץ במקום מצלמה, בהתאם לדפדפן.';
+            }
+
+            if (uploadBtn) {
+                uploadBtn.innerText = isPhone ? 'בחר תמונה מהגלריה' : 'העלאת תמונה מהמחשב';
+                uploadBtn.title = isPhone
+                    ? 'בחירת תמונה שכבר צולמה.'
+                    : 'בחירת JPG/PNG/WEBP מהמחשב.';
+            }
+
+            if (!hint) return;
+
+            let parts = [];
+            parts.push(isPhone ? 'זוהה מצב טלפון.' : 'זוהה מצב מחשב.');
+            parts.push(isPhone ? 'מומלץ להתחיל עם "צלם שאלה (מצלמה)".' : 'מומלץ להתחיל עם "העלאת תמונה מהמחשב".');
+            if (inSites && inIframe) {
+                parts.push('אם המצלמה לא נפתחת בתוך Google Sites, פתחו את האפליקציה בלשונית חדשה ולחצו שוב על כפתור המצלמה.');
+            }
+            hint.innerText = parts.join(' ');
+            hint.classList.toggle('scan-warning', inSites && inIframe);
+        }
+
+        function triggerScanImageInput(mode) {
+            let normalizedMode = mode === 'camera' || mode === 'file' ? mode : resolveDefaultScanInputMode();
+            let input = getScanInputElement(normalizedMode);
+            if (!input) {
+                setScanStatus('לא נמצא רכיב בחירת תמונה/מצלמה.', true);
+                return;
+            }
+
+            ['scan-question-input-camera', 'scan-question-input-file'].forEach((id) => {
+                let el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            lastScanInputMode = normalizedMode;
+
+            try {
+                input.click();
+            } catch (err) {
+                setScanStatus('לא הצלחתי לפתוח את המצלמה/בחירת הקובץ. נסו שוב או פתחו בלשונית חדשה.', true);
+            }
         }
 
         function openScanModal() {
             loadScanConfig();
+            updateScanCaptureUi();
             setScanStatus('');
             document.getElementById('scan-modal').classList.remove('hidden');
         }
@@ -4414,13 +4483,18 @@
             if (event.target.id === 'scan-modal') closeScanModal();
         }
 
-        function onScanImageSelected(event) {
+        function onScanImageSelected(event, sourceMode) {
             let file = event?.target?.files?.[0];
             if (!file) return;
             if (!String(file.type || '').startsWith('image/')) {
                 setScanStatus('הקובץ שנבחר אינו תמונה. בחרו JPG/PNG/WEBP.', true);
                 return;
             }
+
+            let normalizedMode = sourceMode === 'camera' || sourceMode === 'file'
+                ? sourceMode
+                : (String(event?.target?.id || '').includes('camera') ? 'camera' : 'file');
+            lastScanInputMode = normalizedMode;
 
             scanImageFile = file;
             scanImageDataUrl = '';
@@ -4435,7 +4509,8 @@
             scanPreviewObjectUrl = URL.createObjectURL(file);
             if (image) image.src = scanPreviewObjectUrl;
             if (wrap) wrap.classList.remove('scan-preview-empty');
-            setScanStatus(`נבחרה תמונה: ${file.name}. עכשיו לחצו "נתח שאלה".`);
+            let sourceLabel = lastScanInputMode === 'camera' ? 'מצלמה/צילום' : 'קובץ/גלריה';
+            setScanStatus(`נבחרה תמונה (${sourceLabel}): ${file.name}. עכשיו לחצו "נתח שאלה".`);
         }
 
         function fileToDataUrl(file) {

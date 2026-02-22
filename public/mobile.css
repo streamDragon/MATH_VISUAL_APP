@@ -2147,10 +2147,16 @@ body.session-started #builder-template-panel {
     cursor: pointer;
 }
 
-#btn-scan-pick {
+#btn-scan-camera {
     border-color: #a4c8f8;
     background: #eaf3ff;
     color: #0f3d85;
+}
+
+#btn-scan-upload {
+    border-color: #c7d2e4;
+    background: #ffffff;
+    color: #12356a;
 }
 
 #btn-scan-analyze {
@@ -2171,6 +2177,23 @@ body.session-started #builder-template-panel {
     background: #f8fbff;
     padding: 7px 8px;
     margin-bottom: 8px;
+}
+
+.scan-device-hint {
+    margin-bottom: 8px;
+    border-radius: 10px;
+    border: 1px solid #d3e2f8;
+    background: #f8fbff;
+    color: #12356a;
+    padding: 7px 9px;
+    line-height: 1.35;
+    font-size: 0.88rem;
+}
+
+.scan-device-hint.scan-warning {
+    border-color: #fdba74;
+    background: #fff7ed;
+    color: #9a3412;
 }
 
 #scan-config-box summary {
@@ -3244,6 +3267,18 @@ body.session-started #builder-template-panel {
 
 .hidden {
     display: none !important;
+}
+
+.scan-file-input {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
 }
 
 .lab-readout {
