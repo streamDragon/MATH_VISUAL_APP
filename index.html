@@ -174,6 +174,7 @@
     <div id="side-quick-actions" class="hidden" aria-label="קיצורי דרך" style="display:none !important;" aria-hidden="true">
         <button id="btn-side-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
         <button id="btn-side-questions" onclick="toggleQuestionsFromTop()">שאלות</button>
+        <button id="btn-side-scan" onclick="openScanModal()">סריקת שאלה</button>
         <button id="btn-side-feedback" onclick="openFeedbackModal()">כיכר השוק</button>
         <button id="btn-side-overlay" onclick="openQuestionOverlay()">הסבר שאלה מלא</button>
         <button id="btn-side-normal" class="hidden" onclick="openNormalLabGuide()">מעבדת האנך</button>
@@ -289,6 +290,7 @@
     </div>
 
     <div id="step-toast" class="hidden"></div>
+    <input id="scan-question-input" class="hidden" type="file" accept="image/*" capture="environment" onchange="onScanImageSelected(event)">
 
     <div id="start-guide-modal" class="hidden" onclick="onStartGuideBackdropClick(event)">
         <div id="start-guide-card">
@@ -375,6 +377,58 @@
         </div>
     </div>
 
+    <div id="scan-modal" class="hidden" onclick="onScanModalBackdropClick(event)">
+        <div id="scan-modal-card">
+            <div class="overlay-head">
+                <h3>סריקת שאלה והמרה ל־QUESTIONS</h3>
+                <button onclick="closeScanModal()">סגור</button>
+            </div>
+            <div class="scan-body">
+                <p class="scan-intro">צלמו שאלה מהטלפון או העלו קובץ תמונה. המערכת תיצור ממנה שאלה מפורקת עם שלבי תרגול ויזואליים.</p>
+
+                <div class="scan-actions-row">
+                    <button id="btn-scan-pick" onclick="triggerScanImageInput()">מצלמה / העלאת קובץ</button>
+                    <button id="btn-scan-analyze" onclick="analyzeScannedQuestion()">נתח שאלה</button>
+                    <button id="btn-scan-inject" class="hidden" onclick="injectScannedQuestion()">הוסף ל־QUESTIONS ופתח</button>
+                    <button id="btn-scan-copy" class="hidden" onclick="copyScannedQuestionObject()">העתק אובייקט שאלה</button>
+                </div>
+
+                <details id="scan-config-box">
+                    <summary>הגדרות API (OpenAI / Proxy)</summary>
+                    <div class="scan-config-grid">
+                        <label for="scan-api-endpoint">API Endpoint</label>
+                        <input id="scan-api-endpoint" type="url" autocomplete="off" placeholder="https://api.openai.com/v1/chat/completions">
+
+                        <label for="scan-api-model">מודל</label>
+                        <input id="scan-api-model" type="text" autocomplete="off" placeholder="gpt-4o-mini">
+
+                        <label for="scan-api-key">API Key (לא נשמרת אוטומטית)</label>
+                        <input id="scan-api-key" type="password" autocomplete="off" placeholder="sk-...">
+
+                        <label for="scan-remember-config" class="scan-checkbox-row">
+                            <input id="scan-remember-config" type="checkbox" checked>
+                            שמור Endpoint + Model בדפדפן
+                        </label>
+                    </div>
+                </details>
+
+                <div id="scan-preview-wrap" class="scan-preview-empty">
+                    <img id="scan-preview-image" alt="תצוגה מקדימה לשאלה שנסרקה">
+                    <div id="scan-preview-placeholder">לא נבחרה תמונה עדיין.</div>
+                </div>
+
+                <div id="scan-spinner" class="hidden">מנתחים תמונה...</div>
+                <div id="scan-status"></div>
+
+                <div id="scan-result" class="hidden">
+                    <div class="scan-result-title">טיוטת שאלה שנוצרה</div>
+                    <div id="scan-result-problem"></div>
+                    <ol id="scan-subquestions-list"></ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="graph-area-wrapper">
         <div id="top-strip">
             <div id="top-version-badge">גרסה: --</div>
@@ -429,6 +483,7 @@
                 <span id="top-question-select-label">כאן בוחרים שאלה:</span>
                 <select id="top-question-select" title="בחירת שאלה"></select>
                 <button id="btn-top-questions" onclick="toggleQuestionsFromTop()">שאלות ▼</button>
+                <button id="btn-scan-question" onclick="openScanModal()">סריקת שאלה</button>
                 <button id="btn-replay-opening" onclick="replayOpeningSplash()">פתיח+שיר</button>
                 <button id="btn-top-init-builder" onclick="openInitialBuilderFromTop()">בנייה ראשונית</button>
                 <button id="btn-start-guide" onclick="openStartGuideModal()">סיור מודרך</button>
@@ -606,6 +661,10 @@
         const XP_PER_LEVEL = 120;
         const GUIDE_HIT_LIMIT = 8;
         const FEEDBACK_STORAGE_KEY = 'math_visual_feedback_v1';
+        const SCAN_CONFIG_STORAGE_KEY = 'math_visual_scan_config_v1';
+        const SCANNED_QUESTIONS_STORAGE_KEY = 'math_visual_scanned_questions_v1';
+        const DEFAULT_SCAN_API_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
+        const DEFAULT_SCAN_MODEL = 'gpt-4o-mini';
         const OPENING_SPLASH_DURATION_MS = 5000;
         const OPENING_MUSIC_DURATION_SECONDS = 30;
         const QUICK_TOUR_STORAGE_KEY = 'math_visual_quick_tour_v1';
@@ -685,6 +744,12 @@
         let sidebarFocusPulseTimer = null;
         let buildWatchInterval = null;
         let buildWatchEventsBound = false;
+        let scanImageFile = null;
+        let scanImageDataUrl = '';
+        let scanPreviewObjectUrl = '';
+        let scannedQuestionDraft = null;
+        let scannedVisionPayload = null;
+        let scanInFlight = false;
 
         function setupOpeningSplashMedia() {
             let video = document.getElementById('opening-splash-video');
@@ -2195,6 +2260,7 @@
             // Show splash immediately while the app keeps initializing in the background.
             startOpeningSplash();
             await ensureQuestionsLoadedAtRuntime();
+            loadScannedQuestionsFromStorage();
             let versionForDisplay = await resolveVersionForDisplay();
             runtimeDisplayedVersion = versionForDisplay;
             let splashVersion = document.getElementById('opening-splash-version');
@@ -2202,6 +2268,7 @@
             updateDisplayedVersionBadges();
             exposeBuildBadgeInEmbedMode();
             loadFeedbackMessages();
+            loadScanConfig();
             let defaultDrawerOpen = false;
             setDrawerOpen(defaultDrawerOpen);
             initAdMobBanner();
@@ -4247,6 +4314,763 @@
             saveFeedbackMessages();
             renderFeedbackList();
             setFeedbackStatus('המשובים המקומיים נמחקו.');
+        }
+
+        function setScanStatus(text, isError) {
+            let status = document.getElementById('scan-status');
+            if (!status) return;
+            status.innerText = text || '';
+            status.classList.toggle('error', !!isError);
+            status.classList.toggle('ok', !!text && !isError);
+        }
+
+        function setScanBusy(busy) {
+            scanInFlight = !!busy;
+            ['btn-scan-pick', 'btn-scan-analyze', 'btn-scan-inject', 'btn-scan-copy'].forEach((id) => {
+                let el = document.getElementById(id);
+                if (!el) return;
+                el.disabled = !!busy;
+            });
+            let spinner = document.getElementById('scan-spinner');
+            if (spinner) spinner.classList.toggle('hidden', !busy);
+        }
+
+        function resetScanResultUi() {
+            scannedQuestionDraft = null;
+            scannedVisionPayload = null;
+            let result = document.getElementById('scan-result');
+            let injectBtn = document.getElementById('btn-scan-inject');
+            let copyBtn = document.getElementById('btn-scan-copy');
+            let list = document.getElementById('scan-subquestions-list');
+            let problem = document.getElementById('scan-result-problem');
+            if (result) result.classList.add('hidden');
+            if (injectBtn) injectBtn.classList.add('hidden');
+            if (copyBtn) copyBtn.classList.add('hidden');
+            if (list) list.innerHTML = '';
+            if (problem) problem.innerText = '';
+        }
+
+        function loadScanConfig() {
+            let endpointInput = document.getElementById('scan-api-endpoint');
+            let modelInput = document.getElementById('scan-api-model');
+            let remember = document.getElementById('scan-remember-config');
+            if (!endpointInput || !modelInput) return;
+
+            endpointInput.value = DEFAULT_SCAN_API_ENDPOINT;
+            modelInput.value = DEFAULT_SCAN_MODEL;
+            if (remember) remember.checked = true;
+
+            try {
+                let raw = localStorage.getItem(SCAN_CONFIG_STORAGE_KEY);
+                if (!raw) return;
+                let cfg = JSON.parse(raw);
+                if (cfg && typeof cfg === 'object') {
+                    if (typeof cfg.endpoint === 'string' && cfg.endpoint.trim()) endpointInput.value = cfg.endpoint.trim();
+                    if (typeof cfg.model === 'string' && cfg.model.trim()) modelInput.value = cfg.model.trim();
+                    if (remember && typeof cfg.remember === 'boolean') remember.checked = cfg.remember;
+                }
+            } catch (err) {
+                // Keep defaults if config parsing fails.
+            }
+        }
+
+        function saveScanConfig() {
+            let endpoint = (document.getElementById('scan-api-endpoint')?.value || '').trim() || DEFAULT_SCAN_API_ENDPOINT;
+            let model = (document.getElementById('scan-api-model')?.value || '').trim() || DEFAULT_SCAN_MODEL;
+            let remember = !!document.getElementById('scan-remember-config')?.checked;
+            try {
+                if (!remember) {
+                    localStorage.removeItem(SCAN_CONFIG_STORAGE_KEY);
+                    return;
+                }
+                localStorage.setItem(SCAN_CONFIG_STORAGE_KEY, JSON.stringify({
+                    endpoint,
+                    model,
+                    remember: true
+                }));
+            } catch (err) {
+                // Continue even if storage is blocked.
+            }
+        }
+
+        function triggerScanImageInput() {
+            let input = document.getElementById('scan-question-input');
+            if (!input) return;
+            input.value = '';
+            input.click();
+        }
+
+        function openScanModal() {
+            loadScanConfig();
+            setScanStatus('');
+            document.getElementById('scan-modal').classList.remove('hidden');
+        }
+
+        function closeScanModal() {
+            document.getElementById('scan-modal').classList.add('hidden');
+        }
+
+        function onScanModalBackdropClick(event) {
+            if (event.target.id === 'scan-modal') closeScanModal();
+        }
+
+        function onScanImageSelected(event) {
+            let file = event?.target?.files?.[0];
+            if (!file) return;
+            if (!String(file.type || '').startsWith('image/')) {
+                setScanStatus('הקובץ שנבחר אינו תמונה. בחרו JPG/PNG/WEBP.', true);
+                return;
+            }
+
+            scanImageFile = file;
+            scanImageDataUrl = '';
+            resetScanResultUi();
+
+            let wrap = document.getElementById('scan-preview-wrap');
+            let image = document.getElementById('scan-preview-image');
+            if (scanPreviewObjectUrl) {
+                URL.revokeObjectURL(scanPreviewObjectUrl);
+                scanPreviewObjectUrl = '';
+            }
+            scanPreviewObjectUrl = URL.createObjectURL(file);
+            if (image) image.src = scanPreviewObjectUrl;
+            if (wrap) wrap.classList.remove('scan-preview-empty');
+            setScanStatus(`נבחרה תמונה: ${file.name}. עכשיו לחצו "נתח שאלה".`);
+        }
+
+        function fileToDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                let reader = new FileReader();
+                reader.onload = () => resolve(String(reader.result || ''));
+                reader.onerror = () => reject(new Error('לא הצלחתי לקרוא את קובץ התמונה.'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function parseMaybeNumber(value) {
+            if (Number.isFinite(value)) return Number(value);
+            if (typeof value !== 'string') return NaN;
+            let txt = value.replace(',', '.').trim();
+            if (!txt) return NaN;
+            let match = txt.match(/-?\d+(\.\d+)?/);
+            if (!match) return NaN;
+            return Number(match[0]);
+        }
+
+        function parsePointFromText(text) {
+            if (typeof text !== 'string') return null;
+            let m = text.match(/\(\s*(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)\s*\)/);
+            if (!m) return null;
+            let x = Number(m[1]);
+            let y = Number(m[2]);
+            if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+            return { x, y };
+        }
+
+        function normalizeGoalType(goal) {
+            let raw = String(goal || '').trim().toLowerCase();
+            if (!raw) return 'free';
+            if (['slope_zero', 'slope0', 'zero_slope', 'horizontal_tangent'].includes(raw)) return 'slope_zero';
+            if (['min_point', 'minimum', 'min', 'local_minimum'].includes(raw)) return 'min_point';
+            if (['slope_equals', 'slope_target', 'match_slope'].includes(raw)) return 'slope_equals';
+            if (['y_equals', 'value_equals', 'function_value'].includes(raw)) return 'y_equals';
+            if (['read_slope', 'slope_read', 'read_derivative'].includes(raw)) return 'read_slope';
+            if (['read_y', 'read_value', 'read_function_value'].includes(raw)) return 'read_y';
+            if (['hit_target', 'through_point', 'point_target'].includes(raw)) return 'hit_target';
+            if (['hit_targets', 'multi_targets', 'multiple_points'].includes(raw)) return 'hit_targets';
+            if (['tangent_through_point', 'tangent_external_point', 'tangent_point'].includes(raw)) return 'tangent_through_point';
+            if (['choose_function_template', 'template_select'].includes(raw)) return 'choose_function_template';
+            return 'free';
+        }
+
+        function inferGoalTypeFromText(text) {
+            let s = String(text || '').toLowerCase();
+            if (!s) return 'free';
+            if ((/משיק/.test(s) || /tangent/.test(s)) && (/נקודה/.test(s) || /point/.test(s))) return 'tangent_through_point';
+            if ((/שיפוע/.test(s) || /slope/.test(s) || /f'\(x\)/.test(s)) && (/אפס/.test(s) || /\b0\b/.test(s) || /horizontal/.test(s))) return 'slope_zero';
+            if (/מינימום|minimum|min point|min_point/.test(s)) return 'min_point';
+            if ((/קרא|read/.test(s)) && (/שיפוע|slope|f'\(x\)/.test(s))) return 'read_slope';
+            if ((/קרא|read/.test(s)) && (/ערך|value|f\(x\)|\by\b/.test(s))) return 'read_y';
+            if ((/שיפוע|slope|f'\(x\)/.test(s)) && (/=|שווה|target/.test(s))) return 'slope_equals';
+            if ((/f\(x\)|ערך|value|\by=/.test(s)) && (/=|שווה|target/.test(s))) return 'y_equals';
+            if (/נקודות|points|targets/.test(s)) return 'hit_targets';
+            if (/נקודה|point|עובר דרך|passes through|פרמטר|parameter/.test(s)) return 'hit_target';
+            return 'free';
+        }
+
+        function normalizeTemplateId(rawTemplate, rawProblemText) {
+            let tpl = String(rawTemplate || '').trim().toLowerCase();
+            let text = String(rawProblemText || '').toLowerCase();
+            if (getTemplateById(tpl)) return tpl;
+            if (['line', 'linear', 'line_ab', 'mxn', 'mx_plus_n'].includes(tpl)) return 'line_ab';
+            if (['quadratic', 'quad', 'quad_abcd', 'x2'].includes(tpl)) return 'quad_abcd';
+            if (['cubic', 'poly3', 'cubic_abcd', 'x3'].includes(tpl)) return 'cubic_abcd';
+            if (['quartic', 'poly4', 'quartic_abcd', 'x4'].includes(tpl)) return 'quartic_abcd';
+            if (['shifted_quad', 'shifted_quad_k', 'vertex_form'].includes(tpl)) return 'shifted_quad_k';
+
+            if (/\(x-[^)]+\)\^?2/.test(text) || /\(x\+[^)]+\)\^?2/.test(text)) return 'shifted_quad_k';
+            if (/x\s*\^?\s*4/.test(text)) return 'quartic_abcd';
+            if (/x\s*\^?\s*3/.test(text)) return 'cubic_abcd';
+            if (/x\s*\^?\s*2/.test(text)) return 'quad_abcd';
+            if (/mx\+n|mx\s*[+\-]\s*n|קו ישר|line|linear|ax\+b|y=/.test(text)) return 'line_ab';
+            return 'quad_abcd';
+        }
+
+        function normalizeTargets(rawTargets, rawVisuals, textFallback) {
+            let out = [];
+            if (Array.isArray(rawTargets)) {
+                rawTargets.forEach((t) => {
+                    let x = parseMaybeNumber(t?.x);
+                    let y = parseMaybeNumber(t?.y);
+                    if (Number.isFinite(x) && Number.isFinite(y)) out.push({ x, y, label: t?.label || '' });
+                });
+            }
+
+            if (Array.isArray(rawVisuals)) {
+                rawVisuals.forEach((v) => {
+                    if (v && typeof v === 'object') {
+                        let x = parseMaybeNumber(v.x);
+                        let y = parseMaybeNumber(v.y);
+                        if (Number.isFinite(x) && Number.isFinite(y)) out.push({ x, y, label: v.label || '' });
+                        return;
+                    }
+                    let pt = parsePointFromText(String(v || ''));
+                    if (pt) out.push({ x: pt.x, y: pt.y, label: '' });
+                });
+            }
+
+            let fallbackPoint = parsePointFromText(String(textFallback || ''));
+            if (fallbackPoint) out.push({ x: fallbackPoint.x, y: fallbackPoint.y, label: '' });
+
+            let seen = new Set();
+            let unique = [];
+            out.forEach((t) => {
+                let key = `${t.x.toFixed(4)}|${t.y.toFixed(4)}`;
+                if (seen.has(key)) return;
+                seen.add(key);
+                unique.push(t);
+            });
+            return unique;
+        }
+
+        function normalizeStepGoalParams(goalType, item, instructionText) {
+            let params = (item && typeof item.params === 'object' && item.params) ? item.params : {};
+            let visuals = Array.isArray(item?.required_visuals) ? item.required_visuals : [];
+            let text = String(instructionText || '');
+
+            if (goalType === 'slope_zero') {
+                return { toleranceM: Number.isFinite(parseMaybeNumber(params.toleranceM)) ? Number(params.toleranceM) : 0.15 };
+            }
+
+            if (goalType === 'min_point') {
+                return {
+                    toleranceM: Number.isFinite(parseMaybeNumber(params.toleranceM)) ? Number(params.toleranceM) : 0.15,
+                    requireSecondDerivCheck: true
+                };
+            }
+
+            if (goalType === 'slope_equals') {
+                let targetM = parseMaybeNumber(params.targetM);
+                if (!Number.isFinite(targetM)) targetM = parseMaybeNumber(params.slope);
+                if (!Number.isFinite(targetM)) {
+                    let m1 = text.match(/f'\(x\)\s*=\s*(-?\d+(?:\.\d+)?)/i);
+                    let m2 = text.match(/(?:שיפוע|slope|m)\s*(?:=|:)\s*(-?\d+(?:\.\d+)?)/i);
+                    targetM = parseMaybeNumber(m1?.[1] || m2?.[1]);
+                }
+                return {
+                    targetM: Number.isFinite(targetM) ? targetM : NaN,
+                    toleranceM: Number.isFinite(parseMaybeNumber(params.toleranceM)) ? Number(params.toleranceM) : 0.18
+                };
+            }
+
+            if (goalType === 'y_equals') {
+                let targetY = parseMaybeNumber(params.targetY);
+                if (!Number.isFinite(targetY)) targetY = parseMaybeNumber(params.y);
+                if (!Number.isFinite(targetY)) {
+                    let m = text.match(/f\(x\)\s*=\s*(-?\d+(?:\.\d+)?)/i);
+                    targetY = parseMaybeNumber(m?.[1]);
+                }
+                return {
+                    targetY: Number.isFinite(targetY) ? targetY : NaN,
+                    toleranceY: Number.isFinite(parseMaybeNumber(params.toleranceY)) ? Number(params.toleranceY) : 0.22
+                };
+            }
+
+            if (goalType === 'read_slope' || goalType === 'read_y') {
+                let fixedX0 = parseMaybeNumber(params.fixedX0);
+                if (!Number.isFinite(fixedX0)) fixedX0 = parseMaybeNumber(params.x0);
+                if (!Number.isFinite(fixedX0)) {
+                    let m = text.match(/x0\s*(?:=|:)\s*(-?\d+(?:\.\d+)?)/i) || text.match(/x\s*(?:=|:)\s*(-?\d+(?:\.\d+)?)/i);
+                    fixedX0 = parseMaybeNumber(m?.[1]);
+                }
+                return {
+                    fixedX0: Number.isFinite(fixedX0) ? fixedX0 : 0,
+                    answerTolerance: Number.isFinite(parseMaybeNumber(params.answerTolerance))
+                        ? Number(params.answerTolerance)
+                        : (goalType === 'read_slope' ? 0.2 : 0.25)
+                };
+            }
+
+            if (goalType === 'hit_target' || goalType === 'hit_targets') {
+                let targets = normalizeTargets(params.targets, visuals, text);
+                if (targets.length === 0) {
+                    let x = parseMaybeNumber(params.x);
+                    let y = parseMaybeNumber(params.y);
+                    if (Number.isFinite(x) && Number.isFinite(y)) targets.push({ x, y, label: '' });
+                }
+                if (goalType === 'hit_target' && targets.length > 1) targets = [targets[0]];
+                return {
+                    targets,
+                    toleranceY: Number.isFinite(parseMaybeNumber(params.toleranceY))
+                        ? Number(params.toleranceY)
+                        : (Number.isFinite(parseMaybeNumber(params.tolerance)) ? Number(params.tolerance) : 0.24),
+                    preferredEditableParams: Array.isArray(params.preferredEditableParams)
+                        ? params.preferredEditableParams.filter((p) => ['a', 'b', 'c', 'd', 'e'].includes(String(p)))
+                        : undefined
+                };
+            }
+
+            if (goalType === 'tangent_through_point') {
+                let point = null;
+                if (params.point && typeof params.point === 'object') {
+                    let x = parseMaybeNumber(params.point.x);
+                    let y = parseMaybeNumber(params.point.y);
+                    if (Number.isFinite(x) && Number.isFinite(y)) point = { x, y };
+                }
+                if (!point) {
+                    let targets = normalizeTargets([], visuals, text);
+                    if (targets.length > 0) point = { x: targets[0].x, y: targets[0].y };
+                }
+                return {
+                    point,
+                    tolerance: Number.isFinite(parseMaybeNumber(params.tolerance)) ? Number(params.tolerance) : 0.25
+                };
+            }
+
+            return {};
+        }
+
+        function buildStepFromVisionItem(item, index) {
+            let instruction = getShortText(item?.question_text || item?.instruction || item?.step || '', `שלב ${index + 1}: בצעו את המשימה על הגרף.`);
+            let preferredGoal = normalizeGoalType(item?.goal_type || item?.goal || '');
+            let inferredGoal = inferGoalTypeFromText(`${instruction} ${(item?.required_visuals || []).join(' ')}`);
+            let goalType = preferredGoal !== 'free' ? preferredGoal : inferredGoal;
+            let params = normalizeStepGoalParams(goalType, item, instruction);
+
+            if (goalType === 'slope_equals' && !Number.isFinite(params.targetM)) {
+                goalType = 'free';
+                params = {};
+            }
+            if (goalType === 'y_equals' && !Number.isFinite(params.targetY)) {
+                goalType = 'free';
+                params = {};
+            }
+            if ((goalType === 'hit_target' || goalType === 'hit_targets') && (!Array.isArray(params.targets) || params.targets.length === 0)) {
+                goalType = 'free';
+                params = {};
+            }
+            if (goalType === 'tangent_through_point' && (!params.point || !Number.isFinite(params.point.x) || !Number.isFinite(params.point.y))) {
+                goalType = 'free';
+                params = {};
+            }
+
+            let successText = getShortText(item?.success_criteria || item?.success || '', `יפה! השלמתם את שלב ${index + 1}.`);
+            return {
+                instruction,
+                goal: { type: goalType, params },
+                onComplete: { toastText: successText }
+            };
+        }
+
+        function parseVisionJsonText(raw) {
+            if (raw && typeof raw === 'object') return raw;
+            let text = String(raw || '').trim();
+            if (!text) throw new Error('לא התקבל תוכן מה-API.');
+
+            if (text.startsWith('```')) {
+                text = text.replace(/^```[a-zA-Z]*\s*/, '').replace(/```$/, '').trim();
+            }
+
+            try {
+                return JSON.parse(text);
+            } catch (err) {
+                let start = text.indexOf('{');
+                let end = text.lastIndexOf('}');
+                if (start >= 0 && end > start) {
+                    let slice = text.slice(start, end + 1);
+                    return JSON.parse(slice);
+                }
+            }
+            throw new Error('ה-API החזיר תשובה שלא הצלחתי לפרק ל-JSON.');
+        }
+
+        function getScanSystemPrompt() {
+            return [
+                'You are a math-education problem deconstructor.',
+                'Return ONLY valid JSON (no markdown fences, no extra text).',
+                'Supported start_template_id values: quad_abcd, cubic_abcd, quartic_abcd, line_ab, shifted_quad_k.',
+                'Supported goal_type values: slope_zero, min_point, slope_equals, y_equals, read_slope, read_y, hit_target, hit_targets, tangent_through_point, free.',
+                'JSON schema:',
+                '{',
+                '  \"title\": \"short title\",',
+                '  \"original_problem\": \"detected math problem text\",',
+                '  \"start_template_id\": \"quad_abcd\",',
+                '  \"sub_questions\": [',
+                '    {',
+                '      \"question_text\": \"instruction for student\",',
+                '      \"goal_type\": \"one supported goal_type\",',
+                '      \"params\": {},',
+                '      \"required_visuals\": [\"point at (0,2)\", \"...\"],',
+                '      \"success_criteria\": \"what counts as solved\"',
+                '    }',
+                '  ],',
+                '  \"overlay\": {',
+                '    \"essence\": \"plain explanation\",',
+                '    \"goal\": \"learning goal\",',
+                '    \"material\": \"related theory\",',
+                '    \"howTo\": [\"step 1\", \"step 2\"]',
+                '  }',
+                '}'
+            ].join('\n');
+        }
+
+        async function callScanVisionApi(imageDataUrl) {
+            let endpoint = (document.getElementById('scan-api-endpoint')?.value || '').trim() || DEFAULT_SCAN_API_ENDPOINT;
+            let model = (document.getElementById('scan-api-model')?.value || '').trim() || DEFAULT_SCAN_MODEL;
+            let apiKey = (document.getElementById('scan-api-key')?.value || '').trim();
+
+            let systemPrompt = getScanSystemPrompt();
+            let userPrompt = 'Analyze the attached math problem image and produce a pedagogy-first visual decomposition JSON following the exact schema.';
+            let isChatCompletions = /\/chat\/completions/i.test(endpoint);
+
+            if (isChatCompletions) {
+                if (!apiKey) throw new Error('חסר API Key לניתוח תמונה ב-OpenAI.');
+                let payload = {
+                    model,
+                    temperature: 0.1,
+                    response_format: { type: 'json_object' },
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        {
+                            role: 'user',
+                            content: [
+                                { type: 'text', text: userPrompt },
+                                { type: 'image_url', image_url: { url: imageDataUrl } }
+                            ]
+                        }
+                    ]
+                };
+
+                let res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                let text = await res.text();
+                let data = {};
+                try { data = JSON.parse(text); } catch (err) { data = {}; }
+                if (!res.ok) {
+                    let apiMessage = data?.error?.message || text || `HTTP ${res.status}`;
+                    throw new Error(`שגיאת API: ${apiMessage}`);
+                }
+                let content = data?.choices?.[0]?.message?.content;
+                if (Array.isArray(content)) {
+                    content = content.map((part) => part?.text || '').join('\n').trim();
+                }
+                if (!content) throw new Error('ה-API החזיר תשובה ריקה.');
+                return parseVisionJsonText(content);
+            }
+
+            let headers = { 'Content-Type': 'application/json' };
+            if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+            let proxyPayload = {
+                model,
+                image_data_url: imageDataUrl,
+                system_prompt: systemPrompt,
+                user_prompt: userPrompt
+            };
+            let proxyRes = await fetch(endpoint, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(proxyPayload)
+            });
+            let proxyText = await proxyRes.text();
+            if (!proxyRes.ok) throw new Error(`שגיאת Proxy: ${proxyText || proxyRes.status}`);
+            let proxyData = parseVisionJsonText(proxyText);
+            if (proxyData?.vision && typeof proxyData.vision === 'object') return proxyData.vision;
+            if (proxyData?.question && typeof proxyData.question === 'object') return proxyData.question;
+            return proxyData;
+        }
+
+        function parseVisionToQuestionSchema(visionPayload) {
+            if (!visionPayload || typeof visionPayload !== 'object') {
+                throw new Error('לא התקבל JSON תקין מהניתוח.');
+            }
+
+            let originalProblem = getShortText(
+                visionPayload.original_problem || visionPayload.problem || visionPayload.math_expression || '',
+                'שאלה שזוהתה מתמונה'
+            );
+
+            let rawTemplateHint = visionPayload.start_template_id || visionPayload.template || visionPayload.function_template_hint || '';
+            let startTemplateId = normalizeTemplateId(rawTemplateHint, `${originalProblem} ${visionPayload.function_expression || ''}`);
+            if (!getTemplateById(startTemplateId)) {
+                startTemplateId = getDefaultTemplate()?.id || 'quad_abcd';
+            }
+
+            let rawSubQuestions = Array.isArray(visionPayload.sub_questions)
+                ? visionPayload.sub_questions
+                : (Array.isArray(visionPayload.steps) ? visionPayload.steps : []);
+            if (rawSubQuestions.length === 0) {
+                rawSubQuestions = [{
+                    question_text: 'חקרו את הגרף והנגזרת והסיקו מה קורה בנקודות חשובות.',
+                    goal_type: 'free',
+                    params: {},
+                    required_visuals: []
+                }];
+            }
+
+            let steps = rawSubQuestions
+                .slice(0, 6)
+                .map((item, index) => buildStepFromVisionItem(item, index))
+                .filter((step) => !!step);
+
+            if (steps.length === 0) {
+                steps = [{
+                    instruction: 'חקרו את הגרף והנגזרת והסיקו מסקנות.',
+                    goal: { type: 'free', params: {} },
+                    onComplete: { toastText: 'השלב הושלם.' }
+                }];
+            }
+
+            let firstStepGoal = steps[0]?.goal?.type || 'free';
+            let firstStepParams = Object.assign({}, steps[0]?.goal?.params || {});
+            let mode = steps.some((s) => ['hit_target', 'hit_targets', 'free', 'choose_function_template'].includes(s.goal.type))
+                ? 'find_param'
+                : 'move_x';
+
+            let title = getShortText(visionPayload.title || visionPayload.generated_title || '', '');
+            if (!title) {
+                let compact = originalProblem.length > 42 ? `${originalProblem.slice(0, 42).trim()}...` : originalProblem;
+                title = `שאלה מסריקה: ${compact}`;
+            }
+
+            let descLines = [`שאלה מזוהה: ${originalProblem}`];
+            steps.slice(0, 2).forEach((step, idx) => {
+                descLines.push(`שלב ${idx + 1}: ${step.instruction}`);
+            });
+
+            let overlayHowTo = Array.isArray(visionPayload?.overlay?.howTo) && visionPayload.overlay.howTo.length > 0
+                ? visionPayload.overlay.howTo.map((line) => getShortText(line, '')).filter(Boolean)
+                : steps.map((step) => step.instruction);
+
+            let allowNormal = steps.some((s) => ['slope_zero', 'min_point', 'tangent_through_point'].includes(s.goal.type));
+            let allowLineTool = steps.some((s) => ['tangent_through_point', 'free'].includes(s.goal.type));
+
+            return {
+                id: -1,
+                startTemplateId,
+                title,
+                desc: descLines.join('\n'),
+                mode,
+                goal: firstStepGoal,
+                data: firstStepParams,
+                steps,
+                ui: {
+                    allowNormal,
+                    defaultNormalOn: false,
+                    allowLineTool
+                },
+                overlay: {
+                    essence: getShortText(visionPayload?.overlay?.essence, `המטרה: לפרק את השאלה "${originalProblem}" לשלבים ברורים.`),
+                    goal: getShortText(visionPayload?.overlay?.goal, 'לפתור שאלה מורכבת דרך שלבי משנה ויזואליים.'),
+                    material: getShortText(visionPayload?.overlay?.material, 'פונקציות, נגזרת, שיפוע משיק, קריאת ערכים מהגרף.'),
+                    howTo: overlayHowTo
+                },
+                meta: {
+                    source: 'vision_scan',
+                    original_problem: originalProblem,
+                    created_at_utc: new Date().toISOString()
+                }
+            };
+        }
+
+        function goalTypeLabel(goalType) {
+            let map = {
+                slope_zero: 'משיק אופקי',
+                min_point: 'מינימום',
+                slope_equals: 'שיפוע נתון',
+                y_equals: 'ערך פונקציה נתון',
+                read_slope: 'קריאת שיפוע',
+                read_y: 'קריאת ערך פונקציה',
+                hit_target: 'מעבר דרך נקודת יעד',
+                hit_targets: 'מעבר דרך כמה נקודות יעד',
+                tangent_through_point: 'משיק דרך נקודה חיצונית',
+                free: 'חקירה חופשית'
+            };
+            return map[goalType] || goalType || 'שלב';
+        }
+
+        function renderScannedQuestionDraft(questionDraft, visionPayload) {
+            let result = document.getElementById('scan-result');
+            let problem = document.getElementById('scan-result-problem');
+            let list = document.getElementById('scan-subquestions-list');
+            let injectBtn = document.getElementById('btn-scan-inject');
+            let copyBtn = document.getElementById('btn-scan-copy');
+            if (!result || !problem || !list || !injectBtn || !copyBtn) return;
+
+            let originalProblem = questionDraft?.meta?.original_problem || visionPayload?.original_problem || '';
+            problem.innerText = `בעיה שזוהתה: ${originalProblem}\nתבנית התחלה: ${questionDraft.startTemplateId}\nמספר שלבים: ${questionDraft.steps.length}`;
+
+            list.innerHTML = '';
+            questionDraft.steps.forEach((step, idx) => {
+                let li = document.createElement('li');
+                li.innerText = `שלב ${idx + 1}: ${step.instruction} (${goalTypeLabel(step.goal?.type)})`;
+                list.appendChild(li);
+            });
+
+            result.classList.remove('hidden');
+            injectBtn.classList.remove('hidden');
+            copyBtn.classList.remove('hidden');
+        }
+
+        async function analyzeScannedQuestion() {
+            if (scanInFlight) return;
+            if (!scanImageFile) {
+                setScanStatus('קודם בחרו תמונה לצורך ניתוח.', true);
+                return;
+            }
+
+            saveScanConfig();
+            setScanBusy(true);
+            setScanStatus('שולח את התמונה לניתוח...');
+            resetScanResultUi();
+
+            try {
+                scanImageDataUrl = await fileToDataUrl(scanImageFile);
+                let visionPayload = await callScanVisionApi(scanImageDataUrl);
+                let draft = parseVisionToQuestionSchema(visionPayload);
+                scannedVisionPayload = visionPayload;
+                scannedQuestionDraft = draft;
+                renderScannedQuestionDraft(draft, visionPayload);
+                setScanStatus('הניתוח הצליח. אפשר להוסיף את השאלה החדשה לאפליקציה.');
+            } catch (err) {
+                setScanStatus(err?.message || 'ניתוח השאלה נכשל. נסו תמונה ברורה יותר או בדקו API.', true);
+            } finally {
+                setScanBusy(false);
+            }
+        }
+
+        function getNextQuestionId() {
+            let questions = getQuestionsList();
+            let maxId = 0;
+            questions.forEach((q) => {
+                let id = Number(q?.id);
+                if (Number.isFinite(id)) maxId = Math.max(maxId, id);
+            });
+            return maxId + 1;
+        }
+
+        function isScannedQuestionCandidate(q) {
+            if (!q || typeof q !== 'object') return false;
+            if (!q.meta || q.meta.source !== 'vision_scan') return false;
+            if (typeof q.title !== 'string' || !q.title.trim()) return false;
+            if (typeof q.startTemplateId !== 'string' || !q.startTemplateId.trim()) return false;
+            if (!Array.isArray(q.steps) || q.steps.length === 0) return false;
+            return true;
+        }
+
+        function saveScannedQuestionsToStorage() {
+            try {
+                let payload = getQuestionsList().filter((q) => isScannedQuestionCandidate(q));
+                localStorage.setItem(SCANNED_QUESTIONS_STORAGE_KEY, JSON.stringify(payload));
+            } catch (err) {
+                // Continue without persistence if storage is blocked.
+            }
+        }
+
+        function loadScannedQuestionsFromStorage() {
+            let questions = getQuestionsList();
+            if (!Array.isArray(questions)) return;
+            let existingIds = new Set(questions.map((q) => String(q?.id)));
+            try {
+                let raw = localStorage.getItem(SCANNED_QUESTIONS_STORAGE_KEY);
+                if (!raw) return;
+                let list = JSON.parse(raw);
+                if (!Array.isArray(list)) return;
+                list.forEach((item) => {
+                    if (!isScannedQuestionCandidate(item)) return;
+                    let clone = JSON.parse(JSON.stringify(item));
+                    let id = Number(clone.id);
+                    if (!Number.isFinite(id) || existingIds.has(String(id))) {
+                        clone.id = getNextQuestionId();
+                    }
+                    existingIds.add(String(clone.id));
+                    questions.push(clone);
+                });
+            } catch (err) {
+                // Ignore invalid stored content.
+            }
+        }
+
+        async function copyScannedQuestionObject() {
+            if (!scannedQuestionDraft) {
+                setScanStatus('אין טיוטת שאלה להעתקה.', true);
+                return;
+            }
+            let payload = JSON.parse(JSON.stringify(scannedQuestionDraft));
+            if (!Number.isFinite(Number(payload.id)) || Number(payload.id) < 0) {
+                payload.id = getNextQuestionId();
+            }
+            let text = JSON.stringify(payload, null, 2);
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    let ta = document.createElement('textarea');
+                    ta.value = text;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                }
+                setScanStatus('אובייקט השאלה הועתק. אפשר להדביק ידנית לתוך QUESTIONS בקוד.', false);
+            } catch (err) {
+                setScanStatus('לא הצלחתי להעתיק ללוח. נסו שוב.', true);
+            }
+        }
+
+        function injectScannedQuestion() {
+            if (!scannedQuestionDraft) {
+                setScanStatus('אין טיוטת שאלה מוכנה. נתחו קודם תמונה.', true);
+                return;
+            }
+            let questions = getQuestionsList();
+            if (!Array.isArray(questions)) {
+                setScanStatus('רשימת השאלות אינה זמינה כרגע.', true);
+                return;
+            }
+
+            let toInsert = JSON.parse(JSON.stringify(scannedQuestionDraft));
+            toInsert.id = getNextQuestionId();
+            toInsert.meta = Object.assign({}, toInsert.meta || {}, {
+                source: 'vision_scan',
+                injected_at_utc: new Date().toISOString(),
+                build: APP_BUILD
+            });
+
+            questions.push(toInsert);
+            saveScannedQuestionsToStorage();
+
+            let newIndex = questions.length - 1;
+            closeScanModal();
+            if (!sessionStarted) markSessionStarted();
+            loadQ(newIndex, { autoOpenOverlay: true });
+            showStepToast(`נוספה שאלה חדשה מהסריקה: ${toInsert.title}`);
         }
 
         function stopGuidedDemoPlayback() {
