@@ -262,6 +262,22 @@ const QUESTIONS = [
       "parameter_shift",
       "parameterized_family"
     ],
+    steps: [
+      {
+        instruction: "מומלץ לבחור line, לטעון גרף פתיחה לשאלה, ואז לשנות c ו-d עד שהגרף עובר דרך (2,0).",
+        goal: {
+          type: "hit_target",
+          params: {
+            targets: [{ x: 2, y: 0, label: "B" }],
+            toleranceY: 0.2,
+            preferredEditableParams: ["c", "d"]
+          }
+        },
+        onComplete: {
+          toastText: "מעולה! הגרף עבר דרך (2,0)."
+        }
+      }
+    ],
     ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
   },
   {
@@ -347,7 +363,7 @@ const QUESTIONS = [
       "function_object",
       "axis_intersection",
       "equation_to_intersection",
-      "coordinate_anchors"
+      "parameterized_family"
     ],
     ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
   },
@@ -357,7 +373,7 @@ const QUESTIONS = [
     title: "שורש גרפי: מצאו x כך ש-f(x)=0",
     desc:
       "מחפשים שורש של הפונקציה: נקודה שבה הגרף חותך (או נוגע) בציר x.\n" +
-      "גררו את הנקודה לאורך הגרף עד שערך הפונקציה קרוב ל-0, כלומר y≈0.",
+      "גררו את הנקודה לאורך הגרף עד שערך הפונקציה קרוב ל-0, כלומר y~0.",
     mode: "move_x",
     goal: "y_equals",
     data: {
