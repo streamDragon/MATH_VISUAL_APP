@@ -2511,6 +2511,22 @@
 
         function ensureGraphAndBuilderVisible() {
             if (!document.body.classList.contains('embed-mode')) return;
+            let panel = document.getElementById('builder-panel');
+            let desktopBuilderSplitTarget = document.body.classList.contains('viewport-desktop')
+                && drawerOpen
+                && activeAccordion === 'params'
+                && panel
+                && !panel.classList.contains('hidden');
+            if (desktopBuilderSplitTarget) {
+                // In desktop embeds keep the split workspace pinned inside the visible iframe area.
+                try {
+                    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                } catch (err) {
+                    window.scrollTo(0, 0);
+                }
+                queueBoardResize();
+                return;
+            }
             let graphWrap = document.getElementById('graph-area-wrapper');
             if (!graphWrap) return;
             graphWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2796,7 +2812,8 @@
             board = JXG.JSXGraph.initBoard('graph-area', {
                 boundingbox: [-5, 8, 5, -8], axis: true, keepaspectratio: true, showCopyright: false,
                 pan: {enabled:false},
-                zoom: {enabled:true, needshift: false, factorX: 1.15, factorY: 1.15}
+                // Reduce accidental wheel zoom on desktop mice/touchpads; zoom still works with Shift.
+                zoom: {enabled:true, needshift: true, factorX: 1.15, factorY: 1.15}
             });
 
             curve = board.create('functiongraph', [
