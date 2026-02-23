@@ -1202,6 +1202,10 @@ body.session-started #prestart-hint {
     display: none !important;
 }
 
+body.session-started #btn-scan-question {
+    display: none !important;
+}
+
 .formula-chip {
     direction: ltr;
     text-align: left;

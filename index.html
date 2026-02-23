@@ -1609,6 +1609,23 @@
             syncTemplateToggleButtons();
         }
 
+        function ensureBuilderTemplateChoicesRendered() {
+            let select = document.getElementById('template-select');
+            let wrap = document.getElementById('template-toggle-group');
+            if (!select) return;
+            let hasOptions = (select.options && select.options.length > 0);
+            let hasToggleButtons = !!(wrap && wrap.querySelector('.template-toggle-btn'));
+            if (!hasOptions) {
+                populateTemplateSelect();
+                return;
+            }
+            if (!hasToggleButtons) {
+                renderTemplateToggleButtons();
+            } else {
+                syncTemplateToggleButtons();
+            }
+        }
+
         function populateTemplateSelect() {
             let select = document.getElementById('template-select');
             if (!select) return;
@@ -1656,6 +1673,7 @@
 
         function applySelectedTemplate(markChosen = true) {
             dismissQuestionIntro();
+            ensureBuilderTemplateChoicesRendered();
             let select = document.getElementById('template-select');
             if (!select) return;
             applyTemplateById(select.value, !!markChosen);
@@ -1752,6 +1770,7 @@
         }
 
         function syncBuilderTemplatePanel(q) {
+            ensureBuilderTemplateChoicesRendered();
             let label = document.getElementById('builder-question-template-label');
             let applyStartBtn = document.getElementById('btn-apply-question-template');
             let status = document.getElementById('template-status-text');
@@ -2236,7 +2255,6 @@
 
         function canOpenBuilderForQuestion(q) {
             if (!q) return false;
-            if (sessionStarted) return false;
             let locked = new Set(q.locked || []);
             let editableCount = ['inpA','inpB','inpC','inpD','inpE','inpF'].filter((id) => !locked.has(id)).length;
             return editableCount > 0 && shouldAllowBuilderForQuestion(q);
@@ -2504,7 +2522,15 @@
 
         function retrySplashMusic() {
             if (typeof playTimedBackgroundTrack !== 'function') return;
-            playTimedBackgroundTrack(OPENING_MUSIC_FILE, OPENING_MUSIC_DURATION_SECONDS).then((played) => {
+            let triedFallback = false;
+            let tryPlay = (src) => playTimedBackgroundTrack(src, OPENING_MUSIC_DURATION_SECONDS);
+            tryPlay(OPENING_MUSIC_FILE).then((played) => {
+                if (!played && !triedFallback && OPENING_MUSIC_FILE !== 'opening-theme.mp3') {
+                    triedFallback = true;
+                    return tryPlay('opening-theme.mp3');
+                }
+                return played;
+            }).then((played) => {
                 let hint = document.getElementById('opening-splash-audio-hint');
                 let btn = document.getElementById('opening-splash-audio-btn');
                 if (hint) hint.classList.toggle('hidden', played);
@@ -2546,13 +2572,7 @@
             bindSplashMusicUnlock();
 
             if (typeof playTimedBackgroundTrack === 'function') {
-                playTimedBackgroundTrack(OPENING_MUSIC_FILE, OPENING_MUSIC_DURATION_SECONDS).then((played) => {
-                    let hint = document.getElementById('opening-splash-audio-hint');
-                    let btn = document.getElementById('opening-splash-audio-btn');
-                    if (hint) hint.classList.toggle('hidden', played);
-                    if (btn) btn.innerText = played ? 'נגן שוב' : 'נגן שיר';
-                    if (played) unbindSplashMusicUnlock();
-                });
+                retrySplashMusic();
             }
 
             openingSplashExitTimer = setTimeout(() => {
@@ -6327,6 +6347,7 @@ Rules:
 
         function toggleBuilderPanel() {
             closeInitialBuilderModal();
+            ensureBuilderTemplateChoicesRendered();
             if (activeAccordion === 'params' && !document.getElementById('builder-panel').classList.contains('hidden')) {
                 closeAllAccordions();
                 return;
@@ -6344,6 +6365,7 @@ Rules:
             let q = getCurrentQuestion();
             if (!q) return;
             if (!canOpenBuilderForQuestion(q)) return;
+            ensureBuilderTemplateChoicesRendered();
             if (isBuilderPanelExpanded()) {
                 focusStepsFromTop();
                 return;
@@ -6364,7 +6386,13 @@ Rules:
                 return;
             }
             loadQ(freeIdx, { autoOpenOverlay: false });
-            openBuilderFromTop();
+            dismissQuestionIntro();
+            builderPanelOpen = true;
+            openAccordion('params');
+            setDrawerOpen(true);
+            ensureGraphAndBuilderVisible();
+            ensureBuilderTemplateChoicesRendered();
+            updateBuilderVisibility(getCurrentQuestion());
             showStepToast('עברתם לחקירה חופשית. בחרו סוג פונקציה ונסו פרמטרים.');
         }
 
@@ -6505,13 +6533,24 @@ Rules:
             });
             updateParamRowVisibility();
             builderPanelOpen = false;
+            if (!isPreStartOnlyQuestion(q)) {
+                // Each new question should start with selecting/confirming a function type again.
+                templateChosen = false;
+            }
             updateBuilderVisibility(q);
             applyQuestionUi(q);
             configureVideoButton(q);
             updateParamHints();
             syncBuilderTemplatePanel(q);
-            openAccordion('steps');
-            setDrawerOpen(false);
+            let mustStartFromFunctionSetup = !!sessionStarted && !isPreStartOnlyQuestion(q) && canOpenBuilderForQuestion(q);
+            if (mustStartFromFunctionSetup) {
+                builderPanelOpen = true;
+                openAccordion('params');
+                setDrawerOpen(true);
+            } else {
+                openAccordion('steps');
+                setDrawerOpen(false);
+            }
 
             board.removeObject(targets);
             targets = [];
@@ -6544,6 +6583,9 @@ Rules:
             renderQuestionOverlay(q);
             if (autoOpenOverlay) openQuestionOverlay();
             else closeQuestionOverlay();
+            if (mustStartFromFunctionSetup) {
+                showStepToast('שאלה חדשה: קודם בחרו סוג פונקציה, דייקו פרמטרים, ואז לחצו "קבע פונקציה והתחל תרגול".');
+            }
         }
 
         window.onload = init;
