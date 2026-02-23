@@ -1888,11 +1888,11 @@
             }
             if (q.goal === 'read_slope') {
                 let x0 = Number.isFinite(data.fixedX0) ? formatNumber(data.fixedX0) : 'x0';
-                return `קבעו את הנקודה על x=${x0} (זהו x0), קראו m=f'(${x0}), הזינו בתיבת התשובה ולחצו "בדוק תשובה".`;
+                return `קבעו את הנקודה על x = ${x0} (זהו x0 - ערך ה-x הנתון בשאלה).\nקראו מהחלונית את m = f'(${x0}).\nהזינו בתיבת התשובה ולחצו "בדוק תשובה".`;
             }
             if (q.goal === 'read_y') {
                 let x0 = Number.isFinite(data.fixedX0) ? formatNumber(data.fixedX0) : 'x0';
-                return `קבעו את הנקודה על x=${x0} (זהו x0), קראו y=f(${x0}), הזינו בתיבת התשובה ולחצו "בדוק תשובה".`;
+                return `קבעו את הנקודה על x = ${x0} (זהו x0 - ערך ה-x הנתון בשאלה).\nקראו מהחלונית את y = f(${x0}).\nהזינו בתיבת התשובה ולחצו "בדוק תשובה".`;
             }
             if (q.goal === 'hit_target' || q.goal === 'hit_targets') {
                 let targets = Array.isArray(data.targets) ? data.targets : [];
@@ -1923,7 +1923,7 @@
         function getMissionHintText(q) {
             if (!q) return '';
             if (q.goal === 'read_slope' || q.goal === 'read_y') {
-                return 'טיפ: x0 הוא ערך ה-x של הנקודה הכחולה. קודם מקמים ל-x0, אחר כך קוראים ערך בחלונית, מזינים בתיבת התשובה ולוחצים "בדוק תשובה".';
+                return 'טיפ: x0 הוא ערך ה-x הנתון בשאלה.\nקודם מקמים את הנקודה הכחולה על x0, אחר כך קוראים את הערך מהחלונית.\nלבסוף מזינים בתיבת התשובה ולוחצים "בדוק תשובה".';
             }
             if (q.goal === 'hit_target' || q.goal === 'hit_targets') {
                 let shortDesc = getQuestionShortDesc(q);
@@ -2073,6 +2073,7 @@
             document.body.classList.toggle('viewport-mobile', mobile);
             document.body.classList.toggle('viewport-desktop', !mobile);
             document.body.classList.toggle('viewport-short', isShortViewportNow());
+            updateTopQuestionIndexDisplay();
         }
 
         function getViewportSizeNow() {
@@ -2272,6 +2273,23 @@
             return `${hostLabel} ${viewportLabel}`;
         }
 
+        function shouldInlineVersionInTopQuestionIndex() {
+            return document.body.classList.contains('embed-mode') && document.body.classList.contains('viewport-mobile');
+        }
+
+        function updateTopQuestionIndexDisplay() {
+            let chip = document.getElementById('top-question-index');
+            if (!chip) return;
+            let baseLabel = chip.dataset.baseLabel || chip.innerText || '';
+            let text = baseLabel;
+            if (shouldInlineVersionInTopQuestionIndex()) {
+                let versionLabel = runtimeDisplayedVersion || APP_VERSION || '';
+                if (versionLabel) text = `${baseLabel} | V${versionLabel}`;
+            }
+            chip.innerText = text;
+            if (baseLabel) chip.title = baseLabel;
+        }
+
         function updateDisplayedVersionBadges() {
             let versionLabel = runtimeDisplayedVersion || APP_VERSION || 'local';
             let buildLabel = APP_BUILD_DISPLAY || 'local';
@@ -2285,6 +2303,7 @@
                 buildBadge.innerText = `V${versionLabel}`;
                 buildBadge.title = `build: ${buildLabel}`;
             }
+            updateTopQuestionIndexDisplay();
         }
 
         function applyTopStripFocusMode() {
@@ -3833,7 +3852,7 @@
             let data = getQuestionGoalData(q);
             if (goal === 'slope_zero') {
                 let tol = Number.isFinite(data.toleranceM) ? formatNumber(data.toleranceM) : '0.1';
-                return `הצלחה: הערך f'(x)=m קרוב מאוד ל-0 (טווח דיוק בערך ±${tol}).`;
+                return `הצלחה: הערך f'(x)=m שווה ל-0 (בתוך טווח הדיוק בערך ±${tol}).`;
             }
             if (goal === 'min_point') {
                 return 'הצלחה: גם f\'(x)=0 וגם הגרף נמצא במינימום (בדיקה אחרי/לפני הנקודה או f\'\'(x)>0).';
@@ -3848,11 +3867,11 @@
             }
             if (goal === 'read_slope') {
                 let x0 = Number.isFinite(data.fixedX0) ? formatNumber(data.fixedX0) : 'x0';
-                return `הצלחה: מזיזים לנקודה x=${x0}, קוראים את השיפוע, ומזינים תשובה מדויקת בשדה.`;
+                return `הצלחה: מזיזים לנקודה x = ${x0}, קוראים את השיפוע, ומזינים תשובה מדויקת בשדה.`;
             }
             if (goal === 'read_y') {
                 let x0 = Number.isFinite(data.fixedX0) ? formatNumber(data.fixedX0) : 'x0';
-                return `הצלחה: מזיזים לנקודה x=${x0}, קוראים את ערך הפונקציה, ומזינים תשובה מדויקת בשדה.`;
+                return `הצלחה: מזיזים לנקודה x = ${x0}, קוראים את ערך הפונקציה, ומזינים תשובה מדויקת בשדה.`;
             }
             if (goal === 'hit_target' || goal === 'hit_targets') {
                 let targets = Array.isArray(data.targets) ? data.targets : [];
@@ -3909,7 +3928,7 @@
             if (goal === 'slope_zero' || goal === 'min_point') {
                 return [
                     'גררו את הנקודה הכחולה לאורך הגרף.',
-                    'עקבו אחרי ערך f\'(x)=m וחפשו מצב שבו m קרוב ל-0.',
+                    'עקבו אחרי ערך f\'(x)=m וחפשו מצב שבו m שווה ל-0 (בתוך טווח הדיוק).',
                     goal === 'min_point'
                         ? 'ודאו שזה מינימום אמיתי (למשל שינוי כיוון/סימן או בדיקת f\'\').'
                         : 'כשהשיפוע אפס, בדקו שהמשיק נראה אופקי.',
@@ -3937,8 +3956,10 @@
             if (goal === 'read_slope' || goal === 'read_y') {
                 let x0 = Number.isFinite(data.fixedX0) ? formatNumber(data.fixedX0) : 'x0';
                 return [
-                    `קבעו את הנקודה בדיוק על x=${x0}.`,
-                    goal === 'read_slope' ? 'קראו את m=f\'(x) מתוך חלונית הנתונים.' : 'קראו את y=f(x) מתוך חלונית הנתונים.',
+                    `קבעו את הנקודה בדיוק על x = ${x0} (זהו x0).`,
+                    goal === 'read_slope'
+                        ? `קראו מתוך חלונית הנתונים את m = f'(${x0}).`
+                        : `קראו מתוך חלונית הנתונים את y = f(${x0}).`,
                     'הזינו את הערך בשדה התשובה (אפשר עם ספרה או שתיים אחרי הנקודה).',
                     'בדקו תשובה; אם צריך, תקנו קלות וחזרו על הבדיקה.'
                 ];
@@ -4070,9 +4091,9 @@
                 let data = getQuestionGoalData(q);
                 let x0 = data.fixedX0 ?? 0;
                 let prompt = q.goal === 'read_slope'
-                    ? `קבע x=${formatNumber(x0)}, קרא את השיפוע, והזן בתיבת התשובה: m = f'(${formatNumber(x0)})`
-                    : `קבע x=${formatNumber(x0)}, קרא את הערך, והזן בתיבת התשובה: y = f(${formatNumber(x0)})`;
-                document.getElementById('read-answer-prompt').innerText = prompt;
+                    ? `קבע x = ${formatNumber(x0)} (זהו x0), קרא את השיפוע, ואז הזן: m = f'(${formatNumber(x0)})`
+                    : `קבע x = ${formatNumber(x0)} (זהו x0), קרא את הערך, ואז הזן: y = f(${formatNumber(x0)})`;
+                setMixedBidiText(document.getElementById('read-answer-prompt'), prompt);
                 let readInputEl = document.getElementById('read-answer-input');
                 if (readInputEl) {
                     readInputEl.placeholder = q.goal === 'read_slope' ? 'הזן כאן את m' : 'הזן כאן את y';
@@ -4248,8 +4269,8 @@
                 let shortDesc = getQuestionShortDesc(q);
                 let prestartEssence = getShortText(q?.overlay?.essence, shortDesc.first);
                 let prestartGoal = getShortText(q?.overlay?.goal, shortDesc.second);
-                textEl.innerText = `מה עושים עכשיו: ${prestartEssence}`;
-                successEl.innerText = `הצלחה: בניתם פונקציה שמתאימה למשימה (${prestartGoal}) ולחצתם "קבע פונקציה והתחל תרגול".`;
+                setMixedBidiText(textEl, `מה עושים עכשיו: ${prestartEssence}`);
+                setMixedBidiText(successEl, `הצלחה: בניתם פונקציה שמתאימה למשימה (${prestartGoal}) ולחצתם "קבע פונקציה והתחל תרגול".`);
                 listEl.innerHTML = '';
                 [
                     'קראו את הסבר השאלה בראש המסך.',
@@ -4260,21 +4281,21 @@
                     'בסיום לחצו "קבע פונקציה והתחל תרגול".'
                 ].forEach((stepText) => {
                     let li = document.createElement('li');
-                    li.innerText = stepText;
+                    setMixedBidiText(li, stepText);
                     listEl.appendChild(li);
                 });
                 return;
             }
             if (!q) return;
 
-            textEl.innerText = `מה עושים עכשיו: ${getGoalInstructionText(q)}`;
-            successEl.innerText = getQuestionSuccessCriteriaText(q);
+            setMixedBidiText(textEl, `מה עושים עכשיו: ${getGoalInstructionText(q)}`);
+            setMixedBidiText(successEl, getQuestionSuccessCriteriaText(q));
 
             let steps = getQuestionHowToSteps(q);
             listEl.innerHTML = '';
             steps.slice(0, 4).forEach((stepText) => {
                 let li = document.createElement('li');
-                li.innerText = stepText;
+                setMixedBidiText(li, stepText);
                 listEl.appendChild(li);
             });
         }
@@ -4286,22 +4307,27 @@
                 let prestartEssence = getShortText(q?.overlay?.essence, shortDesc.first);
                 let prestartGoal = getShortText(q?.overlay?.goal, shortDesc.second);
                 let prestartText = `לפני התרגול: ${prestartEssence}`;
-                document.getElementById('mission-step-text').innerText = prestartText;
+                setMixedBidiText(document.getElementById('mission-step-text'), prestartText);
                 document.getElementById('top-step-status').innerText = prestartText;
                 let missionNote = document.getElementById('mission-step-note');
-                if (missionNote) missionNote.innerText = `מטרה: ${prestartGoal} | אחרי קביעת פונקציה מתחילים לפתור.`;
+                if (missionNote) setMixedBidiText(missionNote, `מטרה: ${prestartGoal}\nאחרי קביעת פונקציה מתחילים לפתור.`);
                 renderMissionExpandedHelp();
                 updateTopBriefCard({ instruction: `שאלה ${currentQ + 1}: ${q?.title || 'תרגיל'} | ${prestartEssence}` });
                 return;
             }
             let total = activeSteps.length || 1;
             let step = activeSteps[currentStepIndex];
-            let instruction = (step?.instruction || 'בצע את המשימה').replace(/\s+/g, ' ').trim();
+            let rawInstruction = String(step?.instruction || 'בצע את המשימה').replace(/\r\n?/g, '\n');
+            let instruction = rawInstruction
+                .split('\n')
+                .map((line) => line.replace(/\s+/g, ' ').trim())
+                .filter(Boolean)
+                .join('\n');
             let missionText = `שלב ${currentStepIndex + 1}/${total}: ${instruction}`;
-            document.getElementById('mission-step-text').innerText = missionText;
-            document.getElementById('top-step-status').innerText = missionText;
+            setMixedBidiText(document.getElementById('mission-step-text'), missionText);
+            document.getElementById('top-step-status').innerText = missionText.replace(/\n+/g, ' | ');
             let missionNote = document.getElementById('mission-step-note');
-            if (missionNote) missionNote.innerText = getMissionHintText(getCurrentQuestion());
+            if (missionNote) setMixedBidiText(missionNote, getMissionHintText(getCurrentQuestion()));
             renderMissionExpandedHelp();
             updateTopBriefCard(step);
         }
@@ -4311,6 +4337,44 @@
             let normalized = input.replace(/\s+/g, ' ').trim();
             if (!normalized) return fallback;
             return normalized;
+        }
+
+        function escapeHtmlText(text) {
+            return String(text ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function formatMixedBidiTextHtml(text) {
+            let raw = String(text ?? '').replace(/\r\n?/g, '\n');
+            return raw.split('\n').map((line) => {
+                return line.split(/(\s+)/).map((token) => {
+                    if (!token) return '';
+                    if (/^\s+$/.test(token)) return token;
+                    if (/[A-Za-z]/.test(token)) {
+                        let trailing = '';
+                        let coreToken = token;
+                        let m = coreToken.match(/^(.*?)([,:;]+)$/);
+                        if (m) {
+                            coreToken = m[1];
+                            trailing = m[2];
+                        }
+                        coreToken = coreToken.replace(/\s*=\s*/g, ' = ');
+                        let safeCore = escapeHtmlText(coreToken);
+                        let safeTrailing = escapeHtmlText(trailing);
+                        return `<span class="inline-math-bidi" dir="ltr">${safeCore}</span>${safeTrailing}`;
+                    }
+                    return escapeHtmlText(token);
+                }).join('');
+            }).join('<br>');
+        }
+
+        function setMixedBidiText(el, text) {
+            if (!el) return;
+            el.innerHTML = formatMixedBidiTextHtml(text);
         }
 
         function getQuestionShortDesc(q) {
@@ -4374,8 +4438,8 @@
 
             let main = document.getElementById('top-brief-main');
             let detail = document.getElementById('top-brief-detail');
-            if (main) main.innerText = stepInstruction;
-            if (detail) detail.innerText = `למה: ${goal}`;
+            if (main) setMixedBidiText(main, stepInstruction);
+            if (detail) setMixedBidiText(detail, `למה: ${goal}`);
 
             let clarityTitle = document.getElementById('top-clarity-title');
             let clarityGoal = document.getElementById('top-clarity-goal');
@@ -6169,7 +6233,7 @@ Rules:
 
         function goalTypeLabel(goalType) {
             let map = {
-                slope_zero: 'משיק אופקי',
+                slope_zero: 'משיק אופקי (שיפוע 0 / קיצון אפשרי)',
                 min_point: 'מינימום',
                 slope_equals: 'שיפוע נתון',
                 y_equals: 'ערך פונקציה נתון',
@@ -6775,7 +6839,11 @@ Rules:
             let displayTotal = visiblePos.total > 0 ? visiblePos.total : questions.length;
             document.getElementById('q-title').innerText = `שאלה ${displayNumber}: ${q.title}`;
             document.getElementById('q-desc').innerText = q.desc;
-            document.getElementById('top-question-index').innerText = `שאלה ${displayNumber}/${displayTotal}`;
+            let topQuestionIndexChip = document.getElementById('top-question-index');
+            if (topQuestionIndexChip) {
+                topQuestionIndexChip.dataset.baseLabel = `שאלה ${displayNumber}/${displayTotal}`;
+                updateTopQuestionIndexDisplay();
+            }
             document.getElementById('top-question').innerText = `${q.title}`;
             updatePracticeQuestionBar(`שאלה ${displayNumber}/${displayTotal}`, `${q.title}`);
             refreshTopQuestionSelect(safeIdx);

@@ -187,6 +187,13 @@ body.embed-mode .formula-chip {
     padding: 3px 7px;
 }
 
+.inline-math-bidi {
+    direction: ltr;
+    unicode-bidi: isolate;
+    display: inline-block;
+    font-weight: inherit;
+}
+
 body.embed-mode #hot-cold-widget {
     margin-top: 0;
 }
@@ -812,6 +819,9 @@ body.builder-workspace-mode #top-actions {
     border-radius: 999px;
     font-weight: 800;
     padding: 2px 8px;
+    gap: 4px;
+    line-height: 1.2;
+    unicode-bidi: plaintext;
 }
 
 #top-question {
@@ -1061,14 +1071,18 @@ body:not(.session-started) #btn-focus-steps-inline {
     font-size: 0.86rem;
     font-weight: 800;
     color: #0f172a;
-    line-height: 1.35;
+    line-height: 1.45;
     margin-bottom: 2px;
+    white-space: pre-line;
+    unicode-bidi: plaintext;
 }
 
 #top-brief-detail {
     font-size: 0.79rem;
     color: #334155;
-    line-height: 1.35;
+    line-height: 1.42;
+    white-space: pre-line;
+    unicode-bidi: plaintext;
 }
 
 #top-question-select {
@@ -1932,13 +1946,19 @@ h2 {
 
 #mission-step-text {
     font-weight: 700;
+    font-size: 0.96rem;
+    line-height: 1.55;
+    white-space: pre-line;
+    unicode-bidi: plaintext;
 }
 
 #mission-step-note {
     margin-top: 4px;
     font-size: 0.82rem;
-    line-height: 1.4;
+    line-height: 1.5;
     color: #144a8e;
+    white-space: pre-line;
+    unicode-bidi: plaintext;
 }
 
 #mission-panel-toolbar {
@@ -1988,8 +2008,10 @@ body:not(.session-started) #step-mission-box {
     font-size: 0.86rem;
     font-weight: 700;
     color: #12356a;
-    line-height: 1.45;
+    line-height: 1.55;
     margin-bottom: 4px;
+    white-space: pre-line;
+    unicode-bidi: plaintext;
 }
 
 #mission-success-text {
@@ -1999,8 +2021,10 @@ body:not(.session-started) #step-mission-box {
     border: 1px solid #f3d489;
     border-radius: 8px;
     padding: 5px 7px;
-    line-height: 1.4;
+    line-height: 1.5;
     margin-bottom: 6px;
+    white-space: pre-line;
+    unicode-bidi: plaintext;
 }
 
 #mission-expanded-steps {
@@ -2013,6 +2037,8 @@ body:not(.session-started) #step-mission-box {
 
 #mission-expanded-steps li {
     margin-bottom: 4px;
+    line-height: 1.55;
+    unicode-bidi: plaintext;
 }
 
 #template-setup-panel,
@@ -2200,6 +2226,12 @@ body.session-started #builder-template-panel {
 #read-answer-feedback {
     margin-top: 4px;
     font-size: 0.82rem;
+}
+
+#read-answer-prompt {
+    line-height: 1.5;
+    unicode-bidi: plaintext;
+    white-space: normal;
 }
 
 #step-result-panel {
@@ -4831,6 +4863,16 @@ body.embed-mode.viewport-desktop #btn-top-questions {
 
 body.embed-mode.viewport-mobile #graph-area {
     min-height: min(170px, var(--embed-graph-height, 170px));
+}
+
+body.embed-mode.viewport-mobile #top-version-badge {
+    display: none;
+}
+
+body.embed-mode.viewport-mobile #top-question-index {
+    max-width: 100%;
+    font-size: 0.72rem;
+    padding: 2px 7px;
 }
 
 body.embed-mode.viewport-short #top-strip {
