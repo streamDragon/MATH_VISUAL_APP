@@ -499,7 +499,7 @@
             <div id="top-actions">
                 <span id="top-question-select-label">כאן בוחרים שאלה:</span>
                 <select id="top-question-select" title="בחירת שאלה"></select>
-                <button id="btn-top-questions" onclick="toggleQuestionsFromTop()">שאלות ▼</button>
+                <button id="btn-top-questions" onclick="toggleQuestionsFromTop()" title="הצג/הסתר משימות ורמזים">משימות/רמזים ▼</button>
                 <button id="btn-scan-question" onclick="openScanModal()">📷 סריקת שאלה</button>
                 <button id="btn-replay-opening" onclick="replayOpeningSplash()">פתיח+שיר</button>
                 <button id="btn-top-init-builder" onclick="openInitialBuilderFromTop()">בנייה ראשונית</button>
@@ -529,6 +529,9 @@
                 <button class="acc-btn" onclick="openAccordion('steps')">שלבים/משימות</button>
                 <div id="acc-steps" class="acc-panel">
                     <div id="step-mission-box" class="info-box blue-box">
+                        <div id="mission-panel-toolbar">
+                            <button id="btn-hide-mission-panel" type="button" onclick="hideMissionPanel()">הסתר משימות/רמזים</button>
+                        </div>
                         <div class="info-title">משימה נוכחית</div>
                         <div id="mission-step-text">שלב 1/1: ...</div>
                         <div id="mission-step-note">טיפ: קראו את המשימה ובצעו צעד אחד בכל פעם.</div>
@@ -1692,11 +1695,11 @@
                 markSessionStarted({ preserveCurrentFunction: true });
             }
             openAccordion('steps');
-            setDrawerOpen(document.body.classList.contains('embed-mode'));
+            setDrawerOpen(false);
             renderMission();
             updateSpecialPanels();
             updateInfo();
-            showStepToast('הפונקציה נקבעה. אפשר להתחיל לתרגל שאלות.');
+            showStepToast('הפונקציה נקבעה. התחילו לעבוד על הגרף; אפשר להחזיר משימות/רמזים מהכפתור העליון.');
         }
 
         function updateParamHints() {
@@ -1852,11 +1855,11 @@
             }
             if (q.goal === 'read_slope') {
                 let x0 = Number.isFinite(data.fixedX0) ? formatNumber(data.fixedX0) : 'x0';
-                return `קבעו את הנקודה על x=${x0} (זהו x0), קראו m=f'(${x0}), והזינו בתיבה.`;
+                return `קבעו את הנקודה על x=${x0} (זהו x0), קראו m=f'(${x0}), הזינו בתיבת התשובה ולחצו "בדוק תשובה".`;
             }
             if (q.goal === 'read_y') {
                 let x0 = Number.isFinite(data.fixedX0) ? formatNumber(data.fixedX0) : 'x0';
-                return `קבעו את הנקודה על x=${x0} (זהו x0), קראו y=f(${x0}), והזינו בתיבה.`;
+                return `קבעו את הנקודה על x=${x0} (זהו x0), קראו y=f(${x0}), הזינו בתיבת התשובה ולחצו "בדוק תשובה".`;
             }
             if (q.goal === 'hit_target' || q.goal === 'hit_targets') {
                 let targets = Array.isArray(data.targets) ? data.targets : [];
@@ -1887,7 +1890,7 @@
         function getMissionHintText(q) {
             if (!q) return '';
             if (q.goal === 'read_slope' || q.goal === 'read_y') {
-                return 'טיפ: x0 הוא ערך ה-x של הנקודה הכחולה. קודם מקמים ל-x0, ואז קוראים ערך ומגישים תשובה.';
+                return 'טיפ: x0 הוא ערך ה-x של הנקודה הכחולה. קודם מקמים ל-x0, אחר כך קוראים ערך בחלונית, מזינים בתיבת התשובה ולוחצים "בדוק תשובה".';
             }
             if (q.goal === 'hit_target' || q.goal === 'hit_targets') {
                 let shortDesc = getQuestionShortDesc(q);
@@ -2475,7 +2478,13 @@
             let btn = document.getElementById('btn-top-questions');
             if (!btn) return;
             let stepsOpen = isTopQuestionsPanelOpen();
-            btn.innerText = stepsOpen ? 'שאלות ▲' : 'שאלות ▼';
+            btn.innerText = stepsOpen ? 'משימות/רמזים ▲' : 'משימות/רמזים ▼';
+        }
+
+        function hideMissionPanel() {
+            closeAllAccordions();
+            setDrawerOpen(false);
+            showStepToast('פאנל המשימות הוסתר. אפשר להחזיר עם "משימות/רמזים" למעלה.');
         }
 
         function isTopQuestionsPanelOpen() {
@@ -4030,9 +4039,14 @@
                 let data = getQuestionGoalData(q);
                 let x0 = data.fixedX0 ?? 0;
                 let prompt = q.goal === 'read_slope'
-                    ? `קבע x=${formatNumber(x0)} והזן m = f'(${formatNumber(x0)})`
-                    : `קבע x=${formatNumber(x0)} והזן y = f(${formatNumber(x0)})`;
+                    ? `קבע x=${formatNumber(x0)}, קרא את השיפוע, והזן בתיבת התשובה: m = f'(${formatNumber(x0)})`
+                    : `קבע x=${formatNumber(x0)}, קרא את הערך, והזן בתיבת התשובה: y = f(${formatNumber(x0)})`;
                 document.getElementById('read-answer-prompt').innerText = prompt;
+                let readInputEl = document.getElementById('read-answer-input');
+                if (readInputEl) {
+                    readInputEl.placeholder = q.goal === 'read_slope' ? 'הזן כאן את m' : 'הזן כאן את y';
+                    readInputEl.title = 'כאן רושמים את התשובה ואז לוחצים "בדוק תשובה"';
+                }
                 if (!readAnswerValidated) document.getElementById('read-answer-feedback').innerText = '';
             }
             syncBuilderEquationPracticeBox(q);
@@ -4301,10 +4315,10 @@
                 action = 'הזיזו את הנקודה עד ש־f(x) מגיע לערך המבוקש.';
             } else if (goal === 'read_slope') {
                 target = 'לקרוא שיפוע מדויק מהגרף בנקודה שנקבעת בשאלה.';
-                action = 'מקמים את הנקודה על ה־x המבוקש, קוראים את m, ומזינים את התשובה בשדה הבדיקה.';
+                action = 'מקמים את הנקודה על ה־x המבוקש, קוראים את m, מזינים בתיבת התשובה בפאנל המשימה, ולוחצים "בדוק תשובה".';
             } else if (goal === 'read_y') {
                 target = 'לקרוא ערך פונקציה מדויק מהגרף בנקודה שנקבעת בשאלה.';
-                action = 'מקמים את הנקודה על ה־x המבוקש, קוראים את y, ומזינים את התשובה בשדה הבדיקה.';
+                action = 'מקמים את הנקודה על ה־x המבוקש, קוראים את y, מזינים בתיבת התשובה בפאנל המשימה, ולוחצים "בדוק תשובה".';
             } else if (goal === 'hit_target' || goal === 'hit_targets') {
                 target = 'לכוון את הפרמטרים כך שהגרף יעבור בנקודות היעד של השאלה.';
                 action = 'פותחים עריכת פרמטרים, משנים סליידרים בהדרגה, ובודקים שהגרף פוגע ביעד.';
@@ -6765,6 +6779,7 @@ Rules:
                 // Each new question should start with selecting/confirming a function type again.
                 templateChosen = false;
             }
+            ensureBuilderTemplateChoicesRendered();
             updateBuilderVisibility(q);
             applyQuestionUi(q);
             configureVideoButton(q);
@@ -6813,6 +6828,7 @@ Rules:
             else closeQuestionOverlay();
             if (mustStartFromFunctionSetup) {
                 showStepToast('שאלה חדשה: קודם בחרו סוג פונקציה, דייקו פרמטרים, ואז לחצו "קבע פונקציה והתחל תרגול".');
+                setTimeout(pulseStartConfirmButton, 140);
             }
         }
 

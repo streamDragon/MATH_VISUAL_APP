@@ -164,7 +164,7 @@ body.embed-mode #top-question-select-label {
 }
 
 body.embed-mode #btn-top-questions {
-    display: none !important;
+    display: inline-flex !important;
 }
 
 body.embed-mode #top-step-status,
@@ -1151,6 +1151,13 @@ body:not(.session-started) #btn-focus-steps-inline {
 
 #btn-top-questions {
     display: none !important;
+    border: 1px solid #a5c4ff;
+    background: linear-gradient(120deg, #eff5ff, #dae8ff);
+    color: #0b4aa8;
+}
+
+body.session-started #btn-top-questions {
+    display: inline-flex !important;
 }
 
 #btn-top-init-builder {
@@ -1873,6 +1880,27 @@ h2 {
     font-size: 0.82rem;
     line-height: 1.4;
     color: #144a8e;
+}
+
+#mission-panel-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 6px;
+}
+
+#btn-hide-mission-panel {
+    border: 1px solid #bfd8ff;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #0f356f;
+    font-weight: 800;
+    font-size: 0.76rem;
+    padding: 4px 10px;
+    cursor: pointer;
+}
+
+#btn-hide-mission-panel:hover {
+    background: #eef5ff;
 }
 
 body:not(.session-started) #step-mission-box {
