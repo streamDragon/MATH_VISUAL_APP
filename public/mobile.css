@@ -1719,6 +1719,7 @@ body.embed-mode #sound-toggle {
     text-align: center;
     z-index: 2000;
     display: none;
+    pointer-events: none;
 }
 
 #win-overlay h1 {
@@ -4789,6 +4790,28 @@ body.track-equation-modeling #builder-notebook-box {
     body.panel-focus #top-step-status,
     body.panel-focus #prestart-hint {
         display: none;
+    }
+
+    body.embed-mode.panel-focus #top-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 4px 6px;
+    }
+
+    body.embed-mode.panel-focus #top-actions > * {
+        display: none;
+    }
+
+    body.embed-mode.panel-focus #top-question-select-label,
+    body.embed-mode.panel-focus #btn-top-questions {
+        display: inline-flex !important;
+    }
+
+    body.embed-mode.panel-focus #top-question-select {
+        display: block !important;
+        flex: 1 1 170px;
+        min-width: 140px;
     }
 
     #sidebar.accordion-focus .accordion-item {

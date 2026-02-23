@@ -830,6 +830,10 @@
         let pendingStepSolve = null;
         let questionSolved = false;
         let questionParamValues = {};
+        let questionLoadedAtMs = 0;
+        let questionUserInteractedSinceLoad = false;
+        let pendingStepRecheckTimer = null;
+        let questionSolveGuardToken = 0;
         let stepToastTimer = null;
         let drawerOpen = false;
         let activeAccordion = 'steps';
@@ -876,6 +880,7 @@
         let notebookAutoGenerateOnDrag = true;
         let notebookLastSnapshotHash = '';
         const NOTEBOOK_HISTORY_LIMIT = 8;
+        const QUESTION_INITIAL_SUCCESS_GRACE_MS = 1200;
         const PEDAGOGY_TRACK_MODELING_GOALS = new Set(['hit_target', 'hit_targets']);
         const PEDAGOGY_TRACK_EXPLORATION_GOALS = new Set([
             'choose_function_template',
@@ -1911,7 +1916,7 @@
                 return 'בחרו תבנית פונקציה, אשרו, ואז עברו לתרגול.';
             }
             if (q.goal === 'slope_zero') {
-                return 'גררו את הנקודה עד שהשיפוע f\'(x)=m שווה לאפס (m=0) - נקודת קיצון אפשרית.';
+                return 'גררו את הנקודה עד שהשיפוע f\'(x) שווה לאפס.';
             }
             if (q.goal === 'min_point') {
                 return 'גררו עד f\'(x)=0, ואז ודאו שמדובר במינימום.';
@@ -2509,6 +2514,47 @@
             syncTopInlineQuickActions();
         }
 
+        function clearPendingStepRecheckTimer() {
+            if (!pendingStepRecheckTimer) return;
+            clearTimeout(pendingStepRecheckTimer);
+            pendingStepRecheckTimer = null;
+        }
+
+        function resetQuestionSolveGuard() {
+            questionLoadedAtMs = Date.now();
+            questionUserInteractedSinceLoad = false;
+            questionSolveGuardToken += 1;
+            clearPendingStepRecheckTimer();
+        }
+
+        function noteQuestionInteraction() {
+            questionUserInteractedSinceLoad = true;
+        }
+
+        function getQuestionSuccessGuardRemainingMs() {
+            let elapsed = Date.now() - (questionLoadedAtMs || 0);
+            return Math.max(0, QUESTION_INITIAL_SUCCESS_GRACE_MS - elapsed);
+        }
+
+        function canAllowAutoStepCompletionNow() {
+            if (guidedDemoActive) return true;
+            if (!questionUserInteractedSinceLoad) return false;
+            return getQuestionSuccessGuardRemainingMs() <= 0;
+        }
+
+        function scheduleDeferredStepEvaluation() {
+            if (pendingStepRecheckTimer) return;
+            let token = questionSolveGuardToken;
+            let delay = Math.max(40, getQuestionSuccessGuardRemainingMs() + 25);
+            pendingStepRecheckTimer = setTimeout(() => {
+                pendingStepRecheckTimer = null;
+                if (token !== questionSolveGuardToken) return;
+                if (questionSolved) return;
+                if (!questionUserInteractedSinceLoad && !guidedDemoActive) return;
+                updateInfo();
+            }, delay);
+        }
+
         function getAppScrollTop() {
             let root = document.scrollingElement || document.documentElement;
             let rootTop = root ? root.scrollTop : 0;
@@ -3001,6 +3047,7 @@
                 updateInfo();
             });
             board.on('up', () => {
+                noteQuestionInteraction();
                 dismissQuestionIntro();
                 ensureFocusPointsVisibleOnBoard();
                 updateInfo();
@@ -3010,16 +3057,19 @@
             ['inpA','inpB','inpC','inpD','inpE','inpF'].forEach(id => {
                 let el = document.getElementById(id);
                 el.addEventListener('input', () => {
+                    noteQuestionInteraction();
                     dismissQuestionIntro();
                     updateParams();
                     board.update();
                 });
                 el.addEventListener('change', () => {
+                    noteQuestionInteraction();
                     maybeAutoGenerateNotebook('slider_auto');
                 });
             });
 
             document.getElementById('normal-shift').addEventListener('input', () => {
+                noteQuestionInteraction();
                 dismissQuestionIntro();
                 updateNormalShiftLabel();
                 updateInfo();
@@ -3028,6 +3078,7 @@
             let readInput = document.getElementById('read-answer-input');
             if (readInput) {
                 readInput.addEventListener('input', () => {
+                    noteQuestionInteraction();
                     dismissQuestionIntro();
                     updateInfo();
                 });
@@ -4891,6 +4942,7 @@
         function submitReadAnswer() {
             let q = getCurrentQuestion();
             if (!q || (q.goal !== 'read_slope' && q.goal !== 'read_y')) return;
+            noteQuestionInteraction();
             dismissQuestionIntro();
             let data = getQuestionGoalData(q);
             let x0 = data.fixedX0 ?? 0;
@@ -5156,11 +5208,11 @@
                 target = 'לבנות פונקציה שמתאימה לרמה שלכם ולחומר שנלמד עכשיו.';
                 action = 'בחרו צורת פונקציה, אשרו, ואז שנו פרמטרים כדי לראות מיד איך הגרף והנגזרת משתנים.';
             } else if (goal === 'slope_zero') {
-                target = 'למצוא נקודה שבה שיפוע המשיק שווה לאפס (m=0) - נקודת קיצון אפשרית.';
-                action = 'גררו את הנקודה הכחולה עד שבתיבת הנתונים מופיע f\'(x)=m שווה לאפס.';
+                target = 'למצוא נקודה שבה שיפוע המשיק שווה לאפס.';
+                action = 'גררו את הנקודה הכחולה עד שבתיבת הנתונים מופיע f\'(x) שווה לאפס.';
             } else if (goal === 'min_point') {
                 target = 'לזהות נקודת מינימום אמיתית על הגרף.';
-                action = 'הביאו את השיפוע ל־0 (נקודת קיצון אפשרית), ואז בדקו לפי ההנחיה שהנקודה אכן מינימום.';
+                action = 'הביאו את השיפוע ל־0, ואז בדקו לפי ההנחיה שהנקודה אכן מינימום.';
             } else if (goal === 'slope_equals') {
                 let targetM = Number.isFinite(data.targetM) ? formatNumber(data.targetM) : 'הערך הנתון';
                 target = `למצוא x שבו השיפוע שווה ${targetM}.`;
@@ -5247,6 +5299,7 @@
         }
 
         function markQuestionSolved() {
+            clearPendingStepRecheckTimer();
             questionSolved = true;
             let box = document.querySelector('.jxgbox');
             let winOverlay = document.getElementById('win-overlay');
@@ -5282,6 +5335,11 @@
             if (!step || stepCompleted) return;
 
             if (!isCurrentStepDone(step.goal || { type: 'free' }, m, x, y)) return;
+            if (!canAllowAutoStepCompletionNow()) {
+                if (!questionUserInteractedSinceLoad && !guidedDemoActive) return;
+                scheduleDeferredStepEvaluation();
+                return;
+            }
             stepCompleted = true;
             showStepToast(step?.onComplete?.toastText || 'יפה! מצאת את הצעד הנכון.');
             spawnStepSuccessStars(x, y);
@@ -7690,6 +7748,7 @@ Rules:
             syncBuilderTemplatePanel(q);
             notebookLastSnapshotHash = '';
             renderNotebookSnapshot(null, { keepStatus: false });
+            resetQuestionSolveGuard();
             let mustStartFromFunctionSetup = !!sessionStarted && !isPreStartOnlyQuestion(q) && canOpenBuilderForQuestion(q);
             if (mustStartFromFunctionSetup) {
                 builderPanelOpen = true;
