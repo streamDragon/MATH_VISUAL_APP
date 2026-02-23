@@ -22,13 +22,14 @@ const GOALS = new Set([
   'free'
 ]);
 
-const PARAM_KEYS = ['a', 'b', 'c', 'd', 'e'];
+const PARAM_KEYS = ['a', 'b', 'c', 'd', 'e', 'f'];
 const PARAM_TO_INPUT_ID = {
   a: 'inpA',
   b: 'inpB',
   c: 'inpC',
   d: 'inpD',
-  e: 'inpE'
+  e: 'inpE',
+  f: 'inpF'
 };
 const INPUT_IDS = new Set(Object.values(PARAM_TO_INPUT_ID));
 const RANGE_VALUES = Array.from({ length: 101 }, (_, i) => -5 + i * 0.1);
@@ -54,7 +55,7 @@ function toNumber(value) {
 }
 
 function normalizeParams(template, q) {
-  const params = { a: 0, b: 0, c: 0, d: 0, e: 0 };
+  const params = { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 };
   if (template && template.defaults && typeof template.defaults === 'object') {
     for (const key of PARAM_KEYS) {
       if (Number.isFinite(template.defaults[key])) params[key] = template.defaults[key];
@@ -75,6 +76,7 @@ function normalizeParams(template, q) {
 
 function getActiveParams(template) {
   if (!template) return [];
+  if (template.kind === 'poly5') return ['a', 'b', 'c', 'd', 'e', 'f'];
   if (template.kind === 'poly4') return ['a', 'b', 'c', 'd', 'e'];
   if (Array.isArray(template.params)) {
     return template.params.filter((key) => PARAM_KEYS.includes(key));
@@ -90,6 +92,7 @@ function getEditableParams(q, template) {
 
 function evaluateFunction(kind, params, x) {
   if (kind === 'poly2') return params.a * x * x + params.b * x + params.c;
+  if (kind === 'poly5') return params.a * x ** 5 + params.b * x ** 4 + params.c * x ** 3 + params.d * x ** 2 + params.e * x + params.f;
   if (kind === 'poly4') return params.a * x ** 4 + params.b * x ** 3 + params.c * x * x + params.d * x + params.e;
   if (kind === 'line') return params.c * x + params.d;
   if (kind === 'quad_shift') return (x - params.c) * (x - params.c) + params.d;
@@ -98,6 +101,7 @@ function evaluateFunction(kind, params, x) {
 
 function evaluateDerivative(kind, params, x) {
   if (kind === 'poly2') return 2 * params.a * x + params.b;
+  if (kind === 'poly5') return 5 * params.a * x ** 4 + 4 * params.b * x ** 3 + 3 * params.c * x ** 2 + 2 * params.d * x + params.e;
   if (kind === 'poly4') return 4 * params.a * x ** 3 + 3 * params.b * x * x + 2 * params.c * x + params.d;
   if (kind === 'line') return params.c;
   if (kind === 'quad_shift') return 2 * (x - params.c);
@@ -106,6 +110,7 @@ function evaluateDerivative(kind, params, x) {
 
 function evaluateSecondDerivative(kind, params, x) {
   if (kind === 'poly2') return 2 * params.a;
+  if (kind === 'poly5') return 20 * params.a * x ** 3 + 12 * params.b * x ** 2 + 6 * params.c * x + 2 * params.d;
   if (kind === 'poly4') return 12 * params.a * x * x + 6 * params.b * x + 2 * params.c;
   if (kind === 'line') return 0;
   if (kind === 'quad_shift') return 2;

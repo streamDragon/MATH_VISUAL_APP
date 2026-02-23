@@ -244,6 +244,24 @@ const QUESTIONS = [
       preferredEditableParams: ["c", "d"],
     },
     locked: [],
+    overlay: {
+      essence: "בשאלה הזאת מכוונים גרף כך שיעבור דרך הנקודה (2,0).",
+      goal: "להבין שנקודה על ציר x פירושה f(2)=0, ולכן צריך לגרום לגרף לעבור בדיוק דרך היעד הירוק.",
+      material: "שיפוע וישר (מומלץ לבחור line), או כל פונקציה אחרת אם רוצים אתגר גדול יותר.",
+      howTo: [
+        "פתחו פרמטרים ובחרו סוג פונקציה. לשאלה זו מומלץ line.",
+        "אפשר ללחוץ על \"טען גרף פתיחה לשאלה הזאת\" כדי להתחיל מקו ישר.",
+        "שנו c (שיפוע) ו-d (חיתוך עם ציר y) עד שהגרף הכחול עובר דרך (2,0).",
+        "בדקו שהנקודה הירוקה יושבת על הגרף ולא רק קרובה אליו."
+      ]
+    },
+    visualCategories: [
+      "line_object",
+      "axis_intersection",
+      "equation_to_intersection",
+      "parameter_shift",
+      "parameterized_family"
+    ],
     ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
   },
   {
@@ -303,6 +321,159 @@ const QUESTIONS = [
       "המשימה: לשנות פרמטר אחד בכל פעם ולהבין איך הוא משפיע על צורת הגרף והנגזרת.",
     mode: "free",
     goal: "free",
+    visualCategories: [
+      "parameterized_family",
+      "parameter_shift",
+      "end_behavior",
+      "visual_planning_sequence",
+      "prerequisite_order"
+    ],
+    ui: { allowNormal: true, defaultNormalOn: false, allowLineTool: true },
+  },
+  {
+    id: 14,
+    startTemplateId: "quad_abcd",
+    title: "עוגן גרפי: חיתוך עם ציר y",
+    desc:
+      "מטרת השאלה: לבנות עוגן ראשון לגרף באמצעות חיתוך עם ציר y.\n" +
+      "קבעו את הנקודה הכחולה בדיוק על x=0, קראו y=f(0), והזינו תשובה. אחר כך נסו לשנות את c ולראות איך החיתוך משתנה.",
+    mode: "move_x",
+    goal: "read_y",
+    data: {
+      fixedX0: 0,
+      answerTolerance: 0.2,
+    },
+    visualCategories: [
+      "function_object",
+      "axis_intersection",
+      "equation_to_intersection",
+      "coordinate_anchors"
+    ],
+    ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
+  },
+  {
+    id: 15,
+    startTemplateId: "cubic_abcd",
+    title: "שורש גרפי: מצאו x כך ש-f(x)=0",
+    desc:
+      "מחפשים שורש של הפונקציה: נקודה שבה הגרף חותך (או נוגע) בציר x.\n" +
+      "גררו את הנקודה לאורך הגרף עד שערך הפונקציה קרוב ל-0, כלומר y≈0.",
+    mode: "move_x",
+    goal: "y_equals",
+    data: {
+      targetY: 0,
+      toleranceY: 0.2,
+    },
+    visualCategories: [
+      "axis_intersection",
+      "equation_to_intersection",
+      "single_solution_visual",
+      "function_object"
+    ],
+    ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
+  },
+  {
+    id: 16,
+    startTemplateId: "quartic_abcd",
+    title: "משיק מקביל לישר y=2x+1",
+    desc:
+      "משיק מקביל לישר y=2x+1 פירושו שיפוע משיק m=2.\n" +
+      "גררו את הנקודה עד שבתיבה מופיע f'(x)=m קרוב ל-2.",
+    mode: "move_x",
+    goal: "slope_equals",
+    data: {
+      targetM: 2,
+      toleranceM: 0.15,
+    },
+    visualCategories: [
+      "tangent_condition",
+      "parallel_tangent_condition",
+      "derivative_to_slope",
+      "slope_at_point"
+    ],
+    ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
+  },
+  {
+    id: 17,
+    startTemplateId: "quintic_abcdef",
+    title: "קריאת שיפוע במעלה 5",
+    desc:
+      "בוחנים פונקציה ממעלה 5 וקוראים שיפוע בנקודה נתונה.\n" +
+      "קבעו את הנקודה על x=0, קראו את m=f'(0), והזינו תשובה. אחר כך נסו לשנות רק את e ולראות מה משתנה.",
+    mode: "move_x",
+    goal: "read_slope",
+    data: {
+      fixedX0: 0,
+      answerTolerance: 0.25,
+    },
+    visualCategories: [
+      "derivative_related_object",
+      "derivative_to_slope",
+      "slope_at_point",
+      "parameterized_family"
+    ],
+    ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
+  },
+  {
+    id: 18,
+    startTemplateId: "cubic_abcd",
+    title: "כוונון פרמטרים: שתי נקודות על ציר x",
+    desc:
+      "המטרה: לכוון את הפולינום כך שיעבור דרך שתי נקודות יעד על ציר x: (-1,0) ו-(2,0).\n" +
+      "כך מתרגלים יחד פרמטרים, שורשים, ומספר חיתוכים עם הציר.",
+    mode: "find_param",
+    goal: "hit_targets",
+    data: {
+      targets: [
+        { x: -1, y: 0, label: "A" },
+        { x: 2, y: 0, label: "B" },
+      ],
+      toleranceY: 0.2,
+      preferredEditableParams: ["c", "d", "b"],
+    },
+    locked: [],
+    visualCategories: [
+      "parameterized_family",
+      "axis_intersection",
+      "solution_count_visualization",
+      "parameter_case_split",
+      "equation_to_intersection"
+    ],
+    ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
+  },
+  {
+    id: 19,
+    startTemplateId: "quartic_abcd",
+    title: "חקירה חופשית: התנהגות קצוות (מעלה 4)",
+    desc:
+      "חקירה ממוקדת: מה קורה בקצוות הגרף בפולינום ממעלה 4.\n" +
+      "שנו בעיקר את a ואז את b, ותארו מה נשאר קבוע ומה משתנה בצורה.",
+    mode: "free",
+    goal: "free",
+    visualCategories: [
+      "parameterized_family",
+      "end_behavior",
+      "parameter_shift",
+      "visual_planning_sequence"
+    ],
+    ui: { allowNormal: true, defaultNormalOn: false, allowLineTool: true },
+  },
+  {
+    id: 20,
+    startTemplateId: "quintic_abcdef",
+    title: "חקירה חופשית: התנהגות קצוות (מעלה 5)",
+    desc:
+      "חקירה ממוקדת: פולינום ממעלה 5 (מעלה אי-זוגית) והתנהגות הקצוות שלו.\n" +
+      "שנו את a ואת f, והשוו בין הגרף לבין הנגזרת כדי לזהות עליות/ירידות ושינויי צורה.",
+    mode: "free",
+    goal: "free",
+    visualCategories: [
+      "parameterized_family",
+      "end_behavior",
+      "monotonicity_sign",
+      "derivative_related_object",
+      "visual_planning_sequence"
+    ],
     ui: { allowNormal: true, defaultNormalOn: false, allowLineTool: true },
   },
 ];

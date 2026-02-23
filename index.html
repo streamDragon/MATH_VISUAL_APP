@@ -440,6 +440,7 @@
                         </div>
                     </div>
                     <ol id="scan-subquestions-list"></ol>
+                    <div id="scan-recommended-questions" class="hidden"></div>
                 </div>
             </div>
         </div>
@@ -1664,7 +1665,7 @@
             if (status) status.innerText = `נבחרה תבנית: ${tpl.title}`;
             syncTemplateToggleButtons();
             updateParamHints();
-            updateParamRowVisibility();
+            syncParamInputsDisabledState(getCurrentQuestion());
             fitBoardToCurrentFunction();
             board.update();
             updateInfo();
@@ -1713,6 +1714,29 @@
             if (activeTemplate.kind === 'poly5') return ['a', 'b', 'c', 'd', 'e', 'f'];
             if (activeTemplate.kind === 'poly4') return ['a', 'b', 'c', 'd', 'e'];
             return Array.isArray(activeTemplate.params) ? activeTemplate.params : [];
+        }
+
+        function syncParamInputsDisabledState(q) {
+            q = q || getCurrentQuestion();
+            ['inpA','inpB','inpC','inpD','inpE','inpF'].forEach((id) => {
+                let el = document.getElementById(id);
+                if (el) el.disabled = false;
+            });
+            let activeParams = getActiveTemplateParams();
+            if (activeParams.length > 0) {
+                const allowed = new Set(activeParams);
+                const map = { inpA: 'a', inpB: 'b', inpC: 'c', inpD: 'd', inpE: 'e', inpF: 'f' };
+                Object.keys(map).forEach((id) => {
+                    let el = document.getElementById(id);
+                    if (!el) return;
+                    el.disabled = !allowed.has(map[id]);
+                });
+            }
+            if (q && q.locked) q.locked.forEach((id) => {
+                let el = document.getElementById(id);
+                if (el) el.disabled = true;
+            });
+            updateParamRowVisibility();
         }
 
         function updateParamRowVisibility() {
@@ -4720,6 +4744,7 @@
             let injectBtn = document.getElementById('btn-scan-inject');
             let copyBtn = document.getElementById('btn-scan-copy');
             let list = document.getElementById('scan-subquestions-list');
+            let recommended = document.getElementById('scan-recommended-questions');
             let problem = document.getElementById('scan-result-problem');
             let planWrap = document.getElementById('scan-visual-plan-wrap');
             let planLayers = document.getElementById('scan-visual-plan-layers');
@@ -4731,6 +4756,10 @@
             if (injectBtn) injectBtn.classList.add('hidden');
             if (copyBtn) copyBtn.classList.add('hidden');
             if (list) list.innerHTML = '';
+            if (recommended) {
+                recommended.innerHTML = '';
+                recommended.classList.add('hidden');
+            }
             if (problem) problem.innerText = '';
             if (planLayers) planLayers.innerHTML = '';
             if (planNote) planNote.innerText = '';
@@ -5383,6 +5412,217 @@
             return out.slice(0, 5);
         }
 
+        function getQuestionVisualCategoryTags(q) {
+            let tags = new Set();
+            if (!q || typeof q !== 'object') return [];
+
+            let explicit = Array.isArray(q.visualCategories) ? q.visualCategories : [];
+            explicit.forEach((tag) => {
+                let normalized = normalizeVisualCategoryTag(tag, '');
+                if (normalized) tags.add(normalized);
+            });
+
+            let tpl = getTemplateById(q.startTemplateId || '') || null;
+            let kind = String(tpl?.kind || '').trim();
+            if (kind === 'line') {
+                tags.add('line_object');
+            } else if (kind) {
+                tags.add('function_object');
+            }
+
+            if (['poly2', 'poly3', 'poly4', 'poly5', 'quad_shift'].includes(kind)) {
+                tags.add('parameterized_family');
+            }
+            if (['poly4', 'poly5'].includes(kind)) {
+                tags.add('end_behavior');
+            }
+            if (kind === 'quad_shift') {
+                tags.add('translation');
+                tags.add('parameter_shift');
+            }
+
+            let goal = String(q.goal || '').trim();
+            if (goal === 'read_y') {
+                tags.add('equation_to_intersection');
+                tags.add('axis_intersection');
+            }
+            if (goal === 'read_slope') {
+                tags.add('slope_at_point');
+                tags.add('derivative_to_slope');
+                tags.add('derivative_related_object');
+            }
+            if (goal === 'slope_zero') {
+                tags.add('extreme_point');
+                tags.add('derivative_to_slope');
+                tags.add('slope_at_point');
+            }
+            if (goal === 'min_point') {
+                tags.add('extreme_point');
+                tags.add('derivative_to_slope');
+                tags.add('monotonicity_sign');
+            }
+            if (goal === 'slope_equals') {
+                tags.add('tangent_condition');
+                tags.add('slope_at_point');
+                tags.add('derivative_to_slope');
+                tags.add('parallel_tangent_condition');
+            }
+            if (goal === 'y_equals') {
+                tags.add('equation_to_intersection');
+                tags.add('single_solution_visual');
+            }
+            if (goal === 'hit_target' || goal === 'hit_targets') {
+                tags.add('parameter_shift');
+                tags.add('parameter_case_split');
+                tags.add('solution_count_visualization');
+            }
+            if (goal === 'tangent_through_point') {
+                tags.add('tangent_condition');
+                tags.add('slope_at_point');
+                tags.add('derivative_to_slope');
+            }
+            if (goal === 'free') {
+                tags.add('visual_planning_sequence');
+                tags.add('prerequisite_order');
+            }
+
+            let targets = Array.isArray(q?.data?.targets) ? q.data.targets : (Array.isArray(q?.targets) ? q.targets : []);
+            if (targets.some((t) => Number.isFinite(t?.y) && Math.abs(Number(t.y)) <= 1e-9)) {
+                tags.add('axis_intersection');
+                tags.add('equation_to_intersection');
+            }
+            if (targets.length >= 2) {
+                tags.add('solution_count_visualization');
+            }
+
+            return Array.from(tags);
+        }
+
+        function buildQuestionCoverageCatalog() {
+            let questions = getQuestionsList();
+            return questions.map((q, index) => ({
+                index,
+                q,
+                categories: getQuestionVisualCategoryTags(q)
+            }));
+        }
+
+        function getRecommendedQuestionsForVisualPlan(plan, options = {}) {
+            let requested = new Set();
+            let order = Array.isArray(plan?.action_plan_order) ? plan.action_plan_order : [];
+            let unique = Array.isArray(plan?._unique_categories) ? plan._unique_categories : [];
+            [...order, ...unique].forEach((tag) => {
+                let normalized = normalizeVisualCategoryTag(tag, '');
+                if (normalized) requested.add(normalized);
+            });
+
+            let visibleIndexes = new Set(getVisibleQuestionIndexes());
+            let catalog = buildQuestionCoverageCatalog();
+            let scored = catalog
+                .filter((item) => item.q && item.q.goal !== 'choose_function_template')
+                .map((item) => {
+                    let overlap = item.categories.filter((tag) => requested.has(tag));
+                    let score = overlap.length * 10;
+                    if (visibleIndexes.has(item.index)) score += 1;
+                    if ((item.q.startTemplateId || '').includes('quartic') || (item.q.startTemplateId || '').includes('quintic')) score += 1;
+                    if (item.q.meta?.source === 'vision_scan') score -= 2;
+                    return Object.assign({}, item, { overlap, score });
+                })
+                .filter((item) => item.score > 0)
+                .sort((a, b) => {
+                    if (b.score !== a.score) return b.score - a.score;
+                    let aVisible = visibleIndexes.has(a.index) ? 1 : 0;
+                    let bVisible = visibleIndexes.has(b.index) ? 1 : 0;
+                    if (bVisible !== aVisible) return bVisible - aVisible;
+                    return (a.q?.id ?? a.index) - (b.q?.id ?? b.index);
+                });
+
+            let maxItems = Number.isFinite(options.maxItems) ? Math.max(1, options.maxItems) : 5;
+            if (scored.length > 0) return scored.slice(0, maxItems);
+
+            return catalog
+                .filter((item) => item.q && item.q.goal !== 'choose_function_template')
+                .filter((item) => {
+                    let tplId = String(item.q.startTemplateId || '');
+                    return /quad|cubic|quartic|quintic/.test(tplId);
+                })
+                .slice(0, maxItems)
+                .map((item) => Object.assign({}, item, { overlap: [], score: 0 }));
+        }
+
+        function renderScanRecommendedQuestions(questionDraft, visualPlan) {
+            let wrap = document.getElementById('scan-recommended-questions');
+            if (!wrap) return;
+            wrap.innerHTML = '';
+
+            if (!visualPlan || typeof visualPlan !== 'object') {
+                wrap.classList.add('hidden');
+                return;
+            }
+
+            let recs = getRecommendedQuestionsForVisualPlan(visualPlan, { maxItems: 6 });
+            if (!Array.isArray(recs) || recs.length === 0) {
+                wrap.classList.add('hidden');
+                return;
+            }
+
+            let title = document.createElement('div');
+            title.className = 'scan-reco-title';
+            title.innerText = 'שאלות קיימות שמתרגלות את היכולות שזוהו';
+            wrap.appendChild(title);
+
+            let note = document.createElement('div');
+            note.className = 'scan-reco-note';
+            let tags = Array.isArray(visualPlan.action_plan_order) ? visualPlan.action_plan_order.slice(0, 6) : [];
+            note.innerText = tags.length > 0
+                ? `התאמה לפי קטגוריות ניתוח: ${tags.join(', ')}`
+                : 'לא זוהו קטגוריות מספיק מדויקות, לכן מוצגות שאלות פולינומים כלליות.';
+            wrap.appendChild(note);
+
+            let list = document.createElement('div');
+            list.className = 'scan-reco-list';
+
+            recs.forEach((rec) => {
+                let q = rec.q || {};
+                let item = document.createElement('div');
+                item.className = 'scan-reco-item';
+
+                let btn = document.createElement('button');
+                let visiblePos = getVisibleQuestionPosition(rec.index);
+                let visibleLabel = (visiblePos.position >= 0 && visiblePos.total > 0)
+                    ? `שאלה ${visiblePos.position + 1}`
+                    : `שאלה ID ${q.id ?? rec.index}`;
+                btn.type = 'button';
+                btn.innerText = `${visibleLabel}: ${q.title || 'ללא כותרת'}`;
+                btn.onclick = () => openRecommendedQuestionFromScan(rec.index);
+                item.appendChild(btn);
+
+                let meta = document.createElement('div');
+                meta.className = 'scan-reco-meta';
+                let overlapText = rec.overlap && rec.overlap.length > 0
+                    ? `קטגוריות חופפות: ${rec.overlap.slice(0, 4).join(', ')}`
+                    : 'כיסוי כללי לפולינומים / פרמטרים';
+                let templateText = q.startTemplateId ? ` | פתיחה מומלצת: ${q.startTemplateId}` : '';
+                let goalText = q.goal ? ` | סוג משימה: ${goalTypeLabel(q.goal)}` : '';
+                meta.innerText = `${overlapText}${templateText}${goalText}`;
+                item.appendChild(meta);
+
+                list.appendChild(item);
+            });
+
+            wrap.appendChild(list);
+            wrap.classList.remove('hidden');
+        }
+
+        function openRecommendedQuestionFromScan(questionIndex) {
+            let idx = Number(questionIndex);
+            if (!Number.isFinite(idx)) return;
+            closeScanModal();
+            if (!sessionStarted) markSessionStarted();
+            loadQ(idx, { autoOpenOverlay: true });
+            showStepToast('נפתחה שאלה מומלצת מתוך הקטלוג לפי ניתוח היכולות הויזואליות.');
+        }
+
         function getScanActionPlanProgressContext() {
             let plan = scannedVisualActionPlan;
             if (!plan) return { total: 0, completed: 0, order: [] };
@@ -5885,6 +6125,7 @@ Rules:
                 li.innerText = `שלב ${idx + 1}: ${step.instruction} (${goalTypeLabel(step.goal?.type)})`;
                 list.appendChild(li);
             });
+            renderScanRecommendedQuestions(questionDraft, visualPlan);
 
             result.classList.remove('hidden');
             injectBtn.classList.remove('hidden');
@@ -6518,20 +6759,7 @@ Rules:
             let readFeedback = document.getElementById('read-answer-feedback');
             if (readFeedback) readFeedback.innerText = '';
 
-            ['inpA','inpB','inpC','inpD','inpE','inpF'].forEach(id => document.getElementById(id).disabled = false);
-            let activeParams = getActiveTemplateParams();
-            if (activeParams.length > 0) {
-                const allowed = new Set(activeParams);
-                const map = { inpA: 'a', inpB: 'b', inpC: 'c', inpD: 'd', inpE: 'e', inpF: 'f' };
-                Object.keys(map).forEach((id) => {
-                    document.getElementById(id).disabled = !allowed.has(map[id]);
-                });
-            }
-            if(q.locked) q.locked.forEach(id => {
-                let el = document.getElementById(id);
-                if (el) el.disabled = true;
-            });
-            updateParamRowVisibility();
+            syncParamInputsDisabledState(q);
             builderPanelOpen = false;
             if (!isPreStartOnlyQuestion(q)) {
                 // Each new question should start with selecting/confirming a function type again.
