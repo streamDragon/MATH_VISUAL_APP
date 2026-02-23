@@ -460,6 +460,7 @@
             <div id="top-question-wrap">
                 <span id="top-question-index">שאלה 1/4</span>
                 <span id="top-question">טוען...</span>
+                <span id="top-track-badge" class="track-visual-explore">מסלול: חקירה ויזואלית</span>
                 <div id="top-build-cta-wrap">
                     <button id="btn-top-build-cta" type="button" onclick="openBuilderFromMainCta()">לחצו כאן לבניית פונקציה</button>
                     <span id="top-build-cta-note">לפני התרגול אפשר לבחור כל פונקציה פולינומית. בונים פונקציה ואז לוחצים "קבע פונקציה והתחל תרגול".</span>
@@ -665,6 +666,26 @@
                             <button id="btn-builder-fill-equation" type="button" onclick="fillEquationGuessFromCurrent()">מלא מהגרף</button>
                         </div>
                         <div id="builder-equation-auto" dir="ltr">f(x) = ...</div>
+                        <div id="builder-notebook-box" class="hidden">
+                            <div class="builder-notebook-head">
+                                <div id="builder-notebook-title">המחברת שלי - משוואות מהגרף</div>
+                                <span id="builder-track-badge" class="track-visual-explore">חקירה</span>
+                            </div>
+                            <div id="builder-notebook-note">מיועד בעיקר לשאלות מידול/פרמטרים: האפליקציה אוספת נתונים מהגרף ומתרגמת אותם למשוואות.</div>
+                            <div class="builder-notebook-controls">
+                                <button id="btn-generate-notebook" type="button" onclick="generateNotebookFromCurrentState('manual')">ייצר מחברת</button>
+                                <label class="builder-notebook-auto-row">
+                                    <input id="chk-notebook-auto" type="checkbox" onchange="toggleNotebookAutoGenerate(this.checked)">
+                                    אוטומטי אחרי גרירה/שינוי
+                                </label>
+                                <button id="btn-notebook-clear-history" type="button" onclick="clearNotebookHistory()">נקה היסטוריה</button>
+                            </div>
+                            <div id="builder-notebook-status">עדיין לא נוצרה מחברת לשאלה הזו.</div>
+                            <div id="builder-notebook-constraints" class="builder-notebook-block hidden"></div>
+                            <div id="builder-notebook-equations" class="builder-notebook-block hidden"></div>
+                            <div id="builder-notebook-solution" class="builder-notebook-block hidden"></div>
+                            <div id="builder-notebook-history" class="builder-notebook-block hidden"></div>
+                        </div>
                     </div>
                     <div class="slider-row"><span class="slider-lbl">a</span><input type="range" id="inpA" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintA"></span></div>
                     <div class="slider-row"><span class="slider-lbl">b</span><input type="range" id="inpB" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintB"></span></div>
@@ -851,6 +872,22 @@
         let scanCompletedVisualSkills = new Set();
         let scanInFlight = false;
         let lastScanInputMode = '';
+        let notebookHistory = [];
+        let notebookAutoGenerateOnDrag = true;
+        let notebookLastSnapshotHash = '';
+        const NOTEBOOK_HISTORY_LIMIT = 8;
+        const PEDAGOGY_TRACK_MODELING_GOALS = new Set(['hit_target', 'hit_targets']);
+        const PEDAGOGY_TRACK_EXPLORATION_GOALS = new Set([
+            'choose_function_template',
+            'free',
+            'read_y',
+            'read_slope',
+            'slope_zero',
+            'min_point',
+            'slope_equals',
+            'y_equals',
+            'tangent_through_point'
+        ]);
 
         function setupOpeningSplashMedia() {
             let video = document.getElementById('opening-splash-video');
@@ -1533,10 +1570,11 @@
                 let opt = document.createElement('option');
                 opt.value = String(realIdx);
                 let shortDesc = getQuestionShortDesc(q);
+                let trackMeta = getQuestionPedagogyTrackMeta(q);
                 let compactTitle = (q?.title || '').replace(/\s+/g, ' ').trim();
                 if (compactTitle.length > 24) compactTitle = `${compactTitle.slice(0, 24).trim()}...`;
-                opt.textContent = `שאלה ${visibleOrder + 1} · ${compactTitle}`;
-                opt.title = `${q?.title || ''} - ${shortDesc.first}`;
+                opt.textContent = `${trackMeta.icon} שאלה ${visibleOrder + 1} · ${compactTitle}`;
+                opt.title = `${trackMeta.shortLabel} | ${q?.title || ''} - ${shortDesc.first}`;
                 topSelect.appendChild(opt);
             });
 
@@ -2005,6 +2043,65 @@
 
         function getQuestionGoalData(q) {
             return q?.data || {};
+        }
+
+        function getQuestionPedagogyTrack(q) {
+            let explicit = String(q?.pedagogyTrack || '').trim();
+            if (explicit === 'equation_modeling' || explicit === 'visual_explore') return explicit;
+            let goal = String(q?.goal || '').trim();
+            if (PEDAGOGY_TRACK_MODELING_GOALS.has(goal)) return 'equation_modeling';
+            if (PEDAGOGY_TRACK_EXPLORATION_GOALS.has(goal)) return 'visual_explore';
+            return 'visual_explore';
+        }
+
+        function getQuestionPedagogyTrackMeta(q) {
+            let track = getQuestionPedagogyTrack(q);
+            if (track === 'equation_modeling') {
+                return {
+                    track,
+                    shortLabel: 'מחברת/מידול',
+                    compactLabel: 'מחברת',
+                    icon: '🧩',
+                    bodyClass: 'track-equation-modeling'
+                };
+            }
+            return {
+                track: 'visual_explore',
+                shortLabel: 'חקירה ויזואלית',
+                compactLabel: 'חקירה',
+                icon: '🔎',
+                bodyClass: 'track-visual-explore'
+            };
+        }
+
+        function syncQuestionPedagogyUi(q) {
+            let meta = getQuestionPedagogyTrackMeta(q);
+            document.body.classList.toggle('track-equation-modeling', meta.track === 'equation_modeling');
+            document.body.classList.toggle('track-visual-explore', meta.track !== 'equation_modeling');
+
+            let topBadge = document.getElementById('top-track-badge');
+            if (topBadge) {
+                topBadge.classList.remove('track-equation-modeling', 'track-visual-explore');
+                topBadge.classList.add(meta.track === 'equation_modeling' ? 'track-equation-modeling' : 'track-visual-explore');
+                topBadge.innerText = `${meta.icon} ${meta.shortLabel}`;
+                topBadge.title = meta.track === 'equation_modeling'
+                    ? 'שאלת מידול: מייצרים משוואות מהגרף והנתונים'
+                    : 'שאלת חקירה: מתמקדים בקריאה/תנועה/הבנה ויזואלית';
+            }
+
+            let builderTrackBadge = document.getElementById('builder-track-badge');
+            if (builderTrackBadge) {
+                builderTrackBadge.classList.remove('track-equation-modeling', 'track-visual-explore');
+                builderTrackBadge.classList.add(meta.track === 'equation_modeling' ? 'track-equation-modeling' : 'track-visual-explore');
+                builderTrackBadge.innerText = `${meta.icon} ${meta.compactLabel}`;
+            }
+
+            let note = document.getElementById('builder-notebook-note');
+            if (note) {
+                note.innerText = meta.track === 'equation_modeling'
+                    ? 'זה המסלול המרכזי למחברת: מסדרים נתונים על הגרף, ומייצרים מהם משוואות כלליות בפרמטרים.'
+                    : 'בשאלות חקירה אפשר עדיין לייצר מחברת, אבל הדגש כאן הוא קריאה/הבנה ויזואלית ולא פתרון מערכת פרמטרים.';
+            }
         }
 
         function getQuestionParamsArray(q) {
@@ -2837,13 +2934,18 @@
                 dismissQuestionIntro();
                 ensureFocusPointsVisibleOnBoard();
                 updateInfo();
+                maybeAutoGenerateNotebook('drag_auto');
             });
 
             ['inpA','inpB','inpC','inpD','inpE','inpF'].forEach(id => {
-                document.getElementById(id).addEventListener('input', () => {
+                let el = document.getElementById(id);
+                el.addEventListener('input', () => {
                     dismissQuestionIntro();
                     updateParams();
                     board.update();
+                });
+                el.addEventListener('change', () => {
+                    maybeAutoGenerateNotebook('slider_auto');
                 });
             });
 
@@ -2888,6 +2990,8 @@
             updateSoundButton();
             initLearnerProgress();
             syncSessionUiState();
+            toggleNotebookAutoGenerate(notebookAutoGenerateOnDrag);
+            renderNotebookSnapshot(null, { keepStatus: false });
 
             queueBoardResize();
             window.addEventListener('resize', handleViewportResize);
@@ -4115,7 +4219,9 @@
         function syncBuilderEquationPracticeBox(q) {
             let box = document.getElementById('builder-equation-practice-box');
             if (!box) return;
-            box.classList.toggle('hidden', !shouldShowBuilderEquationPractice(q || getCurrentQuestion()));
+            let question = q || getCurrentQuestion();
+            box.classList.toggle('hidden', !shouldShowBuilderEquationPractice(question));
+            syncBuilderNotebookBox(question);
         }
 
         function fillEquationGuessFromCurrent() {
@@ -4125,6 +4231,587 @@
             input.value = fx.innerText || '';
             input.focus();
             input.select();
+        }
+
+        function shouldShowBuilderNotebook(q) {
+            return shouldShowBuilderEquationPractice(q || getCurrentQuestion());
+        }
+
+        function toggleNotebookAutoGenerate(enabled) {
+            notebookAutoGenerateOnDrag = !!enabled;
+            let chk = document.getElementById('chk-notebook-auto');
+            if (chk) chk.checked = notebookAutoGenerateOnDrag;
+            let status = document.getElementById('builder-notebook-status');
+            if (status && notebookHistory.length === 0) {
+                status.innerText = notebookAutoGenerateOnDrag
+                    ? 'אוטומטי פעיל: אחרי גרירה/שינוי תיווצר מחברת חדשה (כשיש נתונים מתאימים).'
+                    : 'אוטומטי כבוי. לחצו "ייצר מחברת" כדי ליצור משוואות מהגרף.';
+            }
+        }
+
+        function syncBuilderNotebookBox(q) {
+            let box = document.getElementById('builder-notebook-box');
+            if (!box) return;
+            let shouldShow = shouldShowBuilderNotebook(q || getCurrentQuestion());
+            box.classList.toggle('hidden', !shouldShow);
+            if (!shouldShow) return;
+            syncQuestionPedagogyUi(q || getCurrentQuestion());
+            let chk = document.getElementById('chk-notebook-auto');
+            if (chk) chk.checked = notebookAutoGenerateOnDrag;
+            if (notebookHistory.length === 0) {
+                let status = document.getElementById('builder-notebook-status');
+                if (status) {
+                    status.innerText = notebookAutoGenerateOnDrag
+                        ? 'אוטומטי פעיל: אחרי גרירה/שינוי תיווצר מחברת חדשה (כשיש נתונים מתאימים).'
+                        : 'אוטומטי כבוי. לחצו "ייצר מחברת" כדי ליצור משוואות מהגרף.';
+                }
+            }
+        }
+
+        function clearNotebookHistory() {
+            notebookHistory = [];
+            notebookLastSnapshotHash = '';
+            renderNotebookSnapshot(null, { keepStatus: false });
+        }
+
+        function getNotebookTemplateParamKeys(template = activeTemplate) {
+            if (!template) return [];
+            if (Array.isArray(template.params) && template.params.length > 0) return template.params.slice();
+            return getActiveTemplateParams();
+        }
+
+        function getNotebookDisplayParamSymbol(paramKey, template = activeTemplate) {
+            let key = String(paramKey || '').trim();
+            if (template?.kind === 'quad_shift' && key === 'c') return 'k';
+            return key || '?';
+        }
+
+        function createNotebookRhsValue(rawValue, fallbackSymbol = '') {
+            if (Number.isFinite(rawValue)) {
+                return { kind: 'number', value: Number(rawValue), text: formatNumber(Number(rawValue)) };
+            }
+            if (typeof rawValue === 'string' && rawValue.trim()) {
+                return { kind: 'symbol', text: rawValue.trim() };
+            }
+            if (fallbackSymbol) return { kind: 'symbol', text: fallbackSymbol };
+            return { kind: 'number', value: 0, text: '0' };
+        }
+
+        function addNotebookConstraint(list, constraint) {
+            if (!Array.isArray(list) || !constraint) return;
+            let xKey = Number.isFinite(constraint.x) ? Number(constraint.x).toFixed(4) : String(constraint.x ?? '');
+            let rhsKey = constraint.rhs?.kind === 'number'
+                ? `n:${Number(constraint.rhs.value).toFixed(4)}`
+                : `s:${String(constraint.rhs?.text || '')}`;
+            let key = `${constraint.relation}|${xKey}|${rhsKey}|${constraint.sourceLabel || ''}`;
+            if (list.some((c) => c._key === key)) return;
+            constraint._key = key;
+            list.push(constraint);
+        }
+
+        function buildNotebookConstraintsFromCurrentState() {
+            let q = getCurrentQuestion();
+            if (!q) return [];
+            let data = getQuestionGoalData(q);
+            let constraints = [];
+            let hasPoint = p && typeof p.X === 'function' && typeof p.Y === 'function';
+            let currentX = hasPoint ? p.X() : NaN;
+            let currentY = hasPoint ? p.Y() : NaN;
+            let currentSlope = Number.isFinite(currentX) ? getSlope(currentX) : NaN;
+
+            if (hasPoint && Number.isFinite(currentX) && Number.isFinite(currentY)) {
+                addNotebookConstraint(constraints, {
+                    relation: 'f',
+                    x: currentX,
+                    rhs: createNotebookRhsValue(currentY),
+                    sourceLabel: 'הנקודה הכחולה (מצב נוכחי)',
+                    sourceKind: 'current_point',
+                    rawText: `f(${formatNumber(currentX)}) = ${formatNumber(currentY)}`
+                });
+            }
+
+            if ((q.goal === 'hit_target' || q.goal === 'hit_targets') && Array.isArray(data.targets)) {
+                data.targets.forEach((t, idx) => {
+                    let rhsRaw = Number.isFinite(t?.y) ? Number(t.y) : (t?.ySymbol || t?.symbol || '');
+                    addNotebookConstraint(constraints, {
+                        relation: 'f',
+                        x: Number(t?.x),
+                        rhs: createNotebookRhsValue(rhsRaw),
+                        sourceLabel: `נקודת יעד ${t?.label || String.fromCharCode(65 + idx)}`,
+                        sourceKind: 'target_point',
+                        rawText: `f(${formatNumber(Number(t?.x))}) = ${Number.isFinite(t?.y) ? formatNumber(Number(t.y)) : (t?.ySymbol || t?.symbol || 'y')}`
+                    });
+                });
+            }
+
+            if ((q.goal === 'slope_zero' || q.goal === 'min_point') && Number.isFinite(currentX)) {
+                addNotebookConstraint(constraints, {
+                    relation: 'df',
+                    x: currentX,
+                    rhs: createNotebookRhsValue(0),
+                    sourceLabel: q.goal === 'min_point' ? 'תנאי קיצון (מינימום/קיצון אפשרי)' : 'משיק אופקי',
+                    sourceKind: 'slope_condition',
+                    rawText: `f'(${formatNumber(currentX)}) = 0`
+                });
+            }
+
+            if (q.goal === 'slope_equals' && Number.isFinite(currentX)) {
+                let targetM = Number.isFinite(data.targetM) ? Number(data.targetM) : currentSlope;
+                addNotebookConstraint(constraints, {
+                    relation: 'df',
+                    x: currentX,
+                    rhs: createNotebookRhsValue(targetM),
+                    sourceLabel: 'שיפוע מבוקש',
+                    sourceKind: 'slope_condition',
+                    rawText: `f'(${formatNumber(currentX)}) = ${formatNumber(targetM)}`
+                });
+            }
+
+            if (q.goal === 'y_equals' && Number.isFinite(currentX)) {
+                let targetY = Number.isFinite(data.targetY) ? Number(data.targetY) : currentY;
+                addNotebookConstraint(constraints, {
+                    relation: 'f',
+                    x: currentX,
+                    rhs: createNotebookRhsValue(targetY),
+                    sourceLabel: 'ערך פונקציה מבוקש',
+                    sourceKind: 'value_condition',
+                    rawText: `f(${formatNumber(currentX)}) = ${formatNumber(targetY)}`
+                });
+            }
+
+            if ((q.goal === 'read_slope' || q.goal === 'read_y') && Number.isFinite(data.fixedX0)) {
+                let x0 = Number(data.fixedX0);
+                if (q.goal === 'read_slope') {
+                    addNotebookConstraint(constraints, {
+                        relation: 'df',
+                        x: x0,
+                        rhs: createNotebookRhsValue(getSlope(x0)),
+                        sourceLabel: 'קריאת שיפוע ב-x0',
+                        sourceKind: 'read_value',
+                        rawText: `f'(${formatNumber(x0)}) = ${formatNumber(getSlope(x0))}`
+                    });
+                } else {
+                    addNotebookConstraint(constraints, {
+                        relation: 'f',
+                        x: x0,
+                        rhs: createNotebookRhsValue(evaluateFunctionAt(x0)),
+                        sourceLabel: 'קריאת ערך פונקציה ב-x0',
+                        sourceKind: 'read_value',
+                        rawText: `f(${formatNumber(x0)}) = ${formatNumber(evaluateFunctionAt(x0))}`
+                    });
+                }
+            }
+
+            return constraints.filter((c) => Number.isFinite(c.x));
+        }
+
+        function getNotebookLinearModelForConstraint(template, constraint) {
+            let x = Number(constraint?.x);
+            if (!template || !Number.isFinite(x) || !constraint) return { supportedLinear: false, reason: 'missing_data' };
+            let relation = constraint.relation === 'df' ? 'df' : 'f';
+            let coeffs = {};
+            let constantLeft = 0;
+            let paramsList = getNotebookTemplateParamKeys(template);
+            paramsList.forEach((k) => coeffs[k] = 0);
+
+            if (template.kind === 'poly2') {
+                if (relation === 'f') {
+                    coeffs.a = x * x; coeffs.b = x; coeffs.c = 1;
+                } else {
+                    coeffs.a = 2 * x; coeffs.b = 1; coeffs.c = 0;
+                }
+                return { supportedLinear: true, coeffs, constantLeft };
+            }
+            if (template.kind === 'poly3') {
+                if (relation === 'f') {
+                    coeffs.a = x ** 3; coeffs.b = x ** 2; coeffs.c = x; coeffs.d = 1;
+                } else {
+                    coeffs.a = 3 * x * x; coeffs.b = 2 * x; coeffs.c = 1; coeffs.d = 0;
+                }
+                return { supportedLinear: true, coeffs, constantLeft };
+            }
+            if (template.kind === 'poly4') {
+                if (relation === 'f') {
+                    coeffs.a = x ** 4; coeffs.b = x ** 3; coeffs.c = x ** 2; coeffs.d = x; coeffs.e = 1;
+                } else {
+                    coeffs.a = 4 * x ** 3; coeffs.b = 3 * x ** 2; coeffs.c = 2 * x; coeffs.d = 1; coeffs.e = 0;
+                }
+                return { supportedLinear: true, coeffs, constantLeft };
+            }
+            if (template.kind === 'poly5') {
+                if (relation === 'f') {
+                    coeffs.a = x ** 5; coeffs.b = x ** 4; coeffs.c = x ** 3; coeffs.d = x ** 2; coeffs.e = x; coeffs.f = 1;
+                } else {
+                    coeffs.a = 5 * x ** 4; coeffs.b = 4 * x ** 3; coeffs.c = 3 * x ** 2; coeffs.d = 2 * x; coeffs.e = 1; coeffs.f = 0;
+                }
+                return { supportedLinear: true, coeffs, constantLeft };
+            }
+            if (template.kind === 'line') {
+                if (relation === 'f') {
+                    coeffs.c = x; coeffs.d = 1;
+                } else {
+                    coeffs.c = 1; coeffs.d = 0;
+                }
+                return { supportedLinear: true, coeffs, constantLeft };
+            }
+            if (template.kind === 'quad_shift') {
+                if (relation === 'df') {
+                    coeffs.c = -2;
+                    coeffs.d = 0;
+                    constantLeft = 2 * x;
+                    return { supportedLinear: true, coeffs, constantLeft };
+                }
+                return {
+                    supportedLinear: false,
+                    reason: 'nonlinear',
+                    displayText: `(x - ${getNotebookDisplayParamSymbol('c', template)})^2 + d = ${constraint.rhs?.text || '?'}`
+                };
+            }
+            return { supportedLinear: false, reason: 'template_not_supported' };
+        }
+
+        function formatNotebookCoeffNumber(n) {
+            if (!Number.isFinite(n)) return '0';
+            return formatNumber(n);
+        }
+
+        function formatNotebookLinearExpression(coeffs, template, options = {}) {
+            let keys = Array.isArray(options.keys) && options.keys.length > 0
+                ? options.keys
+                : Object.keys(coeffs || {});
+            let pieces = [];
+            keys.forEach((k) => {
+                let v = Number(coeffs?.[k] || 0);
+                if (!Number.isFinite(v) || Math.abs(v) < 1e-9) return;
+                let sym = getNotebookDisplayParamSymbol(k, template);
+                let absV = Math.abs(v);
+                let coeffText = Math.abs(absV - 1) < 1e-9 ? '' : formatNotebookCoeffNumber(absV);
+                let term = `${coeffText}${sym}`;
+                if (pieces.length === 0) {
+                    pieces.push(v < 0 ? `-${term}` : term);
+                } else {
+                    pieces.push(v < 0 ? ` - ${term}` : ` + ${term}`);
+                }
+            });
+            return pieces.length > 0 ? pieces.join('') : '0';
+        }
+
+        function buildNotebookEquationFromConstraint(constraint, template = activeTemplate) {
+            if (!constraint || !template) return null;
+            let model = getNotebookLinearModelForConstraint(template, constraint);
+            let rhs = constraint.rhs || createNotebookRhsValue(0);
+            let relationToken = constraint.relation === 'df' ? "f'" : 'f';
+            let xText = formatNumber(Number(constraint.x));
+            let constraintText = constraint.rawText || `${relationToken}(${xText}) = ${rhs.text || '?'}`;
+
+            if (!model.supportedLinear) {
+                let unsupportedText = model.displayText
+                    || (constraint.relation === 'df'
+                        ? `${relationToken}(${xText}) = ${rhs.text || '?'}`
+                        : `f(${xText}) = ${rhs.text || '?'}`);
+                return {
+                    constraint,
+                    templateKind: template.kind,
+                    supportedLinear: false,
+                    canSolve: false,
+                    constraintText,
+                    equationText: unsupportedText,
+                    reason: model.reason || 'unsupported'
+                };
+            }
+
+            let coeffs = model.coeffs || {};
+            let constantLeft = Number(model.constantLeft || 0);
+            let exprText = formatNotebookLinearExpression(coeffs, template);
+            let equationText = '';
+            let numericRhs = null;
+            if (rhs.kind === 'number') {
+                numericRhs = Number(rhs.value || 0) - constantLeft;
+                equationText = `${exprText} = ${formatNumber(numericRhs)}`;
+            } else if (Math.abs(constantLeft) > 1e-9) {
+                let constText = formatNumber(Math.abs(constantLeft));
+                equationText = `${exprText} ${constantLeft > 0 ? '+' : '-'} ${constText} = ${rhs.text}`;
+            } else {
+                equationText = `${exprText} = ${rhs.text}`;
+            }
+
+            let unknownKeys = Object.keys(coeffs).filter((k) => Math.abs(Number(coeffs[k] || 0)) > 1e-9);
+            return {
+                constraint,
+                templateKind: template.kind,
+                supportedLinear: true,
+                canSolve: rhs.kind === 'number',
+                coeffs,
+                constantLeft,
+                rhs,
+                numericRhs,
+                unknownKeys,
+                constraintText,
+                equationText
+            };
+        }
+
+        function getNotebookPreferredUnknowns(q, template = activeTemplate) {
+            let active = getNotebookTemplateParamKeys(template);
+            let preferred = Array.isArray(q?.data?.preferredEditableParams) ? q.data.preferredEditableParams : [];
+            let preferredFiltered = preferred.filter((k) => active.includes(k));
+            let combined = [...preferredFiltered, ...active.filter((k) => !preferredFiltered.includes(k))];
+            return combined;
+        }
+
+        function canEquationSolveOnlyFor(eq, allowedKeys) {
+            if (!eq?.supportedLinear) return false;
+            let allowed = new Set(allowedKeys || []);
+            return Object.keys(eq.coeffs || {}).every((k) => {
+                let v = Number(eq.coeffs[k] || 0);
+                if (Math.abs(v) < 1e-9) return true;
+                return allowed.has(k);
+            });
+        }
+
+        function chooseIndependentTwoEquationSolve(equations, u1, u2) {
+            let rows = (equations || []).filter((eq) =>
+                eq?.canSolve && eq.supportedLinear && canEquationSolveOnlyFor(eq, [u1, u2]));
+            for (let i = 0; i < rows.length; i++) {
+                for (let j = i + 1; j < rows.length; j++) {
+                    let e1 = rows[i];
+                    let e2 = rows[j];
+                    let a11 = Number(e1.coeffs?.[u1] || 0);
+                    let a12 = Number(e1.coeffs?.[u2] || 0);
+                    let a21 = Number(e2.coeffs?.[u1] || 0);
+                    let a22 = Number(e2.coeffs?.[u2] || 0);
+                    let det = a11 * a22 - a12 * a21;
+                    if (!Number.isFinite(det) || Math.abs(det) < 1e-9) continue;
+                    let b1 = Number(e1.numericRhs || 0);
+                    let b2 = Number(e2.numericRhs || 0);
+                    let xVal = (b1 * a22 - a12 * b2) / det;
+                    let yVal = (a11 * b2 - b1 * a21) / det;
+                    return {
+                        solved: true,
+                        vars: { [u1]: xVal, [u2]: yVal },
+                        usedEquations: [e1, e2],
+                        det
+                    };
+                }
+            }
+            return { solved: false };
+        }
+
+        function chooseSingleEquationSolve(equations, u) {
+            let rows = (equations || []).filter((eq) =>
+                eq?.canSolve && eq.supportedLinear && canEquationSolveOnlyFor(eq, [u]));
+            for (let eq of rows) {
+                let a = Number(eq.coeffs?.[u] || 0);
+                if (!Number.isFinite(a) || Math.abs(a) < 1e-9) continue;
+                let b = Number(eq.numericRhs || 0);
+                return {
+                    solved: true,
+                    vars: { [u]: b / a },
+                    usedEquations: [eq]
+                };
+            }
+            return { solved: false };
+        }
+
+        function solveNotebookEquationsPartial(equations, q, template = activeTemplate) {
+            let linear = (equations || []).filter((eq) => eq?.supportedLinear);
+            if (linear.length === 0) {
+                return {
+                    status: 'info',
+                    title: 'עדיין אין מערכת פתירה',
+                    lines: ['לא נמצאו משוואות ליניאריות מתאימות לתבנית הנוכחית.']
+                };
+            }
+
+            let numeric = linear.filter((eq) => eq.canSolve);
+            if (numeric.length === 0) {
+                return {
+                    status: 'info',
+                    title: 'יש משוואות סמליות',
+                    lines: ['נבנו משוואות, אבל יש ערכים סמליים (למשל β), ולכן נשאיר את הפתרון לשלב האלגברי.']
+                };
+            }
+
+            let unknownOrder = getNotebookPreferredUnknowns(q, template);
+            let twoCandidates = unknownOrder.slice(0, 2);
+            if (twoCandidates.length >= 2) {
+                let twoSolve = chooseIndependentTwoEquationSolve(numeric, twoCandidates[0], twoCandidates[1]);
+                if (twoSolve.solved) {
+                    let varsText = Object.entries(twoSolve.vars)
+                        .map(([k, v]) => `${getNotebookDisplayParamSymbol(k, template)} = ${formatNumber(v)}`)
+                        .join(', ');
+                    return {
+                        status: 'success',
+                        title: 'פתרון חלקי (2 נעלמים)',
+                        lines: [
+                            `נפתרה מערכת לשני נעלמים: ${varsText}.`,
+                            'שאר הפרמטרים (אם קיימים) נשארים חופשיים או דורשים עוד משוואות.'
+                        ],
+                        solvedVars: twoSolve.vars,
+                        usedEquations: twoSolve.usedEquations
+                    };
+                }
+            }
+
+            if (unknownOrder.length >= 1) {
+                let oneSolve = chooseSingleEquationSolve(numeric, unknownOrder[0]);
+                if (oneSolve.solved) {
+                    let [k, v] = Object.entries(oneSolve.vars)[0];
+                    return {
+                        status: 'success',
+                        title: 'פתרון חלקי (נעלם אחד)',
+                        lines: [
+                            `אפשר לבודד כבר עכשיו: ${getNotebookDisplayParamSymbol(k, template)} = ${formatNumber(v)}.`,
+                            'כדי לחשוף נעלמים נוספים צריך עוד משוואה בלתי תלויה.'
+                        ],
+                        solvedVars: oneSolve.vars,
+                        usedEquations: oneSolve.usedEquations
+                    };
+                }
+            }
+
+            let nonlinearCount = (equations || []).filter((eq) => !eq.supportedLinear).length;
+            let extraLine = nonlinearCount > 0
+                ? `שימו לב: ${nonlinearCount} מהמשוואות אינן ליניאריות בתבנית הנוכחית (למשל פרבולה מוזזת).`
+                : '';
+            return {
+                status: 'warn',
+                title: 'חסר מידע / אין בידוד ישיר עדיין',
+                lines: [
+                    'נבנו משוואות, אבל כרגע אין מספיק משוואות בלתי תלויות כדי לפתור 1–2 נעלמים בצורה ישירה.',
+                    'זה בדיוק המקום לחשיבה אלגברית: הוסיפו עוד אילוץ ויזואלי (נקודה/שיפוע/קיצון) או בחרו זוג פרמטרים אחר.',
+                    extraLine
+                ].filter(Boolean)
+            };
+        }
+
+        function renderNotebookBlock(elementId, title, htmlBody) {
+            let el = document.getElementById(elementId);
+            if (!el) return;
+            if (!htmlBody) {
+                el.classList.add('hidden');
+                el.innerHTML = '';
+                return;
+            }
+            el.classList.remove('hidden');
+            el.innerHTML = `<div class="builder-notebook-block-title">${escapeHtmlText(title)}</div>${htmlBody}`;
+        }
+
+        function renderNotebookHistoryList() {
+            let html = '';
+            if (notebookHistory.length > 0) {
+                html = `<div class="builder-notebook-history-list">${notebookHistory.map((item) => {
+                    let triggerLabel = item.trigger === 'drag_auto' ? 'אוטומטי' : (item.trigger === 'slider_auto' ? 'אוטומטי (פרמטרים)' : 'ידני');
+                    return `<div class="builder-notebook-history-item">${escapeHtmlText(item.timeLabel)} | ${escapeHtmlText(triggerLabel)} | ${escapeHtmlText(item.questionLabel)} | ${item.equationCount} משוואות</div>`;
+                }).join('')}</div>`;
+            }
+            renderNotebookBlock('builder-notebook-history', 'היסטוריית מחברות (אחרונות)', html);
+        }
+
+        function renderNotebookSnapshot(snapshot, options = {}) {
+            let keepStatus = !!options.keepStatus;
+            let statusEl = document.getElementById('builder-notebook-status');
+            if (!statusEl) return;
+
+            if (!snapshot) {
+                if (!keepStatus) {
+                    statusEl.innerText = notebookAutoGenerateOnDrag
+                        ? 'אוטומטי פעיל: אחרי גרירה/שינוי תיווצר מחברת חדשה (כשיש נתונים מתאימים).'
+                        : 'אוטומטי כבוי. לחצו "ייצר מחברת" כדי ליצור משוואות מהגרף.';
+                }
+                renderNotebookBlock('builder-notebook-constraints', '', '');
+                renderNotebookBlock('builder-notebook-equations', '', '');
+                renderNotebookBlock('builder-notebook-solution', '', '');
+                renderNotebookHistoryList();
+                return;
+            }
+
+            statusEl.innerText = `${snapshot.summaryTitle} | ${snapshot.equationCount} משוואות | ${snapshot.timeLabel}`;
+
+            let constraintsHtml = `<ol class="builder-notebook-list">${snapshot.constraints.map((c) =>
+                `<li>${escapeHtmlText(c.sourceLabel)}: <span dir="ltr">${escapeHtmlText(c.rawText || c.constraintText || '')}</span></li>`
+            ).join('')}</ol>`;
+            renderNotebookBlock('builder-notebook-constraints', 'מה נאסף מהגרף (אילוצים)', constraintsHtml);
+
+            let equationsHtml = snapshot.equations.map((eq, idx) => {
+                let label = `משוואה ${idx + 1}: ${eq.constraint?.sourceLabel || 'אילוץ'}`;
+                let eqText = eq.equationText || eq.constraintText || '';
+                let note = !eq.supportedLinear
+                    ? ' (לא ליניארי / מוצג להמחשה)'
+                    : (!eq.canSolve ? ' (ערך סמלי - לא פותרים אוטומטית)' : '');
+                return `<div class="builder-notebook-eq"><span class="builder-notebook-eq-label">${escapeHtmlText(label + note)}</span>${escapeHtmlText(eqText)}</div>`;
+            }).join('');
+            renderNotebookBlock('builder-notebook-equations', 'מערכת המשוואות שנבנתה', equationsHtml || '');
+
+            let solution = snapshot.solution;
+            let solutionHtml = solution
+                ? `<ol class="builder-notebook-list">${(solution.lines || []).map((line) => `<li>${escapeHtmlText(line)}</li>`).join('')}</ol>`
+                : '';
+            renderNotebookBlock('builder-notebook-solution', solution?.title || 'כיוון לפתרון', solutionHtml);
+            renderNotebookHistoryList();
+        }
+
+        function generateNotebookFromCurrentState(trigger = 'manual', options = {}) {
+            let q = getCurrentQuestion();
+            let template = activeTemplate;
+            let statusEl = document.getElementById('builder-notebook-status');
+            if (!q || !template) {
+                if (statusEl) statusEl.innerText = 'אי אפשר ליצור מחברת לפני שטוענים שאלה ופונקציה.';
+                return null;
+            }
+            syncBuilderNotebookBox(q);
+
+            let constraints = buildNotebookConstraintsFromCurrentState();
+            if (constraints.length === 0) {
+                if (statusEl) statusEl.innerText = 'לא נמצאו אילוצים מתאימים מהמצב הנוכחי (נסו לגרור נקודה או לעבוד על שאלת פרמטרים).';
+                renderNotebookBlock('builder-notebook-constraints', '', '');
+                renderNotebookBlock('builder-notebook-equations', '', '');
+                renderNotebookBlock('builder-notebook-solution', '', '');
+                return null;
+            }
+
+            let equations = constraints.map((c) => buildNotebookEquationFromConstraint(c, template)).filter(Boolean);
+            let hashSeed = JSON.stringify({
+                q: currentQ,
+                tpl: template.id,
+                constraints: constraints.map((c) => ({ r: c.relation, x: formatNumber(c.x), rhs: c.rhs?.text, src: c.sourceLabel })),
+                eqs: equations.map((e) => e.equationText)
+            });
+            if (options.skipIfSame && hashSeed === notebookLastSnapshotHash) return null;
+            notebookLastSnapshotHash = hashSeed;
+
+            let solution = solveNotebookEquationsPartial(equations, q, template);
+            let now = new Date();
+            let snapshot = {
+                id: now.getTime(),
+                trigger,
+                questionIndex: currentQ,
+                questionLabel: `${document.getElementById('top-question-index')?.dataset?.baseLabel || ('שאלה ' + (currentQ + 1))}`,
+                questionTitle: q.title || 'תרגיל',
+                track: getQuestionPedagogyTrack(q),
+                templateId: template.id,
+                templateKind: template.kind,
+                constraints,
+                equations,
+                equationCount: equations.length,
+                solution,
+                timeLabel: now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
+                summaryTitle: trigger === 'manual'
+                    ? 'מחברת נוצרה ידנית'
+                    : (trigger === 'slider_auto' ? 'מחברת עודכנה אוטומטית אחרי שינוי פרמטר' : 'מחברת עודכנה אוטומטית')
+            };
+
+            notebookHistory.unshift(snapshot);
+            notebookHistory = notebookHistory.slice(0, NOTEBOOK_HISTORY_LIMIT);
+            renderNotebookSnapshot(snapshot);
+            return snapshot;
+        }
+
+        function maybeAutoGenerateNotebook(trigger = 'drag_auto') {
+            if (!notebookAutoGenerateOnDrag) return;
+            let q = getCurrentQuestion();
+            if (!q || !shouldShowBuilderNotebook(q)) return;
+            generateNotebookFromCurrentState(trigger, { skipIfSame: true });
         }
 
         function submitReadAnswer() {
@@ -6918,10 +7605,13 @@ Rules:
             }
             ensureBuilderTemplateChoicesRendered();
             updateBuilderVisibility(q);
+            syncQuestionPedagogyUi(q);
             applyQuestionUi(q);
             configureVideoButton(q);
             updateParamHints();
             syncBuilderTemplatePanel(q);
+            notebookLastSnapshotHash = '';
+            renderNotebookSnapshot(null, { keepStatus: false });
             let mustStartFromFunctionSetup = !!sessionStarted && !isPreStartOnlyQuestion(q) && canOpenBuilderForQuestion(q);
             if (mustStartFromFunctionSetup) {
                 builderPanelOpen = true;
