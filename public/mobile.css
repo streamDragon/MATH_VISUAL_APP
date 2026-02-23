@@ -37,6 +37,7 @@ body.admob-banner-visible {
 body.embed-mode {
     overflow: auto;
     min-height: 100vh;
+    overflow-anchor: none;
 }
 
 body.embed-mode.viewport-desktop {
@@ -76,6 +77,9 @@ body.embed-mode #top-strip {
         "actions";
     gap: 6px;
     padding: 6px 8px;
+    position: sticky;
+    top: 0;
+    z-index: 1650;
 }
 
 body.embed-mode.question-intro-active #top-strip {
@@ -1526,6 +1530,35 @@ body.session-started #btn-scan-question {
 
 #opening-splash-audio-btn:hover {
     background: linear-gradient(135deg, rgba(146, 64, 14, 0.92), rgba(234, 127, 13, 0.96)) !important;
+}
+
+/* Embedded desktop iframes (Google Sites): fill the opening splash so it does not look like
+   a partially scrolled/letterboxed view with large dark empty regions. */
+body.embed-mode.viewport-desktop #opening-splash {
+    padding: 0;
+}
+
+body.embed-mode.viewport-desktop #opening-splash-video,
+body.embed-mode.viewport-desktop #opening-splash-poster {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+    object-fit: cover;
+    object-position: center top;
+    box-shadow: none;
+}
+
+body.embed-mode.viewport-desktop #opening-splash-content {
+    width: min(560px, calc(100% - 20px));
+    bottom: calc(8px + var(--safe-bottom));
+}
+
+body.embed-mode.viewport-desktop #opening-splash-shade {
+    background:
+        linear-gradient(180deg, rgba(2, 6, 23, 0.14), rgba(2, 6, 23, 0.5)),
+        radial-gradient(circle at center, rgba(2, 6, 23, 0) 28%, rgba(2, 6, 23, 0.44) 100%);
 }
 
 @media (max-width: 720px) {

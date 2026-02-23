@@ -2509,6 +2509,50 @@
             syncTopInlineQuickActions();
         }
 
+        function getAppScrollTop() {
+            let root = document.scrollingElement || document.documentElement;
+            let rootTop = root ? root.scrollTop : 0;
+            let htmlTop = document.documentElement ? document.documentElement.scrollTop : 0;
+            let bodyTop = document.body ? document.body.scrollTop : 0;
+            let winTop = typeof window.scrollY === 'number' ? window.scrollY : 0;
+            return Math.max(rootTop || 0, htmlTop || 0, bodyTop || 0, winTop || 0);
+        }
+
+        function snapViewportToTop(options = {}) {
+            let onlyEmbed = options.onlyEmbed !== false;
+            if (onlyEmbed && !document.body.classList.contains('embed-mode')) return;
+            let force = !!options.force;
+            if (!force && getAppScrollTop() < 4) return;
+            let behavior = options.behavior === 'smooth' ? 'smooth' : 'auto';
+            try {
+                window.scrollTo({ top: 0, left: 0, behavior });
+            } catch (err) {
+                window.scrollTo(0, 0);
+            }
+            if (document.documentElement) document.documentElement.scrollTop = 0;
+            if (document.body) document.body.scrollTop = 0;
+            let root = document.scrollingElement;
+            if (root) root.scrollTop = 0;
+        }
+
+        function scheduleViewportTopReset(options = {}) {
+            if (!document.body.classList.contains('embed-mode')) return;
+            let delays = Array.isArray(options.delays) && options.delays.length
+                ? options.delays
+                : [0, 40, 140, 360, 760];
+            delays.forEach((delay, idx) => {
+                setTimeout(() => {
+                    if (!document.body.classList.contains('embed-mode')) return;
+                    if (options.onlyWhilePrestart && sessionStarted) return;
+                    if (options.onlyWhileSplash && openingSplashDone) return;
+                    snapViewportToTop({
+                        force: idx === 0 || !!options.force,
+                        behavior: idx === 0 && options.smooth ? 'smooth' : 'auto'
+                    });
+                }, delay);
+            });
+        }
+
         function ensureGraphAndBuilderVisible() {
             if (!document.body.classList.contains('embed-mode')) return;
             let panel = document.getElementById('builder-panel');
@@ -2683,6 +2727,7 @@
             let splash = document.getElementById('opening-splash');
             if (!splash) return;
             openingSplashDone = true;
+            scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 90, 260, 540] });
             splash.classList.remove('is-visible');
             splash.classList.add('is-exiting');
             let splashVideo = document.getElementById('opening-splash-video');
@@ -2691,6 +2736,7 @@
             openingSplashHideTimer = setTimeout(() => {
                 splash.classList.add('hidden');
                 splash.classList.remove('is-exiting');
+                scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 80, 220] });
                 maybeOpenStartChoiceAfterSplash();
             }, 420);
         }
@@ -2741,6 +2787,7 @@
             openingSplashDone = false;
             let splash = document.getElementById('opening-splash');
             if (!splash) return;
+            scheduleViewportTopReset({ onlyWhileSplash: true, delays: [0, 60, 160, 420, 900] });
             if (openingSplashExitTimer) {
                 clearTimeout(openingSplashExitTimer);
                 openingSplashExitTimer = null;
@@ -2782,11 +2829,17 @@
         }
 
         async function init() {
+            try {
+                if (history && 'scrollRestoration' in history) history.scrollRestoration = 'manual';
+            } catch (err) {
+                // Ignore browser restrictions.
+            }
             if (shouldEnableEmbedMode()) {
                 document.body.classList.add('embed-mode');
             }
             applyViewportClasses();
             updateResponsiveLayoutMetrics();
+            scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 90, 260, 520, 1100] });
             setupOpeningSplashMedia();
             // Show splash immediately while the app keeps initializing in the background.
             startOpeningSplash();
@@ -3013,10 +3066,14 @@
             queueBoardResize();
             window.addEventListener('resize', handleViewportResize);
             window.addEventListener('orientationchange', handleViewportResize);
+            window.addEventListener('pageshow', () => {
+                scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 90, 240] });
+            });
             if (window.visualViewport) {
                 window.visualViewport.addEventListener('resize', handleViewportResize);
             }
             appInitialized = true;
+            scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 80, 220, 520] });
             if (openingSplashDone) maybeOpenStartChoiceAfterSplash();
         }
 
@@ -7309,6 +7366,7 @@ Rules:
             if (levelSel && !levelSel.value) levelSel.value = 'easy';
             syncStartGuideVideoButton();
             modal.classList.remove('hidden');
+            scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 70, 180, 420] });
         }
 
         function closeStartGuide(skipOverlay) {
@@ -7383,6 +7441,9 @@ Rules:
             document.body.classList.toggle('session-started', sessionStarted);
             document.body.classList.toggle('practice-clean-mode', shouldUsePracticeCleanMode());
             document.body.classList.toggle('prestart-only', !sessionStarted);
+            if (!sessionStarted) {
+                scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 80, 220, 520] });
+            }
             if (sessionStarted && drawerOpen && !document.body.classList.contains('embed-mode')) setDrawerOpen(false);
             let prestartHint = document.getElementById('prestart-hint');
             if (prestartHint) prestartHint.classList.toggle('hidden', sessionStarted);
