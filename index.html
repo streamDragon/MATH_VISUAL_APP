@@ -555,6 +555,8 @@
                     <div class="formula-static">נגזרת פולינום: (ax^3+bx^2+cx+d)' = 3ax^2+2bx+c</div>
                     <div class="formula-static">פולינום מעלה 4: f(x)=ax^4+bx^3+cx^2+dx+e</div>
                     <div class="formula-static">נגזרת מעלה 4: f'(x)=4ax^3+3bx^2+2cx+d</div>
+                    <div class="formula-static">פולינום מעלה 5: f(x)=ax^5+bx^4+cx^3+dx^2+ex+f</div>
+                    <div class="formula-static">נגזרת מעלה 5: f'(x)=5ax^4+4bx^3+3cx^2+2dx+e</div>
                     <div class="formula-static">שיפוע קו ישר: m = (y2 - y1) / (x2 - x1)</div>
                     <div class="formula-static">משוואת קו ישר: y = mx + n</div>
                     <div class="formula-static">משוואת משיק: y - y0 = m(x - x0)</div>
@@ -609,6 +611,7 @@
                         <div id="builder-question-template-label">גרף פתיחה לשאלה: טוען...</div>
                         <div id="builder-template-type-note">לפני שמתחילים תרגול אפשר לבחור כל פונקציה פולינומית: קודם בוחרים סוג פונקציה (ישר / פרבולה / פולינום), ואז מדייקים אותה בעזרת הפרמטרים.</div>
                         <select id="template-select" onchange="applySelectedTemplate(false)"></select>
+                        <div id="template-toggle-group" aria-label="בחירה מהירה של סוג פונקציה"></div>
                         <div id="template-setup-actions">
                             <button id="btn-apply-question-template" onclick="applyQuestionStartTemplateFromBuilder()">טען גרף פתיחה לשאלה</button>
                             <button id="btn-apply-template" onclick="applySelectedTemplate(false)">החל תצורה</button>
@@ -627,6 +630,7 @@
                         <span class="builder-val-chip" id="chipC">c=0</span>
                         <span class="builder-val-chip" id="chipD">d=0</span>
                         <span class="builder-val-chip" id="chipE">e=0</span>
+                        <span class="builder-val-chip" id="chipF">f=0</span>
                     </div>
                     <div id="builder-equation-practice-box" class="hidden">
                         <div id="builder-equation-practice-title">כתיבת פונקציה מהגרף (בשאלות פרמטרים)</div>
@@ -642,6 +646,7 @@
                     <div class="slider-row"><span class="slider-lbl">c</span><input type="range" id="inpC" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintC"></span></div>
                     <div class="slider-row"><span class="slider-lbl">d</span><input type="range" id="inpD" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintD"></span></div>
                     <div class="slider-row"><span class="slider-lbl">e</span><input type="range" id="inpE" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintE"></span></div>
+                    <div class="slider-row"><span class="slider-lbl">f</span><input type="range" id="inpF" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintF"></span></div>
                     <div id="builder-confirm-wrap">
                         <div id="builder-confirm-note">כשתסיימו לבנות את הפונקציה הרצויה (גם אם היא לא גרף הפתיחה המומלץ), לחצו "קבע פונקציה והתחל תרגול".</div>
                         <button id="btn-apply-template-params" onclick="confirmFunctionAndStart()">קבע פונקציה והתחל תרגול</button>
@@ -723,7 +728,7 @@
         let guideNormalBasePoint, guideNormalDirPoint, guideNormalLine, guideNormalIntersect, guideNormalLabel;
         let guideNormalHitPoints = [];
         let targets = [];
-        let params = { a:0, b:0, c:0, d:0, e:0 };
+        let params = { a:0, b:0, c:0, d:0, e:0, f:0 };
         let currentQ = 0;
         let wasWin = false;
         let prevHotColdScore = null;
@@ -1513,7 +1518,40 @@
 
         function templateDefaultsToArray(template) {
             let d = template?.defaults || {};
-            return [d.a || 0, d.b || 0, d.c || 0, d.d || 0, d.e || 0];
+            return [d.a || 0, d.b || 0, d.c || 0, d.d || 0, d.e || 0, d.f || 0];
+        }
+
+        function syncTemplateToggleButtons() {
+            let wrap = document.getElementById('template-toggle-group');
+            if (!wrap) return;
+            let activeId = activeTemplate?.id || '';
+            wrap.querySelectorAll('.template-toggle-btn').forEach((btn) => {
+                let selected = btn.dataset.templateId === activeId;
+                btn.classList.toggle('is-active', selected);
+                btn.setAttribute('aria-pressed', selected ? 'true' : 'false');
+            });
+        }
+
+        function renderTemplateToggleButtons() {
+            let wrap = document.getElementById('template-toggle-group');
+            if (!wrap) return;
+            wrap.innerHTML = '';
+            (FUNCTION_TEMPLATES || []).forEach((tpl) => {
+                let btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'template-toggle-btn';
+                btn.dataset.templateId = tpl.id;
+                btn.title = tpl.title || tpl.id;
+                btn.textContent = tpl.toggleLabel || tpl.title || tpl.id;
+                btn.addEventListener('click', () => {
+                    dismissQuestionIntro();
+                    let select = document.getElementById('template-select');
+                    if (select) select.value = tpl.id;
+                    applyTemplateById(tpl.id, false);
+                });
+                wrap.appendChild(btn);
+            });
+            syncTemplateToggleButtons();
         }
 
         function populateTemplateSelect() {
@@ -1527,6 +1565,7 @@
                 select.appendChild(opt);
             });
             if (activeTemplate) select.value = activeTemplate.id;
+            renderTemplateToggleButtons();
         }
 
         function applyTemplateById(templateId, markChosen) {
@@ -1539,16 +1578,19 @@
             params.c = arr[2];
             params.d = arr[3];
             params.e = arr[4];
+            params.f = arr[5];
             document.getElementById('inpA').value = params.a;
             document.getElementById('inpB').value = params.b;
             document.getElementById('inpC').value = params.c;
             document.getElementById('inpD').value = params.d;
             document.getElementById('inpE').value = params.e;
+            document.getElementById('inpF').value = params.f;
             if (markChosen) templateChosen = true;
             let select = document.getElementById('template-select');
             if (select) select.value = tpl.id;
             let status = document.getElementById('template-status-text');
             if (status) status.innerText = `נבחרה תבנית: ${tpl.title}`;
+            syncTemplateToggleButtons();
             updateParamHints();
             updateParamRowVisibility();
             fitBoardToCurrentFunction();
@@ -1566,16 +1608,14 @@
 
         function confirmFunctionAndStart() {
             dismissQuestionIntro();
-            applySelectedTemplate(true);
-            if (!sessionStarted) {
-                markSessionStarted();
+            let select = document.getElementById('template-select');
+            if (select && (!activeTemplate || activeTemplate.id !== select.value)) {
+                applyTemplateById(select.value, false);
             }
-            let q = getCurrentQuestion();
-            if (isPreStartOnlyQuestion(q)) {
-                let firstPractice = getFirstPracticeQuestionIndex();
-                if (firstPractice >= 0) {
-                    loadQ(firstPractice, { autoOpenOverlay: true, preserveCurrentFunction: true });
-                }
+            templateChosen = true;
+            syncBuilderTemplatePanel(getCurrentQuestion());
+            if (!sessionStarted) {
+                markSessionStarted({ preserveCurrentFunction: true });
             }
             openAccordion('steps');
             setDrawerOpen(false);
@@ -1587,20 +1627,17 @@
 
         function updateParamHints() {
             const desc = activeTemplate?.paramDescriptions || {};
-            const map = { A: 'a', B: 'b', C: 'c', D: 'd', E: 'e' };
+            const map = { A: 'a', B: 'b', C: 'c', D: 'd', E: 'e', F: 'f' };
             Object.keys(map).forEach((k) => {
                 const el = document.getElementById(`hint${k}`);
                 if (!el) return;
-                if (map[k] === 'e' && activeTemplate?.kind === 'poly4') {
-                    el.innerText = desc[map[k]] || 'איבר חופשי';
-                    return;
-                }
                 el.innerText = desc[map[k]] || '';
             });
         }
 
         function getActiveTemplateParams() {
             if (!activeTemplate) return [];
+            if (activeTemplate.kind === 'poly5') return ['a', 'b', 'c', 'd', 'e', 'f'];
             if (activeTemplate.kind === 'poly4') return ['a', 'b', 'c', 'd', 'e'];
             return Array.isArray(activeTemplate.params) ? activeTemplate.params : [];
         }
@@ -1613,6 +1650,7 @@
                 { key: 'c', inputId: 'inpC' },
                 { key: 'd', inputId: 'inpD' },
                 { key: 'e', inputId: 'inpE' },
+                { key: 'f', inputId: 'inpF' },
             ];
             rows.forEach(({ key, inputId }) => {
                 let input = document.getElementById(inputId);
@@ -1630,7 +1668,8 @@
                 { inputId: 'inpB', chipId: 'chipB', key: 'b' },
                 { inputId: 'inpC', chipId: 'chipC', key: 'c' },
                 { inputId: 'inpD', chipId: 'chipD', key: 'd' },
-                { inputId: 'inpE', chipId: 'chipE', key: 'e' }
+                { inputId: 'inpE', chipId: 'chipE', key: 'e' },
+                { inputId: 'inpF', chipId: 'chipF', key: 'f' }
             ];
 
             items.forEach(({ inputId, chipId, key }) => {
@@ -1796,6 +1835,7 @@
             }
             let kind = activeTemplate?.kind || 'poly3';
             if (kind === 'poly2') return params.a*x*x + params.b*x + params.c;
+            if (kind === 'poly5') return params.a*x*x*x*x*x + params.b*x*x*x*x + params.c*x*x*x + params.d*x*x + params.e*x + params.f;
             if (kind === 'poly4') return params.a*x*x*x*x + params.b*x*x*x + params.c*x*x + params.d*x + params.e;
             if (kind === 'line') return params.c*x + params.d;
             if (kind === 'quad_shift') {
@@ -1814,6 +1854,7 @@
             }
             let kind = activeTemplate?.kind || 'poly3';
             if (kind === 'poly2') return 2*params.a*x + params.b;
+            if (kind === 'poly5') return 5*params.a*x*x*x*x + 4*params.b*x*x*x + 3*params.c*x*x + 2*params.d*x + params.e;
             if (kind === 'poly4') return 4*params.a*x*x*x + 3*params.b*x*x + 2*params.c*x + params.d;
             if (kind === 'line') return params.c;
             if (kind === 'quad_shift') {
@@ -1835,10 +1876,10 @@
         function getQuestionParamsArray(q) {
             if (Array.isArray(q?.params) && q.params.length >= 4) return q.params;
             if (q?.defaults && typeof q.defaults === 'object') {
-                return [q.defaults.a || 0, q.defaults.b || 0, q.defaults.c || 0, q.defaults.d || 0, q.defaults.e || 0];
+                return [q.defaults.a || 0, q.defaults.b || 0, q.defaults.c || 0, q.defaults.d || 0, q.defaults.e || 0, q.defaults.f || 0];
             }
             if (activeTemplate) return templateDefaultsToArray(activeTemplate);
-            return [0.2, 0, 0, 0, 0];
+            return [0.2, 0, 0, 0, 0, 0];
         }
 
         function getSecondDerivativeAt(x) {
@@ -2142,7 +2183,7 @@
             if (!q) return false;
             if (sessionStarted) return false;
             let locked = new Set(q.locked || []);
-            let editableCount = ['inpA','inpB','inpC','inpD','inpE'].filter((id) => !locked.has(id)).length;
+            let editableCount = ['inpA','inpB','inpC','inpD','inpE','inpF'].filter((id) => !locked.has(id)).length;
             return editableCount > 0 && shouldAllowBuilderForQuestion(q);
         }
 
@@ -2640,7 +2681,7 @@
                 updateInfo();
             });
 
-            ['inpA','inpB','inpC','inpD','inpE'].forEach(id => {
+            ['inpA','inpB','inpC','inpD','inpE','inpF'].forEach(id => {
                 document.getElementById(id).addEventListener('input', () => {
                     dismissQuestionIntro();
                     updateParams();
@@ -2764,6 +2805,7 @@
             params.c = parseFloat(document.getElementById('inpC').value);
             params.d = parseFloat(document.getElementById('inpD').value);
             params.e = parseFloat(document.getElementById('inpE').value);
+            params.f = parseFloat(document.getElementById('inpF').value);
             updateBuilderValueChips();
             updateInfo();
         }
@@ -2853,7 +2895,7 @@
                 let numStr = formatNumber(absVal);
                 if (numStr === '1' && pow > 0) numStr = '';
 
-                let xPart = pow === 4 ? 'x⁴' : pow === 3 ? 'x³' : pow === 2 ? 'x²' : pow === 1 ? 'x' : '';
+                let xPart = pow === 5 ? 'x⁵' : pow === 4 ? 'x⁴' : pow === 3 ? 'x³' : pow === 2 ? 'x²' : pow === 1 ? 'x' : '';
                 parts.push(sign + numStr + xPart);
             });
             if (parts.length === 0) return '0';
@@ -2870,7 +2912,7 @@
                 let pow = term.pow;
                 let absVal = Math.abs(val);
                 let numStr = formatNumber(absVal);
-                let xPart = pow === 4 ? 'x⁴' : pow === 3 ? 'x³' : pow === 2 ? 'x²' : pow === 1 ? 'x' : '';
+                let xPart = pow === 5 ? 'x⁵' : pow === 4 ? 'x⁴' : pow === 3 ? 'x³' : pow === 2 ? 'x²' : pow === 1 ? 'x' : '';
                 let body = `${numStr}${xPart}`;
                 if (idx === 0) {
                     parts.push((val < 0 ? '-' : '') + body);
@@ -2907,6 +2949,11 @@
                     let dTerms = [{val: 2*params.a, pow:1}, {val: params.b, pow:0}];
                     fxText = 'f(x) = ' + formatPoly(fTerms);
                     dText = "f'(x) = " + formatPoly(dTerms);
+                } else if (kind === 'poly5') {
+                    let fTerms = [{val: params.a, pow:5}, {val: params.b, pow:4}, {val: params.c, pow:3}, {val: params.d, pow:2}, {val: params.e, pow:1}, {val: params.f, pow:0}];
+                    let dTerms = [{val: 5*params.a, pow:4}, {val: 4*params.b, pow:3}, {val: 3*params.c, pow:2}, {val: 2*params.d, pow:1}, {val: params.e, pow:0}];
+                    fxText = 'f(x) = ' + formatPolyFull(fTerms);
+                    dText = "f'(x) = " + formatPolyFull(dTerms);
                 } else if (kind === 'poly4') {
                     let fTerms = [{val: params.a, pow:4}, {val: params.b, pow:3}, {val: params.c, pow:2}, {val: params.d, pow:1}, {val: params.e, pow:0}];
                     let dTerms = [{val: 4*params.a, pow:3}, {val: 3*params.b, pow:2}, {val: 2*params.c, pow:1}, {val: params.d, pow:0}];
@@ -4831,9 +4878,11 @@
             if (['quadratic', 'quad', 'quad_abcd', 'x2'].includes(tpl)) return 'quad_abcd';
             if (['cubic', 'poly3', 'cubic_abcd', 'x3'].includes(tpl)) return 'cubic_abcd';
             if (['quartic', 'poly4', 'quartic_abcd', 'x4'].includes(tpl)) return 'quartic_abcd';
+            if (['quintic', 'poly5', 'quintic_abcdef', 'x5'].includes(tpl)) return 'quintic_abcdef';
             if (['shifted_quad', 'shifted_quad_k', 'vertex_form'].includes(tpl)) return 'shifted_quad_k';
 
             if (/\(x-[^)]+\)\^?2/.test(text) || /\(x\+[^)]+\)\^?2/.test(text)) return 'shifted_quad_k';
+            if (/x\s*\^?\s*5/.test(text)) return 'quintic_abcdef';
             if (/x\s*\^?\s*4/.test(text)) return 'quartic_abcd';
             if (/x\s*\^?\s*3/.test(text)) return 'cubic_abcd';
             if (/x\s*\^?\s*2/.test(text)) return 'quad_abcd';
@@ -5033,7 +5082,7 @@
             return [
                 'You are a math-education problem deconstructor.',
                 'Return ONLY valid JSON (no markdown fences, no extra text).',
-                'Supported start_template_id values: quad_abcd, cubic_abcd, quartic_abcd, line_ab, shifted_quad_k.',
+                'Supported start_template_id values: quad_abcd, cubic_abcd, quartic_abcd, quintic_abcdef, line_ab, shifted_quad_k.',
                 'Supported goal_type values: slope_zero, min_point, slope_equals, y_equals, read_slope, read_y, hit_target, hit_targets, tangent_through_point, free.',
                 'JSON schema:',
                 '{',
@@ -5674,15 +5723,16 @@
             queueBoardResize();
         }
 
-        function markSessionStarted() {
+        function markSessionStarted(options = {}) {
             if (sessionStarted) return;
+            let preserveCurrentFunction = !!options.preserveCurrentFunction;
+            let wasPreStartQuestion = isPreStartOnlyQuestion(getCurrentQuestion());
             sessionStarted = true;
             syncSessionUiState();
-            let q = getCurrentQuestion();
-            if (isPreStartOnlyQuestion(q)) {
+            if (wasPreStartQuestion) {
                 let nextIdx = getFirstPracticeQuestionIndex();
-                if (nextIdx >= 0 && nextIdx !== currentQ) {
-                    loadQ(nextIdx, { autoOpenOverlay: true });
+                if (nextIdx >= 0) {
+                    loadQ(nextIdx, { autoOpenOverlay: true, preserveCurrentFunction: preserveCurrentFunction });
                 }
             }
         }
@@ -5844,12 +5894,14 @@
                         params.c = qParams[2]; document.getElementById('inpC').value = params.c;
                         params.d = qParams[3]; document.getElementById('inpD').value = params.d;
                         params.e = qParams[4] || 0; document.getElementById('inpE').value = params.e;
+                        params.f = qParams[5] || 0; document.getElementById('inpF').value = params.f;
                     } else {
                         document.getElementById('inpA').value = params.a;
                         document.getElementById('inpB').value = params.b;
                         document.getElementById('inpC').value = params.c;
                         document.getElementById('inpD').value = params.d;
                         document.getElementById('inpE').value = params.e;
+                        document.getElementById('inpF').value = params.f;
                     }
                 }
             } else {
@@ -5858,6 +5910,7 @@
                 document.getElementById('inpC').value = params.c;
                 document.getElementById('inpD').value = params.d;
                 document.getElementById('inpE').value = params.e;
+                document.getElementById('inpF').value = params.f;
             }
 
             let paramSpec = getQuestionParamSpec(q);
@@ -5873,11 +5926,11 @@
             let readFeedback = document.getElementById('read-answer-feedback');
             if (readFeedback) readFeedback.innerText = '';
 
-            ['inpA','inpB','inpC','inpD','inpE'].forEach(id => document.getElementById(id).disabled = false);
+            ['inpA','inpB','inpC','inpD','inpE','inpF'].forEach(id => document.getElementById(id).disabled = false);
             let activeParams = getActiveTemplateParams();
             if (activeParams.length > 0) {
                 const allowed = new Set(activeParams);
-                const map = { inpA: 'a', inpB: 'b', inpC: 'c', inpD: 'd', inpE: 'e' };
+                const map = { inpA: 'a', inpB: 'b', inpC: 'c', inpD: 'd', inpE: 'e', inpF: 'f' };
                 Object.keys(map).forEach((id) => {
                     document.getElementById(id).disabled = !allowed.has(map[id]);
                 });

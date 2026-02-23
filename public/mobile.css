@@ -1989,6 +1989,33 @@ body.session-started #builder-template-panel {
     font-family: 'Assistant', sans-serif;
 }
 
+#template-toggle-group {
+    margin-top: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.template-toggle-btn {
+    border: 1px solid #c7d2e4;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #12356a;
+    padding: 5px 10px;
+    font-family: 'Assistant', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.template-toggle-btn.is-active {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+    color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.15);
+}
+
 #template-setup-actions {
     margin-top: 6px;
     display: flex;
@@ -3983,7 +4010,8 @@ body.session-started #builder-template-panel {
     #btn-apply-template,
     #btn-builder-free-explore,
     #btn-builder-fill-equation,
-    #btn-apply-template-params {
+    #btn-apply-template-params,
+    .template-toggle-btn {
         min-height: var(--tap-min);
         font-size: 0.95rem;
     }

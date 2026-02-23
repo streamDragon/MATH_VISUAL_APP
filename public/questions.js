@@ -5,6 +5,7 @@ const FUNCTION_TEMPLATES = [
     id: "quad_abcd",
     title: "פרבולה כללית: f(x)=ax^2+bx+c",
     kind: "poly2",
+    toggleLabel: "x2",
     defaults: { a: 1, b: 0, c: 0, d: 0 },
     params: ["a", "b", "c"],
     paramDescriptions: {
@@ -19,6 +20,7 @@ const FUNCTION_TEMPLATES = [
     id: "cubic_abcd",
     title: "פולינום ממעלה 3: f(x)=ax^3+bx^2+cx+d",
     kind: "poly3",
+    toggleLabel: "x3",
     defaults: { a: 0.2, b: 0, c: 0, d: 0 },
     params: ["a", "b", "c", "d"],
     paramDescriptions: {
@@ -33,6 +35,7 @@ const FUNCTION_TEMPLATES = [
     id: "quartic_abcd",
     title: "פולינום ממעלה 4: f(x)=ax^4+bx^3+cx^2+dx+e",
     kind: "poly4",
+    toggleLabel: "x4",
     defaults: { a: 0.05, b: 0, c: -1, d: 0.5, e: 0 },
     params: ["a", "b", "c", "d", "e"],
     paramDescriptions: {
@@ -45,9 +48,27 @@ const FUNCTION_TEMPLATES = [
     domain: { xMin: -5, xMax: 5 },
   },
   {
+    id: "quintic_abcdef",
+    title: "Polynomial degree 5: f(x)=ax^5+bx^4+cx^3+dx^2+ex+f",
+    kind: "poly5",
+    toggleLabel: "x5",
+    defaults: { a: 0.02, b: 0, c: 0, d: -0.3, e: 0.5, f: 0 },
+    params: ["a", "b", "c", "d", "e", "f"],
+    paramDescriptions: {
+      a: "coeff x^5",
+      b: "coeff x^4",
+      c: "coeff x^3",
+      d: "coeff x^2",
+      e: "coeff x",
+      f: "constant term",
+    },
+    domain: { xMin: -4.5, xMax: 4.5 },
+  },
+  {
     id: "line_ab",
     title: "קו ישר: f(x)=mx+n",
     kind: "line",
+    toggleLabel: "line",
     defaults: { a: 0, b: 0, c: 1, d: 0 },
     params: ["c", "d"],
     paramDescriptions: {
@@ -62,6 +83,7 @@ const FUNCTION_TEMPLATES = [
     id: "shifted_quad_k",
     title: "פרבולה מוזזת: f(x)=(x-k)^2 + d",
     kind: "quad_shift",
+    toggleLabel: "(x-k)^2",
     defaults: { a: 0, b: 0, c: 0, d: 0 },
     params: ["c", "d"],
     paramDescriptions: {
@@ -284,4 +306,3 @@ const QUESTIONS = [
     ui: { allowNormal: true, defaultNormalOn: false, allowLineTool: true },
   },
 ];
-
