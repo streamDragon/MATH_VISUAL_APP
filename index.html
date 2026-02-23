@@ -403,7 +403,7 @@
                         <input id="scan-api-endpoint" type="url" autocomplete="off" placeholder="https://api.openai.com/v1/chat/completions">
 
                         <label for="scan-api-model">מודל</label>
-                        <input id="scan-api-model" type="text" autocomplete="off" placeholder="gpt-4o-mini">
+                        <input id="scan-api-model" type="text" autocomplete="off" placeholder="gpt-4o">
 
                         <label for="scan-api-key">API Key (לא נשמרת אוטומטית)</label>
                         <input id="scan-api-key" type="password" autocomplete="off" placeholder="sk-...">
@@ -426,6 +426,19 @@
                 <div id="scan-result" class="hidden">
                     <div class="scan-result-title">טיוטת שאלה שנוצרה</div>
                     <div id="scan-result-problem"></div>
+                    <div id="scan-visual-plan-wrap" class="hidden">
+                        <div id="scan-visual-plan-head">
+                            <div id="scan-visual-plan-title">תוכנית פעולה ויזואלית</div>
+                            <div id="scan-visual-plan-progress">0/0</div>
+                        </div>
+                        <div id="scan-visual-plan-bar"><div id="scan-visual-plan-fill"></div></div>
+                        <div id="scan-visual-plan-note"></div>
+                        <div id="scan-visual-plan-layers"></div>
+                        <div id="scan-visual-plan-complete" class="hidden">
+                            <div id="scan-visual-plan-complete-text">Equipped with these visual capabilities, you can now return to the original problem. Good luck solving it.</div>
+                            <button type="button" id="btn-scan-return-problem" onclick="onScanActionPlanReturnToProblem()">חזרה לשאלה המקורית (Placeholder)</button>
+                        </div>
+                    </div>
                     <ol id="scan-subquestions-list"></ol>
                 </div>
             </div>
@@ -693,7 +706,47 @@
         const SCAN_CONFIG_STORAGE_KEY = 'math_visual_scan_config_v1';
         const SCANNED_QUESTIONS_STORAGE_KEY = 'math_visual_scanned_questions_v1';
         const DEFAULT_SCAN_API_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
-        const DEFAULT_SCAN_MODEL = 'gpt-4o-mini';
+        const DEFAULT_SCAN_MODEL = 'gpt-4o';
+        const SCAN_ALLOWED_LAYER_IDS = new Set([
+            'object_identification',
+            'coordinate_anchors',
+            'shape_drivers',
+            'local_geometry',
+            'global_behavior',
+            'algebra_graph_translation',
+            'task_decomposition'
+        ]);
+        const VISUAL_SKILL_REGISTRY = {
+            function_object: { heTitle: 'זיהוי האובייקט המתמטי', colorToken: 'blue', icon: 'ƒ', defaultExerciseType: 'classification', launcherKey: 'startObjectRecognitionModule' },
+            parameterized_family: { heTitle: 'משפחת פונקציות עם פרמטר', colorToken: 'indigo', icon: 'a', defaultExerciseType: 'classification', launcherKey: 'startParameterizedFamilyModule' },
+            line_object: { heTitle: 'זיהוי ישר', colorToken: 'slate', icon: '/', defaultExerciseType: 'classification', launcherKey: 'startLineObjectModule' },
+            derivative_related_object: { heTitle: 'קשר לפונקציה ונגזרת', colorToken: 'rose', icon: "f'", defaultExerciseType: 'classification', launcherKey: 'startDerivativeRelationModule' },
+            axis_intersection: { heTitle: 'חיתוך עם הצירים', colorToken: 'emerald', icon: '+', defaultExerciseType: 'drag_to_axis', launcherKey: 'startAxisIntersectionModule' },
+            domain_constraint: { heTitle: 'תחום הגדרה', colorToken: 'cyan', icon: 'D', defaultExerciseType: 'graph_compare', launcherKey: 'startDomainConstraintModule' },
+            symmetry_hint: { heTitle: 'סימטריה', colorToken: 'violet', icon: 'S', defaultExerciseType: 'graph_compare', launcherKey: 'startSymmetryModule' },
+            end_behavior: { heTitle: 'התנהגות קצה', colorToken: 'amber', icon: '∞', defaultExerciseType: 'graph_compare', launcherKey: 'startEndBehaviorModule' },
+            parameter_shift: { heTitle: 'השפעת פרמטר על מיקום', colorToken: 'sky', icon: '⇄', defaultExerciseType: 'parameter_slider', launcherKey: 'startParameterShiftModule' },
+            parameter_scale: { heTitle: 'מתיחה/כיווץ', colorToken: 'sky', icon: '↕', defaultExerciseType: 'parameter_slider', launcherKey: 'startParameterScaleModule' },
+            reflection: { heTitle: 'שיקוף', colorToken: 'purple', icon: '↺', defaultExerciseType: 'graph_compare', launcherKey: 'startReflectionModule' },
+            translation: { heTitle: 'הזזה', colorToken: 'blue', icon: '⇆', defaultExerciseType: 'parameter_slider', launcherKey: 'startTranslationModule' },
+            tangent_condition: { heTitle: 'תנאי השקה', colorToken: 'orange', icon: 'T', defaultExerciseType: 'slope_match', launcherKey: 'startTangentModule' },
+            slope_at_point: { heTitle: 'שיפוע בנקודה', colorToken: 'orange', icon: 'm', defaultExerciseType: 'slope_match', launcherKey: 'startSlopeAtPointModule' },
+            extreme_point: { heTitle: 'נקודת קיצון', colorToken: 'red', icon: '∩', defaultExerciseType: 'point_placement', launcherKey: 'startExtremePointModule' },
+            inflection_point: { heTitle: 'נקודת פיתול', colorToken: 'pink', icon: '∿', defaultExerciseType: 'point_placement', launcherKey: 'startInflectionPointModule' },
+            concavity: { heTitle: 'קעירות/קמירות', colorToken: 'pink', icon: '⌒', defaultExerciseType: 'graph_compare', launcherKey: 'startConcavityModule' },
+            monotonicity_sign: { heTitle: 'עלייה/ירידה', colorToken: 'teal', icon: '↗', defaultExerciseType: 'sign_chart_visual', launcherKey: 'startMonotonicityModule' },
+            sign_regions: { heTitle: 'תחומי סימן', colorToken: 'teal', icon: '±', defaultExerciseType: 'sign_chart_visual', launcherKey: 'startSignRegionsModule' },
+            solution_count_visualization: { heTitle: 'מספר פתרונות דרך חיתוכים', colorToken: 'green', icon: '#', defaultExerciseType: 'graph_compare', launcherKey: 'startSolutionCountModule' },
+            parameter_case_split: { heTitle: 'פיצול למקרי פרמטר', colorToken: 'lime', icon: '⋮', defaultExerciseType: 'case_split_visual', launcherKey: 'startCaseSplitModule' },
+            asymptote_behavior: { heTitle: 'התנהגות אסימפטוטית', colorToken: 'gray', icon: '∥', defaultExerciseType: 'graph_compare', launcherKey: 'startAsymptoteModule' },
+            equation_to_intersection: { heTitle: 'תרגום משוואה לחיתוך', colorToken: 'emerald', icon: '=', defaultExerciseType: 'graph_compare', launcherKey: 'startEquationToIntersectionModule' },
+            derivative_to_slope: { heTitle: 'תרגום נגזרת לשיפוע', colorToken: 'orange', icon: "f'→m", defaultExerciseType: 'slope_match', launcherKey: 'startDerivativeToSlopeModule' },
+            parallel_tangent_condition: { heTitle: 'משיק מקביל לישר', colorToken: 'orange', icon: '∥T', defaultExerciseType: 'slope_match', launcherKey: 'startParallelTangentModule' },
+            double_root_touch: { heTitle: 'שורש כפול = השקה לציר', colorToken: 'red', icon: '2x', defaultExerciseType: 'graph_compare', launcherKey: 'startDoubleRootTouchModule' },
+            single_solution_visual: { heTitle: 'פתרון יחיד (ויזואלי)', colorToken: 'green', icon: '1', defaultExerciseType: 'graph_compare', launcherKey: 'startSingleSolutionModule' },
+            visual_planning_sequence: { heTitle: 'סדר חשיבה ויזואלי', colorToken: 'slate', icon: '→', defaultExerciseType: 'classification', launcherKey: 'startVisualPlanningSequenceModule' },
+            prerequisite_order: { heTitle: 'סדר קדימויות', colorToken: 'slate', icon: '1-2', defaultExerciseType: 'classification', launcherKey: 'startPrerequisiteOrderModule' }
+        };
         const OPENING_SPLASH_DURATION_MS = 5000;
         const OPENING_MUSIC_DURATION_SECONDS = 30;
         const QUICK_TOUR_STORAGE_KEY = 'math_visual_quick_tour_v1';
@@ -778,6 +831,8 @@
         let scanPreviewObjectUrl = '';
         let scannedQuestionDraft = null;
         let scannedVisionPayload = null;
+        let scannedVisualActionPlan = null;
+        let scanCompletedVisualSkills = new Set();
         let scanInFlight = false;
         let lastScanInputMode = '';
 
@@ -1618,7 +1673,7 @@
                 markSessionStarted({ preserveCurrentFunction: true });
             }
             openAccordion('steps');
-            setDrawerOpen(false);
+            setDrawerOpen(document.body.classList.contains('embed-mode'));
             renderMission();
             updateSpecialPanels();
             updateInfo();
@@ -4639,16 +4694,30 @@
         function resetScanResultUi() {
             scannedQuestionDraft = null;
             scannedVisionPayload = null;
+            scannedVisualActionPlan = null;
+            scanCompletedVisualSkills = new Set();
             let result = document.getElementById('scan-result');
             let injectBtn = document.getElementById('btn-scan-inject');
             let copyBtn = document.getElementById('btn-scan-copy');
             let list = document.getElementById('scan-subquestions-list');
             let problem = document.getElementById('scan-result-problem');
+            let planWrap = document.getElementById('scan-visual-plan-wrap');
+            let planLayers = document.getElementById('scan-visual-plan-layers');
+            let planNote = document.getElementById('scan-visual-plan-note');
+            let planProgress = document.getElementById('scan-visual-plan-progress');
+            let planFill = document.getElementById('scan-visual-plan-fill');
+            let planComplete = document.getElementById('scan-visual-plan-complete');
             if (result) result.classList.add('hidden');
             if (injectBtn) injectBtn.classList.add('hidden');
             if (copyBtn) copyBtn.classList.add('hidden');
             if (list) list.innerHTML = '';
             if (problem) problem.innerText = '';
+            if (planLayers) planLayers.innerHTML = '';
+            if (planNote) planNote.innerText = '';
+            if (planProgress) planProgress.innerText = '0/0';
+            if (planFill) planFill.style.width = '0%';
+            if (planComplete) planComplete.classList.add('hidden');
+            if (planWrap) planWrap.classList.add('hidden');
         }
 
         function loadScanConfig() {
@@ -4999,7 +5068,7 @@
                         ? Number(params.toleranceY)
                         : (Number.isFinite(parseMaybeNumber(params.tolerance)) ? Number(params.tolerance) : 0.24),
                     preferredEditableParams: Array.isArray(params.preferredEditableParams)
-                        ? params.preferredEditableParams.filter((p) => ['a', 'b', 'c', 'd', 'e'].includes(String(p)))
+                        ? params.preferredEditableParams.filter((p) => ['a', 'b', 'c', 'd', 'e', 'f'].includes(String(p)))
                         : undefined
                 };
             }
@@ -5056,6 +5125,420 @@
             };
         }
 
+        function normalizeVisualCategoryTag(raw, fallback = 'visual_planning_sequence') {
+            let tag = String(raw || '').trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '');
+            return tag || fallback;
+        }
+
+        function normalizeLayerId(raw, fallback = 'task_decomposition') {
+            let id = String(raw || '').trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '');
+            if (!id || !SCAN_ALLOWED_LAYER_IDS.has(id)) return fallback;
+            return id;
+        }
+
+        function getVisualSkillRegistryMeta(category, skillObject = null) {
+            let tag = normalizeVisualCategoryTag(category);
+            let meta = VISUAL_SKILL_REGISTRY[tag];
+            if (!meta) {
+                console.warn('Unknown visual_category from scan vision payload:', tag, skillObject || null);
+                return {
+                    heTitle: skillObject?.title || tag,
+                    colorToken: 'slate',
+                    icon: '•',
+                    defaultExerciseType: 'classification',
+                    launcherKey: 'startUnknownVisualSkillModule'
+                };
+            }
+            return meta;
+        }
+
+        function normalizeVisualSkillDifficulty(raw) {
+            let v = String(raw || '').trim().toLowerCase();
+            if (['basic', 'intermediate', 'advanced'].includes(v)) return v;
+            return 'basic';
+        }
+
+        function normalizeVisualExerciseType(raw, category) {
+            let allowed = new Set([
+                'classification',
+                'drag_to_axis',
+                'graph_compare',
+                'slope_match',
+                'parameter_slider',
+                'sign_chart_visual',
+                'point_placement',
+                'case_split_visual'
+            ]);
+            let v = String(raw || '').trim();
+            if (allowed.has(v)) return v;
+            return getVisualSkillRegistryMeta(category).defaultExerciseType || 'classification';
+        }
+
+        function normalizeScanVisualActionPlan(visionPayload) {
+            let payload = (visionPayload && typeof visionPayload === 'object') ? visionPayload : {};
+            let originalTopic = getShortText(payload.original_topic || payload.title || payload.original_problem || '', 'Visual preparation plan');
+            let problemFamily = normalizeVisualCategoryTag(payload.problem_family || 'parameterized_polynomial', 'parameterized_polynomial');
+            let rawLayers = Array.isArray(payload.visual_layers_required) ? payload.visual_layers_required : [];
+            let normalizedLayers = [];
+            let seenCategories = new Set();
+
+            rawLayers.forEach((layer, layerIndex) => {
+                let layerId = normalizeLayerId(layer?.layer_id, layerIndex === 0 ? 'object_identification' : 'task_decomposition');
+                let layerTitle = getShortText(layer?.layer_title || '', layerId.replaceAll('_', ' '));
+                let why = getShortText(layer?.why_this_layer_matters || '', '');
+                let rawSkills = Array.isArray(layer?.skills) ? layer.skills : [];
+                let skills = [];
+                rawSkills.forEach((skill, skillIndex) => {
+                    let category = normalizeVisualCategoryTag(skill?.visual_category || skill?.category, 'visual_planning_sequence');
+                    let meta = getVisualSkillRegistryMeta(category, skill);
+                    let title = getShortText(skill?.title || '', meta.heTitle || category);
+                    let prerequisites = Array.isArray(skill?.prerequisites)
+                        ? skill.prerequisites.map((p) => normalizeVisualCategoryTag(p, '')).filter(Boolean)
+                        : [];
+                    let normalizedSkill = {
+                        skill_number: Number.isFinite(Number(skill?.skill_number)) ? Number(skill.skill_number) : (skillIndex + 1),
+                        title,
+                        pedagogical_reason: getShortText(skill?.pedagogical_reason || '', ''),
+                        visual_category: category,
+                        difficulty: normalizeVisualSkillDifficulty(skill?.difficulty),
+                        prerequisites,
+                        micro_goal: getShortText(skill?.micro_goal || skill?.student_self_check || '', ''),
+                        ui_exercise_type: normalizeVisualExerciseType(skill?.ui_exercise_type, category),
+                        student_self_check: getShortText(skill?.student_self_check || skill?.micro_goal || '', ''),
+                        _layer_id: layerId,
+                        _layer_index: layerIndex
+                    };
+                    skills.push(normalizedSkill);
+                    seenCategories.add(category);
+                });
+
+                if (skills.length > 0) {
+                    normalizedLayers.push({
+                        layer_id: layerId,
+                        layer_title: layerTitle,
+                        why_this_layer_matters: why,
+                        skills
+                    });
+                }
+            });
+
+            if (normalizedLayers.length === 0) {
+                let fallbackSkills = [];
+                let rawSubQuestions = Array.isArray(payload.sub_questions) ? payload.sub_questions : (Array.isArray(payload.steps) ? payload.steps : []);
+                rawSubQuestions.slice(0, 4).forEach((item, idx) => {
+                    let text = getShortText(item?.question_text || item?.instruction || item?.step || '', `Visual step ${idx + 1}`);
+                    fallbackSkills.push({
+                        skill_number: idx + 1,
+                        title: text,
+                        pedagogical_reason: getShortText(item?.success_criteria || '', ''),
+                        visual_category: 'visual_planning_sequence',
+                        difficulty: 'basic',
+                        prerequisites: idx > 0 ? ['prerequisite_order'] : [],
+                        micro_goal: getShortText(item?.success_criteria || '', ''),
+                        ui_exercise_type: 'classification',
+                        student_self_check: '',
+                        _layer_id: 'task_decomposition',
+                        _layer_index: 0
+                    });
+                    seenCategories.add('visual_planning_sequence');
+                });
+                if (fallbackSkills.length > 0) {
+                    normalizedLayers.push({
+                        layer_id: 'task_decomposition',
+                        layer_title: 'Visual Planning Sequence',
+                        why_this_layer_matters: 'Break the problem into smaller visual actions before algebraic work.',
+                        skills: fallbackSkills
+                    });
+                }
+            }
+
+            let rawOrder = Array.isArray(payload.action_plan_order) ? payload.action_plan_order : [];
+            let ordered = [];
+            let seenOrder = new Set();
+            rawOrder.forEach((tag) => {
+                let normalized = normalizeVisualCategoryTag(tag, '');
+                if (!normalized || seenOrder.has(normalized)) return;
+                if (!seenCategories.has(normalized)) return;
+                ordered.push(normalized);
+                seenOrder.add(normalized);
+            });
+            normalizedLayers.forEach((layer) => {
+                layer.skills.forEach((skill) => {
+                    if (seenOrder.has(skill.visual_category)) return;
+                    ordered.push(skill.visual_category);
+                    seenOrder.add(skill.visual_category);
+                });
+            });
+
+            let confidenceNum = Number(payload.confidence);
+            let confidence = Number.isFinite(confidenceNum)
+                ? Math.max(0, Math.min(1, confidenceNum))
+                : null;
+
+            let skillCount = normalizedLayers.reduce((sum, layer) => sum + layer.skills.length, 0);
+            return {
+                original_topic: originalTopic,
+                problem_family: problemFamily,
+                visual_layers_required: normalizedLayers,
+                action_plan_order: ordered,
+                do_not_solve_notice: getShortText(payload.do_not_solve_notice || '', 'This output is a visual preparation plan only. No algebraic solution steps are provided.'),
+                confidence,
+                _skill_count: skillCount,
+                _unique_categories: Array.from(seenCategories)
+            };
+        }
+
+        function inferTemplateIdFromVisualPlan(plan, originalProblem, visionPayload) {
+            let topicText = `${originalProblem || ''} ${plan?.original_topic || ''} ${visionPayload?.function_expression || ''}`;
+            let byText = normalizeTemplateId(visionPayload?.start_template_id || visionPayload?.template || '', topicText);
+            if (getTemplateById(byText)) return byText;
+
+            let cats = new Set(Array.isArray(plan?.action_plan_order) ? plan.action_plan_order : []);
+            let family = String(plan?.problem_family || '').toLowerCase();
+            if (cats.has('line_object') && !cats.has('parameterized_family')) return 'line_ab';
+            if (family.includes('analytic_geometry') && cats.has('line_object')) return 'line_ab';
+            if (cats.has('parameterized_family') && cats.has('solution_count_visualization')) return 'quartic_abcd';
+            if (cats.has('parameterized_family') && cats.has('extreme_point')) return 'quartic_abcd';
+            if (cats.has('asymptote_behavior')) return 'cubic_abcd';
+            if (cats.has('axis_intersection') && !cats.has('derivative_to_slope') && !cats.has('extreme_point')) return 'quad_abcd';
+            return getDefaultTemplate()?.id || 'quad_abcd';
+        }
+
+        function buildRawSubQuestionsFromVisualPlan(plan) {
+            let categories = Array.isArray(plan?.action_plan_order) && plan.action_plan_order.length > 0
+                ? plan.action_plan_order.slice()
+                : (Array.isArray(plan?._unique_categories) ? plan._unique_categories.slice() : []);
+            let out = [{
+                question_text: 'בחרו סוג פונקציה שמתאים לשאלה המצולמת, ואז אשרו התחלה.',
+                goal_type: 'choose_function_template',
+                params: {},
+                required_visuals: ['function family', String(plan?.problem_family || '')],
+                success_criteria: 'נבחרה תבנית פונקציה מתאימה ונשמרה התחלה לתרגול.'
+            }];
+
+            categories.forEach((category) => {
+                if (out.length >= 5) return;
+                let meta = getVisualSkillRegistryMeta(category);
+                let item = {
+                    question_text: '',
+                    goal_type: 'free',
+                    params: {},
+                    required_visuals: [category],
+                    success_criteria: `הבנתם את היכולת הויזואלית: ${meta.heTitle}.`
+                };
+
+                if (['axis_intersection', 'equation_to_intersection', 'single_solution_visual', 'double_root_touch'].includes(category)) {
+                    item.goal_type = 'read_y';
+                    item.params = { fixedX0: 0, answerTolerance: 0.35 };
+                    item.question_text = `קבעו את הנקודה על x=0 וקראו את ערך הפונקציה כדי לעגן את הגרף לפני עבודה על ${meta.heTitle}.`;
+                    item.success_criteria = 'נקרא ערך פונקציה על ציר y ונבנה עוגן ראשוני לגרף.';
+                } else if (['slope_at_point', 'derivative_to_slope', 'derivative_related_object'].includes(category)) {
+                    item.goal_type = 'read_slope';
+                    item.params = { fixedX0: 1, answerTolerance: 0.35 };
+                    item.question_text = `קבעו את הנקודה על x=1 וקראו את השיפוע כדי לחזק את ההבנה: ${meta.heTitle}.`;
+                    item.success_criteria = 'נקרא שיפוע בנקודה וחובר לגרף/נגזרת.';
+                } else if (['tangent_condition', 'parallel_tangent_condition'].includes(category)) {
+                    item.goal_type = 'slope_equals';
+                    item.params = { targetM: 1, toleranceM: 0.25 };
+                    item.question_text = `חפשו נקודה שבה השיפוע שווה m=1 כהכנה ליכולת: ${meta.heTitle}.`;
+                    item.success_criteria = 'נמצא מקום שבו שיפוע המשיק מתאים לערך יעד.';
+                } else if (['extreme_point'].includes(category)) {
+                    item.goal_type = 'slope_zero';
+                    item.params = { toleranceM: 0.2 };
+                    item.question_text = 'חפשו נקודה שבה המשיק אופקי (f\'(x)=0) כדי לבנות אינטואיציה לקיצון.';
+                    item.success_criteria = 'זוהתה נקודה עם שיפוע כמעט אפס.';
+                } else if (['parameterized_family', 'parameter_shift', 'parameter_scale', 'translation', 'reflection', 'parameter_case_split', 'solution_count_visualization', 'monotonicity_sign', 'concavity', 'sign_regions', 'end_behavior', 'domain_constraint', 'symmetry_hint', 'visual_planning_sequence', 'prerequisite_order', 'function_object', 'line_object', 'inflection_point', 'asymptote_behavior'].includes(category)) {
+                    item.goal_type = 'free';
+                    item.params = {};
+                    item.question_text = `חקירה ויזואלית ממוקדת: ${meta.heTitle}. שנו פרמטר אחד בכל פעם ותארו מה נשאר קבוע ומה משתנה.`;
+                    item.success_criteria = `הוסברה היכולת "${meta.heTitle}" במילים ועל הגרף.`;
+                } else {
+                    item.goal_type = 'free';
+                    item.question_text = `חקירה ויזואלית: ${meta.heTitle}. הפעילו חשיבה גרפית לפני מעבר לאלגברה.`;
+                }
+
+                out.push(item);
+            });
+
+            return out.slice(0, 5);
+        }
+
+        function getScanActionPlanProgressContext() {
+            let plan = scannedVisualActionPlan;
+            if (!plan) return { total: 0, completed: 0, order: [] };
+            let order = Array.isArray(plan.action_plan_order) ? plan.action_plan_order : [];
+            let total = order.length;
+            let completed = 0;
+            order.forEach((tag) => {
+                if (scanCompletedVisualSkills.has(tag)) completed += 1;
+            });
+            return { total, completed, order };
+        }
+
+        function syncScanVisualPlanCompletionUi() {
+            let wrap = document.getElementById('scan-visual-plan-wrap');
+            if (!wrap || !scannedVisualActionPlan) return;
+            let progressEl = document.getElementById('scan-visual-plan-progress');
+            let fillEl = document.getElementById('scan-visual-plan-fill');
+            let noteEl = document.getElementById('scan-visual-plan-note');
+            let completeEl = document.getElementById('scan-visual-plan-complete');
+            let ctx = getScanActionPlanProgressContext();
+            let percent = ctx.total > 0 ? Math.round((ctx.completed / ctx.total) * 100) : 0;
+            if (progressEl) progressEl.innerText = `${ctx.completed}/${ctx.total}`;
+            if (fillEl) fillEl.style.width = `${percent}%`;
+            if (noteEl) {
+                let confidenceText = Number.isFinite(scannedVisualActionPlan.confidence)
+                    ? ` | confidence: ${Math.round(scannedVisualActionPlan.confidence * 100)}%`
+                    : '';
+                noteEl.innerText = `${scannedVisualActionPlan.do_not_solve_notice}${confidenceText}`;
+            }
+            if (completeEl) completeEl.classList.toggle('hidden', !(ctx.total > 0 && ctx.completed >= ctx.total));
+
+            document.querySelectorAll('#scan-visual-plan-layers .scan-skill-item').forEach((row) => {
+                let tag = row.getAttribute('data-skill-category') || '';
+                let done = !!tag && scanCompletedVisualSkills.has(tag);
+                row.classList.toggle('is-complete', done);
+                let btn = row.querySelector('.scan-skill-complete-btn');
+                if (btn) btn.innerText = done ? 'בוצע' : 'סמן כהושלם';
+            });
+        }
+
+        function markSkillCompleted(skillCategory) {
+            let tag = normalizeVisualCategoryTag(skillCategory, '');
+            if (!tag) return;
+            scanCompletedVisualSkills.add(tag);
+            syncScanVisualPlanCompletionUi();
+        }
+
+        function startVisualSkill(skillCategory, skillObject) {
+            let tag = normalizeVisualCategoryTag(skillCategory, 'visual_planning_sequence');
+            let meta = getVisualSkillRegistryMeta(tag, skillObject);
+            let title = getShortText(skillObject?.title || '', meta.heTitle || tag);
+            let exerciseType = skillObject?.ui_exercise_type || meta.defaultExerciseType || 'classification';
+            let line = `Placeholder: startVisualSkill(${tag}) | module=${meta.launcherKey} | exercise=${exerciseType}`;
+            setScanStatus(`נפתח שלב ויזואלי (Placeholder): ${title}`, false);
+            showStepToast(`שלב ויזואלי: ${title}`);
+            console.log(line, { skillCategory: tag, skillObject: skillObject || null });
+        }
+
+        function onScanActionPlanReturnToProblem() {
+            setScanStatus('חזרה לשאלה המקורית (Placeholder): עכשיו אפשר לעבור לבניית/הזרקת השאלה או להמשיך אימון.', false);
+            showStepToast('חזרתם לשאלה המקורית. המשיכו לאימון/הזרקה.');
+        }
+
+        function renderScanVisualActionPlan(visionPayload) {
+            let wrap = document.getElementById('scan-visual-plan-wrap');
+            let layersWrap = document.getElementById('scan-visual-plan-layers');
+            if (!wrap || !layersWrap) return null;
+
+            let plan = normalizeScanVisualActionPlan(visionPayload);
+            scannedVisualActionPlan = plan;
+            scanCompletedVisualSkills = new Set();
+            layersWrap.innerHTML = '';
+
+            if (!Array.isArray(plan.visual_layers_required) || plan.visual_layers_required.length === 0) {
+                wrap.classList.add('hidden');
+                return plan;
+            }
+
+            plan.visual_layers_required.forEach((layer, layerIdx) => {
+                let card = document.createElement('section');
+                card.className = 'scan-layer-card';
+
+                let head = document.createElement('div');
+                head.className = 'scan-layer-head';
+
+                let title = document.createElement('div');
+                title.className = 'scan-layer-title';
+                title.innerText = `${layerIdx + 1}. ${getShortText(layer.layer_title, layer.layer_id)}`;
+                head.appendChild(title);
+
+                let layerIdChip = document.createElement('span');
+                layerIdChip.className = 'scan-layer-id-chip';
+                layerIdChip.innerText = layer.layer_id;
+                head.appendChild(layerIdChip);
+
+                card.appendChild(head);
+
+                if (layer.why_this_layer_matters) {
+                    let why = document.createElement('div');
+                    why.className = 'scan-layer-why';
+                    why.innerText = layer.why_this_layer_matters;
+                    card.appendChild(why);
+                }
+
+                let list = document.createElement('div');
+                list.className = 'scan-skill-list';
+                layer.skills.forEach((skill) => {
+                    let meta = getVisualSkillRegistryMeta(skill.visual_category, skill);
+                    let row = document.createElement('div');
+                    row.className = `scan-skill-item tone-${meta.colorToken || 'slate'}`;
+                    row.setAttribute('data-skill-category', skill.visual_category);
+
+                    let icon = document.createElement('div');
+                    icon.className = 'scan-skill-icon';
+                    icon.innerText = meta.icon || '•';
+                    row.appendChild(icon);
+
+                    let body = document.createElement('div');
+                    body.className = 'scan-skill-body';
+
+                    let titleBtn = document.createElement('button');
+                    titleBtn.type = 'button';
+                    titleBtn.className = 'scan-skill-title-btn';
+                    titleBtn.innerText = skill.title || meta.heTitle || skill.visual_category;
+                    titleBtn.onclick = () => startVisualSkill(skill.visual_category, skill);
+                    body.appendChild(titleBtn);
+
+                    let metaLine = document.createElement('div');
+                    metaLine.className = 'scan-skill-meta';
+                    metaLine.innerText = `tag: ${skill.visual_category} | level: ${skill.difficulty} | ui: ${skill.ui_exercise_type}`;
+                    body.appendChild(metaLine);
+
+                    if (skill.pedagogical_reason) {
+                        let reason = document.createElement('div');
+                        reason.className = 'scan-skill-reason';
+                        reason.innerText = skill.pedagogical_reason;
+                        body.appendChild(reason);
+                    }
+
+                    if (skill.micro_goal) {
+                        let goal = document.createElement('div');
+                        goal.className = 'scan-skill-goal';
+                        goal.innerText = `מטרת-מיקרו: ${skill.micro_goal}`;
+                        body.appendChild(goal);
+                    }
+
+                    if (Array.isArray(skill.prerequisites) && skill.prerequisites.length > 0) {
+                        let prereq = document.createElement('div');
+                        prereq.className = 'scan-skill-prereq';
+                        prereq.innerText = `Prerequisites: ${skill.prerequisites.join(', ')}`;
+                        body.appendChild(prereq);
+                    }
+
+                    row.appendChild(body);
+
+                    let actions = document.createElement('div');
+                    actions.className = 'scan-skill-actions';
+                    let completeBtn = document.createElement('button');
+                    completeBtn.type = 'button';
+                    completeBtn.className = 'scan-skill-complete-btn';
+                    completeBtn.innerText = 'סמן כהושלם';
+                    completeBtn.onclick = () => markSkillCompleted(skill.visual_category);
+                    actions.appendChild(completeBtn);
+                    row.appendChild(actions);
+
+                    list.appendChild(row);
+                });
+                card.appendChild(list);
+                layersWrap.appendChild(card);
+            });
+
+            wrap.classList.remove('hidden');
+            syncScanVisualPlanCompletionUi();
+            return plan;
+        }
+
         function parseVisionJsonText(raw) {
             if (raw && typeof raw === 'object') return raw;
             let text = String(raw || '').trim();
@@ -5079,33 +5562,88 @@
         }
 
         function getScanSystemPrompt() {
-            return [
-                'You are a math-education problem deconstructor.',
-                'Return ONLY valid JSON (no markdown fences, no extra text).',
-                'Supported start_template_id values: quad_abcd, cubic_abcd, quartic_abcd, quintic_abcdef, line_ab, shifted_quad_k.',
-                'Supported goal_type values: slope_zero, min_point, slope_equals, y_equals, read_slope, read_y, hit_target, hit_targets, tangent_through_point, free.',
-                'JSON schema:',
-                '{',
-                '  \"title\": \"short title\",',
-                '  \"original_problem\": \"detected math problem text\",',
-                '  \"start_template_id\": \"quad_abcd\",',
-                '  \"sub_questions\": [',
-                '    {',
-                '      \"question_text\": \"instruction for student\",',
-                '      \"goal_type\": \"one supported goal_type\",',
-                '      \"params\": {},',
-                '      \"required_visuals\": [\"point at (0,2)\", \"...\"],',
-                '      \"success_criteria\": \"what counts as solved\"',
-                '    }',
-                '  ],',
-                '  \"overlay\": {',
-                '    \"essence\": \"plain explanation\",',
-                '    \"goal\": \"learning goal\",',
-                '    \"material\": \"related theory\",',
-                '    \"howTo\": [\"step 1\", \"step 2\"]',
-                '  }',
-                '}'
-            ].join('\n');
+            return `You are an expert math educator specializing in visual intuition training for high-school mathematics.
+The user will provide an image of a math problem (e.g., polynomials, calculus, analytic geometry, parameter questions).
+
+DO NOT SOLVE THE PROBLEM.
+DO NOT provide algebraic derivations, symbolic manipulations, or final answers.
+Your task is to produce a visual preparation plan only.
+
+Return ONLY a valid JSON object matching this schema:
+
+{
+  "original_topic": "Brief title of the problem type (e.g., 'Function investigation with a parameter')",
+  "problem_family": "One normalized family tag, e.g., parameterized_polynomial, tangent_to_function, extrema_analysis, analytic_geometry_intersection, parameter_solution_count",
+  "visual_layers_required": [
+    {
+      "layer_id": "One normalized layer id, e.g., object_identification, coordinate_anchors, shape_drivers, local_geometry, global_behavior, algebra_graph_translation, task_decomposition",
+      "layer_title": "Human-readable title",
+      "why_this_layer_matters": "Short pedagogical reason",
+      "skills": [
+        {
+          "skill_number": 1,
+          "title": "Human-readable visual skill title",
+          "pedagogical_reason": "Why the student should visualize this before solving",
+          "visual_category": "Normalized visual skill tag (examples below)",
+          "difficulty": "basic | intermediate | advanced",
+          "prerequisites": ["optional list of visual_category tags"],
+          "micro_goal": "What the student should be able to imagine/say after this step",
+          "ui_exercise_type": "One of: classification, drag_to_axis, graph_compare, slope_match, parameter_slider, sign_chart_visual, point_placement, case_split_visual"
+        }
+      ]
+    }
+  ],
+  "action_plan_order": ["ordered list of visual_category tags"],
+  "do_not_solve_notice": "This output is a visual preparation plan only. No algebraic solution steps are provided.",
+  "confidence": 0.0
+}
+
+Allowed layer_id values:
+- object_identification
+- coordinate_anchors
+- shape_drivers
+- local_geometry
+- global_behavior
+- algebra_graph_translation
+- task_decomposition
+
+Allowed visual_category examples (use only relevant ones):
+- function_object
+- parameterized_family
+- line_object
+- derivative_related_object
+- axis_intersection
+- domain_constraint
+- symmetry_hint
+- end_behavior
+- parameter_shift
+- parameter_scale
+- reflection
+- translation
+- tangent_condition
+- slope_at_point
+- extreme_point
+- inflection_point
+- concavity
+- monotonicity_sign
+- sign_regions
+- solution_count_visualization
+- parameter_case_split
+- asymptote_behavior
+- equation_to_intersection
+- derivative_to_slope
+- parallel_tangent_condition
+- double_root_touch
+- single_solution_visual
+- visual_planning_sequence
+- prerequisite_order
+
+Rules:
+1) Prefer normalized tags over free-form wording.
+2) If the image is not a clear high-school math problem, return a valid JSON with empty layers and a suitable original_topic.
+3) Never include a solved answer.
+4) Keep pedagogical text concise and actionable.
+5) The action_plan_order should reflect prerequisite logic.`;
         }
 
         async function callScanVisionApi(imageDataUrl) {
@@ -5114,7 +5652,7 @@
             let apiKey = (document.getElementById('scan-api-key')?.value || '').trim();
 
             let systemPrompt = getScanSystemPrompt();
-            let userPrompt = 'Analyze the attached math problem image and produce a pedagogy-first visual decomposition JSON following the exact schema.';
+            let userPrompt = 'Analyze the attached math problem image and produce a pedagogy-first visual action plan JSON (visual layers + normalized skill tags) following the exact schema. Do not solve the problem.';
             let isChatCompletions = /\/chat\/completions/i.test(endpoint);
 
             if (isChatCompletions) {
@@ -5185,20 +5723,24 @@
                 throw new Error('לא התקבל JSON תקין מהניתוח.');
             }
 
+            let visualPlan = normalizeScanVisualActionPlan(visionPayload);
             let originalProblem = getShortText(
-                visionPayload.original_problem || visionPayload.problem || visionPayload.math_expression || '',
+                visionPayload.original_problem || visionPayload.problem || visionPayload.math_expression || visualPlan.original_topic || '',
                 'שאלה שזוהתה מתמונה'
             );
 
             let rawTemplateHint = visionPayload.start_template_id || visionPayload.template || visionPayload.function_template_hint || '';
-            let startTemplateId = normalizeTemplateId(rawTemplateHint, `${originalProblem} ${visionPayload.function_expression || ''}`);
+            let startTemplateId = normalizeTemplateId(rawTemplateHint, `${originalProblem} ${visionPayload.function_expression || ''} ${visualPlan.original_topic || ''}`);
             if (!getTemplateById(startTemplateId)) {
-                startTemplateId = getDefaultTemplate()?.id || 'quad_abcd';
+                startTemplateId = inferTemplateIdFromVisualPlan(visualPlan, originalProblem, visionPayload);
             }
 
             let rawSubQuestions = Array.isArray(visionPayload.sub_questions)
                 ? visionPayload.sub_questions
                 : (Array.isArray(visionPayload.steps) ? visionPayload.steps : []);
+            if (rawSubQuestions.length === 0 && Array.isArray(visualPlan.visual_layers_required) && visualPlan.visual_layers_required.length > 0) {
+                rawSubQuestions = buildRawSubQuestionsFromVisualPlan(visualPlan);
+            }
             if (rawSubQuestions.length === 0) {
                 rawSubQuestions = [{
                     question_text: 'חקרו את הגרף והנגזרת והסיקו מה קורה בנקודות חשובות.',
@@ -5227,20 +5769,23 @@
                 ? 'find_param'
                 : 'move_x';
 
-            let title = getShortText(visionPayload.title || visionPayload.generated_title || '', '');
+            let title = getShortText(visionPayload.title || visionPayload.generated_title || visionPayload.original_topic || '', '');
             if (!title) {
                 let compact = originalProblem.length > 42 ? `${originalProblem.slice(0, 42).trim()}...` : originalProblem;
                 title = `שאלה מסריקה: ${compact}`;
             }
 
             let descLines = [`שאלה מזוהה: ${originalProblem}`];
+            if (visualPlan?.problem_family) descLines.push(`משפחת שאלה: ${visualPlan.problem_family}`);
             steps.slice(0, 2).forEach((step, idx) => {
                 descLines.push(`שלב ${idx + 1}: ${step.instruction}`);
             });
 
             let overlayHowTo = Array.isArray(visionPayload?.overlay?.howTo) && visionPayload.overlay.howTo.length > 0
                 ? visionPayload.overlay.howTo.map((line) => getShortText(line, '')).filter(Boolean)
-                : steps.map((step) => step.instruction);
+                : (Array.isArray(visualPlan?.action_plan_order) && visualPlan.action_plan_order.length > 0
+                    ? visualPlan.action_plan_order.slice(0, 5).map((tag, idx) => `שלב ${idx + 1}: הפעילו יכולת ויזואלית "${tag}"`)
+                    : steps.map((step) => step.instruction));
 
             let allowNormal = steps.some((s) => ['slope_zero', 'min_point', 'tangent_through_point'].includes(s.goal.type));
             let allowLineTool = steps.some((s) => ['tangent_through_point', 'free'].includes(s.goal.type));
@@ -5260,14 +5805,22 @@
                     allowLineTool
                 },
                 overlay: {
-                    essence: getShortText(visionPayload?.overlay?.essence, `המטרה: לפרק את השאלה "${originalProblem}" לשלבים ברורים.`),
-                    goal: getShortText(visionPayload?.overlay?.goal, 'לפתור שאלה מורכבת דרך שלבי משנה ויזואליים.'),
-                    material: getShortText(visionPayload?.overlay?.material, 'פונקציות, נגזרת, שיפוע משיק, קריאת ערכים מהגרף.'),
+                    essence: getShortText(visionPayload?.overlay?.essence, `המטרה: לפרק את השאלה "${originalProblem}" לרבדים ויזואליים ואז לשלבים ברורים.`),
+                    goal: getShortText(visionPayload?.overlay?.goal, 'לבנות אינטואיציה ויזואלית לפני מעבר לפתרון אלגברי.'),
+                    material: getShortText(visionPayload?.overlay?.material, 'פונקציות, נגזרת, שיפוע משיק, קריאת ערכים מהגרף, והשפעת פרמטרים.'),
                     howTo: overlayHowTo
                 },
                 meta: {
                     source: 'vision_scan',
                     original_problem: originalProblem,
+                    visual_plan: {
+                        original_topic: visualPlan.original_topic,
+                        problem_family: visualPlan.problem_family,
+                        action_plan_order: Array.isArray(visualPlan.action_plan_order) ? visualPlan.action_plan_order.slice(0, 12) : [],
+                        layers_count: Array.isArray(visualPlan.visual_layers_required) ? visualPlan.visual_layers_required.length : 0,
+                        skills_count: Number.isFinite(visualPlan._skill_count) ? visualPlan._skill_count : 0,
+                        confidence: Number.isFinite(visualPlan.confidence) ? visualPlan.confidence : null
+                    },
                     created_at_utc: new Date().toISOString()
                 }
             };
@@ -5284,6 +5837,7 @@
                 hit_target: 'מעבר דרך נקודת יעד',
                 hit_targets: 'מעבר דרך כמה נקודות יעד',
                 tangent_through_point: 'משיק דרך נקודה חיצונית',
+                choose_function_template: 'בחירת סוג פונקציה',
                 free: 'חקירה חופשית'
             };
             return map[goalType] || goalType || 'שלב';
@@ -5297,8 +5851,13 @@
             let copyBtn = document.getElementById('btn-scan-copy');
             if (!result || !problem || !list || !injectBtn || !copyBtn) return;
 
+            let visualPlan = renderScanVisualActionPlan(visionPayload);
             let originalProblem = questionDraft?.meta?.original_problem || visionPayload?.original_problem || '';
-            problem.innerText = `בעיה שזוהתה: ${originalProblem}\nתבנית התחלה: ${questionDraft.startTemplateId}\nמספר שלבים: ${questionDraft.steps.length}`;
+            let familyText = visualPlan?.problem_family ? `\nמשפחת שאלה: ${visualPlan.problem_family}` : '';
+            let layersText = Number.isFinite(visualPlan?._skill_count)
+                ? `\nרבדים/יכולות שזוהו: ${visualPlan.visual_layers_required.length} רבדים, ${visualPlan._skill_count} skills`
+                : '';
+            problem.innerText = `בעיה שזוהתה: ${originalProblem}\nתבנית התחלה: ${questionDraft.startTemplateId}\nמספר שלבים לאפליקציה: ${questionDraft.steps.length}${familyText}${layersText}`;
 
             list.innerHTML = '';
             questionDraft.steps.forEach((step, idx) => {
@@ -5330,8 +5889,9 @@
                 let draft = parseVisionToQuestionSchema(visionPayload);
                 scannedVisionPayload = visionPayload;
                 scannedQuestionDraft = draft;
+                scannedVisualActionPlan = normalizeScanVisualActionPlan(visionPayload);
                 renderScannedQuestionDraft(draft, visionPayload);
-                setScanStatus('הניתוח הצליח. אפשר להוסיף את השאלה החדשה לאפליקציה.');
+                setScanStatus('הניתוח הצליח. עברו על תוכנית הפעולה הויזואלית, ואז הוסיפו את השאלה החדשה לאפליקציה.');
             } catch (err) {
                 setScanStatus(err?.message || 'ניתוח השאלה נכשל. נסו תמונה ברורה יותר או בדקו API.', true);
             } finally {
@@ -5703,11 +6263,15 @@
             return true;
         }
 
+        function shouldUsePracticeCleanMode() {
+            return !!sessionStarted && !document.body.classList.contains('embed-mode');
+        }
+
         function syncSessionUiState() {
             document.body.classList.toggle('session-started', sessionStarted);
-            document.body.classList.toggle('practice-clean-mode', sessionStarted);
+            document.body.classList.toggle('practice-clean-mode', shouldUsePracticeCleanMode());
             document.body.classList.toggle('prestart-only', !sessionStarted);
-            if (sessionStarted && drawerOpen) setDrawerOpen(false);
+            if (sessionStarted && drawerOpen && !document.body.classList.contains('embed-mode')) setDrawerOpen(false);
             let prestartHint = document.getElementById('prestart-hint');
             if (prestartHint) prestartHint.classList.toggle('hidden', sessionStarted);
             ['btn-top-init-builder'].forEach((id) => {

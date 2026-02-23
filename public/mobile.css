@@ -2498,6 +2498,257 @@ body.session-started #builder-template-panel {
     line-height: 1.42;
 }
 
+#scan-visual-plan-wrap {
+    margin: 8px 0 10px;
+    border: 1px solid #cfe0ff;
+    border-radius: 10px;
+    background: linear-gradient(145deg, #f8fbff 0%, #ffffff 100%);
+    padding: 8px;
+}
+
+#scan-visual-plan-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+#scan-visual-plan-title {
+    font-weight: 900;
+    color: #12356a;
+}
+
+#scan-visual-plan-progress {
+    font-weight: 900;
+    color: #0b4aa8;
+    background: #eaf3ff;
+    border: 1px solid #bfd8ff;
+    border-radius: 999px;
+    padding: 2px 8px;
+    min-width: 52px;
+    text-align: center;
+}
+
+#scan-visual-plan-bar {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    overflow: hidden;
+}
+
+#scan-visual-plan-fill {
+    width: 0%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #38bdf8, #2563eb);
+    transition: width 0.18s ease;
+}
+
+#scan-visual-plan-note {
+    margin-top: 6px;
+    font-size: 0.78rem;
+    color: #334155;
+    line-height: 1.35;
+}
+
+#scan-visual-plan-layers {
+    margin-top: 8px;
+    display: grid;
+    gap: 8px;
+}
+
+.scan-layer-card {
+    border: 1px solid #dbeafe;
+    border-radius: 10px;
+    background: #ffffff;
+    padding: 7px;
+}
+
+.scan-layer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.scan-layer-title {
+    font-weight: 800;
+    color: #0f356f;
+    line-height: 1.3;
+}
+
+.scan-layer-id-chip {
+    border: 1px solid #dbeafe;
+    background: #f8fbff;
+    border-radius: 999px;
+    color: #1d4ed8;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    white-space: nowrap;
+}
+
+.scan-layer-why {
+    margin-top: 4px;
+    font-size: 0.78rem;
+    color: #334155;
+    line-height: 1.35;
+}
+
+.scan-skill-list {
+    margin-top: 6px;
+    display: grid;
+    gap: 6px;
+}
+
+.scan-skill-item {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    gap: 6px;
+    align-items: start;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    background: #fff;
+    padding: 6px;
+    transition: border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.scan-skill-item.is-complete {
+    border-color: #86efac;
+    background: #f0fdf4;
+    box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.12);
+}
+
+.scan-skill-item.tone-orange { border-right: 4px solid #fb923c; }
+.scan-skill-item.tone-blue { border-right: 4px solid #60a5fa; }
+.scan-skill-item.tone-green { border-right: 4px solid #4ade80; }
+.scan-skill-item.tone-emerald { border-right: 4px solid #34d399; }
+.scan-skill-item.tone-rose { border-right: 4px solid #fb7185; }
+.scan-skill-item.tone-red { border-right: 4px solid #f87171; }
+.scan-skill-item.tone-teal { border-right: 4px solid #2dd4bf; }
+.scan-skill-item.tone-indigo { border-right: 4px solid #818cf8; }
+.scan-skill-item.tone-purple { border-right: 4px solid #c084fc; }
+.scan-skill-item.tone-cyan { border-right: 4px solid #22d3ee; }
+.scan-skill-item.tone-amber { border-right: 4px solid #fbbf24; }
+.scan-skill-item.tone-lime { border-right: 4px solid #a3e635; }
+.scan-skill-item.tone-pink { border-right: 4px solid #f472b6; }
+.scan-skill-item.tone-gray { border-right: 4px solid #94a3b8; }
+.scan-skill-item.tone-slate { border-right: 4px solid #94a3b8; }
+
+.scan-skill-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.76rem;
+    font-weight: 900;
+    color: #1d4ed8;
+    text-align: center;
+    line-height: 1;
+}
+
+.scan-skill-body {
+    min-width: 0;
+}
+
+.scan-skill-title-btn {
+    border: none;
+    background: transparent;
+    color: #0f172a;
+    font-weight: 800;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    text-align: right;
+    line-height: 1.3;
+}
+
+.scan-skill-title-btn:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+.scan-skill-meta,
+.scan-skill-reason,
+.scan-skill-goal,
+.scan-skill-prereq {
+    margin-top: 3px;
+    font-size: 0.75rem;
+    line-height: 1.3;
+}
+
+.scan-skill-meta {
+    color: #475569;
+    direction: ltr;
+    text-align: left;
+}
+
+.scan-skill-reason {
+    color: #334155;
+}
+
+.scan-skill-goal {
+    color: #0f356f;
+    font-weight: 700;
+}
+
+.scan-skill-prereq {
+    color: #6b21a8;
+}
+
+.scan-skill-actions {
+    display: flex;
+    align-items: start;
+}
+
+.scan-skill-complete-btn {
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #0b4aa8;
+    font-weight: 800;
+    padding: 5px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.scan-skill-item.is-complete .scan-skill-complete-btn {
+    border-color: #86efac;
+    background: #dcfce7;
+    color: #166534;
+}
+
+#scan-visual-plan-complete {
+    margin-top: 8px;
+    border: 1px solid #86efac;
+    background: #f0fdf4;
+    border-radius: 10px;
+    padding: 8px;
+}
+
+#scan-visual-plan-complete-text {
+    color: #14532d;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 6px;
+}
+
+#btn-scan-return-problem {
+    border: 1px solid #7dd3a8;
+    border-radius: 8px;
+    background: #e8fff1;
+    color: #166534;
+    font-weight: 800;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
 .feedback-body {
     color: #0f172a;
     font-size: 0.95rem;
@@ -4006,11 +4257,14 @@ body.session-started #builder-template-panel {
     .step-actions button,
     .feedback-actions button,
     .read-answer-row button,
+    .scan-skill-title-btn,
+    .scan-skill-complete-btn,
     #btn-apply-question-template,
     #btn-apply-template,
     #btn-builder-free-explore,
     #btn-builder-fill-equation,
     #btn-apply-template-params,
+    #btn-scan-return-problem,
     .template-toggle-btn {
         min-height: var(--tap-min);
         font-size: 0.95rem;
