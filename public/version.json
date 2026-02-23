@@ -1,5 +1,5 @@
 {
-  "app_version": "40",
+  "app_version": "41",
   "build": "__BUILD_ID__",
   "generated_at_utc": "__BUILD_TIME__"
 }
