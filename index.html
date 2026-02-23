@@ -161,7 +161,7 @@
         <div id="opening-splash-content">
             <div id="opening-splash-progress" aria-hidden="true"><span></span></div>
             <p id="opening-splash-version">גרסה: --</p>
-            <p id="opening-splash-audio-hint" class="hidden">אם אין מוזיקה, לחצו על "הפעל מוזיקה".</p>
+            <p id="opening-splash-audio-hint">להפעלת שיר בפתיח לחצו על "נגן שיר".</p>
             <div id="opening-splash-actions">
                 <button id="opening-splash-audio-btn" onclick="retrySplashMusic()">נגן שיר</button>
                 <button onclick="skipOpeningSplash()">דלג לפתיחה</button>
@@ -295,6 +295,9 @@
 
     <div id="start-guide-modal" class="hidden" onclick="onStartGuideBackdropClick(event)">
         <div id="start-guide-card">
+            <div class="modal-mobile-exit-row">
+                <button class="modal-mobile-exit-btn" type="button" onclick="startAppFromSplash('app')">⬅ חזרה למסך הראשי</button>
+            </div>
             <div class="start-guide-hero">
                 <div class="start-logo-stage" aria-hidden="true">
                     <div class="start-logo-ring"></div>
@@ -335,6 +338,9 @@
 
     <div id="quick-tour-modal" class="hidden" onclick="onQuickTourBackdropClick(event)">
         <div id="quick-tour-card">
+            <div class="modal-mobile-exit-row">
+                <button class="modal-mobile-exit-btn" type="button" onclick="skipQuickTour()">✕ סגור סיור וחזור</button>
+            </div>
             <div id="quick-tour-video-wrap">
                 <video id="quick-tour-demo-video" muted loop playsinline preload="metadata" poster="public/opening-poster.png"></video>
                 <div id="quick-tour-video-label">סיור מודרך מהיר</div>
@@ -1867,7 +1873,7 @@
                 return 'בחרו תבנית פונקציה, אשרו, ואז עברו לתרגול.';
             }
             if (q.goal === 'slope_zero') {
-                return 'גררו את הנקודה עד שהשיפוע f\'(x)=m קרוב לאפס.';
+                return 'גררו את הנקודה עד שהשיפוע f\'(x)=m שווה לאפס (m=0) - נקודת קיצון אפשרית.';
             }
             if (q.goal === 'min_point') {
                 return 'גררו עד f\'(x)=0, ואז ודאו שמדובר במינימום.';
@@ -2595,8 +2601,6 @@
                 let btn = document.getElementById('opening-splash-audio-btn');
                 if (hint) hint.classList.toggle('hidden', played);
                 if (btn) btn.innerText = played ? 'נגן שוב' : 'נגן שיר';
-                if (played) unbindSplashMusicUnlock();
-                else bindSplashMusicUnlock();
             });
         }
 
@@ -2627,13 +2631,12 @@
                 splashVideo.currentTime = 0;
                 splashVideo.play().catch(() => {});
             }
+            let hint = document.getElementById('opening-splash-audio-hint');
+            let btn = document.getElementById('opening-splash-audio-btn');
+            if (hint) hint.classList.remove('hidden');
+            if (btn) btn.innerText = 'נגן שיר';
             splash.classList.remove('hidden');
             requestAnimationFrame(() => splash.classList.add('is-visible'));
-            bindSplashMusicUnlock();
-
-            if (typeof playTimedBackgroundTrack === 'function') {
-                retrySplashMusic();
-            }
 
             openingSplashExitTimer = setTimeout(() => {
                 openingSplashExitTimer = null;
@@ -2643,6 +2646,7 @@
 
         function replayOpeningSplash() {
             startOpeningSplash(true);
+            retrySplashMusic();
         }
 
         async function init() {
@@ -4327,11 +4331,11 @@
                 target = 'לבנות פונקציה שמתאימה לרמה שלכם ולחומר שנלמד עכשיו.';
                 action = 'בחרו צורת פונקציה, אשרו, ואז שנו פרמטרים כדי לראות מיד איך הגרף והנגזרת משתנים.';
             } else if (goal === 'slope_zero') {
-                target = 'למצוא נקודה שבה שיפוע המשיק הוא אפס (m=0).';
-                action = 'גררו את הנקודה הכחולה עד שבתיבת הנתונים מופיע f\'(x)=m קרוב לאפס.';
+                target = 'למצוא נקודה שבה שיפוע המשיק שווה לאפס (m=0) - נקודת קיצון אפשרית.';
+                action = 'גררו את הנקודה הכחולה עד שבתיבת הנתונים מופיע f\'(x)=m שווה לאפס.';
             } else if (goal === 'min_point') {
                 target = 'לזהות נקודת מינימום אמיתית על הגרף.';
-                action = 'הביאו את השיפוע ל־0, ואז בדקו לפי ההנחיה שהנקודה אכן מינימום.';
+                action = 'הביאו את השיפוע ל־0 (נקודת קיצון אפשרית), ואז בדקו לפי ההנחיה שהנקודה אכן מינימום.';
             } else if (goal === 'slope_equals') {
                 let targetM = Number.isFinite(data.targetM) ? formatNumber(data.targetM) : 'הערך הנתון';
                 target = `למצוא x שבו השיפוע שווה ${targetM}.`;
@@ -4370,7 +4374,7 @@
 
             let main = document.getElementById('top-brief-main');
             let detail = document.getElementById('top-brief-detail');
-            if (main) main.innerText = `מה לעשות: ${stepInstruction}`;
+            if (main) main.innerText = stepInstruction;
             if (detail) detail.innerText = `למה: ${goal}`;
 
             let clarityTitle = document.getElementById('top-clarity-title');
