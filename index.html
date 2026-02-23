@@ -304,15 +304,16 @@
                 <div class="start-guide-brand">
                     <div class="start-guide-badge">HAGI MATH LAB</div>
                     <h3>ברוכים הבאים למעבדת הפונקציות</h3>
-                    <p>מסך פתיחה קצר, מוזיקת פתיחה עדינה, ואז מעבר לתרגול.</p>
+                    <p>למשתמש חדש נפתחת כאן הדרכה ראשונית קצרה: מה עושים, למה זה עובד, ואיך מתחילים נכון.</p>
                 </div>
             </div>
             <div class="start-guide-body">
                 <div class="start-guide-flow-title">איך מתחילים נכון?</div>
                 <ol class="start-guide-flow-list">
-                    <li><b>כניסה רגילה לאפליקציה</b> - מתחילים לתרגל מיד.</li>
+                    <li><b>כניסה רגילה לאפליקציה</b> - מתחילים לתרגל מיד, עם עזרה בתוך המסך.</li>
                     <li><b>הדגמה מודרכת</b> - האפליקציה בוחרת שאלה לפי קושי, מזיזה את הנקודה ומדגימה פתרון.</li>
-                    <li>בסוף ההדגמה נפתח גם סיור קצר של הכפתורים והמסכים.</li>
+                    <li><b>הדרכה ראשונית (סיור ממשק)</b> - מסבירה מה רואים במסך, איפה המשימות, ואיך בודקים תשובה.</li>
+                    <li>אפשר גם לצפות בסרטון YouTube קצר (כשתגדירו לינק) בנוסף להדרכה בתוך האתר.</li>
                 </ol>
                 <div class="start-demo-level-row">
                     <label for="start-demo-level">רמת קושי להדגמה:</label>
@@ -325,7 +326,8 @@
             </div>
             <div class="start-guide-actions">
                 <button onclick="startAppFromSplash('app')">כניסה לאפליקציה</button>
-                <button onclick="startAppFromSplash('tutorial')">סיור ממשק</button>
+                <button onclick="startAppFromSplash('tutorial')">הדרכה ראשונית</button>
+                <button id="btn-start-guide-youtube" class="hidden" type="button" onclick="openOnboardingVideo()">סרטון YouTube</button>
                 <button class="start-primary" onclick="startAppFromSplash('demo')">הדגמה מודרכת</button>
             </div>
         </div>
@@ -754,8 +756,12 @@
         const OPENING_SPLASH_DURATION_MS = 5000;
         const OPENING_MUSIC_DURATION_SECONDS = 30;
         const QUICK_TOUR_STORAGE_KEY = 'math_visual_quick_tour_v1';
+        const START_GUIDE_ONBOARDING_STORAGE_KEY = 'math_visual_start_guide_onboarding_v1';
         const QUICK_TOUR_AUTO_DELAY_MS = 320;
-        const AUTO_OPEN_START_GUIDE = false;
+        const AUTO_OPEN_START_GUIDE = true;
+        // Paste your public YouTube link here (or set window.__ONBOARDING_VIDEO_URL before app loads).
+        const ONBOARDING_VIDEO_URL = '';
+        const ONBOARDING_VIDEO_TITLE = 'הדרכה ראשונית - איך עובדים באתר';
         const RUNTIME_ASSET_BASE = (() => {
             if (typeof window.__ASSET_BASE === 'string') return window.__ASSET_BASE;
             try {
@@ -1058,21 +1064,42 @@
             if (event.target.id === 'quick-tour-modal') skipQuickTour();
         }
 
+        function markStartGuideOnboardingSeen() {
+            try {
+                localStorage.setItem(START_GUIDE_ONBOARDING_STORAGE_KEY, 'done');
+            } catch (err) {
+                // Continue when localStorage is unavailable.
+            }
+        }
+
+        function isReturningUserForStartGuideAutoOpen() {
+            try {
+                if (localStorage.getItem(START_GUIDE_ONBOARDING_STORAGE_KEY) === 'done') return true;
+                if (localStorage.getItem(QUICK_TOUR_STORAGE_KEY) === 'done') return true;
+            } catch (err) {
+                // If storage is unavailable, treat as new and allow the guide.
+            }
+            return false;
+        }
+
         function maybeOpenStartChoiceAfterSplash() {
             if (!AUTO_OPEN_START_GUIDE) return;
             if (launchChoiceAutoPending) return;
             if (sessionStarted) return;
             if (quickTourActive) return;
+            if (isReturningUserForStartGuideAutoOpen()) return;
             launchChoiceAutoPending = true;
             setTimeout(() => {
                 launchChoiceAutoPending = false;
                 if (!openingSplashDone) return;
                 if (sessionStarted) return;
                 if (quickTourActive) return;
+                if (isReturningUserForStartGuideAutoOpen()) return;
                 if (!appInitialized) {
                     maybeOpenStartChoiceAfterSplash();
                     return;
                 }
+                markStartGuideOnboardingSeen();
                 openStartGuideModal({ forceLaunchChoice: true });
             }, QUICK_TOUR_AUTO_DELAY_MS);
         }
@@ -4524,6 +4551,42 @@
             return '';
         }
 
+        function getOnboardingVideoUrl() {
+            try {
+                if (typeof window.__ONBOARDING_VIDEO_URL === 'string' && window.__ONBOARDING_VIDEO_URL.trim()) {
+                    return window.__ONBOARDING_VIDEO_URL.trim();
+                }
+            } catch (err) {
+                // Continue with local constant fallback.
+            }
+            return (typeof ONBOARDING_VIDEO_URL === 'string') ? ONBOARDING_VIDEO_URL.trim() : '';
+        }
+
+        function syncStartGuideVideoButton() {
+            let btn = document.getElementById('btn-start-guide-youtube');
+            if (!btn) return;
+            btn.classList.toggle('hidden', !getOnboardingVideoUrl());
+        }
+
+        function openOnboardingVideo() {
+            let url = getOnboardingVideoUrl();
+            if (!url) {
+                showStepToast('עדיין לא הוגדר לינק ל-YouTube במסך הפתיחה.');
+                return;
+            }
+            markStartGuideOnboardingSeen();
+            closeStartGuide(false);
+            let embedUrl = getYouTubeEmbedUrl(url);
+            if (!embedUrl) {
+                window.open(url, '_blank', 'noopener');
+                return;
+            }
+            document.getElementById('video-modal-title').innerText = ONBOARDING_VIDEO_TITLE;
+            document.getElementById('video-iframe').src = embedUrl;
+            document.getElementById('video-open-link').href = url;
+            document.getElementById('video-modal').classList.remove('hidden');
+        }
+
         function configureVideoButton(q) {
             let btn = document.getElementById('btn-video');
             let hasVideo = !!q.videoUrl;
@@ -6472,6 +6535,7 @@ Rules:
             if (!modal) return;
             let levelSel = document.getElementById('start-demo-level');
             if (levelSel && !levelSel.value) levelSel.value = 'easy';
+            syncStartGuideVideoButton();
             modal.classList.remove('hidden');
         }
 
@@ -6483,6 +6547,7 @@ Rules:
         }
 
         function startAppFromSplash(mode) {
+            markStartGuideOnboardingSeen();
             if (mode === 'tutorial') {
                 closeStartGuide(true);
                 openQuickTour({ force: true });
