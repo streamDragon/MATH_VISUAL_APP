@@ -1900,6 +1900,197 @@
             document.body.classList.toggle('viewport-short', isShortViewportNow());
         }
 
+        function getViewportSizeNow() {
+            let vv = window.visualViewport;
+            let width = Math.round(vv?.width || window.innerWidth || document.documentElement.clientWidth || 0);
+            let height = Math.round(vv?.height || window.innerHeight || document.documentElement.clientHeight || 0);
+            return { width, height };
+        }
+
+        function isElementShown(el) {
+            if (!el) return false;
+            let style = window.getComputedStyle(el);
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            return el.getBoundingClientRect().height > 0;
+        }
+
+        function updateResponsiveLayoutMetrics() {
+            if (!document.body) return;
+            let { width: vw, height: vh } = getViewportSizeNow();
+            if (vh > 0) document.body.style.setProperty('--runtime-vh', `${vh}px`);
+            if (vw > 0) document.body.style.setProperty('--runtime-vw', `${vw}px`);
+
+            if (!document.body.classList.contains('embed-mode')) {
+                document.body.style.removeProperty('--embed-graph-height');
+                return;
+            }
+
+            let topStrip = document.getElementById('top-strip');
+            let practiceBar = document.getElementById('practice-question-bar');
+            let sidebar = document.getElementById('sidebar');
+            let overlayOpen = !!document.querySelector('#question-overlay:not(.hidden)');
+
+            let topH = 0;
+            if (isElementShown(practiceBar)) topH += Math.ceil(practiceBar.getBoundingClientRect().height);
+            if (isElementShown(topStrip)) topH += Math.ceil(topStrip.getBoundingClientRect().height);
+
+            let sidebarReserve = 0;
+            if (isElementShown(sidebar) && sidebar.classList.contains('drawer-open') && !document.body.classList.contains('builder-workspace-mode')) {
+                // In embedded hosts the tools are often rendered below the graph. Reserve part of the height
+                // so the graph remains visible and draggable inside fixed iframes (Google Sites).
+                sidebarReserve = Math.min(180, Math.ceil(sidebar.getBoundingClientRect().height));
+            }
+
+            let chromeReserve = topH + sidebarReserve + (overlayOpen ? 8 : 12);
+            let available = vh - chromeReserve;
+            let hardMin = 120;
+            let softMax = Math.min(
+                Math.round(vh * (document.body.classList.contains('viewport-short') ? 0.54 : 0.62)),
+                document.body.classList.contains('viewport-desktop') ? 560 : 520
+            );
+            let widthCapHeight = Math.round((vw || 0) * (document.body.classList.contains('viewport-mobile') ? 0.78 : 0.55));
+            let maxAllowed = Math.max(hardMin, Math.min(softMax, widthCapHeight || softMax));
+            let target = Math.min(maxAllowed, available);
+            if (!Number.isFinite(target)) target = maxAllowed;
+            target = Math.max(hardMin, target);
+
+            // In builder workspace on wider embeds, allow a bit more height because tools are side-by-side.
+            if (document.body.classList.contains('builder-workspace-mode') && document.body.classList.contains('viewport-desktop')) {
+                let builderTarget = Math.min(Math.round(vh * 0.66), available);
+                builderTarget = Math.max(hardMin, builderTarget);
+                target = Math.max(target, builderTarget);
+            }
+
+            document.body.style.setProperty('--embed-graph-height', `${Math.round(target)}px`);
+        }
+
+        function getQuestionFocusWorldPoints(q = getCurrentQuestion()) {
+            let list = [];
+            function pushPoint(x, y) {
+                if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+                list.push({ x, y });
+            }
+
+            if (p && typeof p.X === 'function' && typeof p.Y === 'function') {
+                pushPoint(p.X(), p.Y());
+            }
+
+            (targets || []).forEach((pt) => {
+                if (!pt || typeof pt.X !== 'function' || typeof pt.Y !== 'function') return;
+                pushPoint(pt.X(), pt.Y());
+            });
+
+            let data = getQuestionGoalData(q);
+            if (Array.isArray(data?.targets)) {
+                data.targets.forEach((t) => pushPoint(t?.x, t?.y));
+            }
+            if (data?.point) {
+                pushPoint(data.point.x, data.point.y);
+            }
+            if (Number.isFinite(data?.fixedX0)) {
+                let x0 = data.fixedX0;
+                pushPoint(x0, evaluateFunctionAt(x0));
+            }
+
+            return list;
+        }
+
+        function ensureFocusPointsVisibleOnBoard(q = getCurrentQuestion()) {
+            if (!board || typeof board.getBoundingBox !== 'function') return;
+            let focusPoints = getQuestionFocusWorldPoints(q).filter((pt) => Number.isFinite(pt.x) && Number.isFinite(pt.y));
+            if (focusPoints.length === 0) return;
+
+            let bb = board.getBoundingBox();
+            if (!Array.isArray(bb) || bb.length < 4) return;
+            let left = Number(bb[0]);
+            let top = Number(bb[1]);
+            let right = Number(bb[2]);
+            let bottom = Number(bb[3]);
+            if (![left, top, right, bottom].every(Number.isFinite)) return;
+            if (!(right > left) || !(top > bottom)) return;
+
+            let spanX = right - left;
+            let spanY = top - bottom;
+            let marginX = Math.max(0.3, spanX * 0.09);
+            let marginY = Math.max(0.4, spanY * 0.12);
+
+            let minX = Math.min(...focusPoints.map((pt) => pt.x));
+            let maxX = Math.max(...focusPoints.map((pt) => pt.x));
+            let minY = Math.min(...focusPoints.map((pt) => pt.y));
+            let maxY = Math.max(...focusPoints.map((pt) => pt.y));
+
+            let changed = false;
+
+            let requiredSpanX = (maxX - minX) + marginX * 2;
+            if (requiredSpanX > spanX) {
+                spanX = requiredSpanX;
+                let centerX = (minX + maxX) / 2;
+                left = centerX - spanX / 2;
+                right = centerX + spanX / 2;
+                changed = true;
+            } else {
+                if (minX < left + marginX) {
+                    let dx = (left + marginX) - minX;
+                    left -= dx;
+                    right -= dx;
+                    changed = true;
+                }
+                if (maxX > right - marginX) {
+                    let dx = maxX - (right - marginX);
+                    left += dx;
+                    right += dx;
+                    changed = true;
+                }
+            }
+
+            let requiredSpanY = (maxY - minY) + marginY * 2;
+            if (requiredSpanY > spanY) {
+                spanY = requiredSpanY;
+                let centerY = (minY + maxY) / 2;
+                bottom = centerY - spanY / 2;
+                top = centerY + spanY / 2;
+                changed = true;
+            } else {
+                if (maxY > top - marginY) {
+                    let dy = maxY - (top - marginY);
+                    top += dy;
+                    bottom += dy;
+                    changed = true;
+                }
+                if (minY < bottom + marginY) {
+                    let dy = (bottom + marginY) - minY;
+                    top -= dy;
+                    bottom -= dy;
+                    changed = true;
+                }
+            }
+
+            if (changed) {
+                board.setBoundingBox([left, top, right, bottom], true);
+                board.fullUpdate();
+            }
+        }
+
+        function getPreferredStartXForQuestion(q = getCurrentQuestion()) {
+            let data = getQuestionGoalData(q);
+            let candidate = 0;
+            if (Number.isFinite(data?.fixedX0)) {
+                candidate = data.fixedX0;
+            } else if (Array.isArray(data?.targets) && data.targets.length > 0) {
+                let xs = data.targets.map((t) => Number(t?.x)).filter(Number.isFinite);
+                if (xs.length > 0) candidate = xs.reduce((sum, x) => sum + x, 0) / xs.length;
+            } else if (Number.isFinite(data?.point?.x)) {
+                candidate = data.point.x;
+            }
+
+            let xMin = activeTemplate?.domain?.xMin;
+            let xMax = activeTemplate?.domain?.xMax;
+            if (Number.isFinite(xMin) && Number.isFinite(xMax) && xMax > xMin) {
+                candidate = Math.max(xMin, Math.min(xMax, candidate));
+            }
+            return Number.isFinite(candidate) ? candidate : 0;
+        }
+
         function getRuntimeModeLabel() {
             let hostLabel = isInSitesContext() ? 'Sites' : 'Web';
             let viewportLabel = document.body.classList.contains('viewport-mobile') ? 'mobile' : 'desktop';
@@ -2138,7 +2329,7 @@
         function shouldEnableEmbedMode() {
             if (VIEW_CONFIG.embed === true) return true;
             if (VIEW_CONFIG.embed === false) return false;
-            if (isInSitesContext()) return isMobileViewportNow();
+            if (isInSitesContext()) return true;
             return false;
         }
 
@@ -2283,6 +2474,7 @@
                 document.body.classList.add('embed-mode');
             }
             applyViewportClasses();
+            updateResponsiveLayoutMetrics();
             setupOpeningSplashMedia();
             // Show splash immediately while the app keeps initializing in the background.
             startOpeningSplash();
@@ -2444,6 +2636,7 @@
             });
             board.on('up', () => {
                 dismissQuestionIntro();
+                ensureFocusPointsVisibleOnBoard();
                 updateInfo();
             });
 
@@ -2511,6 +2704,7 @@
         function handleViewportResize() {
             let wasMobile = document.body.classList.contains('viewport-mobile');
             applyViewportClasses();
+            updateResponsiveLayoutMetrics();
             updateDisplayedVersionBadges();
             let isMobile = document.body.classList.contains('viewport-mobile');
             if (document.body.classList.contains('embed-mode') && wasMobile !== isMobile) {
@@ -2525,16 +2719,18 @@
 
         function queueBoardResize() {
             applyTopStripFocusMode();
+            updateResponsiveLayoutMetrics();
             if (!board) return;
             if (boardResizeRaf !== null) cancelAnimationFrame(boardResizeRaf);
             boardResizeRaf = requestAnimationFrame(() => {
                 boardResizeRaf = null;
                 let graphArea = document.getElementById('graph-area');
                 if (!graphArea) return;
-                let w = Math.max(260, Math.round(graphArea.clientWidth));
-                let h = Math.max(260, Math.round(graphArea.clientHeight));
+                let w = Math.max(180, Math.round(graphArea.clientWidth));
+                let h = Math.max(160, Math.round(graphArea.clientHeight));
                 board.resizeContainer(w, h, true);
                 board.fullUpdate();
+                ensureFocusPointsVisibleOnBoard();
                 if (quickTourActive) {
                     let steps = getQuickTourSteps();
                     let activeStep = steps[quickTourStepIndex] || null;
@@ -2574,6 +2770,7 @@
 
         function fitBoardToCurrentFunction() {
             if (!board) return;
+            let q = getCurrentQuestion();
             let xMin = activeTemplate?.domain?.xMin ?? -5;
             let xMax = activeTemplate?.domain?.xMax ?? 5;
             if (!Number.isFinite(xMin) || !Number.isFinite(xMax) || xMax <= xMin) {
@@ -2611,16 +2808,13 @@
                 }
             }
 
-            let focusYs = [];
-            if (p && typeof p.Y === 'function') {
-                let py = p.Y();
-                if (Number.isFinite(py)) focusYs.push(py);
+            let focusPoints = getQuestionFocusWorldPoints(q);
+            let focusXs = focusPoints.map((pt) => pt.x).filter(Number.isFinite);
+            let focusYs = focusPoints.map((pt) => pt.y).filter(Number.isFinite);
+            if (focusXs.length > 0) {
+                xMin = Math.min(xMin, ...focusXs);
+                xMax = Math.max(xMax, ...focusXs);
             }
-            (targets || []).forEach((pt) => {
-                if (!pt || typeof pt.Y !== 'function') return;
-                let vy = pt.Y();
-                if (Number.isFinite(vy)) focusYs.push(vy);
-            });
             if (focusYs.length > 0) {
                 yMin = Math.min(yMin, ...focusYs);
                 yMax = Math.max(yMax, ...focusYs);
@@ -2631,7 +2825,9 @@
             let ySpan = Math.max(4, yMax - yMin);
             let maxYSpan = isEmbed ? 48 : 72;
             if (ySpan > maxYSpan) {
-                let centerY = (yMin + yMax) / 2;
+                let centerY = focusYs.length > 0
+                    ? ((Math.min(...focusYs) + Math.max(...focusYs)) / 2)
+                    : ((yMin + yMax) / 2);
                 yMin = centerY - maxYSpan / 2;
                 yMax = centerY + maxYSpan / 2;
                 ySpan = maxYSpan;
@@ -2641,6 +2837,7 @@
             let yPad = Math.max(0.8, ySpan * (isEmbed ? 0.12 : 0.16));
             // Keep axis scale ratio so perpendicular lines stay visually perpendicular.
             board.setBoundingBox([xMin - xPad, yMax + yPad, xMax + xPad, yMin - yPad], true);
+            ensureFocusPointsVisibleOnBoard(q);
             board.fullUpdate();
         }
 
@@ -5474,6 +5671,7 @@
             updateBuilderVisibility(getCurrentQuestion());
             syncBuilderTemplatePanel(getCurrentQuestion());
             syncTopInlineQuickActions();
+            queueBoardResize();
         }
 
         function markSessionStarted() {
@@ -5721,7 +5919,8 @@
             updateSpecialPanels();
             setQuestionIntroActive(true);
 
-            p.setCoords(0, evaluateFunctionAt(0));
+            let startX = getPreferredStartXForQuestion(q);
+            p.setCoords(startX, evaluateFunctionAt(startX));
             fitBoardToCurrentFunction();
             board.update();
             updateInfo();

@@ -4273,23 +4273,26 @@ body.embed-mode #sidebar.drawer-open #drawer-content {
     max-height: none;
 }
 
-/* Fill tall Google Sites iframes: keep content stretched instead of leaving blank space below. */
+/* Embedded hosts (Google Sites/iframes): graph height is controlled dynamically by JS
+   so the top UI + graph stay visible inside fixed iframe heights. */
 body.embed-mode:not(.builder-workspace-mode) #graph-area-wrapper {
     flex: 1 1 auto;
-    min-height: 100dvh;
+    min-height: 0;
 }
 
 body.embed-mode:not(.builder-workspace-mode) #graph-area {
-    flex: 1 1 auto;
-    height: auto;
-    min-height: 300px;
+    flex: 0 0 auto;
+    height: var(--embed-graph-height, min(44dvh, 92vw));
+    min-height: 160px;
     max-height: none;
     aspect-ratio: auto;
+    width: min(100%, 940px);
+    margin-inline: auto;
 }
 
 /* Viewport profile classes are applied by JS for embedded hosts like Google Sites. */
 body.embed-mode.viewport-desktop #graph-area {
-    min-height: 360px;
+    min-height: min(200px, var(--embed-graph-height, 200px));
 }
 
 body.embed-mode.viewport-desktop #top-strip {
@@ -4355,7 +4358,7 @@ body.embed-mode.viewport-desktop #btn-top-questions {
 }
 
 body.embed-mode.viewport-mobile #graph-area {
-    min-height: 300px;
+    min-height: min(170px, var(--embed-graph-height, 170px));
 }
 
 body.embed-mode.viewport-short #top-strip {
@@ -4400,10 +4403,10 @@ body.embed-mode.viewport-short #top-version-badge {
     }
 
     body.embed-mode.builder-workspace-mode #graph-area {
-        min-height: 300px;
+        min-height: 220px;
         width: min(100%, 760px);
         margin-inline: auto;
-        height: min(54dvh, 68vw);
+        height: min(var(--embed-graph-height, 54dvh), 68vw);
         max-height: 62dvh;
     }
 
