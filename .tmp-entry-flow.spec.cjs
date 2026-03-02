@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('playwright/test');
 
 const START_GUIDE_KEY = 'math_visual_start_guide_onboarding_v1';
 const QUICK_TOUR_KEY = 'math_visual_quick_tour_v1';

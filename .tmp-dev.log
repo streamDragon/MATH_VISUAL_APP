@@ -1,0 +1,74 @@
+
+> dev
+> node ./node_modules/vite/bin/vite.js --host 127.0.0.1 --port 4173 --strictPort
+
+
+  [32m[1mVITE[22m v7.3.1[39m  [2mready in [0m[1m449[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m4173[22m/[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/questions.js?v=__BUILD_SHA__&cb=mm9k19gbkx1zc[33m, use [36m/questions.js?v=__BUILD_SHA__&cb=mm9k19gbkx1zc[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/sound.js?v=__BUILD_SHA__&cb=mm9k19gbkx1zc[33m, use [36m/sound.js?v=__BUILD_SHA__&cb=mm9k19gbkx1zc[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/capacitor.js?v=__BUILD_SHA__&cb=mm9k19gbkx1zc[33m, use [36m/capacitor.js?v=__BUILD_SHA__&cb=mm9k19gbkx1zc[33m.[39m
+[2m21:11:08[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m Failed to load source map for C:/Users/nlpis/vscode/MATH_VISUAL_APP/public/capacitor.js.
+Error: An error occurred while trying to read the map file at capacitor.js.map
+Error: ENOENT: no such file or directory, open 'C:\Users\nlpis\vscode\MATH_VISUAL_APP\public\capacitor.js.map'
+    at async open (node:internal/fs/promises:637:25)
+    at async Object.readFile (node:internal/fs/promises:1269:14)
+    at async extractSourcemapFromFile (file:///C:/Users/nlpis/vscode/MATH_VISUAL_APP/node_modules/vite/dist/node/chunks/config.js:8050:65)
+    at async loadAndTransform (file:///C:/Users/nlpis/vscode/MATH_VISUAL_APP/node_modules/vite/dist/node/chunks/config.js:22641:22)
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/questions.js?v=__BUILD_SHA__&cb=mm9k19zv5v9hr[33m, use [36m/questions.js?v=__BUILD_SHA__&cb=mm9k19zv5v9hr[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/sound.js?v=__BUILD_SHA__&cb=mm9k19zv5v9hr[33m, use [36m/sound.js?v=__BUILD_SHA__&cb=mm9k19zv5v9hr[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/capacitor.js?v=__BUILD_SHA__&cb=mm9k19zv5v9hr[33m, use [36m/capacitor.js?v=__BUILD_SHA__&cb=mm9k19zv5v9hr[33m.[39m
+[2m21:11:09[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m Failed to load source map for C:/Users/nlpis/vscode/MATH_VISUAL_APP/public/capacitor.js.
+Error: An error occurred while trying to read the map file at capacitor.js.map
+Error: ENOENT: no such file or directory, open 'C:\Users\nlpis\vscode\MATH_VISUAL_APP\public\capacitor.js.map'
+    at async open (node:internal/fs/promises:637:25)
+    at async Object.readFile (node:internal/fs/promises:1269:14)
+    at async extractSourcemapFromFile (file:///C:/Users/nlpis/vscode/MATH_VISUAL_APP/node_modules/vite/dist/node/chunks/config.js:8050:65)
+    at async loadAndTransform (file:///C:/Users/nlpis/vscode/MATH_VISUAL_APP/node_modules/vite/dist/node/chunks/config.js:22641:22)
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/questions.js?v=__BUILD_SHA__&cb=mm9k1a54ix7v1[33m, use [36m/questions.js?v=__BUILD_SHA__&cb=mm9k1a54ix7v1[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/sound.js?v=__BUILD_SHA__&cb=mm9k1a54ix7v1[33m, use [36m/sound.js?v=__BUILD_SHA__&cb=mm9k1a54ix7v1[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/capacitor.js?v=__BUILD_SHA__&cb=mm9k1a54ix7v1[33m, use [36m/capacitor.js?v=__BUILD_SHA__&cb=mm9k1a54ix7v1[33m.[39m
+[2m21:11:09[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m Failed to load source map for C:/Users/nlpis/vscode/MATH_VISUAL_APP/public/capacitor.js.
+Error: An error occurred while trying to read the map file at capacitor.js.map
+Error: ENOENT: no such file or directory, open 'C:\Users\nlpis\vscode\MATH_VISUAL_APP\public\capacitor.js.map'
+    at async open (node:internal/fs/promises:637:25)
+    at async Object.readFile (node:internal/fs/promises:1269:14)
+    at async extractSourcemapFromFile (file:///C:/Users/nlpis/vscode/MATH_VISUAL_APP/node_modules/vite/dist/node/chunks/config.js:8050:65)
+    at async loadAndTransform (file:///C:/Users/nlpis/vscode/MATH_VISUAL_APP/node_modules/vite/dist/node/chunks/config.js:22641:22)
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/questions.js?v=__BUILD_SHA__&cb=mm9k1aa843ygw[33m, use [36m/questions.js?v=__BUILD_SHA__&cb=mm9k1aa843ygw[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/sound.js?v=__BUILD_SHA__&cb=mm9k1aa843ygw[33m, use [36m/sound.js?v=__BUILD_SHA__&cb=mm9k1aa843ygw[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/capacitor.js?v=__BUILD_SHA__&cb=mm9k1aa843ygw[33m, use [36m/capacitor.js?v=__BUILD_SHA__&cb=mm9k1aa843ygw[33m.[39m
+[2m21:11:09[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m Failed to load source map for C:/Users/nlpis/vscode/MATH_VISUAL_APP/public/capacitor.js.
+Error: An error occurred while trying to read the map file at capacitor.js.map
+Error: ENOENT: no such file or directory, open 'C:\Users\nlpis\vscode\MATH_VISUAL_APP\public\capacitor.js.map'
+    at async open (node:internal/fs/promises:637:25)
+    at async Object.readFile (node:internal/fs/promises:1269:14)
+    at async extractSourcemapFromFile (file:///C:/Users/nlpis/vscode/MATH_VISUAL_APP/node_modules/vite/dist/node/chunks/config.js:8050:65)
+    at async loadAndTransform (file:///C:/Users/nlpis/vscode/MATH_VISUAL_APP/node_modules/vite/dist/node/chunks/config.js:22641:22)
