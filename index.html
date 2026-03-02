@@ -1390,13 +1390,14 @@
                 entryFlowCompleted = true;
                 return;
             }
-            if (!openingSplashDone || !appInitialized) return;
-            entryFlowCompleted = true;
+            if (!openingSplashDone) return;
             if (shouldAutoOpenLobby()) {
+                entryFlowCompleted = true;
                 markStartGuideSeen(`lobby:auto:${String(trigger || 'unknown')}`);
                 openStartGuideModal({ forceLaunchChoice: true });
                 return;
             }
+            entryFlowCompleted = true;
             startAppFromSplash('app');
         }
 

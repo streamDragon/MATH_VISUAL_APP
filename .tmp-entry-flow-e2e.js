@@ -179,7 +179,8 @@ async function waitForServer(url, timeoutMs) {
             console.log('--- Console Errors ---');
             for (let err of consoleErrors) console.log(err);
             console.log('--- Page Errors ---');
-            for (let err of pageErrors) console.log(err);
+            let uniquePageErrors = Array.from(new Set(pageErrors));
+            for (let err of uniquePageErrors.slice(0, 12)) console.log(err);
             throw new Error(`Runtime errors detected: console=${consoleErrors.length}, page=${pageErrors.length}`);
         }
 
