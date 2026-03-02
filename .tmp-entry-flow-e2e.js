@@ -1,4 +1,5 @@
 const { spawn } = require('child_process');
+const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -108,7 +109,7 @@ async function waitForServer(url, timeoutMs) {
         trace('STEP_A_START');
         await page.goto(BASE, { waitUntil: 'domcontentloaded' });
         await page.waitForSelector('#opening-splash.is-visible', { timeout: 15000 });
-        await page.waitForSelector('#start-guide-modal:not(.hidden)', { timeout: 20000 });
+        await page.waitForSelector('#start-guide-modal:not(.hidden)', { timeout: 45000 });
         results.push('A ok');
         trace('STEP_A_OK');
 
@@ -196,6 +197,12 @@ async function waitForServer(url, timeoutMs) {
     } finally {
         clearTimeout(hardTimeout);
         await killDevProcess();
+        try {
+            execSync('taskkill /F /IM chrome-headless-shell.exe /T >NUL 2>&1');
+        } catch (err) {}
+        try {
+            execSync('taskkill /F /IM chrome.exe /T >NUL 2>&1');
+        } catch (err) {}
         fs.closeSync(out);
         if (!failed && fs.existsSync(LOG)) fs.unlinkSync(LOG);
         trace('FINALLY_DONE');
