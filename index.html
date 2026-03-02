@@ -211,6 +211,31 @@
             ], () => typeof Capacitor !== 'undefined');
         })();
     </script>
+    <style>
+        body.entry-modal-open {
+            overflow: hidden !important;
+        }
+
+        body.lobby-open #start-guide-modal {
+            align-items: center !important;
+            justify-content: center !important;
+            overflow: hidden !important;
+            padding-top: 14px !important;
+            padding-bottom: calc(14px + var(--safe-bottom, 0px)) !important;
+        }
+
+        body.lobby-open #start-guide-card {
+            max-height: calc(100dvh - 28px - var(--safe-bottom, 0px));
+            overflow-y: auto;
+        }
+
+        #opening-splash-copy-build-btn {
+            min-height: 30px;
+            font-size: 0.78rem;
+            padding: 5px 8px;
+            opacity: 0.9;
+        }
+    </style>
 </head>
 <body class="prestart-only">
 
@@ -227,6 +252,7 @@
             <div id="opening-splash-actions">
                 <button id="opening-splash-audio-btn" onclick="retrySplashMusic()">נגן שיר</button>
                 <button onclick="skipOpeningSplash()">דלג לפתיחה</button>
+                <button id="opening-splash-copy-build-btn" class="hidden" type="button" onclick="copyBuildStampFromSplash()">העתק build</button>
             </div>
         </div>
     </div>
@@ -784,6 +810,30 @@
             }
         })();
 
+        function parseBooleanQueryValue(raw) {
+            let value = String(raw || '').trim().toLowerCase();
+            if (!value) return null;
+            if (['1', 'true', 'yes', 'on'].includes(value)) return true;
+            if (['0', 'false', 'no', 'off'].includes(value)) return false;
+            return null;
+        }
+
+        function readEntryFlowQueryParams() {
+            try {
+                let params = new URLSearchParams(window.location.search);
+                return {
+                    lobby: parseBooleanQueryValue(params.get('lobby')),
+                    splash: parseBooleanQueryValue(params.get('splash')),
+                    hardReset: parseBooleanQueryValue(params.get('hard')) === true,
+                    runtimeVersionOverride: String(params.get('v') || '').trim()
+                };
+            } catch (err) {
+                return { lobby: null, splash: null, hardReset: false, runtimeVersionOverride: '' };
+            }
+        }
+
+        const ENTRY_FLOW_QUERY = readEntryFlowQueryParams();
+
         function normalizeBuildEnv(raw) {
             let value = String(raw || '').trim().toLowerCase();
             if (!value || value === '__build_env__') return 'dev';
@@ -824,11 +874,15 @@
             return version;
         })();
 
+        function getRuntimeVersionDisplayOverride() {
+            return ENTRY_FLOW_QUERY.runtimeVersionOverride || '';
+        }
+
         function getBuildStamp(versionOverride, includeTime) {
             let versionRaw = String(versionOverride || APP_VERSION || 'local').trim() || 'local';
             let versionToken = /^v/i.test(versionRaw) ? versionRaw : `v${versionRaw}`;
             let parts = [versionToken, APP_BUILD_ENV, APP_BUILD_SHA_SHORT];
-            if (includeTime && APP_BUILD_TIME && APP_BUILD_TIME !== 'unknown') parts.push(APP_BUILD_TIME);
+            if (includeTime !== false) parts.push(APP_BUILD_TIME || 'unknown');
             return parts.join(' | ');
         }
 
@@ -920,8 +974,6 @@
         const OPENING_MUSIC_DURATION_SECONDS = 30;
         const QUICK_TOUR_STORAGE_KEY = 'math_visual_quick_tour_v1';
         const START_GUIDE_ONBOARDING_STORAGE_KEY = 'math_visual_start_guide_onboarding_v1';
-        const QUICK_TOUR_AUTO_DELAY_MS = 320;
-        const AUTO_OPEN_START_GUIDE = true;
         // Paste your public YouTube link here (or set window.__ONBOARDING_VIDEO_URL before app loads).
         const ONBOARDING_VIDEO_URL = '';
         const ONBOARDING_VIDEO_TITLE = 'הדרכה ראשונית - איך עובדים באתר';
@@ -993,11 +1045,13 @@
         let splashMusicUnlockBound = false;
         let appInitialized = false;
         let winOverlayTimer = null;
-        let runtimeDisplayedVersion = APP_VERSION;
+        let runtimeDisplayedVersion = getRuntimeVersionDisplayOverride() || APP_VERSION;
         let quickTourStepIndex = 0;
         let quickTourActive = false;
         let quickTourCurrentTarget = null;
-        let launchChoiceAutoPending = false;
+        let entryFlowStarted = false;
+        let entryFlowCompleted = false;
+        let entryFlowHardResetApplied = false;
         let guidedDemoActive = false;
         let guidedDemoToken = 0;
         let guidedDemoRaf = null;
@@ -1189,7 +1243,7 @@
             setupQuickTourMedia();
             let modal = document.getElementById('quick-tour-modal');
             if (!modal) return;
-            closeStartGuide(false);
+            closeStartGuideModal({ skipOverlay: false });
             closeQuestionOverlay();
             quickTourStepIndex = 0;
             quickTourCurrentTarget = null;
@@ -1203,6 +1257,7 @@
             }
 
             modal.classList.remove('hidden');
+            syncEntryModalBodyState();
             renderQuickTourStep();
             let demoVideo = document.getElementById('quick-tour-demo-video');
             if (demoVideo) {
@@ -1222,6 +1277,7 @@
             if (demoVideo) demoVideo.pause();
             quickTourCurrentTarget = null;
             quickTourActive = false;
+            syncEntryModalBodyState();
             if (markSeen !== false) {
                 try {
                     localStorage.setItem(QUICK_TOUR_STORAGE_KEY, 'done');
@@ -1250,44 +1306,110 @@
             if (event.target.id === 'quick-tour-modal') skipQuickTour();
         }
 
-        function markStartGuideOnboardingSeen() {
+        function isStartGuideModalOpen() {
+            let modal = document.getElementById('start-guide-modal');
+            return !!(modal && !modal.classList.contains('hidden'));
+        }
+
+        function isQuickTourModalOpen() {
+            let modal = document.getElementById('quick-tour-modal');
+            return !!(modal && !modal.classList.contains('hidden'));
+        }
+
+        function syncEntryModalBodyState() {
+            let lobbyOpen = isStartGuideModalOpen();
+            let anyEntryModalOpen = lobbyOpen || isQuickTourModalOpen();
+            document.body.classList.toggle('lobby-open', lobbyOpen);
+            document.body.classList.toggle('entry-modal-open', anyEntryModalOpen);
+        }
+
+        function readStartGuideState() {
             try {
-                localStorage.setItem(START_GUIDE_ONBOARDING_STORAGE_KEY, 'done');
+                let raw = localStorage.getItem(START_GUIDE_ONBOARDING_STORAGE_KEY);
+                if (!raw) return null;
+                if (raw === 'done') {
+                    return { seen: true, ts: '', build: 'legacy', version: 'legacy', reason: 'legacy_string_state' };
+                }
+                let parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object') return null;
+                return parsed;
+            } catch (err) {
+                return null;
+            }
+        }
+
+        function markStartGuideSeen(reason) {
+            let payload = {
+                seen: true,
+                ts: new Date().toISOString(),
+                build: APP_BUILD_SHA_SHORT,
+                version: APP_VERSION,
+                reason: String(reason || '').trim() || 'unspecified'
+            };
+            try {
+                localStorage.setItem(START_GUIDE_ONBOARDING_STORAGE_KEY, JSON.stringify(payload));
+            } catch (err) {
+                // Continue when localStorage is unavailable.
+            }
+            return payload;
+        }
+
+        function markStartGuideOnboardingSeen(reason) {
+            markStartGuideSeen(reason || 'legacy_mark');
+        }
+
+        function resetEntryOnboardingFlagsIfRequested() {
+            if (entryFlowHardResetApplied) return;
+            if (!ENTRY_FLOW_QUERY.hardReset) return;
+            entryFlowHardResetApplied = true;
+            try {
+                localStorage.removeItem(START_GUIDE_ONBOARDING_STORAGE_KEY);
+                localStorage.removeItem(QUICK_TOUR_STORAGE_KEY);
             } catch (err) {
                 // Continue when localStorage is unavailable.
             }
         }
 
-        function isReturningUserForStartGuideAutoOpen() {
-            try {
-                if (localStorage.getItem(START_GUIDE_ONBOARDING_STORAGE_KEY) === 'done') return true;
-                if (localStorage.getItem(QUICK_TOUR_STORAGE_KEY) === 'done') return true;
-            } catch (err) {
-                // If storage is unavailable, treat as new and allow the guide.
-            }
+        function shouldAutoOpenLobby() {
+            if (ENTRY_FLOW_QUERY.lobby === true) return true;
+            if (ENTRY_FLOW_QUERY.lobby === false) return false;
+            let state = readStartGuideState();
+            if (!state || state.seen !== true) return true;
             return false;
         }
 
-        function maybeOpenStartChoiceAfterSplash() {
-            if (!AUTO_OPEN_START_GUIDE) return;
-            if (launchChoiceAutoPending) return;
-            if (sessionStarted) return;
-            if (quickTourActive) return;
-            if (isReturningUserForStartGuideAutoOpen()) return;
-            launchChoiceAutoPending = true;
-            setTimeout(() => {
-                launchChoiceAutoPending = false;
-                if (!openingSplashDone) return;
-                if (sessionStarted) return;
-                if (quickTourActive) return;
-                if (isReturningUserForStartGuideAutoOpen()) return;
-                if (!appInitialized) {
-                    maybeOpenStartChoiceAfterSplash();
-                    return;
-                }
-                markStartGuideOnboardingSeen();
+        function shouldShowOpeningSplash() {
+            if (ENTRY_FLOW_QUERY.splash === false) return false;
+            return true;
+        }
+
+        function maybeCompleteEntryFlowAfterSplash(trigger) {
+            if (!entryFlowStarted) return;
+            if (entryFlowCompleted) return;
+            if (sessionStarted) {
+                entryFlowCompleted = true;
+                return;
+            }
+            if (!openingSplashDone || !appInitialized) return;
+            entryFlowCompleted = true;
+            if (shouldAutoOpenLobby()) {
+                markStartGuideSeen(`lobby:auto:${String(trigger || 'unknown')}`);
                 openStartGuideModal({ forceLaunchChoice: true });
-            }, QUICK_TOUR_AUTO_DELAY_MS);
+                return;
+            }
+            startAppFromSplash('app');
+        }
+
+        function runEntryFlow() {
+            if (entryFlowStarted) return;
+            entryFlowStarted = true;
+            resetEntryOnboardingFlagsIfRequested();
+            syncBuildCopyButtonVisibility();
+            if (shouldShowOpeningSplash()) {
+                showOpeningSplash();
+                return;
+            }
+            hideOpeningSplash({ immediate: true });
         }
 
         function isNativeCapacitorEnvironment(cap) {
@@ -2590,6 +2712,37 @@
             }
         }
 
+        function syncBuildCopyButtonVisibility() {
+            let btn = document.getElementById('opening-splash-copy-build-btn');
+            if (!btn) return;
+            btn.classList.toggle('hidden', !SHOW_BUILD_DEBUG);
+            btn.title = SHOW_BUILD_DEBUG ? 'העתק חתימת build' : '';
+        }
+
+        async function copyBuildStampFromSplash() {
+            if (!SHOW_BUILD_DEBUG) return;
+            let stamp = getBuildStamp(runtimeDisplayedVersion || APP_VERSION || 'local', true);
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(stamp);
+                } else {
+                    let area = document.createElement('textarea');
+                    area.value = stamp;
+                    area.setAttribute('readonly', 'readonly');
+                    area.style.position = 'fixed';
+                    area.style.opacity = '0';
+                    area.style.pointerEvents = 'none';
+                    document.body.appendChild(area);
+                    area.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(area);
+                }
+                showStepToast(`הועתק: ${stamp}`);
+            } catch (err) {
+                showStepToast(`העתקה נכשלה. build: ${stamp}`);
+            }
+        }
+
         function shouldInlineVersionInTopQuestionIndex() {
             return document.body.classList.contains('embed-mode') && document.body.classList.contains('viewport-mobile');
         }
@@ -2609,11 +2762,10 @@
 
         function updateDisplayedVersionBadges() {
             let versionLabel = runtimeDisplayedVersion || APP_VERSION || 'local';
-            let buildStamp = getBuildStamp(versionLabel, false);
             let buildStampWithTime = getBuildStamp(versionLabel, true);
             let topVersionBadge = document.getElementById('top-version-badge');
             if (topVersionBadge) {
-                topVersionBadge.innerText = buildStamp;
+                topVersionBadge.innerText = buildStampWithTime;
                 topVersionBadge.title = `${buildStampWithTime} | ${getRuntimeModeLabel()}`;
             }
             let buildBadge = document.getElementById('build-badge');
@@ -2623,6 +2775,7 @@
             }
             updateTopQuestionIndexDisplay();
             updateBuildDebugPanel();
+            syncBuildCopyButtonVisibility();
         }
 
         function applyTopStripFocusMode() {
@@ -2978,7 +3131,8 @@
             if (stepsPanel) stepsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        function hideOpeningSplash() {
+        function hideOpeningSplash(options = {}) {
+            let immediate = !!options.immediate;
             if (openingSplashExitTimer) {
                 clearTimeout(openingSplashExitTimer);
                 openingSplashExitTimer = null;
@@ -2988,7 +3142,11 @@
                 openingSplashHideTimer = null;
             }
             let splash = document.getElementById('opening-splash');
-            if (!splash) return;
+            if (!splash) {
+                openingSplashDone = true;
+                maybeCompleteEntryFlowAfterSplash('missing_splash_element');
+                return;
+            }
             openingSplashDone = true;
             scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 90, 260, 540] });
             splash.classList.remove('is-visible');
@@ -2996,12 +3154,22 @@
             let splashVideo = document.getElementById('opening-splash-video');
             if (splashVideo) splashVideo.pause();
             unbindSplashMusicUnlock();
-            openingSplashHideTimer = setTimeout(() => {
+            let finalizeHide = () => {
+                openingSplashHideTimer = null;
                 splash.classList.add('hidden');
                 splash.classList.remove('is-exiting');
                 scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 80, 220] });
-                maybeOpenStartChoiceAfterSplash();
-            }, 420);
+                maybeCompleteEntryFlowAfterSplash('splash_hidden');
+            };
+            if (immediate) {
+                finalizeHide();
+                return;
+            }
+            openingSplashHideTimer = setTimeout(finalizeHide, 420);
+        }
+
+        function showOpeningSplash(forceReplay) {
+            startOpeningSplash(!!forceReplay);
         }
 
         function skipOpeningSplash() {
@@ -3104,14 +3272,13 @@
             updateResponsiveLayoutMetrics();
             scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 90, 260, 520, 1100] });
             setupOpeningSplashMedia();
-            // Show splash immediately while the app keeps initializing in the background.
-            startOpeningSplash();
+            runEntryFlow();
             await ensureQuestionsLoadedAtRuntime();
             loadScannedQuestionsFromStorage();
             let versionForDisplay = await resolveVersionForDisplay();
-            runtimeDisplayedVersion = versionForDisplay;
+            runtimeDisplayedVersion = getRuntimeVersionDisplayOverride() || versionForDisplay;
             let splashVersion = document.getElementById('opening-splash-version');
-            if (splashVersion) splashVersion.innerText = getBuildStamp(versionForDisplay, true);
+            if (splashVersion) splashVersion.innerText = getBuildStamp(runtimeDisplayedVersion, true);
             updateDisplayedVersionBadges();
             exposeBuildBadgeInEmbedMode();
             loadFeedbackMessages();
@@ -3334,6 +3501,7 @@
             queueBoardResize();
             window.addEventListener('resize', handleViewportResize);
             window.addEventListener('orientationchange', handleViewportResize);
+            document.addEventListener('keydown', onGlobalEscapeKeydown);
             window.addEventListener('pageshow', () => {
                 scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 90, 240] });
             });
@@ -3342,7 +3510,10 @@
             }
             appInitialized = true;
             scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 80, 220, 520] });
-            if (openingSplashDone) maybeOpenStartChoiceAfterSplash();
+            if (entryFlowStarted && shouldShowOpeningSplash() && !openingSplashDone) {
+                hideOpeningSplash();
+            }
+            maybeCompleteEntryFlowAfterSplash('app_initialized');
         }
 
         let boardResizeRaf = null;
@@ -5687,8 +5858,8 @@
                 showStepToast('עדיין לא הוגדר לינק ל-YouTube במסך הפתיחה.');
                 return;
             }
-            markStartGuideOnboardingSeen();
-            closeStartGuide(false);
+            markStartGuideSeen('start:youtube');
+            closeStartGuideModal({ skipOverlay: false });
             let embedUrl = getYouTubeEmbedUrl(url);
             if (!embedUrl) {
                 window.open(url, '_blank', 'noopener');
@@ -7589,7 +7760,7 @@ Rules:
             guidedDemoActive = true;
             let token = ++guidedDemoToken;
 
-            closeStartGuide(true);
+            closeStartGuideModal({ skipOverlay: true });
             openAccordion('steps');
             setDrawerOpen(true);
 
@@ -7639,50 +7810,72 @@ Rules:
         }
 
         function openStartGuideModal(options = {}) {
-            let forceLaunchChoice = !!options.forceLaunchChoice;
-            if (sessionStarted && !forceLaunchChoice) {
-                openQuickTour({ force: true });
-                return;
-            }
             let modal = document.getElementById('start-guide-modal');
             if (!modal) return;
+            if (quickTourActive) closeQuickTour(false);
+            hideOpeningSplash({ immediate: true });
+            closeQuestionOverlay();
             let levelSel = document.getElementById('start-demo-level');
             if (levelSel && !levelSel.value) levelSel.value = 'easy';
             syncStartGuideVideoButton();
             modal.classList.remove('hidden');
+            syncEntryModalBodyState();
             scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 70, 180, 420] });
         }
 
-        function closeStartGuide(skipOverlay) {
-            document.getElementById('start-guide-modal').classList.add('hidden');
+        function closeStartGuideModal(options = {}) {
+            let skipOverlay = !!options.skipOverlay;
+            let modal = document.getElementById('start-guide-modal');
+            if (modal) modal.classList.add('hidden');
+            syncEntryModalBodyState();
             if (skipOverlay) {
                 closeQuestionOverlay();
             }
         }
 
+        function closeStartGuide(skipOverlay) {
+            closeStartGuideModal({ skipOverlay: !!skipOverlay });
+        }
+
         function startAppFromSplash(mode) {
-            markStartGuideOnboardingSeen();
-            if (mode === 'tutorial') {
-                closeStartGuide(true);
+            let selectedMode = ['tutorial', 'demo', 'app'].includes(mode) ? mode : 'app';
+            markStartGuideSeen(`start:${selectedMode}`);
+            closeStartGuideModal({ skipOverlay: true });
+            markSessionStarted();
+            if (selectedMode === 'tutorial') {
                 openQuickTour({ force: true });
                 return;
             }
-            if (mode === 'demo') {
-                markSessionStarted();
+            if (selectedMode === 'demo') {
                 if (typeof playIntroTheme === 'function') playIntroTheme();
                 runGuidedDemoFromLaunch();
                 return;
             }
-            closeStartGuide(true);
             openAccordion('params');
             setDrawerOpen(true);
             showStepToast('לפני תרגול: בחרו סוג פונקציה, דייקו עם הפרמטרים, ואז לחצו "קבע פונקציה והתחל תרגול".');
         }
 
         function onStartGuideBackdropClick(event) {
-            if (event.target.id === 'start-guide-modal') {
-                startAppFromSplash('app');
+            if (event.target.id !== 'start-guide-modal') return;
+            if (sessionStarted) {
+                closeStartGuideModal({ skipOverlay: true });
+                return;
             }
+            startAppFromSplash('app');
+        }
+
+        function onGlobalEscapeKeydown(event) {
+            if (event.key !== 'Escape') return;
+            if (isQuickTourModalOpen()) {
+                event.preventDefault();
+                skipQuickTour();
+                return;
+            }
+            if (!isStartGuideModalOpen()) return;
+            if (!sessionStarted) return;
+            event.preventDefault();
+            closeStartGuideModal({ skipOverlay: true });
         }
 
         function openInitialBuilderModal() {
