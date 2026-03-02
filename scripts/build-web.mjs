@@ -8,7 +8,26 @@ const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 const viteBin = path.join(rootDir, 'node_modules', 'vite', 'bin', 'vite.js');
 
-const buildId = (process.env.BUILD_ID || '').trim() || `local-${Date.now()}`;
+function normalizeBuildEnv(raw) {
+  const value = String(raw || '').trim().toLowerCase();
+  if (!value) return 'dev';
+  if (value === 'preview') return 'preview';
+  if (value === 'production' || value === 'prod') return 'prod';
+  if (value === 'development' || value === 'dev' || value === 'local') return 'dev';
+  return value;
+}
+
+function sanitizeBuildSha(raw) {
+  const value = String(raw || '').trim().toLowerCase().replace(/[^0-9a-f]/g, '');
+  if (!value) return 'unknown';
+  return value.slice(0, 40);
+}
+
+const buildEnv = normalizeBuildEnv(process.env.BUILD_ENV || process.env.VERCEL_ENV || process.env.NODE_ENV);
+const buildSha = sanitizeBuildSha(
+  process.env.BUILD_SHA || process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA || process.env.BUILD_ID
+);
+const buildId = (process.env.BUILD_ID || '').trim() || (buildSha !== 'unknown' ? buildSha : `${buildEnv}-${Date.now()}`);
 const buildTime = (process.env.BUILD_TIME || '').trim() || new Date().toISOString();
 
 function runNode(args) {
@@ -65,6 +84,12 @@ async function bumpAppVersion() {
   if (typeof versionData.build !== 'string' || !versionData.build.trim()) {
     versionData.build = '__BUILD_ID__';
   }
+  if (typeof versionData.build_env !== 'string' || !versionData.build_env.trim()) {
+    versionData.build_env = '__BUILD_ENV__';
+  }
+  if (typeof versionData.build_sha !== 'string' || !versionData.build_sha.trim()) {
+    versionData.build_sha = '__BUILD_SHA__';
+  }
   if (typeof versionData.generated_at_utc !== 'string' || !versionData.generated_at_utc.trim()) {
     versionData.generated_at_utc = '__BUILD_TIME__';
   }
@@ -82,6 +107,9 @@ await fs.mkdir(distDir, { recursive: true });
 
 await replaceInFile(path.join(distDir, 'index.html'), [
   ['__BUILD_ID__', buildId],
+  ['__BUILD_ENV__', buildEnv],
+  ['__BUILD_SHA__', buildSha],
+  ['__BUILD_TIME__', buildTime],
   ['__APP_VERSION__', appVersion],
   ['href="mobile.css"', `href="mobile.css?v=${buildId}"`],
   ['src="questions.js"', `src="questions.js?v=${buildId}"`],
@@ -95,7 +123,7 @@ try {
 } catch {
   await fs.writeFile(
     versionFile,
-    '{\n  "app_version": "__APP_VERSION__",\n  "build": "__BUILD_ID__",\n  "generated_at_utc": "__BUILD_TIME__"\n}\n',
+    '{\n  "app_version": "__APP_VERSION__",\n  "build": "__BUILD_ID__",\n  "build_env": "__BUILD_ENV__",\n  "build_sha": "__BUILD_SHA__",\n  "generated_at_utc": "__BUILD_TIME__"\n}\n',
     'utf8'
   );
 }
@@ -103,6 +131,8 @@ try {
 await replaceInFile(versionFile, [
   ['__APP_VERSION__', appVersion],
   ['__BUILD_ID__', buildId],
+  ['__BUILD_ENV__', buildEnv],
+  ['__BUILD_SHA__', buildSha],
   ['__BUILD_TIME__', buildTime]
 ]);
 
@@ -113,4 +143,4 @@ try {
   await fs.writeFile(noJekyllFile, '', 'utf8');
 }
 
-console.log(`[build:web] version=${appVersion} build=${buildId} time=${buildTime}`);
+console.log(`[build:web] version=${appVersion} env=${buildEnv} sha=${buildSha} build=${buildId} time=${buildTime}`);

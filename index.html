@@ -9,15 +9,35 @@
     <meta http-equiv="Surrogate-Control" content="no-store">
     <meta name="googlebot" content="noarchive">
     <meta name="app-build-id" content="__BUILD_ID__">
+    <meta name="app-build-env" content="__BUILD_ENV__">
+    <meta name="app-build-sha" content="__BUILD_SHA__">
+    <meta name="app-build-time" content="__BUILD_TIME__">
     <meta name="app-version" content="__APP_VERSION__">
     <title>מעבדת הפונקציות - המלא והשלם</title>
 
     <script>
+        (function initScriptLoadRegistry() {
+            let store = window.__SCRIPT_LOAD_STATUS;
+            if (!store || typeof store !== 'object') store = {};
+            window.__SCRIPT_LOAD_STATUS = store;
+            window.__reportScriptLoad = window.__reportScriptLoad || function (name, ok, src, note) {
+                if (!name) return;
+                store[name] = {
+                    ok: !!ok,
+                    src: String(src || '').trim(),
+                    note: String(note || '').trim(),
+                    ts: new Date().toISOString()
+                };
+            };
+        })();
+
         (function ensureBuildQueryParam() {
             const GUARD_KEY = 'math_visual_head_reload_guard_v3';
 
             function parseVersionToken(meta) {
                 if (!meta || typeof meta !== 'object') return '';
+                let buildSha = (typeof meta.build_sha === 'string') ? meta.build_sha.trim() : '';
+                if (buildSha && buildSha !== '__BUILD_SHA__') return buildSha;
                 let build = (typeof meta.build === 'string') ? meta.build.trim() : '';
                 if (build && build !== '__BUILD_ID__') return build;
                 let version = (typeof meta.app_version === 'string') ? meta.app_version.trim() : '';
@@ -28,8 +48,10 @@
             function fetchVersionMetaSync() {
                 let stamp = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
                 let candidates = [
-                    `public/version.json?cb=${stamp}`,
-                    `version.json?cb=${stamp}`
+                    `/version.json?cb=${stamp}`,
+                    `/public/version.json?cb=${stamp}`,
+                    `version.json?cb=${stamp}`,
+                    `public/version.json?cb=${stamp}`
                 ];
                 for (let path of candidates) {
                     try {
@@ -50,6 +72,8 @@
             }
 
             function resolveExpectedToken() {
+                let buildSha = '__BUILD_SHA__';
+                if (buildSha && buildSha !== '__BUILD_SHA__') return buildSha;
                 let build = '__BUILD_ID__';
                 let version = '__APP_VERSION__';
                 if (build && build !== '__BUILD_ID__') return build;
@@ -118,35 +142,73 @@
     <script>
         (function injectCoreAssets() {
             let query = window.__APP_ASSET_QUERY || `v=ts${Date.now().toString(36)}`;
+            let report = (typeof window.__reportScriptLoad === 'function')
+                ? window.__reportScriptLoad
+                : function () {};
+
             let cssLink = document.createElement('link');
             cssLink.rel = 'stylesheet';
-            cssLink.href = `public/mobile.css?${query}`;
-            cssLink.onerror = function () {
-                this.onerror = null;
-                this.href = `mobile.css?${query}`;
+            let cssCandidates = ['/mobile.css', '/public/mobile.css', 'mobile.css', 'public/mobile.css'];
+            let cssIndex = 0;
+            cssLink.onload = function () {
+                report('mobile_css', true, cssCandidates[Math.max(0, cssIndex - 1)], cssIndex <= 1 ? 'primary' : 'fallback');
             };
+            cssLink.onerror = function () {
+                report('mobile_css', false, cssCandidates[Math.max(0, cssIndex - 1)], cssIndex <= 1 ? 'primary_failed' : 'fallback_failed');
+                if (cssIndex >= cssCandidates.length) return;
+                cssLink.href = `${cssCandidates[cssIndex]}?${query}`;
+                cssIndex += 1;
+            };
+            cssLink.href = `${cssCandidates[cssIndex]}?${query}`;
+            cssIndex += 1;
             document.head.appendChild(cssLink);
 
             function writeScript(src) {
                 document.write('<script src="' + src + '"><\/script>');
             }
 
-            window.__ASSET_BASE = 'public/';
-            writeScript(`public/questions.js?${query}`);
-            if (typeof QUESTIONS === 'undefined') {
+            function loadSyncScriptWithFallback(name, candidates, probeFn) {
+                for (let i = 0; i < candidates.length; i += 1) {
+                    let src = `${candidates[i]}?${query}`;
+                    writeScript(src);
+                    if (probeFn()) {
+                        report(name, true, candidates[i], i === 0 ? 'primary' : 'fallback');
+                        return candidates[i];
+                    }
+                    report(name, false, candidates[i], i === 0 ? 'primary_failed' : 'fallback_failed');
+                }
+                report(name, false, '', 'not_loaded');
+                return '';
+            }
+
+            let questionsPath = loadSyncScriptWithFallback('questions', [
+                '/questions.js',
+                '/public/questions.js',
+                'questions.js',
+                'public/questions.js'
+            ], () => typeof QUESTIONS !== 'undefined');
+
+            if (questionsPath.startsWith('/public/') || questionsPath.startsWith('public/')) {
+                window.__ASSET_BASE = '/public/';
+            } else if (questionsPath.startsWith('/')) {
+                window.__ASSET_BASE = '/';
+            } else {
                 window.__ASSET_BASE = '';
-                writeScript(`questions.js?${query}`);
             }
 
-            writeScript(`public/sound.js?${query}`);
-            if (typeof toggleSound !== 'function') {
-                writeScript(`sound.js?${query}`);
-            }
+            loadSyncScriptWithFallback('sound', [
+                '/sound.js',
+                '/public/sound.js',
+                'sound.js',
+                'public/sound.js'
+            ], () => typeof toggleSound === 'function');
 
-            writeScript(`public/capacitor.js?${query}`);
-            if (typeof Capacitor === 'undefined') {
-                writeScript(`capacitor.js?${query}`);
-            }
+            loadSyncScriptWithFallback('capacitor', [
+                '/capacitor.js',
+                '/public/capacitor.js',
+                'capacitor.js',
+                'public/capacitor.js'
+            ], () => typeof Capacitor !== 'undefined');
         })();
     </script>
 </head>
@@ -180,9 +242,14 @@
         <button id="btn-side-normal" class="hidden" onclick="openNormalLabGuide()">מעבדת האנך</button>
     </div>
 
-    <div id="win-overlay">
-        <h1>🏆 כל הכבוד!</h1>
-        <p>פיצחת את המשימה.</p>
+    <div id="win-overlay" role="dialog" aria-modal="true" aria-live="polite" dir="rtl">
+        <div id="win-overlay-body">
+            <h1>🏆 כל הכבוד!</h1>
+            <p>פיצחת את המשימה.</p>
+        </div>
+        <div id="win-overlay-actions">
+            <button type="button" onclick="closeWinOverlay()">המשך</button>
+        </div>
     </div>
 
     <div id="question-overlay" class="hidden" onclick="onOverlayBackdropClick(event)">
@@ -473,6 +540,10 @@
                 <span id="progress-hint">חפש → מצא → בדוק</span>
                 <span id="prestart-hint">לפני התרגול בונים פונקציה, ואז לוחצים "התחל תרגול" כדי להסתיר כפתורי התחלה.</span>
                 <span id="build-badge">build: --</span>
+                <div id="build-debug-panel" class="hidden" aria-hidden="true">
+                    <div id="build-debug-values"></div>
+                    <div id="build-debug-scripts"></div>
+                </div>
                 <span id="learner-progress-chip">רמה 1 | XP 0 | רצף 0 | 0/0</span>
                 <div id="top-brief-card">
                     <div id="top-brief-head">המשימה עכשיו</div>
@@ -703,13 +774,78 @@
     </div>
 
     <script>
-        const APP_BUILD = '__BUILD_ID__';
-        const APP_BUILD_DISPLAY = (!APP_BUILD || APP_BUILD === '__BUILD_ID__') ? 'local' : APP_BUILD;
+        const SHOW_BUILD_DEBUG = (() => {
+            try {
+                let params = new URLSearchParams(window.location.search);
+                let raw = (params.get('debug_build') || params.get('build_debug') || params.get('debug') || '').trim().toLowerCase();
+                return ['1', 'true', 'yes', 'on'].includes(raw);
+            } catch (err) {
+                return false;
+            }
+        })();
+
+        function normalizeBuildEnv(raw) {
+            let value = String(raw || '').trim().toLowerCase();
+            if (!value || value === '__build_env__') return 'dev';
+            if (['production', 'prod'].includes(value)) return 'prod';
+            if (value === 'preview') return 'preview';
+            if (['development', 'dev', 'local'].includes(value)) return 'dev';
+            return value;
+        }
+
+        function sanitizeBuildSha(raw) {
+            let value = String(raw || '').trim().toLowerCase();
+            if (!value || value === '__build_sha__') return 'unknown';
+            value = value.replace(/[^0-9a-f]/g, '');
+            if (!value) return 'unknown';
+            return value.slice(0, 40);
+        }
+
+        function sanitizeBuildTime(raw) {
+            let value = String(raw || '').trim();
+            if (!value || value.toLowerCase() === '__build_time__') return 'unknown';
+            let parsed = Date.parse(value);
+            if (Number.isNaN(parsed)) return value;
+            return new Date(parsed).toISOString();
+        }
+
+        const APP_BUILD_ENV = normalizeBuildEnv('__BUILD_ENV__');
+        const APP_BUILD_SHA = sanitizeBuildSha('__BUILD_SHA__');
+        const APP_BUILD_SHA_SHORT = APP_BUILD_SHA === 'unknown' ? 'unknown' : APP_BUILD_SHA.slice(0, 7);
+        const APP_BUILD_TIME = sanitizeBuildTime('__BUILD_TIME__');
+        const APP_BUILD = (() => {
+            let build = String('__BUILD_ID__' || '').trim();
+            if (build && build.toLowerCase() !== '__build_id__') return build;
+            return APP_BUILD_SHA !== 'unknown' ? APP_BUILD_SHA : 'unknown';
+        })();
         const APP_VERSION = (() => {
-            const version = '__APP_VERSION__';
-            if (!version || version === '__APP_VERSION__') return 'local';
+            const version = String('__APP_VERSION__' || '').trim();
+            if (!version || version.toLowerCase() === '__app_version__') return 'local';
             return version;
         })();
+
+        function getBuildStamp(versionOverride, includeTime) {
+            let versionRaw = String(versionOverride || APP_VERSION || 'local').trim() || 'local';
+            let versionToken = /^v/i.test(versionRaw) ? versionRaw : `v${versionRaw}`;
+            let parts = [versionToken, APP_BUILD_ENV, APP_BUILD_SHA_SHORT];
+            if (includeTime && APP_BUILD_TIME && APP_BUILD_TIME !== 'unknown') parts.push(APP_BUILD_TIME);
+            return parts.join(' | ');
+        }
+
+        const SCRIPT_LOAD_STATUS = (window.__SCRIPT_LOAD_STATUS && typeof window.__SCRIPT_LOAD_STATUS === 'object')
+            ? window.__SCRIPT_LOAD_STATUS
+            : {};
+        window.__SCRIPT_LOAD_STATUS = SCRIPT_LOAD_STATUS;
+        window.__reportScriptLoad = function (name, ok, src, note) {
+            if (!name) return;
+            SCRIPT_LOAD_STATUS[name] = {
+                ok: !!ok,
+                src: String(src || '').trim(),
+                note: String(note || '').trim(),
+                ts: new Date().toISOString()
+            };
+            if (typeof updateBuildDebugPanel === 'function') updateBuildDebugPanel();
+        };
         const VIEW_CONFIG = (() => {
             try {
                 let params = new URLSearchParams(window.location.search);
@@ -790,18 +926,20 @@
         const ONBOARDING_VIDEO_URL = '';
         const ONBOARDING_VIDEO_TITLE = 'הדרכה ראשונית - איך עובדים באתר';
         const RUNTIME_ASSET_BASE = (() => {
-            if (typeof window.__ASSET_BASE === 'string') return window.__ASSET_BASE;
+            if (typeof window.__ASSET_BASE === 'string' && window.__ASSET_BASE.trim()) return window.__ASSET_BASE;
             try {
                 let src = document.currentScript?.src || '';
-                if (src.includes('/public/')) return 'public/';
+                if (src.includes('/public/')) return '/public/';
                 let qScript = document.querySelector('script[src*="questions.js"]');
                 let qSrc = qScript ? (qScript.getAttribute('src') || '') : '';
-                if (qSrc.startsWith('public/')) return 'public/';
-                if ((qScript?.src || '').includes('/public/')) return 'public/';
+                if (qSrc.startsWith('/public/') || qSrc.startsWith('public/')) return '/public/';
+                if (qSrc.startsWith('/')) return '/';
+                if ((qScript?.src || '').includes('/public/')) return '/public/';
+                if ((qScript?.src || '').includes('/questions.js')) return '/';
             } catch (err) {
                 // Keep default root path if script discovery fails.
             }
-            return '';
+            return window.location.protocol === 'file:' ? '' : '/';
         })();
         const OPENING_MUSIC_FILE = `${RUNTIME_ASSET_BASE}opening-theme.mp3`;
         const OPENING_VIDEO_FILE = `${RUNTIME_ASSET_BASE}opening-theme.mp4`;
@@ -1238,6 +1376,8 @@
 
         function getRemoteVersionToken(data) {
             if (!data || typeof data !== 'object') return '';
+            let remoteSha = (typeof data.build_sha === 'string') ? data.build_sha.trim().toLowerCase() : '';
+            if (remoteSha && remoteSha !== '__build_sha__') return remoteSha;
             let remoteBuild = (typeof data.build === 'string') ? data.build.trim() : '';
             if (remoteBuild && remoteBuild !== '__BUILD_ID__') return remoteBuild;
             let remoteVersion = (typeof data.app_version === 'string') ? data.app_version.trim() : '';
@@ -1245,11 +1385,22 @@
             return '';
         }
 
+        function getRemoteBuildComparable(data) {
+            if (!data || typeof data !== 'object') return '';
+            let remoteSha = sanitizeBuildSha(data.build_sha);
+            if (remoteSha !== 'unknown') return remoteSha;
+            let remoteBuild = (typeof data.build === 'string') ? data.build.trim() : '';
+            if (remoteBuild && remoteBuild !== '__BUILD_ID__') return remoteBuild;
+            return '';
+        }
+
         async function fetchVersionMeta() {
             let stamp = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
             let candidates = [
-                `public/version.json?cb=${stamp}`,
-                `version.json?cb=${stamp}`
+                `/version.json?cb=${stamp}`,
+                `/public/version.json?cb=${stamp}`,
+                `version.json?cb=${stamp}`,
+                `public/version.json?cb=${stamp}`
             ];
             for (let path of candidates) {
                 try {
@@ -1285,11 +1436,14 @@
                 return true;
             }
 
-            let remoteBuild = (typeof data.build === 'string') ? data.build.trim() : '';
-            let localBuild = (typeof APP_BUILD === 'string') ? APP_BUILD.trim() : '';
-            if (!remoteBuild || remoteBuild === '__BUILD_ID__') return false;
-            if (!localBuild || localBuild === '__BUILD_ID__') return true;
-            return remoteBuild !== localBuild;
+            let remoteBuildComparable = getRemoteBuildComparable(data);
+            if (!remoteBuildComparable) return false;
+
+            let localBuildComparable = APP_BUILD_SHA !== 'unknown'
+                ? APP_BUILD_SHA
+                : ((typeof APP_BUILD === 'string') ? APP_BUILD.trim() : '');
+            if (!localBuildComparable || localBuildComparable === '__BUILD_ID__' || localBuildComparable === 'unknown') return true;
+            return remoteBuildComparable !== localBuildComparable;
         }
 
         function shouldForceReloadForTransition(transitionKey) {
@@ -1591,24 +1745,44 @@
             return nextSelected;
         }
 
-        function loadRuntimeScript(src) {
+        function loadRuntimeScript(src, label) {
             return new Promise((resolve, reject) => {
                 let script = document.createElement('script');
                 script.src = `${src}${src.includes('?') ? '&' : '?'}t=${Date.now()}`;
                 script.async = false;
-                script.onload = () => resolve(true);
-                script.onerror = () => reject(new Error(`Failed loading ${src}`));
+                script.onload = () => {
+                    if (label) window.__reportScriptLoad(label, true, src, 'runtime');
+                    resolve(true);
+                };
+                script.onerror = () => {
+                    if (label) window.__reportScriptLoad(label, false, src, 'runtime_failed');
+                    reject(new Error(`Failed loading ${src}`));
+                };
                 document.head.appendChild(script);
             });
         }
 
+        async function loadRuntimeScriptWithFallback(name, candidates, probeFn) {
+            for (let i = 0; i < candidates.length; i += 1) {
+                let src = candidates[i];
+                try {
+                    await loadRuntimeScript(src, name);
+                    if (!probeFn || probeFn()) return src;
+                } catch (err) {
+                    // Try next fallback path.
+                }
+            }
+            return '';
+        }
+
         async function ensureQuestionsLoadedAtRuntime() {
             if (getQuestionsList().length > 0) return true;
-            try {
-                await loadRuntimeScript('public/questions.js');
-            } catch (err) {
-                // Keep running; a visible message will be shown if questions stay missing.
-            }
+            await loadRuntimeScriptWithFallback('questions', [
+                '/questions.js',
+                '/public/questions.js',
+                'questions.js',
+                'public/questions.js'
+            ], () => getQuestionsList().length > 0 || typeof QUESTIONS !== 'undefined');
             return getQuestionsList().length > 0;
         }
 
@@ -2375,6 +2549,47 @@
             return `${hostLabel} ${viewportLabel}`;
         }
 
+        function getBuildDebugSummary(versionLabel) {
+            let stamp = getBuildStamp(versionLabel, true);
+            return [
+                `stamp=${stamp}`,
+                `version=${versionLabel || APP_VERSION || 'local'}`,
+                `env=${APP_BUILD_ENV}`,
+                `sha=${APP_BUILD_SHA}`,
+                `time=${APP_BUILD_TIME}`,
+                `mode=${getRuntimeModeLabel()}`
+            ].join('\n');
+        }
+
+        function updateBuildDebugPanel() {
+            let panel = document.getElementById('build-debug-panel');
+            if (!panel) return;
+
+            if (!SHOW_BUILD_DEBUG) {
+                panel.classList.add('hidden');
+                panel.setAttribute('aria-hidden', 'true');
+                return;
+            }
+
+            panel.classList.remove('hidden');
+            panel.removeAttribute('aria-hidden');
+
+            let values = document.getElementById('build-debug-values');
+            if (values) values.innerText = getBuildDebugSummary(runtimeDisplayedVersion || APP_VERSION);
+
+            let scriptsEl = document.getElementById('build-debug-scripts');
+            if (scriptsEl) {
+                let entries = Object.entries(SCRIPT_LOAD_STATUS || {}).sort((a, b) => a[0].localeCompare(b[0]));
+                scriptsEl.innerText = entries.length
+                    ? entries.map(([name, meta]) => {
+                        let status = meta && meta.ok ? 'ok' : 'fail';
+                        let src = meta && meta.src ? meta.src : '-';
+                        return `${name}: ${status} | ${src}`;
+                    }).join('\n')
+                    : 'scripts: no records yet';
+            }
+        }
+
         function shouldInlineVersionInTopQuestionIndex() {
             return document.body.classList.contains('embed-mode') && document.body.classList.contains('viewport-mobile');
         }
@@ -2394,18 +2609,20 @@
 
         function updateDisplayedVersionBadges() {
             let versionLabel = runtimeDisplayedVersion || APP_VERSION || 'local';
-            let buildLabel = APP_BUILD_DISPLAY || 'local';
+            let buildStamp = getBuildStamp(versionLabel, false);
+            let buildStampWithTime = getBuildStamp(versionLabel, true);
             let topVersionBadge = document.getElementById('top-version-badge');
             if (topVersionBadge) {
-                topVersionBadge.innerText = `V${versionLabel}`;
-                topVersionBadge.title = `version=${versionLabel} | build=${buildLabel} | ${getRuntimeModeLabel()}`;
+                topVersionBadge.innerText = buildStamp;
+                topVersionBadge.title = `${buildStampWithTime} | ${getRuntimeModeLabel()}`;
             }
             let buildBadge = document.getElementById('build-badge');
             if (buildBadge) {
-                buildBadge.innerText = `V${versionLabel}`;
-                buildBadge.title = `build: ${buildLabel}`;
+                buildBadge.innerText = `${APP_BUILD_ENV}:${APP_BUILD_SHA_SHORT}`;
+                buildBadge.title = buildStampWithTime;
             }
             updateTopQuestionIndexDisplay();
+            updateBuildDebugPanel();
         }
 
         function applyTopStripFocusMode() {
@@ -2894,7 +3111,7 @@
             let versionForDisplay = await resolveVersionForDisplay();
             runtimeDisplayedVersion = versionForDisplay;
             let splashVersion = document.getElementById('opening-splash-version');
-            if (splashVersion) splashVersion.innerText = `גרסה ${versionForDisplay} | build ${APP_BUILD_DISPLAY}`;
+            if (splashVersion) splashVersion.innerText = getBuildStamp(versionForDisplay, true);
             updateDisplayedVersionBadges();
             exposeBuildBadgeInEmbedMode();
             loadFeedbackMessages();
@@ -5307,7 +5524,7 @@
                 winOverlay.style.display = 'block';
                 if (winOverlayTimer) clearTimeout(winOverlayTimer);
                 winOverlayTimer = setTimeout(() => {
-                    winOverlay.style.display = 'none';
+                    closeWinOverlay();
                 }, 2200);
             }
             if (box) box.classList.add('winning-box');
@@ -5325,6 +5542,15 @@
                 triggerVictoryConfetti();
             }
             wasWin = true;
+        }
+
+        function closeWinOverlay() {
+            let winOverlay = document.getElementById('win-overlay');
+            if (winOverlay) winOverlay.style.display = 'none';
+            if (winOverlayTimer) {
+                clearTimeout(winOverlayTimer);
+                winOverlayTimer = null;
+            }
         }
 
         function evaluateCurrentStep(m, x, y) {
@@ -7798,7 +8024,47 @@ Rules:
 
         window.onload = init;
     </script>
-    <script src="public/presets.js" onerror="this.onerror=null;this.src='presets.js';"></script>
-    <script src="public/codex_features.js" onerror="this.onerror=null;this.src='codex_features.js';"></script>
+    <script>
+        (function loadOptionalFeatureScripts() {
+            let query = window.__APP_ASSET_QUERY || `v=ts${Date.now().toString(36)}`;
+
+            function loadScriptWithFallback(name, candidates) {
+                return new Promise((resolve) => {
+                    let script = document.createElement('script');
+                    script.async = false;
+                    let attemptIndex = 0;
+
+                    script.onload = function () {
+                        let loadedSrc = candidates[Math.max(0, attemptIndex - 1)] || '';
+                        if (window.__reportScriptLoad) {
+                            window.__reportScriptLoad(name, true, loadedSrc, attemptIndex <= 1 ? 'primary' : 'fallback');
+                        }
+                        resolve(true);
+                    };
+
+                    script.onerror = function () {
+                        let failedSrc = candidates[Math.max(0, attemptIndex - 1)] || '';
+                        if (window.__reportScriptLoad) {
+                            window.__reportScriptLoad(name, false, failedSrc, attemptIndex <= 1 ? 'primary_failed' : 'fallback_failed');
+                        }
+                        if (attemptIndex < candidates.length) {
+                            script.src = `${candidates[attemptIndex]}?${query}`;
+                            attemptIndex += 1;
+                            return;
+                        }
+                        resolve(false);
+                    };
+
+                    script.src = `${candidates[attemptIndex]}?${query}`;
+                    attemptIndex += 1;
+                    document.body.appendChild(script);
+                });
+            }
+
+            loadScriptWithFallback('presets', ['/presets.js', '/public/presets.js', 'presets.js', 'public/presets.js'])
+                .then(() => loadScriptWithFallback('codex_features', ['/codex_features.js', '/public/codex_features.js', 'codex_features.js', 'public/codex_features.js']))
+                .catch(() => {});
+        })();
+    </script>
 </body>
 </html>
