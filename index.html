@@ -275,6 +275,11 @@
         <button id="btn-side-normal" class="hidden" onclick="openNormalLabGuide()">מעבדת האנך</button>
     </div>
 
+    <div id="math-gym-popup" class="hidden" aria-label="Math Gym">
+        <button id="btn-close-math-gym-popup" type="button" onclick="closeMathGymPopup()" aria-label="סגור">✕</button>
+        <img id="math-gym-popup-image" src="public/math-gym-promo.png" alt="Math Gym" onerror="this.onerror=null;this.src='public/opening-poster.png';">
+    </div>
+
     <div id="win-overlay" role="dialog" aria-modal="true" aria-live="polite" dir="rtl">
         <div id="win-overlay-body">
             <h1>🏆 כל הכבוד!</h1>
@@ -1053,6 +1058,7 @@
         const START_GUIDE_ONBOARDING_STORAGE_KEY = 'math_visual_start_guide_onboarding_v1';
         const CLEAN_MODE_STORAGE_KEY = 'math_visual_clean_mode_v1';
         const HELP_VOICE_STORAGE_KEY = 'math_visual_voice_enabled_v1';
+        const MATH_GYM_POPUP_STORAGE_KEY = 'math_gym_popup_seen_v1';
         const HELP_HIGHLIGHT_DURATION_MS = 3200;
         const DEFAULT_HELP_CONTENT_HE = {
             title: 'עזרה מהירה',
@@ -1135,6 +1141,7 @@
         let helpVoiceEnabled = false;
         let helpHighlightTimer = null;
         let helpVoiceStatusTimer = null;
+        let mathGymPopupTimer = null;
         let startGuideModalA11y = null;
         let initialBuilderModalA11y = null;
         let globalHelpModalA11y = null;
@@ -1614,6 +1621,51 @@
             let whyBtn = document.getElementById('btn-practice-clean-why');
             if (whyBtn) reason = String(whyBtn.dataset.cleanReason || '').trim();
             openGlobalHelpModal({ cleanModeReason: reason });
+        }
+
+        function hasSeenMathGymPopup() {
+            try {
+                return localStorage.getItem(MATH_GYM_POPUP_STORAGE_KEY) === '1';
+            } catch (err) {
+                return false;
+            }
+        }
+
+        function markMathGymPopupSeen() {
+            try {
+                localStorage.setItem(MATH_GYM_POPUP_STORAGE_KEY, '1');
+            } catch (err) {
+                // Ignore storage failures.
+            }
+        }
+
+        function openMathGymPopup() {
+            let popup = document.getElementById('math-gym-popup');
+            if (!popup) return;
+            if (hasSeenMathGymPopup()) return;
+            popup.classList.remove('hidden');
+        }
+
+        function closeMathGymPopup(options = {}) {
+            let persist = options.persist !== false;
+            let popup = document.getElementById('math-gym-popup');
+            if (popup) popup.classList.add('hidden');
+            if (mathGymPopupTimer) {
+                clearTimeout(mathGymPopupTimer);
+                mathGymPopupTimer = null;
+            }
+            if (persist) markMathGymPopupSeen();
+        }
+
+        function scheduleMathGymPopup() {
+            if (!sessionStarted) return;
+            if (hasSeenMathGymPopup()) return;
+            if (mathGymPopupTimer) clearTimeout(mathGymPopupTimer);
+            mathGymPopupTimer = setTimeout(() => {
+                mathGymPopupTimer = null;
+                if (!sessionStarted || hasSeenMathGymPopup()) return;
+                openMathGymPopup();
+            }, 1800);
         }
 
         function readHelpVoicePreference() {
@@ -8709,6 +8761,7 @@ Rules:
             let wasPreStartQuestion = isPreStartOnlyQuestion(getCurrentQuestion());
             sessionStarted = true;
             syncSessionUiState();
+            scheduleMathGymPopup();
             if (wasPreStartQuestion) {
                 let nextIdx = getFirstPracticeQuestionIndex();
                 if (nextIdx >= 0) {
