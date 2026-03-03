@@ -1075,6 +1075,7 @@
         let adMobBannerShown = false;
         let adMobListenersBound = false;
         let confettiFx = null;
+        let confettiStopTimer = null;
         let openingSplashDone = false;
         let openingSplashExitTimer = null;
         let openingSplashHideTimer = null;
@@ -4613,6 +4614,9 @@
                 spread: isCompactMobile ? 62 : 76,
                 startVelocity: isCompactMobile ? 36 : 48,
                 scalar: isCompactMobile ? 0.88 : 1.05,
+                ticks: isCompactMobile ? 80 : 100,
+                gravity: isCompactMobile ? 1.45 : 1.22,
+                decay: 0.92,
                 colors: palette
             };
             let originY = isCompactMobile ? 0.34 : 0.52;
@@ -4626,6 +4630,14 @@
                     origin: { x: 0.5, y: isCompactMobile ? 0.24 : 0.35 }
                 });
             }, 180);
+            if (confettiStopTimer) {
+                clearTimeout(confettiStopTimer);
+                confettiStopTimer = null;
+            }
+            confettiStopTimer = setTimeout(() => {
+                confettiStopTimer = null;
+                if (typeof fire.reset === 'function') fire.reset();
+            }, 1600);
         }
 
         function updateNormalShiftLabel() {
@@ -8366,6 +8378,7 @@ Rules:
             }
             currentQ = safeIdx;
             let q = questions[safeIdx];
+            if (typeof resetSoundPlayBudget === 'function') resetSoundPlayBudget();
             let visiblePos = getVisibleQuestionPosition(safeIdx);
             let displayNumber = (visiblePos.total > 0 && visiblePos.position >= 0) ? (visiblePos.position + 1) : (safeIdx + 1);
             let displayTotal = visiblePos.total > 0 ? visiblePos.total : questions.length;

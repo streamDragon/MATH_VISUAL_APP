@@ -3,8 +3,22 @@ let soundEnabled = true;
 let lastWarmColdTs = 0;
 let introPlayed = false;
 const SOUND_PREF_KEY = 'math_visual_sound_enabled_v1';
+const SOUND_PLAY_LIMITS = {
+    win: 2,
+    pop: 8,
+    warm_cold: 14,
+    intro_theme: 1,
+    background_track: 1
+};
 let backgroundTrackAudio = null;
 let backgroundTrackTimer = null;
+let soundPlayCounters = {
+    win: 0,
+    pop: 0,
+    warm_cold: 0,
+    intro_theme: 0,
+    background_track: 0
+};
 
 try {
     const AudioCtor = window.AudioContext || window.webkitAudioContext;
@@ -71,8 +85,29 @@ function stopBackgroundTrack(resetPosition = true) {
     backgroundTrackAudio = null;
 }
 
+function resetSoundPlayBudget() {
+    soundPlayCounters = {
+        win: 0,
+        pop: 0,
+        warm_cold: 0,
+        intro_theme: 0,
+        background_track: 0
+    };
+    lastWarmColdTs = 0;
+}
+
+function canPlaySoundByBudget(key) {
+    const budgetKey = String(key || '').trim() || 'pop';
+    const limit = Number.isFinite(SOUND_PLAY_LIMITS[budgetKey]) ? SOUND_PLAY_LIMITS[budgetKey] : 4;
+    const used = Number.isFinite(soundPlayCounters[budgetKey]) ? soundPlayCounters[budgetKey] : 0;
+    if (used >= limit) return false;
+    soundPlayCounters[budgetKey] = used + 1;
+    return true;
+}
+
 function playTimedBackgroundTrack(src, durationSeconds = 30) {
     if (!soundEnabled || !src) return Promise.resolve(false);
+    if (!canPlaySoundByBudget('background_track')) return Promise.resolve(false);
     stopBackgroundTrack(false);
 
     const audio = new Audio(src);
@@ -108,6 +143,7 @@ function playTimedBackgroundTrack(src, durationSeconds = 30) {
 function playSound(type) {
     if (!audioCtx || !soundEnabled) return;
     initAudio();
+    if (!canPlaySoundByBudget(type)) return;
 
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
@@ -141,6 +177,7 @@ function playButtonClickSound() {
 
 function playIntroTheme() {
     if (!audioCtx || !soundEnabled || introPlayed) return;
+    if (!canPlaySoundByBudget('intro_theme')) return;
     initAudio();
     introPlayed = true;
 
@@ -182,6 +219,7 @@ function resetWarmColdFeedback() {
 function playWarmColdFeedback(score, delta) {
     if (!audioCtx || !soundEnabled) return;
     initAudio();
+    if (!canPlaySoundByBudget('warm_cold')) return;
 
     const nowMs = performance.now();
     const level = Math.max(0, Math.min(1, score));
@@ -221,3 +259,4 @@ function attachButtonClickSounds() {
 }
 
 document.addEventListener('DOMContentLoaded', attachButtonClickSounds);
+window.resetSoundPlayBudget = resetSoundPlayBudget;
