@@ -1,4 +1,4 @@
-let audioCtx = null;
+﻿let audioCtx = null;
 let soundEnabled = true;
 let lastWarmColdTs = 0;
 let introPlayed = false;
@@ -42,16 +42,27 @@ function initAudio() {
     }
 }
 
-function updateSoundButton() {
-    const btn = document.getElementById('sound-toggle');
+function applySoundButtonState(btn, options = {}) {
     if (!btn) return;
+    const compact = !!options.compact;
     if (!audioCtx) {
-        btn.innerText = '\uD83D\uDD07';
-        btn.title = 'אין תמיכה בסאונד במכשיר/בדפדפן זה';
+        btn.disabled = true;
+        btn.innerText = compact ? '\uD83D\uDD07 סאונד' : '\uD83D\uDD07';
+        btn.title = 'No sound support in this browser';
         return;
     }
-    btn.innerText = soundEnabled ? '\uD83D\uDD0A' : '\uD83D\uDD07';
-    btn.title = soundEnabled ? 'כבה סאונד' : 'הפעל סאונד';
+    btn.disabled = false;
+    btn.innerText = compact
+        ? (soundEnabled ? '\uD83D\uDD0A סאונד' : '\uD83D\uDD07 סאונד')
+        : (soundEnabled ? '\uD83D\uDD0A' : '\uD83D\uDD07');
+    btn.title = soundEnabled ? 'Mute sound' : 'Enable sound';
+}
+
+function updateSoundButton() {
+    const btn = document.getElementById('sound-toggle');
+    const cleanHudBtn = document.getElementById('btn-practice-sound');
+    applySoundButtonState(btn, { compact: false });
+    applySoundButtonState(cleanHudBtn, { compact: true });
 }
 
 function toggleSound() {
@@ -260,3 +271,4 @@ function attachButtonClickSounds() {
 
 document.addEventListener('DOMContentLoaded', attachButtonClickSounds);
 window.resetSoundPlayBudget = resetSoundPlayBudget;
+

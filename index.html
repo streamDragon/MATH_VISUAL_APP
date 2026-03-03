@@ -203,6 +203,13 @@
                 'public/sound.js'
             ], () => typeof toggleSound === 'function');
 
+            loadSyncScriptWithFallback('help_content', [
+                '/helpContent.he.js',
+                '/public/helpContent.he.js',
+                'helpContent.he.js',
+                'public/helpContent.he.js'
+            ], () => typeof window.HELP_CONTENT_HE !== 'undefined');
+
             loadSyncScriptWithFallback('capacitor', [
                 '/capacitor.js',
                 '/public/capacitor.js',
@@ -386,8 +393,8 @@
     <input id="scan-question-input-camera" class="scan-file-input" type="file" accept="image/*" capture="environment" onchange="onScanImageSelected(event, 'camera')">
     <input id="scan-question-input-file" class="scan-file-input" type="file" accept="image/*" onchange="onScanImageSelected(event, 'file')">
 
-    <div id="start-guide-modal" class="hidden" onclick="onStartGuideBackdropClick(event)">
-        <div id="start-guide-card">
+    <div id="start-guide-modal" class="hidden" role="dialog" aria-modal="true" aria-label="הדרכה ראשונית" onclick="onStartGuideBackdropClick(event)">
+        <div id="start-guide-card" tabindex="-1">
             <div class="modal-mobile-exit-row">
                 <button class="modal-mobile-exit-btn" type="button" onclick="startAppFromSplash('app')">⬅ חזרה למסך הראשי</button>
             </div>
@@ -473,8 +480,8 @@
         <div id="quick-tour-cursor" class="hidden" aria-hidden="true"></div>
     </div>
 
-    <div id="initial-builder-modal" class="hidden" onclick="onInitialBuilderBackdropClick(event)">
-        <div id="initial-builder-card">
+    <div id="initial-builder-modal" class="hidden" role="dialog" aria-modal="true" aria-label="בניית פונקציה" onclick="onInitialBuilderBackdropClick(event)">
+        <div id="initial-builder-card" tabindex="-1">
             <div class="overlay-head">
                 <h3>התחלה פשוטה - מעצבים פונקציה שמתאימה לכם</h3>
                 <button onclick="closeInitialBuilderModal()">סגור</button>
@@ -497,6 +504,29 @@
                 <button onclick="openInitialBuilderWorkspace('steps')">בחירת צורה</button>
                 <button onclick="openInitialBuilderWorkspace('params')">עריכת פרמטרים</button>
                 <button class="start-primary" onclick="closeInitialBuilderModal()">סגור חלון</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="global-help-modal" class="hidden" role="dialog" aria-modal="true" aria-label="עזרה מהירה" onclick="onGlobalHelpBackdropClick(event)">
+        <div id="global-help-card" tabindex="-1">
+            <div class="overlay-head">
+                <h3 id="global-help-title">עזרה מהירה</h3>
+                <button type="button" onclick="closeGlobalHelpModal()">סגור</button>
+            </div>
+            <div class="global-help-body">
+                <ul id="global-help-list"></ul>
+                <div id="global-help-clean-reason" class="hidden"></div>
+                <div class="overlay-actions global-help-actions">
+                    <button id="btn-help-show-me" type="button" onclick="triggerGlobalHelpShowMe()">Show me</button>
+                    <button id="btn-help-play-voice" type="button" onclick="playGlobalHelpVoice()">נגן הסבר</button>
+                </div>
+                <label class="global-help-voice-toggle">
+                    <input id="help-voice-toggle" type="checkbox" onchange="toggleHelpVoiceEnabled(this.checked)">
+                    <span id="help-voice-toggle-label">הסבר בקול (כבוי)</span>
+                </label>
+                <div id="help-voice-status" aria-live="polite"></div>
+                <div class="global-help-privacy-note">הדיבור מופק בדפדפן. ייתכן שקול מסוים תלוי-רשת—אפשר להשאיר כבוי.</div>
             </div>
         </div>
     </div>
@@ -572,6 +602,13 @@
     <div id="graph-area-wrapper">
         <div id="top-strip">
             <div id="top-version-badge">גרסה: --</div>
+            <div id="top-function-bar" aria-live="polite">
+                <span id="top-function-bar-label">הפונקציה</span>
+                <div id="top-function-bar-row">
+                    <span id="top-function-bar-fx" class="inline-math-bidi">f(x) = ...</span>
+                    <button id="btn-top-function-edit" type="button" onclick="openBuilderFromTop()">✎ עריכה</button>
+                </div>
+            </div>
             <div id="top-question-wrap">
                 <span id="top-question-index">שאלה 1/4</span>
                 <span id="top-question">טוען...</span>
@@ -629,6 +666,7 @@
                 <select id="top-question-select" title="בחירת שאלה"></select>
                 <button id="btn-top-questions" onclick="toggleQuestionsFromTop()" title="הצג/הסתר משימות ורמזים">משימות/רמזים ▼</button>
                 <button id="btn-clean-mode-toggle" type="button" onclick="togglePracticeCleanModeFromUi()">מצב ריכוז</button>
+                <button id="btn-top-help" type="button" onclick="openGlobalHelpModal()">? עזרה</button>
                 <button id="btn-param-intro-open-params" class="hidden" type="button" onclick="openBuilderFromTop()">⚙ פתח פרמטרים</button>
                 <button id="btn-param-intro-open-tools" class="hidden" type="button" onclick="openParamIntroTools()">☰ משימה/כלים</button>
                 <button id="btn-scan-question" onclick="openScanModal()">📷 סריקת שאלה</button>
@@ -643,9 +681,18 @@
         </div>
         <div id="practice-question-bar" aria-live="polite">
             <span id="practice-question-index">שאלה 1/4</span>
+            <span id="practice-question-task-label">מה עושים עכשיו?</span>
             <span id="practice-question-title">טוען...</span>
+            <span id="practice-function-inline" class="inline-math-bidi">f(x) = ...</span>
+            <span id="practice-clean-source-chip" class="hidden">
+                <span id="practice-clean-source-text">מצב ריכוז הופעל אוטומטית</span>
+                <button id="btn-practice-clean-why" type="button" onclick="openPracticeCleanModeWhy()">למה?</button>
+            </span>
             <div id="practice-clean-actions">
                 <button id="btn-practice-tools" type="button" onclick="openToolsFromPracticeCleanMode()">☰ כלים</button>
+                <button id="btn-practice-params" class="hidden" type="button" onclick="openParamsFromPracticeCleanMode()">⚙ פרמטרים</button>
+                <button id="btn-practice-sound" type="button" onclick="toggleSound()">🔊 סאונד</button>
+                <button id="btn-practice-help" type="button" onclick="openGlobalHelpModal()">? עזרה</button>
                 <button id="btn-practice-exit" type="button" onclick="disablePracticeCleanModeFromUi()">יציאה ממצב ריכוז</button>
             </div>
         </div>
@@ -1005,6 +1052,26 @@
         const QUICK_TOUR_STORAGE_KEY = 'math_visual_quick_tour_v1';
         const START_GUIDE_ONBOARDING_STORAGE_KEY = 'math_visual_start_guide_onboarding_v1';
         const CLEAN_MODE_STORAGE_KEY = 'math_visual_clean_mode_v1';
+        const HELP_VOICE_STORAGE_KEY = 'math_visual_voice_enabled_v1';
+        const HELP_HIGHLIGHT_DURATION_MS = 3200;
+        const DEFAULT_HELP_CONTENT_HE = {
+            title: 'עזרה מהירה',
+            bullets: [
+                'איפה הפונקציה: בשורת "הפונקציה" למעלה רואים את f(x), ובלחיצה על "עריכה" פותחים פרמטרים.',
+                'איך משתמשים בכלים: הכפתור "☰ כלים" פותח משימות, רמזים וכלי עבודה.',
+                'מה זה מצב ריכוז: זה מצב תצוגה נקי. כדי לצאת לוחצים "יציאה ממצב ריכוז".'
+            ],
+            showMeLabel: 'הדגמה על המסך',
+            playVoiceLabel: 'נגן הסבר',
+            voiceToggleLabelOn: 'הסבר בקול (דולק)',
+            voiceToggleLabelOff: 'הסבר בקול (כבוי)',
+            voiceDefaultHint: 'הקול כבוי כברירת מחדל.',
+            voiceReadyHint: 'הקול פעיל. לחצו "נגן הסבר".',
+            voicePlayingHint: 'מנגן הסבר קולי...',
+            voiceDoneHint: 'ההסבר הקולי הסתיים.',
+            voiceUnsupported: 'אין תמיכה בקול בדפדפן הזה',
+            privacyNote: 'הדיבור מופק בדפדפן. ייתכן שקול מסוים תלוי-רשת—אפשר להשאיר כבוי.'
+        };
         // Paste your public YouTube link here (or set window.__ONBOARDING_VIDEO_URL before app loads).
         const ONBOARDING_VIDEO_URL = '';
         const ONBOARDING_VIDEO_TITLE = 'הדרכה ראשונית - איך עובדים באתר';
@@ -1065,6 +1132,12 @@
         let questionIntroActive = false;
         let cleanModeManualEnabled = false;
         let paramIntroCleanActive = false;
+        let helpVoiceEnabled = false;
+        let helpHighlightTimer = null;
+        let helpVoiceStatusTimer = null;
+        let startGuideModalA11y = null;
+        let initialBuilderModalA11y = null;
+        let globalHelpModalA11y = null;
         let startCoachMode = 'app';
         let startCoachSpeechEnabled = false;
         let startCoachSpeechTimer = null;
@@ -1458,6 +1531,14 @@
             exitParamIntroClean('practice_tools');
         }
 
+        function openParamsFromPracticeCleanMode() {
+            if (shouldUsePracticeCleanMode()) {
+                disablePracticeCleanModeFromUi();
+                if (shouldUsePracticeCleanMode()) return;
+            }
+            openBuilderFromTop();
+        }
+
         function openParamIntroTools() {
             exitParamIntroClean('param_intro_tools');
             openAccordion('steps');
@@ -1468,6 +1549,7 @@
             let cleanModeActive = document.body.classList.contains('practice-clean-mode');
             let paramIntroActive = document.body.classList.contains('param-intro-clean');
             let source = getPracticeCleanModeSource();
+            let canBuilder = canOpenBuilderForQuestion(getCurrentQuestion());
 
             let topToggleBtn = document.getElementById('btn-clean-mode-toggle');
             if (topToggleBtn) {
@@ -1492,14 +1574,380 @@
                 cleanExitBtn.innerText = label;
             }
 
+            let practiceParamsBtn = document.getElementById('btn-practice-params');
+            if (practiceParamsBtn) {
+                practiceParamsBtn.classList.toggle('hidden', !(cleanModeActive && canBuilder));
+            }
+
+            let practiceSoundBtn = document.getElementById('btn-practice-sound');
+            if (practiceSoundBtn) {
+                practiceSoundBtn.classList.toggle('hidden', !cleanModeActive);
+            }
+
+            let cleanSourceChip = document.getElementById('practice-clean-source-chip');
+            let cleanSourceText = document.getElementById('practice-clean-source-text');
+            let cleanSourceReason = '';
+            if (source === 'query_true') cleanSourceReason = 'מצב ריכוז הופעל דרך הקישור (?clean=1).';
+            else if (source === 'question') cleanSourceReason = 'השאלה הנוכחית מגדירה מצב ריכוז אוטומטי.';
+            let showSourceChip = cleanModeActive && !!cleanSourceReason;
+            if (cleanSourceChip) cleanSourceChip.classList.toggle('hidden', !showSourceChip);
+            if (cleanSourceText && showSourceChip) cleanSourceText.innerText = 'מצב ריכוז הופעל אוטומטית';
+            let cleanSourceWhyBtn = document.getElementById('btn-practice-clean-why');
+            if (cleanSourceWhyBtn) {
+                cleanSourceWhyBtn.dataset.cleanReason = cleanSourceReason;
+            }
+
             let paramIntroParamsBtn = document.getElementById('btn-param-intro-open-params');
             if (paramIntroParamsBtn) {
-                let canBuilder = canOpenBuilderForQuestion(getCurrentQuestion());
                 paramIntroParamsBtn.classList.toggle('hidden', !(paramIntroActive && canBuilder));
             }
             let paramIntroToolsBtn = document.getElementById('btn-param-intro-open-tools');
             if (paramIntroToolsBtn) {
                 paramIntroToolsBtn.classList.toggle('hidden', !paramIntroActive);
+            }
+
+            if (typeof updateSoundButton === 'function') updateSoundButton();
+        }
+
+        function openPracticeCleanModeWhy() {
+            let reason = '';
+            let whyBtn = document.getElementById('btn-practice-clean-why');
+            if (whyBtn) reason = String(whyBtn.dataset.cleanReason || '').trim();
+            openGlobalHelpModal({ cleanModeReason: reason });
+        }
+
+        function readHelpVoicePreference() {
+            try {
+                return localStorage.getItem(HELP_VOICE_STORAGE_KEY) === '1';
+            } catch (err) {
+                return false;
+            }
+        }
+
+        function persistHelpVoicePreference(enabled) {
+            try {
+                localStorage.setItem(HELP_VOICE_STORAGE_KEY, enabled ? '1' : '0');
+            } catch (err) {
+                // Keep running even when storage is blocked.
+            }
+        }
+
+        function getResolvedHelpContent() {
+            let incoming = window.HELP_CONTENT_HE;
+            let raw = (incoming && typeof incoming === 'object') ? incoming : DEFAULT_HELP_CONTENT_HE;
+            let bullets = Array.isArray(raw.bullets)
+                ? raw.bullets.map((item) => String(item || '').trim()).filter(Boolean).slice(0, 3)
+                : [];
+            if (bullets.length === 0) bullets = DEFAULT_HELP_CONTENT_HE.bullets.slice();
+            return {
+                ...DEFAULT_HELP_CONTENT_HE,
+                ...raw,
+                bullets
+            };
+        }
+
+        function setHelpVoiceStatus(text, ms) {
+            let statusEl = document.getElementById('help-voice-status');
+            if (!statusEl) return;
+            let resolved = String(text || '').trim();
+            if (resolved) statusEl.innerText = resolved;
+            if (helpVoiceStatusTimer) {
+                clearTimeout(helpVoiceStatusTimer);
+                helpVoiceStatusTimer = null;
+            }
+            if (!ms) return;
+            helpVoiceStatusTimer = setTimeout(() => {
+                helpVoiceStatusTimer = null;
+                syncHelpVoiceUi();
+            }, Math.max(800, ms));
+        }
+
+        function syncHelpVoiceUi() {
+            let content = getResolvedHelpContent();
+            let toggle = document.getElementById('help-voice-toggle');
+            if (toggle) toggle.checked = !!helpVoiceEnabled;
+            let toggleLabel = document.getElementById('help-voice-toggle-label');
+            if (toggleLabel) toggleLabel.innerText = helpVoiceEnabled
+                ? (content.voiceToggleLabelOn || DEFAULT_HELP_CONTENT_HE.voiceToggleLabelOn)
+                : (content.voiceToggleLabelOff || DEFAULT_HELP_CONTENT_HE.voiceToggleLabelOff);
+            let playBtn = document.getElementById('btn-help-play-voice');
+            if (playBtn) {
+                playBtn.disabled = !helpVoiceEnabled;
+                playBtn.innerText = content.playVoiceLabel || DEFAULT_HELP_CONTENT_HE.playVoiceLabel;
+            }
+            if (!document.getElementById('help-voice-status')?.innerText?.trim()) {
+                setHelpVoiceStatus(helpVoiceEnabled
+                    ? (content.voiceReadyHint || DEFAULT_HELP_CONTENT_HE.voiceReadyHint)
+                    : (content.voiceDefaultHint || DEFAULT_HELP_CONTENT_HE.voiceDefaultHint));
+            }
+        }
+
+        function stopGlobalHelpVoice() {
+            try {
+                if (window.speechSynthesis) window.speechSynthesis.cancel();
+            } catch (err) {
+                // Ignore speech teardown errors.
+            }
+        }
+
+        function toggleHelpVoiceEnabled(enabled) {
+            helpVoiceEnabled = !!enabled;
+            persistHelpVoicePreference(helpVoiceEnabled);
+            if (!helpVoiceEnabled) stopGlobalHelpVoice();
+            let statusEl = document.getElementById('help-voice-status');
+            if (statusEl) statusEl.innerText = '';
+            syncHelpVoiceUi();
+        }
+
+        function buildGlobalHelpNarration() {
+            let content = getResolvedHelpContent();
+            let reasonText = document.getElementById('global-help-clean-reason')?.innerText || '';
+            let parts = [content.title].concat(content.bullets);
+            if (reasonText) parts.push(reasonText);
+            return parts.map((p) => String(p || '').trim()).filter(Boolean).join('. ');
+        }
+
+        function playGlobalHelpVoice() {
+            let content = getResolvedHelpContent();
+            if (!helpVoiceEnabled) {
+                setHelpVoiceStatus(content.voiceDefaultHint || DEFAULT_HELP_CONTENT_HE.voiceDefaultHint, 2600);
+                return;
+            }
+            let synth = window.speechSynthesis;
+            if (!synth || typeof SpeechSynthesisUtterance !== 'function') {
+                setHelpVoiceStatus(content.voiceUnsupported || DEFAULT_HELP_CONTENT_HE.voiceUnsupported, 3200);
+                return;
+            }
+            let voices = [];
+            try {
+                voices = synth.getVoices ? synth.getVoices() : [];
+            } catch (err) {
+                voices = [];
+            }
+            if (!Array.isArray(voices) || voices.length === 0) {
+                setHelpVoiceStatus(content.voiceUnsupported || DEFAULT_HELP_CONTENT_HE.voiceUnsupported, 3200);
+                return;
+            }
+            let phrase = buildGlobalHelpNarration();
+            if (!phrase) return;
+            try {
+                synth.cancel();
+                let utter = new SpeechSynthesisUtterance(phrase);
+                utter.lang = 'he-IL';
+                utter.rate = 1;
+                utter.pitch = 1;
+                utter.onstart = () => setHelpVoiceStatus(content.voicePlayingHint || DEFAULT_HELP_CONTENT_HE.voicePlayingHint);
+                utter.onend = () => setHelpVoiceStatus(content.voiceDoneHint || DEFAULT_HELP_CONTENT_HE.voiceDoneHint, 2200);
+                utter.onerror = () => setHelpVoiceStatus(content.voiceUnsupported || DEFAULT_HELP_CONTENT_HE.voiceUnsupported, 3200);
+                synth.speak(utter);
+            } catch (err) {
+                setHelpVoiceStatus(content.voiceUnsupported || DEFAULT_HELP_CONTENT_HE.voiceUnsupported, 3200);
+            }
+        }
+
+        function clearGlobalHelpHighlights() {
+            if (helpHighlightTimer) {
+                clearTimeout(helpHighlightTimer);
+                helpHighlightTimer = null;
+            }
+            document.querySelectorAll('.help-highlight-target').forEach((el) => {
+                el.classList.remove('help-highlight-target');
+            });
+        }
+
+        function getGlobalHelpHighlightTargets() {
+            let functionTarget = document.body.classList.contains('practice-clean-mode')
+                ? document.getElementById('practice-function-inline')
+                : document.getElementById('top-function-bar');
+            let toolsTarget = null;
+            let cleanTools = document.getElementById('btn-practice-tools');
+            if (cleanTools && !cleanTools.classList.contains('hidden')) {
+                toolsTarget = cleanTools;
+            } else {
+                toolsTarget = document.getElementById('btn-tools-menu');
+            }
+            return [functionTarget, toolsTarget].filter(Boolean);
+        }
+
+        function triggerGlobalHelpShowMe() {
+            clearGlobalHelpHighlights();
+            let targets = getGlobalHelpHighlightTargets();
+            if (targets.length === 0) return;
+            targets.forEach((el) => el.classList.add('help-highlight-target'));
+            helpHighlightTimer = setTimeout(clearGlobalHelpHighlights, HELP_HIGHLIGHT_DURATION_MS);
+        }
+
+        function renderGlobalHelpModal(cleanModeReason) {
+            let content = getResolvedHelpContent();
+            let titleEl = document.getElementById('global-help-title');
+            if (titleEl) titleEl.innerText = content.title || DEFAULT_HELP_CONTENT_HE.title;
+            let listEl = document.getElementById('global-help-list');
+            if (listEl) {
+                listEl.innerHTML = '';
+                content.bullets.forEach((line) => {
+                    let li = document.createElement('li');
+                    li.innerText = line;
+                    listEl.appendChild(li);
+                });
+            }
+            let showMeBtn = document.getElementById('btn-help-show-me');
+            if (showMeBtn) showMeBtn.innerText = content.showMeLabel || DEFAULT_HELP_CONTENT_HE.showMeLabel;
+            let reasonEl = document.getElementById('global-help-clean-reason');
+            let reasonText = String(cleanModeReason || '').trim();
+            if (reasonEl) {
+                if (reasonText) {
+                    reasonEl.classList.remove('hidden');
+                    reasonEl.innerText = reasonText;
+                } else {
+                    reasonEl.classList.add('hidden');
+                    reasonEl.innerText = '';
+                }
+            }
+            let privacyEl = document.querySelector('.global-help-privacy-note');
+            if (privacyEl) privacyEl.innerText = content.privacyNote || DEFAULT_HELP_CONTENT_HE.privacyNote;
+            let statusEl = document.getElementById('help-voice-status');
+            if (statusEl) statusEl.innerText = '';
+            syncHelpVoiceUi();
+        }
+
+        function openGlobalHelpModal(options = {}) {
+            let modal = document.getElementById('global-help-modal');
+            if (!modal) return;
+            let reason = String(options.cleanModeReason || '').trim();
+            renderGlobalHelpModal(reason);
+            modal.classList.remove('hidden');
+            if (globalHelpModalA11y) globalHelpModalA11y.activate();
+        }
+
+        function closeGlobalHelpModal() {
+            let modal = document.getElementById('global-help-modal');
+            if (modal) modal.classList.add('hidden');
+            stopGlobalHelpVoice();
+            clearGlobalHelpHighlights();
+            if (globalHelpModalA11y) globalHelpModalA11y.deactivate();
+        }
+
+        function onGlobalHelpBackdropClick(event) {
+            if (event.target.id !== 'global-help-modal') return;
+            closeGlobalHelpModal();
+        }
+
+        function getFocusableElementsWithin(rootEl) {
+            if (!rootEl) return [];
+            let selector = [
+                'a[href]',
+                'button:not([disabled])',
+                'input:not([disabled]):not([type=\"hidden\"])',
+                'select:not([disabled])',
+                'textarea:not([disabled])',
+                '[tabindex]:not([tabindex=\"-1\"])'
+            ].join(', ');
+            return Array.from(rootEl.querySelectorAll(selector)).filter((el) => {
+                if (!(el instanceof HTMLElement)) return false;
+                let style = window.getComputedStyle(el);
+                if (style.display === 'none' || style.visibility === 'hidden') return false;
+                if (el.offsetParent === null && style.position !== 'fixed') return false;
+                return true;
+            });
+        }
+
+        function attachModalA11y(modalEl, panelEl, options = {}) {
+            if (!modalEl || !panelEl) return null;
+            if (!panelEl.hasAttribute('tabindex')) panelEl.setAttribute('tabindex', '-1');
+            if (!modalEl.hasAttribute('role')) modalEl.setAttribute('role', 'dialog');
+            if (!modalEl.hasAttribute('aria-modal')) modalEl.setAttribute('aria-modal', 'true');
+
+            let active = false;
+            let lastFocus = null;
+
+            function focusInitial() {
+                let focusables = getFocusableElementsWithin(panelEl);
+                let target = focusables[0] || panelEl;
+                if (target && typeof target.focus === 'function') target.focus({ preventScroll: true });
+            }
+
+            function onKeydown(event) {
+                if (!active) return;
+                if (event.key === 'Escape') {
+                    if (typeof options.onClose === 'function') {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        options.onClose();
+                    }
+                    return;
+                }
+                if (event.key !== 'Tab') return;
+                let focusables = getFocusableElementsWithin(panelEl);
+                if (focusables.length === 0) {
+                    event.preventDefault();
+                    panelEl.focus({ preventScroll: true });
+                    return;
+                }
+                let first = focusables[0];
+                let last = focusables[focusables.length - 1];
+                let current = document.activeElement;
+                if (event.shiftKey) {
+                    if (current === first || !panelEl.contains(current)) {
+                        event.preventDefault();
+                        last.focus({ preventScroll: true });
+                    }
+                    return;
+                }
+                if (current === last || !panelEl.contains(current)) {
+                    event.preventDefault();
+                    first.focus({ preventScroll: true });
+                }
+            }
+
+            return {
+                activate() {
+                    if (active) return;
+                    active = true;
+                    lastFocus = (document.activeElement instanceof HTMLElement) ? document.activeElement : null;
+                    document.addEventListener('keydown', onKeydown, true);
+                    requestAnimationFrame(focusInitial);
+                },
+                deactivate() {
+                    if (!active) return;
+                    active = false;
+                    document.removeEventListener('keydown', onKeydown, true);
+                    if (lastFocus && document.contains(lastFocus)) {
+                        let style = window.getComputedStyle(lastFocus);
+                        let hiddenByAncestor = !!lastFocus.closest('.hidden');
+                        if (style.display !== 'none' && style.visibility !== 'hidden' && !hiddenByAncestor) {
+                            try {
+                                lastFocus.focus({ preventScroll: true });
+                            } catch (err) {
+                                // Ignore focus restoration errors.
+                            }
+                        }
+                    }
+                    lastFocus = null;
+                }
+            };
+        }
+
+        function initModalA11y() {
+            let startGuideModal = document.getElementById('start-guide-modal');
+            let startGuideCard = document.getElementById('start-guide-card');
+            if (startGuideModal && startGuideCard) {
+                startGuideModalA11y = attachModalA11y(startGuideModal, startGuideCard, {
+                    onClose: () => closeStartGuideModal({ skipOverlay: true })
+                });
+            }
+            let initialBuilderModal = document.getElementById('initial-builder-modal');
+            let initialBuilderCard = document.getElementById('initial-builder-card');
+            if (initialBuilderModal && initialBuilderCard) {
+                initialBuilderModalA11y = attachModalA11y(initialBuilderModal, initialBuilderCard, {
+                    onClose: closeInitialBuilderModal
+                });
+            }
+            let globalHelpModal = document.getElementById('global-help-modal');
+            let globalHelpCard = document.getElementById('global-help-card');
+            if (globalHelpModal && globalHelpCard) {
+                globalHelpModalA11y = attachModalA11y(globalHelpModal, globalHelpCard, {
+                    onClose: closeGlobalHelpModal
+                });
             }
         }
 
@@ -3525,7 +3973,9 @@
                 // Ignore browser restrictions.
             }
             applyStoredCleanModePreference();
+            helpVoiceEnabled = readHelpVoicePreference();
             syncStartCoachPanel(false);
+            initModalA11y();
             if (shouldEnableEmbedMode()) {
                 document.body.classList.add('embed-mode');
             }
@@ -4015,6 +4465,16 @@
             document.getElementById('top-formula-f').innerText = fxText;
             document.getElementById('formula-tag').innerText = dText;
             document.getElementById('top-formula-tag').innerText = dText;
+            let topFunctionBarFx = document.getElementById('top-function-bar-fx');
+            if (topFunctionBarFx) {
+                topFunctionBarFx.innerText = fxText;
+                topFunctionBarFx.title = fxText;
+            }
+            let practiceFunctionInline = document.getElementById('practice-function-inline');
+            if (practiceFunctionInline) {
+                practiceFunctionInline.innerText = fxText;
+                practiceFunctionInline.title = fxText;
+            }
             let builderFx = document.getElementById('builder-formula-fx');
             let builderDx = document.getElementById('builder-formula-dx');
             let builderEquationAuto = document.getElementById('builder-equation-auto');
@@ -8095,6 +8555,7 @@ Rules:
             syncStartGuideVideoButton();
             syncStartCoachPanel(false);
             modal.classList.remove('hidden');
+            if (startGuideModalA11y) startGuideModalA11y.activate();
             syncEntryModalBodyState();
             if (startCoachSpeechEnabled) syncStartCoachPanel(true);
             scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 70, 180, 420] });
@@ -8105,6 +8566,7 @@ Rules:
             let modal = document.getElementById('start-guide-modal');
             if (modal) modal.classList.add('hidden');
             stopStartCoachSpeech();
+            if (startGuideModalA11y) startGuideModalA11y.deactivate();
             syncEntryModalBodyState();
             if (skipOverlay) {
                 closeQuestionOverlay();
@@ -8163,11 +8625,16 @@ Rules:
         }
 
         function openInitialBuilderModal() {
-            document.getElementById('initial-builder-modal').classList.remove('hidden');
+            let modal = document.getElementById('initial-builder-modal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            if (initialBuilderModalA11y) initialBuilderModalA11y.activate();
         }
 
         function closeInitialBuilderModal() {
-            document.getElementById('initial-builder-modal').classList.add('hidden');
+            let modal = document.getElementById('initial-builder-modal');
+            if (modal) modal.classList.add('hidden');
+            if (initialBuilderModalA11y) initialBuilderModalA11y.deactivate();
         }
 
         function onInitialBuilderBackdropClick(event) {
@@ -8258,9 +8725,14 @@ Rules:
             let panel = document.getElementById('builder-panel');
             let topBuilderBtn = document.getElementById('btn-top-builder');
             let sideBuilderBtn = document.getElementById('btn-side-builder');
+            let topFunctionEditBtn = document.getElementById('btn-top-function-edit');
             btn.closest('.accordion-item').classList.toggle('hidden', !shouldAllowBuilder);
             if (topBuilderBtn) topBuilderBtn.classList.toggle('hidden', !shouldAllowBuilder);
             if (sideBuilderBtn) sideBuilderBtn.classList.toggle('hidden', !shouldAllowBuilder);
+            if (topFunctionEditBtn) {
+                topFunctionEditBtn.disabled = !shouldAllowBuilder;
+                topFunctionEditBtn.classList.toggle('hidden', !shouldAllowBuilder);
+            }
             if (!shouldAllowBuilder) {
                 panel.classList.add('hidden');
                 builderPanelOpen = false;
