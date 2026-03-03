@@ -139,6 +139,8 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/coach_feedback.css" onerror="this.onerror=null;this.href='/public/coach_feedback.css';">
+    <script src="/coach_feedback.js" onerror="this.onerror=null;this.src='/public/coach_feedback.js';"></script>
     <script>
         (function injectCoreAssets() {
             let query = window.__APP_ASSET_QUERY || `v=ts${Date.now().toString(36)}`;
@@ -399,9 +401,13 @@
     <input id="scan-question-input-file" class="scan-file-input" type="file" accept="image/*" onchange="onScanImageSelected(event, 'file')">
 
     <div id="start-guide-modal" class="hidden" role="dialog" aria-modal="true" aria-label="הדרכה ראשונית" onclick="onStartGuideBackdropClick(event)">
-        <div id="start-guide-card" tabindex="-1">
+        <div id="start-guide-card" class="is-compact" tabindex="-1">
             <div class="modal-mobile-exit-row">
                 <button class="modal-mobile-exit-btn" type="button" onclick="startAppFromSplash('app')">⬅ חזרה למסך הראשי</button>
+            </div>
+            <div class="modal-function-preview" aria-live="polite">
+                <span id="start-guide-preview-fx" class="inline-math-bidi">f(x) = ...</span>
+                <span id="start-guide-preview-dx" class="inline-math-bidi">f'(x) = ...</span>
             </div>
             <div class="start-guide-hero">
                 <div class="start-logo-stage" aria-hidden="true">
@@ -486,10 +492,14 @@
     </div>
 
     <div id="initial-builder-modal" class="hidden" role="dialog" aria-modal="true" aria-label="בניית פונקציה" onclick="onInitialBuilderBackdropClick(event)">
-        <div id="initial-builder-card" tabindex="-1">
+        <div id="initial-builder-card" class="is-compact" tabindex="-1">
             <div class="overlay-head">
                 <h3>התחלה פשוטה - מעצבים פונקציה שמתאימה לכם</h3>
                 <button onclick="closeInitialBuilderModal()">סגור</button>
+            </div>
+            <div class="modal-function-preview" aria-live="polite">
+                <span id="initial-builder-preview-fx" class="inline-math-bidi">f(x) = ...</span>
+                <span id="initial-builder-preview-dx" class="inline-math-bidi">f'(x) = ...</span>
             </div>
             <div class="initial-builder-body">
                 <p><b>מה עושים כאן?</b> בוחרים צורה של פונקציה לפי מה שלומדים עכשיו בכיתה, ואז מעצבים אותה בעזרת הפרמטרים.</p>
@@ -693,12 +703,14 @@
                 <span id="practice-clean-source-text">מצב ריכוז הופעל אוטומטית</span>
                 <button id="btn-practice-clean-why" type="button" onclick="openPracticeCleanModeWhy()">למה?</button>
             </span>
-            <div id="practice-clean-actions">
-                <button id="btn-practice-tools" type="button" onclick="openToolsFromPracticeCleanMode()">☰ כלים</button>
-                <button id="btn-practice-params" class="hidden" type="button" onclick="openParamsFromPracticeCleanMode()">⚙ פרמטרים</button>
-                <button id="btn-practice-sound" type="button" onclick="toggleSound()">🔊 סאונד</button>
-                <button id="btn-practice-help" type="button" onclick="openGlobalHelpModal()">? עזרה</button>
-                <button id="btn-practice-exit" type="button" onclick="disablePracticeCleanModeFromUi()">יציאה ממצב ריכוז</button>
+            <div id="practice-minbar">
+                <div id="practice-clean-actions">
+                    <button id="btn-practice-tools" type="button" onclick="openToolsFromPracticeCleanMode()">☰ כלים</button>
+                    <button id="btn-practice-params" class="hidden" type="button" onclick="openParamsFromPracticeCleanMode()">⚙ פרמטרים</button>
+                    <button id="btn-practice-sound" type="button" onclick="toggleSound()">🔊 סאונד</button>
+                    <button id="btn-practice-help" type="button" onclick="openGlobalHelpModal()">? עזרה</button>
+                    <button id="btn-practice-exit" type="button" onclick="disablePracticeCleanModeFromUi()">יציאה ממצב ריכוז</button>
+                </div>
             </div>
         </div>
         <div id="graph-area"></div>
@@ -1059,6 +1071,7 @@
         const CLEAN_MODE_STORAGE_KEY = 'math_visual_clean_mode_v1';
         const HELP_VOICE_STORAGE_KEY = 'math_visual_voice_enabled_v1';
         const MATH_GYM_POPUP_STORAGE_KEY = 'math_gym_popup_seen_v1';
+        const COACH_CATALOG_URL = '/coach_feedback_catalog.json';
         const HELP_HIGHLIGHT_DURATION_MS = 3200;
         const DEFAULT_HELP_CONTENT_HE = {
             title: 'עזרה מהירה',
@@ -1142,6 +1155,9 @@
         let helpHighlightTimer = null;
         let helpVoiceStatusTimer = null;
         let mathGymPopupTimer = null;
+        let coachFeedbackReady = false;
+        let coachLastStepEnterKey = '';
+        let coachLastWrongAttemptAtMs = 0;
         let startGuideModalA11y = null;
         let initialBuilderModalA11y = null;
         let globalHelpModalA11y = null;
@@ -1623,6 +1639,97 @@
             openGlobalHelpModal({ cleanModeReason: reason });
         }
 
+        function getCoachQuestionId(q = getCurrentQuestion(), indexHint = currentQ) {
+            let raw = q?.id;
+            if (raw === 0 || raw) return String(raw);
+            let idx = Number(indexHint);
+            if (Number.isFinite(idx) && idx >= 0) return `q_${idx}`;
+            return 'q_unknown';
+        }
+
+        function getCoachCurrentStep() {
+            let step = activeSteps[currentStepIndex] || null;
+            if (!step) return { stepId: 's1', stepLabel: 'שלב תרגול' };
+            let rawId = step.id || step.stepId || step.key || `s${currentStepIndex + 1}`;
+            return {
+                stepId: String(rawId),
+                stepLabel: String(step.label || step.title || step.instruction || `שלב ${currentStepIndex + 1}`).trim()
+            };
+        }
+
+        function buildCoachPayload(extra = {}) {
+            let q = getCurrentQuestion();
+            let step = getCoachCurrentStep();
+            return {
+                questionId: getCoachQuestionId(q, currentQ),
+                questionTitle: String(q?.title || '').trim(),
+                stepId: step.stepId,
+                stepLabel: step.stepLabel,
+                stepIndex: currentStepIndex,
+                attemptsCount: Number(extra.attemptsCount || 0),
+                ...extra
+            };
+        }
+
+        function pushCoachEvent(eventType, payload = {}) {
+            let coach = window.MVCoach;
+            if (!coach || typeof coach.push !== 'function') return;
+            coach.push(String(eventType || '').trim(), buildCoachPayload(payload));
+        }
+
+        function pushCoachStepEnter(reason = 'sync') {
+            let step = getCoachCurrentStep();
+            let qid = getCoachQuestionId(getCurrentQuestion(), currentQ);
+            let key = `${qid}::${step.stepId}`;
+            if (coachLastStepEnterKey === key && reason !== 'force') return;
+            coachLastStepEnterKey = key;
+            pushCoachEvent('STEP_ENTER', { reason });
+        }
+
+        function pushCoachWrongAttempt(reason = 'נסה שוב', payload = {}) {
+            let now = Date.now();
+            if (now - coachLastWrongAttemptAtMs < 1800) return;
+            coachLastWrongAttemptAtMs = now;
+            pushCoachEvent('ATTEMPT_WRONG', { reason, ...payload });
+        }
+
+        function coachHasHelpPopover() {
+            return !!(window.MVCoach && typeof window.MVCoach.toggleHelpPopover === 'function');
+        }
+
+        function toggleCoachHelpPopover(forceOpen) {
+            if (!coachHasHelpPopover()) return false;
+            window.MVCoach.toggleHelpPopover(forceOpen);
+            return true;
+        }
+
+        function isTypingLikeElement(target) {
+            if (!(target instanceof HTMLElement)) return false;
+            if (target.isContentEditable) return true;
+            let tag = target.tagName.toUpperCase();
+            return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+        }
+
+        async function initCoachFeedback() {
+            if (!window.MVCoach || typeof window.MVCoach.init !== 'function') return;
+            try {
+                await window.MVCoach.init({
+                    catalogUrl: COACH_CATALOG_URL,
+                    onHintRequested: () => {
+                        openQuestionOverlay({ trackCoach: false });
+                    }
+                });
+                coachFeedbackReady = true;
+                pushCoachEvent('APP_READY', {
+                    reason: 'init',
+                    questionId: getCoachQuestionId(getCurrentQuestion(), currentQ)
+                });
+                if (sessionStarted) pushCoachStepEnter('app_ready');
+            } catch (err) {
+                console.warn('Coach feedback init failed:', err);
+            }
+        }
+
         function hasSeenMathGymPopup() {
             try {
                 return localStorage.getItem(MATH_GYM_POPUP_STORAGE_KEY) === '1';
@@ -1863,6 +1970,13 @@
         }
 
         function openGlobalHelpModal(options = {}) {
+            if (options.usePopover !== false && coachHasHelpPopover()) {
+                window.MVCoach.toggleHelpPopover(true, {
+                    cleanModeReason: String(options.cleanModeReason || '').trim()
+                });
+                pushCoachEvent('HINT_REQUESTED', { source: 'help_button' });
+                return;
+            }
             let modal = document.getElementById('global-help-modal');
             if (!modal) return;
             let reason = String(options.cleanModeReason || '').trim();
@@ -2127,6 +2241,7 @@
             } catch (err) {
                 // Continue when localStorage is unavailable.
             }
+            pushCoachEvent('RESET', { reason: 'query_hard_reset' });
         }
 
         function shouldAutoOpenLobby() {
@@ -4037,6 +4152,7 @@
             setupOpeningSplashMedia();
             runEntryFlow();
             await ensureQuestionsLoadedAtRuntime();
+            await initCoachFeedback();
             loadScannedQuestionsFromStorage();
             let versionForDisplay = await resolveVersionForDisplay();
             runtimeDisplayedVersion = getRuntimeVersionDisplayOverride() || versionForDisplay;
@@ -4200,6 +4316,18 @@
                 dismissQuestionIntro();
                 ensureFocusPointsVisibleOnBoard();
                 updateInfo();
+                if (sessionStarted && !questionSolved) {
+                    let step = activeSteps[currentStepIndex];
+                    if (step && !stepCompleted) {
+                        let xNow = p.X();
+                        let yNow = p.Y();
+                        let mNow = getSlope(xNow);
+                        let done = isCurrentStepDone(step.goal || { type: 'free' }, mNow, xNow, yNow);
+                        if (!done) {
+                            pushCoachWrongAttempt('עדיין לא שם. נסו שוב.', { source: 'graph_drag' });
+                        }
+                    }
+                }
                 maybeAutoGenerateNotebook('drag_auto');
             });
 
@@ -4527,6 +4655,18 @@
                 practiceFunctionInline.innerText = fxText;
                 practiceFunctionInline.title = fxText;
             }
+            ['start-guide-preview-fx', 'initial-builder-preview-fx'].forEach((id) => {
+                let el = document.getElementById(id);
+                if (!el) return;
+                el.innerText = fxText;
+                el.title = fxText;
+            });
+            ['start-guide-preview-dx', 'initial-builder-preview-dx'].forEach((id) => {
+                let el = document.getElementById(id);
+                if (!el) return;
+                el.innerText = dText;
+                el.title = dText;
+            });
             let builderFx = document.getElementById('builder-formula-fx');
             let builderDx = document.getElementById('builder-formula-dx');
             let builderEquationAuto = document.getElementById('builder-equation-auto');
@@ -5464,12 +5604,17 @@
             if (target) target.classList.toggle('hidden');
         }
 
-        function openQuestionOverlay() {
+        function openQuestionOverlay(options = {}) {
             let q = getCurrentQuestion();
             if (q) renderQuestionOverlay(q);
             syncOverlayPrimaryAction();
             document.body.classList.toggle('overlay-start-mode', questionIntroActive);
             document.getElementById('question-overlay').classList.remove('hidden');
+            if (options.trackCoach !== false) {
+                pushCoachEvent('HINT_REQUESTED', {
+                    source: String(options.source || 'question_overlay').trim() || 'question_overlay'
+                });
+            }
         }
 
         function closeQuestionOverlay() {
@@ -6126,6 +6271,7 @@
             if (!xOk) {
                 document.getElementById('read-answer-feedback').innerText = `שלב 1: מקמים את הנקודה ב-x=${formatNumber(x0)} ורק אז בודקים תשובה.`;
                 readAnswerValidated = false;
+                pushCoachWrongAttempt('מקמו קודם את הנקודה על x המבוקש.', { source: 'read_answer', reason: 'x_not_aligned' });
                 return;
             }
 
@@ -6133,6 +6279,7 @@
             if (!Number.isFinite(inputVal)) {
                 document.getElementById('read-answer-feedback').innerText = 'הזן מספר תקין.';
                 readAnswerValidated = false;
+                pushCoachWrongAttempt('צריך להזין מספר תקין.', { source: 'read_answer', reason: 'invalid_number' });
                 return;
             }
 
@@ -6140,11 +6287,20 @@
             if (Math.abs(inputVal - expected) <= tol) {
                 readAnswerValidated = true;
                 document.getElementById('read-answer-feedback').innerText = `נכון מאוד. הערך הצפוי הוא בערך ${formatNumber(expected)}.`;
+                pushCoachEvent('ATTEMPT_CORRECT', {
+                    source: 'read_answer',
+                    reason: 'answer_in_tolerance',
+                    expected: formatNumber(expected)
+                });
                 showStepToast('✅ תשובה נכונה. המשימה הושלמה.');
                 updateInfo();
             } else {
                 readAnswerValidated = false;
                 document.getElementById('read-answer-feedback').innerText = `עדיין לא. בדקו שוב את החלונית ליד הנקודה ונסו שוב (טווח ±${formatNumber(tol)}).`;
+                pushCoachWrongAttempt('עדיין לא. נסו שוב לפי החלונית ליד הנקודה.', {
+                    source: 'read_answer',
+                    reason: 'answer_out_of_tolerance'
+                });
             }
         }
 
@@ -6318,6 +6474,7 @@
             if (missionNote) setMixedBidiText(missionNote, getMissionHintText(getCurrentQuestion()));
             renderMissionExpandedHelp();
             updateTopBriefCard(step);
+            pushCoachStepEnter('render_mission');
         }
 
         function getShortText(input, fallback) {
@@ -6476,6 +6633,8 @@
         function markQuestionSolved() {
             clearPendingStepRecheckTimer();
             questionSolved = true;
+            pushCoachEvent('STEP_EXIT', { reason: 'question_solved' });
+            pushCoachEvent('ATTEMPT_CORRECT', { reason: 'question_solved' });
             let box = document.querySelector('.jxgbox');
             let winOverlay = document.getElementById('win-overlay');
             if (winOverlay) {
@@ -6525,6 +6684,10 @@
                 return;
             }
             stepCompleted = true;
+            pushCoachEvent('ATTEMPT_CORRECT', {
+                reason: 'step_goal_matched',
+                stepId: getCoachCurrentStep().stepId
+            });
             showStepToast(step?.onComplete?.toastText || 'יפה! מצאת את הצעד הנכון.');
             spawnStepSuccessStars(x, y);
             playSound('pop');
@@ -6552,14 +6715,22 @@
 
         function goToNextStep() {
             if (currentStepIndex >= activeSteps.length - 1) return;
+            let prevStep = getCoachCurrentStep();
             currentStepIndex += 1;
             stepCompleted = false;
             pendingStepSolve = null;
             document.getElementById('step-result-panel').classList.add('hidden');
             document.getElementById('btn-apply-solution').classList.add('hidden');
             document.getElementById('btn-next-step').classList.add('hidden');
+            let nextStep = getCoachCurrentStep();
+            pushCoachEvent('STEP_ADVANCE', {
+                fromStepId: prevStep.stepId,
+                toStepId: nextStep.stepId,
+                reason: 'next_step'
+            });
             renderMission();
             updateInfo();
+            pushCoachStepEnter('next_step');
         }
 
         function isUiEnabled(q, key, fallback) {
@@ -8664,7 +8835,21 @@ Rules:
         }
 
         function onGlobalEscapeKeydown(event) {
-            if (event.key !== 'Escape') return;
+            let key = event.key || '';
+            let isShortcutH = (key === 'h' || key === 'H' || event.code === 'KeyH');
+            if (isShortcutH && !event.altKey && !event.ctrlKey && !event.metaKey && !isTypingLikeElement(event.target)) {
+                if (toggleCoachHelpPopover()) {
+                    event.preventDefault();
+                    return;
+                }
+            }
+
+            if (key !== 'Escape') return;
+            if (coachHasHelpPopover() && typeof window.MVCoach.isHelpPopoverOpen === 'function' && window.MVCoach.isHelpPopoverOpen()) {
+                event.preventDefault();
+                window.MVCoach.toggleHelpPopover(false);
+                return;
+            }
             if (isQuickTourModalOpen()) {
                 event.preventDefault();
                 skipQuickTour();
@@ -8903,6 +9088,7 @@ Rules:
             }
             currentQ = safeIdx;
             let q = questions[safeIdx];
+            coachLastStepEnterKey = '';
             if (typeof resetSoundPlayBudget === 'function') resetSoundPlayBudget();
             let visiblePos = getVisibleQuestionPosition(safeIdx);
             let displayNumber = (visiblePos.total > 0 && visiblePos.position >= 0) ? (visiblePos.position + 1) : (safeIdx + 1);
@@ -8916,6 +9102,11 @@ Rules:
             }
             document.getElementById('top-question').innerText = `${q.title}`;
             updatePracticeQuestionBar(`שאלה ${displayNumber}/${displayTotal}`, `${q.title}`);
+            pushCoachEvent('QUESTION_LOADED', {
+                questionId: getCoachQuestionId(q, safeIdx),
+                questionTitle: String(q?.title || '').trim(),
+                reason: 'loadQ'
+            });
             refreshTopQuestionSelect(safeIdx);
             updateLearnerProgressChip();
             let winOverlay = document.getElementById('win-overlay');
@@ -9040,7 +9231,7 @@ Rules:
             board.update();
             updateInfo();
             renderQuestionOverlay(q);
-            if (autoOpenOverlay && !paramIntroCleanActive) openQuestionOverlay();
+            if (autoOpenOverlay && !paramIntroCleanActive) openQuestionOverlay({ trackCoach: false, source: 'auto_intro' });
             else closeQuestionOverlay();
             if (mustStartFromFunctionSetup) {
                 showStepToast('שאלה חדשה: קודם בחרו סוג פונקציה, דייקו פרמטרים, ואז לחצו "קבע פונקציה והתחל תרגול".');

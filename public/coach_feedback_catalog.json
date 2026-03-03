@@ -1,0 +1,552 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "lang": "he",
+    "fallbackPolicy": "globalThenQuestionThenStep",
+    "notes": "Replace question ids with real IDs from your questions.js. stepId should be managed by your exercise logic."
+  },
+  "global": {
+    "events": {
+      "APP_READY": [
+        {
+          "id": "g_app_ready_1",
+          "tone": "info",
+          "priority": 3,
+          "sticky": false,
+          "ttlMs": 3500,
+          "text": "המערכת מוכנה. בוא נתחיל — מה המשימה שלך עכשיו?",
+          "voiceText": "המערכת מוכנה. בוא נתחיל.",
+          "next": null,
+          "ui": { "variant": "bubble", "icon": "👋", "pulse": false }
+        }
+      ],
+      "QUESTION_LOADED": [
+        {
+          "id": "g_question_loaded_1",
+          "tone": "instruction",
+          "priority": 5,
+          "sticky": true,
+          "ttlMs": null,
+          "text": "משימה נטענה. קרא את ההוראות למעלה ואז עשה צעד אחד קטן.",
+          "voiceText": "משימה נטענה. קרא את ההוראות ואז עשה צעד אחד קטן.",
+          "next": null,
+          "ui": { "variant": "bubble", "icon": "📌", "pulse": true }
+        }
+      ],
+      "STEP_ENTER": [
+        {
+          "id": "g_step_enter_1",
+          "tone": "instruction",
+          "priority": 6,
+          "sticky": true,
+          "ttlMs": null,
+          "text": "הצעד הבא: {stepLabel}. אם נתקעת — לחץ רמז.",
+          "voiceText": "הצעד הבא הוא: {stepLabel}. אם נתקעת, לחץ רמז.",
+          "next": null,
+          "ui": { "variant": "bubble", "icon": "➡️", "pulse": true }
+        }
+      ],
+      "ATTEMPT_CORRECT": [
+        {
+          "id": "g_correct_1",
+          "tone": "praise",
+          "priority": 7,
+          "sticky": false,
+          "ttlMs": 3200,
+          "text": "כל הכבוד! זה נכון ✅",
+          "voiceText": "כל הכבוד. זה נכון.",
+          "next": null,
+          "ui": { "variant": "toast", "icon": "✅", "pulse": false }
+        },
+        {
+          "id": "g_correct_2",
+          "tone": "praise",
+          "priority": 7,
+          "sticky": false,
+          "ttlMs": 3200,
+          "text": "מעולה! המשך לצעד הבא.",
+          "voiceText": "מעולה. המשך לצעד הבא.",
+          "next": null,
+          "ui": { "variant": "toast", "icon": "⭐", "pulse": false }
+        }
+      ],
+      "ATTEMPT_WRONG": [
+        {
+          "id": "g_wrong_1",
+          "tone": "error",
+          "priority": 8,
+          "sticky": false,
+          "ttlMs": 4500,
+          "text": "לא בדיוק. נסה שוב — תסתכל על הגרף ותבדוק את הערך ב־x.",
+          "voiceText": "לא בדיוק. נסה שוב.",
+          "next": null,
+          "ui": { "variant": "toast", "icon": "⚠️", "pulse": true }
+        }
+      ],
+      "HINT_REQUESTED": [
+        {
+          "id": "g_hint_1",
+          "tone": "hint",
+          "priority": 9,
+          "sticky": true,
+          "ttlMs": null,
+          "text": "רמז: אל תחפש מהר — קודם זהה מה השתנה בגרף ואז פעל.",
+          "voiceText": "רמז: קודם זהה מה השתנה בגרף ואז פעל.",
+          "next": null,
+          "ui": { "variant": "bubble", "icon": "💡", "pulse": false }
+        }
+      ],
+      "TIMEOUT": [
+        {
+          "id": "g_timeout_1",
+          "tone": "info",
+          "priority": 6,
+          "sticky": true,
+          "ttlMs": null,
+          "text": "עבר זמן. בוא נפרק לצעד קטן: מה הדבר הראשון שצריך לזהות כאן?",
+          "voiceText": "עבר זמן. בוא נפרק לצעד קטן.",
+          "next": null,
+          "ui": { "variant": "bubble", "icon": "⏱️", "pulse": true }
+        }
+      ],
+      "RESET": [
+        {
+          "id": "g_reset_1",
+          "tone": "info",
+          "priority": 5,
+          "sticky": false,
+          "ttlMs": 2800,
+          "text": "איפוס בוצע. מתחילים מחדש — הפעם לאט ובטוח.",
+          "voiceText": "איפוס בוצע. מתחילים מחדש.",
+          "next": null,
+          "ui": { "variant": "toast", "icon": "🔄", "pulse": false }
+        }
+      ]
+    }
+  },
+  "questions": {
+    "q_extrema_then_intersection_demo": {
+      "title": "קיצון ואז חיתוך",
+      "steps": [
+        {
+          "id": "s1_extrema",
+          "label": "מצא נקודת קיצון",
+          "events": {
+            "STEP_ENTER": [
+              {
+                "id": "q1_s1_enter_1",
+                "tone": "instruction",
+                "priority": 10,
+                "sticky": true,
+                "ttlMs": null,
+                "text": "צעד 1/3: מצא את נקודת הקיצון. גרור את הנקודה עד שתראה שינוי כיוון.",
+                "voiceText": "צעד ראשון: מצא נקודת קיצון. גרור נקודה עד שינוי כיוון.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "📍", "pulse": true }
+              }
+            ],
+            "ATTEMPT_CORRECT": [
+              {
+                "id": "q1_s1_correct_1",
+                "tone": "praise",
+                "priority": 10,
+                "sticky": false,
+                "ttlMs": 3500,
+                "text": "כל הכבוד! מצאת נקודת קיצון ✅ עכשיו עוברים לחיתוך.",
+                "voiceText": "כל הכבוד. מצאת נקודת קיצון. עכשיו חיתוך.",
+                "next": { "stepId": "s2_intersection" },
+                "ui": { "variant": "toast", "icon": "✅", "pulse": false }
+              }
+            ],
+            "ATTEMPT_WRONG": [
+              {
+                "id": "q1_s1_wrong_1",
+                "tone": "error",
+                "priority": 10,
+                "sticky": false,
+                "ttlMs": 5200,
+                "text": "זה לא קיצון. בדוק: האם לפני הנקודה הפונקציה יורדת ואחריה עולה (או להפך)?",
+                "voiceText": "זה לא קיצון. בדוק שינוי כיוון לפני ואחרי הנקודה.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "⚠️", "pulse": true }
+              }
+            ],
+            "HINT_REQUESTED": [
+              {
+                "id": "q1_s1_hint_1",
+                "tone": "hint",
+                "priority": 10,
+                "sticky": true,
+                "ttlMs": null,
+                "text": "רמז: בקיצון השיפוע רגעית 0. חפש מקום שהגרף ׳נח׳ לרגע.",
+                "voiceText": "רמז: בקיצון השיפוע אפס. חפש מקום שהגרף נח לרגע.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "💡", "pulse": false }
+              }
+            ],
+            "STEP_EXIT": [
+              {
+                "id": "q1_s1_exit_1",
+                "tone": "info",
+                "priority": 2,
+                "sticky": false,
+                "ttlMs": 1500,
+                "text": "סיימנו קיצון. ממשיכים הלאה.",
+                "voiceText": "ממשיכים.",
+                "next": null,
+                "ui": { "variant": "toast", "icon": "➡️", "pulse": false }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s2_intersection",
+          "label": "מצא נקודת חיתוך בין שני גרפים",
+          "events": {
+            "STEP_ENTER": [
+              {
+                "id": "q1_s2_enter_1",
+                "tone": "instruction",
+                "priority": 10,
+                "sticky": true,
+                "ttlMs": null,
+                "text": "צעד 2/3: מצא נקודת חיתוך. חפש איפה שני הקווים/עקומות נוגעים באותו מקום.",
+                "voiceText": "צעד שני: מצא נקודת חיתוך. חפש מקום ששני הגרפים באותו נקודה.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "✳️", "pulse": true }
+              }
+            ],
+            "ATTEMPT_CORRECT": [
+              {
+                "id": "q1_s2_correct_1",
+                "tone": "praise",
+                "priority": 10,
+                "sticky": false,
+                "ttlMs": 3500,
+                "text": "מעולה! חיתוך נמצא ✅ עכשיו בדוק/כוון את הפרמטרים אם יש.",
+                "voiceText": "מעולה. החיתוך נמצא. עכשיו פרמטרים אם יש.",
+                "next": { "stepId": "s3_params" },
+                "ui": { "variant": "toast", "icon": "✅", "pulse": false }
+              }
+            ],
+            "ATTEMPT_WRONG": [
+              {
+                "id": "q1_s2_wrong_1",
+                "tone": "error",
+                "priority": 10,
+                "sticky": false,
+                "ttlMs": 5200,
+                "text": "לא. נקודת חיתוך אומרת: אותו x וגם אותו y לשני הגרפים. נסה שוב.",
+                "voiceText": "לא. בחיתוך יש אותו x ואותו y לשני הגרפים.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "⚠️", "pulse": true }
+              }
+            ],
+            "HINT_REQUESTED": [
+              {
+                "id": "q1_s2_hint_1",
+                "tone": "hint",
+                "priority": 10,
+                "sticky": true,
+                "ttlMs": null,
+                "text": "רמז: התקרב בזום לנקודה שנראית קרובה וחפש את הרגע שהקו והעקומה ממש חופפים.",
+                "voiceText": "רמז: התקרב בזום לנקודה קרובה וחפש חפיפה מלאה.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "💡", "pulse": false }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s3_params",
+          "label": "כוון פרמטר",
+          "events": {
+            "STEP_ENTER": [
+              {
+                "id": "q1_s3_enter_1",
+                "tone": "instruction",
+                "priority": 10,
+                "sticky": true,
+                "ttlMs": null,
+                "text": "צעד 3/3: כוון את הפרמטר עד שהמטרה מתקיימת. שנה רק פרמטר אחד כל פעם.",
+                "voiceText": "צעד שלישי: כוון פרמטר. שנה אחד כל פעם.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "🎛️", "pulse": true }
+              }
+            ],
+            "ATTEMPT_CORRECT": [
+              {
+                "id": "q1_s3_correct_1",
+                "tone": "praise",
+                "priority": 10,
+                "sticky": false,
+                "ttlMs": 4000,
+                "text": "אלוף/ה! הפרמטר מתאים ✅ סיימת את התרגיל.",
+                "voiceText": "אלוף. הפרמטר מתאים. סיימת את התרגיל.",
+                "next": null,
+                "ui": { "variant": "toast", "icon": "🏁", "pulse": false }
+              }
+            ],
+            "ATTEMPT_WRONG": [
+              {
+                "id": "q1_s3_wrong_1",
+                "tone": "error",
+                "priority": 10,
+                "sticky": false,
+                "ttlMs": 5200,
+                "text": "עדיין לא. חזור צעד: מה המטרה? חיתוך? שיפוע? ערך ב־x? תכוון בהתאם.",
+                "voiceText": "עדיין לא. בדוק מה המטרה ואז כוון בהתאם.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "⚠️", "pulse": true }
+              }
+            ],
+            "HINT_REQUESTED": [
+              {
+                "id": "q1_s3_hint_1",
+                "tone": "hint",
+                "priority": 10,
+                "sticky": true,
+                "ttlMs": null,
+                "text": "רמז: אם צריך להזיז את הגרף למעלה/למטה — זה בדרך כלל הפרמטר החופשי (c).",
+                "voiceText": "רמז: אם צריך להזיז למעלה או למטה, לרוב זה הפרמטר c.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "💡", "pulse": false }
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+    "q_tangent_demo": {
+      "title": "משיק בנקודה",
+      "steps": [
+        {
+          "id": "s1_choose_point",
+          "label": "בחר נקודה על הגרף",
+          "events": {
+            "STEP_ENTER": [
+              {
+                "id": "q2_s1_enter_1",
+                "tone": "instruction",
+                "priority": 9,
+                "sticky": true,
+                "ttlMs": null,
+                "text": "בחר נקודה על הגרף שבה נבנה משיק. תוודא שהנקודה באמת יושבת על העקומה.",
+                "voiceText": "בחר נקודה על הגרף שבה נבנה משיק.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "📍", "pulse": true }
+              }
+            ],
+            "ATTEMPT_WRONG": [
+              {
+                "id": "q2_s1_wrong_1",
+                "tone": "error",
+                "priority": 9,
+                "sticky": false,
+                "ttlMs": 4500,
+                "text": "הנקודה לא על הגרף. התקרב עם הזום ונסה להצמיד אותה לעקומה.",
+                "voiceText": "הנקודה לא על הגרף.",
+                "next": null,
+                "ui": { "variant": "toast", "icon": "⚠️", "pulse": true }
+              }
+            ],
+            "ATTEMPT_CORRECT": [
+              {
+                "id": "q2_s1_correct_1",
+                "tone": "praise",
+                "priority": 9,
+                "sticky": false,
+                "ttlMs": 3200,
+                "text": "מצוין. עכשיו בנה את המשיק.",
+                "voiceText": "מצוין. עכשיו משיק.",
+                "next": { "stepId": "s2_build_tangent" },
+                "ui": { "variant": "toast", "icon": "✅", "pulse": false }
+              }
+            ],
+            "HINT_REQUESTED": [
+              {
+                "id": "q2_s1_hint_1",
+                "tone": "hint",
+                "priority": 9,
+                "sticky": true,
+                "ttlMs": null,
+                "text": "רמז: אם יש 'נגיעת מגנט', השתמש בה. אחרת—זום ואז גרירה עד שהקואורדינטות מתייצבות.",
+                "voiceText": "רמז: זום ואז גרירה עד שהקואורדינטות מתייצבות.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "💡", "pulse": false }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s2_build_tangent",
+          "label": "התאם את קו המשיק",
+          "events": {
+            "STEP_ENTER": [
+              {
+                "id": "q2_s2_enter_1",
+                "tone": "instruction",
+                "priority": 9,
+                "sticky": true,
+                "ttlMs": null,
+                "text": "התאם את קו המשיק כך שיגע בעקומה בנקודה אחת בלבד. שים לב לשיפוע.",
+                "voiceText": "התאם את קו המשיק. שים לב לשיפוע.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "📏", "pulse": true }
+              }
+            ],
+            "ATTEMPT_WRONG": [
+              {
+                "id": "q2_s2_wrong_1",
+                "tone": "error",
+                "priority": 9,
+                "sticky": false,
+                "ttlMs": 5200,
+                "text": "לא נראה משיק: הקו חותך את העקומה או מתרחק. נסה לכוון את השיפוע בלבד.",
+                "voiceText": "זה לא משיק. נסה לכוון את השיפוע.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "⚠️", "pulse": true }
+              }
+            ],
+            "ATTEMPT_CORRECT": [
+              {
+                "id": "q2_s2_correct_1",
+                "tone": "praise",
+                "priority": 9,
+                "sticky": false,
+                "ttlMs": 4000,
+                "text": "יפה! זה משיק ✅ סיימת.",
+                "voiceText": "יפה. זה משיק. סיימת.",
+                "next": null,
+                "ui": { "variant": "toast", "icon": "🏁", "pulse": false }
+              }
+            ],
+            "HINT_REQUESTED": [
+              {
+                "id": "q2_s2_hint_1",
+                "tone": "hint",
+                "priority": 9,
+                "sticky": true,
+                "ttlMs": null,
+                "text": "רמז: משיק נראה כאילו הקו 'נשען' על העקומה בלי לחצות אותה ליד הנקודה.",
+                "voiceText": "רמז: משיק נשען על העקומה בלי לחצות ליד הנקודה.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "💡", "pulse": false }
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+    "q_param_quadratic_demo": {
+      "title": "פרמטרים בפונקציה ריבועית",
+      "steps": [
+        {
+          "id": "s1_observe",
+          "label": "התבונן לפני שינוי",
+          "events": {
+            "STEP_ENTER": [
+              {
+                "id": "q3_s1_enter_1",
+                "tone": "instruction",
+                "priority": 8,
+                "sticky": true,
+                "ttlMs": null,
+                "text": "לפני שמשנים פרמטרים: תסתכל על הגרף. איפה הקודקוד? האם הפונקציה פתוחה למעלה/למטה?",
+                "voiceText": "לפני שינוי פרמטרים, התבונן בגרף.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "👀", "pulse": true }
+              }
+            ],
+            "HINT_REQUESTED": [
+              {
+                "id": "q3_s1_hint_1",
+                "tone": "hint",
+                "priority": 8,
+                "sticky": true,
+                "ttlMs": null,
+                "text": "רמז: a קובע פתיחה למעלה/למטה, b משפיע על מיקום הקודקוד בציר x, ו־c מזיז למעלה/למטה.",
+                "voiceText": "רמז: a כיוון פתיחה, b הזזה אופקית, c הזזה אנכית.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "💡", "pulse": false }
+              }
+            ],
+            "ATTEMPT_CORRECT": [
+              {
+                "id": "q3_s1_correct_1",
+                "tone": "praise",
+                "priority": 8,
+                "sticky": false,
+                "ttlMs": 2800,
+                "text": "מעולה. עכשיו נוגעים בפרמטר אחד בלבד.",
+                "voiceText": "מעולה. עכשיו פרמטר אחד.",
+                "next": { "stepId": "s2_adjust_one" },
+                "ui": { "variant": "toast", "icon": "✅", "pulse": false }
+              }
+            ]
+          }
+        },
+        {
+          "id": "s2_adjust_one",
+          "label": "כוון פרמטר אחד",
+          "events": {
+            "STEP_ENTER": [
+              {
+                "id": "q3_s2_enter_1",
+                "tone": "instruction",
+                "priority": 8,
+                "sticky": true,
+                "ttlMs": null,
+                "text": "שנה פרמטר אחד בלבד (a או b או c). אחרי כל שינוי — תסתכל מה קרה לגרף.",
+                "voiceText": "שנה פרמטר אחד בלבד, ואז תראה מה השתנה בגרף.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "🎛️", "pulse": true }
+              }
+            ],
+            "ATTEMPT_WRONG": [
+              {
+                "id": "q3_s2_wrong_1",
+                "tone": "error",
+                "priority": 8,
+                "sticky": false,
+                "ttlMs": 5200,
+                "text": "נראה ששינית יותר מפרמטר אחד או שהמטרה לא הושגה. החזר פרמטרים ואז שנה אחד בלבד.",
+                "voiceText": "נראה ששינית יותר מפרמטר אחד. שנה אחד בלבד.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "⚠️", "pulse": true }
+              }
+            ],
+            "ATTEMPT_CORRECT": [
+              {
+                "id": "q3_s2_correct_1",
+                "tone": "praise",
+                "priority": 8,
+                "sticky": false,
+                "ttlMs": 4200,
+                "text": "בדיוק! הגעת לתוצאה ✅ סיימת.",
+                "voiceText": "בדיוק. הגעת לתוצאה. סיימת.",
+                "next": null,
+                "ui": { "variant": "toast", "icon": "🏁", "pulse": false }
+              }
+            ],
+            "HINT_REQUESTED": [
+              {
+                "id": "q3_s2_hint_1",
+                "tone": "hint",
+                "priority": 8,
+                "sticky": true,
+                "ttlMs": null,
+                "text": "רמז מהיר: אם צריך 'להצר/להרחיב' — זה a. אם צריך להזיז שמאלה/ימינה — זה b (בדרך עקיפה). אם למעלה/למטה — c.",
+                "voiceText": "רמז: a לרוחב, b לשינוי מיקום אופקי, c למעלה למטה.",
+                "next": null,
+                "ui": { "variant": "bubble", "icon": "💡", "pulse": false }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
