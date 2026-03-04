@@ -3338,11 +3338,30 @@
             return vh > 0 && vh <= 760;
         }
 
+        function syncMobilePresentationMode() {
+            if (!document.body) return;
+            let isMobile = document.body.classList.contains('viewport-mobile');
+            let overlayOpen = !!document.querySelector('#question-overlay:not(.hidden)');
+            let streamlineMode = isMobile
+                && sessionStarted
+                && !drawerOpen
+                && !overlayOpen
+                && !document.body.classList.contains('practice-clean-mode')
+                && !document.body.classList.contains('param-intro-clean')
+                && !document.body.classList.contains('builder-workspace-mode');
+            document.body.classList.toggle('mobile-streamlined', streamlineMode);
+
+            let overlayActive = isMobile && (overlayOpen || drawerOpen);
+            document.body.classList.toggle('mobile-overlay-active', overlayActive);
+        }
+
         function applyViewportClasses() {
             let mobile = isMobileViewportNow();
             document.body.classList.toggle('viewport-mobile', mobile);
             document.body.classList.toggle('viewport-desktop', !mobile);
             document.body.classList.toggle('viewport-short', isShortViewportNow());
+            syncMobilePresentationMode();
+            if (typeof updateSoundButton === 'function') updateSoundButton();
             updateTopQuestionIndexDisplay();
         }
 
@@ -3924,6 +3943,7 @@
             drawerOpen = !!open;
             document.getElementById('sidebar').classList.toggle('drawer-open', drawerOpen);
             document.getElementById('sidebar').classList.toggle('drawer-collapsed', !drawerOpen);
+            document.body.classList.toggle('drawer-open-state', drawerOpen);
             let isEmbed = document.body.classList.contains('embed-mode');
             let drawerHandle = document.getElementById('drawer-handle');
             if (drawerHandle) {
@@ -3948,6 +3968,7 @@
             if (sideQuickActions) sideQuickActions.classList.toggle('hidden', isEmbed);
             syncBuilderWorkspaceMode();
             applyTopStripFocusMode();
+            syncMobilePresentationMode();
             updateTopQuestionsToggleLabel();
             queueBoardResize();
         }
@@ -5610,6 +5631,7 @@
             syncOverlayPrimaryAction();
             document.body.classList.toggle('overlay-start-mode', questionIntroActive);
             document.getElementById('question-overlay').classList.remove('hidden');
+            syncMobilePresentationMode();
             if (options.trackCoach !== false) {
                 pushCoachEvent('HINT_REQUESTED', {
                     source: String(options.source || 'question_overlay').trim() || 'question_overlay'
@@ -5620,6 +5642,7 @@
         function closeQuestionOverlay() {
             document.body.classList.remove('overlay-start-mode');
             document.getElementById('question-overlay').classList.add('hidden');
+            syncMobilePresentationMode();
         }
 
         function showStepToast(text) {
@@ -8917,6 +8940,7 @@ Rules:
             document.body.classList.toggle('param-intro-clean', paramIntroClean);
             document.body.classList.toggle('prestart-only', !sessionStarted);
             syncPracticeCleanModeControls();
+            syncMobilePresentationMode();
         }
 
         function syncSessionUiState() {

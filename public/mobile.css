@@ -6,6 +6,9 @@
     --tap-min: 44px;
     --mobile-banner-offset: 0px;
     --overlay-top-offset: clamp(2px, 4vh, 48px);
+    --desktop-sidebar-width: clamp(320px, 30vw, 430px);
+    --mobile-floating-reserve: clamp(142px, 36vw, 196px);
+    --mobile-floating-reserve-compact: clamp(126px, 33vw, 172px);
 }
 
 html {
@@ -28,6 +31,7 @@ body {
     box-sizing: border-box;
     padding-left: var(--safe-left);
     padding-right: var(--safe-right);
+    min-width: min(100%, 320px);
 }
 
 body.admob-banner-visible {
@@ -38,6 +42,11 @@ body.embed-mode {
     overflow: auto;
     min-height: 100vh;
     overflow-anchor: none;
+}
+
+body:not(.embed-mode).viewport-desktop {
+    max-width: min(100vw, 1920px);
+    margin-inline: auto;
 }
 
 body.embed-mode.viewport-desktop {
@@ -5241,9 +5250,9 @@ body.track-equation-modeling #builder-notebook-box {
     }
 
     #sidebar {
-        width: 390px;
-        min-width: 390px;
-        flex: 0 0 390px;
+        width: var(--desktop-sidebar-width);
+        min-width: var(--desktop-sidebar-width);
+        flex: 0 0 var(--desktop-sidebar-width);
         height: 100vh;
         order: 2;
         border-top: none;
@@ -5405,7 +5414,7 @@ body.track-equation-modeling #builder-notebook-box {
 
     #top-strip {
         gap: 8px;
-        padding: calc(9px + var(--safe-top)) 10px 9px calc(192px + var(--safe-left));
+        padding: calc(9px + var(--safe-top)) 10px 9px calc(var(--mobile-floating-reserve) + var(--safe-left));
     }
 
     #practice-question-bar {
@@ -5435,8 +5444,20 @@ body.track-equation-modeling #builder-notebook-box {
 
     #sound-toggle {
         top: calc(8px + var(--safe-top));
-        left: calc(124px + var(--safe-left));
-        bottom: auto;
+        left: calc(116px + var(--safe-left));
+        bottom: auto !important;
+        border-radius: 999px;
+        width: auto;
+        min-width: 44px;
+        height: 44px;
+        padding: 0 10px;
+        gap: 4px;
+        font-size: 0.86rem;
+    }
+
+    #sound-toggle.sound-toggle-compact {
+        min-width: 92px;
+        justify-content: center;
     }
 
     #btn-tools-menu {
@@ -5468,6 +5489,19 @@ body.track-equation-modeling #builder-notebook-box {
         border-radius: 12px;
         padding: 7px 8px;
         justify-content: flex-start;
+    }
+
+    body.viewport-mobile #top-actions {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        row-gap: 0;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    body.viewport-mobile #top-actions > * {
+        flex: 0 0 auto;
     }
 
     #top-overlay-cta {
@@ -5662,6 +5696,63 @@ body.track-equation-modeling #builder-notebook-box {
         left: auto;
         bottom: calc(56px + var(--safe-bottom) + var(--mobile-banner-offset));
     }
+
+    body.mobile-streamlined #top-strip {
+        gap: 6px;
+        padding: calc(6px + var(--safe-top)) 8px 6px calc(var(--mobile-floating-reserve-compact) + var(--safe-left));
+    }
+
+    body.mobile-streamlined #top-function-bar,
+    body.mobile-streamlined #top-formulas,
+    body.mobile-streamlined #top-brief-card,
+    body.mobile-streamlined #top-step-status,
+    body.mobile-streamlined #progress-hint {
+        display: none;
+    }
+
+    body.mobile-streamlined #top-question-wrap {
+        padding: 6px 8px;
+    }
+
+    body.mobile-streamlined #top-question {
+        font-size: 0.84rem;
+        line-height: 1.36;
+    }
+
+    body.mobile-streamlined #top-question-index {
+        font-size: 0.72rem;
+    }
+
+    body.mobile-streamlined #top-overlay-cta {
+        padding: 5px 7px;
+    }
+
+    body.mobile-streamlined #top-overlay-cta-label {
+        display: none;
+    }
+
+    body.mobile-streamlined #btn-overlay-open {
+        width: 100%;
+        min-height: 38px;
+        font-size: 0.84rem;
+        padding: 7px 10px;
+    }
+
+    body.mobile-overlay-active #top-strip {
+        padding-left: calc(10px + var(--safe-left));
+    }
+
+    #sound-toggle,
+    #btn-tools-menu {
+        transition: transform 0.18s ease, opacity 0.18s ease;
+    }
+
+    body.mobile-overlay-active #sound-toggle,
+    body.mobile-overlay-active #btn-tools-menu {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-10px);
+    }
 }
 
 @media (max-width: 640px) {
@@ -5766,7 +5857,13 @@ body.track-equation-modeling #builder-notebook-box {
     }
 
     #top-strip {
-        padding: calc(8px + var(--safe-top)) 8px 8px calc(180px + var(--safe-left));
+        padding: calc(8px + var(--safe-top)) 8px 8px calc(var(--mobile-floating-reserve-compact) + var(--safe-left));
+    }
+
+    #sound-toggle.sound-toggle-compact {
+        min-width: 84px;
+        padding: 0 8px;
+        font-size: 0.8rem;
     }
 
     #practice-question-bar {

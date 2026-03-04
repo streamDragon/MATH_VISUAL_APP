@@ -61,7 +61,9 @@ function applySoundButtonState(btn, options = {}) {
 function updateSoundButton() {
     const btn = document.getElementById('sound-toggle');
     const cleanHudBtn = document.getElementById('btn-practice-sound');
-    applySoundButtonState(btn, { compact: false });
+    const mobileCompact = !!(document.body && document.body.classList.contains('viewport-mobile'));
+    applySoundButtonState(btn, { compact: mobileCompact });
+    if (btn) btn.classList.toggle('sound-toggle-compact', mobileCompact);
     applySoundButtonState(cleanHudBtn, { compact: true });
 }
 
