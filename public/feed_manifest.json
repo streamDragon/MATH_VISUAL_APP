@@ -1,0 +1,204 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "lang": "he",
+    "thumbPathPattern": "/thumbs/q-{id}.png",
+    "notes": "Overlay text stays in HTML; thumbnails should avoid text (better for consistency)."
+  },
+  "featured": {
+    "policy": "weekly_hash",
+    "overrideQueryParam": "featured",
+    "label": "🔥 שאלת השבוע"
+  },
+  "items": [
+    {
+      "id": 0,
+      "headline": "בחירת תבנית והתחלה",
+      "deck": "בחר תבנית פונקציה והתחל לערוך פרמטרים.",
+      "tags": ["התחלה", "תבניות"],
+      "difficulty": 1,
+      "estMin": 2,
+      "thumb": "/thumbs/q-0.png"
+    },
+    {
+      "id": 1,
+      "headline": "קיצון: משיק אופקי",
+      "deck": "גרור עד שהשיפוע m≈0 ותפגוש קיצון.",
+      "tags": ["נגזרת", "קיצון", "שיפוע"],
+      "difficulty": 1,
+      "estMin": 3,
+      "thumb": "/thumbs/q-1.png"
+    },
+    {
+      "id": 2,
+      "headline": "מינימום: משיק אופקי + בדיקת f''>0",
+      "deck": "מצא m=0 ואז בדוק שזה מינימום אמיתי.",
+      "tags": ["נגזרת", "מינימום", "נגזרת שנייה"],
+      "difficulty": 2,
+      "estMin": 4,
+      "thumb": "/thumbs/q-2.png"
+    },
+    {
+      "id": 3,
+      "headline": "מצא x0 לפי שיפוע נתון",
+      "deck": "היעד: f'(x0)=2. גרור עד m≈2.",
+      "tags": ["שיפוע", "נגזרת", "יעד"],
+      "difficulty": 2,
+      "estMin": 3,
+      "thumb": "/thumbs/q-3.png"
+    },
+    {
+      "id": 4,
+      "headline": "שיפוע שלילי",
+      "deck": "היעד: f'(x0)=-1. זה לא קיצון—זה שיפוע.",
+      "tags": ["שיפוע", "שלילי", "נגזרת"],
+      "difficulty": 2,
+      "estMin": 3,
+      "thumb": "/thumbs/q-4.png"
+    },
+    {
+      "id": 5,
+      "headline": "מצא x0 לפי ערך פונקציה",
+      "deck": "היעד: f(x0)=3. תמצא את המקום שבו y≈3.",
+      "tags": ["ערך פונקציה", "קריאה מהגרף"],
+      "difficulty": 2,
+      "estMin": 3,
+      "thumb": "/thumbs/q-5.png"
+    },
+    {
+      "id": 6,
+      "headline": "קרא שיפוע בנקודה",
+      "deck": "קבע x0=1 וקרא m=f'(1).",
+      "tags": ["קריאה", "שיפוע", "נגזרת"],
+      "difficulty": 2,
+      "estMin": 3,
+      "thumb": "/thumbs/q-6.png"
+    },
+    {
+      "id": 7,
+      "headline": "קרא ערך פונקציה בנקודה",
+      "deck": "קבע x0=-2 וקרא y=f(-2).",
+      "tags": ["קריאה", "ערך פונקציה"],
+      "difficulty": 1,
+      "estMin": 3,
+      "thumb": "/thumbs/q-7.png"
+    },
+    {
+      "id": 8,
+      "headline": "כוונון פרמטר: מעבר ב-(0,2)",
+      "deck": "כוון פרמטרים עד שהגרף עובר דרך נקודת יעד.",
+      "tags": ["פרמטרים", "מטרה", "נקודת יעד"],
+      "difficulty": 3,
+      "estMin": 5,
+      "thumb": "/thumbs/q-8.png"
+    },
+    {
+      "id": 9,
+      "headline": "כוונון קו ישר דרך (2,0)",
+      "deck": "שנה שיפוע וחיתוך עד שהקו פוגע ביעד.",
+      "tags": ["ישר", "שיפוע", "חיתוך", "פרמטרים"],
+      "difficulty": 3,
+      "estMin": 5,
+      "thumb": "/thumbs/q-9.png"
+    },
+    {
+      "id": 10,
+      "headline": "שתי נקודות יעד יחד",
+      "deck": "הגרף חייב לעבור דרך A וגם B בו־זמנית.",
+      "tags": ["פרמטרים", "שתי מטרות", "דיוק"],
+      "difficulty": 4,
+      "estMin": 6,
+      "thumb": "/thumbs/q-10.png"
+    },
+    {
+      "id": 11,
+      "headline": "משיק שעובר דרך נקודה חיצונית",
+      "deck": "מצא נקודה שבה המשיק עובר דרך P חיצונית.",
+      "tags": ["משיק", "גאומטריה", "תנאי"],
+      "difficulty": 4,
+      "estMin": 6,
+      "thumb": "/thumbs/q-11.png"
+    },
+    {
+      "id": 12,
+      "headline": "נורמל אנכי/אופקי",
+      "deck": "נורמל אנכי ⇔ משיק אופקי ⇔ m=0.",
+      "tags": ["נורמל", "משיק", "נגזרת"],
+      "difficulty": 3,
+      "estMin": 4,
+      "thumb": "/thumbs/q-12.png"
+    },
+    {
+      "id": 13,
+      "headline": "חקירה חופשית",
+      "deck": "שנה פרמטר אחד בכל פעם ותראה מה קורה לצורה.",
+      "tags": ["חקירה", "פרמטרים"],
+      "difficulty": 1,
+      "estMin": 4,
+      "thumb": "/thumbs/q-13.png"
+    },
+    {
+      "id": 14,
+      "headline": "עוגן גרפי: חיתוך עם ציר y",
+      "deck": "קבע x=0 וקרא y=f(0). אחר כך שחק עם c.",
+      "tags": ["חיתוך עם ציר y", "עוגנים", "פרמטרים"],
+      "difficulty": 2,
+      "estMin": 4,
+      "thumb": "/thumbs/q-14.png"
+    },
+    {
+      "id": 15,
+      "headline": "שורש גרפי: מצאו x כך ש-f(x)=0",
+      "deck": "מצא חיתוך/נגיעה בציר x (y≈0).",
+      "tags": ["שורש", "חיתוך עם ציר x"],
+      "difficulty": 2,
+      "estMin": 4,
+      "thumb": "/thumbs/q-15.png"
+    },
+    {
+      "id": 16,
+      "headline": "משיק מקביל לישר y=2x+1",
+      "deck": "מקביל ⇔ אותו שיפוע: m=2. מצא x0.",
+      "tags": ["משיק", "מקביל", "שיפוע"],
+      "difficulty": 3,
+      "estMin": 5,
+      "thumb": "/thumbs/q-16.png"
+    },
+    {
+      "id": 17,
+      "headline": "קריאת שיפוע במעלה 5",
+      "deck": "קבע x=0 וקרא m=f'(0) בפולינום ממעלה 5.",
+      "tags": ["קריאה", "שיפוע", "מעלה 5"],
+      "difficulty": 3,
+      "estMin": 5,
+      "thumb": "/thumbs/q-17.png"
+    },
+    {
+      "id": 18,
+      "headline": "כוונון פרמטרים: שתי נקודות על ציר x",
+      "deck": "כוון כך שהגרף יעבור דרך (-1,0) וגם (2,0).",
+      "tags": ["פרמטרים", "שורשים", "שתי מטרות"],
+      "difficulty": 4,
+      "estMin": 7,
+      "thumb": "/thumbs/q-18.png"
+    },
+    {
+      "id": 19,
+      "headline": "חקירה חופשית: התנהגות קצוות (מעלה 4)",
+      "deck": "שנה a ואז b וראה איך הקצוות מתנהגים.",
+      "tags": ["קצוות", "מעלה 4", "חקירה"],
+      "difficulty": 2,
+      "estMin": 5,
+      "thumb": "/thumbs/q-19.png"
+    },
+    {
+      "id": 20,
+      "headline": "חקירה חופשית: התנהגות קצוות (מעלה 5)",
+      "deck": "מעלה אי־זוגית: קצה אחד עולה והשני יורד. בדוק עם פרמטרים.",
+      "tags": ["קצוות", "מעלה 5", "חקירה"],
+      "difficulty": 2,
+      "estMin": 5,
+      "thumb": "/thumbs/q-20.png"
+    }
+  ]
+}

@@ -1272,7 +1272,16 @@
         let mobileFeedTickerMessages = [];
         let mobileFeedThumbCache = new Map();
         let mobileFeedFeaturedQuestionIndex = -1;
+        let feedManifestData = null;
+        let feedManifestById = new Map();
+        let feedManifestLoadPromise = null;
         const NOTEBOOK_HISTORY_LIMIT = 8;
+        const FEED_MANIFEST_PATH_CANDIDATES = [
+            '/feed_manifest.json',
+            '/public/feed_manifest.json',
+            'feed_manifest.json',
+            'public/feed_manifest.json'
+        ];
         const QUESTION_INITIAL_SUCCESS_GRACE_MS = 1200;
         const PEDAGOGY_TRACK_MODELING_GOALS = new Set(['hit_target', 'hit_targets']);
         const PEDAGOGY_TRACK_EXPLORATION_GOALS = new Set([
@@ -2816,6 +2825,88 @@
             return nextSelected;
         }
 
+        function sanitizeFeedManifestItem(rawItem) {
+            if (!rawItem || typeof rawItem !== 'object') return null;
+            let idRaw = rawItem.id;
+            let numericId = Number(idRaw);
+            if (!Number.isFinite(numericId)) return null;
+            let tags = Array.isArray(rawItem.tags)
+                ? rawItem.tags.map((tag) => String(tag || '').trim()).filter(Boolean).slice(0, 4)
+                : [];
+            let difficulty = Number(rawItem.difficulty);
+            let estMin = Number(rawItem.estMin);
+            return {
+                id: numericId,
+                headline: String(rawItem.headline || '').trim(),
+                deck: String(rawItem.deck || '').trim(),
+                tags,
+                difficulty: Number.isFinite(difficulty) ? Math.max(1, Math.min(5, Math.round(difficulty))) : null,
+                estMin: Number.isFinite(estMin) ? Math.max(1, Math.min(90, Math.round(estMin))) : null,
+                thumb: String(rawItem.thumb || '').trim()
+            };
+        }
+
+        function applyFeedManifest(rawManifest) {
+            feedManifestData = null;
+            feedManifestById = new Map();
+            if (!rawManifest || typeof rawManifest !== 'object') return false;
+            let items = Array.isArray(rawManifest.items) ? rawManifest.items : [];
+            let normalizedItems = items
+                .map((item) => sanitizeFeedManifestItem(item))
+                .filter((item) => !!item);
+            if (!normalizedItems.length) return false;
+            normalizedItems.forEach((item) => {
+                feedManifestById.set(item.id, item);
+            });
+            feedManifestData = {
+                ...rawManifest,
+                items: normalizedItems
+            };
+            return true;
+        }
+
+        async function loadFeedManifestFromPath(path) {
+            let cb = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+            let res = await fetch(`${path}${path.includes('?') ? '&' : '?'}cb=${cb}`, {
+                cache: 'no-store'
+            });
+            if (!res.ok) return null;
+            let data = await res.json();
+            if (!applyFeedManifest(data)) return null;
+            return path;
+        }
+
+        async function ensureFeedManifestLoaded() {
+            if (feedManifestData) return true;
+            if (feedManifestLoadPromise) return feedManifestLoadPromise;
+            feedManifestLoadPromise = (async () => {
+                for (let i = 0; i < FEED_MANIFEST_PATH_CANDIDATES.length; i += 1) {
+                    let path = FEED_MANIFEST_PATH_CANDIDATES[i];
+                    try {
+                        let loadedPath = await loadFeedManifestFromPath(path);
+                        if (loadedPath) return true;
+                    } catch (err) {
+                        // Try next candidate path.
+                    }
+                }
+                return false;
+            })();
+            let ok = await feedManifestLoadPromise;
+            if (!ok) {
+                feedManifestData = null;
+                feedManifestById = new Map();
+            }
+            return ok;
+        }
+
+        function getManifestItemForQuestion(questionIndex, questionObj) {
+            let q = questionObj || getQuestionsList()[questionIndex];
+            if (!q) return null;
+            let qId = Number(q?.id);
+            if (!Number.isFinite(qId)) return null;
+            return feedManifestById.get(qId) || null;
+        }
+
         function getMobileFeedGoalLabel(goal) {
             let labels = {
                 slope_zero: 'משיק אופקי',
@@ -2930,20 +3021,31 @@
             let visible = getVisibleQuestionIndexes();
             return visible.map((realIdx, order) => {
                 let q = questions[realIdx] || {};
+                let manifestItem = getManifestItemForQuestion(realIdx, q);
                 let shortDesc = getQuestionShortDesc(q);
                 let trackMeta = getQuestionPedagogyTrackMeta(q);
-                let tag = `${trackMeta.compactLabel} · ${getMobileFeedGoalLabel(q.goal)}`;
+                let goalLabel = getMobileFeedGoalLabel(q.goal);
+                let tag = manifestItem?.tags?.length
+                    ? manifestItem.tags.slice(0, 2).join(' · ')
+                    : `${trackMeta.compactLabel} · ${goalLabel}`;
+                let difficulty = Number.isFinite(manifestItem?.difficulty) ? manifestItem.difficulty : null;
+                let estMin = Number.isFinite(manifestItem?.estMin) ? manifestItem.estMin : null;
+                let metaTokens = [];
+                if (difficulty) metaTokens.push(`קושי ${difficulty}/5`);
+                if (estMin) metaTokens.push(`${estMin} דק׳`);
+                if (!metaTokens.length) metaTokens.push(goalLabel);
                 return {
                     id: `q_${realIdx}`,
                     kind: 'question',
                     category: 'exercises',
                     questionIndex: realIdx,
                     order: order + 1,
-                    title: `שאלה ${order + 1}: ${q?.title || 'תרגיל'}`,
-                    desc: shortDesc.first,
+                    title: manifestItem?.headline || `שאלה ${order + 1}: ${q?.title || 'תרגיל'}`,
+                    desc: manifestItem?.deck || shortDesc.first,
                     tag,
+                    metaLine: metaTokens.join(' · '),
                     cta: 'פתח תרגיל',
-                    thumbFile: `/thumbs/q-${q?.id ?? realIdx}.png`,
+                    thumbFile: manifestItem?.thumb || `/thumbs/q-${q?.id ?? realIdx}.png`,
                     thumbSrc: getMobileFeedThumbDataUrl(`q_${realIdx}_${q?.goal || ''}`, trackMeta.icon || 'ƒ')
                 };
             });
@@ -3096,21 +3198,27 @@
             wrap.classList.remove('hidden');
 
             let q = getQuestionsList()[mobileFeedFeaturedQuestionIndex] || {};
+            let manifestItem = getManifestItemForQuestion(mobileFeedFeaturedQuestionIndex, q);
             let trackMeta = getQuestionPedagogyTrackMeta(q);
             let shortDesc = getQuestionShortDesc(q);
             let visible = getVisibleQuestionIndexes();
             let pos = visible.indexOf(mobileFeedFeaturedQuestionIndex);
             let labelPos = pos >= 0 ? `שאלה ${pos + 1}` : 'שאלה';
             let fallbackThumb = getMobileFeedThumbDataUrl(`featured_${mobileFeedFeaturedQuestionIndex}_${q?.goal || ''}`, trackMeta.icon || '★');
-            let preferredThumb = `/thumbs/q-${q?.id ?? mobileFeedFeaturedQuestionIndex}.png`;
+            let preferredThumb = String(manifestItem?.thumb || `/thumbs/q-${q?.id ?? mobileFeedFeaturedQuestionIndex}.png`).trim();
             thumb.src = preferredThumb;
             thumb.onerror = () => {
                 thumb.onerror = null;
                 thumb.src = fallbackThumb;
             };
-            tagEl.innerText = `${labelPos} · ${trackMeta.compactLabel} · ${getMobileFeedGoalLabel(q.goal)}`;
-            titleEl.innerText = q?.title || 'שאלת השבוע';
-            descEl.innerText = shortDesc.first || 'תרגול חזותי מומלץ לשבוע הקרוב.';
+            let featuredTagTokens = [labelPos];
+            if (manifestItem?.tags?.length) featuredTagTokens.push(...manifestItem.tags.slice(0, 2));
+            else featuredTagTokens.push(trackMeta.compactLabel, getMobileFeedGoalLabel(q.goal));
+            if (Number.isFinite(manifestItem?.difficulty)) featuredTagTokens.push(`קושי ${manifestItem.difficulty}/5`);
+            if (Number.isFinite(manifestItem?.estMin)) featuredTagTokens.push(`${manifestItem.estMin} דק׳`);
+            tagEl.innerText = featuredTagTokens.join(' · ');
+            titleEl.innerText = manifestItem?.headline || q?.title || 'שאלת השבוע';
+            descEl.innerText = manifestItem?.deck || shortDesc.first || 'תרגול חזותי מומלץ לשבוע הקרוב.';
         }
 
         function stopMobileFeedTickerRotation() {
@@ -3197,6 +3305,11 @@
                 desc.className = 'mobile-feed-card-desc';
                 desc.innerText = item.desc || '';
 
+                let meta = document.createElement('div');
+                meta.className = 'mobile-feed-meta';
+                meta.innerText = String(item.metaLine || '').trim();
+                meta.classList.toggle('hidden', !meta.innerText);
+
                 let cta = document.createElement('span');
                 cta.className = 'mobile-feed-cta';
                 cta.innerText = item.cta || 'פתח';
@@ -3204,6 +3317,7 @@
                 body.appendChild(tag);
                 body.appendChild(title);
                 body.appendChild(desc);
+                body.appendChild(meta);
                 body.appendChild(cta);
 
                 card.appendChild(thumbWrap);
@@ -3314,6 +3428,13 @@
             startMobileFeedTickerRotation();
             syncMobilePresentationMode();
             syncNewsFeedActionButtons();
+            ensureFeedManifestLoaded().then((loaded) => {
+                if (!loaded || !mobileFeedOpen) return;
+                updateMobileFeedTickerMessages(false);
+                renderMobileFeedCards();
+            }).catch(() => {
+                // Keep feed usable with local fallback cards.
+            });
             if (search) {
                 setTimeout(() => {
                     try {
@@ -4806,6 +4927,7 @@
             setupOpeningSplashMedia();
             runEntryFlow();
             await ensureQuestionsLoadedAtRuntime();
+            if (isNewsFeedFeatureEnabled()) await ensureFeedManifestLoaded();
             await initCoachFeedback();
             loadScannedQuestionsFromStorage();
             let versionForDisplay = await resolveVersionForDisplay();
