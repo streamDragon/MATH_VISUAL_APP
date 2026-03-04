@@ -2895,6 +2895,8 @@
             if (!ok) {
                 feedManifestData = null;
                 feedManifestById = new Map();
+                // Allow future retries (e.g., manifest added later without full reload).
+                feedManifestLoadPromise = null;
             }
             return ok;
         }
