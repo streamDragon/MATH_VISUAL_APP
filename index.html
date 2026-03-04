@@ -326,6 +326,49 @@
         </div>
     </div>
 
+    <div id="mobile-feed" class="hidden" role="dialog" aria-modal="true" aria-label="פיד ניווט לנייד">
+        <div id="mobile-feed-shell">
+            <div id="mobile-feed-head">
+                <div id="mobile-feed-head-text">
+                    <span id="mobile-feed-kicker">MATH FEED</span>
+                    <h3 id="mobile-feed-title">בחרו מסלול בגלילה</h3>
+                </div>
+                <button id="btn-mobile-feed-close" type="button" onclick="closeMobileFeed()">סגור</button>
+            </div>
+            <div id="mobile-feed-ticker" aria-live="polite">
+                <span id="mobile-feed-ticker-label">מה חדש</span>
+                <span id="mobile-feed-ticker-text">טוען עדכונים...</span>
+            </div>
+            <div id="mobile-feed-featured-wrap">
+                <div id="mobile-feed-featured-head">
+                    <span id="mobile-feed-featured-kicker">🔥 שאלת השבוע</span>
+                    <span id="mobile-feed-featured-sub">מתחלפת אוטומטית כל שבוע</span>
+                </div>
+                <button id="mobile-feed-featured-card" type="button" onclick="openFeaturedQuestionFromFeed()">
+                    <div id="mobile-feed-featured-thumb-wrap">
+                        <img id="mobile-feed-featured-thumb" alt="שאלת השבוע" loading="lazy">
+                    </div>
+                    <div id="mobile-feed-featured-body">
+                        <span id="mobile-feed-featured-tag">טוען...</span>
+                        <div id="mobile-feed-featured-title">טוען...</div>
+                        <div id="mobile-feed-featured-desc">טוען...</div>
+                    </div>
+                </button>
+            </div>
+            <div id="mobile-feed-toolbar">
+                <input id="mobile-feed-search" type="search" placeholder="חיפוש שאלה / כלי / תגית" oninput="onMobileFeedSearchInput(event)">
+                <div id="mobile-feed-chips">
+                    <button type="button" class="mobile-feed-chip is-active" data-cat="all" onclick="setMobileFeedCategory('all')">הכל</button>
+                    <button type="button" class="mobile-feed-chip" data-cat="exercises" onclick="setMobileFeedCategory('exercises')">תרגול</button>
+                    <button type="button" class="mobile-feed-chip" data-cat="tools" onclick="setMobileFeedCategory('tools')">כלים</button>
+                    <button type="button" class="mobile-feed-chip" data-cat="knowledge" onclick="setMobileFeedCategory('knowledge')">מידע</button>
+                </div>
+            </div>
+            <div id="mobile-feed-list" aria-live="polite"></div>
+            <div id="mobile-feed-empty" class="hidden">לא נמצאו פריטים לפי הסינון.</div>
+        </div>
+    </div>
+
     <div id="video-modal" class="hidden" onclick="onVideoBackdropClick(event)">
         <div id="video-modal-card">
             <div class="overlay-head">
@@ -679,6 +722,8 @@
             <div id="top-actions">
                 <span id="top-question-select-label">כאן בוחרים שאלה:</span>
                 <select id="top-question-select" title="בחירת שאלה"></select>
+                <button id="btn-mobile-feed" class="hidden" type="button" onclick="toggleMobileFeed()">📰 פיד גלילה</button>
+                <button id="btn-back-to-feed" class="hidden" type="button" onclick="goBackToFeedFromQuestion()">↩ חזרה לפיד</button>
                 <button id="btn-top-questions" onclick="toggleQuestionsFromTop()" title="הצג/הסתר משימות ורמזים">משימות/רמזים ▼</button>
                 <button id="btn-clean-mode-toggle" type="button" onclick="togglePracticeCleanModeFromUi()">מצב ריכוז</button>
                 <button id="btn-top-help" type="button" onclick="openGlobalHelpModal()">? עזרה</button>
@@ -914,15 +959,29 @@
         function readEntryFlowQueryParams() {
             try {
                 let params = new URLSearchParams(window.location.search);
+                let viewRaw = String(params.get('view') || '').trim().toLowerCase();
+                let feedRaw = parseBooleanQueryValue(params.get('feed'));
                 return {
                     lobby: parseBooleanQueryValue(params.get('lobby')),
                     clean: parseBooleanQueryValue(params.get('clean')),
                     splash: parseBooleanQueryValue(params.get('splash')),
                     hardReset: parseBooleanQueryValue(params.get('hard')) === true,
-                    runtimeVersionOverride: String(params.get('v') || '').trim()
+                    runtimeVersionOverride: String(params.get('v') || '').trim(),
+                    newsFeedEnabled: feedRaw === true || viewRaw === 'feed',
+                    forceNewsFeedView: viewRaw === 'feed',
+                    featuredQuestionHint: String(params.get('featured') || '').trim()
                 };
             } catch (err) {
-                return { lobby: null, clean: null, splash: null, hardReset: false, runtimeVersionOverride: '' };
+                return {
+                    lobby: null,
+                    clean: null,
+                    splash: null,
+                    hardReset: false,
+                    runtimeVersionOverride: '',
+                    newsFeedEnabled: false,
+                    forceNewsFeedView: false,
+                    featuredQuestionHint: ''
+                };
             }
         }
 
@@ -1204,6 +1263,15 @@
         let notebookHistory = [];
         let notebookAutoGenerateOnDrag = true;
         let notebookLastSnapshotHash = '';
+        let mobileFeedOpen = false;
+        let mobileFeedAutoShown = false;
+        let mobileFeedSearchTerm = '';
+        let mobileFeedCategory = 'all';
+        let mobileFeedTickerTimer = null;
+        let mobileFeedTickerIndex = 0;
+        let mobileFeedTickerMessages = [];
+        let mobileFeedThumbCache = new Map();
+        let mobileFeedFeaturedQuestionIndex = -1;
         const NOTEBOOK_HISTORY_LIMIT = 8;
         const QUESTION_INITIAL_SUCCESS_GRACE_MS = 1200;
         const PEDAGOGY_TRACK_MODELING_GOALS = new Set(['hit_target', 'hit_targets']);
@@ -2262,6 +2330,16 @@
                 return;
             }
             if (!openingSplashDone) return;
+            if (ENTRY_FLOW_QUERY.forceNewsFeedView && isMobileFeedSupportedNow()) {
+                if (!appInitialized) return;
+                entryFlowCompleted = true;
+                markSessionStarted({ preserveCurrentFunction: true });
+                closeQuestionOverlay();
+                setDrawerOpen(false);
+                mobileFeedAutoShown = true;
+                openMobileFeed({ force: true });
+                return;
+            }
             if (shouldAutoOpenLobby()) {
                 entryFlowCompleted = true;
                 openStartGuideModal({ forceLaunchChoice: true });
@@ -2736,6 +2814,556 @@
             let nextSelected = visible.includes(selectedIndex) ? selectedIndex : visible[0];
             topSelect.value = String(nextSelected);
             return nextSelected;
+        }
+
+        function getMobileFeedGoalLabel(goal) {
+            let labels = {
+                slope_zero: 'משיק אופקי',
+                min_point: 'מינימום',
+                slope_equals: 'שיפוע יעד',
+                y_equals: 'ערך יעד',
+                read_slope: 'קריאת שיפוע',
+                read_y: 'קריאת ערך',
+                hit_target: 'פגיעה ביעד',
+                hit_targets: 'פגיעה ביעדים',
+                tangent_through_point: 'משיק דרך נקודה',
+                free: 'חקירה פתוחה',
+                choose_function_template: 'בחירת פונקציה'
+            };
+            return labels[String(goal || '').trim()] || 'תרגול גרפי';
+        }
+
+        function isNewsFeedFeatureEnabled() {
+            return !!ENTRY_FLOW_QUERY.newsFeedEnabled;
+        }
+
+        function shouldShowBackToFeedButton() {
+            return isNewsFeedFeatureEnabled()
+                && !!document.body
+                && document.body.classList.contains('viewport-mobile')
+                && sessionStarted;
+        }
+
+        function syncNewsFeedActionButtons() {
+            let topBtn = document.getElementById('btn-mobile-feed');
+            let backBtn = document.getElementById('btn-back-to-feed');
+            let enabledOnViewport = isNewsFeedFeatureEnabled()
+                && !!document.body
+                && document.body.classList.contains('viewport-mobile');
+
+            if (topBtn) topBtn.classList.toggle('hidden', !enabledOnViewport);
+            if (backBtn) backBtn.classList.toggle('hidden', !shouldShowBackToFeedButton());
+        }
+
+        function getMobileFeedActionItems() {
+            let items = [
+                {
+                    id: 'builder',
+                    kind: 'action',
+                    category: 'tools',
+                    action: 'open_builder',
+                    title: 'בניית פונקציה',
+                    desc: 'פתיחת פרמטרים וסליידרים לבנייה מהירה לפני תרגול.',
+                    tag: 'כלים',
+                    icon: '⚙'
+                },
+                {
+                    id: 'steps',
+                    kind: 'action',
+                    category: 'tools',
+                    action: 'open_steps',
+                    title: 'משימות ורמזים',
+                    desc: 'פתיחת פאנל המשימות, שלבים ותשובות בדיקה.',
+                    tag: 'כלים',
+                    icon: '☰'
+                },
+                {
+                    id: 'scan',
+                    kind: 'action',
+                    category: 'tools',
+                    action: 'open_scan',
+                    title: 'סריקת שאלה',
+                    desc: 'צילום שאלה והמרה לתרגול ויזואלי ישירות באפליקציה.',
+                    tag: 'כלים',
+                    icon: '📷'
+                },
+                {
+                    id: 'guide',
+                    kind: 'action',
+                    category: 'knowledge',
+                    action: 'open_guide',
+                    title: 'סיור מודרך',
+                    desc: 'הדרכת התחלה קצרה: איפה כל דבר ואיך פותרים נכון.',
+                    tag: 'מידע',
+                    icon: '🧭'
+                },
+                {
+                    id: 'help',
+                    kind: 'action',
+                    category: 'knowledge',
+                    action: 'open_help',
+                    title: 'עזרה מהירה',
+                    desc: 'פתיחת עזרה לפי מצב התרגול והשאלה הנוכחית.',
+                    tag: 'מידע',
+                    icon: '❔'
+                },
+                {
+                    id: 'feedback',
+                    kind: 'action',
+                    category: 'knowledge',
+                    action: 'open_feedback',
+                    title: 'כיכר השוק',
+                    desc: 'שליחת רעיונות ושיפורים ישירות מהמכשיר.',
+                    tag: 'מידע',
+                    icon: '💬'
+                }
+            ];
+            return items.map((item) => ({
+                ...item,
+                thumbFile: `/thumbs/action-${item.id}.png`,
+                thumbSrc: getMobileFeedThumbDataUrl(`action_${item.id}`, item.icon || 'ƒ')
+            }));
+        }
+
+        function getMobileFeedQuestionItems() {
+            let questions = getQuestionsList();
+            let visible = getVisibleQuestionIndexes();
+            return visible.map((realIdx, order) => {
+                let q = questions[realIdx] || {};
+                let shortDesc = getQuestionShortDesc(q);
+                let trackMeta = getQuestionPedagogyTrackMeta(q);
+                let tag = `${trackMeta.compactLabel} · ${getMobileFeedGoalLabel(q.goal)}`;
+                return {
+                    id: `q_${realIdx}`,
+                    kind: 'question',
+                    category: 'exercises',
+                    questionIndex: realIdx,
+                    order: order + 1,
+                    title: `שאלה ${order + 1}: ${q?.title || 'תרגיל'}`,
+                    desc: shortDesc.first,
+                    tag,
+                    cta: 'פתח תרגיל',
+                    thumbFile: `/thumbs/q-${q?.id ?? realIdx}.png`,
+                    thumbSrc: getMobileFeedThumbDataUrl(`q_${realIdx}_${q?.goal || ''}`, trackMeta.icon || 'ƒ')
+                };
+            });
+        }
+
+        function getMobileFeedItems() {
+            return [...getMobileFeedQuestionItems(), ...getMobileFeedActionItems()];
+        }
+
+        function getIsoWeekKey(date = new Date()) {
+            let d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            let dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            let yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            let weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+        }
+
+        function findQuestionIndexByHint(hint) {
+            let raw = String(hint || '').trim();
+            if (!raw) return -1;
+            let questions = getQuestionsList();
+            let visible = new Set(getVisibleQuestionIndexes());
+            if (/^\d+$/.test(raw)) {
+                let idx = Number(raw);
+                if (visible.has(idx)) return idx;
+            }
+            for (let i = 0; i < questions.length; i += 1) {
+                if (!visible.has(i)) continue;
+                if (String(questions[i]?.id ?? '').trim() === raw) return i;
+            }
+            return -1;
+        }
+
+        function resolveFeaturedQuestionIndex() {
+            let visible = getVisibleQuestionIndexes();
+            if (!visible.length) return -1;
+
+            let overrideIdx = findQuestionIndexByHint(ENTRY_FLOW_QUERY.featuredQuestionHint);
+            if (overrideIdx >= 0) return overrideIdx;
+
+            let key = getIsoWeekKey(new Date());
+            let hash = hashMobileFeedSeed(`featured_${key}`);
+            return visible[hash % visible.length];
+        }
+
+        function normalizeMobileFeedText(value) {
+            return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+        }
+
+        function getFilteredMobileFeedItems() {
+            let category = String(mobileFeedCategory || 'all').trim();
+            let search = normalizeMobileFeedText(mobileFeedSearchTerm);
+            return getMobileFeedItems().filter((item) => {
+                if (category !== 'all' && item.category !== category) return false;
+                if (!search) return true;
+                let hay = normalizeMobileFeedText(`${item.title} ${item.desc} ${item.tag}`);
+                return hay.includes(search);
+            });
+        }
+
+        function hashMobileFeedSeed(seed) {
+            let text = String(seed || '');
+            let hash = 0;
+            for (let i = 0; i < text.length; i += 1) {
+                hash = ((hash << 5) - hash) + text.charCodeAt(i);
+                hash |= 0;
+            }
+            return Math.abs(hash);
+        }
+
+        function getMobileFeedThumbDataUrl(seed, iconText) {
+            let key = `${seed}|${iconText || ''}`;
+            if (mobileFeedThumbCache.has(key)) return mobileFeedThumbCache.get(key);
+
+            let palettes = [
+                ['#0ea5e9', '#2563eb'],
+                ['#14b8a6', '#0f766e'],
+                ['#f59e0b', '#d97706'],
+                ['#ec4899', '#be185d'],
+                ['#22c55e', '#15803d'],
+                ['#8b5cf6', '#4c1d95']
+            ];
+            let hash = hashMobileFeedSeed(seed);
+            let palette = palettes[hash % palettes.length];
+            let icon = String(iconText || 'ƒ').slice(0, 2);
+            let bubbleX = 44 + (hash % 72);
+            let bubbleY = 28 + (hash % 32);
+            let wave = 78 + (hash % 34);
+            let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90" role="img" aria-label="">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${palette[0]}"/><stop offset="100%" stop-color="${palette[1]}"/></linearGradient></defs>
+<rect width="160" height="90" rx="14" fill="url(#g)"/>
+<circle cx="${bubbleX}" cy="${bubbleY}" r="15" fill="rgba(255,255,255,0.25)"/>
+<path d="M0 ${wave} C 32 ${wave - 8}, 64 ${wave + 8}, 96 ${wave} C 118 ${wave - 7}, 138 ${wave + 7}, 160 ${wave}" stroke="rgba(255,255,255,0.4)" stroke-width="3" fill="none"/>
+<text x="80" y="53" text-anchor="middle" dominant-baseline="middle" font-size="30" font-family="Assistant, Arial, sans-serif" font-weight="700" fill="white">${escapeHtmlText(icon)}</text>
+</svg>`;
+            let url = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+            mobileFeedThumbCache.set(key, url);
+            return url;
+        }
+
+        function buildMobileFeedTickerMessages() {
+            let total = getVisibleQuestionIndexes().length;
+            let solved = Array.isArray(learnerProgress?.uniqueSolved) ? learnerProgress.uniqueSolved.length : 0;
+            let messages = [
+                'פיד גלילה חדש לנייד: תמונה + כותרת + כניסה מהירה.',
+                `זמינות כרגע ${total} שאלות לתרגול.`,
+                'טיפ: חפשו מילה אחת כדי לקפוץ מהר לתרגיל הרצוי.'
+            ];
+            if (sessionStarted && total > 0) {
+                messages.push(`התקדמות אישית כרגע: ${Math.min(total, solved)}/${total}.`);
+            }
+            return messages;
+        }
+
+        function updateMobileFeedTickerMessages(resetIndex = false) {
+            mobileFeedTickerMessages = buildMobileFeedTickerMessages();
+            if (!Array.isArray(mobileFeedTickerMessages) || mobileFeedTickerMessages.length === 0) {
+                mobileFeedTickerMessages = ['ברוכים הבאים לפיד הניווט.'];
+            }
+            if (resetIndex) {
+                mobileFeedTickerIndex = 0;
+            } else {
+                mobileFeedTickerIndex = Math.max(0, Math.min(mobileFeedTickerIndex, mobileFeedTickerMessages.length - 1));
+            }
+            renderMobileFeedTicker();
+            renderMobileFeedFeaturedCard();
+        }
+
+        function renderMobileFeedTicker() {
+            let textEl = document.getElementById('mobile-feed-ticker-text');
+            if (!textEl) return;
+            let msg = mobileFeedTickerMessages[mobileFeedTickerIndex] || mobileFeedTickerMessages[0] || 'טוען...';
+            textEl.innerText = msg;
+        }
+
+        function renderMobileFeedFeaturedCard() {
+            let wrap = document.getElementById('mobile-feed-featured-wrap');
+            let thumb = document.getElementById('mobile-feed-featured-thumb');
+            let tagEl = document.getElementById('mobile-feed-featured-tag');
+            let titleEl = document.getElementById('mobile-feed-featured-title');
+            let descEl = document.getElementById('mobile-feed-featured-desc');
+            if (!wrap || !thumb || !tagEl || !titleEl || !descEl) return;
+
+            mobileFeedFeaturedQuestionIndex = resolveFeaturedQuestionIndex();
+            if (mobileFeedFeaturedQuestionIndex < 0) {
+                wrap.classList.add('hidden');
+                return;
+            }
+            wrap.classList.remove('hidden');
+
+            let q = getQuestionsList()[mobileFeedFeaturedQuestionIndex] || {};
+            let trackMeta = getQuestionPedagogyTrackMeta(q);
+            let shortDesc = getQuestionShortDesc(q);
+            let visible = getVisibleQuestionIndexes();
+            let pos = visible.indexOf(mobileFeedFeaturedQuestionIndex);
+            let labelPos = pos >= 0 ? `שאלה ${pos + 1}` : 'שאלה';
+            let fallbackThumb = getMobileFeedThumbDataUrl(`featured_${mobileFeedFeaturedQuestionIndex}_${q?.goal || ''}`, trackMeta.icon || '★');
+            let preferredThumb = `/thumbs/q-${q?.id ?? mobileFeedFeaturedQuestionIndex}.png`;
+            thumb.src = preferredThumb;
+            thumb.onerror = () => {
+                thumb.onerror = null;
+                thumb.src = fallbackThumb;
+            };
+            tagEl.innerText = `${labelPos} · ${trackMeta.compactLabel} · ${getMobileFeedGoalLabel(q.goal)}`;
+            titleEl.innerText = q?.title || 'שאלת השבוע';
+            descEl.innerText = shortDesc.first || 'תרגול חזותי מומלץ לשבוע הקרוב.';
+        }
+
+        function stopMobileFeedTickerRotation() {
+            if (mobileFeedTickerTimer) {
+                clearInterval(mobileFeedTickerTimer);
+                mobileFeedTickerTimer = null;
+            }
+        }
+
+        function startMobileFeedTickerRotation() {
+            stopMobileFeedTickerRotation();
+            if (!mobileFeedOpen || mobileFeedTickerMessages.length <= 1) return;
+            mobileFeedTickerTimer = setInterval(() => {
+                if (!mobileFeedOpen) {
+                    stopMobileFeedTickerRotation();
+                    return;
+                }
+                mobileFeedTickerIndex = (mobileFeedTickerIndex + 1) % mobileFeedTickerMessages.length;
+                renderMobileFeedTicker();
+            }, 3200);
+        }
+
+        function updateMobileFeedChipSelection() {
+            document.querySelectorAll('#mobile-feed-chips .mobile-feed-chip').forEach((btn) => {
+                let cat = String(btn.dataset.cat || '');
+                btn.classList.toggle('is-active', cat === mobileFeedCategory);
+            });
+        }
+
+        function renderMobileFeedCards() {
+            let list = document.getElementById('mobile-feed-list');
+            let empty = document.getElementById('mobile-feed-empty');
+            if (!list) return;
+            let items = getFilteredMobileFeedItems();
+            list.innerHTML = '';
+
+            if (!items.length) {
+                if (empty) empty.classList.remove('hidden');
+                return;
+            }
+            if (empty) empty.classList.add('hidden');
+
+            items.forEach((item) => {
+                let card = document.createElement('button');
+                card.type = 'button';
+                card.className = 'mobile-feed-card';
+                card.dataset.kind = item.kind;
+                card.dataset.id = item.id;
+                if (item.kind === 'question' && Number(item.questionIndex) === Number(currentQ)) {
+                    card.classList.add('is-current');
+                }
+
+                let thumbWrap = document.createElement('div');
+                thumbWrap.className = 'mobile-feed-thumb-wrap';
+                let img = document.createElement('img');
+                img.className = 'mobile-feed-thumb';
+                img.loading = 'lazy';
+                img.alt = item.title || 'thumbnail';
+                let fallbackThumb = item.thumbSrc || getMobileFeedThumbDataUrl(`fallback_${item.id}`, 'ƒ');
+                let preferredThumb = String(item.thumbFile || '').trim();
+                if (preferredThumb) {
+                    img.src = preferredThumb;
+                    img.onerror = () => {
+                        img.onerror = null;
+                        img.src = fallbackThumb;
+                    };
+                } else {
+                    img.src = fallbackThumb;
+                }
+                thumbWrap.appendChild(img);
+
+                let body = document.createElement('div');
+                body.className = 'mobile-feed-body';
+
+                let tag = document.createElement('span');
+                tag.className = 'mobile-feed-tag';
+                tag.innerText = item.tag || 'פריט';
+
+                let title = document.createElement('div');
+                title.className = 'mobile-feed-card-title';
+                title.innerText = item.title || 'פריט ניווט';
+
+                let desc = document.createElement('div');
+                desc.className = 'mobile-feed-card-desc';
+                desc.innerText = item.desc || '';
+
+                let cta = document.createElement('span');
+                cta.className = 'mobile-feed-cta';
+                cta.innerText = item.cta || 'פתח';
+
+                body.appendChild(tag);
+                body.appendChild(title);
+                body.appendChild(desc);
+                body.appendChild(cta);
+
+                card.appendChild(thumbWrap);
+                card.appendChild(body);
+                card.addEventListener('click', () => onMobileFeedItemSelect(item));
+                list.appendChild(card);
+            });
+        }
+
+        function setMobileFeedCategory(category) {
+            let allowed = new Set(['all', 'exercises', 'tools', 'knowledge']);
+            let next = String(category || 'all').trim();
+            if (!allowed.has(next)) next = 'all';
+            mobileFeedCategory = next;
+            updateMobileFeedChipSelection();
+            renderMobileFeedCards();
+        }
+
+        function onMobileFeedSearchInput(event) {
+            mobileFeedSearchTerm = String(event?.target?.value || '').trim();
+            renderMobileFeedCards();
+        }
+
+        function openQuestionFromFeedIndex(questionIndex, options = {}) {
+            let idx = Number(questionIndex);
+            if (!Number.isFinite(idx)) return;
+            if (!sessionStarted) markSessionStarted({ preserveCurrentFunction: true });
+            closeMobileFeed({ skipFocus: true });
+            loadQ(idx, { autoOpenOverlay: options.autoOpenOverlay !== false });
+            setDrawerOpen(false);
+            snapViewportToTop({ onlyEmbed: false, force: true });
+        }
+
+        function openFeaturedQuestionFromFeed() {
+            if (!Number.isFinite(mobileFeedFeaturedQuestionIndex) || mobileFeedFeaturedQuestionIndex < 0) return;
+            openQuestionFromFeedIndex(mobileFeedFeaturedQuestionIndex, { autoOpenOverlay: false });
+        }
+
+        function goBackToFeedFromQuestion() {
+            if (!isMobileFeedSupportedNow()) return;
+            closeQuestionOverlay();
+            setDrawerOpen(false);
+            openMobileFeed({ force: true });
+        }
+
+        function onMobileFeedItemSelect(item) {
+            if (!item || typeof item !== 'object') return;
+            if (item.kind === 'question') {
+                let idx = Number(item.questionIndex);
+                if (!Number.isFinite(idx)) return;
+                openQuestionFromFeedIndex(idx, { autoOpenOverlay: false });
+                return;
+            }
+            runMobileFeedAction(item.action);
+        }
+
+        function runMobileFeedAction(action) {
+            let actionId = String(action || '').trim();
+            if (!actionId) return;
+            closeMobileFeed({ skipFocus: true });
+            if (actionId === 'open_builder') {
+                if (!sessionStarted) markSessionStarted({ preserveCurrentFunction: true });
+                openBuilderFromTop();
+                return;
+            }
+            if (actionId === 'open_steps') {
+                if (!sessionStarted) markSessionStarted({ preserveCurrentFunction: true });
+                openAccordion('steps');
+                setDrawerOpen(true);
+                return;
+            }
+            if (actionId === 'open_scan') {
+                openScanModal();
+                return;
+            }
+            if (actionId === 'open_guide') {
+                openStartGuideModal();
+                return;
+            }
+            if (actionId === 'open_help') {
+                openGlobalHelpModal();
+                return;
+            }
+            if (actionId === 'open_feedback') {
+                openFeedbackModal();
+            }
+        }
+
+        function isMobileFeedSupportedNow() {
+            return isNewsFeedFeatureEnabled()
+                && !!document.body
+                && document.body.classList.contains('viewport-mobile');
+        }
+
+        function openMobileFeed(options = {}) {
+            let force = !!options.force;
+            if (!force && !isMobileFeedSupportedNow()) return;
+            let modal = document.getElementById('mobile-feed');
+            let search = document.getElementById('mobile-feed-search');
+            if (!modal) return;
+            mobileFeedOpen = true;
+            document.body.classList.add('mobile-feed-open');
+            modal.classList.remove('hidden');
+            updateMobileFeedTickerMessages(true);
+            updateMobileFeedChipSelection();
+            renderMobileFeedFeaturedCard();
+            renderMobileFeedCards();
+            startMobileFeedTickerRotation();
+            syncMobilePresentationMode();
+            syncNewsFeedActionButtons();
+            if (search) {
+                setTimeout(() => {
+                    try {
+                        search.focus({ preventScroll: true });
+                    } catch (err) {
+                        // Fallback for older browsers.
+                    }
+                }, 30);
+            }
+        }
+
+        function closeMobileFeed(options = {}) {
+            let modal = document.getElementById('mobile-feed');
+            if (!modal) return;
+            mobileFeedOpen = false;
+            modal.classList.add('hidden');
+            document.body.classList.remove('mobile-feed-open');
+            stopMobileFeedTickerRotation();
+            syncMobilePresentationMode();
+            syncNewsFeedActionButtons();
+            if (options.skipFocus) return;
+            let btn = document.getElementById('btn-mobile-feed');
+            if (btn && isMobileFeedSupportedNow()) btn.focus();
+        }
+
+        function toggleMobileFeed() {
+            if (mobileFeedOpen) {
+                closeMobileFeed();
+                return;
+            }
+            openMobileFeed();
+        }
+
+        function syncMobileFeedAutostart() {
+            if (!document.body) return;
+            if (!isMobileFeedSupportedNow()) {
+                closeMobileFeed({ skipFocus: true });
+                return;
+            }
+            if (mobileFeedOpen) return;
+            if (mobileFeedAutoShown) return;
+            if (!ENTRY_FLOW_QUERY.forceNewsFeedView) return;
+            if (!appInitialized) return;
+            let splash = document.getElementById('opening-splash');
+            let splashVisible = !!(splash && !splash.classList.contains('hidden'));
+            if (splashVisible) return;
+            if (isStartGuideModalOpen() || isQuickTourModalOpen()) return;
+            mobileFeedAutoShown = true;
+            if (!sessionStarted) markSessionStarted({ preserveCurrentFunction: true });
+            openMobileFeed({ force: true });
         }
 
         function loadRuntimeScript(src, label) {
@@ -3346,12 +3974,13 @@
                 && sessionStarted
                 && !drawerOpen
                 && !overlayOpen
+                && !mobileFeedOpen
                 && !document.body.classList.contains('practice-clean-mode')
                 && !document.body.classList.contains('param-intro-clean')
                 && !document.body.classList.contains('builder-workspace-mode');
             document.body.classList.toggle('mobile-streamlined', streamlineMode);
 
-            let overlayActive = isMobile && (overlayOpen || drawerOpen);
+            let overlayActive = isMobile && (overlayOpen || drawerOpen || mobileFeedOpen);
             document.body.classList.toggle('mobile-overlay-active', overlayActive);
         }
 
@@ -3360,8 +3989,11 @@
             document.body.classList.toggle('viewport-mobile', mobile);
             document.body.classList.toggle('viewport-desktop', !mobile);
             document.body.classList.toggle('viewport-short', isShortViewportNow());
+            document.body.classList.toggle('news-feed-enabled', isNewsFeedFeatureEnabled());
             syncMobilePresentationMode();
             if (typeof updateSoundButton === 'function') updateSoundButton();
+            syncNewsFeedActionButtons();
+            syncMobileFeedAutostart();
             updateTopQuestionIndexDisplay();
         }
 
@@ -4054,6 +4686,7 @@
                 splash.classList.add('hidden');
                 splash.classList.remove('is-exiting');
                 scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 80, 220] });
+                syncMobileFeedAutostart();
                 maybeCompleteEntryFlowAfterSplash('splash_hidden');
             };
             if (immediate) {
@@ -4428,6 +5061,9 @@
             if (entryFlowStarted && shouldShowOpeningSplash() && !openingSplashDone) {
                 hideOpeningSplash();
             }
+            setTimeout(() => {
+                syncMobileFeedAutostart();
+            }, 220);
             maybeCompleteEntryFlowAfterSplash('app_initialized');
         }
 
@@ -8837,6 +9473,13 @@ Rules:
                 runGuidedDemoFromLaunch();
                 return;
             }
+            if (selectedMode === 'app' && isMobileFeedSupportedNow()) {
+                closeQuestionOverlay();
+                setDrawerOpen(false);
+                mobileFeedAutoShown = true;
+                openMobileFeed({ force: true });
+                return;
+            }
             if (paramIntroCleanActive) {
                 openAccordion('steps');
                 setDrawerOpen(false);
@@ -8868,6 +9511,11 @@ Rules:
             }
 
             if (key !== 'Escape') return;
+            if (mobileFeedOpen) {
+                event.preventDefault();
+                closeMobileFeed({ skipFocus: true });
+                return;
+            }
             if (coachHasHelpPopover() && typeof window.MVCoach.isHelpPopoverOpen === 'function' && window.MVCoach.isHelpPopoverOpen()) {
                 event.preventDefault();
                 window.MVCoach.toggleHelpPopover(false);
@@ -8939,8 +9587,12 @@ Rules:
             document.body.classList.toggle('practice-clean-mode', practiceClean);
             document.body.classList.toggle('param-intro-clean', paramIntroClean);
             document.body.classList.toggle('prestart-only', !sessionStarted);
+            document.body.classList.toggle('news-feed-enabled', isNewsFeedFeatureEnabled());
             syncPracticeCleanModeControls();
             syncMobilePresentationMode();
+            syncNewsFeedActionButtons();
+            updateMobileFeedTickerMessages(false);
+            renderMobileFeedCards();
         }
 
         function syncSessionUiState() {
@@ -9257,6 +9909,8 @@ Rules:
             renderQuestionOverlay(q);
             if (autoOpenOverlay && !paramIntroCleanActive) openQuestionOverlay({ trackCoach: false, source: 'auto_intro' });
             else closeQuestionOverlay();
+            updateMobileFeedTickerMessages(false);
+            renderMobileFeedCards();
             if (mustStartFromFunctionSetup) {
                 showStepToast('שאלה חדשה: קודם בחרו סוג פונקציה, דייקו פרמטרים, ואז לחצו "קבע פונקציה והתחל תרגול".');
                 setTimeout(pulseStartConfirmButton, 140);
