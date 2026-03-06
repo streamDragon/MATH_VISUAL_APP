@@ -260,7 +260,7 @@
             <p id="opening-splash-audio-hint">להפעלת שיר בפתיח לחצו על "נגן שיר".</p>
             <div id="opening-splash-actions">
                 <button id="opening-splash-audio-btn" onclick="retrySplashMusic()">נגן שיר</button>
-                <button onclick="skipOpeningSplash()">דלג לפתיחה</button>
+                <button onclick="skipOpeningSplash()">המשך למסך הראשי</button>
                 <button id="opening-splash-copy-build-btn" class="hidden" type="button" onclick="copyBuildStampFromSplash()">העתק build</button>
             </div>
         </div>
@@ -330,7 +330,7 @@
         <div id="mobile-feed-shell">
             <div id="mobile-feed-head">
                 <div id="mobile-feed-head-text">
-                    <span id="mobile-feed-kicker">MATH FEED</span>
+                    <span id="mobile-feed-kicker">מסלול למידה</span>
                     <h3 id="mobile-feed-title">בחרו מסלול בגלילה</h3>
                 </div>
                 <button id="btn-mobile-feed-close" type="button" onclick="closeMobileFeed()">סגור</button>
@@ -459,18 +459,18 @@
                     <div class="start-logo-grid"></div>
                 </div>
                 <div class="start-guide-brand">
-                    <div class="start-guide-badge">HAGI MATH LAB</div>
-                    <h3>ברוכים הבאים למעבדת הפונקציות</h3>
-                    <p>למשתמש חדש נפתחת כאן הדרכה ראשונית קצרה: מה עושים, למה זה עובד, ואיך מתחילים נכון.</p>
+                    <div class="start-guide-badge">לומדים לראות מתמטיקה</div>
+                    <h3>כך מתחילים בלי להילחץ</h3>
+                    <p>זהו סיור קצר שמראה מה רואים במסך, איך עובדים עם הגרף, ואיך הופכים שאלה מלחיצה למשהו שאפשר להבין.</p>
                 </div>
             </div>
             <div class="start-guide-body">
-                <div class="start-guide-flow-title">איך מתחילים נכון?</div>
+                <div class="start-guide-flow-title">מה מחכה בפנים?</div>
                 <ol class="start-guide-flow-list">
-                    <li><b>כניסה רגילה לאפליקציה</b> - מתחילים לתרגל מיד, עם עזרה בתוך המסך.</li>
-                    <li><b>הדגמה מודרכת</b> - האפליקציה בוחרת שאלה לפי קושי, מזיזה את הנקודה ומדגימה פתרון.</li>
-                    <li><b>הדרכה ראשונית (סיור ממשק)</b> - מסבירה מה רואים במסך, איפה המשימות, ואיך בודקים תשובה.</li>
-                    <li>אפשר גם לצפות בסרטון YouTube קצר (כשתגדירו לינק) בנוסף להדרכה בתוך האתר.</li>
+                    <li><b>כניסה רגילה לאפליקציה</b> - פותחים את התרגול ומקבלים עזרה מתוך המסך.</li>
+                    <li><b>הדגמה מודרכת</b> - רואים שאלה נפתחת על הגרף צעד־צעד.</li>
+                    <li><b>סיור קצר במסך</b> - מבינים איפה המשימה, איפה הכלים, ואיך בודקים תשובה.</li>
+                    <li>אם יוגדר סרטון הדרכה, הוא יופיע כאן כאפשרות נוספת.</li>
                 </ol>
                 <div class="start-coach-box">
                     <div id="start-coach-avatar" class="start-coach-avatar" aria-hidden="true">
@@ -506,7 +506,7 @@
             <div class="start-guide-actions">
                 <button onclick="startAppFromSplash('app')">כניסה לאפליקציה</button>
                 <button onclick="startAppFromSplash('tutorial')">הדרכה ראשונית</button>
-                <button id="btn-start-guide-youtube" class="hidden" type="button" onclick="openOnboardingVideo()">סרטון YouTube</button>
+                <button id="btn-start-guide-youtube" class="hidden" type="button" onclick="openOnboardingVideo()">סרטון הדרכה</button>
                 <button class="start-primary" onclick="startAppFromSplash('demo')">הדגמה מודרכת</button>
             </div>
         </div>
@@ -576,7 +576,7 @@
                 <ul id="global-help-list"></ul>
                 <div id="global-help-clean-reason" class="hidden"></div>
                 <div class="overlay-actions global-help-actions">
-                    <button id="btn-help-show-me" type="button" onclick="triggerGlobalHelpShowMe()">Show me</button>
+                    <button id="btn-help-show-me" type="button" onclick="triggerGlobalHelpShowMe()">תראה לי</button>
                     <button id="btn-help-play-voice" type="button" onclick="playGlobalHelpVoice()">נגן הסבר</button>
                 </div>
                 <label class="global-help-voice-toggle">
@@ -592,31 +592,31 @@
     <div id="scan-modal" class="hidden" onclick="onScanModalBackdropClick(event)">
         <div id="scan-modal-card">
             <div class="overlay-head">
-                <h3>סריקת שאלה והמרה ל־QUESTIONS</h3>
+                <h3>מביאים שאלה אמיתית ומפרקים אותה יחד</h3>
                 <button onclick="closeScanModal()">סגור</button>
             </div>
             <div class="scan-body">
-                <p class="scan-intro">צלמו שאלה מהטלפון או העלו קובץ תמונה. המערכת תיצור ממנה שאלה מפורקת עם שלבי תרגול ויזואליים.</p>
+                <p class="scan-intro">צלמו שאלה מהמחברת או העלו תמונה מהמחשב. האפליקציה תזהה את השאלה ותבנה ממנה פירוק ויזואלי פשוט יותר להבנה.</p>
 
                 <div class="scan-actions-row">
                     <button id="btn-scan-camera" onclick="triggerScanImageInput('camera')">📷 צלם שאלה (מצלמה)</button>
                     <button id="btn-scan-upload" onclick="triggerScanImageInput('file')">העלאת תמונה</button>
-                    <button id="btn-scan-analyze" onclick="analyzeScannedQuestion()">נתח שאלה</button>
-                    <button id="btn-scan-inject" class="hidden" onclick="injectScannedQuestion()">הוסף ל־QUESTIONS ופתח</button>
-                    <button id="btn-scan-copy" class="hidden" onclick="copyScannedQuestionObject()">העתק אובייקט שאלה</button>
+                    <button id="btn-scan-analyze" onclick="analyzeScannedQuestion()">פרק את השאלה בשבילי</button>
+                    <button id="btn-scan-inject" class="hidden" onclick="injectScannedQuestion()">הוסף לאפליקציה ופתח</button>
+                    <button id="btn-scan-copy" class="hidden" onclick="copyScannedQuestionObject()">העתק נתוני שאלה</button>
                 </div>
                 <div id="scan-device-hint" class="scan-device-hint">זיהוי מכשיר מתבצע בעת פתיחת החלון.</div>
 
                 <details id="scan-config-box">
-                    <summary>הגדרות API (OpenAI / Proxy)</summary>
+                    <summary>חיבור ניתוח תמונה (למתקדמים)</summary>
                     <div class="scan-config-grid">
-                        <label for="scan-api-endpoint">API Endpoint</label>
+                        <label for="scan-api-endpoint">כתובת השירות</label>
                         <input id="scan-api-endpoint" type="url" autocomplete="off" placeholder="https://api.openai.com/v1/chat/completions">
 
                         <label for="scan-api-model">מודל</label>
                         <input id="scan-api-model" type="text" autocomplete="off" placeholder="gpt-4o">
 
-                        <label for="scan-api-key">API Key (לא נשמרת אוטומטית)</label>
+                        <label for="scan-api-key">מפתח גישה (לא נשמר אוטומטית)</label>
                         <input id="scan-api-key" type="password" autocomplete="off" placeholder="sk-...">
 
                         <label for="scan-remember-config" class="scan-checkbox-row">
@@ -635,7 +635,7 @@
                 <div id="scan-status"></div>
 
                 <div id="scan-result" class="hidden">
-                    <div class="scan-result-title">טיוטת שאלה שנוצרה</div>
+                    <div class="scan-result-title">טיוטת השאלה שנוצרה</div>
                     <div id="scan-result-problem"></div>
                     <div id="scan-visual-plan-wrap" class="hidden">
                         <div id="scan-visual-plan-head">
@@ -646,8 +646,8 @@
                         <div id="scan-visual-plan-note"></div>
                         <div id="scan-visual-plan-layers"></div>
                         <div id="scan-visual-plan-complete" class="hidden">
-                            <div id="scan-visual-plan-complete-text">Equipped with these visual capabilities, you can now return to the original problem. Good luck solving it.</div>
-                            <button type="button" id="btn-scan-return-problem" onclick="onScanActionPlanReturnToProblem()">חזרה לשאלה המקורית (Placeholder)</button>
+                            <div id="scan-visual-plan-complete-text">עכשיו, אחרי שפירקנו את השאלה לשכבות ויזואליות, אפשר לחזור אליה עם יותר ביטחון.</div>
+                            <button type="button" id="btn-scan-return-problem" onclick="onScanActionPlanReturnToProblem()">חזרה לשאלה המקורית</button>
                         </div>
                     </div>
                     <ol id="scan-subquestions-list"></ol>
@@ -658,6 +658,80 @@
     </div>
 
     <div id="graph-area-wrapper">
+        <section id="home-landing" aria-labelledby="home-hero-title">
+            <section id="home-hero" class="home-surface">
+                <div class="home-kicker">מתמטיקה שאפשר לראות</div>
+                <h1 id="home-hero-title">אתה לא טיפש — חסרה לך דרך לראות</h1>
+                <p id="home-hero-subtitle">כאן לומדים להבין פונקציות, גרפים ושיפועים בצורה ויזואלית, פשוטה וצעד־צעד.</p>
+                <button id="btn-home-scroll" type="button" onclick="scrollToHomePaths()">בחרו איך להתחיל</button>
+            </section>
+
+            <section id="home-paths-section" class="home-surface" aria-labelledby="home-paths-title">
+                <div class="home-section-head">
+                    <div class="home-section-kicker">3 דרכים פשוטות להתחיל</div>
+                    <h2 id="home-paths-title">בוחרים דרך אחת ומקבלים התחלה ברורה</h2>
+                </div>
+                <div id="home-paths">
+                    <button class="home-path-card" type="button" onclick="startAppFromSplash('demo')">
+                        <span class="home-path-index">01</span>
+                        <span class="home-path-title">תראה לי איך זה עובד</span>
+                        <span class="home-path-desc">הדגמה מודרכת עם גרף חי והסבר ויזואלי קצר.</span>
+                    </button>
+                    <button class="home-path-card" type="button" onclick="startLevelPracticeFromLanding()">
+                        <span class="home-path-index">02</span>
+                        <span class="home-path-title">תן לי תרגיל לפי הרמה שלי</span>
+                        <span class="home-path-desc">מתחילים בקל, מתרגלים צעד־צעד, ומתקדמים בלי לקפוץ מהר מדי.</span>
+                    </button>
+                    <button class="home-path-card" type="button" onclick="openScanModal()">
+                        <span class="home-path-index">03</span>
+                        <span class="home-path-title">יש לי שאלה — תעזור לי להבין</span>
+                        <span class="home-path-desc">מביאים שאלה אמיתית מהמחברת או מהספר ומקבלים פירוק ויזואלי.</span>
+                    </button>
+                </div>
+            </section>
+
+            <section id="home-benefits" class="home-surface" aria-labelledby="home-benefits-title">
+                <div class="home-section-head">
+                    <div class="home-section-kicker">למה זה עוזר?</div>
+                    <h2 id="home-benefits-title">כשהמתמטיקה נראית ברור, קל יותר להבין</h2>
+                </div>
+                <div id="home-benefit-list">
+                    <div class="home-benefit-item">רואים את המתמטיקה</div>
+                    <div class="home-benefit-item">מבינים שלב־שלב</div>
+                    <div class="home-benefit-item">מתקדמים בלי להילחץ</div>
+                </div>
+            </section>
+
+            <section id="home-adults" class="home-surface" aria-labelledby="home-adults-title">
+                <div class="home-section-head">
+                    <div class="home-section-kicker">להורים ולמורים</div>
+                    <h2 id="home-adults-title">כלי רגוע וברור לתלמידים שצריכים לראות כדי להבין</h2>
+                </div>
+                <ul id="home-adults-list">
+                    <li>מתאים לתלמידים שמתקשים להבין מה הגרף והנוסחה באמת אומרים</li>
+                    <li>מחבר בין ראייה ויזואלית, הבנה וביטחון</li>
+                    <li>מאפשר להתחיל מהדגמה, תרגול לפי רמה, או שאלה אמיתית</li>
+                </ul>
+            </section>
+
+            <details id="home-advanced" class="home-surface">
+                <summary>עוד כלים למי שכבר יודע מה הוא מחפש</summary>
+                <p id="home-advanced-note">הכלים האלה נשארו זמינים, אבל הם לא חייבים להיות הצעד הראשון של תלמיד שנכנס לחוץ.</p>
+                <div id="home-advanced-actions">
+                    <button type="button" onclick="openBuilderFromMainCta()">לעצב פונקציה בעצמי</button>
+                    <button type="button" onclick="openStartGuideModal()">סיור קצר במסך</button>
+                    <button type="button" onclick="replayOpeningSplash()">לראות שוב את הפתיח</button>
+                    <button type="button" onclick="openFeedbackModal()">לשלוח משוב</button>
+                </div>
+                <div id="home-question-picker">
+                    <label for="home-question-select">פתיחת תרגיל מתוך הקטלוג</label>
+                    <div id="home-question-picker-row">
+                        <select id="home-question-select" title="בחירת תרגיל"></select>
+                        <button id="btn-home-open-question" type="button" onclick="openSelectedLandingQuestion()">פתח את התרגיל שבחרתי</button>
+                    </div>
+                </div>
+            </details>
+        </section>
         <div id="top-strip">
             <div id="top-version-badge">גרסה: --</div>
             <div id="top-function-bar" aria-live="polite">
@@ -758,7 +832,14 @@
                 </div>
             </div>
         </div>
-        <div id="graph-area"></div>
+        <div id="home-preview-column">
+            <section id="home-graph-preview" aria-hidden="true">
+                <div class="home-preview-kicker">טעימה חיה</div>
+                <h2>כך הגרף מתחיל לספר את הסיפור</h2>
+                <p>רואים בזמן אמת מה קורה לפונקציה, לשיפוע ולנקודה על הגרף. זו בדיוק השכבה שחסרה כשהנוסחה לבדה לא מספיקה.</p>
+            </section>
+            <div id="graph-area"></div>
+        </div>
     </div>
 
     <div id="sidebar" class="drawer-collapsed">
@@ -2798,30 +2879,42 @@
 
         function refreshTopQuestionSelect(selectedIndex = currentQ) {
             let topSelect = document.getElementById('top-question-select');
-            if (!topSelect) return selectedIndex;
+            let homeSelect = document.getElementById('home-question-select');
+            let selects = [topSelect, homeSelect].filter(Boolean);
+            if (selects.length === 0) return selectedIndex;
 
             let questions = getQuestionsList();
             let visible = getVisibleQuestionIndexes();
-            topSelect.innerHTML = '';
+            selects.forEach((select) => {
+                select.innerHTML = '';
+            });
 
             visible.forEach((realIdx, visibleOrder) => {
                 let q = questions[realIdx];
-                let opt = document.createElement('option');
-                opt.value = String(realIdx);
                 let shortDesc = getQuestionShortDesc(q);
                 let trackMeta = getQuestionPedagogyTrackMeta(q);
                 let compactTitle = (q?.title || '').replace(/\s+/g, ' ').trim();
                 if (compactTitle.length > 24) compactTitle = `${compactTitle.slice(0, 24).trim()}...`;
-                opt.textContent = `${trackMeta.icon} שאלה ${visibleOrder + 1} · ${compactTitle}`;
-                opt.title = `${trackMeta.shortLabel} | ${q?.title || ''} - ${shortDesc.first}`;
-                topSelect.appendChild(opt);
+                selects.forEach((select) => {
+                    let opt = document.createElement('option');
+                    opt.value = String(realIdx);
+                    opt.textContent = `${trackMeta.icon} שאלה ${visibleOrder + 1} · ${compactTitle}`;
+                    opt.title = `${trackMeta.shortLabel} | ${q?.title || ''} - ${shortDesc.first}`;
+                    select.appendChild(opt);
+                });
             });
 
-            topSelect.disabled = visible.length === 0;
+            selects.forEach((select) => {
+                select.disabled = visible.length === 0;
+            });
+            let homeOpenBtn = document.getElementById('btn-home-open-question');
+            if (homeOpenBtn) homeOpenBtn.disabled = visible.length === 0;
             if (visible.length === 0) return selectedIndex;
 
             let nextSelected = visible.includes(selectedIndex) ? selectedIndex : visible[0];
-            topSelect.value = String(nextSelected);
+            selects.forEach((select) => {
+                select.value = String(nextSelected);
+            });
             return nextSelected;
         }
 
@@ -3356,6 +3449,41 @@
         function openFeaturedQuestionFromFeed() {
             if (!Number.isFinite(mobileFeedFeaturedQuestionIndex) || mobileFeedFeaturedQuestionIndex < 0) return;
             openQuestionFromFeedIndex(mobileFeedFeaturedQuestionIndex, { autoOpenOverlay: false });
+        }
+
+        function scrollToHomePaths() {
+            let el = document.getElementById('home-paths-section');
+            if (!el) return;
+            try {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (err) {
+                el.scrollIntoView();
+            }
+        }
+
+        function openSelectedLandingQuestion() {
+            let select = document.getElementById('home-question-select');
+            if (!select) return;
+            let idx = Number(select.value);
+            if (!Number.isFinite(idx)) return;
+            if (!sessionStarted) markSessionStarted({ preserveCurrentFunction: true });
+            closeQuestionOverlay();
+            loadQ(idx, { autoOpenOverlay: false });
+            setDrawerOpen(false);
+            showStepToast('נפתח התרגיל שבחרתם. אפשר לפתוח גם סיור קצר או לעבור ישר לעבודה.');
+        }
+
+        function startLevelPracticeFromLanding() {
+            let startIdx = getFirstPracticeQuestionIndex();
+            markStartGuideSeen('start:practice_path');
+            closeStartGuideModal({ skipOverlay: true });
+            if (!sessionStarted) markSessionStarted();
+            if (startIdx >= 0 && currentQ !== startIdx) {
+                loadQ(startIdx, { autoOpenOverlay: true });
+            }
+            openAccordion('steps');
+            setDrawerOpen(false);
+            showStepToast('מתחילים בתרגיל נגיש וברור. אפשר לפתוח הסבר מלא בכל שלב.');
         }
 
         function goBackToFeedFromQuestion() {
@@ -5147,6 +5275,13 @@
                 let idx = parseInt(ev.target.value, 10);
                 loadQ(idx, { autoOpenOverlay: true });
             });
+            let homeSelect = document.getElementById('home-question-select');
+            if (homeSelect) {
+                homeSelect.addEventListener('change', (ev) => {
+                    let value = String(ev.target.value || '').trim();
+                    if (topSelect) topSelect.value = value;
+                });
+            }
 
             activeTemplate = getDefaultTemplate();
             if (activeTemplate) {
@@ -7596,7 +7731,7 @@
         function openOnboardingVideo() {
             let url = getOnboardingVideoUrl();
             if (!url) {
-                showStepToast('עדיין לא הוגדר לינק ל-YouTube במסך הפתיחה.');
+                showStepToast('עדיין לא הוגדר לינק לסרטון ההדרכה במסך הפתיחה.');
                 return;
             }
             markStartGuideSeen('start:youtube');
@@ -8777,14 +8912,14 @@
             let meta = getVisualSkillRegistryMeta(tag, skillObject);
             let title = getShortText(skillObject?.title || '', meta.heTitle || tag);
             let exerciseType = skillObject?.ui_exercise_type || meta.defaultExerciseType || 'classification';
-            let line = `Placeholder: startVisualSkill(${tag}) | module=${meta.launcherKey} | exercise=${exerciseType}`;
-            setScanStatus(`נפתח שלב ויזואלי (Placeholder): ${title}`, false);
+            let line = `נפתח שלב ויזואלי: ${title} | מודול ${meta.launcherKey} | תרגול ${exerciseType}`;
+            setScanStatus(`נפתח שלב ויזואלי: ${title}`, false);
             showStepToast(`שלב ויזואלי: ${title}`);
             console.log(line, { skillCategory: tag, skillObject: skillObject || null });
         }
 
         function onScanActionPlanReturnToProblem() {
-            setScanStatus('חזרה לשאלה המקורית (Placeholder): עכשיו אפשר לעבור לבניית/הזרקת השאלה או להמשיך אימון.', false);
+            setScanStatus('חזרתם לשאלה המקורית. עכשיו אפשר לעבור לבניית השאלה או להמשיך באימון.', false);
             showStepToast('חזרתם לשאלה המקורית. המשיכו לאימון/הזרקה.');
         }
 
@@ -8854,7 +8989,7 @@
 
                     let metaLine = document.createElement('div');
                     metaLine.className = 'scan-skill-meta';
-                    metaLine.innerText = `tag: ${skill.visual_category} | level: ${skill.difficulty} | ui: ${skill.ui_exercise_type}`;
+                    metaLine.innerText = `תחום: ${skill.visual_category} | רמה: ${skill.difficulty} | סוג תרגול: ${skill.ui_exercise_type}`;
                     body.appendChild(metaLine);
 
                     if (skill.pedagogical_reason) {
@@ -9335,7 +9470,7 @@ Rules:
                     document.execCommand('copy');
                     document.body.removeChild(ta);
                 }
-                setScanStatus('אובייקט השאלה הועתק. אפשר להדביק ידנית לתוך QUESTIONS בקוד.', false);
+                setScanStatus('נתוני השאלה הועתקו. אפשר לשמור אותם ידנית בקוד.', false);
             } catch (err) {
                 setScanStatus('לא הצלחתי להעתיק ללוח. נסו שוב.', true);
             }
