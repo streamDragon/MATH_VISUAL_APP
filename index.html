@@ -266,8 +266,8 @@
         </div>
     </div>
 
-    <button id="sound-toggle" onclick="toggleSound()">🔊</button>
-    <button id="btn-tools-menu" onclick="toggleDrawer()" aria-expanded="false">☰ כלים ומשימות</button>
+    <button id="sound-toggle" onclick="toggleSound()" hidden>🔊</button>
+    <button id="btn-tools-menu" onclick="toggleDrawer()" aria-expanded="false" hidden>☰ כלים ומשימות</button>
     <div id="side-quick-actions" class="hidden" aria-label="קיצורי דרך" style="display:none !important;" aria-hidden="true">
         <button id="btn-side-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
         <button id="btn-side-questions" onclick="toggleQuestionsFromTop()">שאלות</button>
@@ -337,7 +337,7 @@
             </div>
             <div id="mobile-feed-ticker" aria-live="polite">
                 <span id="mobile-feed-ticker-label">מה חדש</span>
-                <span id="mobile-feed-ticker-text">טוען עדכונים...</span>
+                <span id="mobile-feed-ticker-text">מכינים הצעות להמשך...</span>
             </div>
             <div id="mobile-feed-featured-wrap">
                 <div id="mobile-feed-featured-head">
@@ -349,9 +349,9 @@
                         <img id="mobile-feed-featured-thumb" alt="שאלת השבוע" loading="lazy">
                     </div>
                     <div id="mobile-feed-featured-body">
-                        <span id="mobile-feed-featured-tag">טוען...</span>
-                        <div id="mobile-feed-featured-title">טוען...</div>
-                        <div id="mobile-feed-featured-desc">טוען...</div>
+                        <span id="mobile-feed-featured-tag">עוד רגע יופיע כאן תרגיל מומלץ</span>
+                        <div id="mobile-feed-featured-title">מכינים תרגיל מומלץ</div>
+                        <div id="mobile-feed-featured-desc">עוד רגע תופיע כאן הצעה קצרה וברורה.</div>
                     </div>
                 </button>
             </div>
@@ -489,10 +489,10 @@
                 <video id="quick-tour-demo-video" muted loop playsinline preload="metadata" poster="public/opening-poster.png"></video>
                 <div id="quick-tour-video-label">סיור מודרך מהיר</div>
             </div>
-            <div id="quick-tour-sample-question">שאלה לדוגמה: טוען...</div>
+            <div id="quick-tour-sample-question">שאלה לדוגמה תופיע כאן מיד</div>
             <div id="quick-tour-step-index">שלב 1/1</div>
-            <h3 id="quick-tour-title">טוען...</h3>
-            <p id="quick-tour-text">טוען הסבר...</p>
+            <h3 id="quick-tour-title">מכינים סיור קצר</h3>
+            <p id="quick-tour-text">עוד רגע תראו מה רואים קודם ואיפה מתחילים.</p>
             <div id="quick-tour-actions">
                 <button onclick="skipQuickTour()">דלג כרגע</button>
                 <button id="btn-quick-tour-next" onclick="nextQuickTourStep()">הבנתי, הבא</button>
@@ -573,15 +573,18 @@
                     <button id="btn-scan-inject" class="hidden" onclick="injectScannedQuestion()">הוסף לאפליקציה ופתח</button>
                     <button id="btn-scan-copy" class="hidden" onclick="copyScannedQuestionObject()">העתק נתוני שאלה</button>
                 </div>
-                <div id="scan-device-hint" class="scan-device-hint">זיהוי מכשיר מתבצע בעת פתיחת החלון.</div>
+                <div id="scan-device-hint" class="scan-device-hint">בחרו אם לצלם מהטלפון או להעלות תמונה מהמחשב.</div>
+                <button id="btn-scan-admin-toggle" class="hidden" type="button" onclick="toggleScanAdminConfig()">
+                    הגדרות חיבור למורה/אדמין
+                </button>
 
-                <details id="scan-config-box">
-                    <summary>חיבור ניתוח תמונה (למתקדמים)</summary>
+                <details id="scan-config-box" class="hidden">
+                    <summary>הגדרות חיבור למורה/אדמין</summary>
                     <div class="scan-config-grid">
-                        <label for="scan-api-endpoint">כתובת השירות</label>
+                        <label for="scan-api-endpoint">כתובת החיבור</label>
                         <input id="scan-api-endpoint" type="url" autocomplete="off" placeholder="https://api.openai.com/v1/chat/completions">
 
-                        <label for="scan-api-model">מודל</label>
+                        <label for="scan-api-model">שם המודל</label>
                         <input id="scan-api-model" type="text" autocomplete="off" placeholder="gpt-4o">
 
                         <label for="scan-api-key">מפתח גישה (לא נשמר אוטומטית)</label>
@@ -589,7 +592,7 @@
 
                         <label for="scan-remember-config" class="scan-checkbox-row">
                             <input id="scan-remember-config" type="checkbox" checked>
-                            שמור Endpoint + Model בדפדפן
+                            שמור את כתובת החיבור ושם המודל בדפדפן
                         </label>
                     </div>
                 </details>
@@ -599,11 +602,11 @@
                     <div id="scan-preview-placeholder">לא נבחרה תמונה עדיין.</div>
                 </div>
 
-                <div id="scan-spinner" class="hidden">מנתחים תמונה...</div>
+                <div id="scan-spinner" class="hidden">מכינים פירוק ויזואלי...</div>
                 <div id="scan-status"></div>
 
                 <div id="scan-result" class="hidden">
-                    <div class="scan-result-title">טיוטת השאלה שנוצרה</div>
+                    <div class="scan-result-title">כך נתחיל להבין את השאלה</div>
                     <div id="scan-result-problem"></div>
                     <div id="scan-visual-plan-wrap" class="hidden">
                         <div id="scan-visual-plan-head">
@@ -683,7 +686,7 @@
             </section>
 
             <details id="home-advanced" class="home-surface">
-                <summary>עוד כלים למי שכבר יודע מה הוא מחפש</summary>
+                <summary>עוד כלים</summary>
                 <p id="home-advanced-note">הכלים האלה נשארו זמינים, אבל הם לא חייבים להיות הצעד הראשון של תלמיד שנכנס לחוץ.</p>
                 <div id="home-advanced-actions">
                     <button type="button" onclick="openBuilderFromMainCta()">לעצב פונקציה בעצמי</button>
@@ -711,7 +714,7 @@
             </div>
             <div id="top-question-wrap">
                 <span id="top-question-index">שאלה 1/4</span>
-                <span id="top-question">טוען...</span>
+                <span id="top-question">השאלה תופיע כאן בעוד רגע</span>
                 <span id="top-track-badge" class="track-visual-explore">מסלול: חקירה ויזואלית</span>
                 <div id="top-build-cta-wrap">
                     <button id="btn-top-build-cta" type="button" onclick="openBuilderFromMainCta()">לחצו כאן לבניית פונקציה</button>
@@ -732,8 +735,8 @@
                 <span id="learner-progress-chip">רמה 1 | XP 0 | רצף 0 | 0/0</span>
                 <div id="top-brief-card">
                     <div id="top-brief-head">המשימה עכשיו</div>
-                    <div id="top-brief-main">טוען משימה...</div>
-                    <div id="top-brief-detail">טוען הסבר קצר...</div>
+                    <div id="top-brief-main">מכינים את המשימה הראשונה...</div>
+                    <div id="top-brief-detail">עוד רגע יופיע כאן הסבר קצר וברור.</div>
                 </div>
             </div>
             <div id="top-formulas">
@@ -751,9 +754,9 @@
                 </div>
             </div>
             <div id="top-clarity-panel" class="hidden" style="display:none !important;">
-                <div id="top-clarity-title">שאלה: טוען...</div>
-                <div id="top-clarity-goal">מטרת התרגיל: טוען...</div>
-                <div id="top-clarity-action">מה התלמיד עושה עכשיו: טוען...</div>
+                <div id="top-clarity-title">שאלה: עוד רגע תופיע כאן</div>
+                <div id="top-clarity-goal">מטרת התרגיל: תופיע כאן מיד</div>
+                <div id="top-clarity-action">מה התלמיד עושה עכשיו: נציג כאן את הצעד הבא</div>
                 <div id="top-clarity-tip">רוצים להבין למה זה עובד? לחצו על כפתור ההעמקה.</div>
                 <button id="btn-top-deep-dive" onclick="openQuestionOverlay()">להעמקה והסבר מלא</button>
             </div>
@@ -784,7 +787,7 @@
         <div id="practice-question-bar" aria-live="polite" hidden>
             <span id="practice-question-index">שאלה 1/4</span>
             <span id="practice-question-task-label">מה עושים עכשיו?</span>
-            <span id="practice-question-title">טוען...</span>
+            <span id="practice-question-title">מכינים תרגיל...</span>
             <span id="practice-function-inline" class="inline-math-bidi">f(x) = ...</span>
             <span id="practice-clean-source-chip" class="hidden">
                 <span id="practice-clean-source-text">מצב ריכוז הופעל אוטומטית</span>
@@ -814,7 +817,7 @@
         <button id="drawer-handle" onclick="toggleDrawer()">כלים ומשימות</button>
         <div id="drawer-content">
             <div id="drawer-question-head" style="text-align:center; display:none;">
-                <h2 id="q-title">טוען...</h2>
+                <h2 id="q-title">מכינים את השאלה...</h2>
                 <div id="q-desc" style="font-size:0.9rem; color:#555;"></div>
             </div>
 
@@ -830,8 +833,8 @@
                         <div id="mission-step-note">טיפ: קראו את המשימה ובצעו צעד אחד בכל פעם.</div>
                         <div id="mission-expanded-box">
                             <div id="mission-expanded-title">הסבר ברור (גלוי תמיד)</div>
-                            <div id="mission-expanded-text">טוען הסבר...</div>
-                            <div id="mission-success-text">טוען תנאי הצלחה...</div>
+                            <div id="mission-expanded-text">עוד רגע יופיע כאן הסבר פשוט.</div>
+                            <div id="mission-success-text">עוד רגע נציג כאן איך יודעים שהצלחתם.</div>
                             <ol id="mission-expanded-steps"></ol>
                         </div>
                         <div id="read-answer-panel" class="hidden">
@@ -918,7 +921,7 @@
                     <div class="section-title">בניית הפונקציה</div>
                     <div id="builder-template-panel">
                         <div class="section-title">הגדרה לפני תחילת תרגול</div>
-                        <div id="builder-question-template-label">גרף פתיחה לשאלה: טוען...</div>
+                        <div id="builder-question-template-label">גרף פתיחה לשאלה: נטען בעוד רגע</div>
                         <div id="builder-template-type-note">לפני שמתחילים תרגול אפשר לבחור כל פונקציה פולינומית: קודם בוחרים סוג פונקציה (ישר / פרבולה / פולינום), ואז מדייקים אותה בעזרת הפרמטרים.</div>
                         <select id="template-select" onchange="applySelectedTemplate(false)"></select>
                         <div id="template-toggle-group" aria-label="בחירה מהירה של סוג פונקציה"></div>
@@ -1004,6 +1007,26 @@
             if (['0', 'false', 'no', 'off'].includes(value)) return false;
             return null;
         }
+
+        const SHOW_SCAN_ADMIN = (() => {
+            try {
+                let params = new URLSearchParams(window.location.search);
+                let raw = parseBooleanQueryValue(params.get('scan_admin') || params.get('scan_config') || params.get('admin_scan'));
+                return SHOW_BUILD_DEBUG || raw === true;
+            } catch (err) {
+                return SHOW_BUILD_DEBUG;
+            }
+        })();
+
+        const ENABLE_OPTIONAL_ADMIN_EXTENSIONS = (() => {
+            try {
+                let params = new URLSearchParams(window.location.search);
+                let raw = parseBooleanQueryValue(params.get('codex_ext') || params.get('advanced_ui') || params.get('admin_ui'));
+                return SHOW_BUILD_DEBUG || raw === true;
+            } catch (err) {
+                return SHOW_BUILD_DEBUG;
+            }
+        })();
 
         function readEntryFlowQueryParams() {
             try {
@@ -1309,6 +1332,7 @@
         let scanCompletedVisualSkills = new Set();
         let scanInFlight = false;
         let lastScanInputMode = '';
+        let scanAdminConfigRevealed = SHOW_SCAN_ADMIN;
         let notebookHistory = [];
         let notebookAutoGenerateOnDrag = true;
         let notebookLastSnapshotHash = '';
@@ -3239,7 +3263,7 @@
         function renderMobileFeedTicker() {
             let textEl = document.getElementById('mobile-feed-ticker-text');
             if (!textEl) return;
-            let msg = mobileFeedTickerMessages[mobileFeedTickerIndex] || mobileFeedTickerMessages[0] || 'טוען...';
+            let msg = mobileFeedTickerMessages[mobileFeedTickerIndex] || mobileFeedTickerMessages[0] || 'מכינים את מסלול הלמידה...';
             textEl.innerText = msg;
         }
 
@@ -3444,12 +3468,10 @@
             markStartGuideSeen('start:practice_path');
             closeStartGuideModal({ skipOverlay: true });
             if (!sessionStarted) markSessionStarted();
-            if (startIdx >= 0 && currentQ !== startIdx) {
-                loadQ(startIdx, { autoOpenOverlay: true });
-            }
+            loadQ(startIdx >= 0 ? startIdx : currentQ, { autoOpenOverlay: true });
             openAccordion('steps');
             setDrawerOpen(false);
-            showStepToast('מתחילים בתרגיל נגיש וברור. אפשר לפתוח הסבר מלא בכל שלב.');
+            showStepToast('מתחילים בתרגיל נגיש וברור. קודם קוראים את הכרטיס, ואז מתקדמים צעד־צעד.');
         }
 
         function goBackToFeedFromQuestion() {
@@ -4484,7 +4506,9 @@
         }
 
         function shouldInlineVersionInTopQuestionIndex() {
-            return document.body.classList.contains('embed-mode') && document.body.classList.contains('viewport-mobile');
+            return SHOW_BUILD_DEBUG
+                && document.body.classList.contains('embed-mode')
+                && document.body.classList.contains('viewport-mobile');
         }
 
         function updateTopQuestionIndexDisplay() {
@@ -4505,13 +4529,15 @@
             let buildStampWithTime = getBuildStamp(versionLabel, true);
             let topVersionBadge = document.getElementById('top-version-badge');
             if (topVersionBadge) {
-                topVersionBadge.innerText = buildStampWithTime;
-                topVersionBadge.title = `${buildStampWithTime} | ${getRuntimeModeLabel()}`;
+                topVersionBadge.hidden = !SHOW_BUILD_DEBUG;
+                topVersionBadge.innerText = SHOW_BUILD_DEBUG ? buildStampWithTime : '';
+                topVersionBadge.title = SHOW_BUILD_DEBUG ? `${buildStampWithTime} | ${getRuntimeModeLabel()}` : '';
             }
             let buildBadge = document.getElementById('build-badge');
             if (buildBadge) {
-                buildBadge.innerText = `${APP_BUILD_ENV}:${APP_BUILD_SHA_SHORT}`;
-                buildBadge.title = buildStampWithTime;
+                buildBadge.hidden = !SHOW_BUILD_DEBUG;
+                buildBadge.innerText = SHOW_BUILD_DEBUG ? `${APP_BUILD_ENV}:${APP_BUILD_SHA_SHORT}` : '';
+                buildBadge.title = SHOW_BUILD_DEBUG ? buildStampWithTime : '';
             }
             updateTopQuestionIndexDisplay();
             updateBuildDebugPanel();
@@ -4827,7 +4853,7 @@
         }
 
         function exposeBuildBadgeInEmbedMode() {
-            if (!document.body.classList.contains('embed-mode')) return;
+            if (!SHOW_BUILD_DEBUG || !document.body.classList.contains('embed-mode')) return;
             let badge = document.getElementById('build-badge');
             let actions = document.getElementById('top-actions');
             if (!badge || !actions) return;
@@ -5029,11 +5055,15 @@
             let versionForDisplay = await resolveVersionForDisplay();
             runtimeDisplayedVersion = getRuntimeVersionDisplayOverride() || versionForDisplay;
             let splashVersion = document.getElementById('opening-splash-version');
-            if (splashVersion) splashVersion.innerText = getBuildStamp(runtimeDisplayedVersion, true);
+            if (splashVersion) {
+                splashVersion.hidden = !SHOW_BUILD_DEBUG;
+                splashVersion.innerText = SHOW_BUILD_DEBUG ? getBuildStamp(runtimeDisplayedVersion, true) : '';
+            }
             updateDisplayedVersionBadges();
             exposeBuildBadgeInEmbedMode();
             loadFeedbackMessages();
             loadScanConfig();
+            document.getElementById('scan-config-box')?.addEventListener('toggle', () => syncScanAdminConfigUi());
             let defaultDrawerOpen = false;
             setDrawerOpen(defaultDrawerOpen);
             initAdMobBanner();
@@ -5256,7 +5286,7 @@
 
             if (questions.length > 0) {
                 let startIdx = getFirstPracticeQuestionIndex();
-                loadQ(startIdx >= 0 ? startIdx : 0, { autoOpenOverlay: true });
+                loadQ(startIdx >= 0 ? startIdx : 0, { autoOpenOverlay: false });
             } else {
                 renderNoQuestionsState();
             }
@@ -7929,13 +7959,60 @@
 
         function setScanBusy(busy) {
             scanInFlight = !!busy;
-            ['btn-scan-camera', 'btn-scan-upload', 'btn-scan-analyze', 'btn-scan-inject', 'btn-scan-copy'].forEach((id) => {
+            ['btn-scan-camera', 'btn-scan-upload', 'btn-scan-analyze', 'btn-scan-inject', 'btn-scan-copy', 'btn-scan-admin-toggle'].forEach((id) => {
                 let el = document.getElementById(id);
                 if (!el) return;
                 el.disabled = !!busy;
             });
             let spinner = document.getElementById('scan-spinner');
             if (spinner) spinner.classList.toggle('hidden', !busy);
+        }
+
+        function syncScanAdminConfigUi(options = {}) {
+            let box = document.getElementById('scan-config-box');
+            let toggle = document.getElementById('btn-scan-admin-toggle');
+            if (!box || !toggle) return;
+            let visible = SHOW_SCAN_ADMIN || scanAdminConfigRevealed;
+            box.classList.toggle('hidden', !visible);
+            toggle.classList.toggle('hidden', !visible);
+            if (!visible) {
+                box.open = false;
+                return;
+            }
+            if (options.forceOpen) box.open = true;
+            toggle.innerText = box.open ? 'הסתר הגדרות חיבור למורה/אדמין' : 'הגדרות חיבור למורה/אדמין';
+            toggle.setAttribute('aria-expanded', box.open ? 'true' : 'false');
+        }
+
+        function toggleScanAdminConfig(forceOpen) {
+            scanAdminConfigRevealed = true;
+            let box = document.getElementById('scan-config-box');
+            if (!box) return;
+            if (typeof forceOpen === 'boolean') box.open = forceOpen;
+            else box.open = !box.open;
+            syncScanAdminConfigUi();
+        }
+
+        function revealScanAdminConfig() {
+            scanAdminConfigRevealed = true;
+            syncScanAdminConfigUi({ forceOpen: true });
+        }
+
+        function getFriendlyScanErrorMessage(err) {
+            let raw = String(err?.message || '').trim();
+            if (!raw) return 'לא הצלחתי לנתח את השאלה כרגע. נסו שוב עם תמונה ברורה יותר.';
+            if (/scan_config_missing|api key|openai/i.test(raw)) {
+                revealScanAdminConfig();
+                return 'החיבור לניתוח תמונה עדיין לא הוגדר במכשיר הזה. אם צריך, מורה או אדמין יכולים לפתוח כאן את הגדרות החיבור.';
+            }
+            if (/json|תשובה ריקה|לא התקבל תוכן/i.test(raw)) {
+                return 'לא הצלחתי להבין את התמונה בצורה יציבה. נסו צילום חד יותר או חיתוך קרוב יותר לשאלה.';
+            }
+            if (/api|proxy|http/i.test(raw)) {
+                revealScanAdminConfig();
+                return 'לא הצלחתי להתחבר לניתוח התמונה כרגע. נסו שוב בעוד רגע, ואם זה חוזר פתחו הגדרות חיבור למורה/אדמין.';
+            }
+            return 'לא הצלחתי לנתח את השאלה כרגע. נסו שוב עם תמונה ברורה יותר.';
         }
 
         function resetScanResultUi() {
@@ -8056,8 +8133,8 @@
             if (!hint) return;
 
             let parts = [];
-            parts.push(isPhone ? 'זוהה מצב טלפון.' : 'זוהה מצב מחשב.');
-            parts.push(isPhone ? 'מומלץ להתחיל עם "צלם שאלה (מצלמה)".' : 'מומלץ להתחיל עם "העלאת תמונה מהמחשב".');
+            parts.push(isPhone ? 'בטלפון הכי נוח לצלם את השאלה עכשיו.' : 'במחשב הכי נוח להעלות צילום או תמונה של השאלה.');
+            parts.push('אחרי שתבחרו תמונה, אני אפרק את השאלה לצעדים ברורים.');
             if (inSites && inIframe) {
                 parts.push('אם המצלמה לא נפתחת בתוך Google Sites, פתחו את האפליקציה בלשונית חדשה ולחצו שוב על כפתור המצלמה.');
             }
@@ -8089,7 +8166,9 @@
         function openScanModal() {
             loadScanConfig();
             updateScanCaptureUi();
-            setScanStatus('');
+            syncScanAdminConfigUi();
+            resetScanResultUi();
+            setScanStatus('בחרו איך להביא את השאלה, ואני אפרק אותה לצעדים ברורים שאפשר לעקוב אחריהם.');
             document.getElementById('scan-modal').classList.remove('hidden');
         }
 
@@ -8128,7 +8207,7 @@
             if (image) image.src = scanPreviewObjectUrl;
             if (wrap) wrap.classList.remove('scan-preview-empty');
             let sourceLabel = lastScanInputMode === 'camera' ? 'מצלמה/צילום' : 'קובץ/גלריה';
-            setScanStatus(`נבחרה תמונה (${sourceLabel}): ${file.name}. עכשיו לחצו "נתח שאלה".`);
+            setScanStatus(`התמונה מוכנה (${sourceLabel}): ${file.name}. כשתרצו, לחצו על "פרק את השאלה בשבילי".`);
         }
 
         function fileToDataUrl(file) {
@@ -8404,6 +8483,18 @@
             return meta;
         }
 
+        function getVisualProblemFamilyLabel(rawFamily) {
+            let tag = normalizeVisualCategoryTag(rawFamily, 'parameterized_polynomial');
+            let labels = {
+                parameterized_polynomial: 'שאלה על פונקציה ופרמטרים',
+                tangent_to_function: 'שאלה על משיק לגרף',
+                extrema_analysis: 'שאלה על נקודות קיצון',
+                analytic_geometry_intersection: 'שאלה על חיתוך בין גרפים או ישרים',
+                parameter_solution_count: 'שאלה על מספר פתרונות'
+            };
+            return labels[tag] || 'שאלה שצריך להבין דרך הגרף';
+        }
+
         function normalizeVisualSkillDifficulty(raw) {
             let v = String(raw || '').trim().toLowerCase();
             if (['basic', 'intermediate', 'advanced'].includes(v)) return v;
@@ -8497,8 +8588,8 @@
                 if (fallbackSkills.length > 0) {
                     normalizedLayers.push({
                         layer_id: 'task_decomposition',
-                        layer_title: 'Visual Planning Sequence',
-                        why_this_layer_matters: 'Break the problem into smaller visual actions before algebraic work.',
+                        layer_title: 'מסלול פירוק ויזואלי',
+                        why_this_layer_matters: 'מפרקים את השאלה לצעדים קטנים שאפשר לראות ולהבין לפני שעוברים לאלגברה.',
                         skills: fallbackSkills
                     });
                 }
@@ -8533,7 +8624,7 @@
                 problem_family: problemFamily,
                 visual_layers_required: normalizedLayers,
                 action_plan_order: ordered,
-                do_not_solve_notice: getShortText(payload.do_not_solve_notice || '', 'This output is a visual preparation plan only. No algebraic solution steps are provided.'),
+                do_not_solve_notice: getShortText(payload.do_not_solve_notice || '', 'כאן לא קופצים ישר לפתרון. קודם בונים תמונה ויזואלית ברורה של מה שקורה בשאלה.'),
                 confidence,
                 _skill_count: skillCount,
                 _unique_categories: Array.from(seenCategories)
@@ -8771,15 +8862,12 @@
 
             let title = document.createElement('div');
             title.className = 'scan-reco-title';
-            title.innerText = 'שאלות קיימות שמתרגלות את היכולות שזוהו';
+            title.innerText = 'אם תרצו, הנה עוד תרגילים דומים שכבר מחכים כאן';
             wrap.appendChild(title);
 
             let note = document.createElement('div');
             note.className = 'scan-reco-note';
-            let tags = Array.isArray(visualPlan.action_plan_order) ? visualPlan.action_plan_order.slice(0, 6) : [];
-            note.innerText = tags.length > 0
-                ? `התאמה לפי קטגוריות ניתוח: ${tags.join(', ')}`
-                : 'לא זוהו קטגוריות מספיק מדויקות, לכן מוצגות שאלות פולינומים כלליות.';
+            note.innerText = 'אלה תרגילים שיכולים לעזור לחזק את אותו רעיון ויזואלי לפני או אחרי השאלה שהעליתם.';
             wrap.appendChild(note);
 
             let list = document.createElement('div');
@@ -8794,7 +8882,7 @@
                 let visiblePos = getVisibleQuestionPosition(rec.index);
                 let visibleLabel = (visiblePos.position >= 0 && visiblePos.total > 0)
                     ? `שאלה ${visiblePos.position + 1}`
-                    : `שאלה ID ${q.id ?? rec.index}`;
+                    : 'תרגיל דומה';
                 btn.type = 'button';
                 btn.innerText = `${visibleLabel}: ${q.title || 'ללא כותרת'}`;
                 btn.onclick = () => openRecommendedQuestionFromScan(rec.index);
@@ -8802,12 +8890,9 @@
 
                 let meta = document.createElement('div');
                 meta.className = 'scan-reco-meta';
-                let overlapText = rec.overlap && rec.overlap.length > 0
-                    ? `קטגוריות חופפות: ${rec.overlap.slice(0, 4).join(', ')}`
-                    : 'כיסוי כללי לפולינומים / פרמטרים';
-                let templateText = q.startTemplateId ? ` | פתיחה מומלצת: ${q.startTemplateId}` : '';
-                let goalText = q.goal ? ` | סוג משימה: ${goalTypeLabel(q.goal)}` : '';
-                meta.innerText = `${overlapText}${templateText}${goalText}`;
+                meta.innerText = q.goal
+                    ? `מה מתרגלים כאן: ${goalTypeLabel(q.goal)}`
+                    : 'תרגול דומה מתוך האוסף הקיים';
                 item.appendChild(meta);
 
                 list.appendChild(item);
@@ -8823,7 +8908,7 @@
             closeScanModal();
             if (!sessionStarted) markSessionStarted();
             loadQ(idx, { autoOpenOverlay: true });
-            showStepToast('נפתחה שאלה מומלצת מתוך הקטלוג לפי ניתוח היכולות הויזואליות.');
+            showStepToast('פתחתי תרגיל דומה כדי להמשיך לתרגל בצורה ברורה.');
         }
 
         function getScanActionPlanProgressContext() {
@@ -8850,10 +8935,7 @@
             if (progressEl) progressEl.innerText = `${ctx.completed}/${ctx.total}`;
             if (fillEl) fillEl.style.width = `${percent}%`;
             if (noteEl) {
-                let confidenceText = Number.isFinite(scannedVisualActionPlan.confidence)
-                    ? ` | confidence: ${Math.round(scannedVisualActionPlan.confidence * 100)}%`
-                    : '';
-                noteEl.innerText = `${scannedVisualActionPlan.do_not_solve_notice}${confidenceText}`;
+                noteEl.innerText = scannedVisualActionPlan.do_not_solve_notice;
             }
             if (completeEl) completeEl.classList.toggle('hidden', !(ctx.total > 0 && ctx.completed >= ctx.total));
 
@@ -8862,7 +8944,7 @@
                 let done = !!tag && scanCompletedVisualSkills.has(tag);
                 row.classList.toggle('is-complete', done);
                 let btn = row.querySelector('.scan-skill-complete-btn');
-                if (btn) btn.innerText = done ? 'בוצע' : 'סמן כהושלם';
+                if (btn) btn.innerText = done ? 'סומן כהושלם' : 'סיימתי את החלק הזה';
             });
         }
 
@@ -8916,11 +8998,6 @@
                 title.innerText = `${layerIdx + 1}. ${getShortText(layer.layer_title, layer.layer_id)}`;
                 head.appendChild(title);
 
-                let layerIdChip = document.createElement('span');
-                layerIdChip.className = 'scan-layer-id-chip';
-                layerIdChip.innerText = layer.layer_id;
-                head.appendChild(layerIdChip);
-
                 card.appendChild(head);
 
                 if (layer.why_this_layer_matters) {
@@ -8953,11 +9030,6 @@
                     titleBtn.onclick = () => startVisualSkill(skill.visual_category, skill);
                     body.appendChild(titleBtn);
 
-                    let metaLine = document.createElement('div');
-                    metaLine.className = 'scan-skill-meta';
-                    metaLine.innerText = `תחום: ${skill.visual_category} | רמה: ${skill.difficulty} | סוג תרגול: ${skill.ui_exercise_type}`;
-                    body.appendChild(metaLine);
-
                     if (skill.pedagogical_reason) {
                         let reason = document.createElement('div');
                         reason.className = 'scan-skill-reason';
@@ -8968,15 +9040,8 @@
                     if (skill.micro_goal) {
                         let goal = document.createElement('div');
                         goal.className = 'scan-skill-goal';
-                        goal.innerText = `מטרת-מיקרו: ${skill.micro_goal}`;
+                        goal.innerText = skill.micro_goal;
                         body.appendChild(goal);
-                    }
-
-                    if (Array.isArray(skill.prerequisites) && skill.prerequisites.length > 0) {
-                        let prereq = document.createElement('div');
-                        prereq.className = 'scan-skill-prereq';
-                        prereq.innerText = `Prerequisites: ${skill.prerequisites.join(', ')}`;
-                        body.appendChild(prereq);
                     }
 
                     row.appendChild(body);
@@ -8986,7 +9051,7 @@
                     let completeBtn = document.createElement('button');
                     completeBtn.type = 'button';
                     completeBtn.className = 'scan-skill-complete-btn';
-                    completeBtn.innerText = 'סמן כהושלם';
+                    completeBtn.innerText = 'סיימתי את החלק הזה';
                     completeBtn.onclick = () => markSkillCompleted(skill.visual_category);
                     actions.appendChild(completeBtn);
                     row.appendChild(actions);
@@ -9235,11 +9300,11 @@ Rules:
             let title = getShortText(visionPayload.title || visionPayload.generated_title || visionPayload.original_topic || '', '');
             if (!title) {
                 let compact = originalProblem.length > 42 ? `${originalProblem.slice(0, 42).trim()}...` : originalProblem;
-                title = `שאלה מסריקה: ${compact}`;
+                title = `השאלה שהעליתם: ${compact}`;
             }
 
-            let descLines = [`שאלה מזוהה: ${originalProblem}`];
-            if (visualPlan?.problem_family) descLines.push(`משפחת שאלה: ${visualPlan.problem_family}`);
+            let descLines = [`מה זיהינו בשאלה: ${originalProblem}`];
+            if (visualPlan?.problem_family) descLines.push(`מה רואים כאן בעיקר: ${getVisualProblemFamilyLabel(visualPlan.problem_family)}`);
             steps.slice(0, 2).forEach((step, idx) => {
                 descLines.push(`שלב ${idx + 1}: ${step.instruction}`);
             });
@@ -9247,7 +9312,7 @@ Rules:
             let overlayHowTo = Array.isArray(visionPayload?.overlay?.howTo) && visionPayload.overlay.howTo.length > 0
                 ? visionPayload.overlay.howTo.map((line) => getShortText(line, '')).filter(Boolean)
                 : (Array.isArray(visualPlan?.action_plan_order) && visualPlan.action_plan_order.length > 0
-                    ? visualPlan.action_plan_order.slice(0, 5).map((tag, idx) => `שלב ${idx + 1}: הפעילו יכולת ויזואלית "${tag}"`)
+                    ? visualPlan.action_plan_order.slice(0, 5).map((tag, idx) => `שלב ${idx + 1}: מתמקדים ב-${getVisualSkillRegistryMeta(tag).heTitle || 'רעיון ויזואלי חשוב'}`)
                     : steps.map((step) => step.instruction));
 
             let allowNormal = steps.some((s) => ['slope_zero', 'min_point', 'tangent_through_point'].includes(s.goal.type));
@@ -9316,23 +9381,22 @@ Rules:
 
             let visualPlan = renderScanVisualActionPlan(visionPayload);
             let originalProblem = questionDraft?.meta?.original_problem || visionPayload?.original_problem || '';
-            let familyText = visualPlan?.problem_family ? `\nמשפחת שאלה: ${visualPlan.problem_family}` : '';
-            let layersText = Number.isFinite(visualPlan?._skill_count)
-                ? `\nרבדים/יכולות שזוהו: ${visualPlan.visual_layers_required.length} רבדים, ${visualPlan._skill_count} skills`
-                : '';
-            problem.innerText = `בעיה שזוהתה: ${originalProblem}\nתבנית התחלה: ${questionDraft.startTemplateId}\nמספר שלבים לאפליקציה: ${questionDraft.steps.length}${familyText}${layersText}`;
+            let summaryLines = [`מה זיהינו: ${originalProblem}`];
+            if (visualPlan?.problem_family) summaryLines.push(`מה רואים כאן בעיקר: ${getVisualProblemFamilyLabel(visualPlan.problem_family)}`);
+            summaryLines.push(`איך נתקדם: ${questionDraft.steps.length} צעדים קצרים וברורים.`);
+            problem.innerText = summaryLines.join('\n');
 
             list.innerHTML = '';
             questionDraft.steps.forEach((step, idx) => {
                 let li = document.createElement('li');
-                li.innerText = `שלב ${idx + 1}: ${step.instruction} (${goalTypeLabel(step.goal?.type)})`;
+                li.innerText = `שלב ${idx + 1}: ${step.instruction}`;
                 list.appendChild(li);
             });
             renderScanRecommendedQuestions(questionDraft, visualPlan);
 
             result.classList.remove('hidden');
             injectBtn.classList.remove('hidden');
-            copyBtn.classList.remove('hidden');
+            copyBtn.classList.toggle('hidden', !(SHOW_SCAN_ADMIN || scanAdminConfigRevealed));
         }
 
         async function analyzeScannedQuestion() {
@@ -9344,7 +9408,7 @@ Rules:
 
             saveScanConfig();
             setScanBusy(true);
-            setScanStatus('שולח את התמונה לניתוח...');
+            setScanStatus('בודקים את התמונה ומכינים עבורה פירוק ויזואלי...');
             resetScanResultUi();
 
             try {
@@ -9355,9 +9419,9 @@ Rules:
                 scannedQuestionDraft = draft;
                 scannedVisualActionPlan = normalizeScanVisualActionPlan(visionPayload);
                 renderScannedQuestionDraft(draft, visionPayload);
-                setScanStatus('הניתוח הצליח. עברו על תוכנית הפעולה הויזואלית, ואז הוסיפו את השאלה החדשה לאפליקציה.');
+                setScanStatus('הפירוק הוויזואלי מוכן. עברו על הצעדים, ואז פתחו את השאלה בתוך האפליקציה.');
             } catch (err) {
-                setScanStatus(err?.message || 'ניתוח השאלה נכשל. נסו תמונה ברורה יותר או בדקו API.', true);
+                setScanStatus(getFriendlyScanErrorMessage(err), true);
             } finally {
                 setScanBusy(false);
             }
@@ -9420,6 +9484,10 @@ Rules:
                 setScanStatus('אין טיוטת שאלה להעתקה.', true);
                 return;
             }
+            if (!(SHOW_SCAN_ADMIN || scanAdminConfigRevealed)) {
+                setScanStatus('כפתור ההעתקה מיועד רק להגדרות מתקדמות של מורה/אדמין.', true);
+                return;
+            }
             let payload = JSON.parse(JSON.stringify(scannedQuestionDraft));
             if (!Number.isFinite(Number(payload.id)) || Number(payload.id) < 0) {
                 payload.id = getNextQuestionId();
@@ -9468,7 +9536,7 @@ Rules:
             closeScanModal();
             if (!sessionStarted) markSessionStarted();
             loadQ(newIndex, { autoOpenOverlay: true });
-            showStepToast(`נוספה שאלה חדשה מהסריקה: ${toInsert.title}`);
+            showStepToast(`פתחתי את השאלה שהעליתם: ${toInsert.title}`);
         }
 
         function stopGuidedDemoPlayback() {
@@ -9604,7 +9672,9 @@ Rules:
 
             closeStartGuideModal({ skipOverlay: true });
             openAccordion('steps');
-            setDrawerOpen(true);
+            setDrawerOpen(false);
+            dismissQuestionIntro();
+            closeQuestionOverlay();
 
             let levelSel = document.getElementById('start-demo-level');
             let level = levelSel ? levelSel.value : 'easy';
@@ -9614,7 +9684,7 @@ Rules:
 
             loadQ(qIndex, { autoOpenOverlay: false });
             let q = getCurrentQuestion();
-            showStepToast(`הדגמה ${getDemoLevelLabel(level)}: ${q?.title || 'שאלה לדוגמה'}`);
+            showStepToast(`הדגמה ${getDemoLevelLabel(level)}: ${q?.title || 'שאלה לדוגמה'}. רק הסתכלו איך הגרף משתנה.`);
 
             let ok = await waitGuidedDemo(650, token);
             if (!ok) return;
@@ -9698,22 +9768,11 @@ Rules:
                 runGuidedDemoFromLaunch();
                 return;
             }
-            if (selectedMode === 'app' && isMobileFeedSupportedNow()) {
-                closeQuestionOverlay();
-                setDrawerOpen(false);
-                mobileFeedAutoShown = true;
-                openMobileFeed({ force: true });
-                return;
-            }
-            if (paramIntroCleanActive) {
-                openAccordion('steps');
-                setDrawerOpen(false);
-                showStepToast('התחלה נקייה: קודם צפו בגרף, ואז פתחו פרמטרים או משימות כשתרצו.');
-                return;
-            }
-            openAccordion('params');
-            setDrawerOpen(true);
-            showStepToast('לפני תרגול: בחרו סוג פונקציה, דייקו עם הפרמטרים, ואז לחצו "קבע פונקציה והתחל תרגול".');
+            let startIdx = getFirstPracticeQuestionIndex();
+            loadQ(startIdx >= 0 ? startIdx : currentQ, { autoOpenOverlay: true });
+            openAccordion('steps');
+            setDrawerOpen(false);
+            showStepToast('מתחילים בתרגיל נגיש וברור. קודם קוראים את הכרטיס, ואז מתקדמים צעד־צעד.');
         }
 
         function onStartGuideBackdropClick(event) {
@@ -9820,6 +9879,8 @@ Rules:
             syncSessionModeClasses();
             if (!sessionStarted) {
                 scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 80, 220, 520] });
+                dismissQuestionIntro();
+                closeQuestionOverlay();
             }
             if (sessionStarted && drawerOpen && !document.body.classList.contains('embed-mode')) setDrawerOpen(false);
             let homeLanding = document.getElementById('home-landing');
@@ -9828,6 +9889,11 @@ Rules:
             if (topStrip) topStrip.hidden = !sessionStarted;
             let practiceBar = document.getElementById('practice-question-bar');
             if (practiceBar) practiceBar.hidden = !sessionStarted;
+            ['sound-toggle', 'btn-tools-menu'].forEach((id) => {
+                let el = document.getElementById(id);
+                if (!el) return;
+                el.hidden = !sessionStarted;
+            });
             let prestartHint = document.getElementById('prestart-hint');
             if (prestartHint) prestartHint.classList.toggle('hidden', sessionStarted);
             ['btn-top-init-builder'].forEach((id) => {
@@ -10126,7 +10192,8 @@ Rules:
             document.getElementById('btn-next-step').classList.add('hidden');
             renderMission();
             updateSpecialPanels();
-            setQuestionIntroActive(true);
+            let shouldOpenQuestionIntro = !!sessionStarted && !!autoOpenOverlay && !paramIntroCleanActive;
+            setQuestionIntroActive(shouldOpenQuestionIntro);
 
             let startX = getPreferredStartXForQuestion(q);
             p.setCoords(startX, evaluateFunctionAt(startX));
@@ -10134,7 +10201,7 @@ Rules:
             board.update();
             updateInfo();
             renderQuestionOverlay(q);
-            if (autoOpenOverlay && !paramIntroCleanActive) openQuestionOverlay({ trackCoach: false, source: 'auto_intro' });
+            if (shouldOpenQuestionIntro) openQuestionOverlay({ trackCoach: false, source: 'auto_intro' });
             else closeQuestionOverlay();
             updateMobileFeedTickerMessages(false);
             renderMobileFeedCards();
@@ -10148,6 +10215,7 @@ Rules:
     </script>
     <script>
         (function loadOptionalFeatureScripts() {
+            if (!ENABLE_OPTIONAL_ADMIN_EXTENSIONS) return;
             let query = window.__APP_ASSET_QUERY || `v=ts${Date.now().toString(36)}`;
 
             function loadScriptWithFallback(name, candidates) {

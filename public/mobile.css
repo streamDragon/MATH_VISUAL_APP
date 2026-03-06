@@ -3460,6 +3460,18 @@ body.session-started #builder-template-panel {
     margin-bottom: 8px;
 }
 
+#btn-scan-admin-toggle {
+    width: 100%;
+    border: 1px dashed #bfd8ff;
+    border-radius: 10px;
+    background: #f8fbff;
+    color: #0b4aa8;
+    font-weight: 800;
+    padding: 9px 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
 .scan-device-hint {
     margin-bottom: 8px;
     border-radius: 10px;
@@ -6848,6 +6860,9 @@ body.prestart-only #home-preview-column {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    width: 100%;
+    max-width: min(100%, 960px);
+    margin-inline: auto;
 }
 
 .home-surface {
@@ -7146,14 +7161,7 @@ body.prestart-only #home-preview-column {
 }
 
 body.prestart-only #home-graph-preview {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 18px 20px;
-    border: 1px solid rgba(148, 163, 184, 0.24);
-    border-radius: 22px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(239, 246, 255, 0.9));
-    box-shadow: var(--home-shadow);
+    display: none;
 }
 
 #home-graph-preview h2 {
@@ -7172,6 +7180,8 @@ body.prestart-only #home-graph-preview {
 
 body.prestart-only #home-preview-column #graph-area {
     width: 100%;
+    max-width: 960px;
+    margin-inline: auto;
     min-height: 280px;
     height: min(44vh, 460px);
     max-height: none;
@@ -7185,18 +7195,24 @@ body.prestart-only #home-preview-column #graph-area {
 
 @media (min-width: 981px) {
     body.prestart-only #graph-area-wrapper {
-        grid-template-columns: minmax(0, 1.14fr) minmax(320px, 0.86fr);
-        gap: 20px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 18px;
     }
 
     body.prestart-only #home-paths {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
+    body.prestart-only #home-landing {
+        width: 100%;
+        max-width: 1080px;
+        margin-inline: auto;
+    }
+
     body.prestart-only #home-preview-column {
-        position: sticky;
-        top: calc(22px + var(--safe-top));
-        align-self: start;
+        position: static;
+        top: auto;
+        align-self: stretch;
     }
 }
 

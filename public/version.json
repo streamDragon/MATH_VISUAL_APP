@@ -1,5 +1,5 @@
 {
-  "app_version": "55",
+  "app_version": "57",
   "build": "__BUILD_ID__",
   "build_env": "__BUILD_ENV__",
   "build_sha": "__BUILD_SHA__",

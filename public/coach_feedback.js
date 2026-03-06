@@ -451,7 +451,7 @@
             '<div class="coach-feedback-body">',
             '  <div id="coach-feedback-line">',
             '    <span id="coach-feedback-icon" aria-hidden="true">💡</span>',
-            '    <span id="coach-feedback-text">טוען עזרה...</span>',
+            '    <span id="coach-feedback-text">העזרה מתכוננת...</span>',
             '  </div>',
             '  <div id="coach-feedback-next"></div>',
             '</div>',
