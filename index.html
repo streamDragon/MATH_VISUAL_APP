@@ -256,7 +256,7 @@
         <div id="opening-splash-shade" aria-hidden="true"></div>
         <div id="opening-splash-content">
             <div id="opening-splash-progress" aria-hidden="true"><span></span></div>
-            <p id="opening-splash-version">גרסה: --</p>
+            <p id="opening-splash-version"></p>
             <p id="opening-splash-audio-hint">להפעלת שיר בפתיח לחצו על "נגן שיר".</p>
             <div id="opening-splash-actions">
                 <button id="opening-splash-audio-btn" onclick="retrySplashMusic()">נגן שיר</button>
@@ -443,10 +443,10 @@
     <input id="scan-question-input-camera" class="scan-file-input" type="file" accept="image/*" capture="environment" onchange="onScanImageSelected(event, 'camera')">
     <input id="scan-question-input-file" class="scan-file-input" type="file" accept="image/*" onchange="onScanImageSelected(event, 'file')">
 
-    <div id="start-guide-modal" class="hidden" role="dialog" aria-modal="true" aria-label="הדרכה ראשונית" onclick="onStartGuideBackdropClick(event)">
+    <div id="start-guide-modal" class="hidden" role="dialog" aria-modal="true" aria-label="סיור קצר במסך" onclick="onStartGuideBackdropClick(event)">
         <div id="start-guide-card" class="is-compact" tabindex="-1">
             <div class="modal-mobile-exit-row">
-                <button class="modal-mobile-exit-btn" type="button" onclick="startAppFromSplash('app')">⬅ חזרה למסך הראשי</button>
+                <button class="modal-mobile-exit-btn" type="button" onclick="closeStartGuide(true)">⬅ חזרה</button>
             </div>
             <div class="modal-function-preview" aria-live="polite">
                 <span id="start-guide-preview-fx" class="inline-math-bidi">f(x) = ...</span>
@@ -465,49 +465,17 @@
                 </div>
             </div>
             <div class="start-guide-body">
-                <div class="start-guide-flow-title">מה מחכה בפנים?</div>
+                <div class="start-guide-flow-title">מה קורה בסיור?</div>
                 <ol class="start-guide-flow-list">
-                    <li><b>כניסה רגילה לאפליקציה</b> - פותחים את התרגול ומקבלים עזרה מתוך המסך.</li>
-                    <li><b>הדגמה מודרכת</b> - רואים שאלה נפתחת על הגרף צעד־צעד.</li>
-                    <li><b>סיור קצר במסך</b> - מבינים איפה המשימה, איפה הכלים, ואיך בודקים תשובה.</li>
-                    <li>אם יוגדר סרטון הדרכה, הוא יופיע כאן כאפשרות נוספת.</li>
+                    <li>מכירים את הגרף ואת הנקודה שעובדים איתה.</li>
+                    <li>רואים איפה המשימה, ההסבר והכלים נמצאים במסך.</li>
+                    <li>לומדים איך להתקדם בלי ללכת לאיבוד.</li>
                 </ol>
-                <div class="start-coach-box">
-                    <div id="start-coach-avatar" class="start-coach-avatar" aria-hidden="true">
-                        <div class="start-coach-eye"></div>
-                        <div class="start-coach-eye"></div>
-                        <div class="start-coach-mouth"></div>
-                    </div>
-                    <div class="start-coach-content">
-                        <div class="start-coach-head">
-                            <label for="start-coach-mode">Coach</label>
-                            <select id="start-coach-mode" onchange="setStartCoachMode(this.value)">
-                                <option value="app">כניסה רגילה</option>
-                                <option value="demo">הדגמה מודרכת</option>
-                                <option value="tutorial">הדרכה ראשונית</option>
-                            </select>
-                        </div>
-                        <p id="start-coach-text">בכניסה רגילה מתחילים מיד לתרגל, ותמיד אפשר לפתוח כלים מהכפתור העליון.</p>
-                        <label class="start-coach-speech-toggle">
-                            <input id="start-coach-speech-toggle" type="checkbox" onchange="toggleStartCoachSpeech(this.checked)">
-                            🔈 דיבור
-                        </label>
-                    </div>
-                </div>
-                <div class="start-demo-level-row">
-                    <label for="start-demo-level">רמת קושי להדגמה:</label>
-                    <select id="start-demo-level">
-                        <option value="easy">קל - קריאה מהגרף (x0, שיפוע/ערך)</option>
-                        <option value="medium">בינוני - מציאת x לפי שיפוע נתון</option>
-                        <option value="hard">מאתגר - משיק שעובר בנקודה חיצונית</option>
-                    </select>
-                </div>
+                <p id="start-guide-note">זהו סיור קצר ורגוע. הוא לא מעמיס עליכם, ורק מראה מאיפה נכון להתחיל.</p>
             </div>
             <div class="start-guide-actions">
-                <button onclick="startAppFromSplash('app')">כניסה לאפליקציה</button>
-                <button onclick="startAppFromSplash('tutorial')">הדרכה ראשונית</button>
-                <button id="btn-start-guide-youtube" class="hidden" type="button" onclick="openOnboardingVideo()">סרטון הדרכה</button>
-                <button class="start-primary" onclick="startAppFromSplash('demo')">הדגמה מודרכת</button>
+                <button type="button" onclick="closeStartGuide(true)">חזרה</button>
+                <button class="start-primary" onclick="startAppFromSplash('tutorial')">התחל סיור קצר</button>
             </div>
         </div>
     </div>
@@ -732,8 +700,8 @@
                 </div>
             </details>
         </section>
-        <div id="top-strip">
-            <div id="top-version-badge">גרסה: --</div>
+        <div id="top-strip" hidden>
+            <div id="top-version-badge"></div>
             <div id="top-function-bar" aria-live="polite">
                 <span id="top-function-bar-label">הפונקציה</span>
                 <div id="top-function-bar-row">
@@ -756,7 +724,7 @@
                 <span id="top-step-status">שלב 1/1: ...</span>
                 <span id="progress-hint">חפש → מצא → בדוק</span>
                 <span id="prestart-hint">לפני התרגול בונים פונקציה, ואז לוחצים "התחל תרגול" כדי להסתיר כפתורי התחלה.</span>
-                <span id="build-badge">build: --</span>
+                <span id="build-badge"></span>
                 <div id="build-debug-panel" class="hidden" aria-hidden="true">
                     <div id="build-debug-values"></div>
                     <div id="build-debug-scripts"></div>
@@ -813,7 +781,7 @@
                 <button id="btn-top-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
             </div>
         </div>
-        <div id="practice-question-bar" aria-live="polite">
+        <div id="practice-question-bar" aria-live="polite" hidden>
             <span id="practice-question-index">שאלה 1/4</span>
             <span id="practice-question-task-label">מה עושים עכשיו?</span>
             <span id="practice-question-title">טוען...</span>
@@ -1233,7 +1201,7 @@
         };
         // Paste your public YouTube link here (or set window.__ONBOARDING_VIDEO_URL before app loads).
         const ONBOARDING_VIDEO_URL = '';
-        const ONBOARDING_VIDEO_TITLE = 'הדרכה ראשונית - איך עובדים באתר';
+        const ONBOARDING_VIDEO_TITLE = 'סיור קצר - איך עובדים במסך';
         const RUNTIME_ASSET_BASE = (() => {
             if (typeof window.__ASSET_BASE === 'string' && window.__ASSET_BASE.trim()) return window.__ASSET_BASE;
             try {
@@ -1377,9 +1345,9 @@
             'tangent_through_point'
         ]);
         const START_COACH_MESSAGES = {
-            app: 'בכניסה רגילה מתחילים מיד לתרגל, ותמיד אפשר לפתוח כלים מהכפתור העליון.',
-            demo: 'בהדגמה מודרכת אני מזיז את הנקודה ומראה צעד-צעד איך לפתור גרפית.',
-            tutorial: 'בהדרכה ראשונית נעשה סיור קצר: איפה המשימות, איך בודקים תשובה ואיך מתקדמים.'
+            app: 'מכאן אפשר להתחיל מהדגמה, מתרגול לפי הרמה, או משאלה אמיתית שתרצו לפרק יחד.',
+            demo: 'בהדגמה רואים גרף חי והסבר קצר שמראה איך המתמטיקה מתחילה להיות ברורה.',
+            tutorial: 'הסיור הקצר מראה איפה המשימה, איפה העזרה, ואיך מתקדמים בלי ללכת לאיבוד.'
         };
 
         function setupOpeningSplashMedia() {
@@ -2403,13 +2371,11 @@
         }
 
         function shouldAutoOpenLobby() {
-            if (ENTRY_FLOW_QUERY.lobby === false) return false;
-            return true;
+            return ENTRY_FLOW_QUERY.lobby === true;
         }
 
         function shouldShowOpeningSplash() {
-            if (ENTRY_FLOW_QUERY.splash === false) return false;
-            return true;
+            return ENTRY_FLOW_QUERY.splash === true;
         }
 
         function maybeCompleteEntryFlowAfterSplash(trigger) {
@@ -2436,7 +2402,7 @@
                 return;
             }
             entryFlowCompleted = true;
-            startAppFromSplash('app');
+            scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 70, 180] });
         }
 
         function runEntryFlow() {
@@ -9752,11 +9718,7 @@ Rules:
 
         function onStartGuideBackdropClick(event) {
             if (event.target.id !== 'start-guide-modal') return;
-            if (sessionStarted) {
-                closeStartGuideModal({ skipOverlay: true });
-                return;
-            }
-            startAppFromSplash('app');
+            closeStartGuideModal({ skipOverlay: true });
         }
 
         function onGlobalEscapeKeydown(event) {
@@ -9860,6 +9822,12 @@ Rules:
                 scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 80, 220, 520] });
             }
             if (sessionStarted && drawerOpen && !document.body.classList.contains('embed-mode')) setDrawerOpen(false);
+            let homeLanding = document.getElementById('home-landing');
+            if (homeLanding) homeLanding.hidden = !!sessionStarted;
+            let topStrip = document.getElementById('top-strip');
+            if (topStrip) topStrip.hidden = !sessionStarted;
+            let practiceBar = document.getElementById('practice-question-bar');
+            if (practiceBar) practiceBar.hidden = !sessionStarted;
             let prestartHint = document.getElementById('prestart-hint');
             if (prestartHint) prestartHint.classList.toggle('hidden', sessionStarted);
             ['btn-top-init-builder'].forEach((id) => {

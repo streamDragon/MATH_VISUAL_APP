@@ -189,8 +189,8 @@
                 priority: 5,
                 sticky: false,
                 ttlMs: 2600,
-                text: DEFAULT_EVENT_MESSAGE[eventType] || 'אין תוכן Coach זמין כרגע.',
-                voiceText: DEFAULT_EVENT_MESSAGE[eventType] || 'אין תוכן Coach זמין כרגע.',
+                text: DEFAULT_EVENT_MESSAGE[eventType] || 'אין כרגע תוכן עזרה זמין.',
+                voiceText: DEFAULT_EVENT_MESSAGE[eventType] || 'אין כרגע תוכן עזרה זמין.',
                 next: null,
                 ui: { variant: 'bubble', icon: '💡', pulse: false }
             }, eventType, `fallback_${eventType}`);
@@ -238,7 +238,7 @@
         if (!dom.root || !dom.minBtn) return;
         dom.root.classList.toggle('is-collapsed', !!collapsed);
         dom.minBtn.innerText = collapsed ? '▢' : '—';
-        dom.minBtn.title = collapsed ? 'פתח Coach' : 'מזער Coach';
+        dom.minBtn.title = collapsed ? 'פתח עזרה' : 'מזער עזרה';
     }
 
     function hasSpeechApi() {
@@ -328,7 +328,7 @@
     function syncHelpPopover(reasonText) {
         if (!dom.helpPopover) return;
         if (dom.helpText) {
-            dom.helpText.innerText = state.lastText || 'עדיין אין הודעת Coach. התחילו את המשימה כדי לקבל הכוונה.';
+            dom.helpText.innerText = state.lastText || 'עדיין אין הודעת עזרה. התחילו את המשימה כדי לקבל הכוונה.';
         }
         if (dom.helpReason) {
             const cleanReason = String(reasonText || '').trim();
@@ -442,16 +442,16 @@
         root.id = 'coach-feedback';
         root.setAttribute('role', 'status');
         root.setAttribute('aria-live', 'polite');
-        root.setAttribute('aria-label', 'Coach');
+        root.setAttribute('aria-label', 'עזרה בזמן אמת');
         root.innerHTML = [
             '<div class="coach-feedback-head">',
-            '  <strong id="coach-feedback-title">Coach</strong>',
+            '  <strong id="coach-feedback-title">עזרה בזמן אמת</strong>',
             '  <button id="coach-feedback-min" type="button" aria-label="מזער">—</button>',
             '</div>',
             '<div class="coach-feedback-body">',
             '  <div id="coach-feedback-line">',
             '    <span id="coach-feedback-icon" aria-hidden="true">💡</span>',
-            '    <span id="coach-feedback-text">טוען Coach...</span>',
+            '    <span id="coach-feedback-text">טוען עזרה...</span>',
             '  </div>',
             '  <div id="coach-feedback-next"></div>',
             '</div>',
@@ -573,8 +573,8 @@
                     priority: 6,
                     sticky: false,
                     ttlMs: 2400,
-                    text: 'Coach זמין. אפשר לבקש רמז בכל רגע.',
-                    voiceText: 'Coach זמין. אפשר לבקש רמז בכל רגע.',
+                    text: 'העזרה זמינה. אפשר לבקש רמז בכל רגע.',
+                    voiceText: 'העזרה זמינה. אפשר לבקש רמז בכל רגע.',
                     next: null,
                     ui: { variant: 'bubble', icon: '🤖', pulse: false }
                 }, {
