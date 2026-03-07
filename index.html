@@ -459,23 +459,28 @@
                     <div class="start-logo-grid"></div>
                 </div>
                 <div class="start-guide-brand">
-                    <div class="start-guide-badge">לומדים לראות מתמטיקה</div>
-                    <h3>כך מתחילים בלי להילחץ</h3>
-                    <p>זהו סיור קצר שמראה מה רואים במסך, איך עובדים עם הגרף, ואיך הופכים שאלה מלחיצה למשהו שאפשר להבין.</p>
+                    <div id="start-guide-badge-text" class="start-guide-badge">לומדים לראות מתמטיקה</div>
+                    <h3 id="start-guide-title">כך מתחילים בלי להילחץ</h3>
+                    <p id="start-guide-subtitle">זהו סיור קצר שמראה מה רואים במסך, איך עובדים עם הגרף, ואיך הופכים שאלה מלחיצה למשהו שאפשר להבין.</p>
                 </div>
             </div>
             <div class="start-guide-body">
-                <div class="start-guide-flow-title">מה קורה בסיור?</div>
-                <ol class="start-guide-flow-list">
+                <div id="start-guide-flow-title" class="start-guide-flow-title">מה קורה בסיור?</div>
+                <ol id="start-guide-flow-list" class="start-guide-flow-list">
                     <li>מכירים את הגרף ואת הנקודה שעובדים איתה.</li>
                     <li>רואים איפה המשימה, ההסבר והכלים נמצאים במסך.</li>
                     <li>לומדים איך להתקדם בלי ללכת לאיבוד.</li>
                 </ol>
                 <p id="start-guide-note">זהו סיור קצר ורגוע. הוא לא מעמיס עליכם, ורק מראה מאיפה נכון להתחיל.</p>
+                <div class="start-guide-audio-box">
+                    <div id="start-guide-audio-note" class="start-guide-audio-note">אפשר גם לשמוע הסבר קצר לפני שמתחילים.</div>
+                    <button id="btn-start-guide-voice" type="button" onclick="playStartGuideVoice()">שמע הסבר קצר</button>
+                    <div id="start-guide-voice-status" aria-live="polite"></div>
+                </div>
             </div>
             <div class="start-guide-actions">
                 <button type="button" onclick="closeStartGuide(true)">חזרה</button>
-                <button class="start-primary" onclick="startAppFromSplash('tutorial')">התחל סיור קצר</button>
+                <button id="btn-start-guide-primary" class="start-primary" onclick="startGuidedStartFromGuide()">התחל סיור קצר</button>
             </div>
         </div>
     </div>
@@ -651,10 +656,10 @@
                     <h2 id="home-paths-title">בוחרים דרך אחת ומקבלים התחלה ברורה</h2>
                 </div>
                 <div id="home-paths">
-                    <button class="home-path-card" type="button" onclick="startAppFromSplash('demo')">
+                    <button class="home-path-card" type="button" onclick="beginGuidedStartFromLanding()">
                         <span class="home-path-index">01</span>
                         <span class="home-path-title">תראה לי איך זה עובד</span>
-                        <span class="home-path-desc">הדגמה מודרכת עם גרף חי והסבר ויזואלי קצר.</span>
+                        <span class="home-path-desc">סיור קצר שמראה מה רואים במסך ואיך מתחילים בלי להילחץ.</span>
                     </button>
                     <button class="home-path-card" type="button" onclick="startLevelPracticeFromLanding()">
                         <span class="home-path-index">02</span>
@@ -944,6 +949,8 @@
                         </ol>
                         <div id="builder-process-short" class="builder-section-helper">קוראים -> מציירים -> מזהים תנאים -> בונים משוואות -> פותרים -> בודקים</div>
                     </div>
+                    <details id="builder-context-details" class="builder-mobile-details" open>
+                        <summary>הצג רמזים ונתונים מהשאלה</summary>
                     <div id="builder-question-words-box" class="builder-pedagogy-box">
                         <div class="builder-pedagogy-title">מה נאמר בשאלה?</div>
                         <div class="builder-section-subtitle">כאן אוספים את הנתונים כפי שהם מופיעים במילים.</div>
@@ -995,6 +1002,9 @@
                         <div id="builder-facts-summary" class="builder-section-helper">כל נתון כזה הוא צעד בדרך למשוואה.</div>
                     </div>
                     <div id="builder-focus-note">מהמילים בונים ציור, מהציור בונים משוואות, ומהמשוואות מוצאים את הפרמטרים.</div>
+                    </details>
+                    <details id="builder-advanced-details" class="builder-mobile-details" open>
+                        <summary>הצג בקרה מתקדמת</summary>
                     <div id="builder-formula-preview" aria-live="polite">
                         <div class="builder-formula-line" id="builder-formula-fx">f(x) = ...</div>
                         <div class="builder-formula-line" id="builder-formula-dx">f'(x) = ...</div>
@@ -1055,6 +1065,7 @@
                         <div id="builder-confirm-note">אחרי שהמחברת מראה תנאים ומשוואות, בדקו שהפונקציה באמת מקיימת את כולם, ורק אז המשיכו.</div>
                         <button id="btn-apply-template-params" onclick="confirmFunctionAndStart()">קבע פונקציה והתחל תרגול</button>
                     </div>
+                    </details>
                 </div>
             </div>
         </div>
@@ -1463,6 +1474,8 @@
         let quickTourStepIndex = 0;
         let quickTourActive = false;
         let quickTourCurrentTarget = null;
+        let quickTourVariant = 'default';
+        let quickTourCompletionAction = '';
         let entryFlowStarted = false;
         let entryFlowCompleted = false;
         let entryFlowHardResetApplied = false;
@@ -1470,6 +1483,7 @@
         let guidedDemoToken = 0;
         let guidedDemoRaf = null;
         let guidedDemoTimer = null;
+        let startGuideVoiceStatusTimer = null;
         let sidebarFocusPulseTimer = null;
         let buildWatchInterval = null;
         let buildWatchEventsBound = false;
@@ -1567,7 +1581,125 @@
             video.load();
         }
 
+        function beginGuidedStartFromLanding() {
+            if (isMobileViewportNow()) {
+                openStartGuideModal();
+                return;
+            }
+            startAppFromSplash('demo');
+        }
+
+        function syncStartGuideContent() {
+            let mobileIntro = document.body.classList.contains('viewport-mobile');
+            let badgeEl = document.getElementById('start-guide-badge-text');
+            let titleEl = document.getElementById('start-guide-title');
+            let subtitleEl = document.getElementById('start-guide-subtitle');
+            let flowTitleEl = document.getElementById('start-guide-flow-title');
+            let flowListEl = document.getElementById('start-guide-flow-list');
+            let noteEl = document.getElementById('start-guide-note');
+            let audioNoteEl = document.getElementById('start-guide-audio-note');
+            let primaryBtn = document.getElementById('btn-start-guide-primary');
+
+            if (!mobileIntro) {
+                if (badgeEl) badgeEl.innerText = 'לומדים לראות מתמטיקה';
+                if (titleEl) titleEl.innerText = 'כך מתחילים בלי להילחץ';
+                if (subtitleEl) subtitleEl.innerText = 'זהו סיור קצר שמראה מה רואים במסך, איך עובדים עם הגרף, ואיך הופכים שאלה מלחיצה למשהו שאפשר להבין.';
+                if (flowTitleEl) flowTitleEl.innerText = 'מה קורה בסיור?';
+                if (flowListEl) {
+                    flowListEl.innerHTML = [
+                        'מכירים את הגרף ואת הנקודה שעובדים איתה.',
+                        'רואים איפה המשימה, ההסבר והכלים נמצאים במסך.',
+                        'לומדים איך להתקדם בלי ללכת לאיבוד.'
+                    ].map((item) => `<li>${escapeHtmlText(item)}</li>`).join('');
+                }
+                if (noteEl) noteEl.innerText = 'זהו סיור קצר ורגוע. הוא לא מעמיס עליכם, ורק מראה מאיפה נכון להתחיל.';
+                if (audioNoteEl) audioNoteEl.innerText = 'אפשר גם לשמוע הסבר קצר לפני שמתחילים.';
+                if (primaryBtn) primaryBtn.innerText = 'התחל סיור קצר';
+                return;
+            }
+
+            if (badgeEl) badgeEl.innerText = 'סיור מודרך קצר';
+            if (titleEl) titleEl.innerText = 'ברוך הבא — נתחיל לראות מה קורה כאן';
+            if (subtitleEl) subtitleEl.innerText = 'במסך הזה רואים את השאלה, את הגרף, ואת המקום שבו בונים תנאים ומשוואות. נלך לאט, צעד־צעד.';
+            if (flowTitleEl) flowTitleEl.innerText = 'מה יקרה עכשיו?';
+            if (flowListEl) {
+                flowListEl.innerHTML = [
+                    'קודם נבין מה רואים במסך.',
+                    'אחר כך נראה מה הרעיון של הדרך הזו.',
+                    'רק בסוף ניגש לצעד הראשון.'
+                ].map((item) => `<li>${escapeHtmlText(item)}</li>`).join('');
+            }
+            if (noteEl) noteEl.innerText = 'הדבר הראשון כאן הוא לא "הצלחת", אלא להבין מה רואים ואיך מתחילים.';
+            if (audioNoteEl) audioNoteEl.innerText = 'לא חובה. אפשר לשמוע הסבר קצר לפני שמתחילים.';
+            if (primaryBtn) primaryBtn.innerText = 'התחל סיור קצר';
+        }
+
+        function getStartGuideVoiceText() {
+            let parts = [
+                document.getElementById('start-guide-title')?.innerText,
+                document.getElementById('start-guide-subtitle')?.innerText,
+                document.getElementById('start-guide-note')?.innerText
+            ].filter((part) => String(part || '').trim());
+            return parts.join(' ');
+        }
+
+        function setStartGuideVoiceStatus(text, durationMs) {
+            let statusEl = document.getElementById('start-guide-voice-status');
+            if (!statusEl) return;
+            statusEl.innerText = String(text || '').trim();
+            if (startGuideVoiceStatusTimer) clearTimeout(startGuideVoiceStatusTimer);
+            if (durationMs) {
+                startGuideVoiceStatusTimer = setTimeout(() => {
+                    if (statusEl.innerText === String(text || '').trim()) statusEl.innerText = '';
+                    startGuideVoiceStatusTimer = null;
+                }, durationMs);
+            }
+        }
+
+        function playStartGuideVoice() {
+            let phrase = getStartGuideVoiceText();
+            if (!phrase) return;
+            let synth = window.speechSynthesis;
+            if (!synth || typeof SpeechSynthesisUtterance !== 'function') {
+                setStartGuideVoiceStatus('אין תמיכה בקול בדפדפן הזה.', 2600);
+                return;
+            }
+            try {
+                synth.cancel();
+                let utter = new SpeechSynthesisUtterance(phrase);
+                utter.lang = 'he-IL';
+                utter.rate = 0.98;
+                utter.pitch = 1;
+                utter.onstart = () => setStartGuideVoiceStatus('מנגן הסבר קצר...', 0);
+                utter.onend = () => setStartGuideVoiceStatus('ההסבר הקולי הסתיים.', 2200);
+                utter.onerror = () => setStartGuideVoiceStatus('אין תמיכה בקול בדפדפן הזה.', 2600);
+                synth.speak(utter);
+            } catch (err) {
+                setStartGuideVoiceStatus('אין תמיכה בקול בדפדפן הזה.', 2600);
+            }
+        }
+
         function getQuickTourSteps() {
+            if (document.body.classList.contains('viewport-mobile') && quickTourVariant === 'mobile_intro') {
+                return [
+                    {
+                        selectors: ['#top-question-wrap', '#practice-question-bar', '#graph-area'],
+                        title: 'מה רואים כאן?',
+                        text: 'כאן מופיעה הפונקציה, כאן מופיעה השאלה, כאן רואים את הגרף, וכאן בונים תנאים ומשוואות.'
+                    },
+                    {
+                        selectors: ['#graph-area', '#top-overlay-cta', '#btn-tools-menu'],
+                        title: 'מה עושים באפליקציה הזאת?',
+                        text: 'לא מנסים לנחש. קודם רואים, אחר כך מזהים נתונים, ואז בונים מהם משוואות.'
+                    },
+                    {
+                        selectors: ['#btn-overlay-open', '#top-overlay-cta', '#practice-question-bar'],
+                        title: 'מתחילים מהצעד הראשון',
+                        text: 'עכשיו פותחים את כרטיס המשימה, מבינים מה מבקשים, ורק אחר כך ניגשים לגרף.',
+                        nextLabel: 'פתח את כרטיס המשימה'
+                    }
+                ];
+            }
             return [
                 {
                     selectors: ['#top-question', '#q-title'],
@@ -1652,7 +1784,7 @@
             if (titleEl) titleEl.innerText = step.title;
             if (textEl) textEl.innerText = step.text;
             if (indexEl) indexEl.innerText = `שלב ${quickTourStepIndex + 1}/${steps.length}`;
-            if (nextBtn) nextBtn.innerText = quickTourStepIndex === steps.length - 1 ? 'סיימתי, הבנתי' : 'הבנתי, הבא';
+            if (nextBtn) nextBtn.innerText = step.nextLabel || (quickTourStepIndex === steps.length - 1 ? 'סיימתי, הבנתי' : 'הבנתי, הבא');
 
             quickTourCurrentTarget = resolveQuickTourTarget(step);
             if (quickTourCurrentTarget) {
@@ -1688,6 +1820,7 @@
             quickTourStepIndex = 0;
             quickTourCurrentTarget = null;
             quickTourActive = true;
+            modal.classList.toggle('quick-tour-orientation', quickTourVariant === 'mobile_intro');
 
             let sampleQuestion = document.getElementById('quick-tour-sample-question');
             let q = getCurrentQuestion();
@@ -1708,7 +1841,10 @@
 
         function closeQuickTour(markSeen) {
             let modal = document.getElementById('quick-tour-modal');
-            if (modal) modal.classList.add('hidden');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('quick-tour-orientation');
+            }
             let cursor = document.getElementById('quick-tour-cursor');
             if (cursor) cursor.classList.add('hidden');
             let spotlight = document.getElementById('quick-tour-spotlight');
@@ -1717,6 +1853,8 @@
             if (demoVideo) demoVideo.pause();
             quickTourCurrentTarget = null;
             quickTourActive = false;
+            quickTourVariant = 'default';
+            quickTourCompletionAction = '';
             syncEntryModalBodyState();
             if (markSeen !== false) {
                 try {
@@ -1731,7 +1869,16 @@
             if (!quickTourActive) return;
             let steps = getQuickTourSteps();
             if (quickTourStepIndex >= steps.length - 1) {
+                let completionAction = quickTourCompletionAction;
                 closeQuickTour(true);
+                if (completionAction === 'open_question_intro') {
+                    setDrawerOpen(false);
+                    setTimeout(() => {
+                        if (!sessionStarted) return;
+                        showStepToast('בואו נתחיל: קודם קוראים את כרטיס המשימה, ורק אחר כך נוגעים בגרף.');
+                        openQuestionOverlay({ trackCoach: false, source: 'guided_start_intro' });
+                    }, 120);
+                }
                 return;
             }
             quickTourStepIndex += 1;
@@ -4719,6 +4866,22 @@
             return vh > 0 && vh <= 760;
         }
 
+        function syncBuilderMobileSections() {
+            let isMobile = document.body.classList.contains('viewport-mobile');
+            ['builder-context-details', 'builder-advanced-details'].forEach((id) => {
+                let section = document.getElementById(id);
+                if (!section) return;
+                if (!isMobile) {
+                    section.open = true;
+                    section.dataset.mobileInitialized = '0';
+                    return;
+                }
+                if (section.dataset.mobileInitialized === '1') return;
+                section.open = false;
+                section.dataset.mobileInitialized = '1';
+            });
+        }
+
         function syncMobilePresentationMode() {
             if (!document.body) return;
             let isMobile = document.body.classList.contains('viewport-mobile');
@@ -4735,6 +4898,7 @@
 
             let overlayActive = isMobile && (overlayOpen || drawerOpen || mobileFeedOpen);
             document.body.classList.toggle('mobile-overlay-active', overlayActive);
+            syncBuilderMobileSections();
         }
 
         function applyViewportClasses() {
@@ -4744,6 +4908,7 @@
             document.body.classList.toggle('viewport-short', isShortViewportNow());
             document.body.classList.toggle('news-feed-enabled', isNewsFeedFeatureEnabled());
             syncMobilePresentationMode();
+            syncStartGuideContent();
             if (typeof updateSoundButton === 'function') updateSoundButton();
             syncNewsFeedActionButtons();
             syncMobileFeedAutostart();
@@ -10942,6 +11107,19 @@ Rules:
             stopGuidedDemoPlayback();
         }
 
+        function startGuidedStartFromGuide() {
+            if (document.body.classList.contains('viewport-mobile')) {
+                markStartGuideSeen('start:mobile_intro');
+                closeStartGuideModal({ skipOverlay: true });
+                markSessionStarted();
+                quickTourVariant = 'mobile_intro';
+                quickTourCompletionAction = 'open_question_intro';
+                openQuickTour({ force: true });
+                return;
+            }
+            startAppFromSplash('tutorial');
+        }
+
         function openStartGuideModal(options = {}) {
             let modal = document.getElementById('start-guide-modal');
             if (!modal) return;
@@ -10950,6 +11128,7 @@ Rules:
             closeQuestionOverlay();
             let levelSel = document.getElementById('start-demo-level');
             if (levelSel && !levelSel.value) levelSel.value = 'easy';
+            syncStartGuideContent();
             syncStartGuideVideoButton();
             syncStartCoachPanel(false);
             modal.classList.remove('hidden');
@@ -10964,6 +11143,7 @@ Rules:
             let modal = document.getElementById('start-guide-modal');
             if (modal) modal.classList.add('hidden');
             stopStartCoachSpeech();
+            setStartGuideVoiceStatus('', 0);
             if (startGuideModalA11y) startGuideModalA11y.deactivate();
             syncEntryModalBodyState();
             if (skipOverlay) {
