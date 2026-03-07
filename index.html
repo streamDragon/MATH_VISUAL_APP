@@ -349,9 +349,9 @@
                         <img id="mobile-feed-featured-thumb" alt="שאלת השבוע" loading="lazy">
                     </div>
                     <div id="mobile-feed-featured-body">
-                        <span id="mobile-feed-featured-tag">כאן תופיע שאלה מומלצת</span>
+                        <span id="mobile-feed-featured-tag">שאלה מומלצת להתחלה רגועה</span>
                         <div id="mobile-feed-featured-title">תרגיל מומלץ יופיע כאן</div>
-                        <div id="mobile-feed-featured-desc">כאן תופיע הצעה קצרה וברורה להמשך.</div>
+                        <div id="mobile-feed-featured-desc">נציג כאן הצעה קצרה וברורה לצעד הבא.</div>
                     </div>
                 </button>
             </div>
@@ -494,12 +494,12 @@
                 <video id="quick-tour-demo-video" muted loop playsinline preload="metadata" poster="public/opening-poster.png"></video>
                 <div id="quick-tour-video-label">סיור מודרך מהיר</div>
             </div>
-            <div id="quick-tour-sample-question">שאלה לדוגמה תופיע כאן מיד</div>
+            <div id="quick-tour-sample-question">כך נראית שאלה קצרה לפני שמתחילים לעבוד.</div>
             <div id="quick-tour-step-index">שלב 1/1</div>
             <h3 id="quick-tour-title">סיור קצר להבנת המסך</h3>
             <p id="quick-tour-text">רואים קודם את המשימה, אחר כך את הגרף, ואז את המקום שבו בונים תנאים ומשוואות.</p>
             <div id="quick-tour-actions">
-                <button onclick="skipQuickTour()">דלג כרגע</button>
+                <button id="btn-quick-tour-skip" onclick="skipQuickTour()">חזרה</button>
                 <button id="btn-quick-tour-next" onclick="nextQuickTourStep()">הבנתי, הבא</button>
             </div>
         </div>
@@ -510,7 +510,7 @@
     <div id="initial-builder-modal" class="hidden" role="dialog" aria-modal="true" aria-label="בניית פונקציה" onclick="onInitialBuilderBackdropClick(event)">
         <div id="initial-builder-card" class="is-compact" tabindex="-1">
             <div class="overlay-head">
-                <h3>בוחרים בסיס שממנו אפשר לקרוא רמזים</h3>
+                <h3>מתחילים מהמילים, מהציור ומהתנאים</h3>
                 <button onclick="closeInitialBuilderModal()">סגור</button>
             </div>
             <div class="modal-function-preview" aria-live="polite">
@@ -518,22 +518,22 @@
                 <span id="initial-builder-preview-dx" class="inline-math-bidi">f'(x) = ...</span>
             </div>
             <div class="initial-builder-body">
-                <p><b>מה עושים כאן?</b> זה שלב הכנה קצר: בוחרים משפחת פונקציות שמתאימה לשאלה, כדי שאפשר יהיה לראות רמזים בגרף ולהפוך אותם לתנאים ולמשוואות.</p>
+                <p><b>מה עושים כאן?</b> זהו שלב עזר קצר: קודם שואלים מה נאמר בשאלה, מה רואים בציור, ואילו תנאים אפשר להוציא ממנו. רק אחר כך בוחרים צורה תומכת שתעזור לבנות משוואות.</p>
                 <ol>
-                    <li>בחרו משפחה שמתאימה למה שרואים או למה שמבקשים.</li>
-                    <li>דייקו את הגרף עד שהציור נותן נקודה, שיפוע, קיצון או חיתוך שאפשר לסמן.</li>
-                    <li>עברו ל"עריכת פרמטרים" כדי לתרגם כל רמז לתנאי ולמשוואה.</li>
+                    <li>אספו מהשאלה את הנתונים החשובים ומה באמת צריך למצוא.</li>
+                    <li>בנו ציור עזר שמבליט נקודה, שיפוע, קיצון או חיתוך שאפשר לתרגם לתנאי.</li>
+                    <li>רק אם צריך, בחרו צורה תומכת והמשיכו מהתנאים אל המשוואות.</li>
                 </ol>
                 <div class="initial-builder-param-grid">
                     <span><b>a</b> משנה פתיחה, כיוון ועוצמה</span>
                     <span><b>b,c,d</b> משנים את המבנה המקומי והשיפועים</span>
                     <span><b>e,f</b> עוזרים לעגן חיתוכים והזזה אנכית</span>
                 </div>
-                <div class="initial-builder-note">הכי חשוב: להסתכל כל הזמן על הגרף, על <code>f(x)</code>, ועל <code>f'(x)</code> ולשאול איזה תנאי כל שינוי יוצר.</div>
+                <div class="initial-builder-note">הכי חשוב: לשאול בכל רגע מה רואים, איזה תנאי זה נותן על <code>f(x)</code> או על <code>f'(x)</code>, ואיך התנאי הזה הופך למשוואה.</div>
             </div>
             <div class="overlay-actions initial-builder-actions">
-                <button onclick="openInitialBuilderWorkspace('steps')">בחירת צורה</button>
-                <button onclick="openInitialBuilderWorkspace('params')">עריכת פרמטרים</button>
+                <button onclick="openInitialBuilderWorkspace('steps')">מילים, ציור ותנאים</button>
+                <button onclick="openInitialBuilderWorkspace('params')">כלי עזר לפרמטרים</button>
                 <button class="start-primary" onclick="closeInitialBuilderModal()">סגור חלון</button>
             </div>
         </div>
@@ -589,30 +589,9 @@
                 </div>
                 <div id="scan-device-hint" class="scan-device-hint">בחרו אם לצלם מהטלפון או להעלות תמונה מהמחשב.</div>
 
-                <details id="scan-config-box" class="scan-admin-box">
-                    <summary>למורה/אדמין בלבד: הגדרות חיבור ונתונים טכניים</summary>
-                    <div class="scan-config-grid">
-                        <label for="scan-api-endpoint">כתובת החיבור</label>
-                        <input id="scan-api-endpoint" type="url" autocomplete="off" placeholder="https://api.openai.com/v1/chat/completions">
-
-                        <label for="scan-api-model">שם המודל</label>
-                        <input id="scan-api-model" type="text" autocomplete="off" placeholder="gpt-4o">
-
-                        <label for="scan-api-key">מפתח גישה (לא נשמר אוטומטית)</label>
-                        <input id="scan-api-key" type="password" autocomplete="off" placeholder="sk-...">
-
-                        <label for="scan-remember-config" class="scan-checkbox-row">
-                            <input id="scan-remember-config" type="checkbox" checked>
-                            שמור את כתובת החיבור ושם המודל בדפדפן
-                        </label>
-                    </div>
-                    <div class="scan-admin-note">האזור הזה מיועד להגדרת שירות הניתוח במכשיר. תלמידים לא צריכים לגעת בו.</div>
-                    <button id="btn-scan-copy" class="hidden" type="button" onclick="copyScannedQuestionObject()">העתק נתוני שאלה</button>
-                </details>
-
                 <div id="scan-preview-wrap" class="scan-preview-empty">
                     <img id="scan-preview-image" alt="תצוגה מקדימה לשאלה שנסרקה">
-                    <div id="scan-preview-placeholder">כאן תופיע התמונה שתבחרו.</div>
+                    <div id="scan-preview-placeholder">כאן תופיע התמונה שתבחרו כדי שנוכל לפרק אותה יחד לציור, נתונים ומשוואות.</div>
                 </div>
 
                 <div id="scan-spinner" class="hidden">קוראים את השאלה ומארגנים אותה לציור, נתונים ומשוואות.</div>
@@ -637,6 +616,40 @@
                     </div>
                     <ol id="scan-subquestions-list"></ol>
                     <div id="scan-recommended-questions" class="hidden"></div>
+                </div>
+                <div class="scan-admin-entry-row">
+                    <button id="btn-open-scan-admin" class="scan-admin-entry" type="button" onclick="openScanAdminModal()">למורה/אדמין בלבד</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="scan-admin-modal" class="hidden" role="dialog" aria-modal="true" aria-label="הגדרות אדמין לסריקת שאלה" onclick="onScanAdminBackdropClick(event)">
+        <div id="scan-admin-card" tabindex="-1">
+            <div class="overlay-head">
+                <h3>למורה/אדמין בלבד: הגדרות חיבור ונתונים טכניים</h3>
+                <button type="button" onclick="closeScanAdminModal()">סגור</button>
+            </div>
+            <div id="scan-config-box" class="scan-admin-box">
+                <div class="scan-admin-lead">האזור הזה מיועד להגדרת שירות הניתוח במכשיר. תלמידים לא צריכים לגעת בו.</div>
+                <div class="scan-config-grid">
+                    <label for="scan-api-endpoint">כתובת החיבור</label>
+                    <input id="scan-api-endpoint" type="url" autocomplete="off" placeholder="https://api.openai.com/v1/chat/completions">
+
+                    <label for="scan-api-model">שם המודל</label>
+                    <input id="scan-api-model" type="text" autocomplete="off" placeholder="gpt-4o">
+
+                    <label for="scan-api-key">מפתח גישה (לא נשמר אוטומטית)</label>
+                    <input id="scan-api-key" type="password" autocomplete="off" placeholder="sk-...">
+
+                    <label for="scan-remember-config" class="scan-checkbox-row">
+                        <input id="scan-remember-config" type="checkbox" checked>
+                        שמור את כתובת החיבור ושם המודל בדפדפן
+                    </label>
+                </div>
+                <div class="scan-admin-note">אם שירות הניתוח עדיין לא הוגדר, פותחים את החלון הזה רק לצורך חיבור טכני.</div>
+                <div class="overlay-actions scan-admin-actions">
+                    <button id="btn-scan-copy" class="hidden" type="button" onclick="copyScannedQuestionObject()">העתק נתוני שאלה</button>
                 </div>
             </div>
         </div>
@@ -716,6 +729,30 @@
                 </div>
             </details>
         </section>
+        <section id="guided-start-shell" hidden aria-labelledby="guided-shell-title">
+            <div id="guided-shell-card" class="guided-shell-card">
+                <div id="guided-shell-kicker" class="guided-shell-kicker">הדרכה מודרכת</div>
+                <h2 id="guided-shell-title">נבין מה רואים לפני שמתחילים לפעול</h2>
+                <p id="guided-shell-intro">כאן נלמד לזהות את אזור השאלה, את הגרף, ואת המקום שבו הופכים את מה שרואים לתנאים ומשוואות.</p>
+            </div>
+            <div id="guided-shell-question" class="guided-shell-card">
+                <div class="guided-shell-zone-label">כאן מופיעה השאלה</div>
+                <div id="guided-shell-question-title">כאן נציג את השאלה הראשונה בצורה רגועה וברורה.</div>
+                <div id="guided-shell-question-text">כאן נראה מה מבקשים, לפני שנוגעים בגרף או בכלי עבודה.</div>
+            </div>
+            <div id="guided-shell-equations" class="guided-shell-card">
+                <div class="guided-shell-zone-label">כאן אוספים נתונים ובונים משוואות</div>
+                <div id="guided-shell-equations-title">מזה מתחיל הפתרון</div>
+                <div id="guided-shell-equations-text">מהציור אוספים נקודה, שיפוע או קיצון, ואז מתרגמים כל רמז לתנאי ולמשוואה.</div>
+            </div>
+            <div id="guided-start-action-card" class="guided-shell-card hidden" aria-live="polite">
+                <div class="guided-shell-zone-label">הצעד הראשון</div>
+                <div id="guided-start-action-title">שימו לב למה שהגרף מספר</div>
+                <div id="guided-start-action-text">הזיזו את הנקודה המסומנת וחפשו מתי השיפוע מתקרב ל־0.</div>
+                <div id="guided-start-action-hint">רמז: בנקודת קיצון השיפוע הוא 0, ולכן המשיק נראה אופקי.</div>
+                <div id="guided-start-action-readout">כאן נציג בקצרה את ערך ה־x ואת השיפוע בזמן הגרירה.</div>
+            </div>
+        </section>
         <div id="top-strip" hidden>
             <div id="top-version-badge"></div>
             <div id="top-function-bar" aria-live="polite">
@@ -727,7 +764,7 @@
             </div>
             <div id="top-question-wrap">
                 <span id="top-question-index">שאלה 1/4</span>
-                <span id="top-question">כאן תופיע השאלה הנוכחית</span>
+                <span id="top-question">כשתתחילו תרגיל, כאן תופיע השאלה הנוכחית.</span>
                 <span id="top-track-badge" class="track-visual-explore">מסלול: חקירה ויזואלית</span>
                 <div id="top-build-cta-wrap">
                     <button id="btn-top-build-cta" type="button" onclick="openBuilderFromMainCta()">לחצו כאן לבניית פונקציה</button>
@@ -737,9 +774,9 @@
                     <button id="btn-open-params-inline" type="button" onclick="openBuilderFromTop()">⚙ פתח פרמטרים</button>
                     <button id="btn-focus-steps-inline" type="button" onclick="focusStepsFromTop()">⬅ התחילו משמאל</button>
                 </div>
-                <span id="top-step-status">שלב 1/1: ...</span>
+                <span id="top-step-status">שלב 1/1: כאן נציג את המשימה ברגע שייפתח תרגיל.</span>
                 <span id="progress-hint">חפש → מצא → בדוק</span>
-                <span id="prestart-hint">לפני התרגול בונים פונקציה, ואז לוחצים "התחל תרגול" כדי להסתיר כפתורי התחלה.</span>
+                <span id="prestart-hint">לפני התרגול בונים ציור עזר ותנאים, ואז ממשיכים לתרגול מסודר.</span>
                 <span id="build-badge"></span>
                 <div id="build-debug-panel" class="hidden" aria-hidden="true">
                     <div id="build-debug-values"></div>
@@ -748,8 +785,8 @@
                 <span id="learner-progress-chip">רמה 1 | XP 0 | רצף 0 | 0/0</span>
                 <div id="top-brief-card">
                     <div id="top-brief-head">המשימה עכשיו</div>
-                    <div id="top-brief-main">כאן תופיע המשימה הנוכחית.</div>
-                    <div id="top-brief-detail">כאן תופיע הסיבה המתמטית לצעד הבא.</div>
+                    <div id="top-brief-main">כאן נציג את המשימה של הצעד הזה.</div>
+                    <div id="top-brief-detail">כאן נסביר למה זה הצעד המתמטי הבא.</div>
                 </div>
             </div>
             <div id="top-formulas">
@@ -767,8 +804,8 @@
                 </div>
             </div>
             <div id="top-clarity-panel" class="hidden" style="display:none !important;">
-                <div id="top-clarity-title">שאלה: כאן תופיע הכותרת הנוכחית</div>
-                <div id="top-clarity-goal">מטרת התרגיל: תופיע כאן מיד</div>
+                <div id="top-clarity-title">שאלה: כאן נציג את כותרת התרגיל הפעיל</div>
+                <div id="top-clarity-goal">מטרת התרגיל: כאן ננסח מה מחפשים כרגע</div>
                 <div id="top-clarity-action">מה התלמיד עושה עכשיו: נציג כאן את הצעד הבא</div>
                 <div id="top-clarity-tip">רוצים להבין למה זה עובד? לחצו על כפתור ההעמקה.</div>
                 <button id="btn-top-deep-dive" onclick="openQuestionOverlay()">להעמקה והסבר מלא</button>
@@ -800,7 +837,7 @@
         <div id="practice-question-bar" aria-live="polite" hidden>
             <span id="practice-question-index">שאלה 1/4</span>
             <span id="practice-question-task-label">מה עושים עכשיו?</span>
-            <span id="practice-question-title">כאן תופיע המשימה הנוכחית</span>
+            <span id="practice-question-title">כאן תופיע המשימה של הצעד הנוכחי.</span>
             <span id="practice-function-inline" class="inline-math-bidi">f(x) = ...</span>
             <span id="practice-clean-source-chip" class="hidden">
                 <span id="practice-clean-source-text">מצב ריכוז הופעל אוטומטית</span>
@@ -830,7 +867,7 @@
         <button id="drawer-handle" onclick="toggleDrawer()">כלים ומשימות</button>
         <div id="drawer-content">
             <div id="drawer-question-head" style="text-align:center; display:none;">
-                <h2 id="q-title">כאן תופיע השאלה</h2>
+                <h2 id="q-title">כאן תופיע השאלה הפעילה</h2>
                 <div id="q-desc" style="font-size:0.9rem; color:#555;"></div>
             </div>
 
@@ -842,12 +879,12 @@
                             <button id="btn-hide-mission-panel" type="button" onclick="hideMissionPanel()">הסתר משימות/רמזים</button>
                         </div>
                         <div class="info-title">משימה נוכחית</div>
-                        <div id="mission-step-text">שלב 1/1: ...</div>
+                        <div id="mission-step-text">שלב 1/1: כאן נציג את המשימה ברגע שייפתח תרגיל.</div>
                         <div id="mission-step-note">טיפ: קראו את המשימה ובצעו צעד אחד בכל פעם.</div>
                         <div id="mission-expanded-box">
                             <div id="mission-expanded-title">הסבר ברור (גלוי תמיד)</div>
-                            <div id="mission-expanded-text">כאן יופיע הסבר פשוט לצעד הנוכחי.</div>
-                            <div id="mission-success-text">כאן יופיע איך בודקים שהצלחתם.</div>
+                            <div id="mission-expanded-text">כאן נסביר מה רואים ומה עושים עכשיו.</div>
+                            <div id="mission-success-text">כאן נסביר איך בודקים שהצעד הצליח.</div>
                             <ol id="mission-expanded-steps"></ol>
                         </div>
                         <div id="read-answer-panel" class="hidden">
@@ -956,7 +993,7 @@
                         <div class="builder-section-subtitle">כאן אוספים את הנתונים כפי שהם מופיעים במילים.</div>
                         <div class="builder-section-helper">לפני שפותרים — עוצרים להבין מה באמת נאמר.</div>
                         <div id="builder-question-words-content" class="builder-words-list">
-                            <div class="builder-empty-state">כאן יופיע נוסח השאלה או התקציר שלה.</div>
+                            <div class="builder-empty-state">כאן נרכז את נוסח השאלה או את התקציר שלה.</div>
                         </div>
                     </div>
                     <div id="builder-visual-box" class="builder-pedagogy-box">
@@ -979,17 +1016,17 @@
                         <div class="builder-section-note">לא חייבים ציור מושלם — צריך ציור שמגלה תנאים.</div>
                     </div>
                     <div id="builder-template-panel" class="builder-pedagogy-box builder-support-box">
-                        <div class="builder-pedagogy-title">בחירת משפחת פונקציות</div>
-                        <div class="builder-section-helper">זה רק שלב עזר — לא הפתרון עצמו.</div>
-                        <div class="builder-inline-label">ציור פתיחה</div>
-                        <div id="builder-question-template-label">ציור פתיחה: יופיע כאן עם בחירת שאלה</div>
+                        <div class="builder-pedagogy-title">שלב עזר: בחירת צורה תומכת</div>
+                        <div class="builder-section-helper">משתמשים בזה רק כדי לחזק את הציור, את התנאים ואת המשוואות שכבר זיהינו.</div>
+                        <div class="builder-inline-label">ציור עזר התחלתי</div>
+                        <div id="builder-question-template-label">ציור עזר התחלתי יופיע כאן לפי סוג השאלה.</div>
                         <div class="builder-inline-hint">נשתמש בו כדי לחלץ תנאים ולבנות משוואות.</div>
                         <div id="builder-template-type-note">המטרה היא לא לנחש — המטרה היא לבנות מספיק משוואות.</div>
                         <select id="template-select" onchange="applySelectedTemplate(false)"></select>
                         <div id="template-toggle-group" aria-label="בחירה מהירה של סוג פונקציה"></div>
                         <div id="template-setup-actions">
-                            <button id="btn-apply-question-template" onclick="applyQuestionStartTemplateFromBuilder()">ציור פתיחה</button>
-                            <button id="btn-apply-template" onclick="applySelectedTemplate(false)">החל משפחה נבחרת</button>
+                            <button id="btn-apply-question-template" onclick="applyQuestionStartTemplateFromBuilder()">ציור עזר</button>
+                            <button id="btn-apply-template" onclick="applySelectedTemplate(false)">עדכן צורה תומכת</button>
                             <button id="btn-builder-free-explore" onclick="openFreeExploreBuilder()">חקירה חופשית</button>
                         </div>
                         <div id="builder-free-explore-note" class="builder-secondary-note">לבדיקה נוספת · לניסוי עצמי · כלי עזר נוסף</div>
@@ -1003,7 +1040,7 @@
                     </div>
                     <div id="builder-focus-note">מהמילים בונים ציור, מהציור בונים משוואות, ומהמשוואות מוצאים את הפרמטרים.</div>
                     </details>
-                    <details id="builder-advanced-details" class="builder-mobile-details" open>
+                    <details id="builder-advanced-details" class="builder-mobile-details">
                         <summary>הצג בקרה מתקדמת</summary>
                     <div id="builder-formula-preview" aria-live="polite">
                         <div class="builder-formula-line" id="builder-formula-fx">f(x) = ...</div>
@@ -1063,7 +1100,7 @@
                     <div class="slider-row"><span class="slider-lbl">f</span><input type="range" id="inpF" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintF"></span></div>
                     <div id="builder-confirm-wrap">
                         <div id="builder-confirm-note">אחרי שהמחברת מראה תנאים ומשוואות, בדקו שהפונקציה באמת מקיימת את כולם, ורק אז המשיכו.</div>
-                        <button id="btn-apply-template-params" onclick="confirmFunctionAndStart()">קבע פונקציה והתחל תרגול</button>
+                        <button id="btn-apply-template-params" onclick="confirmFunctionAndStart()">סיימתי לאסוף תנאים — ממשיכים לתרגול</button>
                     </div>
                     </details>
                 </div>
@@ -1333,11 +1370,11 @@
         ]);
         const PARAMS_COPY = {
             paramsMainTitle: 'מהמילים למשוואות',
-            paramsMainSubtitle: 'בשאלות פרמטרים לא מנסים לנחש פונקציה.\nקודם בונים ציור מהנתונים,\nאחר כך מוציאים מהציור תנאים,\nואז מתרגמים כל תנאי למשוואה.',
-            paramsMainHelper: 'המטרה כאן היא לעבור מהשאלה הכתובה אל ציור, מהציור אל תנאים, ומהתנאים אל משוואות.',
+            paramsMainSubtitle: 'בשאלות פרמטרים לא מנסים לנחש פונקציה.\nקודם קוראים את המילים,\nאחר כך בונים ציור,\nמחלצים ממנו תנאים,\nורק אז בונים משוואות ופתרון.',
+            paramsMainHelper: 'המטרה כאן היא לעבור מהמילים אל ציור, מהציור אל תנאים, ומהתנאים אל משוואות ולפתרון.',
             questionWordsSectionTitle: 'מה נאמר בשאלה?',
             questionWordsSectionSubtitle: 'כאן אוספים את הנתונים כפי שהם מופיעים במילים.',
-            questionWordsEmptyState: 'כאן יופיע נוסח השאלה או התקציר שלה.',
+            questionWordsEmptyState: 'כאן נרכז את נוסח השאלה או את התקציר שלה.',
             questionWordsPrimaryLabel: 'נתון מילולי',
             questionWordsHelper: 'לפני שפותרים — עוצרים להבין מה באמת נאמר.',
             visualSectionTitle: 'מה רואים בציור?',
@@ -1404,10 +1441,10 @@
             freeExploreModeHint: 'לבדיקה נוספת',
             selfExperimentLabel: 'לניסוי עצמי',
             extraHelperToolLabel: 'כלי עזר נוסף',
-            functionFamilyLabel: 'בחירת משפחת פונקציות',
-            functionFamilyHint: 'זה רק שלב עזר — לא הפתרון עצמו.',
-            starterGraphLabel: 'ציור פתיחה',
-            starterGraphHint: 'נשתמש בו כדי לחלץ תנאים ולבנות משוואות.',
+            functionFamilyLabel: 'שלב עזר: בחירת צורה תומכת',
+            functionFamilyHint: 'זה רק כלי עזר משני אחרי שהבנו מה נאמר ומה רואים.',
+            starterGraphLabel: 'ציור עזר התחלתי',
+            starterGraphHint: 'נשתמש בו כדי לחזק את הציור, לחלץ תנאים ולבנות משוואות.',
             corePedagogyLine: 'מהמילים בונים ציור, מהציור בונים משוואות, ומהמשוואות מוצאים את הפרמטרים.'
         };
         let board, p, curve, tangent, normalLine, triangle, labelText, testLine, testAnchor, testDir;
@@ -1440,6 +1477,8 @@
         let templateChosen = false;
         let readAnswerValidated = false;
         let sessionStarted = false;
+        let appEntryMode = APP_ENTRY_MODES.LANDING;
+        let guidedStartStep = GUIDED_START_FLOW.INTRO;
         let questionIntroActive = false;
         let cleanModeManualEnabled = false;
         let paramIntroCleanActive = false;
@@ -1453,6 +1492,7 @@
         let startGuideModalA11y = null;
         let initialBuilderModalA11y = null;
         let globalHelpModalA11y = null;
+        let scanAdminModalA11y = null;
         let startCoachMode = 'app';
         let startCoachSpeechEnabled = false;
         let startCoachSpeechTimer = null;
@@ -1539,6 +1579,18 @@
             demo: 'בהדגמה רואים גרף חי והסבר קצר שמראה איך המתמטיקה מתחילה להיות ברורה.',
             tutorial: 'הסיור הקצר מראה איפה המשימה, איפה העזרה, ואיך מתקדמים בלי ללכת לאיבוד.'
         };
+        const APP_ENTRY_MODES = Object.freeze({
+            LANDING: 'landing',
+            GUIDED: 'guided',
+            WORKSPACE: 'workspace'
+        });
+        const GUIDED_START_FLOW = Object.freeze({
+            INTRO: 0,
+            TOUR: 1,
+            IDEA: 2,
+            ACTION: 3
+        });
+        const GUIDED_START_QUESTION_ID = 1;
 
         function setupOpeningSplashMedia() {
             let video = document.getElementById('opening-splash-video');
@@ -1581,6 +1633,165 @@
             video.load();
         }
 
+        function normalizeAppEntryMode(mode) {
+            let allowed = new Set(Object.values(APP_ENTRY_MODES));
+            return allowed.has(mode) ? mode : APP_ENTRY_MODES.LANDING;
+        }
+
+        function isLandingEntryMode() {
+            return appEntryMode === APP_ENTRY_MODES.LANDING;
+        }
+
+        function isGuidedEntryMode() {
+            return appEntryMode === APP_ENTRY_MODES.GUIDED;
+        }
+
+        function isWorkspaceEntryMode() {
+            return appEntryMode === APP_ENTRY_MODES.WORKSPACE;
+        }
+
+        function shouldShowGuidedShell() {
+            return isGuidedEntryMode() && guidedStartStep > GUIDED_START_FLOW.INTRO;
+        }
+
+        function getGuidedStartQuestionIndex() {
+            let qIndex = getQuestionIndexById(GUIDED_START_QUESTION_ID);
+            if (qIndex >= 0) return qIndex;
+            let firstPractice = getFirstPracticeQuestionIndex();
+            return firstPractice >= 0 ? firstPractice : 0;
+        }
+
+        function syncGuidedPointInteractivity() {
+            if (!p || typeof p.setAttribute !== 'function') return;
+            let canDrag = !isGuidedEntryMode() || guidedStartStep >= GUIDED_START_FLOW.ACTION;
+            p.setAttribute({ fixed: !canDrag });
+        }
+
+        function syncGuidedStartShellContent(q = getCurrentQuestion()) {
+            let questionTitle = document.getElementById('guided-shell-question-title');
+            let questionText = document.getElementById('guided-shell-question-text');
+            let actionTitle = document.getElementById('guided-start-action-title');
+            let actionText = document.getElementById('guided-start-action-text');
+            let actionHint = document.getElementById('guided-start-action-hint');
+            if (!questionTitle || !questionText || !actionTitle || !actionText || !actionHint) return;
+
+            if (!q) {
+                questionTitle.innerText = 'כאן נציג את השאלה הראשונה בצורה רגועה וברורה.';
+                questionText.innerText = 'כאן נראה מה מבקשים, לפני שנוגעים בגרף או בכלי עבודה.';
+                actionTitle.innerText = 'שימו לב למה שהגרף מספר';
+                actionText.innerText = 'נתחיל מצעד קטן אחד על הגרף, בלי להציף את המסך בכלים.';
+                actionHint.innerText = 'קודם מבינים מה רואים, ורק אחר כך פועלים.';
+                return;
+            }
+
+            let descLines = String(q?.desc || '')
+                .split(/\n+/)
+                .map((line) => line.replace(/\s+/g, ' ').trim())
+                .filter(Boolean);
+            questionTitle.innerText = q.title || 'נתחיל בשאלה אחת קצרה וברורה';
+            questionText.innerText = descLines[0] || 'כאן נראה מה מבקשים, לפני שנוגעים בגרף או בכלי עבודה.';
+
+            if (q.goal === 'slope_zero' || q.goal === 'min_point') {
+                actionTitle.innerText = 'הצעד הראשון: לחפש שיפוע 0';
+                actionText.innerText = 'הזיזו את הנקודה המסומנת וחפשו מתי השיפוע מתקרב ל־0.';
+                actionHint.innerText = 'רמז: בנקודת קיצון השיפוע הוא 0, ולכן המשיק נראה אופקי.';
+                return;
+            }
+
+            actionTitle.innerText = 'הצעד הראשון: רמז אחד מהגרף';
+            actionText.innerText = 'מצאו רמז ויזואלי אחד על הגרף, ונסו להבין איזה תנאי מתמטי הוא נותן.';
+            actionHint.innerText = 'המטרה היא לא לנחש, אלא לחלץ מהגרף נתון שאפשר להפוך למשוואה.';
+        }
+
+        function syncGuidedStartActionReadout(x, m) {
+            let readout = document.getElementById('guided-start-action-readout');
+            if (!readout) return;
+            if (!isGuidedEntryMode() || guidedStartStep < GUIDED_START_FLOW.ACTION || !Number.isFinite(x) || !Number.isFinite(m)) {
+                readout.innerText = 'כאן נציג בקצרה את ערך ה־x ואת השיפוע בזמן הגרירה.';
+                return;
+            }
+            readout.innerText = `כרגע: x = ${formatNumber(x)} | השיפוע f'(x) = ${formatNumber(m)}`;
+        }
+
+        function syncGuidedStartUiState() {
+            let body = document.body;
+            if (!body) return;
+            body.dataset.appMode = appEntryMode;
+            body.classList.toggle('app-mode-landing', isLandingEntryMode());
+            body.classList.toggle('app-mode-guided', isGuidedEntryMode());
+            body.classList.toggle('app-mode-workspace', isWorkspaceEntryMode());
+            body.classList.toggle('guided-step-intro', isGuidedEntryMode() && guidedStartStep === GUIDED_START_FLOW.INTRO);
+            body.classList.toggle('guided-step-tour', isGuidedEntryMode() && guidedStartStep === GUIDED_START_FLOW.TOUR);
+            body.classList.toggle('guided-step-idea', isGuidedEntryMode() && guidedStartStep === GUIDED_START_FLOW.IDEA);
+            body.classList.toggle('guided-step-action', isGuidedEntryMode() && guidedStartStep >= GUIDED_START_FLOW.ACTION);
+
+            let shell = document.getElementById('guided-start-shell');
+            if (shell) shell.hidden = !shouldShowGuidedShell();
+
+            let actionCard = document.getElementById('guided-start-action-card');
+            if (actionCard) actionCard.classList.toggle('hidden', !(isGuidedEntryMode() && guidedStartStep >= GUIDED_START_FLOW.ACTION));
+
+            syncGuidedStartShellContent();
+            syncGuidedPointInteractivity();
+        }
+
+        function setGuidedStartStep(step) {
+            let safeStep = Number.isFinite(step) ? Math.max(GUIDED_START_FLOW.INTRO, Math.round(step)) : GUIDED_START_FLOW.INTRO;
+            guidedStartStep = safeStep;
+            syncGuidedStartUiState();
+            queueBoardResize();
+        }
+
+        function setAppEntryMode(mode, options = {}) {
+            appEntryMode = normalizeAppEntryMode(mode);
+            if (appEntryMode !== APP_ENTRY_MODES.GUIDED) {
+                guidedStartStep = GUIDED_START_FLOW.INTRO;
+            }
+            if (options.syncUi !== false) {
+                syncSessionUiState();
+            } else {
+                syncGuidedStartUiState();
+            }
+        }
+
+        function abortGuidedStartFlow() {
+            closeQuickTour(false);
+            closeQuestionOverlay();
+            closeStartGuideModal({ skipOverlay: true, preserveMode: true });
+            sessionStarted = false;
+            setAppEntryMode(APP_ENTRY_MODES.LANDING);
+            showStepToast('חזרתם למסך הפתיחה. אפשר להתחיל שוב כשתרצו.');
+        }
+
+        function beginGuidedWorkspaceTour() {
+            markStartGuideSeen('start:mobile_intro');
+            closeStartGuideModal({ skipOverlay: true, preserveMode: true });
+            if (!sessionStarted) {
+                markSessionStarted({ entryMode: APP_ENTRY_MODES.GUIDED, preserveCurrentFunction: true });
+            } else {
+                setAppEntryMode(APP_ENTRY_MODES.GUIDED);
+            }
+            let qIndex = getGuidedStartQuestionIndex();
+            loadQ(qIndex, { autoOpenOverlay: false });
+            setGuidedStartStep(GUIDED_START_FLOW.TOUR);
+            quickTourVariant = 'guided_mobile';
+            quickTourCompletionAction = 'start_guided_action';
+            openQuickTour({ force: true });
+        }
+
+        function startGuidedFirstAction() {
+            closeQuickTour(true);
+            setGuidedStartStep(GUIDED_START_FLOW.ACTION);
+            showStepToast('עכשיו צעד אחד בלבד: הזיזו את הנקודה וחפשו מתי השיפוע מתקרב ל־0.');
+        }
+
+        function completeGuidedStartAction() {
+            if (!isGuidedEntryMode()) return;
+            setAppEntryMode(APP_ENTRY_MODES.WORKSPACE);
+            scheduleMathGymPopup();
+            showStepToast('הצעד הראשון הושלם. עכשיו אפשר להמשיך במרחב העבודה המלא, צעד־צעד.');
+        }
+
         function beginGuidedStartFromLanding() {
             if (isMobileViewportNow()) {
                 openStartGuideModal();
@@ -1619,19 +1830,19 @@
             }
 
             if (badgeEl) badgeEl.innerText = 'סיור מודרך קצר';
-            if (titleEl) titleEl.innerText = 'ברוך הבא — נתחיל לראות מה קורה כאן';
-            if (subtitleEl) subtitleEl.innerText = 'במסך הזה רואים את השאלה, את הגרף, ואת המקום שבו בונים תנאים ומשוואות. נלך לאט, צעד־צעד.';
-            if (flowTitleEl) flowTitleEl.innerText = 'מה יקרה עכשיו?';
+            if (titleEl) titleEl.innerText = 'ברוך הבא — נבין קודם מה רואים כאן';
+            if (subtitleEl) subtitleEl.innerText = 'במסך הזה יש 3 חלקים עיקריים:\nהשאלה,\nהגרף,\nוהמקום שבו בונים תנאים ומשוואות.\nנלך לאט, צעד־צעד.';
+            if (flowTitleEl) flowTitleEl.innerText = 'שלושת האזורים שנכיר עכשיו';
             if (flowListEl) {
                 flowListEl.innerHTML = [
-                    'קודם נבין מה רואים במסך.',
-                    'אחר כך נראה מה הרעיון של הדרך הזו.',
-                    'רק בסוף ניגש לצעד הראשון.'
+                    'כאן מופיעה השאלה.',
+                    'כאן רואים את הגרף.',
+                    'כאן הופכים את מה שרואים לתנאים ולמשוואות.'
                 ].map((item) => `<li>${escapeHtmlText(item)}</li>`).join('');
             }
-            if (noteEl) noteEl.innerText = 'הדבר הראשון כאן הוא לא "הצלחת", אלא להבין מה רואים ואיך מתחילים.';
-            if (audioNoteEl) audioNoteEl.innerText = 'לא חובה. אפשר לשמוע הסבר קצר לפני שמתחילים.';
-            if (primaryBtn) primaryBtn.innerText = 'התחל סיור קצר';
+            if (noteEl) noteEl.innerText = 'קודם מבינים את המסך. רק אחר כך עושים צעד ראשון קטן.';
+            if (audioNoteEl) audioNoteEl.innerText = 'לא חובה. אפשר לשמוע הסבר קצר לפני שממשיכים.';
+            if (primaryBtn) primaryBtn.innerText = 'המשך';
         }
 
         function getStartGuideVoiceText() {
@@ -1680,6 +1891,31 @@
         }
 
         function getQuickTourSteps() {
+            if (document.body.classList.contains('viewport-mobile') && quickTourVariant === 'guided_mobile') {
+                return [
+                    {
+                        selectors: ['#guided-shell-question'],
+                        title: 'מה רואים כאן?',
+                        text: 'כאן מופיעה השאלה. כאן כתוב מה מבקשים לפני שנוגעים בגרף.'
+                    },
+                    {
+                        selectors: ['#graph-area'],
+                        title: 'מה רואים כאן?',
+                        text: 'כאן רואים את הגרף. הוא מראה את הצורה המתמטית ולא רק נוסחה כתובה.'
+                    },
+                    {
+                        selectors: ['#guided-shell-equations'],
+                        title: 'מה רואים כאן?',
+                        text: 'כאן אוספים נתונים ובונים משוואות. מזה מתחיל הפתרון.'
+                    },
+                    {
+                        selectors: [],
+                        title: 'מה הרעיון?',
+                        text: 'לא מנסים לנחש.\nקודם רואים,\nאחר כך מזהים נתונים,\nואז בונים מהם משוואות.',
+                        nextLabel: 'תראה לי צעד ראשון'
+                    }
+                ];
+            }
             if (document.body.classList.contains('viewport-mobile') && quickTourVariant === 'mobile_intro') {
                 return [
                     {
@@ -1776,6 +2012,10 @@
             if (steps.length === 0) return;
             quickTourStepIndex = Math.max(0, Math.min(steps.length - 1, quickTourStepIndex));
             let step = steps[quickTourStepIndex];
+            if (quickTourVariant === 'guided_mobile') {
+                guidedStartStep = quickTourStepIndex >= 3 ? GUIDED_START_FLOW.IDEA : GUIDED_START_FLOW.TOUR;
+                syncGuidedStartUiState();
+            }
 
             let titleEl = document.getElementById('quick-tour-title');
             let textEl = document.getElementById('quick-tour-text');
@@ -1821,13 +2061,17 @@
             quickTourCurrentTarget = null;
             quickTourActive = true;
             modal.classList.toggle('quick-tour-orientation', quickTourVariant === 'mobile_intro');
+            modal.classList.toggle('quick-tour-guided', quickTourVariant === 'guided_mobile');
 
             let sampleQuestion = document.getElementById('quick-tour-sample-question');
+            let skipBtn = document.getElementById('btn-quick-tour-skip');
             let q = getCurrentQuestion();
             if (sampleQuestion) {
-                if (q && q.title) sampleQuestion.innerText = `שאלה לדוגמה: ${q.title}`;
+                if (quickTourVariant === 'guided_mobile') sampleQuestion.innerText = 'קודם מכירים את המסך ורק אחר כך מתחילים לפעול.';
+                else if (q && q.title) sampleQuestion.innerText = `שאלה לדוגמה: ${q.title}`;
                 else sampleQuestion.innerText = 'שאלה לדוגמה: מצאו נקודת קיצון בעזרת הגרף.';
             }
+            if (skipBtn) skipBtn.innerText = quickTourVariant === 'guided_mobile' ? 'חזרה ללובי' : 'דלג כרגע';
 
             modal.classList.remove('hidden');
             syncEntryModalBodyState();
@@ -1835,7 +2079,8 @@
             let demoVideo = document.getElementById('quick-tour-demo-video');
             if (demoVideo) {
                 demoVideo.currentTime = 0;
-                demoVideo.play().catch(() => {});
+                if (quickTourVariant === 'guided_mobile') demoVideo.pause();
+                else demoVideo.play().catch(() => {});
             }
         }
 
@@ -1844,6 +2089,7 @@
             if (modal) {
                 modal.classList.add('hidden');
                 modal.classList.remove('quick-tour-orientation');
+                modal.classList.remove('quick-tour-guided');
             }
             let cursor = document.getElementById('quick-tour-cursor');
             if (cursor) cursor.classList.add('hidden');
@@ -1871,6 +2117,10 @@
             if (quickTourStepIndex >= steps.length - 1) {
                 let completionAction = quickTourCompletionAction;
                 closeQuickTour(true);
+                if (completionAction === 'start_guided_action') {
+                    startGuidedFirstAction();
+                    return;
+                }
                 if (completionAction === 'open_question_intro') {
                     setDrawerOpen(false);
                     setTimeout(() => {
@@ -1886,6 +2136,10 @@
         }
 
         function skipQuickTour() {
+            if (quickTourVariant === 'guided_mobile') {
+                abortGuidedStartFlow();
+                return;
+            }
             closeQuickTour(true);
         }
 
@@ -1938,6 +2192,7 @@
 
         function shouldActivateParamIntroCleanForQuestion(q) {
             if (!sessionStarted) return false;
+            if (!isWorkspaceEntryMode()) return false;
             if (!q || isPreStartOnlyQuestion(q)) return false;
             if (!isParameterQuestion(q)) return false;
             if (shouldUsePracticeCleanMode()) return false;
@@ -2025,7 +2280,7 @@
 
             let topToggleBtn = document.getElementById('btn-clean-mode-toggle');
             if (topToggleBtn) {
-                let showTopToggle = !!sessionStarted && !cleanModeActive && !paramIntroActive;
+                let showTopToggle = !!sessionStarted && isWorkspaceEntryMode() && !cleanModeActive && !paramIntroActive;
                 topToggleBtn.classList.toggle('hidden', !showTopToggle);
                 topToggleBtn.innerText = cleanModeManualEnabled ? 'מצב ריכוז פעיל' : 'מצב ריכוז';
                 topToggleBtn.disabled = !canTogglePracticeCleanModeManually();
@@ -2215,11 +2470,12 @@
 
         function scheduleMathGymPopup() {
             if (!sessionStarted) return;
+            if (!isWorkspaceEntryMode()) return;
             if (hasSeenMathGymPopup()) return;
             if (mathGymPopupTimer) clearTimeout(mathGymPopupTimer);
             mathGymPopupTimer = setTimeout(() => {
                 mathGymPopupTimer = null;
-                if (!sessionStarted || hasSeenMathGymPopup()) return;
+                if (!sessionStarted || !isWorkspaceEntryMode() || hasSeenMathGymPopup()) return;
                 openMathGymPopup();
             }, 1800);
         }
@@ -2562,6 +2818,13 @@
             if (globalHelpModal && globalHelpCard) {
                 globalHelpModalA11y = attachModalA11y(globalHelpModal, globalHelpCard, {
                     onClose: closeGlobalHelpModal
+                });
+            }
+            let scanAdminModal = document.getElementById('scan-admin-modal');
+            let scanAdminCard = document.getElementById('scan-admin-card');
+            if (scanAdminModal && scanAdminCard) {
+                scanAdminModalA11y = attachModalA11y(scanAdminModal, scanAdminCard, {
+                    onClose: closeScanAdminModal
                 });
             }
         }
@@ -3562,7 +3825,7 @@
         function renderMobileFeedTicker() {
             let textEl = document.getElementById('mobile-feed-ticker-text');
             if (!textEl) return;
-            let msg = mobileFeedTickerMessages[mobileFeedTickerIndex] || mobileFeedTickerMessages[0] || 'כאן יופיעו הצעות להמשך הלמידה.';
+            let msg = mobileFeedTickerMessages[mobileFeedTickerIndex] || mobileFeedTickerMessages[0] || 'נציג כאן הצעות קצרות וברורות להמשך הלמידה.';
             textEl.innerText = msg;
         }
 
@@ -4109,7 +4372,7 @@
             renderMission();
             updateSpecialPanels();
             updateInfo();
-            showStepToast('הפונקציה נקבעה. התחילו לעבוד על הגרף; אפשר להחזיר משימות/רמזים מהכפתור העליון.');
+            showStepToast('הציור והתנאים הראשונים מוכנים. עכשיו מתחילים לעבוד על הגרף, ואפשר לפתוח משימות ורמזים לפי הצורך.');
         }
 
         function updateParamHints() {
@@ -4245,7 +4508,7 @@
             if (!q) return 'בצע את המשימה לפי ההנחיה.';
             let data = getQuestionGoalData(q);
             if (q.goal === 'choose_function_template') {
-                return 'בחרו משפחה מתאימה, כדי שאפשר יהיה לקרוא מהגרף תנאים ולבנות מהם משוואות.';
+                return 'קראו מה נאמר בשאלה, בנו ציור עזר, ורק אם צריך בחרו צורה תומכת שתעזור להוציא תנאים ומשוואות.';
             }
             if (q.goal === 'slope_zero') {
                 return 'גררו את הנקודה עד שהשיפוע f\'(x) שווה לאפס.';
@@ -4887,7 +5150,7 @@
             let isMobile = document.body.classList.contains('viewport-mobile');
             let overlayOpen = !!document.querySelector('#question-overlay:not(.hidden)');
             let streamlineMode = isMobile
-                && sessionStarted
+                && isWorkspaceEntryMode()
                 && !drawerOpen
                 && !overlayOpen
                 && !mobileFeedOpen
@@ -5225,8 +5488,8 @@
 
         function applyTopStripFocusMode() {
             let isMobile = isMobileViewportNow();
-            let focusMode = isMobile && drawerOpen && !!activeAccordion && activeAccordion !== 'params';
-            let graphPriorityMode = isMobile && drawerOpen && (activeAccordion === 'params' || activeAccordion === 'tools');
+            let focusMode = isMobile && isWorkspaceEntryMode() && drawerOpen && !!activeAccordion && activeAccordion !== 'params';
+            let graphPriorityMode = isMobile && isWorkspaceEntryMode() && drawerOpen && (activeAccordion === 'params' || activeAccordion === 'tools');
             document.body.classList.toggle('panel-focus', focusMode);
             document.body.classList.toggle('graph-priority-mode', graphPriorityMode);
             let questionHead = document.getElementById('drawer-question-head');
@@ -5723,6 +5986,7 @@
                 document.body.classList.add('embed-mode');
             }
             applyViewportClasses();
+            syncGuidedStartUiState();
             updateResponsiveLayoutMetrics();
             scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 90, 260, 520, 1100] });
             setupOpeningSplashMedia();
@@ -5742,7 +6006,7 @@
             exposeBuildBadgeInEmbedMode();
             loadFeedbackMessages();
             loadScanConfig();
-            document.getElementById('scan-config-box')?.addEventListener('toggle', () => syncScanAdminConfigUi());
+            syncScanAdminConfigUi();
             let defaultDrawerOpen = false;
             setDrawerOpen(defaultDrawerOpen);
             initAdMobBanner();
@@ -6264,6 +6528,8 @@
             if (builderFx) builderFx.innerText = fxText;
             if (builderDx) builderDx.innerText = dText;
             if (builderEquationAuto) builderEquationAuto.innerText = `${fxText} | ${dText}`;
+            if (labelText) labelText.setAttribute({ visible: !isGuidedEntryMode() });
+            syncGuidedStartActionReadout(x, m);
 
             updateNormalGeometry(x, y, m);
             updateGuideNormalGeometry(x, y, m);
@@ -7025,7 +7291,7 @@
                 return 'הצלחה: המשיק עובר דרך הנקודה החיצונית הנתונה בשאלה.';
             }
             if (goal === 'choose_function_template') {
-                return 'הצלחה: בחרתם תבנית מתאימה, ועכשיו אפשר לקרוא מהגרף נקודות, שיפועים או קיצון בצורה ברורה.';
+                return 'הצלחה: בניתם ציור עזר שמאפשר לקרוא מהגרף תנאים ברורים ולהתחיל לתרגם אותם למשוואות.';
             }
             return 'הצלחה: עונים לדרישת השאלה ומוודאים בעין ובנתונים שהפתרון יציב.';
         }
@@ -7045,7 +7311,7 @@
                 return 'חומר רלוונטי: משוואת משיק y - y0 = m(x - x0), בדיקת מעבר דרך נקודה חיצונית, וקשר בין נגזרת לשיפוע המשיק.';
             }
             if (goal === 'choose_function_template') {
-                return 'חומר רלוונטי: צורות פונקציה נפוצות (ישר/ריבועית/ממעלה שלישית/רביעית), ותפקידן בבניית גרף שאפשר להפיק ממנו תנאים.';
+                return 'חומר רלוונטי: איך עוברים מהמילים לציור, מהציור לתנאים, ורק אחר כך משתמשים בצורה תומכת כדי לחדד את המשוואות.';
             }
             return 'חומר רלוונטי: נגזרות, שיפוע משיק, עלייה/ירידה, והשפעת פרמטרים על גרף הפונקציה.';
         }
@@ -7055,10 +7321,10 @@
             let data = getQuestionGoalData(q);
             if (goal === 'choose_function_template') {
                 return [
-                    'בחרו משפחה שמתאימה למה שרואים או למה שמבקשים.',
-                    'דייקו את הגרף עד שאפשר לקרוא ממנו נקודה, קיצון, שיפוע או חיתוך.',
-                    'עברו למחברת ושאלו איזו משוואה כל נתון יוצר.',
-                    'רק אחרי שיש תנאים ברורים ממשיכים לפתרון.'
+                    'קראו מה נאמר בשאלה והדגישו את הנתונים החשובים.',
+                    'בנו ציור עזר שמאפשר לראות נקודה, קיצון, שיפוע או חיתוך.',
+                    'שאלו איזה תנאי מתמטי מתקבל מכל רמז שאתם רואים.',
+                    'רק אם צריך, בחרו צורה תומכת והמשיכו מהתנאים אל המשוואות.',
                 ];
             }
             if (goal === 'slope_zero' || goal === 'min_point') {
@@ -8122,16 +8388,16 @@
                 let prestartEssence = getShortText(q?.overlay?.essence, shortDesc.first);
                 let prestartGoal = getShortText(q?.overlay?.goal, shortDesc.second);
                 setMixedBidiText(textEl, `מה עושים עכשיו: ${prestartEssence}`);
-                setMixedBidiText(successEl, `הצלחה: הכנתם גרף שאפשר לקרוא ממנו תנאים ברורים (${prestartGoal}), בדקתם את המחברת, ואז לחצתם "קבע פונקציה והתחל תרגול".`);
+                setMixedBidiText(successEl, `הצלחה: אספתם מהשאלה ומהציור תנאים ברורים (${prestartGoal}), תרגמתם אותם למשוואות, ורק אז עברתם לתרגול.`);
                 listEl.innerHTML = '';
                 [
                     'קראו את הסבר השאלה בראש המסך.',
                     'אם רוצים, בוחרים שאלה אחרת מהרשימה למעלה.',
-                    'פתחו את אזור הפרמטרים רק כדי להכין גרף שאפשר לקרוא ממנו רמזים.',
-                    'בחרו משפחה שמתאימה למה שרואים או למה שמבקשים.',
-                    'דייקו את הגרף עד שאפשר לקרוא ממנו נקודות, שיפועים או קיצון.',
+                    'פתחו את אזור הפרמטרים רק כדי לבנות ציור עזר שאפשר לקרוא ממנו רמזים.',
+                    'שאלו מה נאמר בשאלה ומה כבר רואים בציור.',
+                    'אספו נקודות, שיפועים או קיצון שהציור מגלה.',
                     'עברו למחברת ושאלו: איזו משוואה כל נתון יוצר?',
-                    'בסיום לחצו "קבע פונקציה והתחל תרגול".'
+                    'בסיום עברו לתרגול רק אחרי שיש תנאים ומשוואות ברורים.'
                 ].forEach((stepText) => {
                     let li = document.createElement('li');
                     setMixedBidiText(li, stepText);
@@ -8246,8 +8512,8 @@
             let action = stepInstruction || shortDesc.second;
 
             if (goal === 'choose_function_template') {
-                target = 'להכין גרף שאפשר לקרוא ממנו תנאים ברורים.';
-                action = 'בחרו משפחה מתאימה, דייקו את הצורה, ואז שאלו איזו משוואה כל רמז בונה.';
+                target = 'להכין ציור עזר שאפשר לקרוא ממנו תנאים ברורים.';
+                action = 'קודם מזהים מה נאמר בשאלה ומה רואים בציור, ורק אם צריך בוחרים צורה תומכת שתעזור לבנות משוואות.';
             } else if (goal === 'slope_zero') {
                 target = 'למצוא נקודה שבה שיפוע המשיק שווה לאפס.';
                 action = 'גררו את הנקודה הכחולה עד שבתיבת הנתונים מופיע f\'(x) שווה לאפס.';
@@ -8346,28 +8612,38 @@
             pushCoachEvent('ATTEMPT_CORRECT', { reason: 'question_solved' });
             let box = document.querySelector('.jxgbox');
             let winOverlay = document.getElementById('win-overlay');
-            if (winOverlay) {
+            let suppressCelebration = isGuidedEntryMode();
+            if (winOverlay && !suppressCelebration) {
                 winOverlay.style.display = 'block';
                 if (winOverlayTimer) clearTimeout(winOverlayTimer);
                 winOverlayTimer = setTimeout(() => {
                     closeWinOverlay();
                 }, 2200);
             }
-            if (box) box.classList.add('winning-box');
+            if (box) box.classList.toggle('winning-box', !suppressCelebration);
             let progressAward = registerQuestionSolvedProgress();
-            let message = 'כל הכבוד! השלמת את המשימה.';
-            if (progressAward.gainedXp > 0) message += ` +${progressAward.gainedXp} XP`;
-            if (progressAward.leveledUp) message += ` | עלית לרמה ${progressAward.level}!`;
+            let message = suppressCelebration
+                ? 'יפה. השלמתם את הצעד הראשון, ועכשיו נפתח את מרחב העבודה המלא.'
+                : 'כל הכבוד! השלמת את המשימה.';
+            if (!suppressCelebration && progressAward.gainedXp > 0) message += ` +${progressAward.gainedXp} XP`;
+            if (!suppressCelebration && progressAward.leveledUp) message += ` | עלית לרמה ${progressAward.level}!`;
             showStepToast(message);
             let missionLine = document.getElementById('mission-step-text');
             if (missionLine) missionLine.innerText = `✅ המשימה הושלמה: ${getCurrentQuestion()?.title || ''}`;
             let topStatus = document.getElementById('top-step-status');
-            if (topStatus) topStatus.innerText = '✅ המשימה הושלמה. כל הכבוד!';
-            if (!wasWin) {
+            if (topStatus) {
+                topStatus.innerText = suppressCelebration
+                    ? '✅ הצעד הראשון הושלם.'
+                    : '✅ המשימה הושלמה. כל הכבוד!';
+            }
+            if (!wasWin && !suppressCelebration) {
                 playSound('win');
                 triggerVictoryConfetti();
             }
             wasWin = true;
+            if (suppressCelebration) {
+                completeGuidedStartAction();
+            }
         }
 
         function closeWinOverlay() {
@@ -8767,23 +9043,44 @@
 
         function syncScanAdminConfigUi(options = {}) {
             let box = document.getElementById('scan-config-box');
-            if (!box) return;
-            if (options.forceOpen) box.open = true;
-            box.classList.toggle('scan-admin-revealed', SHOW_SCAN_ADMIN || scanAdminConfigRevealed || box.open);
+            let entryBtn = document.getElementById('btn-open-scan-admin');
+            let visible = SHOW_SCAN_ADMIN || scanAdminConfigRevealed;
+            if (box) box.classList.toggle('scan-admin-revealed', visible);
+            if (entryBtn) entryBtn.classList.toggle('scan-admin-entry-visible', visible);
+            if (options.forceOpen) openScanAdminModal();
         }
 
         function toggleScanAdminConfig(forceOpen) {
+            if (typeof forceOpen === 'boolean' && !forceOpen) {
+                closeScanAdminModal();
+                return;
+            }
             scanAdminConfigRevealed = true;
-            let box = document.getElementById('scan-config-box');
-            if (!box) return;
-            if (typeof forceOpen === 'boolean') box.open = forceOpen;
-            else box.open = !box.open;
-            syncScanAdminConfigUi();
+            syncScanAdminConfigUi({ forceOpen: true });
         }
 
         function revealScanAdminConfig() {
             scanAdminConfigRevealed = true;
             syncScanAdminConfigUi({ forceOpen: true });
+        }
+
+        function openScanAdminModal() {
+            scanAdminConfigRevealed = true;
+            let modal = document.getElementById('scan-admin-modal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            if (scanAdminModalA11y) scanAdminModalA11y.activate();
+            syncScanAdminConfigUi();
+        }
+
+        function closeScanAdminModal() {
+            let modal = document.getElementById('scan-admin-modal');
+            if (modal) modal.classList.add('hidden');
+            if (scanAdminModalA11y) scanAdminModalA11y.deactivate();
+        }
+
+        function onScanAdminBackdropClick(event) {
+            if (event.target.id === 'scan-admin-modal') closeScanAdminModal();
         }
 
         function setScanEntryMode(mode, options = {}) {
@@ -9010,6 +9307,7 @@
             loadScanConfig();
             updateScanCaptureUi();
             syncScanAdminConfigUi();
+            closeScanAdminModal();
             resetScanResultUi();
             scanManualQuestionText = '';
             let textArea = document.getElementById('scan-question-text');
@@ -9031,6 +9329,7 @@
 
         function closeScanModal() {
             document.getElementById('scan-modal').classList.add('hidden');
+            closeScanAdminModal();
         }
 
         function onScanModalBackdropClick(event) {
@@ -11108,10 +11407,11 @@ Rules:
         }
 
         function startGuidedStartFromGuide() {
+            if (document.body.classList.contains('viewport-mobile') && !sessionStarted) {
+                beginGuidedWorkspaceTour();
+                return;
+            }
             if (document.body.classList.contains('viewport-mobile')) {
-                markStartGuideSeen('start:mobile_intro');
-                closeStartGuideModal({ skipOverlay: true });
-                markSessionStarted();
                 quickTourVariant = 'mobile_intro';
                 quickTourCompletionAction = 'open_question_intro';
                 openQuickTour({ force: true });
@@ -11126,6 +11426,11 @@ Rules:
             if (quickTourActive) closeQuickTour(false);
             hideOpeningSplash({ immediate: true });
             closeQuestionOverlay();
+            if (!sessionStarted && document.body.classList.contains('viewport-mobile')) {
+                appEntryMode = APP_ENTRY_MODES.GUIDED;
+                guidedStartStep = GUIDED_START_FLOW.INTRO;
+                syncSessionUiState();
+            }
             let levelSel = document.getElementById('start-demo-level');
             if (levelSel && !levelSel.value) levelSel.value = 'easy';
             syncStartGuideContent();
@@ -11140,6 +11445,7 @@ Rules:
 
         function closeStartGuideModal(options = {}) {
             let skipOverlay = !!options.skipOverlay;
+            let preserveMode = !!options.preserveMode;
             let modal = document.getElementById('start-guide-modal');
             if (modal) modal.classList.add('hidden');
             stopStartCoachSpeech();
@@ -11148,6 +11454,9 @@ Rules:
             syncEntryModalBodyState();
             if (skipOverlay) {
                 closeQuestionOverlay();
+            }
+            if (!preserveMode && !sessionStarted && isGuidedEntryMode()) {
+                setAppEntryMode(APP_ENTRY_MODES.LANDING);
             }
         }
 
@@ -11208,7 +11517,6 @@ Rules:
                 return;
             }
             if (!isStartGuideModalOpen()) return;
-            if (!sessionStarted) return;
             event.preventDefault();
             closeStartGuideModal({ skipOverlay: true });
         }
@@ -11252,6 +11560,7 @@ Rules:
 
         function shouldUsePracticeCleanMode() {
             if (!sessionStarted) return false;
+            if (!isWorkspaceEntryMode()) return false;
             if (document.body.classList.contains('embed-mode')) return false;
             if (ENTRY_FLOW_QUERY.clean === true) return true;
             if (ENTRY_FLOW_QUERY.clean === false) return false;
@@ -11263,12 +11572,13 @@ Rules:
 
         function syncSessionModeClasses() {
             let practiceClean = shouldUsePracticeCleanMode();
-            let paramIntroClean = !!sessionStarted && !practiceClean && !!paramIntroCleanActive;
+            let paramIntroClean = !!sessionStarted && isWorkspaceEntryMode() && !practiceClean && !!paramIntroCleanActive;
             document.body.classList.toggle('session-started', sessionStarted);
             document.body.classList.toggle('practice-clean-mode', practiceClean);
             document.body.classList.toggle('param-intro-clean', paramIntroClean);
-            document.body.classList.toggle('prestart-only', !sessionStarted);
+            document.body.classList.toggle('prestart-only', isLandingEntryMode());
             document.body.classList.toggle('news-feed-enabled', isNewsFeedFeatureEnabled());
+            syncGuidedStartUiState();
             syncPracticeCleanModeControls();
             syncMobilePresentationMode();
             syncNewsFeedActionButtons();
@@ -11278,29 +11588,32 @@ Rules:
 
         function syncSessionUiState() {
             syncSessionModeClasses();
-            if (!sessionStarted) {
+            if (isLandingEntryMode()) {
                 scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 80, 220, 520] });
                 dismissQuestionIntro();
                 closeQuestionOverlay();
             }
-            if (sessionStarted && drawerOpen && !document.body.classList.contains('embed-mode')) setDrawerOpen(false);
+            if ((isLandingEntryMode() || isGuidedEntryMode()) && drawerOpen) setDrawerOpen(false);
+            if (sessionStarted && drawerOpen && !document.body.classList.contains('embed-mode') && !isWorkspaceEntryMode()) setDrawerOpen(false);
             let homeLanding = document.getElementById('home-landing');
-            if (homeLanding) homeLanding.hidden = !!sessionStarted;
+            if (homeLanding) homeLanding.hidden = !isLandingEntryMode();
+            let guidedShell = document.getElementById('guided-start-shell');
+            if (guidedShell) guidedShell.hidden = !shouldShowGuidedShell();
             let topStrip = document.getElementById('top-strip');
-            if (topStrip) topStrip.hidden = !sessionStarted;
+            if (topStrip) topStrip.hidden = !isWorkspaceEntryMode();
             let practiceBar = document.getElementById('practice-question-bar');
-            if (practiceBar) practiceBar.hidden = !sessionStarted;
+            if (practiceBar) practiceBar.hidden = !isWorkspaceEntryMode();
             ['sound-toggle', 'btn-tools-menu'].forEach((id) => {
                 let el = document.getElementById(id);
                 if (!el) return;
-                el.hidden = !sessionStarted;
+                el.hidden = !isWorkspaceEntryMode();
             });
             let prestartHint = document.getElementById('prestart-hint');
-            if (prestartHint) prestartHint.classList.toggle('hidden', sessionStarted);
+            if (prestartHint) prestartHint.classList.toggle('hidden', !isLandingEntryMode());
             ['btn-top-init-builder'].forEach((id) => {
                 let el = document.getElementById(id);
                 if (!el) return;
-                el.classList.toggle('hidden', sessionStarted);
+                el.classList.toggle('hidden', !isLandingEntryMode());
             });
             let selected = refreshTopQuestionSelect(currentQ);
             if (Number.isFinite(selected) && selected !== currentQ) currentQ = selected;
@@ -11311,16 +11624,20 @@ Rules:
         }
 
         function markSessionStarted(options = {}) {
-            if (sessionStarted) return;
             let preserveCurrentFunction = !!options.preserveCurrentFunction;
+            let entryMode = normalizeAppEntryMode(options.entryMode || APP_ENTRY_MODES.WORKSPACE);
             let wasPreStartQuestion = isPreStartOnlyQuestion(getCurrentQuestion());
+            if (sessionStarted && appEntryMode === entryMode) return;
             sessionStarted = true;
-            syncSessionUiState();
+            setAppEntryMode(entryMode);
             scheduleMathGymPopup();
             if (wasPreStartQuestion) {
                 let nextIdx = getFirstPracticeQuestionIndex();
                 if (nextIdx >= 0) {
-                    loadQ(nextIdx, { autoOpenOverlay: true, preserveCurrentFunction: preserveCurrentFunction });
+                    loadQ(nextIdx, {
+                        autoOpenOverlay: entryMode === APP_ENTRY_MODES.WORKSPACE,
+                        preserveCurrentFunction: preserveCurrentFunction
+                    });
                 }
             }
         }
@@ -11458,6 +11775,7 @@ Rules:
             }
             currentQ = safeIdx;
             let q = questions[safeIdx];
+            let inGuidedEntry = isGuidedEntryMode();
             coachLastStepEnterKey = '';
             if (typeof resetSoundPlayBudget === 'function') resetSoundPlayBudget();
             let visiblePos = getVisibleQuestionPosition(safeIdx);
@@ -11535,7 +11853,7 @@ Rules:
                 questionParamValues[paramSpec.key] = initial;
                 paramSpec.applied = false;
             }
-            paramIntroCleanActive = shouldActivateParamIntroCleanForQuestion(q);
+            paramIntroCleanActive = !inGuidedEntry && shouldActivateParamIntroCleanForQuestion(q);
             syncSessionModeClasses();
             readAnswerValidated = false;
             let readInput = document.getElementById('read-answer-input');
@@ -11560,10 +11878,14 @@ Rules:
             renderNotebookSnapshot(null, { keepStatus: false });
             resetQuestionSolveGuard();
             let mustStartFromFunctionSetup = !!sessionStarted
+                && isWorkspaceEntryMode()
                 && !isPreStartOnlyQuestion(q)
                 && canOpenBuilderForQuestion(q)
                 && !paramIntroCleanActive;
-            if (mustStartFromFunctionSetup) {
+            if (inGuidedEntry) {
+                openAccordion('steps');
+                setDrawerOpen(false);
+            } else if (mustStartFromFunctionSetup) {
                 builderPanelOpen = true;
                 openAccordion('params');
                 setDrawerOpen(true);
@@ -11592,8 +11914,9 @@ Rules:
             document.getElementById('btn-apply-solution').classList.add('hidden');
             document.getElementById('btn-next-step').classList.add('hidden');
             renderMission();
+            syncGuidedStartShellContent(q);
             updateSpecialPanels();
-            let shouldOpenQuestionIntro = !!sessionStarted && !!autoOpenOverlay && !paramIntroCleanActive;
+            let shouldOpenQuestionIntro = !!sessionStarted && isWorkspaceEntryMode() && !!autoOpenOverlay && !paramIntroCleanActive;
             setQuestionIntroActive(shouldOpenQuestionIntro);
 
             let startX = getPreferredStartXForQuestion(q);
@@ -11607,7 +11930,7 @@ Rules:
             updateMobileFeedTickerMessages(false);
             renderMobileFeedCards();
             if (mustStartFromFunctionSetup) {
-                showStepToast('שאלה חדשה: קודם בחרו סוג פונקציה, דייקו פרמטרים, ואז לחצו "קבע פונקציה והתחל תרגול".');
+                showStepToast('שאלה חדשה: קודם קראו את הנתונים, בנו ציור עזר, אספו תנאים, ורק אז עברו לתרגול.');
                 setTimeout(pulseStartConfirmButton, 140);
             }
         }
