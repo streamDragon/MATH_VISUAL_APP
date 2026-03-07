@@ -337,7 +337,7 @@
             </div>
             <div id="mobile-feed-ticker" aria-live="polite">
                 <span id="mobile-feed-ticker-label">מה חדש</span>
-                <span id="mobile-feed-ticker-text">מכינים הצעות להמשך...</span>
+                <span id="mobile-feed-ticker-text">כאן תופענה הצעות להמשך.</span>
             </div>
             <div id="mobile-feed-featured-wrap">
                 <div id="mobile-feed-featured-head">
@@ -349,9 +349,9 @@
                         <img id="mobile-feed-featured-thumb" alt="שאלת השבוע" loading="lazy">
                     </div>
                     <div id="mobile-feed-featured-body">
-                        <span id="mobile-feed-featured-tag">עוד רגע יופיע כאן תרגיל מומלץ</span>
-                        <div id="mobile-feed-featured-title">מכינים תרגיל מומלץ</div>
-                        <div id="mobile-feed-featured-desc">עוד רגע תופיע כאן הצעה קצרה וברורה.</div>
+                        <span id="mobile-feed-featured-tag">כאן תופיע שאלה מומלצת</span>
+                        <div id="mobile-feed-featured-title">תרגיל מומלץ יופיע כאן</div>
+                        <div id="mobile-feed-featured-desc">כאן תופיע הצעה קצרה וברורה להמשך.</div>
                     </div>
                 </button>
             </div>
@@ -722,7 +722,7 @@
             </div>
             <div id="top-question-wrap">
                 <span id="top-question-index">שאלה 1/4</span>
-                <span id="top-question">השאלה תופיע כאן בעוד רגע</span>
+                <span id="top-question">כאן תופיע השאלה הנוכחית</span>
                 <span id="top-track-badge" class="track-visual-explore">מסלול: חקירה ויזואלית</span>
                 <div id="top-build-cta-wrap">
                     <button id="btn-top-build-cta" type="button" onclick="openBuilderFromMainCta()">לחצו כאן לבניית פונקציה</button>
@@ -762,7 +762,7 @@
                 </div>
             </div>
             <div id="top-clarity-panel" class="hidden" style="display:none !important;">
-                <div id="top-clarity-title">שאלה: עוד רגע תופיע כאן</div>
+                <div id="top-clarity-title">שאלה: כאן תופיע הכותרת הנוכחית</div>
                 <div id="top-clarity-goal">מטרת התרגיל: תופיע כאן מיד</div>
                 <div id="top-clarity-action">מה התלמיד עושה עכשיו: נציג כאן את הצעד הבא</div>
                 <div id="top-clarity-tip">רוצים להבין למה זה עובד? לחצו על כפתור ההעמקה.</div>
@@ -1408,7 +1408,7 @@
             'tangent_through_point'
         ]);
         const START_COACH_MESSAGES = {
-            app: 'מכאן אפשר להתחיל מהדגמה, מתרגול לפי הרמה, או משאלה אמיתית שתרצו לפרק יחד.',
+            app: 'מכאן מתחילים מהדגמה, מתרגול לפי הרמה, או משאלה אמיתית שמפרקים יחד לציור, נתונים ומשוואות.',
             demo: 'בהדגמה רואים גרף חי והסבר קצר שמראה איך המתמטיקה מתחילה להיות ברורה.',
             tutorial: 'הסיור הקצר מראה איפה המשימה, איפה העזרה, ואיך מתקדמים בלי ללכת לאיבוד.'
         };
@@ -1468,8 +1468,8 @@
                 },
                 {
                     selectors: ['#btn-top-builder', '#btn-side-builder', '#btn-builder'],
-                    title: 'שלב 3: משנים פרמטרים',
-                    text: 'לחיצה כאן פותחת את הפרמטרים a,b,c,d,e ומשנה את הגרף בזמן אמת.'
+                    title: 'שלב 3: פותחים פרמטרים ומחברת',
+                    text: 'כאן פותחים את אזור הפרמטרים, מסמנים תנאים מהגרף, ומתרגמים אותם למשוואות.'
                 },
                 {
                     selectors: ['#btn-tools-menu', '#btn-top-questions'],
@@ -3302,7 +3302,7 @@
         function renderMobileFeedTicker() {
             let textEl = document.getElementById('mobile-feed-ticker-text');
             if (!textEl) return;
-            let msg = mobileFeedTickerMessages[mobileFeedTickerIndex] || mobileFeedTickerMessages[0] || 'מכינים את מסלול הלמידה...';
+            let msg = mobileFeedTickerMessages[mobileFeedTickerIndex] || mobileFeedTickerMessages[0] || 'כאן יופיעו הצעות להמשך הלמידה.';
             textEl.innerText = msg;
         }
 
@@ -3957,7 +3957,7 @@
             if (!tpl) {
                 label.innerText = 'גרף פתיחה לשאלה: לא הוגדר';
                 applyStartBtn.disabled = true;
-                if (status) status.innerText = 'לא נמצאה תצורת פתיחה לשאלה זו.';
+                if (status) status.innerText = 'לשאלה הזו אין כרגע גרף פתיחה מוכן.';
                 return;
             }
 
@@ -3970,8 +3970,8 @@
                 : 'טען גרף פתיחה מומלץ';
             if (status && !templateChosen) {
                 status.innerText = sessionStarted
-                    ? 'רוצים להתחיל את השאלה מהגרף המומלץ? לחצו "טען גרף פתיחה לשאלה הזאת".'
-                    : `המלצה: התחילו מהתצורה "${tpl.title}", או בחרו סוג פונקציה אחר, דייקו עם הפרמטרים ואז קבעו פונקציה.`;
+                    ? 'רוצים להתחיל מהגרף המומלץ ואז לקרוא ממנו נתונים? לחצו "טען גרף פתיחה לשאלה הזאת".'
+                    : `המלצה: התחילו מהתצורה "${tpl.title}", או בחרו משפחה אחרת ובנו ממנה גרף שיהיה נוח לקרוא ממנו תנאים.`;
             }
         }
 
@@ -3987,7 +3987,7 @@
             if (!q) return 'בצע את המשימה לפי ההנחיה.';
             let data = getQuestionGoalData(q);
             if (q.goal === 'choose_function_template') {
-                return 'בחרו תבנית פונקציה, אשרו, ואז עברו לתרגול.';
+                return 'בחרו משפחת פונקציות מתאימה, ובנו גרף פתיחה שאפשר לקרוא ממנו נתונים.';
             }
             if (q.goal === 'slope_zero') {
                 return 'גררו את הנקודה עד שהשיפוע f\'(x) שווה לאפס.';
@@ -4015,13 +4015,13 @@
                 let targets = Array.isArray(data.targets) ? data.targets : [];
                 let preferred = Array.isArray(data.preferredEditableParams) ? data.preferredEditableParams : [];
                 let preferredText = preferred.length > 0
-                    ? ` מומלץ להתחיל מ-${preferred.join(', ')}.`
+                    ? ` אפשר להתחיל מ-${preferred.join(', ')} כדי לייצב את התנאים.`
                     : '';
                 if (targets.length > 0) {
                     let list = targets.map((t) => `(${formatNumber(t.x)},${formatNumber(t.y)})`).join(', ');
-                    return `שנו פרמטרים כך שהגרף יעבור דרך ${list}.${preferredText}`;
+                    return `הפכו את הנתונים ${list} לתנאים על הפונקציה, ובדקו שהגרף מקיים אותם.${preferredText}`;
                 }
-                return `שנו פרמטרים עד שהגרף יעבור דרך נקודת היעד.${preferredText}`;
+                return `זהו איזה תנאי נקודת היעד יוצרת על הפונקציה, ובנו ממנו משוואה.${preferredText}`;
             }
             if (q.goal === 'tangent_through_point') {
                 let point = data.point;
@@ -4031,7 +4031,7 @@
                 return 'גררו עד שהמשיק עובר דרך הנקודה החיצונית.';
             }
             if (q.goal === 'free') {
-                return 'שנו פרמטר אחד בכל פעם והשוו בין f(x) ל-f\'(x).';
+                return 'זהו איזה רמז חדש כל שינוי יוצר על הגרף, ועל מה הוא ירמוז באלגברה.';
             }
             let firstLine = (q.desc || 'בצע את המשימה').split('\n')[0];
             return firstLine.replace(/\s+/g, ' ').trim() || 'בצע את המשימה';
@@ -4045,7 +4045,7 @@
             if (q.goal === 'hit_target' || q.goal === 'hit_targets') {
                 let shortDesc = getQuestionShortDesc(q);
                 if (shortDesc.second) return shortDesc.second;
-                return 'טיפ: הנקודות הירוקות הן יעדים. הצלחה מתקבלת רק כשהגרף הכחול עובר בהן.';
+                return 'טיפ: כל נקודה ירוקה היא תנאי. שאלו מה היא אומרת על f(x) או על f\'(x), והוסיפו אותה למחברת.';
             }
             if (q.goal === 'tangent_through_point') {
                 return 'טיפ: הסתכלו אם הקו הכתום באמת עובר דרך הנקודה החיצונית.';
@@ -4138,8 +4138,8 @@
             if (track === 'equation_modeling') {
                 return {
                     track,
-                    shortLabel: 'מחברת/מידול',
-                    compactLabel: 'מחברת',
+                    shortLabel: 'נתונים → משוואות',
+                    compactLabel: 'משוואות',
                     icon: '🧩',
                     bodyClass: 'track-equation-modeling'
                 };
@@ -4178,8 +4178,29 @@
             let note = document.getElementById('builder-notebook-note');
             if (note) {
                 note.innerText = meta.track === 'equation_modeling'
-                    ? 'זה המסלול המרכזי למחברת: מסדרים נתונים על הגרף, ומייצרים מהם משוואות כלליות בפרמטרים.'
-                    : 'בשאלות חקירה אפשר עדיין לייצר מחברת, אבל הדגש כאן הוא קריאה/הבנה ויזואלית ולא פתרון מערכת פרמטרים.';
+                    ? 'זה המסלול המרכזי כאן: אוספים נתונים על הגרף, מתרגמים אותם למשוואות, ובונים מערכת על הפרמטרים.'
+                    : 'גם בחקירה חופשית אפשר לייצר מחברת, אבל הדגש הוא להבין אילו תנאים כל סימון על הגרף יוצר.';
+            }
+
+            let focus = document.getElementById('builder-focus-note');
+            if (focus) {
+                focus.innerText = meta.track === 'equation_modeling'
+                    ? 'כאן לא רק מזיזים פרמטרים. בודקים איזה תנאי כל נתון יוצר, ומתרגמים אותו למשוואה.'
+                    : 'גם בחקירה חופשית שואלים כל הזמן: איזה רמז חדש נוצר על הגרף, ואיך הייתי כותב אותו באלגברה?';
+            }
+
+            let practiceTitle = document.getElementById('builder-equation-practice-title');
+            if (practiceTitle) {
+                practiceTitle.innerText = meta.track === 'equation_modeling'
+                    ? 'מהנתונים למשוואות'
+                    : 'מחברת ויזואלית';
+            }
+
+            let practiceNote = document.getElementById('builder-equation-practice-note');
+            if (practiceNote) {
+                practiceNote.innerText = meta.track === 'equation_modeling'
+                    ? 'כל נתון מהגרף מתורגם כאן למשוואה, והמשוואות בונות יחד את הפונקציה.'
+                    : 'גם כאן אפשר לכתוב מה אתם רואים בגרף, ואיזו משוואה הייתם בונים מכל רמז.';
             }
         }
 
@@ -4637,7 +4658,7 @@
             let btn = document.getElementById('btn-overlay-primary');
             let mini = document.getElementById('overlay-mini-label');
             if (btn) btn.innerText = questionIntroActive
-                ? (sessionStarted ? 'הבנתי, התחל שאלה' : 'שחקו עם הפרמטרים ובנו פונקציה')
+                ? (sessionStarted ? 'הבנתי, התחל שאלה' : 'בנו גרף פתיחה והמשיכו')
                 : 'סגור כרטיס';
             if (mini) mini.innerText = questionIntroActive
                 ? (sessionStarted ? 'לפני תחילת השאלה' : 'לפני שמתחילים')
@@ -6372,9 +6393,9 @@
                 let targets = Array.isArray(data.targets) ? data.targets : [];
                 if (targets.length > 0) {
                     let labels = targets.map((t) => `(${formatNumber(t.x)}, ${formatNumber(t.y)})`).join(', ');
-                    return `הצלחה: הגרף עובר דרך נקודות היעד: ${labels}.`;
+                    return `הצלחה: מכל הנתונים ${labels} נבנו תנאים ברורים, והגרף אכן מקיים אותם.`;
                 }
-                return 'הצלחה: הגרף עובר דרך נקודת/נקודות היעד לפי הנתון בשאלה.';
+                return 'הצלחה: נבנו תנאים מהגרף ומהנתונים, והם נותנים דרך לפתרון הפרמטרים.';
             }
             if (goal === 'tangent_through_point') {
                 let point = data.point;
@@ -6384,7 +6405,7 @@
                 return 'הצלחה: המשיק עובר דרך הנקודה החיצונית הנתונה בשאלה.';
             }
             if (goal === 'choose_function_template') {
-                return 'הצלחה: בחרתם תבנית מתאימה, ועדכון פרמטרים משנה את הגרף בצורה צפויה וברורה.';
+                return 'הצלחה: בחרתם תבנית מתאימה, ועכשיו אפשר לקרוא מהגרף נקודות, שיפועים או קיצון בצורה ברורה.';
             }
             return 'הצלחה: עונים לדרישת השאלה ומוודאים בעין ובנתונים שהפתרון יציב.';
         }
@@ -6392,7 +6413,7 @@
         function getQuestionMaterialText(q) {
             let goal = q?.goal || '';
             if (goal === 'hit_target' || goal === 'hit_targets') {
-                return 'חומר רלוונטי: הצבה בפונקציה, הבנת השפעת פרמטרים a,b,c,d,e על צורת הגרף, וקריאת נקודות על מערכת צירים.';
+                return 'חומר רלוונטי: נקודה על גרף בתור תנאי, נגזרת כשצריך שיפוע/קיצון, ודרך בניית מערכת משוואות על a,b,c,d,e.';
             }
             if (goal === 'read_slope' || goal === 'read_y') {
                 return 'חומר רלוונטי: קריאת ערכים מהגרף, משמעות f(x), משמעות f\'(x), וקשר בין נקודה על הגרף לבין משוואת המשיק.';
@@ -6404,7 +6425,7 @@
                 return 'חומר רלוונטי: משוואת משיק y - y0 = m(x - x0), בדיקת מעבר דרך נקודה חיצונית, וקשר בין נגזרת לשיפוע המשיק.';
             }
             if (goal === 'choose_function_template') {
-                return 'חומר רלוונטי: צורות פונקציה נפוצות (ישר/ריבועית/ממעלה שלישית/רביעית), ותפקיד כל פרמטר בעיצוב הגרף.';
+                return 'חומר רלוונטי: צורות פונקציה נפוצות (ישר/ריבועית/ממעלה שלישית/רביעית), ותפקידן בבניית גרף שאפשר להפיק ממנו תנאים.';
             }
             return 'חומר רלוונטי: נגזרות, שיפוע משיק, עלייה/ירידה, והשפעת פרמטרים על גרף הפונקציה.';
         }
@@ -6414,10 +6435,10 @@
             let data = getQuestionGoalData(q);
             if (goal === 'choose_function_template') {
                 return [
-                    'בחרו תבנית פונקציה שמתאימה לרמה שלכם (ישר/פרבולה/פולינום).',
-                    'עברו ל"עריכת פרמטרים" ושנו בכל פעם פרמטר אחד בלבד.',
-                    'בדקו במקביל את f(x) ואת f\'(x) כדי להבין מה השתנה ולמה.',
-                    'שמרו תבנית שמרגישה לכם נוחה לפני מעבר לשאלה הבאה.'
+                    'בחרו משפחת פונקציות שמתאימה למה שרואים או למה שמבקשים.',
+                    'דייקו את הגרף עד שאפשר לקרוא ממנו נקודות, קיצון, או שיפועים.',
+                    'עברו למחברת ושאלו איזה תנאי כל נתון יוצר.',
+                    'רק אחרי שיש גרף ברור ממשיכים לפתרון.'
                 ];
             }
             if (goal === 'slope_zero' || goal === 'min_point') {
@@ -6461,10 +6482,10 @@
             }
             if (goal === 'hit_target' || goal === 'hit_targets') {
                 return [
-                    'פתחו את "עריכת פרמטרים" ושנו פרמטר אחד בכל צעד.',
-                    'התמקדו בנקודות היעד ובדקו את מיקום הגרף ביחס אליהן.',
-                    'אם צריך, עברו לכיוונון עדין עם צעדים קטנים של הסליידרים.',
-                    'ודאו שהגרף עובר בכל נקודה נדרשת באותו רגע.'
+                    'הסתכלו קודם על הנתון: נקודה, חיתוך, קיצון או שיפוע.',
+                    'שאלו מה הנתון הזה אומר על f(x) או על f\'(x).',
+                    'פתחו את המחברת והוסיפו כל תנאי כמשוואה חדשה.',
+                    'בדקו אם כבר יש מספיק משוואות כדי למצוא את הפרמטרים, ואז וודאו שהגרף באמת מתאים.'
                 ];
             }
             if (goal === 'tangent_through_point') {
@@ -6477,8 +6498,8 @@
             }
             return [
                 'קראו את דרישת השאלה עד הסוף לפני שינוי כלשהו.',
-                'בצעו שינוי אחד בכל פעם ובדקו את ההשפעה על הגרף.',
-                'היעזרו בחלונית הנתונים ובנוסחאות כדי לוודא כיוון נכון.',
+                'בדקו איזה רמז כל שינוי יוצר על הגרף.',
+                'שאלו איך הייתם כותבים את הרמז הזה באלגברה.',
                 'אשרו פתרון רק אחרי בדיקה חוזרת קצרה.'
             ];
         }
@@ -6635,15 +6656,19 @@
             return shouldShowBuilderEquationPractice(q || getCurrentQuestion());
         }
 
+        function getNotebookDefaultStatusText() {
+            return notebookAutoGenerateOnDrag
+                ? 'איסוף אוטומטי פעיל: כל גרירה או שינוי יכולים להוסיף עוד תנאי למחברת.'
+                : 'האיסוף האוטומטי כבוי. לחצו "אסוף תנאים למחברת" כדי לבנות משוואות מהגרף.';
+        }
+
         function toggleNotebookAutoGenerate(enabled) {
             notebookAutoGenerateOnDrag = !!enabled;
             let chk = document.getElementById('chk-notebook-auto');
             if (chk) chk.checked = notebookAutoGenerateOnDrag;
             let status = document.getElementById('builder-notebook-status');
             if (status && notebookHistory.length === 0) {
-                status.innerText = notebookAutoGenerateOnDrag
-                    ? 'אוטומטי פעיל: אחרי גרירה/שינוי תיווצר מחברת חדשה (כשיש נתונים מתאימים).'
-                    : 'אוטומטי כבוי. לחצו "ייצר מחברת" כדי ליצור משוואות מהגרף.';
+                status.innerText = getNotebookDefaultStatusText();
             }
         }
 
@@ -6658,11 +6683,7 @@
             if (chk) chk.checked = notebookAutoGenerateOnDrag;
             if (notebookHistory.length === 0) {
                 let status = document.getElementById('builder-notebook-status');
-                if (status) {
-                    status.innerText = notebookAutoGenerateOnDrag
-                        ? 'אוטומטי פעיל: אחרי גרירה/שינוי תיווצר מחברת חדשה (כשיש נתונים מתאימים).'
-                        : 'אוטומטי כבוי. לחצו "ייצר מחברת" כדי ליצור משוואות מהגרף.';
-                }
+                if (status) status.innerText = getNotebookDefaultStatusText();
             }
         }
 
@@ -7106,6 +7127,81 @@
             renderNotebookBlock('builder-notebook-history', 'היסטוריית מחברות (אחרונות)', html);
         }
 
+        function getNotebookConstraintLearnerText(constraint) {
+            if (!constraint) return 'נתון מהגרף';
+            let xText = formatNumber(Number(constraint.x));
+            let rhsText = constraint.rhs?.text || '?';
+            if (constraint.sourceKind === 'target_point') return `ידוע שהגרף עובר דרך (${xText}, ${rhsText}).`;
+            if (constraint.sourceKind === 'current_point') return `הנקודה הנוכחית על הגרף היא (${xText}, ${rhsText}).`;
+            if (constraint.sourceKind === 'slope_condition') {
+                return constraint.relation === 'df' && rhsText === '0'
+                    ? `בנקודה x=${xText} מתקבל תנאי של קיצון או משיק אופקי.`
+                    : `בנקודה x=${xText} ידוע השיפוע ${rhsText}.`;
+            }
+            if (constraint.sourceKind === 'read_value') {
+                return constraint.relation === 'df'
+                    ? `קראנו מהגרף את השיפוע בנקודה x=${xText}.`
+                    : `קראנו מהגרף את ערך הפונקציה בנקודה x=${xText}.`;
+            }
+            if (constraint.sourceKind === 'value_condition') return `בנקודה x=${xText} נתון ערך פונקציה ${rhsText}.`;
+            return constraint.sourceLabel || 'נתון מהגרף';
+        }
+
+        function getNotebookConstraintTolerance(constraint, q) {
+            let data = q?.data || {};
+            if (constraint?.relation === 'df') return Number(data.toleranceM ?? data.answerTolerance ?? 0.2);
+            return Number(data.toleranceY ?? data.answerTolerance ?? 0.25);
+        }
+
+        function evaluateNotebookConstraintState(constraint, q) {
+            if (!constraint || constraint.rhs?.kind !== 'number') {
+                return {
+                    toneClass: 'is-recorded',
+                    statusLabel: 'נוסף למחברת',
+                    detailText: 'זהו תנאי שנשמר למחברת, ויהפוך למשוואה יחד עם שאר הנתונים.'
+                };
+            }
+            let x = Number(constraint.x);
+            let expected = Number(constraint.rhs.value || 0);
+            let actual = constraint.relation === 'df' ? getSlope(x) : evaluateFunctionAt(x);
+            let tol = getNotebookConstraintTolerance(constraint, q);
+            let diff = Math.abs(actual - expected);
+            let relationLabel = constraint.relation === 'df' ? "f'" : 'f';
+            let detailText = `${relationLabel}(${formatNumber(x)}) ≈ ${formatNumber(actual)} לעומת ${formatNumber(expected)}.`;
+            if (diff <= tol) {
+                return {
+                    toneClass: 'is-good',
+                    statusLabel: 'מתקיים כרגע על הגרף',
+                    detailText
+                };
+            }
+            if (diff <= tol * 2) {
+                return {
+                    toneClass: 'is-close',
+                    statusLabel: 'כמעט מתקיים. צריך עוד דיוק.',
+                    detailText
+                };
+            }
+            return {
+                toneClass: 'is-pending',
+                statusLabel: 'נוסף למחברת, אבל עדיין לא מתקיים על הגרף.',
+                detailText
+            };
+        }
+
+        function renderNotebookCheckBlock(snapshot) {
+            if (!snapshot || !Array.isArray(snapshot.constraints) || snapshot.constraints.length === 0) {
+                renderNotebookBlock('builder-notebook-check', '', '');
+                return;
+            }
+            let q = getCurrentQuestion();
+            let html = `<ol class="builder-notebook-list">${snapshot.constraints.map((constraint) => {
+                let state = evaluateNotebookConstraintState(constraint, q);
+                return `<li><b>${escapeHtmlText(getNotebookConstraintLearnerText(constraint))}</b><br>${escapeHtmlText(state.statusLabel)}<br>${escapeHtmlText(state.detailText)}</li>`;
+            }).join('')}</ol>`;
+            renderNotebookBlock('builder-notebook-check', 'האם הפונקציה באמת מקיימת את כל התנאים?', html);
+        }
+
         function renderNotebookSnapshot(snapshot, options = {}) {
             let keepStatus = !!options.keepStatus;
             let statusEl = document.getElementById('builder-notebook-status');
@@ -7113,23 +7209,27 @@
 
             if (!snapshot) {
                 if (!keepStatus) {
-                    statusEl.innerText = notebookAutoGenerateOnDrag
-                        ? 'אוטומטי פעיל: אחרי גרירה/שינוי תיווצר מחברת חדשה (כשיש נתונים מתאימים).'
-                        : 'אוטומטי כבוי. לחצו "ייצר מחברת" כדי ליצור משוואות מהגרף.';
+                    statusEl.innerText = getNotebookDefaultStatusText();
                 }
                 renderNotebookBlock('builder-notebook-constraints', '', '');
                 renderNotebookBlock('builder-notebook-equations', '', '');
                 renderNotebookBlock('builder-notebook-solution', '', '');
+                renderNotebookBlock('builder-notebook-check', '', '');
                 renderNotebookHistoryList();
                 return;
             }
 
-            statusEl.innerText = `${snapshot.summaryTitle} | ${snapshot.equationCount} משוואות | ${snapshot.timeLabel}`;
+            statusEl.innerText = `${snapshot.summaryTitle} | נאספו ${snapshot.constraints.length} תנאים ונבנו ${snapshot.equationCount} משוואות | ${snapshot.timeLabel}`;
 
-            let constraintsHtml = `<ol class="builder-notebook-list">${snapshot.constraints.map((c) =>
-                `<li>${escapeHtmlText(c.sourceLabel)}: <span dir="ltr">${escapeHtmlText(c.rawText || c.constraintText || '')}</span></li>`
-            ).join('')}</ol>`;
-            renderNotebookBlock('builder-notebook-constraints', 'מה נאסף מהגרף (אילוצים)', constraintsHtml);
+            let constraintsHtml = snapshot.constraints.map((constraint) => {
+                let state = evaluateNotebookConstraintState(constraint, getCurrentQuestion());
+                return `<div class="builder-clue-note ${escapeHtmlText(state.toneClass)}">
+                    <div class="builder-clue-note-row"><span class="builder-clue-note-label">נתון</span><span>${escapeHtmlText(getNotebookConstraintLearnerText(constraint))}</span></div>
+                    <div class="builder-clue-note-row"><span class="builder-clue-note-label">תרגום</span><span dir="ltr">${escapeHtmlText(constraint.rawText || constraint.constraintText || '')}</span></div>
+                    <div class="builder-clue-note-row"><span class="builder-clue-note-label">מצב</span><span>${escapeHtmlText(state.statusLabel)}</span></div>
+                </div>`;
+            }).join('');
+            renderNotebookBlock('builder-notebook-constraints', 'מהנתונים למשוואות', constraintsHtml);
 
             let equationsHtml = snapshot.equations.map((eq, idx) => {
                 let label = `משוואה ${idx + 1}: ${eq.constraint?.sourceLabel || 'אילוץ'}`;
@@ -7146,6 +7246,7 @@
                 ? `<ol class="builder-notebook-list">${(solution.lines || []).map((line) => `<li>${escapeHtmlText(line)}</li>`).join('')}</ol>`
                 : '';
             renderNotebookBlock('builder-notebook-solution', solution?.title || 'כיוון לפתרון', solutionHtml);
+            renderNotebookCheckBlock(snapshot);
             renderNotebookHistoryList();
         }
 
@@ -7154,17 +7255,18 @@
             let template = activeTemplate;
             let statusEl = document.getElementById('builder-notebook-status');
             if (!q || !template) {
-                if (statusEl) statusEl.innerText = 'אי אפשר ליצור מחברת לפני שטוענים שאלה ופונקציה.';
+                if (statusEl) statusEl.innerText = 'צריך לטעון שאלה ולבחור פונקציה לפני שאוספים תנאים למחברת.';
                 return null;
             }
             syncBuilderNotebookBox(q);
 
             let constraints = buildNotebookConstraintsFromCurrentState();
             if (constraints.length === 0) {
-                if (statusEl) statusEl.innerText = 'לא נמצאו אילוצים מתאימים מהמצב הנוכחי (נסו לגרור נקודה או לעבוד על שאלת פרמטרים).';
+                if (statusEl) statusEl.innerText = 'עדיין לא נמצאו תנאים מתאימים מהמצב הנוכחי. נסו לסמן נקודה, שיפוע, קיצון, או לעבוד על שאלת פרמטרים.';
                 renderNotebookBlock('builder-notebook-constraints', '', '');
                 renderNotebookBlock('builder-notebook-equations', '', '');
                 renderNotebookBlock('builder-notebook-solution', '', '');
+                renderNotebookBlock('builder-notebook-check', '', '');
                 return null;
             }
 
@@ -7195,8 +7297,8 @@
                 solution,
                 timeLabel: now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
                 summaryTitle: trigger === 'manual'
-                    ? 'מחברת נוצרה ידנית'
-                    : (trigger === 'slider_auto' ? 'מחברת עודכנה אוטומטית אחרי שינוי פרמטר' : 'מחברת עודכנה אוטומטית')
+                    ? 'נאספו תנאים למחברת'
+                    : (trigger === 'slider_auto' ? 'המחברת עודכנה אחרי שינוי פרמטר' : 'המחברת עודכנה אוטומטית')
             };
 
             notebookHistory.unshift(snapshot);
@@ -7367,14 +7469,15 @@
                 let prestartEssence = getShortText(q?.overlay?.essence, shortDesc.first);
                 let prestartGoal = getShortText(q?.overlay?.goal, shortDesc.second);
                 setMixedBidiText(textEl, `מה עושים עכשיו: ${prestartEssence}`);
-                setMixedBidiText(successEl, `הצלחה: בניתם פונקציה שמתאימה למשימה (${prestartGoal}) ולחצתם "קבע פונקציה והתחל תרגול".`);
+                setMixedBidiText(successEl, `הצלחה: בניתם גרף פתיחה שאפשר לקרוא ממנו תנאים ברורים (${prestartGoal}) ולחצתם "קבע פונקציה והתחל תרגול".`);
                 listEl.innerHTML = '';
                 [
                     'קראו את הסבר השאלה בראש המסך.',
                     'אם רוצים, בוחרים שאלה אחרת מהרשימה למעלה.',
                     'לחצו על הכפתור הגדול "לחצו כאן לבניית פונקציה".',
-                    'בחרו תצורה כללית (ישר/פרבולה/פולינום).',
-                    'שנו פרמטר אחד בכל פעם וצפו בגרף.',
+                    'בחרו משפחת פונקציות שמתאימה למה שרואים או למה שמבקשים.',
+                    'דייקו את הגרף עד שאפשר לקרוא ממנו נקודות, שיפועים, או קיצון.',
+                    'עברו למחברת ושאלו: איזו משוואה כל נתון יוצר?',
                     'בסיום לחצו "קבע פונקציה והתחל תרגול".'
                 ].forEach((stepText) => {
                     let li = document.createElement('li');
@@ -7490,8 +7593,8 @@
             let action = stepInstruction || shortDesc.second;
 
             if (goal === 'choose_function_template') {
-                target = 'לבנות פונקציה שמתאימה לרמה שלכם ולחומר שנלמד עכשיו.';
-                action = 'בחרו צורת פונקציה, אשרו, ואז שנו פרמטרים כדי לראות מיד איך הגרף והנגזרת משתנים.';
+                target = 'לבנות גרף פתיחה שאפשר לקרוא ממנו את הנתונים של השאלה.';
+                action = 'בחרו משפחת פונקציות, אשרו, ואז דייקו את הגרף עד שאפשר לראות עליו את הרמזים החשובים.';
             } else if (goal === 'slope_zero') {
                 target = 'למצוא נקודה שבה שיפוע המשיק שווה לאפס.';
                 action = 'גררו את הנקודה הכחולה עד שבתיבת הנתונים מופיע f\'(x) שווה לאפס.';
@@ -7513,14 +7616,14 @@
                 target = 'לקרוא ערך פונקציה מדויק מהגרף בנקודה שנקבעת בשאלה.';
                 action = 'מקמים את הנקודה על ה־x המבוקש, קוראים את y, מזינים בתיבת התשובה בפאנל המשימה, ולוחצים "בדוק תשובה".';
             } else if (goal === 'hit_target' || goal === 'hit_targets') {
-                target = 'לכוון את הפרמטרים כך שהגרף יעבור בנקודות היעד של השאלה.';
-                action = 'פותחים עריכת פרמטרים, משנים סליידרים בהדרגה, ובודקים שהגרף פוגע ביעד.';
+                target = 'להפוך את הנתונים שעל הגרף למשוואות על הפרמטרים.';
+                action = 'פותחים את המחברת, שואלים מה כל נקודה/שיפוע/חיתוך אומר על f(x) או על f\'(x), ובונים מערכת משוואות.';
             } else if (goal === 'tangent_through_point') {
                 target = 'למצוא נקודה שבה המשיק לגרף עובר דרך נקודה חיצונית נתונה.';
                 action = 'גררו את הנקודה על הגרף עד שהמשיק הכתום חולף דרך הנקודה הנתונה.';
             } else if (goal === 'free') {
-                target = 'לחקור איך פרמטרים משנים את צורת הגרף, השיפועים והקיצון.';
-                action = 'שנו פרמטר אחד בכל פעם, והשוו את השינוי על f(x) ועל f\'(x).';
+                target = 'לחקור אילו תנאים ורמזים גרפיים נוצרים כשמשנים את הפונקציה.';
+                action = 'שנו פרמטר אחד בכל פעם, ותארו איזה נתון חדש נוצר על הגרף ואיך הייתם כותבים אותו באלגברה.';
             }
 
             return { target, action };
@@ -7998,29 +8101,22 @@
 
         function setScanBusy(busy) {
             scanInFlight = !!busy;
-            ['btn-scan-camera', 'btn-scan-upload', 'btn-scan-analyze', 'btn-scan-inject', 'btn-scan-copy', 'btn-scan-admin-toggle'].forEach((id) => {
+            ['btn-scan-camera', 'btn-scan-upload', 'btn-scan-text', 'btn-scan-analyze', 'btn-scan-inject', 'btn-scan-copy'].forEach((id) => {
                 let el = document.getElementById(id);
                 if (!el) return;
                 el.disabled = !!busy;
             });
+            let textArea = document.getElementById('scan-question-text');
+            if (textArea) textArea.disabled = !!busy;
             let spinner = document.getElementById('scan-spinner');
             if (spinner) spinner.classList.toggle('hidden', !busy);
         }
 
         function syncScanAdminConfigUi(options = {}) {
             let box = document.getElementById('scan-config-box');
-            let toggle = document.getElementById('btn-scan-admin-toggle');
-            if (!box || !toggle) return;
-            let visible = SHOW_SCAN_ADMIN || scanAdminConfigRevealed;
-            box.classList.toggle('hidden', !visible);
-            toggle.classList.toggle('hidden', !visible);
-            if (!visible) {
-                box.open = false;
-                return;
-            }
+            if (!box) return;
             if (options.forceOpen) box.open = true;
-            toggle.innerText = box.open ? 'הסתר הגדרות חיבור למורה/אדמין' : 'הגדרות חיבור למורה/אדמין';
-            toggle.setAttribute('aria-expanded', box.open ? 'true' : 'false');
+            box.classList.toggle('scan-admin-revealed', SHOW_SCAN_ADMIN || scanAdminConfigRevealed || box.open);
         }
 
         function toggleScanAdminConfig(forceOpen) {
@@ -8037,21 +8133,67 @@
             syncScanAdminConfigUi({ forceOpen: true });
         }
 
+        function setScanEntryMode(mode, options = {}) {
+            let normalized = mode === 'text'
+                ? 'text'
+                : (mode === 'camera' || mode === 'file' ? mode : resolveDefaultScanInputMode());
+            scanEntryMode = normalized;
+
+            let previewWrap = document.getElementById('scan-preview-wrap');
+            let textWrap = document.getElementById('scan-text-wrap');
+            if (previewWrap) previewWrap.classList.toggle('hidden', normalized === 'text');
+            if (textWrap) textWrap.classList.toggle('hidden', normalized !== 'text');
+
+            ['btn-scan-camera', 'btn-scan-upload', 'btn-scan-text'].forEach((id) => {
+                let el = document.getElementById(id);
+                if (!el) return;
+                let active = (id === 'btn-scan-text' && normalized === 'text')
+                    || (id === 'btn-scan-camera' && normalized === 'camera')
+                    || (id === 'btn-scan-upload' && normalized === 'file');
+                el.classList.toggle('is-active', active);
+                el.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
+
+            if (!options.skipStatus) {
+                if (normalized === 'text') {
+                    setScanStatus('כתבו את השאלה, ואני אפרק אותה לציור, לנתונים, ולמשוואות שאפשר לבנות ממנה.');
+                } else if (scanImageFile) {
+                    let sourceLabel = normalized === 'camera' ? 'צילום' : 'תמונה';
+                    setScanStatus(`נבחרה ${sourceLabel} לשאלה. כשתרצו, לחצו על "פרק איתי לציור, נתונים ומשוואות".`);
+                }
+            }
+
+            if (normalized === 'text' && !options.skipFocus) {
+                let textArea = document.getElementById('scan-question-text');
+                if (textArea) textArea.focus();
+            }
+        }
+
+        function onScanQuestionTextInput(event) {
+            scanManualQuestionText = String(event?.target?.value || '').trim();
+            if (!scanManualQuestionText) {
+                setScanStatus('כתבו את השאלה, או עברו לצילום/העלאת תמונה.');
+                return;
+            }
+            setScanEntryMode('text', { skipFocus: true, skipStatus: true });
+            setScanStatus('הטקסט מוכן. עכשיו אפרק אותו לציור, לנתונים, ולמשוואות.');
+        }
+
         function getFriendlyScanErrorMessage(err) {
             let raw = String(err?.message || '').trim();
-            if (!raw) return 'לא הצלחתי לנתח את השאלה כרגע. נסו שוב עם תמונה ברורה יותר.';
+            if (!raw) return 'לא הצלחתי לפרק את השאלה כרגע. נסו שוב עם צילום חד יותר או עם ניסוח כתוב קצר.';
             if (/scan_config_missing|api key|openai/i.test(raw)) {
                 revealScanAdminConfig();
-                return 'החיבור לניתוח תמונה עדיין לא הוגדר במכשיר הזה. אם צריך, מורה או אדמין יכולים לפתוח כאן את הגדרות החיבור.';
+                return 'שירות הניתוח עדיין לא הוגדר במכשיר הזה. אם צריך, מורה או אדמין יכולים לפתוח למטה את הגדרות החיבור.';
             }
             if (/json|תשובה ריקה|לא התקבל תוכן/i.test(raw)) {
-                return 'לא הצלחתי להבין את התמונה בצורה יציבה. נסו צילום חד יותר או חיתוך קרוב יותר לשאלה.';
+                return 'לא הצלחתי להבין את השאלה בצורה יציבה. נסו צילום חד יותר, חיתוך קרוב יותר, או כתיבה ידנית של הנתונים.';
             }
             if (/api|proxy|http/i.test(raw)) {
                 revealScanAdminConfig();
-                return 'לא הצלחתי להתחבר לניתוח התמונה כרגע. נסו שוב בעוד רגע, ואם זה חוזר פתחו הגדרות חיבור למורה/אדמין.';
+                return 'לא הצלחתי להתחבר לניתוח כרגע. נסו שוב בעוד רגע, ואם זה חוזר פתחו למטה את אזור המורה/האדמין.';
             }
-            return 'לא הצלחתי לנתח את השאלה כרגע. נסו שוב עם תמונה ברורה יותר.';
+            return 'לא הצלחתי לפרק את השאלה כרגע. נסו שוב עם צילום ברור יותר או עם ניסוח כתוב קצר.';
         }
 
         function resetScanResultUi() {
@@ -8065,6 +8207,7 @@
             let list = document.getElementById('scan-subquestions-list');
             let recommended = document.getElementById('scan-recommended-questions');
             let problem = document.getElementById('scan-result-problem');
+            let summary = document.getElementById('scan-structured-summary');
             let planWrap = document.getElementById('scan-visual-plan-wrap');
             let planLayers = document.getElementById('scan-visual-plan-layers');
             let planNote = document.getElementById('scan-visual-plan-note');
@@ -8080,6 +8223,7 @@
                 recommended.classList.add('hidden');
             }
             if (problem) problem.innerText = '';
+            if (summary) summary.innerHTML = '';
             if (planLayers) planLayers.innerHTML = '';
             if (planNote) planNote.innerText = '';
             if (planProgress) planProgress.innerText = '0/0';
@@ -8153,6 +8297,7 @@
 
             let cameraBtn = document.getElementById('btn-scan-camera');
             let uploadBtn = document.getElementById('btn-scan-upload');
+            let textBtn = document.getElementById('btn-scan-text');
             let hint = document.getElementById('scan-device-hint');
 
             if (cameraBtn) {
@@ -8169,11 +8314,16 @@
                     : 'בחירת JPG/PNG/WEBP מהמחשב.';
             }
 
+            if (textBtn) {
+                textBtn.title = 'הקלידו את נוסח השאלה או את הנתונים החשובים.';
+            }
+
             if (!hint) return;
 
             let parts = [];
             parts.push(isPhone ? 'בטלפון הכי נוח לצלם את השאלה עכשיו.' : 'במחשב הכי נוח להעלות צילום או תמונה של השאלה.');
-            parts.push('אחרי שתבחרו תמונה, אני אפרק את השאלה לצעדים ברורים.');
+            parts.push('אם אין תמונה, אפשר פשוט לכתוב את הנתונים במילים.');
+            parts.push('אחרי הבחירה נפרק יחד את השאלה לציור, לנתונים, ולמשוואות.');
             if (inSites && inIframe) {
                 parts.push('אם המצלמה לא נפתחת בתוך Google Sites, פתחו את האפליקציה בלשונית חדשה ולחצו שוב על כפתור המצלמה.');
             }
@@ -8194,6 +8344,7 @@
                 if (el) el.value = '';
             });
             lastScanInputMode = normalizedMode;
+            setScanEntryMode(normalizedMode, { skipStatus: true });
 
             try {
                 input.click();
@@ -8207,7 +8358,21 @@
             updateScanCaptureUi();
             syncScanAdminConfigUi();
             resetScanResultUi();
-            setScanStatus('בחרו איך להביא את השאלה, ואני אפרק אותה לצעדים ברורים שאפשר לעקוב אחריהם.');
+            scanManualQuestionText = '';
+            let textArea = document.getElementById('scan-question-text');
+            if (textArea) textArea.value = '';
+            if (scanPreviewObjectUrl) {
+                URL.revokeObjectURL(scanPreviewObjectUrl);
+                scanPreviewObjectUrl = '';
+            }
+            let image = document.getElementById('scan-preview-image');
+            if (image) image.removeAttribute('src');
+            let previewWrap = document.getElementById('scan-preview-wrap');
+            if (previewWrap) previewWrap.classList.add('scan-preview-empty');
+            scanImageFile = null;
+            scanImageDataUrl = '';
+            setScanEntryMode(resolveDefaultScanInputMode(), { skipStatus: true, skipFocus: true });
+            setScanStatus('בחרו איך להביא את השאלה, ואני אפרק אותה לציור, לנתונים, ולמשוואות שאפשר לעבוד איתן.');
             document.getElementById('scan-modal').classList.remove('hidden');
         }
 
@@ -8231,6 +8396,7 @@
                 ? sourceMode
                 : (String(event?.target?.id || '').includes('camera') ? 'camera' : 'file');
             lastScanInputMode = normalizedMode;
+            setScanEntryMode(normalizedMode, { skipStatus: true });
 
             scanImageFile = file;
             scanImageDataUrl = '';
@@ -8246,7 +8412,7 @@
             if (image) image.src = scanPreviewObjectUrl;
             if (wrap) wrap.classList.remove('scan-preview-empty');
             let sourceLabel = lastScanInputMode === 'camera' ? 'מצלמה/צילום' : 'קובץ/גלריה';
-            setScanStatus(`התמונה מוכנה (${sourceLabel}): ${file.name}. כשתרצו, לחצו על "פרק את השאלה בשבילי".`);
+            setScanStatus(`התמונה מוכנה (${sourceLabel}): ${file.name}. כשתרצו, לחצו על "פרק איתי לציור, נתונים ומשוואות".`);
         }
 
         function fileToDataUrl(file) {
@@ -8276,6 +8442,420 @@
             let y = Number(m[2]);
             if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
             return { x, y };
+        }
+
+        function parsePointsFromText(text) {
+            if (typeof text !== 'string') return [];
+            let matches = Array.from(text.matchAll(/\(\s*(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)\s*\)/g));
+            let seen = new Set();
+            let out = [];
+            matches.forEach((m) => {
+                let x = Number(m[1]);
+                let y = Number(m[2]);
+                if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+                let key = `${x.toFixed(4)}|${y.toFixed(4)}`;
+                if (seen.has(key)) return;
+                seen.add(key);
+                out.push({ x, y });
+            });
+            return out;
+        }
+
+        function inferTypedScanPreferredParams(problemText, points, goal) {
+            let lower = String(problemText || '').toLowerCase();
+            let out = [];
+            if (/ישר|line|שיפוע/.test(lower)) out.push('c', 'd');
+            if (goal === 'hit_target' || goal === 'hit_targets') out.push('e', 'd', 'c');
+            if (points.some((p) => Math.abs(Number(p.x) || 0) <= 1e-9)) out.push('e', 'd');
+            if (points.some((p) => Math.abs(Number(p.y) || 0) <= 1e-9)) out.push('c', 'd', 'b');
+            if (/ריבוע|פרבולה|quadratic/.test(lower)) out.push('a', 'b', 'c');
+            if (/מעלה 4|רביעית|quartic/.test(lower)) out.push('a', 'b', 'c', 'd', 'e');
+            if (/מעלה 5|חמישית|quintic/.test(lower)) out.push('a', 'b', 'c', 'd', 'e', 'f');
+            let uniq = [];
+            out.forEach((item) => {
+                if (!uniq.includes(item)) uniq.push(item);
+            });
+            return uniq.slice(0, 4);
+        }
+
+        function inferTypedScanGoalParams(problemText, goal, points) {
+            let params = {};
+            let lower = String(problemText || '').toLowerCase();
+            let xMatch = problemText.match(/x0?\s*=\s*(-?\d+(?:\.\d+)?)/i) || problemText.match(/x\s*=\s*(-?\d+(?:\.\d+)?)/i);
+            let slopeMatch = problemText.match(/(?:m|שיפוע)\s*[=:]?\s*(-?\d+(?:\.\d+)?)/i);
+            let valueMatch = problemText.match(/(?:y|ערך(?:\s+הפונקציה)?|f\(x0?\)|f\(x\))\s*[=:]?\s*(-?\d+(?:\.\d+)?)/i);
+
+            if (goal === 'hit_target' || goal === 'hit_targets') {
+                if (points.length > 0) {
+                    params.targets = points.map((point, idx) => ({
+                        x: point.x,
+                        y: point.y,
+                        label: String.fromCharCode(65 + idx)
+                    }));
+                    params.toleranceY = 0.25;
+                    params.preferredEditableParams = inferTypedScanPreferredParams(problemText, points, goal);
+                }
+                return params;
+            }
+
+            if (goal === 'read_slope') {
+                params.fixedX0 = Number.isFinite(Number(xMatch?.[1])) ? Number(xMatch[1]) : (Number.isFinite(points[0]?.x) ? Number(points[0].x) : 0);
+                params.answerTolerance = 0.25;
+                return params;
+            }
+
+            if (goal === 'read_y') {
+                params.fixedX0 = Number.isFinite(Number(xMatch?.[1])) ? Number(xMatch[1]) : (Number.isFinite(points[0]?.x) ? Number(points[0].x) : 0);
+                params.answerTolerance = 0.25;
+                return params;
+            }
+
+            if (goal === 'slope_equals') {
+                params.targetM = Number.isFinite(Number(slopeMatch?.[1])) ? Number(slopeMatch[1]) : 1;
+                params.toleranceM = 0.2;
+                return params;
+            }
+
+            if (goal === 'y_equals') {
+                params.targetY = Number.isFinite(Number(valueMatch?.[1]))
+                    ? Number(valueMatch[1])
+                    : (Number.isFinite(points[0]?.y) ? Number(points[0].y) : 0);
+                params.toleranceY = 0.25;
+                return params;
+            }
+
+            if (goal === 'slope_zero' || goal === 'min_point') {
+                params.toleranceM = 0.2;
+                return params;
+            }
+
+            if (goal === 'tangent_through_point') {
+                params.point = points[0] || { x: 0, y: 0 };
+                params.tolerance = 0.25;
+                return params;
+            }
+
+            return params;
+        }
+
+        function inferTypedScanGoal(problemText, points) {
+            let lower = String(problemText || '').toLowerCase();
+            let inferred = inferGoalTypeFromText(problemText);
+            let mentionsParameter = /פרמטר|מקדמ|parameter|coeff|מקדם|a\b|b\b|c\b|d\b|e\b|f\b/.test(lower);
+            if (mentionsParameter && points.length > 1) return 'hit_targets';
+            if (mentionsParameter && points.length === 1) return 'hit_target';
+            if ((/עובר|עוברת|passes through/.test(lower) || /נקודה/.test(lower)) && points.length > 1) return 'hit_targets';
+            if ((/עובר|עוברת|passes through/.test(lower) || /נקודה/.test(lower)) && points.length === 1 && inferred === 'free') return 'hit_target';
+            if (inferred === 'free' && points.length > 1) return 'hit_targets';
+            if (inferred === 'free' && points.length === 1) return 'hit_target';
+            return inferred;
+        }
+
+        function inferTypedScanCategories(problemText, goal, points) {
+            let lower = String(problemText || '').toLowerCase();
+            let tags = new Set(['function_object', 'visual_planning_sequence', 'prerequisite_order']);
+
+            if (goal === 'hit_target' || goal === 'hit_targets' || /פרמטר|מקדמ|parameter|coeff|מקדם/.test(lower)) {
+                tags.add('parameterized_family');
+                tags.add('parameter_case_split');
+            }
+            if (points.length > 0) {
+                tags.add('equation_to_intersection');
+            }
+            if (points.some((point) => Math.abs(Number(point.y) || 0) <= 1e-9)) {
+                tags.add('axis_intersection');
+            }
+            if (points.length > 1) {
+                tags.add('solution_count_visualization');
+            }
+            if (/קיצון|מינימום|מקסימום|extrem/.test(lower) || goal === 'slope_zero' || goal === 'min_point') {
+                tags.add('extreme_point');
+                tags.add('derivative_to_slope');
+            }
+            if (/שיפוע|נגזרת|f'|slope/.test(lower) || ['read_slope', 'slope_equals'].includes(goal)) {
+                tags.add('slope_at_point');
+                tags.add('derivative_to_slope');
+                tags.add('derivative_related_object');
+            }
+            if (/משיק|tangent/.test(lower) || goal === 'tangent_through_point') {
+                tags.add('tangent_condition');
+            }
+            if (/מקביל/.test(lower)) {
+                tags.add('parallel_tangent_condition');
+            }
+            if (/עלייה|ירידה|עולה|יורדת/.test(lower)) {
+                tags.add('monotonicity_sign');
+            }
+            if (/סימטר/.test(lower)) {
+                tags.add('symmetry_hint');
+            }
+            if (/שורש כפול|השקה לציר/.test(lower)) {
+                tags.add('double_root_touch');
+            }
+
+            let preferredOrder = [
+                'parameterized_family',
+                'function_object',
+                'line_object',
+                'axis_intersection',
+                'extreme_point',
+                'slope_at_point',
+                'derivative_to_slope',
+                'tangent_condition',
+                'parallel_tangent_condition',
+                'equation_to_intersection',
+                'solution_count_visualization',
+                'parameter_case_split',
+                'monotonicity_sign',
+                'symmetry_hint',
+                'double_root_touch',
+                'visual_planning_sequence',
+                'prerequisite_order'
+            ];
+            return preferredOrder.filter((tag) => tags.has(tag));
+        }
+
+        function buildTypedScanVisualLayers(problemText, goal, points, categories) {
+            let pointLines = points.map((point) => `(${formatNumber(point.x)},${formatNumber(point.y)})`).join(', ');
+            let dataSkills = [];
+
+            if (points.length > 0) {
+                dataSkills.push({
+                    skill_number: dataSkills.length + 1,
+                    title: points.length === 1 ? 'מסמנים את הנקודה הנתונה על הגרף' : 'מסמנים את כל הנקודות הנתונות על הגרף',
+                    pedagogical_reason: 'כל נקודה נתונה היא עוגן שמחבר בין הציור לבין האלגברה.',
+                    visual_category: points.some((point) => Math.abs(Number(point.y) || 0) <= 1e-9) ? 'axis_intersection' : 'function_object',
+                    difficulty: 'basic',
+                    prerequisites: [],
+                    micro_goal: `אני יודע אילו נקודות נתונות בשאלה: ${pointLines}.`,
+                    ui_exercise_type: 'point_placement'
+                });
+            }
+
+            if (goal === 'slope_zero' || goal === 'min_point') {
+                dataSkills.push({
+                    skill_number: dataSkills.length + 1,
+                    title: 'מזהים תנאי של קיצון או משיק אופקי',
+                    pedagogical_reason: 'בקיצון חשוב לראות מה קורה לגרף לפני שמתרגמים ל-derivative.',
+                    visual_category: 'extreme_point',
+                    difficulty: 'basic',
+                    prerequisites: [],
+                    micro_goal: "אני יודע שקיצון נותן תנאי על f'(x).",
+                    ui_exercise_type: 'graph_compare'
+                });
+            }
+
+            if (goal === 'slope_equals' || goal === 'read_slope') {
+                dataSkills.push({
+                    skill_number: dataSkills.length + 1,
+                    title: 'מזהים שיפוע נתון בנקודה',
+                    pedagogical_reason: 'שיפוע הוא גשר ישיר מהגרף אל הנגזרת.',
+                    visual_category: 'derivative_to_slope',
+                    difficulty: 'basic',
+                    prerequisites: [],
+                    micro_goal: "אני יודע מה הנתון אומר על f'(x0).",
+                    ui_exercise_type: 'slope_match'
+                });
+            }
+
+            if (goal === 'tangent_through_point') {
+                dataSkills.push({
+                    skill_number: dataSkills.length + 1,
+                    title: 'מזהים משיק ותנאי מעבר דרך נקודה',
+                    pedagogical_reason: 'בשאלת משיק צריך לראות גם נקודת מגע וגם קו שעובר דרך נתון נוסף.',
+                    visual_category: 'tangent_condition',
+                    difficulty: 'intermediate',
+                    prerequisites: [],
+                    micro_goal: 'אני יודע איזה תנאים המשיק צריך לקיים.',
+                    ui_exercise_type: 'graph_compare'
+                });
+            }
+
+            if (dataSkills.length === 0) {
+                dataSkills.push({
+                    skill_number: 1,
+                    title: 'מזהים אילו נתונים באמת נתונים בשאלה',
+                    pedagogical_reason: 'לפני אלגברה צריך לדעת מה ידוע ומה עדיין חסר.',
+                    visual_category: categories[0] || 'function_object',
+                    difficulty: 'basic',
+                    prerequisites: [],
+                    micro_goal: 'אני יודע מה אני רואה ומה נתון לי במפורש.',
+                    ui_exercise_type: 'classification'
+                });
+            }
+
+            let translationSkills = [];
+            if (points.length > 0) {
+                translationSkills.push({
+                    skill_number: translationSkills.length + 1,
+                    title: points.length === 1 ? 'מתרגמים נקודה אחת למשוואה' : 'מתרגמים כל נקודה למשוואה',
+                    pedagogical_reason: 'נקודה על הגרף תמיד יוצרת תנאי מהצורה f(x0)=y0.',
+                    visual_category: 'equation_to_intersection',
+                    difficulty: 'basic',
+                    prerequisites: [],
+                    micro_goal: points.length === 1
+                        ? `אני יודע לכתוב ${pointLines} בתור משוואה על הפונקציה.`
+                        : 'אני יודע שכל נקודה נתונה מוסיפה משוואה למערכת.',
+                    ui_exercise_type: 'classification'
+                });
+            }
+            if (goal === 'slope_zero' || goal === 'min_point' || goal === 'slope_equals' || goal === 'read_slope') {
+                translationSkills.push({
+                    skill_number: translationSkills.length + 1,
+                    title: 'מתרגמים נתון על שיפוע למשוואה',
+                    pedagogical_reason: "נתון על שיפוע או קיצון מתורגם בעזרת f'(x).",
+                    visual_category: 'derivative_to_slope',
+                    difficulty: 'basic',
+                    prerequisites: [],
+                    micro_goal: "אני יודע אם השאלה יוצרת תנאי כמו f'(x0)=0 או f'(x0)=m.",
+                    ui_exercise_type: 'classification'
+                });
+            }
+            if (goal === 'tangent_through_point') {
+                translationSkills.push({
+                    skill_number: translationSkills.length + 1,
+                    title: 'בונים תנאים למשיק',
+                    pedagogical_reason: 'משיק משלב נתון על נקודת מגע ונתון על קו ישר.',
+                    visual_category: 'tangent_condition',
+                    difficulty: 'intermediate',
+                    prerequisites: [],
+                    micro_goal: 'אני יודע אילו משוואות משיק בונה.',
+                    ui_exercise_type: 'graph_compare'
+                });
+            }
+            if (translationSkills.length === 0) {
+                translationSkills.push({
+                    skill_number: 1,
+                    title: 'שואלים מה כל נתון אומר על f(x) או על f\'(x)',
+                    pedagogical_reason: 'המטרה היא לא לזכור נוסחה מוכנה, אלא לבנות אותה מתוך הנתונים.',
+                    visual_category: 'visual_planning_sequence',
+                    difficulty: 'basic',
+                    prerequisites: [],
+                    micro_goal: 'אני יודע לשאול איזו משוואה נבנית מכל נתון.',
+                    ui_exercise_type: 'classification'
+                });
+            }
+
+            return [
+                {
+                    layer_id: 'object_identification',
+                    layer_title: 'מה רואים בציור',
+                    why_this_layer_matters: 'לפני אלגברה צריך להבין איזה אובייקט מתמטי מופיע בשאלה ומה בולט בו.',
+                    skills: [{
+                        skill_number: 1,
+                        title: 'מזהים את סוג הגרף ואת הרמז המרכזי',
+                        pedagogical_reason: 'זה מונע ניחוש אקראי של פונקציה.',
+                        visual_category: categories.includes('parameterized_family') ? 'parameterized_family' : (categories[0] || 'function_object'),
+                        difficulty: 'basic',
+                        prerequisites: [],
+                        micro_goal: 'אני יודע איזה גרף אני מחפש ומה הדבר הראשון שכדאי לסמן עליו.',
+                        ui_exercise_type: 'classification'
+                    }]
+                },
+                {
+                    layer_id: 'coordinate_anchors',
+                    layer_title: 'אילו נתונים נתונים',
+                    why_this_layer_matters: 'כאן מסדרים את כל העוגנים: נקודות, קיצון, שיפוע, או משיק.',
+                    skills: dataSkills
+                },
+                {
+                    layer_id: 'algebra_graph_translation',
+                    layer_title: 'אילו משוואות נבנות',
+                    why_this_layer_matters: 'כל נתון מהציור או מן הטקסט צריך להפוך לתנאי אלגברי ברור.',
+                    skills: translationSkills
+                },
+                {
+                    layer_id: 'task_decomposition',
+                    layer_title: 'מה פותרים עכשיו',
+                    why_this_layer_matters: 'אחרי שיש תנאים, יודעים אם כבר נבנתה מערכת משוואות או שחסר עוד נתון.',
+                    skills: [{
+                        skill_number: 1,
+                        title: 'מסדרים את דרך הפתרון',
+                        pedagogical_reason: 'כך מבינים אם כבר אפשר לפתור את הפרמטרים או שצריך לאסוף עוד תנאי.',
+                        visual_category: 'visual_planning_sequence',
+                        difficulty: 'basic',
+                        prerequisites: [],
+                        micro_goal: 'אני יודע מה הצעד הבא: לאסוף עוד תנאי, לבנות מערכת, או לבדוק את הפתרון.',
+                        ui_exercise_type: 'classification'
+                    }]
+                }
+            ];
+        }
+
+        function buildTypedScanSubQuestions(problemText, goal, params, points) {
+            if (goal === 'hit_target' || goal === 'hit_targets') {
+                let pointEqText = (params.targets || []).map((target) => `(${formatNumber(target.x)},${formatNumber(target.y)}) ⇒ f(${formatNumber(target.x)})=${formatNumber(target.y)}`).join(', ');
+                return [
+                    {
+                        question_text: 'בחרו משפחת פונקציות שמתאימה למה שרואים או למה שמבקשים בשאלה.',
+                        goal_type: 'choose_function_template',
+                        params: {},
+                        success_criteria: 'נבחרה תבנית פתיחה מתאימה לגרף.'
+                    },
+                    {
+                        question_text: `מה הנתון הזה אומר על הפונקציה? ${pointEqText}. פתחו את המחברת והתחילו לאסוף תנאים.`,
+                        goal_type: goal,
+                        params,
+                        success_criteria: 'נאספו תנאים מהנקודות ונבנתה דרך למערכת משוואות.'
+                    }
+                ];
+            }
+
+            if (goal === 'read_slope' || goal === 'read_y' || goal === 'slope_equals' || goal === 'y_equals' || goal === 'slope_zero' || goal === 'min_point' || goal === 'tangent_through_point') {
+                return [{
+                    question_text: 'קודם מזהים מה רואים בגרף, אחר כך שואלים איזה תנאי אלגברי נבנה מהנתון הזה.',
+                    goal_type: goal,
+                    params,
+                    success_criteria: 'הנתון הוויזואלי תורגם לתנאי אלגברי ברור.'
+                }];
+            }
+
+            return [{
+                question_text: 'זהו מה רואים בגרף, אילו נתונים נתונים, ואיזו משוואה כל נתון יכול לייצר.',
+                goal_type: 'free',
+                params: {},
+                success_criteria: 'נבנתה דרך מסודרת מהציור אל האלגברה.'
+            }];
+        }
+
+        function buildTypedVisionPayloadFromText(problemText) {
+            let originalProblem = getShortText(problemText, '').trim();
+            if (!originalProblem) throw new Error('יש לכתוב את השאלה לפני הניתוח.');
+
+            let points = parsePointsFromText(originalProblem);
+            let goal = inferTypedScanGoal(originalProblem, points);
+            let params = inferTypedScanGoalParams(originalProblem, goal, points);
+            let categories = inferTypedScanCategories(originalProblem, goal, points);
+            let lower = originalProblem.toLowerCase();
+            let problemFamily = 'parameterized_polynomial';
+            if (goal === 'tangent_through_point' || /משיק|tangent/.test(lower)) problemFamily = 'tangent_to_function';
+            else if (goal === 'slope_zero' || goal === 'min_point' || /קיצון|מינימום|מקסימום/.test(lower)) problemFamily = 'extrema_analysis';
+            else if (goal === 'hit_targets' && points.some((point) => Math.abs(Number(point.y) || 0) <= 1e-9)) problemFamily = 'parameter_solution_count';
+
+            return {
+                title: `השאלה שהקלדתם: ${originalProblem.length > 44 ? `${originalProblem.slice(0, 44).trim()}...` : originalProblem}`,
+                original_problem: originalProblem,
+                original_topic: /פרמטר|מקדמ|parameter|coeff|מקדם/.test(lower) || goal === 'hit_target' || goal === 'hit_targets'
+                    ? 'שאלת פרמטרים: מהציור אל המשוואות'
+                    : 'פירוק שאלה לגרף, נתונים ומשוואות',
+                problem_family: problemFamily,
+                visual_layers_required: buildTypedScanVisualLayers(originalProblem, goal, points, categories),
+                action_plan_order: categories,
+                do_not_solve_notice: 'לא קופצים מיד לפתרון. קודם בונים ציור ברור, אוספים נתונים, ומתרגמים אותם למשוואות.',
+                confidence: 0.42,
+                sub_questions: buildTypedScanSubQuestions(originalProblem, goal, params, points),
+                overlay: {
+                    essence: 'המטרה היא לפרק את השאלה לציור, לנתונים, ולמשוואות שאפשר לעבוד איתן.',
+                    goal: 'הדרך הנכונה היא לא לנחש פונקציה, אלא לבנות תנאים מתוך מה שרואים ומה שידוע.',
+                    material: 'נקודות על הגרף, נגזרת ושיפוע, קיצון, משיק, חיתוך עם הצירים, ומערכת משוואות על הפרמטרים.',
+                    howTo: [
+                        'קודם מזהים מה רואים בציור ומה באמת נתון.',
+                        'אחר כך שואלים מה כל נתון אומר על f(x) או על f\'(x).',
+                        'מהתנאים בונים משוואות, ומהמשוואות מגיעים לדרך פתרון.',
+                        'בסוף בודקים שהפונקציה שמתאימה אלגברית באמת מתאימה גם לציור.'
+                    ]
+                }
+            };
         }
 
         function normalizeGoalType(goal) {
@@ -8663,7 +9243,7 @@
                 problem_family: problemFamily,
                 visual_layers_required: normalizedLayers,
                 action_plan_order: ordered,
-                do_not_solve_notice: getShortText(payload.do_not_solve_notice || '', 'כאן לא קופצים ישר לפתרון. קודם בונים תמונה ויזואלית ברורה של מה שקורה בשאלה.'),
+                do_not_solve_notice: getShortText(payload.do_not_solve_notice || '', 'כאן לא קופצים ישר לפתרון. קודם מסדרים ציור, נתונים, ומשוואות שאפשר לבנות מהם דרך פתרון.'),
                 confidence,
                 _skill_count: skillCount,
                 _unique_categories: Array.from(seenCategories)
@@ -8732,8 +9312,8 @@
                 } else if (['parameterized_family', 'parameter_shift', 'parameter_scale', 'translation', 'reflection', 'parameter_case_split', 'solution_count_visualization', 'monotonicity_sign', 'concavity', 'sign_regions', 'end_behavior', 'domain_constraint', 'symmetry_hint', 'visual_planning_sequence', 'prerequisite_order', 'function_object', 'line_object', 'inflection_point', 'asymptote_behavior'].includes(category)) {
                     item.goal_type = 'free';
                     item.params = {};
-                    item.question_text = `חקירה ויזואלית ממוקדת: ${meta.heTitle}. שנו פרמטר אחד בכל פעם ותארו מה נשאר קבוע ומה משתנה.`;
-                    item.success_criteria = `הוסברה היכולת "${meta.heTitle}" במילים ועל הגרף.`;
+                    item.question_text = `חקירה ויזואלית ממוקדת: ${meta.heTitle}. זהו איזה נתון נולד מהגרף, ומה הוא יאמר על f(x) או על f'(x).`;
+                    item.success_criteria = `זוהה הרמז "${meta.heTitle}" ונוסח כנתון מתמטי שאפשר לעבוד איתו.`;
                 } else {
                     item.goal_type = 'free';
                     item.question_text = `חקירה ויזואלית: ${meta.heTitle}. הפעילו חשיבה גרפית לפני מעבר לאלגברה.`;
@@ -9310,7 +9890,7 @@ Rules:
             }
             if (rawSubQuestions.length === 0) {
                 rawSubQuestions = [{
-                    question_text: 'חקרו את הגרף והנגזרת והסיקו מה קורה בנקודות חשובות.',
+                    question_text: 'זהו מה רואים בציור, אילו נתונים נתונים, ואיזו משוואה כל נתון יוצר.',
                     goal_type: 'free',
                     params: {},
                     required_visuals: []
@@ -9324,7 +9904,7 @@ Rules:
 
             if (steps.length === 0) {
                 steps = [{
-                    instruction: 'חקרו את הגרף והנגזרת והסיקו מסקנות.',
+                    instruction: 'זהו מה רואים בגרף, אילו נתונים נתונים, ואיזו משוואה נבנית מכל נתון.',
                     goal: { type: 'free', params: {} },
                     onComplete: { toastText: 'השלב הושלם.' }
                 }];
@@ -9372,9 +9952,9 @@ Rules:
                     allowLineTool
                 },
                 overlay: {
-                    essence: getShortText(visionPayload?.overlay?.essence, `המטרה: לפרק את השאלה "${originalProblem}" לרבדים ויזואליים ואז לשלבים ברורים.`),
-                    goal: getShortText(visionPayload?.overlay?.goal, 'לבנות אינטואיציה ויזואלית לפני מעבר לפתרון אלגברי.'),
-                    material: getShortText(visionPayload?.overlay?.material, 'פונקציות, נגזרת, שיפוע משיק, קריאת ערכים מהגרף, והשפעת פרמטרים.'),
+                    essence: getShortText(visionPayload?.overlay?.essence, `המטרה: לפרק את השאלה "${originalProblem}" לציור, לנתונים, ולמשוואות שאפשר לעבוד איתן.`),
+                    goal: getShortText(visionPayload?.overlay?.goal, 'לבנות דרך פתרון מתוך מה שרואים בגרף ומה שידוע אלגברית, לפני שקופצים לחישוב.'),
+                    material: getShortText(visionPayload?.overlay?.material, 'פונקציות, נגזרת, שיפוע, משיק, חיתוך עם הצירים, ומשוואות שנבנות מן הנתונים.'),
                     howTo: overlayHowTo
                 },
                 meta: {
@@ -9401,13 +9981,117 @@ Rules:
                 y_equals: 'ערך פונקציה נתון',
                 read_slope: 'קריאת שיפוע',
                 read_y: 'קריאת ערך פונקציה',
-                hit_target: 'מעבר דרך נקודת יעד',
-                hit_targets: 'מעבר דרך כמה נקודות יעד',
+                hit_target: 'תנאי נקודה על הגרף',
+                hit_targets: 'כמה תנאים על הגרף',
                 tangent_through_point: 'משיק דרך נקודה חיצונית',
                 choose_function_template: 'בחירת סוג פונקציה',
-                free: 'חקירה חופשית'
+                free: 'חקירת רמזים ויזואליים'
             };
             return map[goalType] || goalType || 'שלב';
+        }
+
+        function getScanSummaryWhatWeSeeLines(questionDraft, visualPlan) {
+            let lines = [];
+            let categories = Array.isArray(visualPlan?.action_plan_order) ? visualPlan.action_plan_order : [];
+            if (visualPlan?.problem_family) lines.push(getVisualProblemFamilyLabel(visualPlan.problem_family));
+            if (categories.includes('axis_intersection')) lines.push('יש כאן חיתוך עם הצירים או שורש שחשוב לסמן על הגרף.');
+            if (categories.includes('extreme_point')) lines.push('יש כאן קיצון או מקום שבו המשיק נעשה אופקי.');
+            if (categories.includes('tangent_condition')) lines.push('יש כאן תנאי על משיק, ולכן חשוב לראות נקודת מגע ושיפוע.');
+            if (categories.includes('parameterized_family')) lines.push('זה לא סתם ציור: זו משפחת פונקציות עם פרמטרים שצריך לזהות.');
+            if (lines.length === 0) lines.push(questionDraft?.title || 'קודם מזהים איזה גרף ואיזה רמז מרכזי יש בשאלה.');
+            return lines.slice(0, 3);
+        }
+
+        function getScanSummaryDataLines(questionDraft) {
+            let goal = String(questionDraft?.goal || '').trim();
+            let data = questionDraft?.data || {};
+            if ((goal === 'hit_target' || goal === 'hit_targets') && Array.isArray(data.targets) && data.targets.length > 0) {
+                return data.targets.map((target) => `ידוע שהגרף עובר דרך (${formatNumber(target.x)}, ${formatNumber(target.y)}).`);
+            }
+            if (goal === 'slope_zero' || goal === 'min_point') {
+                return ['ידוע שיש קיצון או משיק אופקי בנקודה חשובה בגרף.'];
+            }
+            if (goal === 'slope_equals') {
+                return [`ידוע שהשיפוע בנקודה מבוקשת שווה ${formatNumber(Number(data.targetM || 0))}.`];
+            }
+            if (goal === 'read_slope') {
+                return [`ידוע באיזה x צריך לקרוא את השיפוע: x=${formatNumber(Number(data.fixedX0 || 0))}.`];
+            }
+            if (goal === 'read_y') {
+                return [`ידוע באיזה x צריך לקרוא את ערך הפונקציה: x=${formatNumber(Number(data.fixedX0 || 0))}.`];
+            }
+            if (goal === 'y_equals') {
+                return [`ידוע שערך הפונקציה המבוקש הוא ${formatNumber(Number(data.targetY || 0))}.`];
+            }
+            if (goal === 'tangent_through_point' && data.point) {
+                return [`ידוע שהמשיק צריך לעבור דרך (${formatNumber(data.point.x)}, ${formatNumber(data.point.y)}).`];
+            }
+            return ['קודם ממיינים מה נתון במפורש, ומה עדיין צריך למצוא מתוך הציור.'];
+        }
+
+        function getScanSummaryEquationLines(questionDraft) {
+            let goal = String(questionDraft?.goal || '').trim();
+            let data = questionDraft?.data || {};
+            if ((goal === 'hit_target' || goal === 'hit_targets') && Array.isArray(data.targets) && data.targets.length > 0) {
+                return data.targets.map((target) => `f(${formatNumber(target.x)}) = ${formatNumber(target.y)}`);
+            }
+            if (goal === 'slope_zero' || goal === 'min_point') {
+                return ["בדרך כלל נבנה כאן התנאי f'(x0)=0."];
+            }
+            if (goal === 'slope_equals') {
+                return [`f'(x0) = ${formatNumber(Number(data.targetM || 0))}`];
+            }
+            if (goal === 'read_slope') {
+                return ["מתרגמים את הקריאה לגרף למשוואה על f'(x0)."];
+            }
+            if (goal === 'read_y') {
+                return ['מתרגמים את הקריאה לגרף למשוואה על f(x0).'];
+            }
+            if (goal === 'y_equals') {
+                return [`f(x0) = ${formatNumber(Number(data.targetY || 0))}`];
+            }
+            if (goal === 'tangent_through_point') {
+                return ["משיק יוצר תנאי על השיפוע, ולעיתים גם על המשוואה y-y0=m(x-x0)."];
+            }
+            return ['שואלים על כל נתון: מה הוא אומר על f(x) או על f\'(x)?'];
+        }
+
+        function getScanSummarySolveNowLines(questionDraft) {
+            let goal = String(questionDraft?.goal || '').trim();
+            if (goal === 'hit_target' || goal === 'hit_targets') {
+                return [
+                    'אוספים את כל המשוואות על a,b,c,d,e,...',
+                    'בודקים אם כבר יש מספיק תנאים כדי למצוא את הפרמטרים.',
+                    'בסוף בודקים שהפונקציה שהתקבלה באמת מתאימה לציור.'
+                ];
+            }
+            if (goal === 'slope_zero' || goal === 'min_point' || goal === 'slope_equals' || goal === 'tangent_through_point') {
+                return [
+                    'מזהים את התנאי הגרפי המדויק.',
+                    'מתרגמים אותו לנגזרת או למשיק.',
+                    'רק אחר כך פותרים אלגברית.'
+                ];
+            }
+            return [
+                'מסדרים קודם את הדרך מהציור אל הנתונים.',
+                'מתרגמים כל נתון למשוואה מתאימה.',
+                'ואז יודעים מה צריך לפתור עכשיו.'
+            ];
+        }
+
+        function renderScanStructuredSummary(questionDraft, visualPlan) {
+            let wrap = document.getElementById('scan-structured-summary');
+            if (!wrap) return;
+            let sections = [
+                { title: 'מה רואים בציור', lines: getScanSummaryWhatWeSeeLines(questionDraft, visualPlan) },
+                { title: 'אילו נתונים נתונים', lines: getScanSummaryDataLines(questionDraft) },
+                { title: 'אילו משוואות נבנות', lines: getScanSummaryEquationLines(questionDraft) },
+                { title: 'מה פותרים עכשיו', lines: getScanSummarySolveNowLines(questionDraft) }
+            ];
+            wrap.innerHTML = sections.map((section, index) => {
+                let items = (section.lines || []).map((line) => `<li>${escapeHtmlText(line)}</li>`).join('');
+                return `<section class="scan-summary-card"><div class="scan-summary-title">${index + 1}. ${escapeHtmlText(section.title)}</div><ul class="scan-summary-list">${items}</ul></section>`;
+            }).join('');
         }
 
         function renderScannedQuestionDraft(questionDraft, visionPayload) {
@@ -9420,10 +10104,11 @@ Rules:
 
             let visualPlan = renderScanVisualActionPlan(visionPayload);
             let originalProblem = questionDraft?.meta?.original_problem || visionPayload?.original_problem || '';
-            let summaryLines = [`מה זיהינו: ${originalProblem}`];
-            if (visualPlan?.problem_family) summaryLines.push(`מה רואים כאן בעיקר: ${getVisualProblemFamilyLabel(visualPlan.problem_family)}`);
-            summaryLines.push(`איך נתקדם: ${questionDraft.steps.length} צעדים קצרים וברורים.`);
+            let summaryLines = [`השאלה המקורית: ${originalProblem}`];
+            if (visualPlan?.problem_family) summaryLines.push(`סוג השאלה: ${getVisualProblemFamilyLabel(visualPlan.problem_family)}`);
+            summaryLines.push(`כיוון העבודה: ${questionDraft.steps.length} צעדים קצרים, ואז מעבר למחברת/לתרגול.`);
             problem.innerText = summaryLines.join('\n');
+            renderScanStructuredSummary(questionDraft, visualPlan);
 
             list.innerHTML = '';
             questionDraft.steps.forEach((step, idx) => {
@@ -9440,25 +10125,34 @@ Rules:
 
         async function analyzeScannedQuestion() {
             if (scanInFlight) return;
-            if (!scanImageFile) {
-                setScanStatus('קודם בחרו תמונה לצורך ניתוח.', true);
+            let manualText = (document.getElementById('scan-question-text')?.value || scanManualQuestionText || '').trim();
+            let shouldUseTextInput = scanEntryMode === 'text' || (!!manualText && !scanImageFile);
+            if (!shouldUseTextInput && !scanImageFile) {
+                setScanStatus('קודם בחרו תמונה או כתבו את השאלה.', true);
                 return;
             }
 
             saveScanConfig();
             setScanBusy(true);
-            setScanStatus('בודקים את התמונה ומכינים עבורה פירוק ויזואלי...');
+            setScanStatus(shouldUseTextInput
+                ? 'קוראים את נוסח השאלה ומסדרים אותו לציור, נתונים ומשוואות...'
+                : 'קוראים את התמונה ומסדרים אותה לציור, נתונים ומשוואות...');
             resetScanResultUi();
 
             try {
-                scanImageDataUrl = await fileToDataUrl(scanImageFile);
-                let visionPayload = await callScanVisionApi(scanImageDataUrl);
+                let visionPayload = null;
+                if (shouldUseTextInput) {
+                    visionPayload = buildTypedVisionPayloadFromText(manualText);
+                } else {
+                    scanImageDataUrl = await fileToDataUrl(scanImageFile);
+                    visionPayload = await callScanVisionApi(scanImageDataUrl);
+                }
                 let draft = parseVisionToQuestionSchema(visionPayload);
                 scannedVisionPayload = visionPayload;
                 scannedQuestionDraft = draft;
                 scannedVisualActionPlan = normalizeScanVisualActionPlan(visionPayload);
                 renderScannedQuestionDraft(draft, visionPayload);
-                setScanStatus('הפירוק הוויזואלי מוכן. עברו על הצעדים, ואז פתחו את השאלה בתוך האפליקציה.');
+                setScanStatus('הפירוק מוכן. עברו על הציור, הנתונים והמשוואות שנבנו, ואז פתחו את השאלה בתוך האפליקציה.');
             } catch (err) {
                 setScanStatus(getFriendlyScanErrorMessage(err), true);
             } finally {
