@@ -4068,23 +4068,21 @@
 
             let tpl = getQuestionStartTemplate(q, currentQ);
             if (!tpl) {
-                label.innerText = 'תצורה מומלצת לשאלה: לא הוגדרה';
+                label.innerText = `${PARAMS_COPY.starterGraphLabel}: ${PARAMS_COPY.questionWordsEmptyState}`;
                 applyStartBtn.disabled = true;
-                if (status) status.innerText = 'לשאלה הזו אין כרגע תצורת עזר מוכנה.';
+                if (status) status.innerText = PARAMS_COPY.starterGraphHint;
                 return;
             }
 
             let visiblePos = getVisibleQuestionPosition(currentQ);
             let displayNum = (visiblePos.total > 0 && visiblePos.position >= 0) ? (visiblePos.position + 1) : (currentQ + 1);
-            label.innerText = `תצורה מומלצת לשאלה ${displayNum}: ${tpl.title}`;
+            label.innerText = `${PARAMS_COPY.starterGraphLabel} לשאלה ${displayNum}: ${tpl.title}`;
             applyStartBtn.disabled = false;
-            applyStartBtn.innerText = sessionStarted
-                ? 'טען תצורה מומלצת לשאלה'
-                : 'טען תצורת עזר מומלצת';
+            applyStartBtn.innerText = PARAMS_COPY.starterGraphLabel;
             if (status && !templateChosen) {
                 status.innerText = sessionStarted
-                    ? 'רוצים להתחיל מתצורה שמבליטה את הרמזים? לחצו "טען תצורה מומלצת לשאלה".'
-                    : `המלצה: התחילו מהתצורה "${tpl.title}", או בחרו משפחה אחרת שתקל על קריאת רמזים ובניית משוואות.`;
+                    ? PARAMS_COPY.starterGraphHint
+                    : `${PARAMS_COPY.starterGraphHint} זהו גרף העזר המומלץ: "${tpl.title}".`;
             }
         }
 
@@ -4093,7 +4091,7 @@
             let tpl = getQuestionStartTemplate(q, currentQ);
             if (!tpl) return;
             applyTemplateById(tpl.id, false);
-            showStepToast('נטענה תצורת העזר של השאלה הנוכחית.');
+            showStepToast(PARAMS_COPY.starterGraphHint);
         }
 
         function getGoalInstructionText(q) {
@@ -4158,7 +4156,7 @@
             if (q.goal === 'hit_target' || q.goal === 'hit_targets') {
                 let shortDesc = getQuestionShortDesc(q);
                 if (shortDesc.second) return shortDesc.second;
-                return 'טיפ: כל נקודה ירוקה היא תנאי. שאלו מה היא אומרת על f(x) או על f\'(x), והוסיפו אותה למחברת.';
+                return 'טיפ: מה הנתון הזה אומר על הפונקציה? איזו משוואה מתקבלת מהנקודה הזאת?';
             }
             if (q.goal === 'tangent_through_point') {
                 return 'טיפ: הסתכלו אם הקו הכתום באמת עובר דרך הנקודה החיצונית.';
@@ -4251,7 +4249,7 @@
             if (track === 'equation_modeling') {
                 return {
                     track,
-                    shortLabel: 'נתונים → משוואות',
+                    shortLabel: 'מהמילים למשוואות',
                     compactLabel: 'משוואות',
                     icon: '🧩',
                     bodyClass: 'track-equation-modeling'
@@ -4259,12 +4257,370 @@
             }
             return {
                 track: 'visual_explore',
-                shortLabel: 'חקירה ויזואלית',
-                compactLabel: 'חקירה',
+                shortLabel: PARAMS_COPY.freeExploreModeLabel,
+                compactLabel: PARAMS_COPY.freeExploreModeHint,
                 icon: '🔎',
                 bodyClass: 'track-visual-explore'
             };
         }
+
+        function applyBuilderParamsStaticCopy() {
+            let title = document.getElementById('builder-main-title');
+            if (title) title.innerText = PARAMS_COPY.paramsMainTitle;
+            let subtitle = document.getElementById('builder-main-subtitle');
+            if (subtitle) subtitle.innerHTML = formatMixedBidiTextHtml(PARAMS_COPY.paramsMainSubtitle);
+            let helper = document.getElementById('builder-main-helper');
+            if (helper) helper.innerText = PARAMS_COPY.paramsMainHelper;
+            let wordsTitle = document.querySelector('#builder-question-words-box .builder-pedagogy-title');
+            if (wordsTitle) wordsTitle.innerText = PARAMS_COPY.questionWordsSectionTitle;
+            let wordsSubtitle = document.querySelector('#builder-question-words-box .builder-section-subtitle');
+            if (wordsSubtitle) wordsSubtitle.innerText = PARAMS_COPY.questionWordsSectionSubtitle;
+            let wordsHelper = document.querySelector('#builder-question-words-box .builder-section-helper');
+            if (wordsHelper) wordsHelper.innerText = PARAMS_COPY.questionWordsHelper;
+            let visualTitle = document.querySelector('#builder-visual-box .builder-pedagogy-title');
+            if (visualTitle) visualTitle.innerText = PARAMS_COPY.visualSectionTitle;
+            let visualSubtitle = document.querySelector('#builder-visual-box .builder-section-subtitle');
+            if (visualSubtitle) visualSubtitle.innerHTML = formatMixedBidiTextHtml(PARAMS_COPY.visualSectionSubtitle);
+            let visualNote = document.querySelector('#builder-visual-box .builder-section-note');
+            if (visualNote) visualNote.innerText = PARAMS_COPY.visualSectionNote;
+            let factsTitle = document.querySelector('#builder-facts-box .builder-pedagogy-title');
+            if (factsTitle) factsTitle.innerText = PARAMS_COPY.factsSectionTitle;
+            let factsSubtitle = document.querySelector('#builder-facts-box .builder-section-subtitle');
+            if (factsSubtitle) factsSubtitle.innerText = PARAMS_COPY.factsSectionSubtitle;
+            let factsSummary = document.getElementById('builder-facts-summary');
+            if (factsSummary) factsSummary.innerText = PARAMS_COPY.factsSummaryLine;
+            let flowTitle = document.querySelector('#builder-flow-box .builder-pedagogy-title');
+            if (flowTitle) flowTitle.innerText = PARAMS_COPY.processSectionTitle;
+            let processShort = document.getElementById('builder-process-short');
+            if (processShort) processShort.innerText = PARAMS_COPY.processShortVersion;
+            let notebookTitle = document.getElementById('builder-notebook-title');
+            if (notebookTitle) notebookTitle.innerText = PARAMS_COPY.notebookSectionTitle;
+            let notebookNote = document.getElementById('builder-notebook-note');
+            if (notebookNote) notebookNote.innerText = PARAMS_COPY.notebookSectionSubtitle;
+            let notebookSystem = document.getElementById('builder-notebook-system-frame');
+            if (notebookSystem) notebookSystem.innerText = PARAMS_COPY.notebookSystemLine;
+            let notebookStatus = document.getElementById('builder-notebook-status');
+            if (notebookStatus && notebookHistory.length === 0) notebookStatus.innerText = PARAMS_COPY.notebookEmptyState;
+            let notebookPrompts = document.getElementById('builder-notebook-prompts');
+            if (notebookPrompts) {
+                notebookPrompts.innerHTML = `<span>${escapeHtmlText(PARAMS_COPY.notebookPromptCount)}</span>
+                    <span>${escapeHtmlText(PARAMS_COPY.notebookPromptMissing)}</span>
+                    <span>${escapeHtmlText(PARAMS_COPY.notebookPromptEnough)}</span>`;
+            }
+            let supportTitle = document.querySelector('#builder-template-panel .builder-pedagogy-title');
+            if (supportTitle) supportTitle.innerText = PARAMS_COPY.functionFamilyLabel;
+            let supportHelper = document.querySelector('#builder-template-panel .builder-section-helper');
+            if (supportHelper) supportHelper.innerText = PARAMS_COPY.functionFamilyHint;
+            let starterLabel = document.querySelector('#builder-template-panel .builder-inline-label');
+            if (starterLabel) starterLabel.innerText = PARAMS_COPY.starterGraphLabel;
+            let starterHint = document.querySelector('#builder-template-panel .builder-inline-hint');
+            if (starterHint) starterHint.innerText = PARAMS_COPY.starterGraphHint;
+            let supportNote = document.getElementById('builder-template-type-note');
+            if (supportNote) supportNote.innerText = PARAMS_COPY.tooltipGraphToEquation7;
+            let freeExploreButton = document.getElementById('btn-builder-free-explore');
+            if (freeExploreButton) freeExploreButton.innerText = PARAMS_COPY.freeExploreModeLabel;
+            let freeExploreNote = document.getElementById('builder-free-explore-note');
+            if (freeExploreNote) freeExploreNote.innerText = `${PARAMS_COPY.freeExploreModeHint} · ${PARAMS_COPY.selfExperimentLabel} · ${PARAMS_COPY.extraHelperToolLabel}`;
+            let equationTitle = document.getElementById('builder-equation-practice-title');
+            if (equationTitle) equationTitle.innerText = PARAMS_COPY.equationsSectionTitle;
+            let equationNote = document.getElementById('builder-equation-practice-note');
+            if (equationNote) equationNote.innerText = PARAMS_COPY.equationsSectionSubtitle;
+            let equationHelper = document.getElementById('builder-equation-helper');
+            if (equationHelper) equationHelper.innerText = PARAMS_COPY.equationsHelperLine;
+            let focusNote = document.getElementById('builder-focus-note');
+            if (focusNote) focusNote.innerText = PARAMS_COPY.corePedagogyLine;
+        }
+
+        function getBuilderQuestionWords(q) {
+            if (!q) return [];
+            let lines = String(q?.desc || '')
+                .split('\n')
+                .map((line) => getShortText(line, ''))
+                .filter(Boolean);
+            let overlayGoal = getShortText(q?.overlay?.goal, '');
+            if (overlayGoal && !lines.includes(overlayGoal)) lines.push(overlayGoal);
+            return lines.slice(0, 4);
+        }
+
+        function isNotebookRhsZero(constraint) {
+            if (!constraint?.rhs) return false;
+            if (constraint.rhs.kind === 'number') return Math.abs(Number(constraint.rhs.value || 0)) < 1e-9;
+            return String(constraint.rhs.text || '').trim() === '0';
+        }
+
+        function getConstraintVisualClueKey(constraint) {
+            if (!constraint) return '';
+            if (constraint.relation === 'df' && isNotebookRhsZero(constraint)) return 'extremum';
+            if (constraint.relation === 'df') return 'slope';
+            if (constraint.relation === 'f' && isNotebookRhsZero(constraint)) return 'x_intercept';
+            if (constraint.relation === 'f' && Math.abs(Number(constraint.x || 0)) < 1e-9) return 'y_intercept';
+            if (constraint.relation === 'f') return 'point';
+            return '';
+        }
+
+        function getActiveBuilderVisualClues(q, constraints) {
+            let active = new Set();
+            (constraints || []).forEach((constraint) => {
+                let key = getConstraintVisualClueKey(constraint);
+                if (key) active.add(key);
+            });
+            let goal = String(q?.goal || '').trim();
+            if (goal === 'tangent_through_point') {
+                active.add('point');
+                active.add('tangent');
+                active.add('slope');
+            } else if (goal === 'slope_equals' || goal === 'read_slope') {
+                active.add('tangent');
+                active.add('slope');
+            } else if (goal === 'slope_zero' || goal === 'min_point') {
+                active.add('extremum');
+                active.add('slope');
+            } else if (goal === 'hit_target' || goal === 'hit_targets' || goal === 'y_equals' || goal === 'read_y') {
+                active.add('point');
+            } else if (goal === 'choose_function_template' || goal === 'free') {
+                active.add('opening');
+                active.add('point');
+                active.add('slope');
+            }
+            (q?.data?.targets || []).forEach((target) => {
+                if (Math.abs(Number(target?.y || 0)) < 1e-9) active.add('x_intercept');
+                if (Math.abs(Number(target?.x || 0)) < 1e-9) active.add('y_intercept');
+            });
+            return active;
+        }
+
+        function createPseudoNotebookConstraint(relation, x, rhsRaw) {
+            return {
+                relation,
+                x,
+                rhs: createNotebookRhsValue(rhsRaw)
+            };
+        }
+
+        function getParameterInterpretationType(constraint) {
+            if (!constraint) return 'point';
+            if (constraint.relation === 'df' && isNotebookRhsZero(constraint)) return 'extremum';
+            if (constraint.relation === 'df') return 'slope';
+            if (constraint.relation === 'f' && Math.abs(Number(constraint.x || 0)) < 1e-9) return 'y_intercept';
+            if (constraint.relation === 'f' && isNotebookRhsZero(constraint)) return 'x_intercept';
+            return 'point';
+        }
+
+        function createParameterInterpretation(type, constraint = null) {
+            let xText = Number.isFinite(Number(constraint?.x)) ? formatNumber(Number(constraint.x)) : 'x₀';
+            let rhsText = String(constraint?.rhs?.text || '').trim() || (type === 'slope' ? 'm' : 'y₀');
+            if (type === 'touch') {
+                return {
+                    seen: 'יש השקה לציר x',
+                    meaning: 'גם הפונקציה וגם הנגזרת מתאפסות',
+                    gives: 'נקבל תנאי על f וגם על f\'',
+                    given: 'השקה לציר x',
+                    translation: 'גם הפונקציה וגם הנגזרת מתאפסות',
+                    equation: Number.isFinite(Number(constraint?.x)) ? `f(${xText})=0 וגם f'(${xText})=0` : 'f(x₀)=0 וגם f\'(x₀)=0'
+                };
+            }
+            if (type === 'extremum') {
+                return {
+                    seen: 'יש נקודת קיצון',
+                    meaning: 'הנגזרת שם שווה לאפס',
+                    gives: 'נקבל תנאי על f\'',
+                    given: Number.isFinite(Number(constraint?.x)) ? `נקודת קיצון ב־${xText}` : 'נקודת קיצון ב־x₀',
+                    translation: 'הנגזרת בנקודה שווה לאפס',
+                    equation: Number.isFinite(Number(constraint?.x)) ? `f'(${xText})=0` : 'f\'(x₀)=0'
+                };
+            }
+            if (type === 'slope') {
+                return {
+                    seen: 'יש משיק בנקודה',
+                    meaning: 'שיפוע המשיק ידוע',
+                    gives: 'נקבל תנאי על f\'',
+                    given: `שיפוע המשיק בנקודה הוא ${rhsText}`,
+                    translation: 'ערך הנגזרת בנקודה ידוע',
+                    equation: Number.isFinite(Number(constraint?.x)) ? `f'(${xText})=${rhsText}` : 'f\'(x₀)=m'
+                };
+            }
+            if (type === 'x_intercept') {
+                return {
+                    seen: 'יש חיתוך עם ציר x',
+                    meaning: 'ערך הפונקציה שווה לאפס',
+                    gives: 'נקבל תנאי על f',
+                    given: Number.isFinite(Number(constraint?.x)) ? `חיתוך עם ציר x ב־${xText}` : 'חיתוך עם ציר x ב־x₀',
+                    translation: 'הפונקציה שווה לאפס בנקודה',
+                    equation: Number.isFinite(Number(constraint?.x)) ? `f(${xText})=0` : 'f(x₀)=0'
+                };
+            }
+            if (type === 'y_intercept') {
+                return {
+                    seen: 'יש חיתוך עם ציר y',
+                    meaning: 'ערך הפונקציה ב־x=0 ידוע',
+                    gives: 'נקבל תנאי על f',
+                    given: 'חיתוך עם ציר y',
+                    translation: 'מציבים x=0',
+                    equation: rhsText && rhsText !== 'y₀' ? `f(0)=${rhsText}` : 'f(0)=y₀'
+                };
+            }
+            return {
+                seen: 'יש נקודה על הגרף',
+                meaning: 'ערך הפונקציה בנקודה ידוע',
+                gives: 'נקבל תנאי על f',
+                given: Number.isFinite(Number(constraint?.x)) || rhsText !== 'y₀'
+                    ? `נקודה (${xText}, ${rhsText}) על הגרף`
+                    : 'נקודה (x₀, y₀) על הגרף',
+                translation: 'ערך הפונקציה בנקודה ידוע',
+                equation: Number.isFinite(Number(constraint?.x)) || rhsText !== 'y₀' ? `f(${xText})=${rhsText}` : 'f(x₀)=y₀'
+            };
+        }
+
+        function getDefaultParameterInterpretations(q) {
+            let goal = String(q?.goal || '').trim();
+            let entries = [];
+            let targets = Array.isArray(q?.data?.targets) ? q.data.targets : [];
+            if (goal === 'hit_target' || goal === 'hit_targets') {
+                targets.forEach((target) => {
+                    let pseudo = createPseudoNotebookConstraint('f', Number(target?.x), Number.isFinite(Number(target?.y)) ? Number(target.y) : (target?.ySymbol || 'y₀'));
+                    entries.push(createParameterInterpretation(getParameterInterpretationType(pseudo), pseudo));
+                });
+            } else if (goal === 'slope_equals' || goal === 'read_slope' || goal === 'tangent_through_point') {
+                let slopeRaw = Number.isFinite(Number(q?.data?.targetM)) ? Number(q.data.targetM) : 'm';
+                entries.push(createParameterInterpretation('slope', createPseudoNotebookConstraint('df', Number(q?.data?.fixedX0), slopeRaw)));
+            } else if (goal === 'slope_zero' || goal === 'min_point') {
+                entries.push(createParameterInterpretation('extremum', createPseudoNotebookConstraint('df', Number(q?.data?.fixedX0), 0)));
+            } else if (goal === 'y_equals' || goal === 'read_y') {
+                let yRaw = Number.isFinite(Number(q?.data?.targetY)) ? Number(q.data.targetY) : (Number.isFinite(Number(q?.data?.fixedX0)) && Number(q.data.fixedX0) === 0 ? 'y₀' : 'y₀');
+                entries.push(createParameterInterpretation('point', createPseudoNotebookConstraint('f', Number(q?.data?.fixedX0), yRaw)));
+            }
+            if (entries.length === 0) {
+                entries = [
+                    createParameterInterpretation('point'),
+                    createParameterInterpretation('slope'),
+                    createParameterInterpretation('extremum')
+                ];
+            }
+            return entries;
+        }
+
+        function buildParameterInterpretations(q, constraints) {
+            let touchByX = new Set();
+            let grouped = new Map();
+            (constraints || []).forEach((constraint) => {
+                let xKey = formatNumber(Number(constraint?.x));
+                if (!grouped.has(xKey)) grouped.set(xKey, { hasZeroF: false, hasZeroDf: false, sample: constraint });
+                let entry = grouped.get(xKey);
+                if (constraint.relation === 'f' && isNotebookRhsZero(constraint)) entry.hasZeroF = true;
+                if (constraint.relation === 'df' && isNotebookRhsZero(constraint)) entry.hasZeroDf = true;
+                if (!entry.sample) entry.sample = constraint;
+            });
+            grouped.forEach((entry, key) => {
+                if (entry.hasZeroF && entry.hasZeroDf) touchByX.add(key);
+            });
+
+            let items = [];
+            let used = new Set();
+            (constraints || []).forEach((constraint) => {
+                let xKey = formatNumber(Number(constraint?.x));
+                if (touchByX.has(xKey)) {
+                    let touchKey = `touch:${xKey}`;
+                    if (!used.has(touchKey)) {
+                        items.push(createParameterInterpretation('touch', constraint));
+                        used.add(touchKey);
+                    }
+                    return;
+                }
+                let type = getParameterInterpretationType(constraint);
+                let key = `${type}:${xKey}:${constraint?.rhs?.text || '?'}`;
+                if (used.has(key)) return;
+                items.push(createParameterInterpretation(type, constraint));
+                used.add(key);
+            });
+            return items.length > 0 ? items : getDefaultParameterInterpretations(q);
+        }
+
+        function getBuilderLiveConstraints(q) {
+            if (!q || !canOpenBuilderForQuestion(q)) return [];
+            try {
+                return buildNotebookConstraintsFromCurrentState();
+            } catch (err) {
+                return [];
+            }
+        }
+
+        function renderBuilderQuestionWords(q) {
+            let container = document.getElementById('builder-question-words-content');
+            if (!container) return;
+            let lines = getBuilderQuestionWords(q);
+            if (lines.length === 0) {
+                container.innerHTML = `<div class="builder-empty-state">${escapeHtmlText(PARAMS_COPY.questionWordsEmptyState)}</div>`;
+                return;
+            }
+            container.innerHTML = lines.map((line) => {
+                return `<div class="builder-word-card">
+                    <span class="builder-word-label">${escapeHtmlText(PARAMS_COPY.questionWordsPrimaryLabel)}</span>
+                    <div class="builder-word-text">${formatMixedBidiTextHtml(line)}</div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderBuilderVisualSection(q, constraints) {
+            let active = getActiveBuilderVisualClues(q, constraints);
+            let summary = document.getElementById('builder-visual-summary');
+            if (summary) {
+                summary.innerText = active.size > 0 ? PARAMS_COPY.corePedagogyLine : PARAMS_COPY.visualSectionEmptyState;
+            }
+            document.querySelectorAll('#builder-visual-clues .builder-clue-chip').forEach((chip) => {
+                chip.classList.toggle('is-active', active.has(String(chip.dataset.clue || '')));
+            });
+        }
+
+        function renderBuilderFactsSection(q, constraints) {
+            let grid = document.getElementById('builder-facts-grid');
+            if (!grid) return;
+            let items = buildParameterInterpretations(q, constraints);
+            grid.innerHTML = items.map((item) => {
+                return `<div class="builder-fact-card">
+                    <div class="builder-fact-row"><span class="builder-fact-label">${escapeHtmlText(PARAMS_COPY.factsCardSeenLabel)}</span><span>${escapeHtmlText(item.seen)}</span></div>
+                    <div class="builder-fact-row"><span class="builder-fact-label">${escapeHtmlText(PARAMS_COPY.factsCardMeaningLabel)}</span><span>${escapeHtmlText(item.meaning)}</span></div>
+                    <div class="builder-fact-row"><span class="builder-fact-label">${escapeHtmlText(PARAMS_COPY.factsCardGivesLabel)}</span><span>${escapeHtmlText(item.gives)}</span></div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderBuilderEquationCards(q, constraints) {
+            let cards = document.getElementById('builder-equation-cards');
+            if (!cards) return;
+            let items = buildParameterInterpretations(q, constraints);
+            cards.innerHTML = items.map((item) => {
+                return `<div class="builder-equation-card">
+                    <div class="builder-fact-row"><span class="builder-fact-label">${escapeHtmlText(PARAMS_COPY.equationsCardGivenLabel)}</span><span>${escapeHtmlText(item.given)}</span></div>
+                    <div class="builder-fact-row"><span class="builder-fact-label">${escapeHtmlText(PARAMS_COPY.equationsCardTranslationLabel)}</span><span>${escapeHtmlText(item.translation)}</span></div>
+                    <div class="builder-fact-row"><span class="builder-fact-label">${escapeHtmlText(PARAMS_COPY.equationsCardEquationLabel)}</span><span dir="ltr">${escapeHtmlText(item.equation)}</span></div>
+                </div>`;
+            }).join('');
+        }
+
+        function syncBuilderLearningPipeline(q, options = {}) {
+            applyBuilderParamsStaticCopy();
+            let question = q || getCurrentQuestion();
+            let constraints = getBuilderLiveConstraints(question);
+            let hash = JSON.stringify({
+                q: question?.id || -1,
+                goal: question?.goal || '',
+                desc: question?.desc || '',
+                template: activeTemplate?.id || '',
+                constraints: constraints.map((constraint) => ({
+                    relation: constraint.relation,
+                    x: formatNumber(Number(constraint.x)),
+                    rhs: constraint?.rhs?.text || '',
+                    source: constraint.sourceKind || ''
+                }))
+            });
+            if (!options.force && hash === syncBuilderLearningPipeline.lastHash) return;
+            syncBuilderLearningPipeline.lastHash = hash;
+            renderBuilderQuestionWords(question);
+            renderBuilderVisualSection(question, constraints);
+            renderBuilderFactsSection(question, constraints);
+            renderBuilderEquationCards(question, constraints);
+        }
+        syncBuilderLearningPipeline.lastHash = '';
 
         function syncQuestionPedagogyUi(q) {
             let meta = getQuestionPedagogyTrackMeta(q);
@@ -4277,8 +4633,8 @@
                 topBadge.classList.add(meta.track === 'equation_modeling' ? 'track-equation-modeling' : 'track-visual-explore');
                 topBadge.innerText = `${meta.icon} ${meta.shortLabel}`;
                 topBadge.title = meta.track === 'equation_modeling'
-                    ? 'שאלת מידול: מייצרים משוואות מהגרף והנתונים'
-                    : 'שאלת חקירה: מתמקדים בקריאה/תנועה/הבנה ויזואלית';
+                    ? PARAMS_COPY.corePedagogyLine
+                    : `${PARAMS_COPY.freeExploreModeLabel} · ${PARAMS_COPY.freeExploreModeHint}`;
             }
 
             let builderTrackBadge = document.getElementById('builder-track-badge');
@@ -4289,32 +4645,17 @@
             }
 
             let note = document.getElementById('builder-notebook-note');
-            if (note) {
-                note.innerText = meta.track === 'equation_modeling'
-                    ? 'זה המסלול המרכזי כאן: אוספים נתונים על הגרף, מתרגמים אותם למשוואות, ובונים מערכת על הפרמטרים.'
-                    : 'גם בחקירה חופשית אפשר לייצר מחברת, אבל הדגש הוא להבין אילו תנאים כל סימון על הגרף יוצר.';
-            }
+            if (note) note.innerText = PARAMS_COPY.notebookSectionSubtitle;
 
             let focus = document.getElementById('builder-focus-note');
-            if (focus) {
-                focus.innerText = meta.track === 'equation_modeling'
-                    ? 'כאן לא רק מזיזים פרמטרים. בודקים איזה תנאי כל נתון יוצר, ומתרגמים אותו למשוואה.'
-                    : 'גם בחקירה חופשית שואלים כל הזמן: איזה רמז חדש נוצר על הגרף, ואיך הייתי כותב אותו באלגברה?';
-            }
+            if (focus) focus.innerText = PARAMS_COPY.corePedagogyLine;
 
             let practiceTitle = document.getElementById('builder-equation-practice-title');
-            if (practiceTitle) {
-                practiceTitle.innerText = meta.track === 'equation_modeling'
-                    ? 'מהנתונים למשוואות'
-                    : 'מחברת ויזואלית';
-            }
+            if (practiceTitle) practiceTitle.innerText = PARAMS_COPY.equationsSectionTitle;
 
             let practiceNote = document.getElementById('builder-equation-practice-note');
-            if (practiceNote) {
-                practiceNote.innerText = meta.track === 'equation_modeling'
-                    ? 'כל נתון מהגרף מתורגם כאן למשוואה, והמשוואות בונות יחד את הפונקציה.'
-                    : 'גם כאן אפשר לכתוב מה אתם רואים בגרף, ואיזו משוואה הייתם בונים מכל רמז.';
-            }
+            if (practiceNote) practiceNote.innerText = PARAMS_COPY.equationsSectionSubtitle;
+            syncBuilderLearningPipeline(q, { force: true });
         }
 
         function getQuestionParamsArray(q) {
@@ -5766,6 +6107,7 @@
             updateHotColdFeedback(m, x, y);
 
             evaluateCurrentStep(m, x, y);
+            syncBuilderLearningPipeline(q);
         }
 
         function getNormalLineData(x, y, tangentSlope) {
@@ -6595,10 +6937,10 @@
             }
             if (goal === 'hit_target' || goal === 'hit_targets') {
                 return [
-                    'הסתכלו קודם על הנתון: נקודה, חיתוך, קיצון או שיפוע.',
-                    'שאלו מה הנתון הזה אומר על f(x) או על f\'(x).',
-                    'פתחו את המחברת והוסיפו כל תנאי כמשוואה חדשה.',
-                    'בדקו אם כבר יש מספיק משוואות כדי למצוא את הפרמטרים, ואז וודאו שהגרף באמת מתאים.'
+                    'מה הנתון הזה אומר על הפונקציה?',
+                    'איזו משוואה מתקבלת מהנקודה הזאת?',
+                    'כמה משוואות כבר בנינו?',
+                    'מה עוד חסר כדי למצוא את כל הפרמטרים?'
                 ];
             }
             if (goal === 'tangent_through_point') {
@@ -6770,9 +7112,7 @@
         }
 
         function getNotebookDefaultStatusText() {
-            return notebookAutoGenerateOnDrag
-                ? 'איסוף אוטומטי פעיל: כל גרירה או שינוי יכולים להוסיף עוד תנאי למחברת.'
-                : 'האיסוף האוטומטי כבוי. לחצו "אסוף תנאים למחברת" כדי לבנות משוואות מהגרף.';
+            return `${PARAMS_COPY.notebookEmptyState}\n${PARAMS_COPY.equationNotebookEmptyState}`;
         }
 
         function toggleNotebookAutoGenerate(enabled) {
@@ -6856,7 +7196,7 @@
                     relation: 'f',
                     x: currentX,
                     rhs: createNotebookRhsValue(currentY),
-                    sourceLabel: 'הנקודה הכחולה (מצב נוכחי)',
+                    sourceLabel: 'יש נקודה על הגרף',
                     sourceKind: 'current_point',
                     rawText: `f(${formatNumber(currentX)}) = ${formatNumber(currentY)}`
                 });
@@ -6881,7 +7221,7 @@
                     relation: 'df',
                     x: currentX,
                     rhs: createNotebookRhsValue(0),
-                    sourceLabel: q.goal === 'min_point' ? 'תנאי קיצון (מינימום/קיצון אפשרי)' : 'משיק אופקי',
+                    sourceLabel: q.goal === 'min_point' ? 'יש נקודת קיצון' : 'יש משיק בנקודה',
                     sourceKind: 'slope_condition',
                     rawText: `f'(${formatNumber(currentX)}) = 0`
                 });
@@ -6893,7 +7233,7 @@
                     relation: 'df',
                     x: currentX,
                     rhs: createNotebookRhsValue(targetM),
-                    sourceLabel: 'שיפוע מבוקש',
+                    sourceLabel: 'יש משיק בנקודה',
                     sourceKind: 'slope_condition',
                     rawText: `f'(${formatNumber(currentX)}) = ${formatNumber(targetM)}`
                 });
@@ -6905,7 +7245,7 @@
                     relation: 'f',
                     x: currentX,
                     rhs: createNotebookRhsValue(targetY),
-                    sourceLabel: 'ערך פונקציה מבוקש',
+                    sourceLabel: 'יש נקודה על הגרף',
                     sourceKind: 'value_condition',
                     rawText: `f(${formatNumber(currentX)}) = ${formatNumber(targetY)}`
                 });
@@ -6918,7 +7258,7 @@
                         relation: 'df',
                         x: x0,
                         rhs: createNotebookRhsValue(getSlope(x0)),
-                        sourceLabel: 'קריאת שיפוע ב-x0',
+                        sourceLabel: 'יש משיק בנקודה',
                         sourceKind: 'read_value',
                         rawText: `f'(${formatNumber(x0)}) = ${formatNumber(getSlope(x0))}`
                     });
@@ -6927,7 +7267,7 @@
                         relation: 'f',
                         x: x0,
                         rhs: createNotebookRhsValue(evaluateFunctionAt(x0)),
-                        sourceLabel: 'קריאת ערך פונקציה ב-x0',
+                        sourceLabel: 'יש נקודה על הגרף',
                         sourceKind: 'read_value',
                         rawText: `f(${formatNumber(x0)}) = ${formatNumber(evaluateFunctionAt(x0))}`
                     });
@@ -7150,8 +7490,8 @@
             if (linear.length === 0) {
                 return {
                     status: 'info',
-                    title: 'עדיין אין מערכת פתירה',
-                    lines: ['לא נמצאו משוואות ליניאריות מתאימות לתבנית הנוכחית.']
+                    title: PARAMS_COPY.solveNowSectionTitle,
+                    lines: [PARAMS_COPY.solveNowBeforeEnough]
                 };
             }
 
@@ -7159,8 +7499,8 @@
             if (numeric.length === 0) {
                 return {
                     status: 'info',
-                    title: 'יש משוואות סמליות',
-                    lines: ['נבנו משוואות, אבל יש ערכים סמליים (למשל β), ולכן נשאיר את הפתרון לשלב האלגברי.']
+                    title: PARAMS_COPY.solveNowSectionTitle,
+                    lines: [PARAMS_COPY.solveNowBeforeEnough]
                 };
             }
 
@@ -7174,7 +7514,7 @@
                         .join(', ');
                     return {
                         status: 'success',
-                        title: 'פתרון חלקי (2 נעלמים)',
+                        title: PARAMS_COPY.solveNowSectionTitle,
                         lines: [
                             `נפתרה מערכת לשני נעלמים: ${varsText}.`,
                             'שאר הפרמטרים (אם קיימים) נשארים חופשיים או דורשים עוד משוואות.'
@@ -7191,7 +7531,7 @@
                     let [k, v] = Object.entries(oneSolve.vars)[0];
                     return {
                         status: 'success',
-                        title: 'פתרון חלקי (נעלם אחד)',
+                        title: PARAMS_COPY.solveNowSectionTitle,
                         lines: [
                             `אפשר לבודד כבר עכשיו: ${getNotebookDisplayParamSymbol(k, template)} = ${formatNumber(v)}.`,
                             'כדי לחשוף נעלמים נוספים צריך עוד משוואה בלתי תלויה.'
@@ -7208,9 +7548,9 @@
                 : '';
             return {
                 status: 'warn',
-                title: 'חסר מידע / אין בידוד ישיר עדיין',
+                title: PARAMS_COPY.solveNowSectionTitle,
                 lines: [
-                    'נבנו משוואות, אבל כרגע אין מספיק משוואות בלתי תלויות כדי לפתור 1–2 נעלמים בצורה ישירה.',
+                    PARAMS_COPY.solveNowBeforeEnough,
                     'זה בדיוק המקום לחשיבה אלגברית: הוסיפו עוד אילוץ ויזואלי (נקודה/שיפוע/קיצון) או בחרו זוג פרמטרים אחר.',
                     extraLine
                 ].filter(Boolean)
@@ -7244,19 +7584,19 @@
             if (!constraint) return 'נתון מהגרף';
             let xText = formatNumber(Number(constraint.x));
             let rhsText = constraint.rhs?.text || '?';
-            if (constraint.sourceKind === 'target_point') return `ידוע שהגרף עובר דרך (${xText}, ${rhsText}).`;
-            if (constraint.sourceKind === 'current_point') return `הנקודה הנוכחית על הגרף היא (${xText}, ${rhsText}).`;
+            if (constraint.sourceKind === 'target_point') return `יש נקודה על הגרף: (${xText}, ${rhsText}).`;
+            if (constraint.sourceKind === 'current_point') return `יש נקודה על הגרף: (${xText}, ${rhsText}).`;
             if (constraint.sourceKind === 'slope_condition') {
                 return constraint.relation === 'df' && rhsText === '0'
-                    ? `בנקודה x=${xText} מתקבל תנאי של קיצון או משיק אופקי.`
-                    : `בנקודה x=${xText} ידוע השיפוע ${rhsText}.`;
+                    ? `יש נקודת קיצון ב־x=${xText}.`
+                    : `יש משיק בנקודה, והשיפוע שלו הוא ${rhsText}.`;
             }
             if (constraint.sourceKind === 'read_value') {
                 return constraint.relation === 'df'
-                    ? `קראנו מהגרף את השיפוע בנקודה x=${xText}.`
-                    : `קראנו מהגרף את ערך הפונקציה בנקודה x=${xText}.`;
+                    ? `יש משיק בנקודה x=${xText}.`
+                    : `יש נקודה על הגרף ב־x=${xText}.`;
             }
-            if (constraint.sourceKind === 'value_condition') return `בנקודה x=${xText} נתון ערך פונקציה ${rhsText}.`;
+            if (constraint.sourceKind === 'value_condition') return `יש נקודה על הגרף: (${xText}, ${rhsText}).`;
             return constraint.sourceLabel || 'נתון מהגרף';
         }
 
@@ -7270,8 +7610,8 @@
             if (!constraint || constraint.rhs?.kind !== 'number') {
                 return {
                     toneClass: 'is-recorded',
-                    statusLabel: 'נוסף למחברת',
-                    detailText: 'זהו תנאי שנשמר למחברת, ויהפוך למשוואה יחד עם שאר הנתונים.'
+                    statusLabel: PARAMS_COPY.notebookStatusAdded,
+                    detailText: PARAMS_COPY.tooltipGraphToEquation1
                 };
             }
             let x = Number(constraint.x);
@@ -7284,39 +7624,72 @@
             if (diff <= tol) {
                 return {
                     toneClass: 'is-good',
-                    statusLabel: 'מתקיים כרגע על הגרף',
+                    statusLabel: PARAMS_COPY.notebookStatusReady,
                     detailText
                 };
             }
             if (diff <= tol * 2) {
                 return {
                     toneClass: 'is-close',
-                    statusLabel: 'כמעט מתקיים. צריך עוד דיוק.',
+                    statusLabel: PARAMS_COPY.notebookStatusNeedsCheck,
                     detailText
                 };
             }
             return {
                 toneClass: 'is-pending',
-                statusLabel: 'נוסף למחברת, אבל עדיין לא מתקיים על הגרף.',
+                statusLabel: PARAMS_COPY.notebookStatusMissing,
                 detailText
             };
+        }
+
+        function renderSolveNowBlock(snapshot) {
+            let solution = snapshot?.solution || null;
+            let ready = solution?.status === 'success';
+            let body = `<div class="builder-solve-subtitle">${escapeHtmlText(PARAMS_COPY.solveNowSectionSubtitle)}</div>
+                <div class="builder-empty-state">${formatMixedBidiTextHtml(ready ? PARAMS_COPY.solveNowReady : PARAMS_COPY.solveNowBeforeEnough)}</div>`;
+            if (Array.isArray(solution?.lines) && solution.lines.length > 0) {
+                body += `<ol class="builder-notebook-list">${solution.lines.map((line) => `<li>${escapeHtmlText(line)}</li>`).join('')}</ol>`;
+            }
+            body += `<div class="builder-section-helper">${escapeHtmlText(PARAMS_COPY.solveNowEncouragement)}</div>`;
+            renderNotebookBlock('builder-notebook-solution', PARAMS_COPY.solveNowSectionTitle, body);
         }
 
         function renderNotebookCheckBlock(snapshot) {
             if (!snapshot || !Array.isArray(snapshot.constraints) || snapshot.constraints.length === 0) {
                 renderNotebookBlock(
                     'builder-notebook-check',
-                    'האם הפונקציה באמת מקיימת את כל התנאים?',
-                    '<div class="builder-notebook-check-placeholder">אחרי שנאסוף תנאים למחברת, נבדוק כאן אם הפונקציה באמת מקיימת את כולם.</div>'
+                    PARAMS_COPY.checkSectionTitle,
+                    `<div class="builder-check-subtitle">${escapeHtmlText(PARAMS_COPY.checkSectionSubtitle)}</div>
+                    <div class="builder-check-labels">
+                        <span>${escapeHtmlText(PARAMS_COPY.checkLabelPoints)}</span>
+                        <span>${escapeHtmlText(PARAMS_COPY.checkLabelSlopes)}</span>
+                        <span>${escapeHtmlText(PARAMS_COPY.checkLabelExtrema)}</span>
+                        <span>${escapeHtmlText(PARAMS_COPY.checkLabelIntercepts)}</span>
+                        <span>${escapeHtmlText(PARAMS_COPY.checkLabelGraphFit)}</span>
+                    </div>
+                    <div class="builder-notebook-check-placeholder">${escapeHtmlText(PARAMS_COPY.checkEmptyState)}</div>`
                 );
                 return;
             }
             let q = getCurrentQuestion();
-            let html = `<ol class="builder-notebook-list">${snapshot.constraints.map((constraint) => {
-                let state = evaluateNotebookConstraintState(constraint, q);
-                return `<li><b>${escapeHtmlText(getNotebookConstraintLearnerText(constraint))}</b><br>${escapeHtmlText(state.statusLabel)}<br>${escapeHtmlText(state.detailText)}</li>`;
-            }).join('')}</ol>`;
-            renderNotebookBlock('builder-notebook-check', 'האם הפונקציה באמת מקיימת את כל התנאים?', html);
+            let states = snapshot.constraints.map((constraint) => evaluateNotebookConstraintState(constraint, q));
+            let success = states.every((state) => state.toneClass === 'is-good' || state.toneClass === 'is-recorded');
+            let failure = states.some((state) => state.toneClass === 'is-pending');
+            let summaryText = success ? PARAMS_COPY.checkSuccess : (failure ? PARAMS_COPY.checkFailure : PARAMS_COPY.checkPartial);
+            let html = `<div class="builder-check-subtitle">${escapeHtmlText(PARAMS_COPY.checkSectionSubtitle)}</div>
+                <div class="builder-check-labels">
+                    <span>${escapeHtmlText(PARAMS_COPY.checkLabelPoints)}</span>
+                    <span>${escapeHtmlText(PARAMS_COPY.checkLabelSlopes)}</span>
+                    <span>${escapeHtmlText(PARAMS_COPY.checkLabelExtrema)}</span>
+                    <span>${escapeHtmlText(PARAMS_COPY.checkLabelIntercepts)}</span>
+                    <span>${escapeHtmlText(PARAMS_COPY.checkLabelGraphFit)}</span>
+                </div>
+                <div class="builder-check-state">${formatMixedBidiTextHtml(summaryText)}</div>
+                <ol class="builder-notebook-list">${snapshot.constraints.map((constraint, idx) => {
+                    let state = states[idx];
+                    return `<li><b>${escapeHtmlText(getNotebookConstraintLearnerText(constraint))}</b><br>${escapeHtmlText(state.statusLabel)}<br>${escapeHtmlText(state.detailText)}</li>`;
+                }).join('')}</ol>`;
+            renderNotebookBlock('builder-notebook-check', PARAMS_COPY.checkSectionTitle, html);
         }
 
         function renderNotebookSnapshot(snapshot, options = {}) {
@@ -7330,7 +7703,7 @@
                 }
                 renderNotebookBlock('builder-notebook-constraints', '', '');
                 renderNotebookBlock('builder-notebook-equations', '', '');
-                renderNotebookBlock('builder-notebook-solution', '', '');
+                renderSolveNowBlock(null);
                 renderNotebookCheckBlock(null);
                 renderNotebookHistoryList();
                 return;
@@ -7340,13 +7713,16 @@
 
             let constraintsHtml = snapshot.constraints.map((constraint) => {
                 let state = evaluateNotebookConstraintState(constraint, getCurrentQuestion());
+                let interpretation = createParameterInterpretation(getParameterInterpretationType(constraint), constraint);
+                let equation = buildNotebookEquationFromConstraint(constraint, activeTemplate);
                 return `<div class="builder-clue-note ${escapeHtmlText(state.toneClass)}">
-                    <div class="builder-clue-note-row"><span class="builder-clue-note-label">נתון</span><span>${escapeHtmlText(getNotebookConstraintLearnerText(constraint))}</span></div>
-                    <div class="builder-clue-note-row"><span class="builder-clue-note-label">תרגום</span><span dir="ltr">${escapeHtmlText(constraint.rawText || constraint.constraintText || '')}</span></div>
-                    <div class="builder-clue-note-row"><span class="builder-clue-note-label">מצב</span><span>${escapeHtmlText(state.statusLabel)}</span></div>
+                    <div class="builder-clue-note-row"><span class="builder-clue-note-label">${escapeHtmlText(PARAMS_COPY.notebookColumnGiven)}</span><span>${escapeHtmlText(getNotebookConstraintLearnerText(constraint))}</span></div>
+                    <div class="builder-clue-note-row"><span class="builder-clue-note-label">${escapeHtmlText(PARAMS_COPY.notebookColumnTranslation)}</span><span>${escapeHtmlText(interpretation.translation)}</span></div>
+                    <div class="builder-clue-note-row"><span class="builder-clue-note-label">${escapeHtmlText(PARAMS_COPY.notebookColumnEquation)}</span><span dir="ltr">${escapeHtmlText(equation?.equationText || constraint.rawText || constraint.constraintText || '')}</span></div>
+                    <div class="builder-clue-note-row"><span class="builder-clue-note-label">${escapeHtmlText(PARAMS_COPY.notebookColumnStatus)}</span><span>${escapeHtmlText(state.statusLabel)}</span></div>
                 </div>`;
             }).join('');
-            renderNotebookBlock('builder-notebook-constraints', 'מהנתונים למשוואות', constraintsHtml);
+            renderNotebookBlock('builder-notebook-constraints', PARAMS_COPY.notebookSectionTitle, constraintsHtml);
 
             let equationsHtml = snapshot.equations.map((eq, idx) => {
                 let label = `משוואה ${idx + 1}: ${eq.constraint?.sourceLabel || 'אילוץ'}`;
@@ -7356,14 +7732,9 @@
                     : (!eq.canSolve ? ' (ערך סמלי - לא פותרים אוטומטית)' : '');
                 return `<div class="builder-notebook-eq"><span class="builder-notebook-eq-label">${escapeHtmlText(label + note)}</span>${escapeHtmlText(eqText)}</div>`;
             }).join('');
-            renderNotebookBlock('builder-notebook-equations', 'מערכת המשוואות שנבנתה', equationsHtml || '');
+            renderNotebookBlock('builder-notebook-equations', PARAMS_COPY.equationsSectionTitle, equationsHtml || '');
+            renderSolveNowBlock(snapshot);
             renderNotebookCheckBlock(snapshot);
-
-            let solution = snapshot.solution;
-            let solutionHtml = solution
-                ? `<ol class="builder-notebook-list">${(solution.lines || []).map((line) => `<li>${escapeHtmlText(line)}</li>`).join('')}</ol>`
-                : '';
-            renderNotebookBlock('builder-notebook-solution', solution?.title || 'כיוון לפתרון', solutionHtml);
             renderNotebookHistoryList();
         }
 
@@ -7372,18 +7743,18 @@
             let template = activeTemplate;
             let statusEl = document.getElementById('builder-notebook-status');
             if (!q || !template) {
-                if (statusEl) statusEl.innerText = 'צריך לטעון שאלה ולבחור פונקציה לפני שאוספים תנאים למחברת.';
+                if (statusEl) statusEl.innerText = `${PARAMS_COPY.functionFamilyLabel}\n${PARAMS_COPY.functionFamilyHint}`;
                 return null;
             }
             syncBuilderNotebookBox(q);
 
             let constraints = buildNotebookConstraintsFromCurrentState();
             if (constraints.length === 0) {
-                if (statusEl) statusEl.innerText = 'עדיין לא נמצאו תנאים מתאימים מהמצב הנוכחי. נסו לסמן נקודה, שיפוע, קיצון, או לעבוד על שאלת פרמטרים.';
+                if (statusEl) statusEl.innerText = PARAMS_COPY.solveNowBeforeEnough;
                 renderNotebookBlock('builder-notebook-constraints', '', '');
                 renderNotebookBlock('builder-notebook-equations', '', '');
-                renderNotebookBlock('builder-notebook-solution', '', '');
-                renderNotebookBlock('builder-notebook-check', '', '');
+                renderSolveNowBlock(null);
+                renderNotebookCheckBlock(null);
                 return null;
             }
 
@@ -8904,13 +9275,13 @@
                 let pointEqText = (params.targets || []).map((target) => `(${formatNumber(target.x)},${formatNumber(target.y)}) ⇒ f(${formatNumber(target.x)})=${formatNumber(target.y)}`).join(', ');
                 return [
                     {
-                        question_text: 'בחרו משפחת פונקציות שמתאימה למה שרואים או למה שמבקשים בשאלה.',
+                        question_text: 'מה נאמר בשאלה? כאן אוספים את הנתונים כפי שהם מופיעים במילים.',
                         goal_type: 'choose_function_template',
                         params: {},
-                        success_criteria: 'נבחרה תבנית פתיחה מתאימה לגרף.'
+                        success_criteria: 'נבנה ציור עזר שממחיש את הנתונים.'
                     },
                     {
-                        question_text: `מה הנתון הזה אומר על הפונקציה? ${pointEqText}. פתחו את המחברת והתחילו לאסוף תנאים.`,
+                        question_text: `מה הנתון הזה אומר על הפונקציה? ${pointEqText}. איזו משוואה מתקבלת מהנקודה הזאת?`,
                         goal_type: goal,
                         params,
                         success_criteria: 'נאספו תנאים מהנקודות ונבנתה דרך למערכת משוואות.'
@@ -10854,7 +11225,7 @@ Rules:
             ensureGraphAndBuilderVisible();
             ensureBuilderTemplateChoicesRendered();
             updateBuilderVisibility(getCurrentQuestion());
-            showStepToast('עברתם לחקירת רמזים פתוחה. בדקו איזה תנאי כל שינוי יוצר, והוסיפו אותו למחברת.');
+            showStepToast(`${PARAMS_COPY.freeExploreModeLabel}: ${PARAMS_COPY.freeExploreModeHint}. ${PARAMS_COPY.tooltipGraphToEquation7}`);
         }
 
         function pulseStartConfirmButton() {
@@ -10870,7 +11241,7 @@ Rules:
         function openBuilderFromMainCta() {
             if (sessionStarted) return;
             openBuilderFromTop();
-            showStepToast('בחרו משפחה מתאימה, דייקו את הרמזים שעל הגרף, ואז לחצו "קבע פונקציה והתחל תרגול".');
+            showStepToast(PARAMS_COPY.corePedagogyLine);
             setTimeout(pulseStartConfirmButton, 120);
         }
 
