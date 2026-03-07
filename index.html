@@ -505,7 +505,7 @@
     <div id="initial-builder-modal" class="hidden" role="dialog" aria-modal="true" aria-label="בניית פונקציה" onclick="onInitialBuilderBackdropClick(event)">
         <div id="initial-builder-card" class="is-compact" tabindex="-1">
             <div class="overlay-head">
-                <h3>בוחרים גרף פתיחה שאפשר להבין ממנו את השאלה</h3>
+                <h3>בוחרים בסיס שממנו אפשר לקרוא רמזים</h3>
                 <button onclick="closeInitialBuilderModal()">סגור</button>
             </div>
             <div class="modal-function-preview" aria-live="polite">
@@ -513,11 +513,11 @@
                 <span id="initial-builder-preview-dx" class="inline-math-bidi">f'(x) = ...</span>
             </div>
             <div class="initial-builder-body">
-                <p><b>מה עושים כאן?</b> בוחרים משפחת פונקציות שמתאימה לשאלה או לנושא, ואז בונים גרף פתיחה שממנו אפשר לקרוא נתונים ולעבוד מסודר.</p>
+                <p><b>מה עושים כאן?</b> זה שלב הכנה קצר: בוחרים משפחת פונקציות שמתאימה לשאלה, כדי שאפשר יהיה לראות רמזים בגרף ולהפוך אותם לתנאים ולמשוואות.</p>
                 <ol>
-                    <li>בחרו סוג פונקציה שמתאים למה שרואים או למה שמבקשים.</li>
-                    <li>דייקו את הגרף עד שהציור נותן נקודות, שיפועים או קיצון שאפשר לעבוד איתם.</li>
-                    <li>עברו ל־"עריכת פרמטרים" כדי לתרגם את מה שרואים לתנאים ומשוואות.</li>
+                    <li>בחרו משפחה שמתאימה למה שרואים או למה שמבקשים.</li>
+                    <li>דייקו את הגרף עד שהציור נותן נקודה, שיפוע, קיצון או חיתוך שאפשר לסמן.</li>
+                    <li>עברו ל"עריכת פרמטרים" כדי לתרגם כל רמז לתנאי ולמשוואה.</li>
                 </ol>
                 <div class="initial-builder-param-grid">
                     <span><b>a</b> משנה פתיחה, כיוון ועוצמה</span>
@@ -726,7 +726,7 @@
                 <span id="top-track-badge" class="track-visual-explore">מסלול: חקירה ויזואלית</span>
                 <div id="top-build-cta-wrap">
                     <button id="btn-top-build-cta" type="button" onclick="openBuilderFromMainCta()">לחצו כאן לבניית פונקציה</button>
-                    <span id="top-build-cta-note">לפני התרגול בוחרים גרף פתיחה, מזהים ממנו נתונים, ואז ממשיכים למחברת ולמשוואות.</span>
+                    <span id="top-build-cta-note">לפני התרגול מזהים על הגרף רמזים חשובים, מתרגמים אותם לתנאים, ואז ממשיכים למחברת ולמשוואות.</span>
                 </div>
                 <div id="top-question-quick-row">
                     <button id="btn-open-params-inline" type="button" onclick="openBuilderFromTop()">⚙ פתח פרמטרים</button>
@@ -926,48 +926,75 @@
             <div id="acc-item-params" class="accordion-item">
                 <button id="btn-builder" class="acc-btn" onclick="toggleBuilderPanel()">פרמטרים</button>
                 <div id="builder-panel" class="acc-panel hidden">
-                    <div class="section-title">מהציור והנתונים בונים פונקציה</div>
-                    <div id="builder-template-panel">
-                        <div class="section-title">גרף פתיחה לעבודת הפתרון</div>
-                        <div id="builder-question-template-label">גרף פתיחה לשאלה: יופיע כאן עם בחירת שאלה</div>
-                        <div id="builder-template-type-note">קודם בוחרים משפחת פונקציות מתאימה, ואז מדייקים את הגרף עד שהנתונים שעליו נעשים ברורים.</div>
-                        <select id="template-select" onchange="applySelectedTemplate(false)"></select>
-                        <div id="template-toggle-group" aria-label="בחירה מהירה של סוג פונקציה"></div>
-                        <div id="template-setup-actions">
-                            <button id="btn-apply-question-template" onclick="applyQuestionStartTemplateFromBuilder()">טען גרף פתיחה לשאלה</button>
-                            <button id="btn-apply-template" onclick="applySelectedTemplate(false)">החל תצורה</button>
-                            <button id="btn-builder-free-explore" onclick="openFreeExploreBuilder()">בניית פונקציה לחקירה חופשית</button>
-                        </div>
-                        <div id="template-status-text"></div>
-                    </div>
-                    <div id="builder-purpose-box" class="builder-pedagogy-box">
-                        <div class="builder-pedagogy-title">מה המטרה כאן?</div>
-                        <p>המטרה היא לא לנחש פונקציה. המטרה היא להוציא מהציור ומהנתונים משוואות, עד שאפשר לגלות את הפרמטרים.</p>
+                    <div id="builder-main-copy" class="builder-pedagogy-box builder-main-copy">
+                        <div class="section-title" id="builder-main-title">מהמילים למשוואות</div>
+                        <div id="builder-main-subtitle" class="builder-section-subtitle">בשאלות פרמטרים לא מנסים לנחש פונקציה.<br>קודם בונים ציור מהנתונים,<br>אחר כך מוציאים מהציור תנאים,<br>ואז מתרגמים כל תנאי למשוואה.</div>
+                        <div id="builder-main-helper" class="builder-section-helper">המטרה כאן היא לעבור מהשאלה הכתובה אל ציור, מהציור אל תנאים, ומהתנאים אל משוואות.</div>
                     </div>
                     <div id="builder-flow-box" class="builder-pedagogy-box">
                         <div class="builder-pedagogy-title">איך עובדים בשאלות פרמטרים?</div>
-                        <ol class="builder-flow-list">
-                            <li>בוחנים מה רואים בגרף: נקודה, קיצון, שיפוע, משיק, חיתוך עם הצירים, סימטריה או שורש כפול.</li>
-                            <li>מסמנים מה ידוע: למשל <code>f(x0)=y0</code>, או <code>f'(x0)=m</code>.</li>
-                            <li>מכל נתון בונים משוואה.</li>
-                            <li>צוברים מערכת משוואות על <code>a,b,c,d,e,...</code>.</li>
-                            <li>פותרים את הפרמטרים ובודקים שהפונקציה באמת מתאימה לציור.</li>
+                        <ol class="builder-flow-list" id="builder-flow-list">
+                            <li>1. קוראים את השאלה</li>
+                            <li>2. בונים ציור עזר</li>
+                            <li>3. מזהים נתונים מתמטיים</li>
+                            <li>4. מתרגמים כל נתון למשוואה</li>
+                            <li>5. אוספים מערכת משוואות</li>
+                            <li>6. פותרים את הפרמטרים</li>
+                            <li>7. בודקים שהפונקציה מתאימה</li>
                         </ol>
+                        <div id="builder-process-short" class="builder-section-helper">קוראים -> מציירים -> מזהים תנאים -> בונים משוואות -> פותרים -> בודקים</div>
                     </div>
-                    <div id="builder-clues-box" class="builder-pedagogy-box">
-                        <div class="builder-pedagogy-title">רמזים שאפשר לקרוא מהגרף</div>
-                        <div class="builder-clues-grid">
-                            <div class="builder-clue-pair"><span>נקודה על הגרף</span><span dir="ltr">f(x0)=y0</span></div>
-                            <div class="builder-clue-pair"><span>נקודת קיצון</span><span dir="ltr">f'(x0)=0</span></div>
-                            <div class="builder-clue-pair"><span>שיפוע בנקודה</span><span dir="ltr">f'(x0)=m</span></div>
-                            <div class="builder-clue-pair"><span>משיק</span><span dir="ltr">y-y0=m(x-x0)</span></div>
-                            <div class="builder-clue-pair"><span>חיתוך עם ציר y</span><span dir="ltr">f(0)=...</span></div>
-                            <div class="builder-clue-pair"><span>שורש / השקה לציר x</span><span dir="ltr">f(x0)=0</span></div>
-                            <div class="builder-clue-pair"><span>עלייה / ירידה</span><span dir="ltr">f'(x)&gt;0 / f'(x)&lt;0</span></div>
-                            <div class="builder-clue-pair"><span>סימטריה / כיוון / פתיחה</span><span>אילו פרמטרים שולטים בצורה</span></div>
+                    <div id="builder-question-words-box" class="builder-pedagogy-box">
+                        <div class="builder-pedagogy-title">מה נאמר בשאלה?</div>
+                        <div class="builder-section-subtitle">כאן אוספים את הנתונים כפי שהם מופיעים במילים.</div>
+                        <div class="builder-section-helper">לפני שפותרים — עוצרים להבין מה באמת נאמר.</div>
+                        <div id="builder-question-words-content" class="builder-words-list">
+                            <div class="builder-empty-state">כאן יופיע נוסח השאלה או התקציר שלה.</div>
                         </div>
                     </div>
-                    <div id="builder-focus-note">כאן לא רק מזיזים פרמטרים. בודקים איזה תנאי כל נתון יוצר, ומתרגמים אותו למשוואה.</div>
+                    <div id="builder-visual-box" class="builder-pedagogy-box">
+                        <div class="builder-pedagogy-title">מה רואים בציור?</div>
+                        <div class="builder-section-subtitle">הציור לא בא לקשט.<br>הוא עוזר לנו לחשוף את התנאים המתמטיים שמסתתרים בתוך המילים.</div>
+                        <div id="builder-visual-summary" class="builder-empty-state">כאן נבנה ציור עזר שממחיש את הנתונים.</div>
+                        <div id="builder-visual-clues" class="builder-clue-chip-list">
+                            <span class="builder-clue-chip" data-clue="point" title="נקודה על הגרף נותנת מידע על f.">נקודה על הגרף</span>
+                            <span class="builder-clue-chip" data-clue="tangent" title="שיפוע המשיק הוא מידע על f'.">משיק</span>
+                            <span class="builder-clue-chip" data-clue="slope" title="שיפוע המשיק הוא מידע על f'.">שיפוע</span>
+                            <span class="builder-clue-chip" data-clue="extremum" title="נקודת קיצון נותנת מידע על הנגזרת.">נקודת קיצון</span>
+                            <span class="builder-clue-chip" data-clue="x_intercept" title="כל פרט בציור יכול להפוך למשוואה.">חיתוך עם ציר x</span>
+                            <span class="builder-clue-chip" data-clue="y_intercept" title="נקודה על הגרף נותנת מידע על f.">חיתוך עם ציר y</span>
+                            <span class="builder-clue-chip" data-clue="increase_decrease" title="הגרף הוא לא קישוט — הוא כלי לחשיבה.">עלייה / ירידה</span>
+                            <span class="builder-clue-chip" data-clue="opening" title="הגרף הוא לא קישוט — הוא כלי לחשיבה.">פתיחה / כיוון</span>
+                            <span class="builder-clue-chip" data-clue="symmetry" title="כל פרט בציור יכול להפוך למשוואה.">סימטריה</span>
+                            <span class="builder-clue-chip" data-clue="double_root" title="אם מצאת תנאי, חפש איך לכתוב אותו על f או על f'.">שורש כפול</span>
+                            <span class="builder-clue-chip" data-clue="touch_x_axis" title="אם מצאת תנאי, חפש איך לכתוב אותו על f או על f'.">השקה לציר</span>
+                        </div>
+                        <div class="builder-section-note">לא חייבים ציור מושלם — צריך ציור שמגלה תנאים.</div>
+                    </div>
+                    <div id="builder-template-panel" class="builder-pedagogy-box builder-support-box">
+                        <div class="builder-pedagogy-title">בחירת משפחת פונקציות</div>
+                        <div class="builder-section-helper">זה רק שלב עזר — לא הפתרון עצמו.</div>
+                        <div class="builder-inline-label">ציור פתיחה</div>
+                        <div id="builder-question-template-label">ציור פתיחה: יופיע כאן עם בחירת שאלה</div>
+                        <div class="builder-inline-hint">נשתמש בו כדי לחלץ תנאים ולבנות משוואות.</div>
+                        <div id="builder-template-type-note">המטרה היא לא לנחש — המטרה היא לבנות מספיק משוואות.</div>
+                        <select id="template-select" onchange="applySelectedTemplate(false)"></select>
+                        <div id="template-toggle-group" aria-label="בחירה מהירה של סוג פונקציה"></div>
+                        <div id="template-setup-actions">
+                            <button id="btn-apply-question-template" onclick="applyQuestionStartTemplateFromBuilder()">ציור פתיחה</button>
+                            <button id="btn-apply-template" onclick="applySelectedTemplate(false)">החל משפחה נבחרת</button>
+                            <button id="btn-builder-free-explore" onclick="openFreeExploreBuilder()">חקירה חופשית</button>
+                        </div>
+                        <div id="builder-free-explore-note" class="builder-secondary-note">לבדיקה נוספת · לניסוי עצמי · כלי עזר נוסף</div>
+                        <div id="template-status-text"></div>
+                    </div>
+                    <div id="builder-facts-box" class="builder-pedagogy-box">
+                        <div class="builder-pedagogy-title">אילו נתונים מתמטיים קיבלנו?</div>
+                        <div class="builder-section-subtitle">עכשיו הופכים את מה שרואים בציור לנתונים מתמטיים מדויקים.</div>
+                        <div id="builder-facts-grid" class="builder-facts-grid"></div>
+                        <div id="builder-facts-summary" class="builder-section-helper">כל נתון כזה הוא צעד בדרך למשוואה.</div>
+                    </div>
+                    <div id="builder-focus-note">מהמילים בונים ציור, מהציור בונים משוואות, ומהמשוואות מוצאים את הפרמטרים.</div>
                     <div id="builder-formula-preview" aria-live="polite">
                         <div class="builder-formula-line" id="builder-formula-fx">f(x) = ...</div>
                         <div class="builder-formula-line" id="builder-formula-dx">f'(x) = ...</div>
@@ -982,18 +1009,20 @@
                     </div>
                     <div id="builder-equation-practice-box" class="hidden">
                         <div id="builder-equation-practice-title">מהנתונים למשוואות</div>
-                        <div id="builder-equation-practice-note">כאן המחברת נהיית מרכזית: כל נתון מהגרף מתורגם למשוואה, והמשוואות בונות יחד את הפונקציה.</div>
+                        <div id="builder-equation-practice-note">כאן מתרגמים כל נתון למשוואה אלגברית.</div>
+                        <div id="builder-equation-cards" class="builder-equation-cards"></div>
+                        <div id="builder-equation-helper" class="builder-section-helper">כאן בדיוק עוברים מהציור לאלגברה.</div>
                         <div class="builder-equation-write-row">
-                            <input id="builder-equation-write" type="text" dir="ltr" placeholder="לדוגמה: f(x)=x^2-3x+2">
-                            <button id="btn-builder-fill-equation" type="button" onclick="fillEquationGuessFromCurrent()">מלא מהגרף</button>
+                            <input id="builder-equation-write" type="text" dir="ltr" placeholder="לדוגמה: f(x₀)=y₀ או f'(x₀)=m">
+                            <button id="btn-builder-fill-equation" type="button" onclick="fillEquationGuessFromCurrent()">מהנתון למשוואה</button>
                         </div>
                         <div id="builder-equation-auto" dir="ltr">f(x) = ...</div>
                         <div id="builder-notebook-box" class="hidden">
                             <div class="builder-notebook-head">
-                                <div id="builder-notebook-title">המחברת שלי: מהגרף למערכת משוואות</div>
+                                <div id="builder-notebook-title">המחברת שלי: מהציור למערכת משוואות</div>
                                 <span id="builder-track-badge" class="track-visual-explore">חקירה</span>
                             </div>
-                            <div id="builder-notebook-note">זה המקום שבו אוספים תנאים, מתרגמים אותם למשוואות, ורואים מתי כבר יש דרך אל הפרמטרים.</div>
+                            <div id="builder-notebook-note">כאן נאספות כל המשוואות שבנינו מתוך הנתונים.</div>
                             <div id="builder-notebook-system-frame">ככל שנאסוף יותר תנאים, תיבנה כאן מערכת משוואות על הפרמטרים.</div>
                             <div class="builder-notebook-controls">
                                 <button id="btn-generate-notebook" type="button" onclick="generateNotebookFromCurrentState('manual')">אסוף תנאים למחברת</button>
@@ -1003,7 +1032,12 @@
                                 </label>
                                 <button id="btn-notebook-clear-history" type="button" onclick="clearNotebookHistory()">נקה היסטוריה</button>
                             </div>
-                            <div id="builder-notebook-status">כאן תופיע המחברת של השאלה: נתונים, תרגומים, ומערכת המשוואות שנאספה.</div>
+                            <div id="builder-notebook-status">עדיין לא נוספו משוואות למחברת. ברגע שנסמן נתונים מהציור, הן יופיעו כאן.</div>
+                            <div id="builder-notebook-prompts" class="builder-prompt-list">
+                                <span>כמה משוואות כבר יש לנו?</span>
+                                <span>מה עדיין חסר כדי למצוא את הפרמטרים?</span>
+                                <span>האם יש לנו מספיק תנאים כדי לפתור?</span>
+                            </div>
                             <div id="builder-notebook-constraints" class="builder-notebook-block hidden"></div>
                             <div id="builder-notebook-equations" class="builder-notebook-block hidden"></div>
                             <div id="builder-notebook-solution" class="builder-notebook-block hidden"></div>
@@ -1018,7 +1052,7 @@
                     <div class="slider-row"><span class="slider-lbl">e</span><input type="range" id="inpE" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintE"></span></div>
                     <div class="slider-row"><span class="slider-lbl">f</span><input type="range" id="inpF" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintF"></span></div>
                     <div id="builder-confirm-wrap">
-                        <div id="builder-confirm-note">אחרי שבדקתם שהגרף נותן את הנתונים הנכונים ושיש לכם כיוון למחברת, אפשר לקבוע את הפונקציה ולהמשיך.</div>
+                        <div id="builder-confirm-note">אחרי שהמחברת מראה תנאים ומשוואות, בדקו שהפונקציה באמת מקיימת את כולם, ורק אז המשיכו.</div>
                         <button id="btn-apply-template-params" onclick="confirmFunctionAndStart()">קבע פונקציה והתחל תרגול</button>
                     </div>
                 </div>
@@ -1286,6 +1320,85 @@
             'hit_targets',
             'free'
         ]);
+        const PARAMS_COPY = {
+            paramsMainTitle: 'מהמילים למשוואות',
+            paramsMainSubtitle: 'בשאלות פרמטרים לא מנסים לנחש פונקציה.\nקודם בונים ציור מהנתונים,\nאחר כך מוציאים מהציור תנאים,\nואז מתרגמים כל תנאי למשוואה.',
+            paramsMainHelper: 'המטרה כאן היא לעבור מהשאלה הכתובה אל ציור, מהציור אל תנאים, ומהתנאים אל משוואות.',
+            questionWordsSectionTitle: 'מה נאמר בשאלה?',
+            questionWordsSectionSubtitle: 'כאן אוספים את הנתונים כפי שהם מופיעים במילים.',
+            questionWordsEmptyState: 'כאן יופיע נוסח השאלה או התקציר שלה.',
+            questionWordsPrimaryLabel: 'נתון מילולי',
+            questionWordsHelper: 'לפני שפותרים — עוצרים להבין מה באמת נאמר.',
+            visualSectionTitle: 'מה רואים בציור?',
+            visualSectionSubtitle: 'הציור לא בא לקשט.\nהוא עוזר לנו לחשוף את התנאים המתמטיים שמסתתרים בתוך המילים.',
+            visualSectionEmptyState: 'כאן נבנה ציור עזר שממחיש את הנתונים.',
+            visualSectionNote: 'לא חייבים ציור מושלם — צריך ציור שמגלה תנאים.',
+            factsSectionTitle: 'אילו נתונים מתמטיים קיבלנו?',
+            factsSectionSubtitle: 'עכשיו הופכים את מה שרואים בציור לנתונים מתמטיים מדויקים.',
+            factsCardSeenLabel: 'ראינו',
+            factsCardMeaningLabel: 'פירוש מתמטי',
+            factsCardGivesLabel: 'מה זה נותן לנו',
+            factsSummaryLine: 'כל נתון כזה הוא צעד בדרך למשוואה.',
+            equationsSectionTitle: 'מהנתונים למשוואות',
+            equationsSectionSubtitle: 'כאן מתרגמים כל נתון למשוואה אלגברית.',
+            equationsCardGivenLabel: 'נתון',
+            equationsCardTranslationLabel: 'תרגום מתמטי',
+            equationsCardEquationLabel: 'משוואה',
+            equationsHelperLine: 'כאן בדיוק עוברים מהציור לאלגברה.',
+            notebookSectionTitle: 'המחברת שלי: מהציור למערכת משוואות',
+            notebookSectionSubtitle: 'כאן נאספות כל המשוואות שבנינו מתוך הנתונים.',
+            notebookSystemLine: 'ככל שנאסוף יותר תנאים, תיבנה כאן מערכת משוואות על הפרמטרים.',
+            notebookColumnGiven: 'מה נתון',
+            notebookColumnTranslation: 'איך תרגמנו',
+            notebookColumnEquation: 'המשוואה שקיבלנו',
+            notebookColumnStatus: 'מצב',
+            notebookStatusAdded: 'נוסף למחברת',
+            notebookStatusReady: 'מוכן לפתרון',
+            notebookStatusMissing: 'חסר עוד תנאי',
+            notebookStatusNeedsCheck: 'דורש בדיקה',
+            notebookEmptyState: 'עדיין לא נוספו משוואות למחברת.\nברגע שנסמן נתונים מהציור, הן יופיעו כאן.',
+            notebookPromptCount: 'כמה משוואות כבר יש לנו?',
+            notebookPromptMissing: 'מה עדיין חסר כדי למצוא את הפרמטרים?',
+            notebookPromptEnough: 'האם יש לנו מספיק תנאים כדי לפתור?',
+            solveNowSectionTitle: 'מה פותרים עכשיו?',
+            solveNowSectionSubtitle: 'עכשיו פותרים את מערכת המשוואות כדי למצוא את הפרמטרים.',
+            solveNowBeforeEnough: 'עדיין אין מספיק תנאים.\nצריך להוסיף עוד נתון מהציור או מהשאלה.',
+            solveNowReady: 'עכשיו כבר אפשר לעבוד אלגברית:\nלפתור את מערכת המשוואות ולמצוא את הפרמטרים.',
+            solveNowEncouragement: 'ברגע שיש משוואות, הדרך לפתרון כבר הרבה יותר ברורה.',
+            checkSectionTitle: 'האם הפונקציה באמת מקיימת את כל התנאים?',
+            checkSectionSubtitle: 'אחרי שמצאנו פונקציה, בודקים שהיא באמת מתאימה לכל הנתונים.',
+            checkLabelPoints: 'בודקים נקודות',
+            checkLabelSlopes: 'בודקים שיפועים',
+            checkLabelExtrema: 'בודקים קיצון',
+            checkLabelIntercepts: 'בודקים חיתוכים',
+            checkLabelGraphFit: 'בודקים התאמה לציור',
+            checkSuccess: 'הפונקציה מקיימת את כל התנאים שסימנו.',
+            checkPartial: 'חלק מהתנאים מתקיימים, אבל עדיין צריך לבדוק או לתקן.',
+            checkFailure: 'הפונקציה לא מקיימת את כל התנאים.\nכדאי לחזור לנתונים ולבדוק איזו משוואה חסרה או שגויה.',
+            checkEmptyState: 'כאן נבדוק אם הפונקציה שקיבלנו באמת מתאימה לכל התנאים.',
+            processSectionTitle: 'איך עובדים בשאלות פרמטרים?',
+            processShortVersion: 'קוראים -> מציירים -> מזהים תנאים -> בונים משוואות -> פותרים -> בודקים',
+            tooltipGraphToEquation1: 'כל פרט בציור יכול להפוך למשוואה.',
+            tooltipGraphToEquation2: 'הגרף הוא לא קישוט — הוא כלי לחשיבה.',
+            tooltipGraphToEquation3: 'אם מצאת תנאי, חפש איך לכתוב אותו על f או על f\'.',
+            tooltipGraphToEquation4: 'נקודת קיצון נותנת מידע על הנגזרת.',
+            tooltipGraphToEquation5: 'שיפוע המשיק הוא מידע על f\'.',
+            tooltipGraphToEquation6: 'נקודה על הגרף נותנת מידע על f.',
+            tooltipGraphToEquation7: 'המטרה היא לא לנחש — המטרה היא לבנות מספיק משוואות.',
+            genericLoadingText: 'מעמיסים את השלב הבא...',
+            genericPreparingText: 'מארגנים את הנתונים...',
+            genericTransitionText: 'עוד רגע נראה איך הנתונים הופכים למשוואות.',
+            equationNotebookEmptyState: 'כאן תיבנה מערכת המשוואות שלך.',
+            freeExploreModeLabel: 'חקירה חופשית',
+            freeExploreModeHint: 'לבדיקה נוספת',
+            selfExperimentLabel: 'לניסוי עצמי',
+            extraHelperToolLabel: 'כלי עזר נוסף',
+            functionFamilyLabel: 'בחירת משפחת פונקציות',
+            functionFamilyHint: 'זה רק שלב עזר — לא הפתרון עצמו.',
+            starterGraphLabel: 'ציור פתיחה',
+            starterGraphHint: 'נשתמש בו כדי לחלץ תנאים ולבנות משוואות.',
+            corePedagogyLine: 'מהמילים בונים ציור, מהציור בונים משוואות, ומהמשוואות מוצאים את הפרמטרים.'
+        };
         let board, p, curve, tangent, normalLine, triangle, labelText, testLine, testAnchor, testDir;
         let normalOrigin, normalXAxisPoint, normalYAxisPoint;
         let rightAngleP1, rightAngleP2, rightAngleP3, rightAngleP4, rightAngleMarker;
@@ -2438,7 +2551,7 @@
         }
 
         function shouldShowOpeningSplash() {
-            return ENTRY_FLOW_QUERY.splash === true;
+            return false;
         }
 
         function maybeCompleteEntryFlowAfterSplash(trigger) {
@@ -3043,7 +3156,7 @@
                 hit_targets: 'פגיעה ביעדים',
                 tangent_through_point: 'משיק דרך נקודה',
                 free: 'חקירה פתוחה',
-                choose_function_template: 'בחירת פונקציה'
+                choose_function_template: 'הכנת גרף לקריאת נתונים'
             };
             return labels[String(goal || '').trim()] || 'תרגול גרפי';
         }
@@ -3955,23 +4068,23 @@
 
             let tpl = getQuestionStartTemplate(q, currentQ);
             if (!tpl) {
-                label.innerText = 'גרף פתיחה לשאלה: לא הוגדר';
+                label.innerText = 'תצורה מומלצת לשאלה: לא הוגדרה';
                 applyStartBtn.disabled = true;
-                if (status) status.innerText = 'לשאלה הזו אין כרגע גרף פתיחה מוכן.';
+                if (status) status.innerText = 'לשאלה הזו אין כרגע תצורת עזר מוכנה.';
                 return;
             }
 
             let visiblePos = getVisibleQuestionPosition(currentQ);
             let displayNum = (visiblePos.total > 0 && visiblePos.position >= 0) ? (visiblePos.position + 1) : (currentQ + 1);
-            label.innerText = `גרף פתיחה לשאלה ${displayNum}: ${tpl.title}`;
+            label.innerText = `תצורה מומלצת לשאלה ${displayNum}: ${tpl.title}`;
             applyStartBtn.disabled = false;
             applyStartBtn.innerText = sessionStarted
-                ? 'טען גרף פתיחה לשאלה הזאת'
-                : 'טען גרף פתיחה מומלץ';
+                ? 'טען תצורה מומלצת לשאלה'
+                : 'טען תצורת עזר מומלצת';
             if (status && !templateChosen) {
                 status.innerText = sessionStarted
-                    ? 'רוצים להתחיל מהגרף המומלץ ואז לקרוא ממנו נתונים? לחצו "טען גרף פתיחה לשאלה הזאת".'
-                    : `המלצה: התחילו מהתצורה "${tpl.title}", או בחרו משפחה אחרת ובנו ממנה גרף שיהיה נוח לקרוא ממנו תנאים.`;
+                    ? 'רוצים להתחיל מתצורה שמבליטה את הרמזים? לחצו "טען תצורה מומלצת לשאלה".'
+                    : `המלצה: התחילו מהתצורה "${tpl.title}", או בחרו משפחה אחרת שתקל על קריאת רמזים ובניית משוואות.`;
             }
         }
 
@@ -3980,14 +4093,14 @@
             let tpl = getQuestionStartTemplate(q, currentQ);
             if (!tpl) return;
             applyTemplateById(tpl.id, false);
-            showStepToast('נטענה תצורת הפתיחה של השאלה הנוכחית.');
+            showStepToast('נטענה תצורת העזר של השאלה הנוכחית.');
         }
 
         function getGoalInstructionText(q) {
             if (!q) return 'בצע את המשימה לפי ההנחיה.';
             let data = getQuestionGoalData(q);
             if (q.goal === 'choose_function_template') {
-                return 'בחרו משפחת פונקציות מתאימה, ובנו גרף פתיחה שאפשר לקרוא ממנו נתונים.';
+                return 'בחרו משפחה מתאימה, כדי שאפשר יהיה לקרוא מהגרף תנאים ולבנות מהם משוואות.';
             }
             if (q.goal === 'slope_zero') {
                 return 'גררו את הנקודה עד שהשיפוע f\'(x) שווה לאפס.';
@@ -4658,7 +4771,7 @@
             let btn = document.getElementById('btn-overlay-primary');
             let mini = document.getElementById('overlay-mini-label');
             if (btn) btn.innerText = questionIntroActive
-                ? (sessionStarted ? 'הבנתי, התחל שאלה' : 'בנו גרף פתיחה והמשיכו')
+                ? (sessionStarted ? 'הבנתי, התחל שאלה' : 'עברו לגרף ולמחברת')
                 : 'סגור כרטיס';
             if (mini) mini.innerText = questionIntroActive
                 ? (sessionStarted ? 'לפני תחילת השאלה' : 'לפני שמתחילים')
@@ -6435,10 +6548,10 @@
             let data = getQuestionGoalData(q);
             if (goal === 'choose_function_template') {
                 return [
-                    'בחרו משפחת פונקציות שמתאימה למה שרואים או למה שמבקשים.',
-                    'דייקו את הגרף עד שאפשר לקרוא ממנו נקודות, קיצון, או שיפועים.',
-                    'עברו למחברת ושאלו איזה תנאי כל נתון יוצר.',
-                    'רק אחרי שיש גרף ברור ממשיכים לפתרון.'
+                    'בחרו משפחה שמתאימה למה שרואים או למה שמבקשים.',
+                    'דייקו את הגרף עד שאפשר לקרוא ממנו נקודה, קיצון, שיפוע או חיתוך.',
+                    'עברו למחברת ושאלו איזו משוואה כל נתון יוצר.',
+                    'רק אחרי שיש תנאים ברורים ממשיכים לפתרון.'
                 ];
             }
             if (goal === 'slope_zero' || goal === 'min_point') {
@@ -7191,7 +7304,11 @@
 
         function renderNotebookCheckBlock(snapshot) {
             if (!snapshot || !Array.isArray(snapshot.constraints) || snapshot.constraints.length === 0) {
-                renderNotebookBlock('builder-notebook-check', '', '');
+                renderNotebookBlock(
+                    'builder-notebook-check',
+                    'האם הפונקציה באמת מקיימת את כל התנאים?',
+                    '<div class="builder-notebook-check-placeholder">אחרי שנאסוף תנאים למחברת, נבדוק כאן אם הפונקציה באמת מקיימת את כולם.</div>'
+                );
                 return;
             }
             let q = getCurrentQuestion();
@@ -7214,7 +7331,7 @@
                 renderNotebookBlock('builder-notebook-constraints', '', '');
                 renderNotebookBlock('builder-notebook-equations', '', '');
                 renderNotebookBlock('builder-notebook-solution', '', '');
-                renderNotebookBlock('builder-notebook-check', '', '');
+                renderNotebookCheckBlock(null);
                 renderNotebookHistoryList();
                 return;
             }
@@ -7240,13 +7357,13 @@
                 return `<div class="builder-notebook-eq"><span class="builder-notebook-eq-label">${escapeHtmlText(label + note)}</span>${escapeHtmlText(eqText)}</div>`;
             }).join('');
             renderNotebookBlock('builder-notebook-equations', 'מערכת המשוואות שנבנתה', equationsHtml || '');
+            renderNotebookCheckBlock(snapshot);
 
             let solution = snapshot.solution;
             let solutionHtml = solution
                 ? `<ol class="builder-notebook-list">${(solution.lines || []).map((line) => `<li>${escapeHtmlText(line)}</li>`).join('')}</ol>`
                 : '';
             renderNotebookBlock('builder-notebook-solution', solution?.title || 'כיוון לפתרון', solutionHtml);
-            renderNotebookCheckBlock(snapshot);
             renderNotebookHistoryList();
         }
 
@@ -7469,14 +7586,14 @@
                 let prestartEssence = getShortText(q?.overlay?.essence, shortDesc.first);
                 let prestartGoal = getShortText(q?.overlay?.goal, shortDesc.second);
                 setMixedBidiText(textEl, `מה עושים עכשיו: ${prestartEssence}`);
-                setMixedBidiText(successEl, `הצלחה: בניתם גרף פתיחה שאפשר לקרוא ממנו תנאים ברורים (${prestartGoal}) ולחצתם "קבע פונקציה והתחל תרגול".`);
+                setMixedBidiText(successEl, `הצלחה: הכנתם גרף שאפשר לקרוא ממנו תנאים ברורים (${prestartGoal}), בדקתם את המחברת, ואז לחצתם "קבע פונקציה והתחל תרגול".`);
                 listEl.innerHTML = '';
                 [
                     'קראו את הסבר השאלה בראש המסך.',
                     'אם רוצים, בוחרים שאלה אחרת מהרשימה למעלה.',
-                    'לחצו על הכפתור הגדול "לחצו כאן לבניית פונקציה".',
-                    'בחרו משפחת פונקציות שמתאימה למה שרואים או למה שמבקשים.',
-                    'דייקו את הגרף עד שאפשר לקרוא ממנו נקודות, שיפועים, או קיצון.',
+                    'פתחו את אזור הפרמטרים רק כדי להכין גרף שאפשר לקרוא ממנו רמזים.',
+                    'בחרו משפחה שמתאימה למה שרואים או למה שמבקשים.',
+                    'דייקו את הגרף עד שאפשר לקרוא ממנו נקודות, שיפועים או קיצון.',
                     'עברו למחברת ושאלו: איזו משוואה כל נתון יוצר?',
                     'בסיום לחצו "קבע פונקציה והתחל תרגול".'
                 ].forEach((stepText) => {
@@ -7593,8 +7710,8 @@
             let action = stepInstruction || shortDesc.second;
 
             if (goal === 'choose_function_template') {
-                target = 'לבנות גרף פתיחה שאפשר לקרוא ממנו את הנתונים של השאלה.';
-                action = 'בחרו משפחת פונקציות, אשרו, ואז דייקו את הגרף עד שאפשר לראות עליו את הרמזים החשובים.';
+                target = 'להכין גרף שאפשר לקרוא ממנו תנאים ברורים.';
+                action = 'בחרו משפחה מתאימה, דייקו את הצורה, ואז שאלו איזו משוואה כל רמז בונה.';
             } else if (goal === 'slope_zero') {
                 target = 'למצוא נקודה שבה שיפוע המשיק שווה לאפס.';
                 action = 'גררו את הנקודה הכחולה עד שבתיבת הנתונים מופיע f\'(x) שווה לאפס.';
@@ -8191,7 +8308,7 @@
             }
             if (/api|proxy|http/i.test(raw)) {
                 revealScanAdminConfig();
-                return 'לא הצלחתי להתחבר לניתוח כרגע. נסו שוב בעוד רגע, ואם זה חוזר פתחו למטה את אזור המורה/האדמין.';
+                return 'לא הצלחתי להתחבר לניתוח כרגע. נסו שוב בעוד כמה שניות, ואם זה חוזר פתחו למטה את אזור המורה/האדמין.';
             }
             return 'לא הצלחתי לפרק את השאלה כרגע. נסו שוב עם צילום ברור יותר או עם ניסוח כתוב קצר.';
         }
@@ -9984,7 +10101,7 @@ Rules:
                 hit_target: 'תנאי נקודה על הגרף',
                 hit_targets: 'כמה תנאים על הגרף',
                 tangent_through_point: 'משיק דרך נקודה חיצונית',
-                choose_function_template: 'בחירת סוג פונקציה',
+                choose_function_template: 'הכנת גרף לרמזים',
                 free: 'חקירת רמזים ויזואליים'
             };
             return map[goalType] || goalType || 'שלב';
@@ -10737,7 +10854,7 @@ Rules:
             ensureGraphAndBuilderVisible();
             ensureBuilderTemplateChoicesRendered();
             updateBuilderVisibility(getCurrentQuestion());
-            showStepToast('עברתם לחקירה חופשית. בחרו סוג פונקציה ונסו פרמטרים.');
+            showStepToast('עברתם לחקירת רמזים פתוחה. בדקו איזה תנאי כל שינוי יוצר, והוסיפו אותו למחברת.');
         }
 
         function pulseStartConfirmButton() {
@@ -10753,7 +10870,7 @@ Rules:
         function openBuilderFromMainCta() {
             if (sessionStarted) return;
             openBuilderFromTop();
-            showStepToast('בחרו סוג פונקציה, דייקו עם הפרמטרים, ואז לחצו "קבע פונקציה והתחל תרגול".');
+            showStepToast('בחרו משפחה מתאימה, דייקו את הרמזים שעל הגרף, ואז לחצו "קבע פונקציה והתחל תרגול".');
             setTimeout(pulseStartConfirmButton, 120);
         }
 
