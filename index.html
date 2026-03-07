@@ -491,8 +491,8 @@
             </div>
             <div id="quick-tour-sample-question">שאלה לדוגמה תופיע כאן מיד</div>
             <div id="quick-tour-step-index">שלב 1/1</div>
-            <h3 id="quick-tour-title">מכינים סיור קצר</h3>
-            <p id="quick-tour-text">עוד רגע תראו מה רואים קודם ואיפה מתחילים.</p>
+            <h3 id="quick-tour-title">סיור קצר להבנת המסך</h3>
+            <p id="quick-tour-text">רואים קודם את המשימה, אחר כך את הגרף, ואז את המקום שבו בונים תנאים ומשוואות.</p>
             <div id="quick-tour-actions">
                 <button onclick="skipQuickTour()">דלג כרגע</button>
                 <button id="btn-quick-tour-next" onclick="nextQuickTourStep()">הבנתי, הבא</button>
@@ -505,7 +505,7 @@
     <div id="initial-builder-modal" class="hidden" role="dialog" aria-modal="true" aria-label="בניית פונקציה" onclick="onInitialBuilderBackdropClick(event)">
         <div id="initial-builder-card" class="is-compact" tabindex="-1">
             <div class="overlay-head">
-                <h3>התחלה פשוטה - מעצבים פונקציה שמתאימה לכם</h3>
+                <h3>בוחרים גרף פתיחה שאפשר להבין ממנו את השאלה</h3>
                 <button onclick="closeInitialBuilderModal()">סגור</button>
             </div>
             <div class="modal-function-preview" aria-live="polite">
@@ -513,18 +513,18 @@
                 <span id="initial-builder-preview-dx" class="inline-math-bidi">f'(x) = ...</span>
             </div>
             <div class="initial-builder-body">
-                <p><b>מה עושים כאן?</b> בוחרים צורה של פונקציה לפי מה שלומדים עכשיו בכיתה, ואז מעצבים אותה בעזרת הפרמטרים.</p>
+                <p><b>מה עושים כאן?</b> בוחרים משפחת פונקציות שמתאימה לשאלה או לנושא, ואז בונים גרף פתיחה שממנו אפשר לקרוא נתונים ולעבוד מסודר.</p>
                 <ol>
-                    <li>בחרו צורת פונקציה שמתאימה לרמה שלכם.</li>
-                    <li>שנו את <code>a,b,c,d,e</code> וראו מיד איך הגרף משתנה.</li>
-                    <li>עברו ל־"עריכת פרמטרים" כדי לראות ברור מה מעצבים.</li>
+                    <li>בחרו סוג פונקציה שמתאים למה שרואים או למה שמבקשים.</li>
+                    <li>דייקו את הגרף עד שהציור נותן נקודות, שיפועים או קיצון שאפשר לעבוד איתם.</li>
+                    <li>עברו ל־"עריכת פרמטרים" כדי לתרגם את מה שרואים לתנאים ומשוואות.</li>
                 </ol>
                 <div class="initial-builder-param-grid">
-                    <span><b>a</b> משפיע על הפתיחה והכיוון של הגרף</span>
-                    <span><b>b,c,d</b> משנים את הצורה והשיפוע</span>
-                    <span><b>e</b> מזיז את הגרף למעלה או למטה</span>
+                    <span><b>a</b> משנה פתיחה, כיוון ועוצמה</span>
+                    <span><b>b,c,d</b> משנים את המבנה המקומי והשיפועים</span>
+                    <span><b>e,f</b> עוזרים לעגן חיתוכים והזזה אנכית</span>
                 </div>
-                <div class="initial-builder-note">הכי חשוב: להסתכל כל הזמן על שתי השורות של <code>f(x)</code> ו־<code>f'(x)</code> ולראות מה השתנה.</div>
+                <div class="initial-builder-note">הכי חשוב: להסתכל כל הזמן על הגרף, על <code>f(x)</code>, ועל <code>f'(x)</code> ולשאול איזה תנאי כל שינוי יוצר.</div>
             </div>
             <div class="overlay-actions initial-builder-actions">
                 <button onclick="openInitialBuilderWorkspace('steps')">בחירת צורה</button>
@@ -560,26 +560,32 @@
     <div id="scan-modal" class="hidden" onclick="onScanModalBackdropClick(event)">
         <div id="scan-modal-card">
             <div class="overlay-head">
-                <h3>מביאים שאלה אמיתית ומפרקים אותה יחד</h3>
+                <h3>יש לי שאלה. תעזרו לי להבין אותה.</h3>
                 <button onclick="closeScanModal()">סגור</button>
             </div>
             <div class="scan-body">
-                <p class="scan-intro">צלמו שאלה מהמחברת או העלו תמונה מהמחשב. האפליקציה תזהה את השאלה ותבנה ממנה פירוק ויזואלי פשוט יותר להבנה.</p>
+                <p class="scan-intro">בחרו איך להביא את השאלה: לצלם, להעלות תמונה, או פשוט לכתוב אותה.</p>
+                <div class="scan-promise">נפרק יחד את השאלה לציור, לנתונים, ולמשוואות, כדי שתדעו מה פותרים עכשיו.</div>
 
                 <div class="scan-actions-row">
                     <button id="btn-scan-camera" onclick="triggerScanImageInput('camera')">📷 צלם שאלה (מצלמה)</button>
                     <button id="btn-scan-upload" onclick="triggerScanImageInput('file')">העלאת תמונה</button>
-                    <button id="btn-scan-analyze" onclick="analyzeScannedQuestion()">פרק את השאלה בשבילי</button>
+                    <button id="btn-scan-text" type="button" onclick="setScanEntryMode('text')">כתוב לי את השאלה</button>
+                </div>
+                <div id="scan-text-wrap" class="hidden">
+                    <label for="scan-question-text">כתבו כאן את נוסח השאלה או את הנתונים החשובים</label>
+                    <textarea id="scan-question-text" rows="5" placeholder="לדוגמה: מצאו פונקציה ריבועית העוברת דרך (2,5), עם קיצון ב-x=1, ומשיק בשיפוע 0 בנקודת הקיצון." oninput="onScanQuestionTextInput(event)"></textarea>
+                    <div class="scan-text-hint">לא צריך לנסח מושלם. מספיק לכתוב נקודות, קיצון, שיפוע, משיק, או מה מבקשים למצוא.</div>
+                </div>
+
+                <div class="scan-primary-actions">
+                    <button id="btn-scan-analyze" onclick="analyzeScannedQuestion()">פרק איתי לציור, נתונים ומשוואות</button>
                     <button id="btn-scan-inject" class="hidden" onclick="injectScannedQuestion()">הוסף לאפליקציה ופתח</button>
-                    <button id="btn-scan-copy" class="hidden" onclick="copyScannedQuestionObject()">העתק נתוני שאלה</button>
                 </div>
                 <div id="scan-device-hint" class="scan-device-hint">בחרו אם לצלם מהטלפון או להעלות תמונה מהמחשב.</div>
-                <button id="btn-scan-admin-toggle" class="hidden" type="button" onclick="toggleScanAdminConfig()">
-                    הגדרות חיבור למורה/אדמין
-                </button>
 
-                <details id="scan-config-box" class="hidden">
-                    <summary>הגדרות חיבור למורה/אדמין</summary>
+                <details id="scan-config-box" class="scan-admin-box">
+                    <summary>למורה/אדמין בלבד: הגדרות חיבור ונתונים טכניים</summary>
                     <div class="scan-config-grid">
                         <label for="scan-api-endpoint">כתובת החיבור</label>
                         <input id="scan-api-endpoint" type="url" autocomplete="off" placeholder="https://api.openai.com/v1/chat/completions">
@@ -595,29 +601,32 @@
                             שמור את כתובת החיבור ושם המודל בדפדפן
                         </label>
                     </div>
+                    <div class="scan-admin-note">האזור הזה מיועד להגדרת שירות הניתוח במכשיר. תלמידים לא צריכים לגעת בו.</div>
+                    <button id="btn-scan-copy" class="hidden" type="button" onclick="copyScannedQuestionObject()">העתק נתוני שאלה</button>
                 </details>
 
                 <div id="scan-preview-wrap" class="scan-preview-empty">
                     <img id="scan-preview-image" alt="תצוגה מקדימה לשאלה שנסרקה">
-                    <div id="scan-preview-placeholder">לא נבחרה תמונה עדיין.</div>
+                    <div id="scan-preview-placeholder">כאן תופיע התמונה שתבחרו.</div>
                 </div>
 
-                <div id="scan-spinner" class="hidden">מכינים פירוק ויזואלי...</div>
+                <div id="scan-spinner" class="hidden">קוראים את השאלה ומארגנים אותה לציור, נתונים ומשוואות.</div>
                 <div id="scan-status"></div>
 
                 <div id="scan-result" class="hidden">
-                    <div class="scan-result-title">כך נתחיל להבין את השאלה</div>
+                    <div class="scan-result-title">כך נתחיל לעבוד על השאלה</div>
                     <div id="scan-result-problem"></div>
+                    <div id="scan-structured-summary"></div>
                     <div id="scan-visual-plan-wrap" class="hidden">
                         <div id="scan-visual-plan-head">
-                            <div id="scan-visual-plan-title">תוכנית פעולה ויזואלית</div>
+                            <div id="scan-visual-plan-title">מסלול עבודה מודרך</div>
                             <div id="scan-visual-plan-progress">0/0</div>
                         </div>
                         <div id="scan-visual-plan-bar"><div id="scan-visual-plan-fill"></div></div>
                         <div id="scan-visual-plan-note"></div>
                         <div id="scan-visual-plan-layers"></div>
                         <div id="scan-visual-plan-complete" class="hidden">
-                            <div id="scan-visual-plan-complete-text">עכשיו, אחרי שפירקנו את השאלה לשכבות ויזואליות, אפשר לחזור אליה עם יותר ביטחון.</div>
+                            <div id="scan-visual-plan-complete-text">אחרי שסידרנו ציור, נתונים ומשוואות, אפשר לחזור לשאלה עם דרך ברורה יותר לפתרון.</div>
                             <button type="button" id="btn-scan-return-problem" onclick="onScanActionPlanReturnToProblem()">חזרה לשאלה המקורית</button>
                         </div>
                     </div>
@@ -634,7 +643,6 @@
                 <div class="home-kicker">מתמטיקה שאפשר לראות</div>
                 <h1 id="home-hero-title">אתה לא טיפש — חסרה לך דרך לראות</h1>
                 <p id="home-hero-subtitle">כאן לומדים להבין פונקציות, גרפים ושיפועים בצורה ויזואלית, פשוטה וצעד־צעד.</p>
-                <button id="btn-home-scroll" type="button" onclick="scrollToHomePaths()">בחרו איך להתחיל</button>
             </section>
 
             <section id="home-paths-section" class="home-surface" aria-labelledby="home-paths-title">
@@ -656,7 +664,7 @@
                     <button class="home-path-card" type="button" onclick="openScanModal()">
                         <span class="home-path-index">03</span>
                         <span class="home-path-title">יש לי שאלה — תעזור לי להבין</span>
-                        <span class="home-path-desc">מביאים שאלה אמיתית מהמחברת או מהספר ומקבלים פירוק ויזואלי.</span>
+                        <span class="home-path-desc">מביאים שאלה אמיתית ומפרקים אותה יחד לציור, נתונים ומשוואות.</span>
                     </button>
                 </div>
             </section>
@@ -718,7 +726,7 @@
                 <span id="top-track-badge" class="track-visual-explore">מסלול: חקירה ויזואלית</span>
                 <div id="top-build-cta-wrap">
                     <button id="btn-top-build-cta" type="button" onclick="openBuilderFromMainCta()">לחצו כאן לבניית פונקציה</button>
-                    <span id="top-build-cta-note">לפני התרגול אפשר לבחור כל פונקציה פולינומית. בונים פונקציה ואז לוחצים "קבע פונקציה והתחל תרגול".</span>
+                    <span id="top-build-cta-note">לפני התרגול בוחרים גרף פתיחה, מזהים ממנו נתונים, ואז ממשיכים למחברת ולמשוואות.</span>
                 </div>
                 <div id="top-question-quick-row">
                     <button id="btn-open-params-inline" type="button" onclick="openBuilderFromTop()">⚙ פתח פרמטרים</button>
@@ -735,8 +743,8 @@
                 <span id="learner-progress-chip">רמה 1 | XP 0 | רצף 0 | 0/0</span>
                 <div id="top-brief-card">
                     <div id="top-brief-head">המשימה עכשיו</div>
-                    <div id="top-brief-main">מכינים את המשימה הראשונה...</div>
-                    <div id="top-brief-detail">עוד רגע יופיע כאן הסבר קצר וברור.</div>
+                    <div id="top-brief-main">כאן תופיע המשימה הנוכחית.</div>
+                    <div id="top-brief-detail">כאן תופיע הסיבה המתמטית לצעד הבא.</div>
                 </div>
             </div>
             <div id="top-formulas">
@@ -787,7 +795,7 @@
         <div id="practice-question-bar" aria-live="polite" hidden>
             <span id="practice-question-index">שאלה 1/4</span>
             <span id="practice-question-task-label">מה עושים עכשיו?</span>
-            <span id="practice-question-title">מכינים תרגיל...</span>
+            <span id="practice-question-title">כאן תופיע המשימה הנוכחית</span>
             <span id="practice-function-inline" class="inline-math-bidi">f(x) = ...</span>
             <span id="practice-clean-source-chip" class="hidden">
                 <span id="practice-clean-source-text">מצב ריכוז הופעל אוטומטית</span>
@@ -817,7 +825,7 @@
         <button id="drawer-handle" onclick="toggleDrawer()">כלים ומשימות</button>
         <div id="drawer-content">
             <div id="drawer-question-head" style="text-align:center; display:none;">
-                <h2 id="q-title">מכינים את השאלה...</h2>
+                <h2 id="q-title">כאן תופיע השאלה</h2>
                 <div id="q-desc" style="font-size:0.9rem; color:#555;"></div>
             </div>
 
@@ -833,8 +841,8 @@
                         <div id="mission-step-note">טיפ: קראו את המשימה ובצעו צעד אחד בכל פעם.</div>
                         <div id="mission-expanded-box">
                             <div id="mission-expanded-title">הסבר ברור (גלוי תמיד)</div>
-                            <div id="mission-expanded-text">עוד רגע יופיע כאן הסבר פשוט.</div>
-                            <div id="mission-success-text">עוד רגע נציג כאן איך יודעים שהצלחתם.</div>
+                            <div id="mission-expanded-text">כאן יופיע הסבר פשוט לצעד הנוכחי.</div>
+                            <div id="mission-success-text">כאן יופיע איך בודקים שהצלחתם.</div>
                             <ol id="mission-expanded-steps"></ol>
                         </div>
                         <div id="read-answer-panel" class="hidden">
@@ -918,11 +926,11 @@
             <div id="acc-item-params" class="accordion-item">
                 <button id="btn-builder" class="acc-btn" onclick="toggleBuilderPanel()">פרמטרים</button>
                 <div id="builder-panel" class="acc-panel hidden">
-                    <div class="section-title">בניית הפונקציה</div>
+                    <div class="section-title">מהציור והנתונים בונים פונקציה</div>
                     <div id="builder-template-panel">
-                        <div class="section-title">הגדרה לפני תחילת תרגול</div>
-                        <div id="builder-question-template-label">גרף פתיחה לשאלה: נטען בעוד רגע</div>
-                        <div id="builder-template-type-note">לפני שמתחילים תרגול אפשר לבחור כל פונקציה פולינומית: קודם בוחרים סוג פונקציה (ישר / פרבולה / פולינום), ואז מדייקים אותה בעזרת הפרמטרים.</div>
+                        <div class="section-title">גרף פתיחה לעבודת הפתרון</div>
+                        <div id="builder-question-template-label">גרף פתיחה לשאלה: יופיע כאן עם בחירת שאלה</div>
+                        <div id="builder-template-type-note">קודם בוחרים משפחת פונקציות מתאימה, ואז מדייקים את הגרף עד שהנתונים שעליו נעשים ברורים.</div>
                         <select id="template-select" onchange="applySelectedTemplate(false)"></select>
                         <div id="template-toggle-group" aria-label="בחירה מהירה של סוג פונקציה"></div>
                         <div id="template-setup-actions">
@@ -932,7 +940,34 @@
                         </div>
                         <div id="template-status-text"></div>
                     </div>
-                    <div id="builder-focus-note">שנו פרמטר אחד בכל פעם וצפו מיד בגרף למעלה, כדי להבין מה כל פרמטר משנה.</div>
+                    <div id="builder-purpose-box" class="builder-pedagogy-box">
+                        <div class="builder-pedagogy-title">מה המטרה כאן?</div>
+                        <p>המטרה היא לא לנחש פונקציה. המטרה היא להוציא מהציור ומהנתונים משוואות, עד שאפשר לגלות את הפרמטרים.</p>
+                    </div>
+                    <div id="builder-flow-box" class="builder-pedagogy-box">
+                        <div class="builder-pedagogy-title">איך עובדים בשאלות פרמטרים?</div>
+                        <ol class="builder-flow-list">
+                            <li>בוחנים מה רואים בגרף: נקודה, קיצון, שיפוע, משיק, חיתוך עם הצירים, סימטריה או שורש כפול.</li>
+                            <li>מסמנים מה ידוע: למשל <code>f(x0)=y0</code>, או <code>f'(x0)=m</code>.</li>
+                            <li>מכל נתון בונים משוואה.</li>
+                            <li>צוברים מערכת משוואות על <code>a,b,c,d,e,...</code>.</li>
+                            <li>פותרים את הפרמטרים ובודקים שהפונקציה באמת מתאימה לציור.</li>
+                        </ol>
+                    </div>
+                    <div id="builder-clues-box" class="builder-pedagogy-box">
+                        <div class="builder-pedagogy-title">רמזים שאפשר לקרוא מהגרף</div>
+                        <div class="builder-clues-grid">
+                            <div class="builder-clue-pair"><span>נקודה על הגרף</span><span dir="ltr">f(x0)=y0</span></div>
+                            <div class="builder-clue-pair"><span>נקודת קיצון</span><span dir="ltr">f'(x0)=0</span></div>
+                            <div class="builder-clue-pair"><span>שיפוע בנקודה</span><span dir="ltr">f'(x0)=m</span></div>
+                            <div class="builder-clue-pair"><span>משיק</span><span dir="ltr">y-y0=m(x-x0)</span></div>
+                            <div class="builder-clue-pair"><span>חיתוך עם ציר y</span><span dir="ltr">f(0)=...</span></div>
+                            <div class="builder-clue-pair"><span>שורש / השקה לציר x</span><span dir="ltr">f(x0)=0</span></div>
+                            <div class="builder-clue-pair"><span>עלייה / ירידה</span><span dir="ltr">f'(x)&gt;0 / f'(x)&lt;0</span></div>
+                            <div class="builder-clue-pair"><span>סימטריה / כיוון / פתיחה</span><span>אילו פרמטרים שולטים בצורה</span></div>
+                        </div>
+                    </div>
+                    <div id="builder-focus-note">כאן לא רק מזיזים פרמטרים. בודקים איזה תנאי כל נתון יוצר, ומתרגמים אותו למשוואה.</div>
                     <div id="builder-formula-preview" aria-live="polite">
                         <div class="builder-formula-line" id="builder-formula-fx">f(x) = ...</div>
                         <div class="builder-formula-line" id="builder-formula-dx">f'(x) = ...</div>
@@ -946,8 +981,8 @@
                         <span class="builder-val-chip" id="chipF">f=0</span>
                     </div>
                     <div id="builder-equation-practice-box" class="hidden">
-                        <div id="builder-equation-practice-title">כתיבת פונקציה מהגרף (בשאלות פרמטרים)</div>
-                        <div id="builder-equation-practice-note">אפשר לכתוב כאן את המשוואה שאתם משערים, ובמקביל לראות מה האפליקציה בנתה מהגרף.</div>
+                        <div id="builder-equation-practice-title">מהנתונים למשוואות</div>
+                        <div id="builder-equation-practice-note">כאן המחברת נהיית מרכזית: כל נתון מהגרף מתורגם למשוואה, והמשוואות בונות יחד את הפונקציה.</div>
                         <div class="builder-equation-write-row">
                             <input id="builder-equation-write" type="text" dir="ltr" placeholder="לדוגמה: f(x)=x^2-3x+2">
                             <button id="btn-builder-fill-equation" type="button" onclick="fillEquationGuessFromCurrent()">מלא מהגרף</button>
@@ -955,22 +990,24 @@
                         <div id="builder-equation-auto" dir="ltr">f(x) = ...</div>
                         <div id="builder-notebook-box" class="hidden">
                             <div class="builder-notebook-head">
-                                <div id="builder-notebook-title">המחברת שלי - משוואות מהגרף</div>
+                                <div id="builder-notebook-title">המחברת שלי: מהגרף למערכת משוואות</div>
                                 <span id="builder-track-badge" class="track-visual-explore">חקירה</span>
                             </div>
-                            <div id="builder-notebook-note">מיועד בעיקר לשאלות מידול/פרמטרים: האפליקציה אוספת נתונים מהגרף ומתרגמת אותם למשוואות.</div>
+                            <div id="builder-notebook-note">זה המקום שבו אוספים תנאים, מתרגמים אותם למשוואות, ורואים מתי כבר יש דרך אל הפרמטרים.</div>
+                            <div id="builder-notebook-system-frame">ככל שנאסוף יותר תנאים, תיבנה כאן מערכת משוואות על הפרמטרים.</div>
                             <div class="builder-notebook-controls">
-                                <button id="btn-generate-notebook" type="button" onclick="generateNotebookFromCurrentState('manual')">ייצר מחברת</button>
+                                <button id="btn-generate-notebook" type="button" onclick="generateNotebookFromCurrentState('manual')">אסוף תנאים למחברת</button>
                                 <label class="builder-notebook-auto-row">
                                     <input id="chk-notebook-auto" type="checkbox" onchange="toggleNotebookAutoGenerate(this.checked)">
-                                    אוטומטי אחרי גרירה/שינוי
+                                    לעדכן אוטומטית אחרי גרירה/שינוי
                                 </label>
                                 <button id="btn-notebook-clear-history" type="button" onclick="clearNotebookHistory()">נקה היסטוריה</button>
                             </div>
-                            <div id="builder-notebook-status">עדיין לא נוצרה מחברת לשאלה הזו.</div>
+                            <div id="builder-notebook-status">כאן תופיע המחברת של השאלה: נתונים, תרגומים, ומערכת המשוואות שנאספה.</div>
                             <div id="builder-notebook-constraints" class="builder-notebook-block hidden"></div>
                             <div id="builder-notebook-equations" class="builder-notebook-block hidden"></div>
                             <div id="builder-notebook-solution" class="builder-notebook-block hidden"></div>
+                            <div id="builder-notebook-check" class="builder-notebook-block hidden"></div>
                             <div id="builder-notebook-history" class="builder-notebook-block hidden"></div>
                         </div>
                     </div>
@@ -981,7 +1018,7 @@
                     <div class="slider-row"><span class="slider-lbl">e</span><input type="range" id="inpE" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintE"></span></div>
                     <div class="slider-row"><span class="slider-lbl">f</span><input type="range" id="inpF" min="-5" max="5" step="0.1" class="slider-inp"><span class="slider-hint" id="hintF"></span></div>
                     <div id="builder-confirm-wrap">
-                        <div id="builder-confirm-note">כשתסיימו לבנות את הפונקציה הרצויה (גם אם היא לא גרף הפתיחה המומלץ), לחצו "קבע פונקציה והתחל תרגול".</div>
+                        <div id="builder-confirm-note">אחרי שבדקתם שהגרף נותן את הנתונים הנכונים ושיש לכם כיוון למחברת, אפשר לקבוע את הפונקציה ולהמשיך.</div>
                         <button id="btn-apply-template-params" onclick="confirmFunctionAndStart()">קבע פונקציה והתחל תרגול</button>
                     </div>
                 </div>
@@ -1332,6 +1369,8 @@
         let scanCompletedVisualSkills = new Set();
         let scanInFlight = false;
         let lastScanInputMode = '';
+        let scanEntryMode = '';
+        let scanManualQuestionText = '';
         let scanAdminConfigRevealed = SHOW_SCAN_ADMIN;
         let notebookHistory = [];
         let notebookAutoGenerateOnDrag = true;
