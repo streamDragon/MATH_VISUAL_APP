@@ -141,6 +141,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/coach_feedback.css" onerror="this.onerror=null;this.href='/public/coach_feedback.css';">
     <script src="/coach_feedback.js" onerror="this.onerror=null;this.src='/public/coach_feedback.js';"></script>
+    <script src="/help-video-registry.js" onerror="this.onerror=null;this.src='/public/help-video-registry.js';"></script>
     <script>
         (function injectCoreAssets() {
             let query = window.__APP_ASSET_QUERY || `v=ts${Date.now().toString(36)}`;
@@ -372,14 +373,23 @@
     <div id="video-modal" class="hidden" onclick="onVideoBackdropClick(event)">
         <div id="video-modal-card">
             <div class="overlay-head">
-                <h3 id="video-modal-title">וידאו הסבר</h3>
+                <div class="video-modal-head-copy">
+                    <h3 id="video-modal-title">וידאו הסבר</h3>
+                    <div id="video-modal-duration" class="video-modal-duration hidden">משך: --</div>
+                </div>
                 <button onclick="closeVideoModal()">סגור</button>
             </div>
+            <p id="video-modal-description" class="hidden"></p>
             <div id="video-embed-wrap">
-                <iframe id="video-iframe" src="" title="Video explanation" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                <video id="video-modal-player" class="hidden" controls playsinline preload="none">
+                    <source id="video-modal-source" src="">
+                    <track id="video-modal-track" kind="subtitles">
+                </video>
+                <iframe id="video-iframe" class="hidden" src="" title="Video explanation" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                <div id="video-modal-fallback" aria-live="polite">הסרטון עדיין לא זמין</div>
             </div>
             <div class="overlay-actions">
-                <a id="video-open-link" href="#" target="_blank" rel="noopener noreferrer">פתח בלשונית חדשה</a>
+                <a id="video-open-link" class="hidden" href="#" target="_blank" rel="noopener noreferrer">פתח בלשונית חדשה</a>
             </div>
         </div>
     </div>
@@ -474,7 +484,10 @@
                 <p id="start-guide-note">זהו סיור קצר ורגוע. הוא לא מעמיס עליכם, ורק מראה מאיפה נכון להתחיל.</p>
                 <div class="start-guide-audio-box">
                     <div id="start-guide-audio-note" class="start-guide-audio-note">אפשר גם לשמוע הסבר קצר לפני שמתחילים.</div>
-                    <button id="btn-start-guide-voice" type="button" onclick="playStartGuideVoice()">שמע הסבר קצר</button>
+                    <div class="start-guide-help-actions">
+                        <button id="btn-start-guide-voice" type="button" onclick="playStartGuideVoice()">שמע הסבר קצר</button>
+                        <button class="help-video-cta help-video-cta-inline" type="button" onclick="openHelpVideo('guided_intro')">צפה בהסבר קצר</button>
+                    </div>
                     <div id="start-guide-voice-status" aria-live="polite"></div>
                 </div>
             </div>
@@ -571,6 +584,9 @@
             <div class="scan-body">
                 <p class="scan-intro">בחרו איך להביא את השאלה: לצלם, להעלות תמונה, או פשוט לכתוב אותה.</p>
                 <div class="scan-promise">נפרק יחד את השאלה לציור, לנתונים, ולמשוואות, כדי שתדעו מה פותרים עכשיו.</div>
+                <div class="help-video-cta-row scan-help-video-row">
+                    <button class="help-video-cta help-video-cta-inline" type="button" onclick="openHelpVideo('question_intro')">צפה בהסבר קצר</button>
+                </div>
 
                 <div class="scan-actions-row">
                     <button id="btn-scan-camera" onclick="triggerScanImageInput('camera')">📷 צלם שאלה (מצלמה)</button>
@@ -661,6 +677,9 @@
                 <div class="home-kicker">מתמטיקה שאפשר לראות</div>
                 <h1 id="home-hero-title">אתה לא טיפש — חסרה לך דרך לראות</h1>
                 <p id="home-hero-subtitle">כאן לומדים להבין פונקציות, גרפים ושיפועים בצורה ויזואלית, פשוטה וצעד־צעד.</p>
+                <div class="help-video-cta-row">
+                    <button class="help-video-cta" type="button" onclick="openHelpVideo('landing_intro')">צפה בהסבר קצר</button>
+                </div>
             </section>
 
             <section id="home-paths-section" class="home-surface" aria-labelledby="home-paths-title">
@@ -972,6 +991,9 @@
                         <div class="section-title" id="builder-main-title">מהמילים למשוואות</div>
                         <div id="builder-main-subtitle" class="builder-section-subtitle">בשאלות פרמטרים לא מנסים לנחש פונקציה.<br>קודם בונים ציור מהנתונים,<br>אחר כך מוציאים מהציור תנאים,<br>ואז מתרגמים כל תנאי למשוואה.</div>
                         <div id="builder-main-helper" class="builder-section-helper">המטרה כאן היא לעבור מהשאלה הכתובה אל ציור, מהציור אל תנאים, ומהתנאים אל משוואות.</div>
+                        <div class="help-video-cta-row builder-help-video-row">
+                            <button class="help-video-cta help-video-cta-inline" type="button" onclick="openHelpVideo('parameters_intro')">צפה בהסבר קצר</button>
+                        </div>
                     </div>
                     <div id="builder-flow-box" class="builder-pedagogy-box">
                         <div class="builder-pedagogy-title">איך עובדים בשאלות פרמטרים?</div>
@@ -1341,9 +1363,8 @@
             voiceUnsupported: 'אין תמיכה בקול בדפדפן הזה',
             privacyNote: 'הדיבור מופק בדפדפן. ייתכן שקול מסוים תלוי-רשת—אפשר להשאיר כבוי.'
         };
-        // Paste your public YouTube link here (or set window.__ONBOARDING_VIDEO_URL before app loads).
-        const ONBOARDING_VIDEO_URL = '';
-        const ONBOARDING_VIDEO_TITLE = 'סיור קצר - איך עובדים במסך';
+        const HELP_VIDEO_UNAVAILABLE_TEXT = 'הסרטון עדיין לא זמין';
+        const HELP_VIDEO_LOADING_TEXT = 'טוענים את הסרטון...';
         const RUNTIME_ASSET_BASE = (() => {
             if (typeof window.__ASSET_BASE === 'string' && window.__ASSET_BASE.trim()) return window.__ASSET_BASE;
             try {
@@ -1489,6 +1510,7 @@
         let coachFeedbackReady = false;
         let coachLastStepEnterKey = '';
         let coachLastWrongAttemptAtMs = 0;
+        let helpVideoModalA11y = null;
         let startGuideModalA11y = null;
         let initialBuilderModalA11y = null;
         let globalHelpModalA11y = null;
@@ -1524,6 +1546,7 @@
         let guidedDemoRaf = null;
         let guidedDemoTimer = null;
         let startGuideVoiceStatusTimer = null;
+        let helpVideoLoadToken = 0;
         let sidebarFocusPulseTimer = null;
         let buildWatchInterval = null;
         let buildWatchEventsBound = false;
@@ -2799,6 +2822,13 @@
         }
 
         function initModalA11y() {
+            let videoModal = document.getElementById('video-modal');
+            let videoCard = document.getElementById('video-modal-card');
+            if (videoModal && videoCard) {
+                helpVideoModalA11y = attachModalA11y(videoModal, videoCard, {
+                    onClose: closeVideoModal
+                });
+            }
             let startGuideModal = document.getElementById('start-guide-modal');
             let startGuideCard = document.getElementById('start-guide-card');
             if (startGuideModal && startGuideCard) {
@@ -8778,65 +8808,311 @@
             return '';
         }
 
-        function getOnboardingVideoUrl() {
-            try {
-                if (typeof window.__ONBOARDING_VIDEO_URL === 'string' && window.__ONBOARDING_VIDEO_URL.trim()) {
-                    return window.__ONBOARDING_VIDEO_URL.trim();
-                }
-            } catch (err) {
-                // Continue with local constant fallback.
+        function normalizeHelpVideoAssetUrl(url) {
+            let value = String(url || '').trim();
+            if (!value) return '';
+            let upper = value.toUpperCase();
+            if (upper === 'VIDEO_URL' || upper === 'POSTER_URL' || upper === 'CLOUDINARY_VIDEO_URL' || upper === 'CLOUDINARY_POSTER_URL') return '';
+            return value;
+        }
+
+        function getVideoMimeTypeFromUrl(url) {
+            let value = String(url || '').toLowerCase();
+            if (value.includes('.webm')) return 'video/webm';
+            if (value.includes('.ogv') || value.includes('.ogg')) return 'video/ogg';
+            return 'video/mp4';
+        }
+
+        function formatHelpVideoDuration(durationSec) {
+            let total = Number(durationSec);
+            if (!Number.isFinite(total) || total <= 0) return '';
+            if (total < 60) return `משך: ${Math.round(total)} שנ׳`;
+            let minutes = Math.floor(total / 60);
+            let seconds = Math.round(total % 60);
+            return `משך: ${minutes}:${String(seconds).padStart(2, '0')} דק׳`;
+        }
+
+        function showVideoModalShell() {
+            let modal = document.getElementById('video-modal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            document.body.classList.add('video-modal-open');
+            if (helpVideoModalA11y) helpVideoModalA11y.activate();
+        }
+
+        function setVideoModalMeta(options = {}) {
+            let title = document.getElementById('video-modal-title');
+            let description = document.getElementById('video-modal-description');
+            let duration = document.getElementById('video-modal-duration');
+            let titleText = String(options.title || 'וידאו הסבר').trim();
+            let descriptionText = String(options.description || '').trim();
+            let durationText = formatHelpVideoDuration(options.durationSec);
+
+            if (title) title.innerText = titleText;
+            if (description) {
+                description.innerText = descriptionText;
+                description.classList.toggle('hidden', !descriptionText);
             }
-            return (typeof ONBOARDING_VIDEO_URL === 'string') ? ONBOARDING_VIDEO_URL.trim() : '';
+            if (duration) {
+                duration.innerText = durationText;
+                duration.classList.toggle('hidden', !durationText);
+            }
         }
 
-        function syncStartGuideVideoButton() {
-            let btn = document.getElementById('btn-start-guide-youtube');
-            if (!btn) return;
-            btn.classList.toggle('hidden', !getOnboardingVideoUrl());
+        function resetVideoModalMedia() {
+            let player = document.getElementById('video-modal-player');
+            let source = document.getElementById('video-modal-source');
+            let track = document.getElementById('video-modal-track');
+            let iframe = document.getElementById('video-iframe');
+            let fallback = document.getElementById('video-modal-fallback');
+            let openLink = document.getElementById('video-open-link');
+
+            if (player) {
+                try {
+                    player.pause();
+                } catch (err) {
+                    // Ignore pause errors when nothing is loaded.
+                }
+                player.classList.add('hidden');
+                player.removeAttribute('poster');
+            }
+            if (source) {
+                source.removeAttribute('src');
+                source.removeAttribute('type');
+            }
+            if (track) {
+                track.removeAttribute('src');
+                track.removeAttribute('label');
+                track.removeAttribute('srclang');
+                track.default = false;
+            }
+            if (player) player.load();
+            if (iframe) {
+                iframe.src = '';
+                iframe.classList.add('hidden');
+            }
+            if (fallback) {
+                fallback.innerText = HELP_VIDEO_UNAVAILABLE_TEXT;
+                fallback.classList.add('hidden');
+            }
+            if (openLink) {
+                openLink.classList.add('hidden');
+                openLink.removeAttribute('href');
+            }
         }
 
-        function openOnboardingVideo() {
-            let url = getOnboardingVideoUrl();
-            if (!url) {
-                showStepToast('עדיין לא הוגדר לינק לסרטון ההדרכה במסך הפתיחה.');
+        function renderVideoModalUnavailable(options = {}) {
+            showVideoModalShell();
+            resetVideoModalMedia();
+            setVideoModalMeta(options);
+            let fallback = document.getElementById('video-modal-fallback');
+            let openLink = document.getElementById('video-open-link');
+            let message = String(options.message || HELP_VIDEO_UNAVAILABLE_TEXT).trim() || HELP_VIDEO_UNAVAILABLE_TEXT;
+            let externalUrl = normalizeHelpVideoAssetUrl(options.externalUrl);
+            if (fallback) {
+                fallback.innerText = message;
+                fallback.classList.remove('hidden');
+            }
+            if (openLink && externalUrl) {
+                openLink.href = externalUrl;
+                openLink.classList.remove('hidden');
+            }
+        }
+
+        function renderHtml5VideoModal(options = {}) {
+            let src = normalizeHelpVideoAssetUrl(options.src);
+            if (!src) {
+                renderVideoModalUnavailable(options);
                 return;
             }
-            markStartGuideSeen('start:youtube');
-            closeStartGuideModal({ skipOverlay: false });
+            showVideoModalShell();
+            resetVideoModalMedia();
+            setVideoModalMeta(options);
+
+            let player = document.getElementById('video-modal-player');
+            let source = document.getElementById('video-modal-source');
+            let track = document.getElementById('video-modal-track');
+            let openLink = document.getElementById('video-open-link');
+            let poster = normalizeHelpVideoAssetUrl(options.poster);
+            let trackSrc = normalizeHelpVideoAssetUrl(options.trackSrc);
+
+            if (!player || !source) return;
+
+            source.src = src;
+            source.type = options.mimeType || getVideoMimeTypeFromUrl(src);
+            if (poster) player.poster = poster;
+            if (track && trackSrc) {
+                track.src = trackSrc;
+                track.label = String(options.trackLabel || 'כתוביות');
+                track.srclang = String(options.trackLang || 'he');
+                track.default = !!options.trackDefault;
+            }
+            if (openLink) {
+                openLink.href = src;
+                openLink.classList.remove('hidden');
+            }
+            player.classList.remove('hidden');
+            player.load();
+        }
+
+        function renderEmbedVideoModal(options = {}) {
+            let url = normalizeHelpVideoAssetUrl(options.url);
             let embedUrl = getYouTubeEmbedUrl(url);
             if (!embedUrl) {
-                window.open(url, '_blank', 'noopener');
+                renderVideoModalUnavailable({
+                    title: options.title,
+                    description: options.description,
+                    durationSec: options.durationSec,
+                    externalUrl: url,
+                    message: HELP_VIDEO_UNAVAILABLE_TEXT
+                });
                 return;
             }
-            document.getElementById('video-modal-title').innerText = ONBOARDING_VIDEO_TITLE;
-            document.getElementById('video-iframe').src = embedUrl;
-            document.getElementById('video-open-link').href = url;
-            document.getElementById('video-modal').classList.remove('hidden');
+            showVideoModalShell();
+            resetVideoModalMedia();
+            setVideoModalMeta(options);
+
+            let iframe = document.getElementById('video-iframe');
+            let openLink = document.getElementById('video-open-link');
+            if (!iframe) return;
+            iframe.src = embedUrl;
+            iframe.classList.remove('hidden');
+            if (openLink) {
+                openLink.href = url;
+                openLink.classList.remove('hidden');
+            }
+        }
+
+        function openVideoFromUrl(options = {}) {
+            let url = normalizeHelpVideoAssetUrl(options.url);
+            if (!url) {
+                renderVideoModalUnavailable({
+                    title: options.title,
+                    description: options.description,
+                    durationSec: options.durationSec,
+                    message: HELP_VIDEO_UNAVAILABLE_TEXT
+                });
+                return;
+            }
+            if (/\.(mp4|webm|ogg|ogv)(?:[?#].*)?$/i.test(url)) {
+                renderHtml5VideoModal({
+                    title: options.title,
+                    description: options.description,
+                    durationSec: options.durationSec,
+                    src: url,
+                    poster: options.poster,
+                    trackSrc: options.trackSrc,
+                    trackLabel: options.trackLabel,
+                    trackLang: options.trackLang
+                });
+                return;
+            }
+            renderEmbedVideoModal({
+                title: options.title,
+                description: options.description,
+                durationSec: options.durationSec,
+                url
+            });
+        }
+
+        async function openHelpVideo(videoId) {
+            let normalizedId = String(videoId || '').trim();
+            if (!normalizedId) return;
+            let token = ++helpVideoLoadToken;
+            renderVideoModalUnavailable({
+                title: 'וידאו הסבר קצר',
+                description: 'הסבר קצר על המסך הנוכחי',
+                message: HELP_VIDEO_LOADING_TEXT
+            });
+
+            let registryApi = window.HelpVideoRegistry;
+            let item = null;
+            try {
+                if (registryApi && typeof registryApi.getById === 'function') {
+                    item = await registryApi.getById(normalizedId);
+                } else if (registryApi && typeof registryApi.load === 'function') {
+                    let items = await registryApi.load();
+                    item = Array.isArray(items) ? items.find((entry) => entry.id === normalizedId) : null;
+                }
+            } catch (err) {
+                item = null;
+            }
+
+            if (token !== helpVideoLoadToken) return;
+            if (!item) {
+                renderVideoModalUnavailable({
+                    title: 'וידאו הסבר קצר',
+                    description: 'נוסיף כאן הסבר קצר ברגע שהסרטון יהיה מוכן.',
+                    message: HELP_VIDEO_UNAVAILABLE_TEXT
+                });
+                return;
+            }
+
+            let src = normalizeHelpVideoAssetUrl(item.src);
+            let externalUrl = normalizeHelpVideoAssetUrl(item.externalUrl);
+            if (src) {
+                renderHtml5VideoModal({
+                    title: item.title,
+                    description: item.description,
+                    durationSec: item.durationSec,
+                    src,
+                    poster: item.poster,
+                    mimeType: item.mimeType,
+                    trackSrc: item.trackSrc,
+                    trackLabel: item.trackLabel,
+                    trackLang: item.trackLang,
+                    trackDefault: item.trackDefault
+                });
+                return;
+            }
+
+            if (externalUrl) {
+                openVideoFromUrl({
+                    title: item.title,
+                    description: item.description,
+                    durationSec: item.durationSec,
+                    url: externalUrl,
+                    poster: item.poster
+                });
+                return;
+            }
+
+            renderVideoModalUnavailable({
+                title: item.title,
+                description: item.description || 'נוסיף כאן הסבר קצר ברגע שהסרטון יהיה זמין.',
+                durationSec: item.durationSec,
+                message: HELP_VIDEO_UNAVAILABLE_TEXT
+            });
         }
 
         function configureVideoButton(q) {
             let btn = document.getElementById('btn-video');
-            let hasVideo = !!q.videoUrl;
+            let hasVideo = !!(q?.videoUrl || q?.helpVideoId);
             btn.classList.toggle('hidden', !hasVideo);
         }
 
         function openVideoForCurrentQuestion() {
             let q = getCurrentQuestion();
-            if (!q?.videoUrl) return;
-            let embedUrl = getYouTubeEmbedUrl(q.videoUrl);
-            if (!embedUrl) {
-                window.open(q.videoUrl, '_blank', 'noopener');
+            if (!q) return;
+            if (q.helpVideoId) {
+                openHelpVideo(q.helpVideoId);
                 return;
             }
-            document.getElementById('video-modal-title').innerText = `${q.title} - וידאו הסבר`;
-            document.getElementById('video-iframe').src = embedUrl;
-            document.getElementById('video-open-link').href = q.videoUrl;
-            document.getElementById('video-modal').classList.remove('hidden');
+            if (!q.videoUrl) return;
+            openVideoFromUrl({
+                title: `${q.title} - וידאו הסבר`,
+                description: q.videoDescription || '',
+                url: q.videoUrl
+            });
         }
 
         function closeVideoModal() {
-            document.getElementById('video-modal').classList.add('hidden');
-            document.getElementById('video-iframe').src = '';
+            helpVideoLoadToken += 1;
+            let modal = document.getElementById('video-modal');
+            if (modal) modal.classList.add('hidden');
+            document.body.classList.remove('video-modal-open');
+            resetVideoModalMedia();
+            if (helpVideoModalA11y) helpVideoModalA11y.deactivate();
         }
 
         function onVideoBackdropClick(event) {
@@ -11434,7 +11710,6 @@ Rules:
             let levelSel = document.getElementById('start-demo-level');
             if (levelSel && !levelSel.value) levelSel.value = 'easy';
             syncStartGuideContent();
-            syncStartGuideVideoButton();
             syncStartCoachPanel(false);
             modal.classList.remove('hidden');
             if (startGuideModalA11y) startGuideModalA11y.activate();

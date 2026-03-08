@@ -49,6 +49,11 @@ body.embed-mode {
     overflow-anchor: none;
 }
 
+body.video-modal-open {
+    overflow: hidden !important;
+    touch-action: none;
+}
+
 body:not(.embed-mode).viewport-desktop {
     max-width: min(100vw, 1920px);
     margin-inline: auto;
@@ -2745,38 +2750,92 @@ body.session-started #builder-template-panel {
 #video-modal {
     position: fixed;
     inset: 0;
-    background: rgba(7, 20, 39, 0.55);
+    background: rgba(7, 20, 39, 0.72);
+    backdrop-filter: blur(3px);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2700;
+    z-index: 2820;
     padding: 14px;
+    overflow-y: auto;
 }
 
 #video-modal-card {
     width: min(860px, 100%);
-    background: #ffffff;
-    border-radius: 14px;
-    border: 2px solid #2f6fed;
-    box-shadow: 0 16px 48px rgba(4, 21, 43, 0.35);
-    padding: 14px;
+    max-height: calc(100dvh - 28px);
+    overflow-y: auto;
+    background: linear-gradient(145deg, #ffffff 0%, #eff6ff 52%, #f8fafc 100%);
+    border-radius: 20px;
+    border: 1px solid rgba(147, 197, 253, 0.9);
+    box-shadow: 0 20px 56px rgba(4, 21, 43, 0.42);
+    padding: 16px;
+    display: grid;
+    gap: 12px;
+}
+
+.video-modal-head-copy {
+    display: grid;
+    gap: 4px;
+}
+
+.video-modal-duration {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    border-radius: 999px;
+    background: rgba(37, 99, 235, 0.1);
+    color: #1d4ed8;
+    font-size: 0.76rem;
+    font-weight: 900;
+    padding: 4px 9px;
+}
+
+#video-modal-description {
+    margin: 0;
+    color: #334155;
+    font-size: 0.92rem;
+    line-height: 1.55;
 }
 
 #video-embed-wrap {
     position: relative;
     width: 100%;
     padding-top: 56.25%;
-    border-radius: 10px;
+    border-radius: 14px;
     overflow: hidden;
     border: 1px solid #d9e4f7;
+    background: #020617;
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.18);
 }
 
-#video-iframe {
+#video-modal-player,
+#video-iframe,
+#video-modal-fallback {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
+}
+
+#video-modal-player {
     border: 0;
+    background: #020617;
+}
+
+#video-iframe {
+    border: 0;
+}
+
+#video-modal-fallback {
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    box-sizing: border-box;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    text-align: center;
+    line-height: 1.6;
 }
 
 #video-open-link {
@@ -2788,6 +2847,41 @@ body.session-started #builder-template-panel {
     font-weight: 700;
     padding: 6px 11px;
     text-decoration: none;
+}
+
+.help-video-cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.help-video-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    min-height: 40px;
+    border: 1px solid #93c5fd;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #12356a;
+    font-size: 0.9rem;
+    font-weight: 900;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.help-video-cta:hover {
+    background: #dbeafe;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgba(37, 99, 235, 0.12);
+}
+
+.help-video-cta-inline {
+    min-height: 38px;
+    font-size: 0.84rem;
+    padding: 7px 12px;
 }
 
 #btn-feedback,
@@ -3287,6 +3381,10 @@ body.session-started #builder-template-panel {
     font-weight: 800;
     line-height: 1.45;
     padding: 9px 11px;
+}
+
+.scan-help-video-row {
+    margin-bottom: 10px;
 }
 
 .scan-actions-row {
@@ -4502,8 +4600,14 @@ body.session-started #builder-template-panel {
     line-height: 1.5;
 }
 
+.start-guide-help-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
 #btn-start-guide-voice {
-    justify-self: start;
     border: 1px solid #93c5fd;
     border-radius: 999px;
     background: #eff6ff;
@@ -5209,6 +5313,10 @@ body.session-started #builder-template-panel {
 .builder-main-copy {
     border-color: #bfdbfe;
     background: linear-gradient(135deg, #ffffff 0%, #eff6ff 52%, #f0fdf4 100%);
+}
+
+.builder-help-video-row {
+    margin-top: 10px;
 }
 
 .builder-pedagogy-title {

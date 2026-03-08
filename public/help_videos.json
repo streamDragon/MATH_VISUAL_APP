@@ -1,0 +1,34 @@
+[
+  {
+    "id": "landing_intro",
+    "title": "מה רואים כאן",
+    "description": "הסבר קצר על המסך הראשי",
+    "src": "CLOUDINARY_VIDEO_URL",
+    "poster": "CLOUDINARY_POSTER_URL",
+    "durationSec": 42
+  },
+  {
+    "id": "guided_intro",
+    "title": "איך מתחילים",
+    "description": "הסבר קצר על תהליך ההדרכה",
+    "src": "CLOUDINARY_VIDEO_URL",
+    "poster": "CLOUDINARY_POSTER_URL",
+    "durationSec": 35
+  },
+  {
+    "id": "parameters_intro",
+    "title": "איך עובדים עם פרמטרים",
+    "description": "מהמילים למשוואות",
+    "src": "CLOUDINARY_VIDEO_URL",
+    "poster": "CLOUDINARY_POSTER_URL",
+    "durationSec": 55
+  },
+  {
+    "id": "question_intro",
+    "title": "איך משתמשים ביש לי שאלה",
+    "description": "צילום שאלה, זיהוי נתונים ובניית משוואות",
+    "src": "CLOUDINARY_VIDEO_URL",
+    "poster": "CLOUDINARY_POSTER_URL",
+    "durationSec": 40
+  }
+]
