@@ -33,7 +33,14 @@ const buildTime = (process.env.BUILD_TIME || '').trim() || new Date().toISOStrin
 function runNode(args) {
   return spawnSync(process.execPath, args, {
     stdio: 'inherit',
-    cwd: rootDir
+    cwd: rootDir,
+    env: {
+      ...process.env,
+      BUILD_ENV: buildEnv,
+      BUILD_SHA: buildSha,
+      BUILD_ID: buildId,
+      BUILD_TIME: buildTime
+    }
   });
 }
 

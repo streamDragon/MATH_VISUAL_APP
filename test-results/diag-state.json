@@ -1,0 +1,85 @@
+{
+  "state": {
+    "readyState": "complete",
+    "bodyClasses": "prestart-only viewport-desktop app-mode-landing lobby-open entry-modal-open track-visual-explore",
+    "homeLandingDisplay": "flex",
+    "homeQuestionSelectOptions": 20,
+    "topQuestionSelectOptions": 20,
+    "versionBadge": "vunknown | prod | unknown | 2026-03-08T01:55:56.292Z",
+    "scriptLoads": {
+      "mobile_css": {
+        "ok": true,
+        "src": "/mobile.css",
+        "note": "primary",
+        "ts": "2026-03-08T01:56:13.341Z"
+      },
+      "questions": {
+        "ok": true,
+        "src": "/questions.js",
+        "note": "primary",
+        "ts": "2026-03-08T01:56:13.343Z"
+      },
+      "sound": {
+        "ok": true,
+        "src": "/sound.js",
+        "note": "primary",
+        "ts": "2026-03-08T01:56:13.364Z"
+      },
+      "help_content": {
+        "ok": true,
+        "src": "/helpContent.he.js",
+        "note": "primary",
+        "ts": "2026-03-08T01:56:13.374Z"
+      },
+      "capacitor": {
+        "ok": true,
+        "src": "/capacitor.js",
+        "note": "primary",
+        "ts": "2026-03-08T01:56:13.387Z"
+      }
+    },
+    "questionsType": "undefined",
+    "questionsLen": -1,
+    "hasStartLevelPractice": true
+  },
+  "consoleErrors": [],
+  "pageErrors": [],
+  "consoleAll": [
+    {
+      "type": "warning",
+      "text": "Unrecognized feature: 'web-share'."
+    },
+    {
+      "type": "warning",
+      "text": "Unrecognized feature: 'web-share'."
+    },
+    {
+      "type": "log",
+      "text": "AdMob skipped: not running in native Capacitor."
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    },
+    {
+      "type": "warning",
+      "text": "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+    }
+  ]
+}

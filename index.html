@@ -14,6 +14,7 @@
     <meta name="app-build-time" content="__BUILD_TIME__">
     <meta name="app-version" content="__APP_VERSION__">
     <title>מעבדת הפונקציות - המלא והשלם</title>
+    <link rel="icon" type="image/png" href="/opening-poster.png">
 
     <script>
         (function initScriptLoadRegistry() {
@@ -232,8 +233,8 @@
 
     <div id="opening-splash" class="hidden" aria-label="מסך פתיחה">
         <div id="opening-splash-backdrop" aria-hidden="true">
-            <video id="opening-splash-video" class="hidden" muted loop playsinline preload="metadata" poster="public/opening-poster.png"></video>
-            <img id="opening-splash-poster" src="public/opening-poster.png" onerror="this.onerror=null;this.src='opening-poster.png';" alt="">
+            <video id="opening-splash-video" class="hidden" muted loop playsinline preload="metadata" poster="/opening-poster.png"></video>
+            <img id="opening-splash-poster" src="/opening-poster.png" onerror="this.onerror=null;this.src='opening-poster.png';" alt="">
         </div>
         <div id="opening-splash-shade" aria-hidden="true"></div>
         <div id="opening-splash-content">
@@ -261,7 +262,7 @@
 
     <div id="math-gym-popup" class="hidden" aria-label="Math Gym">
         <button id="btn-close-math-gym-popup" type="button" onclick="closeMathGymPopup()" aria-label="סגור">✕</button>
-        <img id="math-gym-popup-image" src="public/math-gym-promo.png" alt="Math Gym" onerror="this.onerror=null;this.src='public/opening-poster.png';">
+        <img id="math-gym-popup-image" src="/opening-poster.png" alt="Math Gym">
     </div>
 
     <div id="win-overlay" role="dialog" aria-modal="true" aria-live="polite" dir="rtl">
@@ -489,7 +490,7 @@
                 <button class="modal-mobile-exit-btn" type="button" onclick="skipQuickTour()">✕ סגור סיור וחזור</button>
             </div>
             <div id="quick-tour-video-wrap">
-                <video id="quick-tour-demo-video" muted loop playsinline preload="metadata" poster="public/opening-poster.png"></video>
+                <video id="quick-tour-demo-video" muted loop playsinline preload="metadata" poster="/opening-poster.png"></video>
                 <div id="quick-tour-video-label">סיור מודרך מהיר</div>
             </div>
             <div id="quick-tour-sample-question">כך נראית שאלה קצרה לפני שמתחילים לעבוד.</div>
@@ -1160,9 +1161,9 @@
             try {
                 let params = new URLSearchParams(window.location.search);
                 let raw = parseBooleanQueryValue(params.get('codex_ext') || params.get('advanced_ui') || params.get('admin_ui'));
-                return SHOW_BUILD_DEBUG || raw === true;
+                return raw === true;
             } catch (err) {
-                return SHOW_BUILD_DEBUG;
+                return false;
             }
         })();
 
@@ -1539,8 +1540,8 @@
         let templateChosen = false;
         let readAnswerValidated = false;
         let sessionStarted = false;
-        let appEntryMode = APP_ENTRY_MODES.LANDING;
-        let guidedStartStep = GUIDED_START_FLOW.INTRO;
+        let appEntryMode = 'landing';
+        let guidedStartStep = 0;
         let questionIntroActive = false;
         let cleanModeManualEnabled = false;
         let paramIntroCleanActive = false;
@@ -1573,7 +1574,7 @@
         let splashMusicUnlockBound = false;
         let appInitialized = false;
         let winOverlayTimer = null;
-        let runtimeDisplayedVersion = getRuntimeVersionDisplayOverride() || APP_VERSION;
+        let runtimeDisplayedVersion = APP_VERSION;
         let quickTourStepIndex = 0;
         let quickTourActive = false;
         let quickTourCurrentTarget = null;
@@ -8909,6 +8910,7 @@
                 });
                 showStepToast('✅ תשובה נכונה. המשימה הושלמה.');
                 updateInfo();
+                evaluateCurrentStep(getSlope(p.X()), p.X(), p.Y());
             } else {
                 readAnswerValidated = false;
                 document.getElementById('read-answer-feedback').innerText = `עדיין לא. בדקו שוב את החלונית ליד הנקודה ונסו שוב. מותר להיות בערך בטווח ±${formatNumber(tol)}.`;
@@ -12864,7 +12866,7 @@ Rules:
             setQuestionIntroActive(shouldOpenQuestionIntro);
 
             let startX = getPreferredStartXForQuestion(q);
-            p.setCoords(startX, evaluateFunctionAt(startX));
+            p.setPosition(JXG.COORDS_BY_USER, [startX, evaluateFunctionAt(startX)]);
             fitBoardToCurrentFunction();
             board.update();
             updateInfo();
@@ -12921,7 +12923,10 @@ Rules:
             }
 
             loadScriptWithFallback('presets', ['/presets.js', '/public/presets.js', 'presets.js', 'public/presets.js'])
-                .then(() => loadScriptWithFallback('codex_features', ['/codex_features.js', '/public/codex_features.js', 'codex_features.js', 'public/codex_features.js']))
+                .then(() => {
+                    if (!ENABLE_OPTIONAL_ADMIN_EXTENSIONS) return false;
+                    return loadScriptWithFallback('codex_features', ['/codex_features.js', '/public/codex_features.js', 'codex_features.js', 'public/codex_features.js']);
+                })
                 .catch(() => {});
         })();
     </script>
