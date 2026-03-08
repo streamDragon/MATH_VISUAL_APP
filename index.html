@@ -8908,9 +8908,26 @@
                     reason: 'answer_in_tolerance',
                     expected: formatNumber(expected)
                 });
-                showStepToast('✅ תשובה נכונה. המשימה הושלמה.');
                 updateInfo();
                 evaluateCurrentStep(getSlope(p.X()), p.X(), p.Y());
+                let currentStep = activeSteps[currentStepIndex];
+                let currentGoalType = String(currentStep?.goal?.type || q.goal || '').trim();
+                let advancedAfterReadAnswer = false;
+                if (!questionSolved
+                    && readAnswerValidated
+                    && Math.abs(p.X() - x0) <= 0.12
+                    && (currentGoalType === 'read_slope' || currentGoalType === 'read_y')) {
+                    stepCompleted = true;
+                    advancedAfterReadAnswer = true;
+                    if (currentStepIndex >= activeSteps.length - 1) {
+                        markQuestionSolved();
+                    } else {
+                        goToNextStep();
+                    }
+                }
+                if (!advancedAfterReadAnswer) {
+                    showStepToast('✅ תשובה נכונה. המשימה הושלמה.');
+                }
             } else {
                 readAnswerValidated = false;
                 document.getElementById('read-answer-feedback').innerText = `עדיין לא. בדקו שוב את החלונית ליד הנקודה ונסו שוב. מותר להיות בערך בטווח ±${formatNumber(tol)}.`;
