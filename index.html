@@ -301,28 +301,32 @@
                     <div id="overlay-mini-label" class="overlay-mini">כרטיס משימה</div>
                     <h3 id="overlay-title">שאלה</h3>
                 </div>
-                <button id="btn-close-overlay" onclick="closeQuestionOverlay()">סגור</button>
+                <button id="btn-close-overlay" type="button">סגור</button>
             </div>
             <div class="overlay-section">
-                <button class="overlay-toggle" onclick="toggleOverlaySection('essence')">מהות השאלה</button>
+                <button id="btn-overlay-section-essence" class="overlay-toggle" type="button" data-overlay-section="essence">מהות השאלה</button>
                 <div id="overlay-essence" class="overlay-content"></div>
             </div>
             <div class="overlay-section">
-                <button class="overlay-toggle" onclick="toggleOverlaySection('goal')">מטרת הלמידה</button>
+                <button id="btn-overlay-section-goal" class="overlay-toggle" type="button" data-overlay-section="goal">מטרת הלמידה</button>
                 <div id="overlay-goal" class="overlay-content hidden"></div>
             </div>
             <div class="overlay-section">
-                <button class="overlay-toggle" onclick="toggleOverlaySection('material')">חומר לימוד רלוונטי</button>
-                <div id="overlay-material" class="overlay-content hidden"></div>
+                <button id="btn-overlay-section-visual" class="overlay-toggle" type="button" data-overlay-section="visual">מה לשים לב בציור</button>
+                <div id="overlay-visual" class="overlay-content hidden"></div>
             </div>
             <div class="overlay-section">
-                <button class="overlay-toggle" onclick="toggleOverlaySection('howto')">איך עובדים באפליקציה</button>
+                <button id="btn-overlay-section-howto" class="overlay-toggle" type="button" data-overlay-section="howto">איך עובדים שלב אחר שלב</button>
                 <div id="overlay-howto-wrap" class="overlay-content hidden">
                     <ul id="overlay-howto"></ul>
                 </div>
             </div>
+            <div class="overlay-section">
+                <button id="btn-overlay-section-mistake" class="overlay-toggle" type="button" data-overlay-section="mistake">טעות נפוצה</button>
+                <div id="overlay-mistake" class="overlay-content hidden"></div>
+            </div>
             <div class="overlay-actions">
-                <button id="btn-overlay-primary" onclick="onOverlayPrimaryAction()">התחל תרגול</button>
+                <button id="btn-overlay-primary" type="button">התחל תרגול</button>
             </div>
         </div>
     </div>
@@ -334,35 +338,35 @@
                     <span id="mobile-feed-kicker">מסלול למידה</span>
                     <h3 id="mobile-feed-title">בחרו מסלול בגלילה</h3>
                 </div>
-                <button id="btn-mobile-feed-close" type="button" onclick="closeMobileFeed()">סגור</button>
+                <button id="btn-mobile-feed-close" type="button">סגור</button>
             </div>
             <div id="mobile-feed-ticker" aria-live="polite">
                 <span id="mobile-feed-ticker-label">מה חדש</span>
-                <span id="mobile-feed-ticker-text">כאן תופענה הצעות להמשך.</span>
+                <span id="mobile-feed-ticker-text">נציג כאן צעד ברור להמשך לפי מה שכבר פתרתם.</span>
             </div>
             <div id="mobile-feed-featured-wrap">
                 <div id="mobile-feed-featured-head">
-                    <span id="mobile-feed-featured-kicker">🔥 שאלת השבוע</span>
-                    <span id="mobile-feed-featured-sub">מתחלפת אוטומטית כל שבוע</span>
+                    <span id="mobile-feed-featured-kicker">🔥 מומלץ עכשיו</span>
+                    <span id="mobile-feed-featured-sub">מבוסס על שאלות, תגיות, קושי וזמן</span>
                 </div>
-                <button id="mobile-feed-featured-card" type="button" onclick="openFeaturedQuestionFromFeed()">
+                <button id="mobile-feed-featured-card" type="button">
                     <div id="mobile-feed-featured-thumb-wrap">
                         <img id="mobile-feed-featured-thumb" alt="שאלת השבוע" loading="lazy">
                     </div>
                     <div id="mobile-feed-featured-body">
-                        <span id="mobile-feed-featured-tag">שאלה מומלצת להתחלה רגועה</span>
-                        <div id="mobile-feed-featured-title">תרגיל מומלץ יופיע כאן</div>
-                        <div id="mobile-feed-featured-desc">נציג כאן הצעה קצרה וברורה לצעד הבא.</div>
+                        <span id="mobile-feed-featured-tag">פתיחה רגועה או המשך מדויק</span>
+                        <div id="mobile-feed-featured-title">נבחר כאן את הצעד הכי מתאים כרגע</div>
+                        <div id="mobile-feed-featured-desc">אפשר לפתוח מכאן תרגיל קצר להתחלה או להמשיך בדיוק מהמקום הנכון.</div>
                     </div>
                 </button>
             </div>
             <div id="mobile-feed-toolbar">
-                <input id="mobile-feed-search" type="search" placeholder="חיפוש שאלה / כלי / תגית" oninput="onMobileFeedSearchInput(event)">
+                <input id="mobile-feed-search" type="search" placeholder="חיפוש שאלה / כלי / תגית">
                 <div id="mobile-feed-chips">
-                    <button type="button" class="mobile-feed-chip is-active" data-cat="all" onclick="setMobileFeedCategory('all')">הכל</button>
-                    <button type="button" class="mobile-feed-chip" data-cat="exercises" onclick="setMobileFeedCategory('exercises')">תרגול</button>
-                    <button type="button" class="mobile-feed-chip" data-cat="tools" onclick="setMobileFeedCategory('tools')">כלים</button>
-                    <button type="button" class="mobile-feed-chip" data-cat="knowledge" onclick="setMobileFeedCategory('knowledge')">מידע</button>
+                    <button type="button" class="mobile-feed-chip is-active" data-cat="all">הכל</button>
+                    <button type="button" class="mobile-feed-chip" data-cat="exercises">תרגול</button>
+                    <button type="button" class="mobile-feed-chip" data-cat="tools">כלים</button>
+                    <button type="button" class="mobile-feed-chip" data-cat="knowledge">מידע</button>
                 </div>
             </div>
             <div id="mobile-feed-list" aria-live="polite"></div>
@@ -589,19 +593,19 @@
                 </div>
 
                 <div class="scan-actions-row">
-                    <button id="btn-scan-camera" onclick="triggerScanImageInput('camera')">📷 צלם שאלה (מצלמה)</button>
-                    <button id="btn-scan-upload" onclick="triggerScanImageInput('file')">העלאת תמונה</button>
-                    <button id="btn-scan-text" type="button" onclick="setScanEntryMode('text')">כתוב לי את השאלה</button>
+                    <button id="btn-scan-camera" type="button">📷 צלם שאלה (מצלמה)</button>
+                    <button id="btn-scan-upload" type="button">העלאת תמונה</button>
+                    <button id="btn-scan-text" type="button">כתוב לי את השאלה</button>
                 </div>
                 <div id="scan-text-wrap" class="hidden">
                     <label for="scan-question-text">כתבו כאן את נוסח השאלה או את הנתונים החשובים</label>
-                    <textarea id="scan-question-text" rows="5" placeholder="לדוגמה: מצאו פונקציה ריבועית העוברת דרך (2,5), עם קיצון ב-x=1, ומשיק בשיפוע 0 בנקודת הקיצון." oninput="onScanQuestionTextInput(event)"></textarea>
+                    <textarea id="scan-question-text" rows="5" placeholder="לדוגמה: מצאו פונקציה ריבועית העוברת דרך (2,5), עם קיצון ב-x=1, ומשיק בשיפוע 0 בנקודת הקיצון."></textarea>
                     <div class="scan-text-hint">לא צריך לנסח מושלם. מספיק לכתוב נקודות, קיצון, שיפוע, משיק, או מה מבקשים למצוא.</div>
                 </div>
 
                 <div class="scan-primary-actions">
-                    <button id="btn-scan-analyze" onclick="analyzeScannedQuestion()">פרק איתי לציור, נתונים ומשוואות</button>
-                    <button id="btn-scan-inject" class="hidden" onclick="injectScannedQuestion()">הוסף לאפליקציה ופתח</button>
+                    <button id="btn-scan-analyze" type="button">פרק איתי לציור, נתונים ומשוואות</button>
+                    <button id="btn-scan-inject" class="hidden" type="button">הוסף לאפליקציה ופתח</button>
                 </div>
                 <div id="scan-device-hint" class="scan-device-hint">בחרו אם לצלם מהטלפון או להעלות תמונה מהמחשב.</div>
 
@@ -633,8 +637,8 @@
                     <ol id="scan-subquestions-list"></ol>
                     <div id="scan-recommended-questions" class="hidden"></div>
                 </div>
-                <div class="scan-admin-entry-row">
-                    <button id="btn-open-scan-admin" class="scan-admin-entry" type="button" onclick="openScanAdminModal()">למורה/אדמין בלבד</button>
+                <div id="scan-admin-entry-row" class="scan-admin-entry-row hidden">
+                    <button id="btn-open-scan-admin" class="scan-admin-entry" type="button">למורה/אדמין בלבד</button>
                 </div>
             </div>
         </div>
@@ -649,23 +653,20 @@
             <div id="scan-config-box" class="scan-admin-box">
                 <div class="scan-admin-lead">האזור הזה מיועד להגדרת שירות הניתוח במכשיר. תלמידים לא צריכים לגעת בו.</div>
                 <div class="scan-config-grid">
-                    <label for="scan-api-endpoint">כתובת החיבור</label>
-                    <input id="scan-api-endpoint" type="url" autocomplete="off" placeholder="https://api.openai.com/v1/chat/completions">
+                    <label for="scan-api-endpoint">כתובת שרת התיווך</label>
+                    <input id="scan-api-endpoint" type="url" autocomplete="off" placeholder="https://school-proxy.example/api/scan-question">
 
                     <label for="scan-api-model">שם המודל</label>
                     <input id="scan-api-model" type="text" autocomplete="off" placeholder="gpt-4o">
-
-                    <label for="scan-api-key">מפתח גישה (לא נשמר אוטומטית)</label>
-                    <input id="scan-api-key" type="password" autocomplete="off" placeholder="sk-...">
 
                     <label for="scan-remember-config" class="scan-checkbox-row">
                         <input id="scan-remember-config" type="checkbox" checked>
                         שמור את כתובת החיבור ושם המודל בדפדפן
                     </label>
                 </div>
-                <div class="scan-admin-note">אם שירות הניתוח עדיין לא הוגדר, פותחים את החלון הזה רק לצורך חיבור טכני.</div>
+                <div class="scan-admin-note">החיבור כאן צריך להיות לשרת מתווך בצד השרת. תלמידים לא מכניסים מפתחות API בדפדפן.</div>
                 <div class="overlay-actions scan-admin-actions">
-                    <button id="btn-scan-copy" class="hidden" type="button" onclick="copyScannedQuestionObject()">העתק נתוני שאלה</button>
+                    <button id="btn-scan-copy" class="hidden" type="button">העתק נתוני שאלה</button>
                 </div>
             </div>
         </div>
@@ -716,6 +717,14 @@
                     <div class="home-benefit-item">מבינים שלב־שלב</div>
                     <div class="home-benefit-item">מתקדמים בלי להילחץ</div>
                 </div>
+            </section>
+
+            <section id="home-roadmap" class="home-surface" aria-labelledby="home-roadmap-title">
+                <div class="home-section-head">
+                    <div class="home-section-kicker">מסלול 4 יחידות</div>
+                    <h2 id="home-roadmap-title">רואים איפה אתם עומדים ומה כדאי לפתוח עכשיו</h2>
+                </div>
+                <div id="home-roadmap-list"></div>
             </section>
 
             <section id="home-adults" class="home-surface" aria-labelledby="home-adults-title">
@@ -909,18 +918,25 @@
                         <div id="read-answer-panel" class="hidden">
                             <div id="read-answer-prompt"></div>
                             <div class="read-answer-row">
-                                <input id="read-answer-input" type="number" step="0.1" placeholder="הזן תשובה">
-                                <button onclick="submitReadAnswer()">בדוק תשובה</button>
+                                <input id="read-answer-input" type="text" inputmode="decimal" autocomplete="off" placeholder="למשל 0.5 או 1/2">
+                                <button id="btn-read-answer-submit" type="button">בדוק תשובה</button>
                             </div>
+                            <div id="read-answer-helper">אפשר לכתוב גם שבר פשוט כמו 1/2. נבדוק בטווח הדיוק של השאלה.</div>
                             <div id="read-answer-feedback"></div>
                         </div>
                         <div id="step-result-panel" class="hidden">
                             <div id="step-result-title">✅ השלב הושלם</div>
                             <div id="step-math-line"></div>
                             <div class="step-actions">
-                                <button id="btn-apply-solution" class="hidden" onclick="applyStepSolution()">עדכן פונקציה</button>
-                                <button id="btn-next-step" class="hidden" onclick="goToNextStep()">הבא</button>
+                                <button id="btn-apply-solution" class="hidden" type="button">עדכן פונקציה</button>
+                                <button id="btn-next-step" class="hidden" type="button">הבא</button>
                             </div>
+                        </div>
+                        <div id="exam-bridge-panel" class="hidden" aria-live="polite">
+                            <div id="exam-bridge-title">כך כותבים את זה בבגרות</div>
+                            <div id="exam-bridge-subtitle">מהרמז הוויזואלי לכתיבה מסודרת.</div>
+                            <ol id="exam-bridge-steps"></ol>
+                            <div id="exam-bridge-final"></div>
                         </div>
                     </div>
                 </div>
@@ -1294,8 +1310,52 @@
         const FEEDBACK_STORAGE_KEY = 'math_visual_feedback_v1';
         const SCAN_CONFIG_STORAGE_KEY = 'math_visual_scan_config_v1';
         const SCANNED_QUESTIONS_STORAGE_KEY = 'math_visual_scanned_questions_v1';
-        const DEFAULT_SCAN_API_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
-        const DEFAULT_SCAN_MODEL = 'gpt-4o';
+        const DEFAULT_SCAN_API_ENDPOINT = '/api/scan-question';
+        const DEFAULT_SCAN_MODEL = 'gpt-4.1-mini';
+        const FOUR_UNIT_TOPIC_DEFS = [
+            {
+                key: 'graph_reading',
+                title: 'קריאת גרף',
+                description: 'ערכי פונקציה, שיפוע, חיתוך עם הצירים ושורשים.',
+                status: 'active'
+            },
+            {
+                key: 'derivative_slope',
+                title: 'נגזרת ושיפוע',
+                description: 'לזהות שיפוע מבוקש ולהבין מה הוא אומר על הגרף.',
+                status: 'active'
+            },
+            {
+                key: 'extrema',
+                title: 'קיצון',
+                description: 'משיק אופקי, מינימום, ומה משתנה לפני ואחרי הנקודה.',
+                status: 'active'
+            },
+            {
+                key: 'tangent_normal',
+                title: 'משיק ואנך',
+                description: 'משיק דרך נקודה, מקביל, ונורמל מתוך הגרף.',
+                status: 'active'
+            },
+            {
+                key: 'parameter_building',
+                title: 'בניית פרמטרים',
+                description: 'מהמילים ומהציור למערכת משוואות על הפרמטרים.',
+                status: 'active'
+            },
+            {
+                key: 'rational_asymptotes',
+                title: 'רציונליות ואסימפטוטות',
+                description: 'סלייס ההמשך המועדף: זיהוי תחום, אסימפטוטות והתנהגות גרפית.',
+                status: 'scaffold'
+            },
+            {
+                key: 'future_domains',
+                title: 'שורש / אקספוננט / גאומטריה',
+                description: 'תשתית להרחבה עתידית ל־4 יחידות מלאות.',
+                status: 'scaffold'
+            }
+        ];
         const SCAN_ALLOWED_LAYER_IDS = new Set([
             'object_identification',
             'coordinate_anchors',
@@ -2533,6 +2593,48 @@
             };
         }
 
+        function getCurrentTaskHelpContent() {
+            let q = getCurrentQuestion();
+            if (!q) {
+                let fallback = getResolvedHelpContent();
+                return {
+                    title: fallback.title,
+                    bullets: fallback.bullets.slice(0, 3),
+                    helpText: fallback.bullets[0] || '',
+                    reasonText: ''
+                };
+            }
+
+            if (!sessionStarted) {
+                let shortDesc = getQuestionShortDesc(q);
+                let essence = getShortText(q?.overlay?.essence, shortDesc.first);
+                let goal = getShortText(q?.overlay?.goal, shortDesc.second);
+                return {
+                    title: 'לפני שמתחילים',
+                    bullets: [
+                        `מה עושים עכשיו: ${essence}`,
+                        `מה לשים לב בציור: ${getQuestionVisualNoticeText(q)}`,
+                        `טעות נפוצה: ${getQuestionCommonMistakeText(q)}`
+                    ],
+                    helpText: goal,
+                    reasonText: ''
+                };
+            }
+
+            let step = activeSteps[currentStepIndex] || null;
+            let commonMistake = (step && step.commonMistake) ? step.commonMistake : getQuestionCommonMistakeText(q);
+            return {
+                title: `עזרה לשלב ${currentStepIndex + 1}`,
+                bullets: [
+                    `מה עושים עכשיו: ${step?.instruction || getGoalInstructionText(q)}`,
+                    `מה לשים לב בציור: ${(step && step.visualNotice) ? step.visualNotice : getQuestionVisualNoticeText(q)}`,
+                    `טעות נפוצה: ${commonMistake}`
+                ],
+                helpText: getStepHintText(q, step),
+                reasonText: `שימו לב: ${commonMistake}`
+            };
+        }
+
         function setHelpVoiceStatus(text, ms) {
             let statusEl = document.getElementById('help-voice-status');
             if (!statusEl) return;
@@ -2664,14 +2766,18 @@
             helpHighlightTimer = setTimeout(clearGlobalHelpHighlights, HELP_HIGHLIGHT_DURATION_MS);
         }
 
-        function renderGlobalHelpModal(cleanModeReason) {
+        function renderGlobalHelpModal(options = {}) {
             let content = getResolvedHelpContent();
+            let taskHelp = getCurrentTaskHelpContent();
+            let dynamicBullets = Array.isArray(options.bullets) && options.bullets.length > 0
+                ? options.bullets
+                : taskHelp.bullets;
             let titleEl = document.getElementById('global-help-title');
-            if (titleEl) titleEl.innerText = content.title || DEFAULT_HELP_CONTENT_HE.title;
+            if (titleEl) titleEl.innerText = String(options.title || taskHelp.title || content.title || DEFAULT_HELP_CONTENT_HE.title).trim();
             let listEl = document.getElementById('global-help-list');
             if (listEl) {
                 listEl.innerHTML = '';
-                content.bullets.forEach((line) => {
+                dynamicBullets.forEach((line) => {
                     let li = document.createElement('li');
                     li.innerText = line;
                     listEl.appendChild(li);
@@ -2680,7 +2786,7 @@
             let showMeBtn = document.getElementById('btn-help-show-me');
             if (showMeBtn) showMeBtn.innerText = content.showMeLabel || DEFAULT_HELP_CONTENT_HE.showMeLabel;
             let reasonEl = document.getElementById('global-help-clean-reason');
-            let reasonText = String(cleanModeReason || '').trim();
+            let reasonText = String(options.cleanModeReason || taskHelp.reasonText || '').trim();
             if (reasonEl) {
                 if (reasonText) {
                     reasonEl.classList.remove('hidden');
@@ -2698,17 +2804,23 @@
         }
 
         function openGlobalHelpModal(options = {}) {
+            let taskHelp = getCurrentTaskHelpContent();
             if (options.usePopover !== false && coachHasHelpPopover()) {
                 window.MVCoach.toggleHelpPopover(true, {
-                    cleanModeReason: String(options.cleanModeReason || '').trim()
+                    cleanModeReason: String(options.cleanModeReason || taskHelp.reasonText || '').trim(),
+                    helpText: String(options.helpText || taskHelp.helpText || '').trim()
                 });
                 pushCoachEvent('HINT_REQUESTED', { source: 'help_button' });
                 return;
             }
             let modal = document.getElementById('global-help-modal');
             if (!modal) return;
-            let reason = String(options.cleanModeReason || '').trim();
-            renderGlobalHelpModal(reason);
+            renderGlobalHelpModal({
+                ...options,
+                title: options.title || taskHelp.title,
+                bullets: Array.isArray(options.bullets) ? options.bullets : taskHelp.bullets,
+                cleanModeReason: options.cleanModeReason || taskHelp.reasonText
+            });
             modal.classList.remove('hidden');
             if (globalHelpModalA11y) globalHelpModalA11y.activate();
         }
@@ -3298,7 +3410,9 @@
                 lastSolveDay: '',
                 uniqueSolved: [],
                 repeatDay: '',
-                repeatCount: 0
+                repeatCount: 0,
+                lastOpenedQuestionId: '',
+                lastSolvedQuestionId: ''
             };
         }
 
@@ -3380,6 +3494,8 @@
             if (!Number.isFinite(learnerProgress.repeatCount)) learnerProgress.repeatCount = 0;
             if (typeof learnerProgress.lastSolveDay !== 'string') learnerProgress.lastSolveDay = '';
             if (typeof learnerProgress.repeatDay !== 'string') learnerProgress.repeatDay = '';
+            if (typeof learnerProgress.lastOpenedQuestionId !== 'string') learnerProgress.lastOpenedQuestionId = '';
+            if (typeof learnerProgress.lastSolvedQuestionId !== 'string') learnerProgress.lastSolvedQuestionId = '';
             saveLearnerProgress();
             updateLearnerProgressChip();
         }
@@ -3418,6 +3534,7 @@
                 learnerProgress.lastSolveDay = today;
             }
 
+            learnerProgress.lastSolvedQuestionId = qKey;
             learnerProgress.totalXp += gainedXp;
             let newLevel = getProgressLevel(learnerProgress.totalXp);
             let leveledUp = newLevel > prevLevel;
@@ -3457,6 +3574,154 @@
                 total: visible.length,
                 position: visible.indexOf(questionIndex)
             };
+        }
+
+        function getQuestionProgressKeyByIndex(questionIndex) {
+            let questions = getQuestionsList();
+            let q = questions[Number(questionIndex)] || null;
+            if (q && typeof q.id === 'string' && q.id.trim()) return q.id.trim();
+            if (q && Number.isFinite(Number(q?.id))) return String(Number(q.id));
+            let title = String(q?.title || '').replace(/\s+/g, ' ').trim();
+            return `${Number(questionIndex)}:${title}`;
+        }
+
+        function getSolvedQuestionKeySet() {
+            let solved = Array.isArray(learnerProgress?.uniqueSolved) ? learnerProgress.uniqueSolved : [];
+            return new Set(solved.map((item) => String(item || '').trim()).filter(Boolean));
+        }
+
+        function findQuestionIndexByProgressKey(progressKey) {
+            let target = String(progressKey || '').trim();
+            if (!target) return -1;
+            let questions = getQuestionsList();
+            for (let i = 0; i < questions.length; i += 1) {
+                if (getQuestionProgressKeyByIndex(i) === target) return i;
+            }
+            return -1;
+        }
+
+        function isQuestionSolvedByProgress(questionIndex) {
+            return getSolvedQuestionKeySet().has(getQuestionProgressKeyByIndex(questionIndex));
+        }
+
+        function getQuestionTopicKeys(q) {
+            let goal = String(q?.goal || '').trim();
+            let topics = [];
+            if (goal === 'read_y' || goal === 'y_equals') topics.push('graph_reading');
+            if (goal === 'read_slope' || goal === 'slope_equals') topics.push('derivative_slope');
+            if (goal === 'slope_zero' || goal === 'min_point') topics.push('extrema');
+            if (goal === 'tangent_through_point' || goal === 'free') topics.push('tangent_normal');
+            if (goal === 'hit_target' || goal === 'hit_targets' || goal === 'choose_function_template') topics.push('parameter_building');
+            if (goal === 'free' && !topics.includes('graph_reading')) topics.push('graph_reading');
+            if (topics.length === 0) topics.push('graph_reading');
+            return topics;
+        }
+
+        function getQuestionPrimaryTopicKey(q) {
+            return getQuestionTopicKeys(q)[0] || 'graph_reading';
+        }
+
+        function getFourUnitTopicMeta(topicKey) {
+            return FOUR_UNIT_TOPIC_DEFS.find((item) => item.key === topicKey) || FOUR_UNIT_TOPIC_DEFS[0];
+        }
+
+        function getTopicProgressEntries() {
+            let visible = getVisibleQuestionIndexes();
+            let entries = FOUR_UNIT_TOPIC_DEFS.map((topic) => ({
+                ...topic,
+                activeQuestions: [],
+                solvedCount: 0,
+                nextQuestionIndex: -1
+            }));
+
+            visible.forEach((questionIndex) => {
+                let q = getQuestionsList()[questionIndex];
+                getQuestionTopicKeys(q).forEach((topicKey) => {
+                    let entry = entries.find((item) => item.key === topicKey);
+                    if (!entry || entry.status !== 'active') return;
+                    entry.activeQuestions.push(questionIndex);
+                    if (isQuestionSolvedByProgress(questionIndex)) {
+                        entry.solvedCount += 1;
+                    } else if (entry.nextQuestionIndex < 0) {
+                        entry.nextQuestionIndex = questionIndex;
+                    }
+                });
+            });
+
+            return entries;
+        }
+
+        function renderHomeRoadmap() {
+            let wrap = document.getElementById('home-roadmap-list');
+            if (!wrap) return;
+            wrap.innerHTML = '';
+
+            let entries = getTopicProgressEntries();
+            entries.forEach((entry) => {
+                let card = document.createElement('section');
+                card.className = 'roadmap-topic-card';
+                card.dataset.status = entry.status;
+
+                let head = document.createElement('div');
+                head.className = 'roadmap-topic-head';
+
+                let title = document.createElement('div');
+                title.className = 'roadmap-topic-title';
+                title.innerText = entry.title;
+
+                let badge = document.createElement('span');
+                badge.className = 'roadmap-topic-badge';
+                badge.innerText = entry.status === 'active' ? 'פעיל עכשיו' : 'השלב הבא';
+
+                head.appendChild(title);
+                head.appendChild(badge);
+
+                let desc = document.createElement('div');
+                desc.className = 'roadmap-topic-desc';
+                desc.innerText = entry.description;
+
+                card.appendChild(head);
+                card.appendChild(desc);
+
+                if (entry.status === 'active') {
+                    let total = entry.activeQuestions.length;
+                    let progress = document.createElement('div');
+                    progress.className = 'roadmap-topic-progress';
+                    progress.innerText = `${entry.solvedCount}/${total} תרגילים הושלמו בנושא הזה`;
+
+                    let bar = document.createElement('div');
+                    bar.className = 'roadmap-topic-bar';
+                    let fill = document.createElement('div');
+                    fill.className = 'roadmap-topic-fill';
+                    let ratio = total > 0 ? Math.min(100, Math.round((entry.solvedCount / total) * 100)) : 0;
+                    fill.style.width = `${ratio}%`;
+                    bar.appendChild(fill);
+
+                    let btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'roadmap-topic-open';
+                    btn.innerText = entry.nextQuestionIndex >= 0 ? 'פתחו את הצעד הבא' : 'חזרו לתרגול בנושא';
+                    btn.disabled = total === 0;
+                    btn.addEventListener('click', () => {
+                        let targetIndex = entry.nextQuestionIndex >= 0 ? entry.nextQuestionIndex : (entry.activeQuestions[0] ?? -1);
+                        if (targetIndex < 0) return;
+                        if (!sessionStarted) markSessionStarted({ preserveCurrentFunction: true });
+                        loadQ(targetIndex, { autoOpenOverlay: true });
+                        scheduleViewportTopReset({ onlyWhilePrestart: false, delays: [0, 90] });
+                    });
+
+                    card.appendChild(progress);
+                    card.appendChild(bar);
+                    card.appendChild(btn);
+                } else {
+                    let note = document.createElement('div');
+                    note.className = 'roadmap-topic-upcoming';
+                    note.innerText = 'כאן כבר הוכנה שפה ויזואלית והתקדמות, כדי שהרחבת הנושא תהיה טבעית ולא קפיצה עיוורת.';
+                    card.appendChild(note);
+                }
+
+                wrap.appendChild(card);
+            });
         }
 
         function refreshTopQuestionSelect(selectedIndex = currentQ) {
@@ -3693,21 +3958,93 @@
             }));
         }
 
+        function getContinueQuestionIndex() {
+            let visible = new Set(getVisibleQuestionIndexes());
+            let lastOpened = findQuestionIndexByProgressKey(learnerProgress?.lastOpenedQuestionId);
+            if (visible.has(lastOpened) && !isQuestionSolvedByProgress(lastOpened)) return lastOpened;
+            return -1;
+        }
+
+        function getRecommendationAnchorQuestionIndex() {
+            let continueIndex = getContinueQuestionIndex();
+            if (continueIndex >= 0) return continueIndex;
+            let lastSolved = findQuestionIndexByProgressKey(learnerProgress?.lastSolvedQuestionId);
+            let visible = new Set(getVisibleQuestionIndexes());
+            if (visible.has(lastSolved)) return lastSolved;
+            return -1;
+        }
+
+        function getMobileFeedQuestionRecommendation(realIdx, q, manifestItem, order) {
+            let solvedSet = getSolvedQuestionKeySet();
+            let solved = solvedSet.has(getQuestionProgressKeyByIndex(realIdx));
+            let solvedCount = solvedSet.size;
+            let firstTime = solvedCount === 0;
+            let continueIndex = getContinueQuestionIndex();
+            let anchorIndex = getRecommendationAnchorQuestionIndex();
+            let difficulty = Number.isFinite(manifestItem?.difficulty) ? Number(manifestItem.difficulty) : Math.min(4, 1 + Math.floor(order / 4));
+            let estMin = Number.isFinite(manifestItem?.estMin) ? Number(manifestItem.estMin) : 4;
+            let topicMeta = getFourUnitTopicMeta(getQuestionPrimaryTopicKey(q));
+            let reasons = [];
+            let score = solved ? -20 : 80;
+            let badge = '';
+
+            if (realIdx === continueIndex) {
+                score += 520;
+                badge = 'המשך';
+                reasons.push('להמשיך בדיוק מהצעד האחרון');
+            } else if (firstTime) {
+                score += 240 - (difficulty * 28) - (estMin * 2) - (order * 7);
+                badge = 'מתאים להתחלה';
+                reasons.push('קצר ורגוע להתחלה ראשונה');
+            } else {
+                if (anchorIndex >= 0) {
+                    let anchorTopic = getQuestionPrimaryTopicKey(getQuestionsList()[anchorIndex]);
+                    if (anchorTopic === getQuestionPrimaryTopicKey(q)) {
+                        score += 120;
+                        reasons.push(`אותו נושא: ${topicMeta.title}`);
+                    }
+                    if (!solved && realIdx > anchorIndex) {
+                        score += Math.max(12, 72 - ((realIdx - anchorIndex) * 7));
+                        reasons.push('צעד טבעי להמשך');
+                    }
+                }
+                if (!solved && difficulty <= Math.min(4, 2 + Math.floor(solvedCount / 4))) {
+                    score += 26;
+                    reasons.push('רמת קושי מתאימה כרגע');
+                }
+                if (solved) {
+                    badge = 'חזרה';
+                    reasons.push('לחיזוק קצר ובטוח');
+                } else if (!badge) {
+                    badge = 'מומלץ';
+                }
+            }
+
+            return {
+                score,
+                solved,
+                badge,
+                reason: reasons[0] || 'פתיחה טובה להמשך',
+                topicTitle: topicMeta.title
+            };
+        }
+
         function getMobileFeedQuestionItems() {
             let questions = getQuestionsList();
             let visible = getVisibleQuestionIndexes();
-            return visible.map((realIdx, order) => {
+            let items = visible.map((realIdx, order) => {
                 let q = questions[realIdx] || {};
                 let manifestItem = getManifestItemForQuestion(realIdx, q);
                 let shortDesc = getQuestionShortDesc(q);
                 let trackMeta = getQuestionPedagogyTrackMeta(q);
                 let goalLabel = getMobileFeedGoalLabel(q.goal);
+                let recommendation = getMobileFeedQuestionRecommendation(realIdx, q, manifestItem, order);
                 let tag = manifestItem?.tags?.length
-                    ? manifestItem.tags.slice(0, 2).join(' · ')
-                    : `${trackMeta.compactLabel} · ${goalLabel}`;
+                    ? `${recommendation.badge} · ${manifestItem.tags.slice(0, 2).join(' · ')}`
+                    : `${recommendation.badge} · ${recommendation.topicTitle}`;
                 let difficulty = Number.isFinite(manifestItem?.difficulty) ? manifestItem.difficulty : null;
                 let estMin = Number.isFinite(manifestItem?.estMin) ? manifestItem.estMin : null;
-                let metaTokens = [];
+                let metaTokens = [recommendation.reason];
                 if (difficulty) metaTokens.push(`קושי ${difficulty}/5`);
                 if (estMin) metaTokens.push(`${estMin} דק׳`);
                 if (!metaTokens.length) metaTokens.push(goalLabel);
@@ -3721,11 +4058,18 @@
                     desc: manifestItem?.deck || shortDesc.first,
                     tag,
                     metaLine: metaTokens.join(' · '),
-                    cta: 'פתח תרגיל',
+                    cta: recommendation.badge === 'המשך' ? 'המשך' : (recommendation.solved ? 'חיזוק קצר' : 'פתח תרגיל'),
                     thumbFile: manifestItem?.thumb || `/thumbs/q-${q?.id ?? realIdx}.png`,
-                    thumbSrc: getMobileFeedThumbDataUrl(`q_${realIdx}_${q?.goal || ''}`, trackMeta.icon || 'ƒ')
+                    thumbSrc: getMobileFeedThumbDataUrl(`q_${realIdx}_${q?.goal || ''}`, trackMeta.icon || 'ƒ'),
+                    recommendation
                 };
             });
+            items.sort((a, b) => {
+                let diff = Number(b?.recommendation?.score || 0) - Number(a?.recommendation?.score || 0);
+                if (diff !== 0) return diff;
+                return Number(a.order || 0) - Number(b.order || 0);
+            });
+            return items;
         }
 
         function getMobileFeedItems() {
@@ -3758,12 +4102,14 @@
         }
 
         function resolveFeaturedQuestionIndex() {
-            let visible = getVisibleQuestionIndexes();
-            if (!visible.length) return -1;
-
             let overrideIdx = findQuestionIndexByHint(ENTRY_FLOW_QUERY.featuredQuestionHint);
             if (overrideIdx >= 0) return overrideIdx;
 
+            let topReco = getMobileFeedQuestionItems()[0];
+            if (Number.isFinite(topReco?.questionIndex)) return Number(topReco.questionIndex);
+
+            let visible = getVisibleQuestionIndexes();
+            if (!visible.length) return -1;
             let key = getIsoWeekKey(new Date());
             let hash = hashMobileFeedSeed(`featured_${key}`);
             return visible[hash % visible.length];
@@ -3827,14 +4173,19 @@
         function buildMobileFeedTickerMessages() {
             let total = getVisibleQuestionIndexes().length;
             let solved = Array.isArray(learnerProgress?.uniqueSolved) ? learnerProgress.uniqueSolved.length : 0;
-            let messages = [
-                'פיד גלילה חדש לנייד: תמונה + כותרת + כניסה מהירה.',
-                `זמינות כרגע ${total} שאלות לתרגול.`,
-                'טיפ: חפשו מילה אחת כדי לקפוץ מהר לתרגיל הרצוי.'
-            ];
-            if (sessionStarted && total > 0) {
-                messages.push(`התקדמות אישית כרגע: ${Math.min(total, solved)}/${total}.`);
+            let topItems = getMobileFeedQuestionItems().slice(0, 3);
+            let continueItem = topItems.find((item) => item?.recommendation?.badge === 'המשך');
+            let messages = [];
+            if (continueItem) {
+                messages.push(`המשך מומלץ עכשיו: ${continueItem.title}. ${continueItem.recommendation.reason}.`);
+            } else if (topItems.length >= 3) {
+                messages.push(`כדאי להתחיל עם: ${topItems.map((item) => item.title).join(' • ')}.`);
+            } else {
+                messages.push('נציג כאן תרגילים קצרים וברורים שמתאימים למצב ההתקדמות הנוכחי.');
             }
+            messages.push(`זמינות כרגע ${total} שאלות לתרגול.`);
+            messages.push('אפשר לחפש תגית אחת כדי להגיע מהר בדיוק לנושא הרצוי.');
+            if (sessionStarted && total > 0) messages.push(`התקדמות אישית כרגע: ${Math.min(total, solved)}/${total}.`);
             return messages;
         }
 
@@ -3878,6 +4229,8 @@
             let manifestItem = getManifestItemForQuestion(mobileFeedFeaturedQuestionIndex, q);
             let trackMeta = getQuestionPedagogyTrackMeta(q);
             let shortDesc = getQuestionShortDesc(q);
+            let visibleOrder = getVisibleQuestionIndexes().indexOf(mobileFeedFeaturedQuestionIndex);
+            let recommendation = getMobileFeedQuestionRecommendation(mobileFeedFeaturedQuestionIndex, q, manifestItem, Math.max(0, visibleOrder));
             let visible = getVisibleQuestionIndexes();
             let pos = visible.indexOf(mobileFeedFeaturedQuestionIndex);
             let labelPos = pos >= 0 ? `שאלה ${pos + 1}` : 'שאלה';
@@ -3888,14 +4241,14 @@
                 thumb.onerror = null;
                 thumb.src = fallbackThumb;
             };
-            let featuredTagTokens = [labelPos];
-            if (manifestItem?.tags?.length) featuredTagTokens.push(...manifestItem.tags.slice(0, 2));
+            let featuredTagTokens = [recommendation.badge || labelPos, recommendation.topicTitle || labelPos];
+            if (manifestItem?.tags?.length) featuredTagTokens.push(...manifestItem.tags.slice(0, 1));
             else featuredTagTokens.push(trackMeta.compactLabel, getMobileFeedGoalLabel(q.goal));
             if (Number.isFinite(manifestItem?.difficulty)) featuredTagTokens.push(`קושי ${manifestItem.difficulty}/5`);
             if (Number.isFinite(manifestItem?.estMin)) featuredTagTokens.push(`${manifestItem.estMin} דק׳`);
             tagEl.innerText = featuredTagTokens.join(' · ');
-            titleEl.innerText = manifestItem?.headline || q?.title || 'שאלת השבוע';
-            descEl.innerText = manifestItem?.deck || shortDesc.first || 'תרגול חזותי מומלץ לשבוע הקרוב.';
+            titleEl.innerText = manifestItem?.headline || q?.title || 'תרגיל מומלץ';
+            descEl.innerText = `${recommendation.reason}. ${manifestItem?.deck || shortDesc.first || 'תרגול חזותי מומלץ לשבוע הקרוב.'}`.trim();
         }
 
         function stopMobileFeedTickerRotation() {
@@ -4588,28 +4941,129 @@
             return firstLine.replace(/\s+/g, ' ').trim() || 'בצע את המשימה';
         }
 
-        function getMissionHintText(q) {
-            if (!q) return '';
+        function getQuestionVisualNoticeText(q) {
+            if (!q) return 'חפשו את הרמז הגרפי המרכזי לפני שנוגעים בכלי נוסף.';
+            let data = getQuestionGoalData(q);
+            if (q.goal === 'choose_function_template') {
+                return 'שימו לב איזה ציור עזר יבליט הכי מהר נקודה, קיצון, חיתוך או שיפוע. לא צריך ציור מושלם, רק ציור שמגלה תנאים.';
+            }
+            if (q.goal === 'slope_zero' || q.goal === 'min_point') {
+                return 'חפשו מקום שבו המשיק נראה אופקי והערך f\'(x) מתקרב ל־0. במינימום בודקים גם מה קורה משני צדי הנקודה.';
+            }
+            if (q.goal === 'slope_equals') {
+                return 'אל תסתכלו רק על צורת הגרף. הסתכלו על הקריאה המספרית של f\'(x)=m וחפשו התאמה יציבה לערך המבוקש.';
+            }
+            if (q.goal === 'y_equals') {
+                return 'התמקדו בגובה של הנקודה על הגרף. ההצלחה כאן היא התאמה של ערך הפונקציה, לא רק מיקום יפה על העקומה.';
+            }
             if (q.goal === 'read_slope' || q.goal === 'read_y') {
-                return 'טיפ: x0 הוא ערך ה-x הנתון בשאלה.\nקודם מקמים את הנקודה הכחולה על x0, אחר כך קוראים את הערך מהחלונית.\nלבסוף מזינים בתיבת התשובה ולוחצים "בדוק תשובה".';
+                let x0 = Number.isFinite(data.fixedX0) ? formatNumber(data.fixedX0) : 'x0';
+                return `הדבר החשוב בציור הוא שהנקודה הכחולה תהיה בדיוק מעל x=${x0}. רק אחר כך קוראים את הערך מהחלונית.`;
             }
             if (q.goal === 'hit_target' || q.goal === 'hit_targets') {
-                let shortDesc = getQuestionShortDesc(q);
-                if (shortDesc.second) return shortDesc.second;
-                return 'טיפ: מה הנתון הזה אומר על הפונקציה? איזו משוואה מתקבלת מהנקודה הזאת?';
+                let targets = Array.isArray(data.targets) ? data.targets : [];
+                if (targets.length > 0) {
+                    return `בציור מחפשים אילו נקודות כבר ידועות על הגרף: ${targets.map((t) => `(${formatNumber(t.x)}, ${formatNumber(t.y)})`).join(', ')}. כל נקודה כזאת היא תנאי אלגברי.`;
+                }
+                return 'הציור צריך להבליט את הנתון שממנו בונים תנאי על הפונקציה או על הנגזרת.';
             }
             if (q.goal === 'tangent_through_point') {
-                return 'טיפ: הסתכלו אם הקו הכתום באמת עובר דרך הנקודה החיצונית.';
+                let point = data.point;
+                if (point && Number.isFinite(point.x) && Number.isFinite(point.y)) {
+                    return `שימו לב שהמשיק הכתום באמת חולף דרך (${formatNumber(point.x)}, ${formatNumber(point.y)}) ולא רק נראה קרוב.`;
+                }
+                return 'שימו לב שהמשיק נוגע בעקומה נכון וגם עובר דרך הנקודה החיצונית.';
             }
-            let shortDesc = getQuestionShortDesc(q);
-            return shortDesc.second || '';
+            return 'חפשו על הגרף מה באמת משתנה עכשיו: נקודה, שיפוע, חיתוך, או כיוון כללי של העקומה.';
+        }
+
+        function getQuestionCommonMistakeText(q) {
+            if (!q) return 'לא רצים לפתור לפני שמזהים מה רואים בגרף.';
+            let data = getQuestionGoalData(q);
+            if (q.goal === 'choose_function_template') {
+                return 'טעות נפוצה היא לבחור פונקציה לפי נוחות העין במקום לפי הנתונים שהשאלה צריכה להבליט.';
+            }
+            if (q.goal === 'slope_zero') {
+                return 'טעות נפוצה היא לעצור במקום שבו השיפוע קטן מאוד אבל עדיין לא בטווח הדיוק, או לא לבדוק שהמשיק באמת אופקי.';
+            }
+            if (q.goal === 'min_point') {
+                return 'טעות נפוצה היא לעצור ב־f\'(x)=0 ולשכוח לבדוק אם זו באמת נקודת מינימום ולא מקסימום או פיתול שטוח.';
+            }
+            if (q.goal === 'slope_equals') {
+                return 'טעות נפוצה היא לחפש "מקום שנראה נכון" בלי לבדוק את ערך השיפוע המספרי בחלונית.';
+            }
+            if (q.goal === 'y_equals') {
+                return 'טעות נפוצה היא להסתכל על מיקום ה־x במקום על הגובה y שהשאלה ביקשה.';
+            }
+            if (q.goal === 'read_slope' || q.goal === 'read_y') {
+                let x0 = Number.isFinite(data.fixedX0) ? formatNumber(data.fixedX0) : 'x0';
+                return `טעות נפוצה היא לענות לפני שהנקודה יושבת בדיוק על x=${x0}, או לשכוח שטווח הדיוק בשאלה מאפשר סטייה קטנה בלבד.`;
+            }
+            if (q.goal === 'hit_target' || q.goal === 'hit_targets') {
+                return 'טעות נפוצה היא להזיז פרמטרים עד שהגרף נראה טוב, אבל לא לכתוב איזה תנאי מתמטי כל נתון יוצר.';
+            }
+            if (q.goal === 'tangent_through_point') {
+                return 'טעות נפוצה היא לכוון קו שנראה קרוב לנקודה החיצונית אבל בפועל חותך את העקומה לא נכון או מפספס את הנקודה.';
+            }
+            return 'טעות נפוצה היא לנסות לפתור מהר מדי במקום לעצור על הרמז הגרפי של השלב הנוכחי.';
+        }
+
+        function getStepHintText(q, step = null) {
+            if (step && typeof step.hintText === 'string' && step.hintText.trim()) return step.hintText.trim();
+            if (!q) return '';
+            if (q.goal === 'read_slope' || q.goal === 'read_y') {
+                return 'רמז: קודם מקמים את הנקודה על x0, אחר כך קוראים את הערך מהחלונית, ורק אז כותבים תשובה.';
+            }
+            if (q.goal === 'hit_target' || q.goal === 'hit_targets') {
+                return 'רמז: שאלו על כל נתון "איזו משוואה הוא יוצר?" לפני שאתם מזיזים עוד פרמטר.';
+            }
+            if (q.goal === 'tangent_through_point') {
+                return 'רמז: בדקו גם את נקודת המגע עם הגרף וגם את המעבר דרך הנקודה החיצונית.';
+            }
+            return getQuestionVisualNoticeText(q);
+        }
+
+        function getMissionHintText(q, step = null) {
+            if (!q) return '';
+            let hint = getStepHintText(q, step);
+            let mistake = (step && typeof step.commonMistake === 'string' && step.commonMistake.trim())
+                ? step.commonMistake.trim()
+                : getQuestionCommonMistakeText(q);
+            return `${hint}\nטעות נפוצה: ${mistake}`;
+        }
+
+        function normalizeQuestionStep(q, step, stepIndex) {
+            let safeStep = (step && typeof step === 'object') ? step : {};
+            let rawInstruction = getShortText(safeStep.instruction, getGoalInstructionText(q));
+            return {
+                ...safeStep,
+                id: String(safeStep.id || safeStep.stepId || `s${stepIndex + 1}`),
+                label: String(safeStep.label || safeStep.title || `שלב ${stepIndex + 1}`).trim(),
+                instruction: rawInstruction,
+                visualNotice: getShortText(safeStep.visualNotice, getQuestionVisualNoticeText(q)),
+                hintText: getShortText(safeStep.hintText, getStepHintText(q, safeStep)),
+                commonMistake: getShortText(safeStep.commonMistake, getQuestionCommonMistakeText(q)),
+                goal: safeStep.goal || {
+                    type: q.goal || 'free',
+                    params: Object.assign({}, getQuestionGoalData(q), {
+                        targetM: q.targetM,
+                        targets: q.targets || getQuestionGoalData(q).targets
+                    })
+                },
+                onComplete: {
+                    toastText: 'יפה! השלמת את המשימה.',
+                    ...(safeStep.onComplete || {})
+                }
+            };
         }
 
         function getQuestionSteps(q) {
-            if (Array.isArray(q.steps) && q.steps.length > 0) return q.steps;
+            if (Array.isArray(q.steps) && q.steps.length > 0) {
+                return q.steps.map((step, stepIndex) => normalizeQuestionStep(q, step, stepIndex));
+            }
             let fallbackGoal = q.goal || 'free';
             let goalData = getQuestionGoalData(q);
-            return [{
+            return [normalizeQuestionStep(q, {
                 instruction: getGoalInstructionText(q),
                 goal: {
                     type: fallbackGoal,
@@ -4621,7 +5075,7 @@
                 onComplete: {
                     toastText: 'יפה! השלמת את המשימה.'
                 }
-            }];
+            }, 0)];
         }
 
         function getQuestionParamSpec(q) {
@@ -7440,8 +7894,9 @@
             return {
                 essence,
                 goal,
-                material: getQuestionMaterialText(q),
-                howTo: getQuestionHowToSteps(q)
+                visualNotice: getQuestionVisualNoticeText(q),
+                howTo: getQuestionHowToSteps(q),
+                commonMistake: getQuestionCommonMistakeText(q)
             };
         }
 
@@ -7450,7 +7905,8 @@
             document.getElementById('overlay-title').innerText = q.title;
             document.getElementById('overlay-essence').innerText = q.overlay?.essence || rich.essence;
             document.getElementById('overlay-goal').innerText = q.overlay?.goal || rich.goal;
-            document.getElementById('overlay-material').innerText = q.overlay?.material || rich.material;
+            document.getElementById('overlay-visual').innerText = q.overlay?.visualNotice || q.overlay?.material || rich.visualNotice;
+            document.getElementById('overlay-mistake').innerText = q.overlay?.commonMistake || rich.commonMistake;
 
             let howTo = document.getElementById('overlay-howto');
             howTo.innerHTML = '';
@@ -7469,16 +7925,18 @@
         function resetOverlaySections() {
             document.getElementById('overlay-essence').classList.remove('hidden');
             document.getElementById('overlay-goal').classList.add('hidden');
-            document.getElementById('overlay-material').classList.add('hidden');
+            document.getElementById('overlay-visual').classList.add('hidden');
             document.getElementById('overlay-howto-wrap').classList.add('hidden');
+            document.getElementById('overlay-mistake').classList.add('hidden');
         }
 
         function toggleOverlaySection(section) {
             const ids = {
                 essence: 'overlay-essence',
                 goal: 'overlay-goal',
-                material: 'overlay-material',
-                howto: 'overlay-howto-wrap'
+                visual: 'overlay-visual',
+                howto: 'overlay-howto-wrap',
+                mistake: 'overlay-mistake'
             };
             const selected = ids[section];
             Object.values(ids).forEach((id) => {
@@ -8437,10 +8895,19 @@
             }
             if (!q) return;
 
-            setMixedBidiText(textEl, `מה עושים עכשיו: ${getGoalInstructionText(q)}`);
+            let step = activeSteps[currentStepIndex] || null;
+            let hintText = getStepHintText(q, step);
+            let visualNotice = (step && step.visualNotice) ? step.visualNotice : getQuestionVisualNoticeText(q);
+            let commonMistake = (step && step.commonMistake) ? step.commonMistake : getQuestionCommonMistakeText(q);
+            setMixedBidiText(textEl, `מה עושים עכשיו: ${step?.instruction || getGoalInstructionText(q)}`);
             setMixedBidiText(successEl, getQuestionSuccessCriteriaText(q));
 
-            let steps = getQuestionHowToSteps(q);
+            let steps = [
+                `רמז ממוקד: ${hintText}`,
+                `מה לשים לב בציור: ${visualNotice}`,
+                ...getQuestionHowToSteps(q).slice(0, 2),
+                `טעות נפוצה: ${commonMistake}`
+            ];
             listEl.innerHTML = '';
             steps.slice(0, 4).forEach((stepText) => {
                 let li = document.createElement('li');
@@ -8476,7 +8943,7 @@
             setMixedBidiText(document.getElementById('mission-step-text'), missionText);
             document.getElementById('top-step-status').innerText = missionText.replace(/\n+/g, ' | ');
             let missionNote = document.getElementById('mission-step-note');
-            if (missionNote) setMixedBidiText(missionNote, getMissionHintText(getCurrentQuestion()));
+            if (missionNote) setMixedBidiText(missionNote, getMissionHintText(getCurrentQuestion(), step));
             renderMissionExpandedHelp();
             updateTopBriefCard(step);
             pushCoachStepEnter('render_mission');
