@@ -62,43 +62,19 @@ async function replaceInFile(filePath, replacements) {
   }
 }
 
-async function bumpAppVersion() {
+async function readAppVersion() {
   const sourceVersionFile = path.join(rootDir, 'public', 'version.json');
-  let versionData = {};
-
   try {
     const raw = await fs.readFile(sourceVersionFile, 'utf8');
-    versionData = JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    const version = typeof parsed?.app_version === 'string' ? parsed.app_version.trim() : '';
+    return version || 'local';
   } catch {
-    versionData = {};
+    return 'local';
   }
-
-  const rawVersion = typeof versionData.app_version === 'string'
-    ? versionData.app_version.trim()
-    : '';
-  const numericVersion = /^\d+$/.test(rawVersion) ? rawVersion : '';
-  const width = Math.max(2, numericVersion.length || 2);
-  const nextVersion = String((numericVersion ? Number(numericVersion) : 0) + 1).padStart(width, '0');
-
-  versionData.app_version = nextVersion;
-  if (typeof versionData.build !== 'string' || !versionData.build.trim()) {
-    versionData.build = '__BUILD_ID__';
-  }
-  if (typeof versionData.build_env !== 'string' || !versionData.build_env.trim()) {
-    versionData.build_env = '__BUILD_ENV__';
-  }
-  if (typeof versionData.build_sha !== 'string' || !versionData.build_sha.trim()) {
-    versionData.build_sha = '__BUILD_SHA__';
-  }
-  if (typeof versionData.generated_at_utc !== 'string' || !versionData.generated_at_utc.trim()) {
-    versionData.generated_at_utc = '__BUILD_TIME__';
-  }
-
-  await fs.writeFile(sourceVersionFile, `${JSON.stringify(versionData, null, 2)}\n`, 'utf8');
-  return nextVersion;
 }
 
-const appVersion = await bumpAppVersion();
+const appVersion = await readAppVersion();
 
 exitOnFailure(runNode([viteBin, 'build']));
 

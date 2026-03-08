@@ -2698,6 +2698,13 @@ body.session-started #builder-template-panel {
     font-size: 0.82rem;
 }
 
+#read-answer-helper {
+    margin-top: 6px;
+    color: #475569;
+    font-size: 0.8rem;
+    line-height: 1.55;
+}
+
 #read-answer-prompt {
     line-height: 1.5;
     unicode-bidi: plaintext;
@@ -2741,6 +2748,48 @@ body.session-started #builder-template-panel {
     font-weight: 700;
     padding: 6px 10px;
     cursor: pointer;
+}
+
+#exam-bridge-panel {
+    margin-top: 12px;
+    border: 1px solid #fcd34d;
+    border-radius: 16px;
+    background: linear-gradient(145deg, rgba(255, 251, 235, 0.96), rgba(255, 247, 237, 0.98));
+    box-shadow: 0 10px 24px rgba(180, 83, 9, 0.08);
+    padding: 14px 14px 12px;
+}
+
+#exam-bridge-title {
+    color: #92400e;
+    font-size: 0.96rem;
+    font-weight: 900;
+    line-height: 1.45;
+}
+
+#exam-bridge-subtitle {
+    margin-top: 4px;
+    color: #9a3412;
+    font-size: 0.82rem;
+    line-height: 1.55;
+}
+
+#exam-bridge-steps {
+    margin: 10px 0 0 0;
+    padding: 0 1.15rem 0 0;
+    display: grid;
+    gap: 6px;
+    color: #7c2d12;
+    line-height: 1.65;
+}
+
+#exam-bridge-final {
+    margin-top: 10px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.82);
+    color: #431407;
+    font-weight: 800;
+    line-height: 1.65;
+    padding: 10px 12px;
 }
 
 .step-actions button:hover {
@@ -7609,6 +7658,117 @@ body.prestart-only #home-preview-column {
     line-height: 1.38;
 }
 
+#home-roadmap-list {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.roadmap-topic-card {
+    display: grid;
+    gap: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.94));
+    padding: 16px;
+}
+
+.roadmap-topic-card[data-status="active"] {
+    border-color: rgba(14, 116, 144, 0.24);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.74), 0 12px 24px rgba(14, 116, 144, 0.08);
+}
+
+.roadmap-topic-card[data-status="scaffold"] {
+    border-style: dashed;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 247, 237, 0.9));
+}
+
+.roadmap-topic-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.roadmap-topic-title {
+    color: var(--home-text-strong);
+    font-size: 1rem;
+    font-weight: 900;
+    line-height: 1.45;
+}
+
+.roadmap-topic-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    border-radius: 999px;
+    background: rgba(15, 118, 110, 0.1);
+    color: #0f766e;
+    font-size: 0.75rem;
+    font-weight: 900;
+    white-space: nowrap;
+    padding: 0 10px;
+}
+
+.roadmap-topic-card[data-status="scaffold"] .roadmap-topic-badge {
+    background: rgba(180, 83, 9, 0.12);
+    color: #b45309;
+}
+
+.roadmap-topic-desc,
+.roadmap-topic-progress,
+.roadmap-topic-upcoming {
+    color: var(--home-text-soft);
+    line-height: 1.65;
+}
+
+.roadmap-topic-progress {
+    font-size: 0.92rem;
+    font-weight: 800;
+}
+
+.roadmap-topic-bar {
+    overflow: hidden;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(191, 219, 254, 0.54);
+}
+
+.roadmap-topic-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #0f766e 0%, #06b6d4 100%);
+}
+
+.roadmap-topic-open {
+    min-height: 46px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+    color: #f8fafc;
+    font-family: 'Assistant', sans-serif;
+    font-size: 0.94rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+    padding: 10px 14px;
+}
+
+.roadmap-topic-open:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(15, 118, 110, 0.22);
+    filter: saturate(1.04);
+}
+
+.roadmap-topic-open:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+    filter: none;
+}
+
 #home-paths {
     display: grid;
     gap: 12px;
@@ -7890,6 +8050,10 @@ body.prestart-only #home-preview-column #graph-area {
 
     #home-advanced-actions,
     #home-question-picker-row {
+        grid-template-columns: 1fr;
+    }
+
+    #home-roadmap-list {
         grid-template-columns: 1fr;
     }
 

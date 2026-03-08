@@ -43,7 +43,9 @@
         lastText: '',
         lastMessage: null,
         hideTimer: null,
-        helpOpen: false
+        helpOpen: false,
+        helpTextOverride: '',
+        helpReasonText: ''
     };
 
     const callbacks = {
@@ -327,11 +329,12 @@
 
     function syncHelpPopover(reasonText) {
         if (!dom.helpPopover) return;
+        const helpText = String(state.helpTextOverride || '').trim();
         if (dom.helpText) {
-            dom.helpText.innerText = state.lastText || 'עדיין אין הודעת עזרה. התחילו את המשימה כדי לקבל הכוונה.';
+            dom.helpText.innerText = helpText || state.lastText || 'עדיין אין הודעת עזרה. התחילו את המשימה כדי לקבל הכוונה.';
         }
         if (dom.helpReason) {
-            const cleanReason = String(reasonText || '').trim();
+            const cleanReason = String(reasonText || state.helpReasonText || '').trim();
             dom.helpReason.classList.toggle('hidden', !cleanReason);
             dom.helpReason.innerText = cleanReason;
         }
@@ -341,8 +344,10 @@
     function setHelpPopoverOpen(open, options = {}) {
         if (!dom.helpPopover) return;
         state.helpOpen = !!open;
+        state.helpTextOverride = state.helpOpen ? String(options.helpText || '').trim() : '';
+        state.helpReasonText = state.helpOpen ? String(options.cleanModeReason || '').trim() : '';
         dom.helpPopover.classList.toggle('hidden', !state.helpOpen);
-        if (state.helpOpen) syncHelpPopover(options.cleanModeReason || '');
+        if (state.helpOpen) syncHelpPopover(options.cleanModeReason || state.helpReasonText || '');
     }
 
     function updateStateFromPayload(payload = {}) {

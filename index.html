@@ -34,43 +34,6 @@
         (function ensureBuildQueryParam() {
             const GUARD_KEY = 'math_visual_head_reload_guard_v3';
 
-            function parseVersionToken(meta) {
-                if (!meta || typeof meta !== 'object') return '';
-                let buildSha = (typeof meta.build_sha === 'string') ? meta.build_sha.trim() : '';
-                if (buildSha && buildSha !== '__BUILD_SHA__') return buildSha;
-                let build = (typeof meta.build === 'string') ? meta.build.trim() : '';
-                if (build && build !== '__BUILD_ID__') return build;
-                let version = (typeof meta.app_version === 'string') ? meta.app_version.trim() : '';
-                if (/^\d+$/.test(version)) return `v${version}`;
-                return '';
-            }
-
-            function fetchVersionMetaSync() {
-                let stamp = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
-                let candidates = [
-                    `/version.json?cb=${stamp}`,
-                    `/public/version.json?cb=${stamp}`,
-                    `version.json?cb=${stamp}`,
-                    `public/version.json?cb=${stamp}`
-                ];
-                for (let path of candidates) {
-                    try {
-                        let xhr = new XMLHttpRequest();
-                        xhr.open('GET', path, false);
-                        xhr.setRequestHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
-                        xhr.setRequestHeader('Pragma', 'no-cache');
-                        xhr.setRequestHeader('Expires', '0');
-                        xhr.send(null);
-                        if (xhr.status < 200 || xhr.status >= 300) continue;
-                        let data = JSON.parse(xhr.responseText || '{}');
-                        if (data && typeof data === 'object') return data;
-                    } catch (err) {
-                        // Try next candidate.
-                    }
-                }
-                return null;
-            }
-
             function resolveExpectedToken() {
                 let buildSha = '__BUILD_SHA__';
                 if (buildSha && buildSha !== '__BUILD_SHA__') return buildSha;
@@ -78,7 +41,7 @@
                 let version = '__APP_VERSION__';
                 if (build && build !== '__BUILD_ID__') return build;
                 if (version && version !== '__APP_VERSION__') return `v${version}`;
-                return parseVersionToken(fetchVersionMetaSync());
+                return '';
             }
 
             try {
@@ -135,9 +98,22 @@
         })();
     </script>
 
-    <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <script
+        type="text/javascript"
+        charset="UTF-8"
+        src="https://cdn.jsdelivr.net/npm/jsxgraph@1.10.1/distrib/jsxgraphcore.js"
+        integrity="sha384-j2eb15DvbzHR1bFK9+SR9DPOYNtKl240eV6GAKCqB4q9WZn1i4JiTACFmlzymI3A"
+        crossorigin="anonymous"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"
+        integrity="sha384-Rv68Y7adOjMMJc1/xFMcdNvXre/HF51to4GZjBALmXr7ABnVl5V4UajJwBu7zbhN"
+        crossorigin="anonymous"></script>
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="https://cdn.jsdelivr.net/npm/jsxgraph@1.10.1/distrib/jsxgraph.css"
+        integrity="sha384-5po7shfMYRqeiRGGNe15zR3Eut1Eycer67e2j0zws+iUa+bgsMoF4VUyJ5TfXQPQ"
+        crossorigin="anonymous" />
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/coach_feedback.css" onerror="this.onerror=null;this.href='/public/coach_feedback.css';">
     <script src="/coach_feedback.js" onerror="this.onerror=null;this.src='/public/coach_feedback.js';"></script>
@@ -166,59 +142,64 @@
             cssIndex += 1;
             document.head.appendChild(cssLink);
 
-            function writeScript(src) {
-                document.write('<script src="' + src + '"><\/script>');
+            function appendScript(src) {
+                return new Promise((resolve, reject) => {
+                    let script = document.createElement('script');
+                    script.src = `${src}?${query}`;
+                    script.async = false;
+                    script.onload = () => resolve(src);
+                    script.onerror = () => reject(new Error(`failed:${src}`));
+                    document.head.appendChild(script);
+                });
             }
 
-            function loadSyncScriptWithFallback(name, candidates, probeFn) {
+            async function loadScriptWithFallback(name, candidates, probeFn) {
                 for (let i = 0; i < candidates.length; i += 1) {
-                    let src = `${candidates[i]}?${query}`;
-                    writeScript(src);
-                    if (probeFn()) {
-                        report(name, true, candidates[i], i === 0 ? 'primary' : 'fallback');
-                        return candidates[i];
+                    let candidate = candidates[i];
+                    try {
+                        await appendScript(candidate);
+                        if (!probeFn || probeFn()) {
+                            report(name, true, candidate, i === 0 ? 'primary' : 'fallback');
+                            return candidate;
+                        }
+                    } catch (err) {
+                        // Try the next candidate.
                     }
-                    report(name, false, candidates[i], i === 0 ? 'primary_failed' : 'fallback_failed');
+                    report(name, false, candidate, i === 0 ? 'primary_failed' : 'fallback_failed');
                 }
                 report(name, false, '', 'not_loaded');
                 return '';
             }
 
-            let questionsPath = loadSyncScriptWithFallback('questions', [
-                '/questions.js',
-                '/public/questions.js',
-                'questions.js',
-                'public/questions.js'
-            ], () => typeof QUESTIONS !== 'undefined');
+            window.__CORE_ASSETS_READY__ = (async () => {
+                let questionsPath = await loadScriptWithFallback('questions', [
+                    '/questions.js',
+                    '/public/questions.js'
+                ], () => typeof QUESTIONS !== 'undefined' || Array.isArray(window.QUESTIONS));
 
-            if (questionsPath.startsWith('/public/') || questionsPath.startsWith('public/')) {
-                window.__ASSET_BASE = '/public/';
-            } else if (questionsPath.startsWith('/')) {
-                window.__ASSET_BASE = '/';
-            } else {
-                window.__ASSET_BASE = '';
-            }
+                if (questionsPath.startsWith('/public/')) {
+                    window.__ASSET_BASE = '/public/';
+                } else {
+                    window.__ASSET_BASE = '/';
+                }
 
-            loadSyncScriptWithFallback('sound', [
-                '/sound.js',
-                '/public/sound.js',
-                'sound.js',
-                'public/sound.js'
-            ], () => typeof toggleSound === 'function');
+                await loadScriptWithFallback('sound', [
+                    '/sound.js',
+                    '/public/sound.js'
+                ], () => typeof toggleSound === 'function');
 
-            loadSyncScriptWithFallback('help_content', [
-                '/helpContent.he.js',
-                '/public/helpContent.he.js',
-                'helpContent.he.js',
-                'public/helpContent.he.js'
-            ], () => typeof window.HELP_CONTENT_HE !== 'undefined');
+                await loadScriptWithFallback('help_content', [
+                    '/helpContent.he.js',
+                    '/public/helpContent.he.js'
+                ], () => typeof window.HELP_CONTENT_HE !== 'undefined');
 
-            loadSyncScriptWithFallback('capacitor', [
-                '/capacitor.js',
-                '/public/capacitor.js',
-                'capacitor.js',
-                'public/capacitor.js'
-            ], () => typeof Capacitor !== 'undefined');
+                await loadScriptWithFallback('capacitor', [
+                    '/capacitor.js',
+                    '/public/capacitor.js'
+                ], () => typeof Capacitor !== 'undefined');
+
+                return { questionsPath };
+            })();
         })();
     </script>
     <style>
@@ -293,7 +274,7 @@
         </div>
     </div>
 
-    <div id="question-overlay" class="hidden" onclick="onOverlayBackdropClick(event)">
+    <div id="question-overlay" class="hidden">
         <div id="question-overlay-card">
             <div class="overlay-head">
                 <div class="overlay-title-wrap">
@@ -454,8 +435,8 @@
     </div>
 
     <div id="step-toast" class="hidden"></div>
-    <input id="scan-question-input-camera" class="scan-file-input" type="file" accept="image/*" capture="environment" onchange="onScanImageSelected(event, 'camera')">
-    <input id="scan-question-input-file" class="scan-file-input" type="file" accept="image/*" onchange="onScanImageSelected(event, 'file')">
+    <input id="scan-question-input-camera" class="scan-file-input" type="file" accept="image/*" capture="environment">
+    <input id="scan-question-input-file" class="scan-file-input" type="file" accept="image/*">
 
     <div id="start-guide-modal" class="hidden" role="dialog" aria-modal="true" aria-label="סיור קצר במסך" onclick="onStartGuideBackdropClick(event)">
         <div id="start-guide-card" class="is-compact" tabindex="-1">
@@ -579,17 +560,17 @@
         </div>
     </div>
 
-    <div id="scan-modal" class="hidden" onclick="onScanModalBackdropClick(event)">
+    <div id="scan-modal" class="hidden">
         <div id="scan-modal-card">
             <div class="overlay-head">
                 <h3>יש לי שאלה. תעזרו לי להבין אותה.</h3>
-                <button onclick="closeScanModal()">סגור</button>
+                <button id="btn-scan-close" type="button">סגור</button>
             </div>
             <div class="scan-body">
                 <p class="scan-intro">בחרו איך להביא את השאלה: לצלם, להעלות תמונה, או פשוט לכתוב אותה.</p>
                 <div class="scan-promise">נפרק יחד את השאלה לציור, לנתונים, ולמשוואות, כדי שתדעו מה פותרים עכשיו.</div>
                 <div class="help-video-cta-row scan-help-video-row">
-                    <button class="help-video-cta help-video-cta-inline" type="button" onclick="openHelpVideo('question_intro')">צפה בהסבר קצר</button>
+                    <button id="btn-scan-help-video" class="help-video-cta help-video-cta-inline" type="button">צפה בהסבר קצר</button>
                 </div>
 
                 <div class="scan-actions-row">
@@ -631,7 +612,7 @@
                         <div id="scan-visual-plan-layers"></div>
                         <div id="scan-visual-plan-complete" class="hidden">
                             <div id="scan-visual-plan-complete-text">אחרי שסידרנו ציור, נתונים ומשוואות, אפשר לחזור לשאלה עם דרך ברורה יותר לפתרון.</div>
-                            <button type="button" id="btn-scan-return-problem" onclick="onScanActionPlanReturnToProblem()">חזרה לשאלה המקורית</button>
+                            <button type="button" id="btn-scan-return-problem">חזרה לשאלה המקורית</button>
                         </div>
                     </div>
                     <ol id="scan-subquestions-list"></ol>
@@ -644,11 +625,11 @@
         </div>
     </div>
 
-    <div id="scan-admin-modal" class="hidden" role="dialog" aria-modal="true" aria-label="הגדרות אדמין לסריקת שאלה" onclick="onScanAdminBackdropClick(event)">
+    <div id="scan-admin-modal" class="hidden" role="dialog" aria-modal="true" aria-label="הגדרות אדמין לסריקת שאלה">
         <div id="scan-admin-card" tabindex="-1">
             <div class="overlay-head">
                 <h3>למורה/אדמין בלבד: הגדרות חיבור ונתונים טכניים</h3>
-                <button type="button" onclick="closeScanAdminModal()">סגור</button>
+                <button id="btn-scan-admin-close" type="button">סגור</button>
             </div>
             <div id="scan-config-box" class="scan-admin-box">
                 <div class="scan-admin-lead">האזור הזה מיועד להגדרת שירות הניתוח במכשיר. תלמידים לא צריכים לגעת בו.</div>
@@ -845,8 +826,8 @@
             <div id="top-actions">
                 <span id="top-question-select-label">כאן בוחרים שאלה:</span>
                 <select id="top-question-select" title="בחירת שאלה"></select>
-                <button id="btn-mobile-feed" class="hidden" type="button" onclick="toggleMobileFeed()">📰 פיד גלילה</button>
-                <button id="btn-back-to-feed" class="hidden" type="button" onclick="goBackToFeedFromQuestion()">↩ חזרה לפיד</button>
+                <button id="btn-mobile-feed" class="hidden" type="button">📰 פיד גלילה</button>
+                <button id="btn-back-to-feed" class="hidden" type="button">↩ חזרה לפיד</button>
                 <button id="btn-top-questions" onclick="toggleQuestionsFromTop()" title="הצג/הסתר משימות ורמזים">משימות/רמזים ▼</button>
                 <button id="btn-clean-mode-toggle" type="button" onclick="togglePracticeCleanModeFromUi()">מצב ריכוז</button>
                 <button id="btn-top-help" type="button" onclick="openGlobalHelpModal()">? עזרה</button>
@@ -2691,7 +2672,11 @@
         function buildGlobalHelpNarration() {
             let content = getResolvedHelpContent();
             let reasonText = document.getElementById('global-help-clean-reason')?.innerText || '';
-            let parts = [content.title].concat(content.bullets);
+            let title = document.getElementById('global-help-title')?.innerText || content.title;
+            let bullets = Array.from(document.querySelectorAll('#global-help-list li'))
+                .map((item) => String(item?.innerText || '').trim())
+                .filter(Boolean);
+            let parts = [title].concat(bullets.length > 0 ? bullets : content.bullets);
             if (reasonText) parts.push(reasonText);
             return parts.map((p) => String(p || '').trim()).filter(Boolean).join('. ');
         }
@@ -4580,13 +4565,21 @@
             return '';
         }
 
+        async function waitForCoreAssetsReady() {
+            try {
+                let pending = window.__CORE_ASSETS_READY__;
+                if (pending && typeof pending.then === 'function') await pending;
+            } catch (err) {
+                // Runtime fallbacks below can still recover.
+            }
+        }
+
         async function ensureQuestionsLoadedAtRuntime() {
+            await waitForCoreAssetsReady();
             if (getQuestionsList().length > 0) return true;
             await loadRuntimeScriptWithFallback('questions', [
                 '/questions.js',
                 '/public/questions.js',
-                'questions.js',
-                'public/questions.js'
             ], () => getQuestionsList().length > 0 || typeof QUESTIONS !== 'undefined');
             return getQuestionsList().length > 0;
         }
@@ -4614,6 +4607,10 @@
                 topSelect.innerHTML = '';
                 topSelect.disabled = true;
             }
+            renderExamBridge(false);
+            renderHomeRoadmap();
+            updateMobileFeedTickerMessages(true);
+            renderMobileFeedCards();
         }
 
         function getCurrentQuestion() {
@@ -6456,6 +6453,51 @@
             retrySplashMusic();
         }
 
+        function bindAuditFlowEvents() {
+            document.getElementById('question-overlay')?.addEventListener('click', onOverlayBackdropClick);
+            document.getElementById('btn-close-overlay')?.addEventListener('click', closeQuestionOverlay);
+            document.getElementById('btn-overlay-primary')?.addEventListener('click', onOverlayPrimaryAction);
+            document.querySelectorAll('[data-overlay-section]').forEach((btn) => {
+                btn.addEventListener('click', () => toggleOverlaySection(btn.dataset.overlaySection || 'essence'));
+            });
+
+            document.getElementById('btn-mobile-feed')?.addEventListener('click', toggleMobileFeed);
+            document.getElementById('btn-back-to-feed')?.addEventListener('click', goBackToFeedFromQuestion);
+            document.getElementById('btn-mobile-feed-close')?.addEventListener('click', () => closeMobileFeed());
+            document.getElementById('mobile-feed-featured-card')?.addEventListener('click', openFeaturedQuestionFromFeed);
+            document.getElementById('mobile-feed-search')?.addEventListener('input', onMobileFeedSearchInput);
+            document.querySelectorAll('#mobile-feed-chips .mobile-feed-chip').forEach((btn) => {
+                btn.addEventListener('click', () => setMobileFeedCategory(btn.dataset.cat || 'all'));
+            });
+
+            document.getElementById('scan-modal')?.addEventListener('click', onScanModalBackdropClick);
+            document.getElementById('btn-scan-close')?.addEventListener('click', closeScanModal);
+            document.getElementById('btn-scan-help-video')?.addEventListener('click', () => openHelpVideo('question_intro'));
+            document.getElementById('btn-scan-camera')?.addEventListener('click', () => triggerScanImageInput('camera'));
+            document.getElementById('btn-scan-upload')?.addEventListener('click', () => triggerScanImageInput('file'));
+            document.getElementById('btn-scan-text')?.addEventListener('click', () => setScanEntryMode('text'));
+            document.getElementById('scan-question-text')?.addEventListener('input', onScanQuestionTextInput);
+            document.getElementById('btn-scan-analyze')?.addEventListener('click', analyzeScannedQuestion);
+            document.getElementById('btn-scan-inject')?.addEventListener('click', injectScannedQuestion);
+            document.getElementById('btn-scan-return-problem')?.addEventListener('click', onScanActionPlanReturnToProblem);
+            document.getElementById('btn-open-scan-admin')?.addEventListener('click', openScanAdminModal);
+            document.getElementById('btn-scan-copy')?.addEventListener('click', copyScannedQuestionObject);
+            document.getElementById('scan-question-input-camera')?.addEventListener('change', (event) => onScanImageSelected(event, 'camera'));
+            document.getElementById('scan-question-input-file')?.addEventListener('change', (event) => onScanImageSelected(event, 'file'));
+            document.getElementById('scan-admin-modal')?.addEventListener('click', onScanAdminBackdropClick);
+            document.getElementById('btn-scan-admin-close')?.addEventListener('click', closeScanAdminModal);
+
+            document.getElementById('btn-read-answer-submit')?.addEventListener('click', submitReadAnswer);
+            document.getElementById('read-answer-input')?.addEventListener('keydown', (event) => {
+                if (event.key !== 'Enter') return;
+                event.preventDefault();
+                submitReadAnswer();
+            });
+
+            document.getElementById('btn-apply-solution')?.addEventListener('click', applyStepSolution);
+            document.getElementById('btn-next-step')?.addEventListener('click', goToNextStep);
+        }
+
         async function init() {
             try {
                 if (history && 'scrollRestoration' in history) history.scrollRestoration = 'manual';
@@ -6466,6 +6508,7 @@
             helpVoiceEnabled = readHelpVoicePreference();
             syncStartCoachPanel(false);
             initModalA11y();
+            bindAuditFlowEvents();
             if (shouldEnableEmbedMode()) {
                 document.body.classList.add('embed-mode');
             }
@@ -6711,6 +6754,7 @@
                 applyTemplateById(activeTemplate.id, false);
             }
 
+            initLearnerProgress();
             if (questions.length > 0) {
                 let startIdx = getFirstPracticeQuestionIndex();
                 loadQ(startIdx >= 0 ? startIdx : 0, { autoOpenOverlay: false });
@@ -6723,7 +6767,6 @@
             updateNormalShiftLabel();
             refreshTestLineControlVisibility();
             updateSoundButton();
-            initLearnerProgress();
             syncSessionUiState();
             toggleNotebookAutoGenerate(notebookAutoGenerateOnDrag);
             renderNotebookSnapshot(null, { keepStatus: false });
@@ -7406,8 +7449,8 @@
             let tol = goalParams.answerTolerance ?? 0.2;
             let expected = goalType === 'read_slope' ? getSlope(x0) : evaluateFunctionAt(x0);
             let inputEl = document.getElementById('read-answer-input');
-            let typed = inputEl ? parseFloat(inputEl.value) : NaN;
-            let probe = Number.isFinite(typed) ? typed : (goalType === 'read_slope' ? m : y);
+            let parsed = inputEl ? parseStudentNumericInput(inputEl.value) : null;
+            let probe = parsed?.ok ? parsed.value : (goalType === 'read_slope' ? m : y);
             let xScore = normalizeDistanceToScore(x - x0, Math.max(0.7, 0.12 * 8));
             let valueScore = normalizeDistanceToScore(probe - expected, Math.max(1, tol * 10));
             return {
@@ -7841,13 +7884,14 @@
             }
             if (goal === 'read_slope' || goal === 'read_y') {
                 let x0 = Number.isFinite(data.fixedX0) ? formatNumber(data.fixedX0) : 'x0';
+                let tol = Number.isFinite(Number(data.answerTolerance)) ? formatNumber(Number(data.answerTolerance)) : '0.2';
                 return [
                     `קבעו את הנקודה בדיוק על x = ${x0} (זהו x0).`,
                     goal === 'read_slope'
                         ? `קראו מתוך חלונית הנתונים את m = f'(${x0}).`
                         : `קראו מתוך חלונית הנתונים את y = f(${x0}).`,
-                    'הזינו את הערך בשדה התשובה (אפשר עם ספרה או שתיים אחרי הנקודה).',
-                    'בדקו תשובה; אם צריך, תקנו קלות וחזרו על הבדיקה.'
+                    'הזינו את הערך בשדה התשובה. אפשר לכתוב גם מספר עשרוני וגם שבר פשוט כמו 1/2.',
+                    `בדקו תשובה; אם צריך, תקנו קלות וחזרו על הבדיקה. טווח הדיוק כאן הוא בערך ±${tol}.`
                 ];
             }
             if (goal === 'hit_target' || goal === 'hit_targets') {
@@ -7950,6 +7994,76 @@
             if (target) target.classList.toggle('hidden');
         }
 
+        function buildExamBridgeContent(q) {
+            if (!q) return null;
+            let data = getQuestionGoalData(q);
+            if (q.goal === 'read_slope' || q.goal === 'read_y') {
+                let x0 = Number.isFinite(Number(data.fixedX0)) ? Number(data.fixedX0) : 0;
+                let expected = q.goal === 'read_slope' ? getSlope(x0) : evaluateFunctionAt(x0);
+                let relation = q.goal === 'read_slope' ? `m = f'(${formatNumber(x0)})` : `y = f(${formatNumber(x0)})`;
+                return {
+                    title: 'כך כותבים את הקריאה הזאת בבגרות',
+                    subtitle: 'מהגרף לכתיבה מדויקת.',
+                    steps: [
+                        `נתון שצריך לקרוא את הערך בנקודה x=${formatNumber(x0)}.`,
+                        q.goal === 'read_slope'
+                            ? `מהגרף/מהנגזרת קוראים את השיפוע בנקודה: ${relation}.`
+                            : `מהגרף קוראים את ערך הפונקציה בנקודה: ${relation}.`,
+                        `${relation} ≈ ${formatNumber(expected)}.`
+                    ],
+                    finalText: `לכן בתשובה מסודרת נכתוב: ${relation} ≈ ${formatNumber(expected)}.`
+                };
+            }
+
+            if (q.goal === 'hit_target' || q.goal === 'hit_targets') {
+                let targets = Array.isArray(data.targets) ? data.targets : [];
+                if (targets.length === 0) return null;
+                let fxText = String(document.getElementById('builder-formula-fx')?.innerText || '').trim();
+                let equations = targets.map((target) => `(${formatNumber(target.x)}, ${formatNumber(target.y)}) על הגרף ולכן f(${formatNumber(target.x)}) = ${formatNumber(target.y)}.`);
+                let steps = [];
+                if (fxText) steps.push(`כותבים את הפונקציה/המשפחה: ${fxText}.`);
+                steps.push(...equations.slice(0, 2));
+                steps.push('מציבים את התנאים שקיבלנו ובונים מערכת משוואות על הפרמטרים.');
+                steps.push('פותרים את המערכת, ואז בודקים שהפונקציה שהתקבלה באמת מתאימה לגרף.');
+                return {
+                    title: 'כך עוברים מציור לכתיבה בבגרות',
+                    subtitle: 'מהנקודות שעל הגרף למשוואות מסודרות.',
+                    steps,
+                    finalText: `לכן הפתרון הכתוב מתחיל מן התנאים ${equations.map((line) => line.replace(/\.$/, '')).join(' , ')}.`
+                };
+            }
+
+            return null;
+        }
+
+        function renderExamBridge(forceVisible = false) {
+            let panel = document.getElementById('exam-bridge-panel');
+            let titleEl = document.getElementById('exam-bridge-title');
+            let subtitleEl = document.getElementById('exam-bridge-subtitle');
+            let listEl = document.getElementById('exam-bridge-steps');
+            let finalEl = document.getElementById('exam-bridge-final');
+            if (!panel || !titleEl || !subtitleEl || !listEl || !finalEl) return;
+
+            let content = buildExamBridgeContent(getCurrentQuestion());
+            if (!forceVisible || !content) {
+                panel.classList.add('hidden');
+                listEl.innerHTML = '';
+                finalEl.innerText = '';
+                return;
+            }
+
+            titleEl.innerText = content.title || 'כך כותבים את זה בבגרות';
+            subtitleEl.innerText = content.subtitle || 'מהרמז הוויזואלי לכתיבה מסודרת.';
+            listEl.innerHTML = '';
+            (content.steps || []).forEach((line) => {
+                let li = document.createElement('li');
+                li.innerText = line;
+                listEl.appendChild(li);
+            });
+            finalEl.innerText = content.finalText || '';
+            panel.classList.remove('hidden');
+        }
+
         function openQuestionOverlay(options = {}) {
             let q = getCurrentQuestion();
             if (q) renderQuestionOverlay(q);
@@ -7987,14 +8101,19 @@
                 readPanel.classList.remove('hidden');
                 let data = getQuestionGoalData(q);
                 let x0 = data.fixedX0 ?? 0;
+                let tol = Number.isFinite(Number(data.answerTolerance)) ? Number(data.answerTolerance) : 0.2;
                 let prompt = q.goal === 'read_slope'
                     ? `קבע x = ${formatNumber(x0)} (זהו x0), קרא את השיפוע, ואז הזן: m = f'(${formatNumber(x0)})`
                     : `קבע x = ${formatNumber(x0)} (זהו x0), קרא את הערך, ואז הזן: y = f(${formatNumber(x0)})`;
                 setMixedBidiText(document.getElementById('read-answer-prompt'), prompt);
                 let readInputEl = document.getElementById('read-answer-input');
                 if (readInputEl) {
-                    readInputEl.placeholder = q.goal === 'read_slope' ? 'הזן כאן את m' : 'הזן כאן את y';
+                    readInputEl.placeholder = q.goal === 'read_slope' ? 'למשל 1.5 או 3/2' : 'למשל -2 או -1/2';
                     readInputEl.title = 'כאן רושמים את התשובה ואז לוחצים "בדוק תשובה"';
+                }
+                let helper = document.getElementById('read-answer-helper');
+                if (helper) {
+                    helper.innerText = `אפשר לענות במספר עשרוני או בשבר פשוט כמו 1/2. הבדיקה כאן סלחנית בטווח ±${formatNumber(tol)}.`;
                 }
                 if (!readAnswerValidated) document.getElementById('read-answer-feedback').innerText = '';
             }
@@ -8721,6 +8840,39 @@
             generateNotebookFromCurrentState(trigger, { skipIfSame: true });
         }
 
+        function parseStudentNumericInput(rawValue) {
+            let raw = String(rawValue || '').trim();
+            if (!raw) return { ok: false, code: 'empty', message: 'כתבו מספר, או שבר פשוט כמו 1/2.' };
+
+            let compact = raw
+                .replace(/[−–—]/g, '-')
+                .replace(/\s+/g, '')
+                .replace(/,/g, '.');
+
+            let fractionMatch = compact.match(/^([+-]?(?:\d+(?:\.\d+)?|\.\d+))\/([+-]?(?:\d+(?:\.\d+)?|\.\d+))$/);
+            if (fractionMatch) {
+                let numerator = Number(fractionMatch[1]);
+                let denominator = Number(fractionMatch[2]);
+                if (!Number.isFinite(numerator) || !Number.isFinite(denominator)) {
+                    return { ok: false, code: 'invalid_fraction', message: 'השבר שכתבתם לא נראה תקין. נסו בפורמט כמו 3/2 או -1/4.' };
+                }
+                if (Math.abs(denominator) < 1e-12) {
+                    return { ok: false, code: 'division_by_zero', message: 'בשבר אי אפשר לחלק ב־0. נסו שוב.' };
+                }
+                return { ok: true, value: numerator / denominator, display: `${fractionMatch[1]}/${fractionMatch[2]}` };
+            }
+
+            if (!/^[+-]?(?:\d+(?:\.\d+)?|\.\d+)$/.test(compact)) {
+                return { ok: false, code: 'invalid_format', message: 'אפשר להזין מספר רגיל, מספר עם פסיק/נקודה, או שבר פשוט כמו 1/2.' };
+            }
+
+            let numeric = Number(compact);
+            if (!Number.isFinite(numeric)) {
+                return { ok: false, code: 'invalid_number', message: 'לא הצלחתי לקרוא את המספר. נסו שוב בפורמט כמו 2, -0.5, או 3/4.' };
+            }
+            return { ok: true, value: numeric, display: compact };
+        }
+
         function submitReadAnswer() {
             let q = getCurrentQuestion();
             if (!q || (q.goal !== 'read_slope' && q.goal !== 'read_y')) return;
@@ -8737,18 +8889,19 @@
                 return;
             }
 
-            let inputVal = parseFloat(document.getElementById('read-answer-input').value);
-            if (!Number.isFinite(inputVal)) {
-                document.getElementById('read-answer-feedback').innerText = 'הזן מספר תקין.';
+            let parsed = parseStudentNumericInput(document.getElementById('read-answer-input')?.value || '');
+            if (!parsed.ok) {
+                document.getElementById('read-answer-feedback').innerText = parsed.message;
                 readAnswerValidated = false;
-                pushCoachWrongAttempt('צריך להזין מספר תקין.', { source: 'read_answer', reason: 'invalid_number' });
+                pushCoachWrongAttempt(parsed.message, { source: 'read_answer', reason: parsed.code || 'invalid_number' });
                 return;
             }
 
+            let inputVal = parsed.value;
             let expected = q.goal === 'read_slope' ? getSlope(x0) : evaluateFunctionAt(x0);
             if (Math.abs(inputVal - expected) <= tol) {
                 readAnswerValidated = true;
-                document.getElementById('read-answer-feedback').innerText = `נכון מאוד. הערך הצפוי הוא בערך ${formatNumber(expected)}.`;
+                document.getElementById('read-answer-feedback').innerText = `נכון מאוד. התשובה שלך בטווח הנכון (בערך ${formatNumber(expected)}, עם סובלנות של ±${formatNumber(tol)}).`;
                 pushCoachEvent('ATTEMPT_CORRECT', {
                     source: 'read_answer',
                     reason: 'answer_in_tolerance',
@@ -8758,7 +8911,7 @@
                 updateInfo();
             } else {
                 readAnswerValidated = false;
-                document.getElementById('read-answer-feedback').innerText = `עדיין לא. בדקו שוב את החלונית ליד הנקודה ונסו שוב (טווח ±${formatNumber(tol)}).`;
+                document.getElementById('read-answer-feedback').innerText = `עדיין לא. בדקו שוב את החלונית ליד הנקודה ונסו שוב. מותר להיות בערך בטווח ±${formatNumber(tol)}.`;
                 pushCoachWrongAttempt('עדיין לא. נסו שוב לפי החלונית ליד הנקודה.', {
                     source: 'read_answer',
                     reason: 'answer_out_of_tolerance'
@@ -9138,6 +9291,10 @@
                 triggerVictoryConfetti();
             }
             wasWin = true;
+            renderHomeRoadmap();
+            updateMobileFeedTickerMessages(false);
+            renderMobileFeedCards();
+            renderExamBridge(true);
             if (suppressCelebration) {
                 completeGuidedStartAction();
             }
@@ -9482,6 +9639,62 @@
             });
         }
 
+        function getHelpVideoFallbackDefinition(videoId) {
+            let id = String(videoId || '').trim();
+            if (id === 'landing_intro') {
+                return {
+                    toast: 'הווידאו עדיין לא הוטמע, אז פתחתי את סיור ההתחלה במקום.',
+                    run: () => openStartGuideModal({ forceLaunchChoice: true })
+                };
+            }
+            if (id === 'guided_intro') {
+                return {
+                    toast: 'הווידאו עדיין לא הוטמע, אז פתחתי את הסיור המודרך במקום.',
+                    run: () => openQuickTour({ force: true })
+                };
+            }
+            if (id === 'parameters_intro') {
+                return {
+                    toast: 'הווידאו עדיין לא הוטמע, אז פתחתי עזרה ממוקדת לפרמטרים.',
+                    run: () => openGlobalHelpModal({
+                        usePopover: false,
+                        title: 'איך עובדים עם פרמטרים',
+                        bullets: [
+                            'מתחילים מהמילים: מה השאלה נותנת לנו על הגרף?',
+                            'בונים ציור עזר ורק אחר כך מתרגמים כל נקודה או שיפוע למשוואה.',
+                            'אוספים תנאים למחברת ורק אז פותרים את הפרמטרים.'
+                        ],
+                        cleanModeReason: 'הציור הוא כלי לחשיפת תנאים, לא קישוט.'
+                    })
+                };
+            }
+            if (id === 'question_intro') {
+                return {
+                    toast: 'הווידאו עדיין לא הוטמע, אז פתחתי עזרה ממוקדת לסריקת שאלה.',
+                    run: () => openGlobalHelpModal({
+                        usePopover: false,
+                        title: 'איך משתמשים ב"יש לי שאלה"',
+                        bullets: [
+                            'אפשר לצלם, להעלות תמונה, או פשוט לכתוב את הנתונים החשובים.',
+                            'המערכת מפרקת קודם לציור, לנתונים ולמשוואות, ולא ישר לפתרון מלא.',
+                            'אם ניתוח תמונה לא זמין, תמיד אפשר לעבור למסלול כתיבה ידנית ולהמשיך.'
+                        ],
+                        cleanModeReason: 'המטרה כאן היא סדר חשיבה, לא קסם שחור של AI.'
+                    })
+                };
+            }
+            return null;
+        }
+
+        function runHelpVideoFallback(videoId) {
+            let fallback = getHelpVideoFallbackDefinition(videoId);
+            if (!fallback || typeof fallback.run !== 'function') return false;
+            closeVideoModal();
+            fallback.run();
+            if (fallback.toast) showStepToast(fallback.toast);
+            return true;
+        }
+
         async function openHelpVideo(videoId) {
             let normalizedId = String(videoId || '').trim();
             if (!normalizedId) return;
@@ -9507,6 +9720,7 @@
 
             if (token !== helpVideoLoadToken) return;
             if (!item) {
+                if (runHelpVideoFallback(normalizedId)) return;
                 renderVideoModalUnavailable({
                     title: 'וידאו הסבר קצר',
                     description: 'נוסיף כאן הסבר קצר ברגע שהסרטון יהיה מוכן.',
@@ -9544,6 +9758,7 @@
                 return;
             }
 
+            if (runHelpVideoFallback(normalizedId)) return;
             renderVideoModalUnavailable({
                 title: item.title,
                 description: item.description || 'נוסיף כאן הסבר קצר ברגע שהסרטון יהיה זמין.',
@@ -9786,9 +10001,11 @@
 
         function syncScanAdminConfigUi(options = {}) {
             let box = document.getElementById('scan-config-box');
+            let entryRow = document.getElementById('scan-admin-entry-row');
             let entryBtn = document.getElementById('btn-open-scan-admin');
             let visible = SHOW_SCAN_ADMIN || scanAdminConfigRevealed;
             if (box) box.classList.toggle('scan-admin-revealed', visible);
+            if (entryRow) entryRow.classList.toggle('hidden', !visible);
             if (entryBtn) entryBtn.classList.toggle('scan-admin-entry-visible', visible);
             if (options.forceOpen) openScanAdminModal();
         }
@@ -9875,16 +10092,16 @@
         function getFriendlyScanErrorMessage(err) {
             let raw = String(err?.message || '').trim();
             if (!raw) return 'לא הצלחתי לפרק את השאלה כרגע. נסו שוב עם צילום חד יותר או עם ניסוח כתוב קצר.';
-            if (/scan_config_missing|api key|openai/i.test(raw)) {
+            if (/scan_config_missing|proxy endpoint|server-side proxy|openai/i.test(raw)) {
                 revealScanAdminConfig();
-                return 'שירות הניתוח עדיין לא הוגדר במכשיר הזה. אם צריך, מורה או אדמין יכולים לפתוח למטה את הגדרות החיבור.';
+                return 'שירות הניתוח עדיין לא הוגדר במכשיר הזה. אם צריך, מורה או אדמין יכולים לפתוח את הגדרות שרת התיווך.';
             }
             if (/json|תשובה ריקה|לא התקבל תוכן/i.test(raw)) {
                 return 'לא הצלחתי להבין את השאלה בצורה יציבה. נסו צילום חד יותר, חיתוך קרוב יותר, או כתיבה ידנית של הנתונים.';
             }
             if (/api|proxy|http/i.test(raw)) {
                 revealScanAdminConfig();
-                return 'לא הצלחתי להתחבר לניתוח כרגע. נסו שוב בעוד כמה שניות, ואם זה חוזר פתחו למטה את אזור המורה/האדמין.';
+                return 'לא הצלחתי להתחבר לניתוח כרגע. נסו שוב בעוד כמה שניות, ואם זה חוזר פתחו את אזור המורה/האדמין.';
             }
             return 'לא הצלחתי לפרק את השאלה כרגע. נסו שוב עם צילום ברור יותר או עם ניסוח כתוב קצר.';
         }
@@ -9940,7 +10157,9 @@
                 if (!raw) return;
                 let cfg = JSON.parse(raw);
                 if (cfg && typeof cfg === 'object') {
-                    if (typeof cfg.endpoint === 'string' && cfg.endpoint.trim()) endpointInput.value = cfg.endpoint.trim();
+                    if (typeof cfg.endpoint === 'string' && cfg.endpoint.trim() && !/openai\.com|\/chat\/completions|\/responses/i.test(cfg.endpoint.trim())) {
+                        endpointInput.value = cfg.endpoint.trim();
+                    }
                     if (typeof cfg.model === 'string' && cfg.model.trim()) modelInput.value = cfg.model.trim();
                     if (remember && typeof cfg.remember === 'boolean') remember.checked = cfg.remember;
                 }
@@ -9953,6 +10172,9 @@
             let endpoint = (document.getElementById('scan-api-endpoint')?.value || '').trim() || DEFAULT_SCAN_API_ENDPOINT;
             let model = (document.getElementById('scan-api-model')?.value || '').trim() || DEFAULT_SCAN_MODEL;
             let remember = !!document.getElementById('scan-remember-config')?.checked;
+            if (/openai\.com|\/chat\/completions|\/responses/i.test(endpoint)) {
+                endpoint = DEFAULT_SCAN_API_ENDPOINT;
+            }
             try {
                 if (!remember) {
                     localStorage.removeItem(SCAN_CONFIG_STORAGE_KEY);
@@ -11491,56 +11713,15 @@ Rules:
         async function callScanVisionApi(imageDataUrl) {
             let endpoint = (document.getElementById('scan-api-endpoint')?.value || '').trim() || DEFAULT_SCAN_API_ENDPOINT;
             let model = (document.getElementById('scan-api-model')?.value || '').trim() || DEFAULT_SCAN_MODEL;
-            let apiKey = (document.getElementById('scan-api-key')?.value || '').trim();
 
             let systemPrompt = getScanSystemPrompt();
             let userPrompt = 'Analyze the attached math problem image and produce a pedagogy-first visual action plan JSON (visual layers + normalized skill tags) following the exact schema. Do not solve the problem.';
-            let isChatCompletions = /\/chat\/completions/i.test(endpoint);
-
-            if (isChatCompletions) {
-                if (!apiKey) throw new Error('חסר API Key לניתוח תמונה ב-OpenAI.');
-                let payload = {
-                    model,
-                    temperature: 0.1,
-                    response_format: { type: 'json_object' },
-                    messages: [
-                        { role: 'system', content: systemPrompt },
-                        {
-                            role: 'user',
-                            content: [
-                                { type: 'text', text: userPrompt },
-                                { type: 'image_url', image_url: { url: imageDataUrl } }
-                            ]
-                        }
-                    ]
-                };
-
-                let res = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                let text = await res.text();
-                let data = {};
-                try { data = JSON.parse(text); } catch (err) { data = {}; }
-                if (!res.ok) {
-                    let apiMessage = data?.error?.message || text || `HTTP ${res.status}`;
-                    throw new Error(`שגיאת API: ${apiMessage}`);
-                }
-                let content = data?.choices?.[0]?.message?.content;
-                if (Array.isArray(content)) {
-                    content = content.map((part) => part?.text || '').join('\n').trim();
-                }
-                if (!content) throw new Error('ה-API החזיר תשובה ריקה.');
-                return parseVisionJsonText(content);
+            if (!endpoint || /example/i.test(endpoint)) throw new Error('scan_config_missing_server_side_proxy');
+            if (/openai\.com|\/chat\/completions|\/responses/i.test(endpoint)) {
+                throw new Error('scan_config_missing_server_side_proxy');
             }
 
             let headers = { 'Content-Type': 'application/json' };
-            if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
             let proxyPayload = {
                 model,
                 image_data_url: imageDataUrl,
@@ -11783,10 +11964,27 @@ Rules:
                 { title: 'אילו משוואות נבנות', lines: getScanSummaryEquationLines(questionDraft) },
                 { title: 'מה פותרים עכשיו', lines: getScanSummarySolveNowLines(questionDraft) }
             ];
-            wrap.innerHTML = sections.map((section, index) => {
-                let items = (section.lines || []).map((line) => `<li>${escapeHtmlText(line)}</li>`).join('');
-                return `<section class="scan-summary-card"><div class="scan-summary-title">${index + 1}. ${escapeHtmlText(section.title)}</div><ul class="scan-summary-list">${items}</ul></section>`;
-            }).join('');
+            wrap.innerHTML = '';
+            sections.forEach((section, index) => {
+                let card = document.createElement('section');
+                card.className = 'scan-summary-card';
+
+                let title = document.createElement('div');
+                title.className = 'scan-summary-title';
+                title.innerText = `${index + 1}. ${section.title}`;
+                card.appendChild(title);
+
+                let list = document.createElement('ul');
+                list.className = 'scan-summary-list';
+                (section.lines || []).forEach((line) => {
+                    let li = document.createElement('li');
+                    li.innerText = line;
+                    list.appendChild(li);
+                });
+
+                card.appendChild(list);
+                wrap.appendChild(card);
+            });
         }
 
         function renderScannedQuestionDraft(questionDraft, visionPayload) {
@@ -12517,6 +12715,9 @@ Rules:
             }
             currentQ = safeIdx;
             let q = questions[safeIdx];
+            if (!learnerProgress) initLearnerProgress();
+            learnerProgress.lastOpenedQuestionId = getQuestionProgressKeyByIndex(safeIdx);
+            saveLearnerProgress();
             let inGuidedEntry = isGuidedEntryMode();
             coachLastStepEnterKey = '';
             if (typeof resetSoundPlayBudget === 'function') resetSoundPlayBudget();
@@ -12655,6 +12856,7 @@ Rules:
             document.getElementById('step-result-panel').classList.add('hidden');
             document.getElementById('btn-apply-solution').classList.add('hidden');
             document.getElementById('btn-next-step').classList.add('hidden');
+            renderExamBridge(false);
             renderMission();
             syncGuidedStartShellContent(q);
             updateSpecialPanels();
@@ -12669,6 +12871,7 @@ Rules:
             renderQuestionOverlay(q);
             if (shouldOpenQuestionIntro) openQuestionOverlay({ trackCoach: false, source: 'auto_intro' });
             else closeQuestionOverlay();
+            renderHomeRoadmap();
             updateMobileFeedTickerMessages(false);
             renderMobileFeedCards();
             if (mustStartFromFunctionSetup) {
