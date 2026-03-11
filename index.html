@@ -372,7 +372,7 @@
                     <track id="video-modal-track" kind="subtitles">
                 </video>
                 <iframe id="video-iframe" class="hidden" src="" title="סרטון הסבר" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-                <div id="video-modal-fallback" aria-live="polite">הסרטון עדיין לא זמין</div>
+                <div id="video-modal-fallback" aria-live="polite">נפתח כאן הסבר חלופי קצר</div>
             </div>
             <div class="overlay-actions">
                 <a id="video-open-link" class="hidden" href="#" target="_blank" rel="noopener noreferrer">פתח בלשונית חדשה</a>
@@ -659,35 +659,41 @@
     <div id="graph-area-wrapper">
         <section id="home-landing" aria-labelledby="home-hero-title">
             <section id="home-hero" class="home-surface">
-                <div class="home-kicker">מתמטיקה שאפשר לראות</div>
-                <h1 id="home-hero-title">כאן רואים מתמטיקה בדרך ברורה</h1>
-                <p id="home-hero-subtitle">לומדים להבין פונקציות, גרפים ושיפועים בצורה ויזואלית, פשוטה, רגועה וצעד־צעד.</p>
-                <div class="help-video-cta-row">
-                    <button class="help-video-cta" type="button" onclick="openHelpVideo('landing_intro')">צפה בהסבר קצר</button>
+                <div class="home-kicker">כאן לומדים לראות מתמטיקה</div>
+                <h1 id="home-hero-title">רגע — אפשר לפתור בלי לראות?</h1>
+                <div id="home-visual-hook" aria-label="שאלת פתיחה">
+                    <div class="home-hook-label">שאלה קטנה להתחלה</div>
+                    <div class="home-hook-question">איפה בגרף השיפוע שווה 0?</div>
+                    <div class="home-hook-note">לא צריך לענות עכשיו. קודם רואים.</div>
                 </div>
+                <p id="home-hero-subtitle">הרבה תלמידים מנסים ישר נוסחאות.<br>אבל בלי לראות קיצון, משיק, שיפוע וצורה קשה להבין מה באמת קורה.<br>כאן לומדים לראות מתמטיקה.</p>
+                <p id="home-hero-support">לא צריך להבין הכול עכשיו. בוחרים דרך אחת ומתחילים.</p>
             </section>
 
             <section id="home-paths-section" class="home-surface" aria-labelledby="home-paths-title">
                 <div class="home-section-head">
                     <div class="home-section-kicker">3 דרכים פשוטות להתחיל</div>
-                    <h2 id="home-paths-title">בוחרים דרך אחת ומקבלים התחלה ברורה</h2>
+                    <h2 id="home-paths-title">בוחרים דרך אחת ומתחילים</h2>
                 </div>
                 <div id="home-paths">
                     <button class="home-path-card" type="button" onclick="beginGuidedStartFromLanding()">
                         <span class="home-path-index">01</span>
                         <span class="home-path-title">תראה לי איך זה עובד</span>
-                        <span class="home-path-desc">סיור קצר שמראה מה רואים במסך ואיך מתחילים בלי להילחץ.</span>
+                        <span class="home-path-desc">סיור קצר שמראה איפה השאלה, איפה הגרף, ומה עושים קודם.</span>
                     </button>
                     <button class="home-path-card" type="button" onclick="startLevelPracticeFromLanding()">
                         <span class="home-path-index">02</span>
-                        <span class="home-path-title">תן לי תרגיל לפי הרמה שלי</span>
-                        <span class="home-path-desc">מתחילים בקל, מתרגלים צעד־צעד, ומתקדמים בלי לקפוץ מהר מדי.</span>
+                        <span class="home-path-title">תן לי תרגיל קל להתחלה</span>
+                        <span class="home-path-desc">נפתח תרגיל אחד קצר וברור, עם צעד ראשון שאפשר להצליח בו מהר.</span>
                     </button>
-                    <button class="home-path-card" type="button" onclick="openScanModal()">
+                    <button class="home-path-card" type="button" onclick="beginScanQuestionFromLanding()">
                         <span class="home-path-index">03</span>
-                        <span class="home-path-title">יש לי שאלה — תעזור לי להבין</span>
-                        <span class="home-path-desc">מביאים שאלה אמיתית ומפרקים אותה יחד לציור, נתונים ומשוואות.</span>
+                        <span class="home-path-title">יש לי שאלה משלי</span>
+                        <span class="home-path-desc">מצלמים, מעלים או כותבים, ואז מפרקים יחד לציור, נתונים ומשוואות.</span>
                     </button>
+                </div>
+                <div id="home-returning-row">
+                    <button id="btn-home-returning" type="button" onclick="continueAsReturningUserFromLanding()">כבר הייתי כאן / דלג למסך העבודה</button>
                 </div>
             </section>
 
@@ -749,8 +755,8 @@
             </div>
             <div id="guided-shell-question" class="guided-shell-card">
                 <div class="guided-shell-zone-label">כאן מופיעה השאלה</div>
-                <div id="guided-shell-question-title">כאן נציג את השאלה הראשונה בצורה רגועה וברורה.</div>
-                <div id="guided-shell-question-text">כאן נראה מה מבקשים, לפני שנוגעים בגרף או בכלי עבודה.</div>
+                <div id="guided-shell-question-title">נתחיל משאלה אחת קצרה וברורה.</div>
+                <div id="guided-shell-question-text">קודם קוראים מה מבקשים. אחר כך מסתכלים על הגרף.</div>
             </div>
             <div id="guided-shell-equations" class="guided-shell-card">
                 <div class="guided-shell-zone-label">כאן אוספים נתונים ובונים משוואות</div>
@@ -762,7 +768,7 @@
                 <div id="guided-start-action-title">שימו לב למה שהגרף מספר</div>
                 <div id="guided-start-action-text">הזיזו את הנקודה המסומנת וחפשו מתי השיפוע מתקרב ל־0.</div>
                 <div id="guided-start-action-hint">רמז: בנקודת קיצון השיפוע הוא 0, ולכן המשיק נראה אופקי.</div>
-                <div id="guided-start-action-readout">כאן נציג בקצרה את ערך ה־x ואת השיפוע בזמן הגרירה.</div>
+                <div id="guided-start-action-readout">כשתזיזו את הנקודה, כאן יופיעו ערך ה־x והשיפוע.</div>
             </div>
         </section>
         <div id="top-strip" hidden>
@@ -1431,7 +1437,7 @@
             voiceUnsupported: 'אין תמיכה בקול בדפדפן הזה',
             privacyNote: 'הדיבור מופק בדפדפן. ייתכן שקול מסוים תלוי-רשת—אפשר להשאיר כבוי.'
         };
-        const HELP_VIDEO_UNAVAILABLE_TEXT = 'הסרטון עדיין לא זמין';
+        const HELP_VIDEO_UNAVAILABLE_TEXT = 'כרגע נפתח כאן הסבר קצר חלופי';
         const HELP_VIDEO_LOADING_TEXT = 'טוענים את הסרטון...';
         const RUNTIME_ASSET_BASE = (() => {
             if (typeof window.__ASSET_BASE === 'string' && window.__ASSET_BASE.trim()) return window.__ASSET_BASE;
@@ -1568,6 +1574,8 @@
         let sessionStarted = false;
         let appEntryMode = 'landing';
         let guidedStartStep = 0;
+        let entryOnboardingState = null;
+        let firstTimeWorkspaceFocusLock = false;
         let questionIntroActive = false;
         let cleanModeManualEnabled = null;
         let paramIntroCleanActive = false;
@@ -1768,8 +1776,8 @@
             if (!questionTitle || !questionText || !actionTitle || !actionText || !actionHint) return;
 
             if (!q) {
-                questionTitle.innerText = 'כאן נציג את השאלה הראשונה בצורה רגועה וברורה.';
-                questionText.innerText = 'כאן נראה מה מבקשים, לפני שנוגעים בגרף או בכלי עבודה.';
+                questionTitle.innerText = 'נתחיל משאלה אחת קצרה וברורה.';
+                questionText.innerText = 'קודם קוראים מה מבקשים, לפני שנוגעים בגרף או בכלי עבודה.';
                 actionTitle.innerText = 'שימו לב למה שהגרף מספר';
                 actionText.innerText = 'נתחיל מצעד קטן אחד על הגרף, בלי להציף את המסך בכלים.';
                 actionHint.innerText = 'קודם מבינים מה רואים, ורק אחר כך פועלים.';
@@ -1781,7 +1789,7 @@
                 .map((line) => line.replace(/\s+/g, ' ').trim())
                 .filter(Boolean);
             questionTitle.innerText = q.title || 'נתחיל בשאלה אחת קצרה וברורה';
-            questionText.innerText = descLines[0] || 'כאן נראה מה מבקשים, לפני שנוגעים בגרף או בכלי עבודה.';
+            questionText.innerText = descLines[0] || 'קודם קוראים מה מבקשים, לפני שנוגעים בגרף או בכלי עבודה.';
 
             if (q.goal === 'slope_zero' || q.goal === 'min_point') {
                 actionTitle.innerText = 'הצעד הראשון: לחפש שיפוע 0';
@@ -1799,7 +1807,7 @@
             let readout = document.getElementById('guided-start-action-readout');
             if (!readout) return;
             if (!isGuidedEntryMode() || guidedStartStep < GUIDED_START_FLOW.ACTION || !Number.isFinite(x) || !Number.isFinite(m)) {
-                readout.innerText = 'כאן נציג בקצרה את ערך ה־x ואת השיפוע בזמן הגרירה.';
+                readout.innerText = 'כשתזיזו את הנקודה, כאן יופיעו ערך ה־x והשיפוע.';
                 return;
             }
             readout.innerText = `כרגע: x = ${formatNumber(x)} | השיפוע f'(x) = ${formatNumber(m)}`;
@@ -1856,8 +1864,8 @@
         }
 
         function beginGuidedWorkspaceTour() {
-            markStartGuideSeen('start:mobile_intro');
             closeStartGuideModal({ skipOverlay: true, preserveMode: true });
+            prepareFocusedFirstTimeWorkspace('start:guided_tour');
             if (!sessionStarted) {
                 markSessionStarted({ entryMode: APP_ENTRY_MODES.GUIDED, preserveCurrentFunction: true });
             } else {
@@ -1866,7 +1874,7 @@
             let qIndex = getGuidedStartQuestionIndex();
             loadQ(qIndex, { autoOpenOverlay: false });
             setGuidedStartStep(GUIDED_START_FLOW.TOUR);
-            quickTourVariant = 'guided_mobile';
+            quickTourVariant = 'guided_start';
             quickTourCompletionAction = 'start_guided_action';
             openQuickTour({ force: true });
         }
@@ -1879,17 +1887,18 @@
 
         function completeGuidedStartAction() {
             if (!isGuidedEntryMode()) return;
+            unlockAdvancedTools('guided_first_success', {
+                keepFocusLock: true,
+                skipToast: true,
+                path: 'tour'
+            });
             setAppEntryMode(APP_ENTRY_MODES.WORKSPACE);
             scheduleMathGymPopup();
-            showStepToast('הצעד הראשון הושלם. עכשיו אפשר להמשיך במרחב העבודה המלא, צעד־צעד.');
+            showStepToast('יפה. עכשיו כבר יותר קל להתחיל. כשתרצו, אפשר לפתוח גם עוד כלים.');
         }
 
         function beginGuidedStartFromLanding() {
-            if (isMobileViewportNow()) {
-                openStartGuideModal();
-                return;
-            }
-            startAppFromSplash('demo');
+            beginGuidedWorkspaceTour();
         }
 
         function syncStartGuideContent() {
@@ -1984,28 +1993,28 @@
 
         function getQuickTourSteps() {
             let studentSafe = isStudentSafeModeEnabled();
-            if (document.body.classList.contains('viewport-mobile') && quickTourVariant === 'guided_mobile') {
+            if (quickTourVariant === 'guided_start') {
                 return [
                     {
                         selectors: ['#guided-shell-question'],
-                        title: 'מה רואים כאן?',
-                        text: 'כאן מופיעה השאלה. כאן כתוב מה מבקשים לפני שנוגעים בגרף.'
+                        title: 'כאן מתחילים לקרוא',
+                        text: 'כאן מופיעה השאלה. קודם קוראים מה מבקשים, בלי לרוץ ישר לחישוב.'
                     },
                     {
                         selectors: ['#graph-area'],
-                        title: 'מה רואים כאן?',
-                        text: 'כאן רואים את הגרף. הוא מראה את הצורה המתמטית ולא רק נוסחה כתובה.'
+                        title: 'כאן רואים את הסיפור',
+                        text: 'כאן רואים את הגרף. הוא מראה קיצון, כיוון ושיפוע עוד לפני נוסחאות.'
                     },
                     {
                         selectors: ['#guided-shell-equations'],
-                        title: 'מה רואים כאן?',
-                        text: 'כאן אוספים נתונים ובונים משוואות. מזה מתחיל הפתרון.'
+                        title: 'כאן מתרגמים למה שרואים',
+                        text: 'מהציור אוספים נקודה, שיפוע או קיצון, ואז כותבים תנאי ומשוואה.'
                     },
                     {
                         selectors: [],
-                        title: 'מה הרעיון?',
-                        text: 'לא מנסים לנחש.\nקודם רואים,\nאחר כך מזהים נתונים,\nואז בונים מהם משוואות.',
-                        nextLabel: 'תראה לי צעד ראשון'
+                        title: 'עכשיו רק צעד אחד',
+                        text: 'לא צריך להבין הכול עכשיו.\nרק מחפשים איפה השיפוע מתקרב ל־0.',
+                        nextLabel: 'יאללה, צעד ראשון'
                     }
                 ];
             }
@@ -2129,7 +2138,7 @@
             if (steps.length === 0) return;
             quickTourStepIndex = Math.max(0, Math.min(steps.length - 1, quickTourStepIndex));
             let step = steps[quickTourStepIndex];
-            if (quickTourVariant === 'guided_mobile') {
+            if (quickTourVariant === 'guided_start') {
                 guidedStartStep = quickTourStepIndex >= 3 ? GUIDED_START_FLOW.IDEA : GUIDED_START_FLOW.TOUR;
                 syncGuidedStartUiState();
             }
@@ -2178,17 +2187,17 @@
             quickTourCurrentTarget = null;
             quickTourActive = true;
             modal.classList.toggle('quick-tour-orientation', quickTourVariant === 'mobile_intro');
-            modal.classList.toggle('quick-tour-guided', quickTourVariant === 'guided_mobile');
+            modal.classList.toggle('quick-tour-guided', quickTourVariant === 'guided_start');
 
             let sampleQuestion = document.getElementById('quick-tour-sample-question');
             let skipBtn = document.getElementById('btn-quick-tour-skip');
             let q = getCurrentQuestion();
             if (sampleQuestion) {
-                if (quickTourVariant === 'guided_mobile') sampleQuestion.innerText = 'קודם מכירים את המסך ורק אחר כך מתחילים לפעול.';
+                if (quickTourVariant === 'guided_start') sampleQuestion.innerText = 'קודם מכירים את המסך ורק אחר כך עושים צעד אחד קטן.';
                 else if (q && q.title) sampleQuestion.innerText = `שאלה לדוגמה: ${q.title}`;
                 else sampleQuestion.innerText = 'שאלה לדוגמה: מצאו נקודת קיצון בעזרת הגרף.';
             }
-            if (skipBtn) skipBtn.innerText = quickTourVariant === 'guided_mobile' ? 'חזרה ללובי' : 'דלג כרגע';
+            if (skipBtn) skipBtn.innerText = quickTourVariant === 'guided_start' ? 'חזרה למסך הפתיחה' : 'דלג כרגע';
 
             modal.classList.remove('hidden');
             syncEntryModalBodyState();
@@ -2196,7 +2205,7 @@
             let demoVideo = document.getElementById('quick-tour-demo-video');
             if (demoVideo) {
                 demoVideo.currentTime = 0;
-                if (quickTourVariant === 'guided_mobile') demoVideo.pause();
+                if (quickTourVariant === 'guided_start') demoVideo.pause();
                 else demoVideo.play().catch(() => {});
             }
         }
@@ -2253,7 +2262,7 @@
         }
 
         function skipQuickTour() {
-            if (quickTourVariant === 'guided_mobile') {
+            if (quickTourVariant === 'guided_start') {
                 abortGuidedStartFlow();
                 return;
             }
@@ -2334,9 +2343,10 @@
             if (document.body.classList.contains('embed-mode')) return 'embed';
             if (ENTRY_FLOW_QUERY.clean === true) return 'query_true';
             if (ENTRY_FLOW_QUERY.clean === false) return 'query_false';
+            if (firstTimeWorkspaceFocusLock) return hasAdvancedToolsUnlocked() ? 'first_time_unlocked' : 'first_time_locked';
             if (cleanModeManualEnabled === true) return 'manual_on';
             if (cleanModeManualEnabled === false) return 'manual_off';
-            if (isStudentSafeModeEnabled()) return 'student_default';
+            if (isStudentSafeModeEnabled() && !hasAdvancedToolsUnlocked()) return 'student_default';
             let q = getCurrentQuestion();
             if (q?.ui?.practiceCleanMode === true) return 'question';
             return 'none';
@@ -2364,6 +2374,10 @@
 
         function disablePracticeCleanModeFromUi() {
             if (!sessionStarted) return;
+            if (firstTimeWorkspaceFocusLock && !hasAdvancedToolsUnlocked()) {
+                showStepToast('עוד כלים נפתחים אחרי שמסיימים צעד ראשון אחד.');
+                return;
+            }
             if (!canTogglePracticeCleanModeManually()) {
                 showStepToast('מצב ריכוז נקבע דרך הקישור (clean=0/1).');
                 return;
@@ -2372,10 +2386,16 @@
                 showStepToast('השאלה הנוכחית מוגדרת למצב ריכוז.');
                 return;
             }
+            firstTimeWorkspaceFocusLock = false;
             setCleanModeManualEnabled(false);
         }
 
         function openToolsFromPracticeCleanMode() {
+            if (firstTimeWorkspaceFocusLock && !hasAdvancedToolsUnlocked()) {
+                openQuestionOverlay({ trackCoach: false, source: 'first_time_task' });
+                showStepToast('קודם קוראים את המשימה, ואז חוזרים לגרף.');
+                return;
+            }
             if (shouldUsePracticeCleanMode()) {
                 disablePracticeCleanModeFromUi();
                 if (shouldUsePracticeCleanMode()) return;
@@ -2423,9 +2443,15 @@
                 } else if (source === 'question') {
                     blocked = true;
                     label = 'ריכוז מובנה בשאלה';
+                } else if (source === 'first_time_locked') {
+                    blocked = true;
+                    label = 'עוד כלים נפתחים בהמשך';
+                } else if (source === 'first_time_unlocked') {
+                    label = 'עוד כלים';
                 }
                 cleanExitBtn.disabled = blocked;
                 cleanExitBtn.innerText = label;
+                cleanExitBtn.classList.toggle('hidden', source === 'first_time_locked');
             }
 
             let practiceParamsBtn = document.getElementById('btn-practice-params');
@@ -2448,6 +2474,8 @@
             let cleanSourceText = document.getElementById('practice-clean-source-text');
             let cleanSourceReason = '';
             if (source === 'query_true') cleanSourceReason = 'מצב ריכוז הופעל דרך הקישור (?clean=1).';
+            else if (source === 'first_time_locked') cleanSourceReason = 'קודם מצליחים פעם אחת במסך רגוע ופשוט. אחר כך אפשר לפתוח עוד כלים.';
+            else if (source === 'first_time_unlocked') cleanSourceReason = 'הצעד הראשון כבר ברור יותר. אפשר להישאר בריכוז, או לפתוח עוד כלים.';
             else if (source === 'student_default') cleanSourceReason = 'כדי לראות רק את הצעד החשוב עכשיו, המסך נפתח קודם במצב מתחילים רגוע ופשוט.';
             else if (source === 'question') cleanSourceReason = 'השאלה הנוכחית מגדירה מצב ריכוז אוטומטי.';
             let showSourceChip = cleanModeActive && !!cleanSourceReason;
@@ -2455,7 +2483,9 @@
             if (cleanSourceText && showSourceChip) {
                 cleanSourceText.innerText = source === 'student_default'
                     ? 'נפתח מצב מתחילים'
-                    : 'מצב ריכוז הופעל אוטומטית';
+                    : (source === 'first_time_locked'
+                        ? 'קודם צעד אחד ברור'
+                        : (source === 'first_time_unlocked' ? 'אפשר לפתוח עוד כלים' : 'מצב ריכוז הופעל אוטומטית'));
             }
             let cleanSourceWhyBtn = document.getElementById('btn-practice-clean-why');
             if (cleanSourceWhyBtn) {
@@ -2609,11 +2639,13 @@
         function scheduleMathGymPopup() {
             if (!sessionStarted) return;
             if (!isWorkspaceEntryMode()) return;
+            if (firstTimeWorkspaceFocusLock && !hasAdvancedToolsUnlocked()) return;
             if (hasSeenMathGymPopup()) return;
             if (mathGymPopupTimer) clearTimeout(mathGymPopupTimer);
             mathGymPopupTimer = setTimeout(() => {
                 mathGymPopupTimer = null;
                 if (!sessionStarted || !isWorkspaceEntryMode() || hasSeenMathGymPopup()) return;
+                if (firstTimeWorkspaceFocusLock && !hasAdvancedToolsUnlocked()) return;
                 openMathGymPopup();
             }, 1800);
         }
@@ -3124,20 +3156,136 @@
             }
         }
 
-        function markStartGuideSeen(reason) {
-            let payload = {
-                seen: true,
-                ts: new Date().toISOString(),
+        function normalizeStartGuideState(raw) {
+            let base = {
+                seen: false,
+                completedFirstAction: false,
+                showAdvancedTools: false,
+                userMode: 'first_time',
+                ts: '',
                 build: APP_BUILD_SHA_SHORT,
                 version: APP_VERSION,
-                reason: String(reason || '').trim() || 'unspecified'
+                reason: '',
+                lastPath: ''
             };
+            if (!raw || typeof raw !== 'object') return base;
+            let hasExplicitUnlock = Object.prototype.hasOwnProperty.call(raw, 'showAdvancedTools');
+            let seen = !!raw.seen;
+            let showAdvancedTools = hasExplicitUnlock ? !!raw.showAdvancedTools : seen;
+            let completedFirstAction = Object.prototype.hasOwnProperty.call(raw, 'completedFirstAction')
+                ? !!raw.completedFirstAction
+                : showAdvancedTools;
+            let requestedMode = String(raw.userMode || '').trim();
+            let userMode = requestedMode === 'returning' || showAdvancedTools || seen ? 'returning' : 'first_time';
+            return Object.assign({}, base, raw, {
+                seen,
+                completedFirstAction,
+                showAdvancedTools,
+                userMode,
+                ts: String(raw.ts || '').trim(),
+                build: String(raw.build || APP_BUILD_SHA_SHORT).trim() || APP_BUILD_SHA_SHORT,
+                version: String(raw.version || APP_VERSION).trim() || APP_VERSION,
+                reason: String(raw.reason || '').trim(),
+                lastPath: String(raw.lastPath || '').trim()
+            });
+        }
+
+        function getEntryOnboardingState() {
+            if (!entryOnboardingState) entryOnboardingState = normalizeStartGuideState(readStartGuideState());
+            return entryOnboardingState;
+        }
+
+        function persistEntryOnboardingState(nextState) {
+            let normalized = normalizeStartGuideState(nextState);
+            entryOnboardingState = normalized;
             try {
-                localStorage.setItem(START_GUIDE_ONBOARDING_STORAGE_KEY, JSON.stringify(payload));
+                localStorage.setItem(START_GUIDE_ONBOARDING_STORAGE_KEY, JSON.stringify(normalized));
             } catch (err) {
                 // Continue when localStorage is unavailable.
             }
-            return payload;
+            return normalized;
+        }
+
+        function updateEntryOnboardingState(patch = {}) {
+            let current = getEntryOnboardingState();
+            let normalizedPatch = Object.assign({}, patch);
+            if (typeof normalizedPatch.reason !== 'undefined') normalizedPatch.reason = String(normalizedPatch.reason || '').trim();
+            if (typeof normalizedPatch.lastPath !== 'undefined') normalizedPatch.lastPath = String(normalizedPatch.lastPath || '').trim();
+            if (typeof normalizedPatch.userMode !== 'undefined') normalizedPatch.userMode = String(normalizedPatch.userMode || '').trim();
+            let next = normalizeStartGuideState(Object.assign({}, current, normalizedPatch, {
+                ts: normalizedPatch.ts || new Date().toISOString(),
+                build: APP_BUILD_SHA_SHORT,
+                version: APP_VERSION
+            }));
+            persistEntryOnboardingState(next);
+            if (appInitialized && document.body) syncSessionUiState();
+            return next;
+        }
+
+        function hasSeenEntryIntro() {
+            return !!getEntryOnboardingState().seen;
+        }
+
+        function hasAdvancedToolsUnlocked() {
+            if (!isStudentSafeModeEnabled()) return true;
+            return !!getEntryOnboardingState().showAdvancedTools;
+        }
+
+        function isFirstTimeStudentFlowActive() {
+            return isStudentSafeModeEnabled() && !hasAdvancedToolsUnlocked();
+        }
+
+        function isReturningUserMode() {
+            return hasSeenEntryIntro() || hasAdvancedToolsUnlocked();
+        }
+
+        function isFirstTimeWorkspaceFocusLocked() {
+            return !!firstTimeWorkspaceFocusLock;
+        }
+
+        function setFirstTimeWorkspaceFocusLock(locked, options = {}) {
+            firstTimeWorkspaceFocusLock = !!locked;
+            if (options.syncUi !== false && appInitialized && document.body) syncSessionUiState();
+        }
+
+        function prepareFocusedFirstTimeWorkspace(reason) {
+            if (!isStudentSafeModeEnabled()) return;
+            if (hasAdvancedToolsUnlocked()) return;
+            markStartGuideSeen(reason || 'first_time_focus');
+            setFirstTimeWorkspaceFocusLock(true, { syncUi: false });
+        }
+
+        function unlockAdvancedTools(reason, options = {}) {
+            let path = String(options.path || getEntryOnboardingState().lastPath || '').trim();
+            let state = updateEntryOnboardingState({
+                seen: true,
+                completedFirstAction: true,
+                showAdvancedTools: true,
+                userMode: 'returning',
+                reason: String(reason || '').trim() || 'first_success',
+                lastPath: path
+            });
+            if (options.keepFocusLock === false) setFirstTimeWorkspaceFocusLock(false, { syncUi: false });
+            if (appInitialized && document.body) syncSessionUiState();
+            if (!options.skipToast) {
+                showStepToast(options.message || 'יפה. עכשיו כבר יותר קל להתחיל.');
+            }
+            return state;
+        }
+
+        function markStartGuideSeen(reason) {
+            let normalizedReason = String(reason || '').trim() || 'unspecified';
+            let current = getEntryOnboardingState();
+            let path = current.lastPath;
+            if (/practice/i.test(normalizedReason)) path = 'practice';
+            else if (/scan|question/i.test(normalizedReason)) path = 'question';
+            else if (/guided|tour|tutorial|demo/i.test(normalizedReason)) path = 'tour';
+            return updateEntryOnboardingState({
+                seen: true,
+                userMode: 'returning',
+                reason: normalizedReason,
+                lastPath: path
+            });
         }
 
         function markStartGuideOnboardingSeen(reason) {
@@ -3148,6 +3296,8 @@
             if (entryFlowHardResetApplied) return;
             if (!ENTRY_FLOW_QUERY.hardReset) return;
             entryFlowHardResetApplied = true;
+            entryOnboardingState = null;
+            firstTimeWorkspaceFocusLock = false;
             try {
                 localStorage.removeItem(START_GUIDE_ONBOARDING_STORAGE_KEY);
                 localStorage.removeItem(QUICK_TOUR_STORAGE_KEY);
@@ -4467,10 +4617,30 @@
             showStepToast('נפתח התרגיל שבחרתם. אפשר לפתוח גם סיור קצר או לעבור ישר לעבודה.');
         }
 
+        function beginScanQuestionFromLanding() {
+            markStartGuideSeen('start:question_path');
+            openScanModal();
+        }
+
+        function continueAsReturningUserFromLanding() {
+            unlockAdvancedTools('start:returning_link', {
+                keepFocusLock: false,
+                skipToast: true,
+                path: 'workspace'
+            });
+            if (!sessionStarted) markSessionStarted();
+            let continueIdx = getContinueQuestionIndex();
+            let startIdx = continueIdx >= 0 ? continueIdx : getFirstPracticeQuestionIndex();
+            loadQ(startIdx >= 0 ? startIdx : currentQ, { autoOpenOverlay: false });
+            setDrawerOpen(false);
+            showStepToast('נכנסתם ישר למסך העבודה. אפשר להמשיך מהמקום הנכון לכם.');
+        }
+
         function startLevelPracticeFromLanding() {
             let startIdx = getFirstPracticeQuestionIndex();
             markStartGuideSeen('start:practice_path');
             closeStartGuideModal({ skipOverlay: true });
+            prepareFocusedFirstTimeWorkspace('start:practice_path');
             if (!sessionStarted) markSessionStarted();
             loadQ(startIdx >= 0 ? startIdx : currentQ, { autoOpenOverlay: true });
             openAccordion('steps');
@@ -9365,11 +9535,21 @@
             }
             if (box) box.classList.toggle('winning-box', !suppressCelebration);
             let progressAward = registerQuestionSolvedProgress();
+            let unlockingAdvanced = !suppressCelebration && !hasAdvancedToolsUnlocked() && firstTimeWorkspaceFocusLock;
+            if (unlockingAdvanced) {
+                unlockAdvancedTools('practice_first_success', {
+                    keepFocusLock: true,
+                    skipToast: true,
+                    path: 'practice'
+                });
+            }
             let message = suppressCelebration
                 ? 'יפה. השלמתם את הצעד הראשון, ועכשיו נפתח את מרחב העבודה המלא.'
-                : 'כל הכבוד! השלמת את המשימה.';
-            if (!suppressCelebration && progressAward.gainedXp > 0) message += ` +${progressAward.gainedXp} נקודות`;
-            if (!suppressCelebration && progressAward.leveledUp) message += ` | עלית לרמה ${progressAward.level}!`;
+                : (unlockingAdvanced
+                    ? 'יפה. עכשיו כבר יותר קל להתחיל. כשתרצו, אפשר לפתוח גם עוד כלים.'
+                    : 'כל הכבוד! השלמת את המשימה.');
+            if (!suppressCelebration && !unlockingAdvanced && progressAward.gainedXp > 0) message += ` +${progressAward.gainedXp} נקודות`;
+            if (!suppressCelebration && !unlockingAdvanced && progressAward.leveledUp) message += ` | עלית לרמה ${progressAward.level}!`;
             showStepToast(message);
             let missionLine = document.getElementById('mission-step-text');
             if (missionLine) missionLine.innerText = `✅ המשימה הושלמה: ${getCurrentQuestion()?.title || ''}`;
@@ -9377,7 +9557,7 @@
             if (topStatus) {
                 topStatus.innerText = suppressCelebration
                     ? '✅ הצעד הראשון הושלם.'
-                    : '✅ המשימה הושלמה. כל הכבוד!';
+                    : (unlockingAdvanced ? '✅ הצעד הראשון הושלם. עוד כלים זמינים.' : '✅ המשימה הושלמה. כל הכבוד!');
             }
             if (!wasWin && !suppressCelebration) {
                 playSound('win');
@@ -9736,19 +9916,19 @@
             let id = String(videoId || '').trim();
             if (id === 'landing_intro') {
                 return {
-                    toast: 'הווידאו עדיין לא הוטמע, אז פתחתי את סיור ההתחלה במקום.',
+                    toast: 'פתחתי במקום סיור התחלה קצר.',
                     run: () => openStartGuideModal({ forceLaunchChoice: true })
                 };
             }
             if (id === 'guided_intro') {
                 return {
-                    toast: 'הווידאו עדיין לא הוטמע, אז פתחתי את הסיור המודרך במקום.',
+                    toast: 'פתחתי במקום סיור מודרך קצר.',
                     run: () => openQuickTour({ force: true })
                 };
             }
             if (id === 'parameters_intro') {
                 return {
-                    toast: 'הווידאו עדיין לא הוטמע, אז פתחתי עזרה ממוקדת לפרמטרים.',
+                    toast: 'פתחתי במקום עזרה ממוקדת לפרמטרים.',
                     run: () => openGlobalHelpModal({
                         usePopover: false,
                         title: 'איך עובדים עם פרמטרים',
@@ -9763,7 +9943,7 @@
             }
             if (id === 'question_intro') {
                 return {
-                    toast: 'הווידאו עדיין לא הוטמע, אז פתחתי עזרה ממוקדת לסריקת שאלה.',
+                    toast: 'פתחתי במקום עזרה ממוקדת לסריקת שאלה.',
                     run: () => openGlobalHelpModal({
                         usePopover: false,
                         title: 'איך משתמשים ב"יש לי שאלה"',
@@ -12265,6 +12445,14 @@ Rules:
                 scannedVisualActionPlan = normalizeScanVisualActionPlan(visionPayload);
                 renderScannedQuestionDraft(draft, visionPayload);
                 setScanStatus('הפירוק מוכן. עברו על הציור, הנתונים והמשוואות שנבנו, ואז פתחו את השאלה בתוך האפליקציה.');
+                if (!hasAdvancedToolsUnlocked()) {
+                    unlockAdvancedTools('scan_breakdown_success', {
+                        keepFocusLock: false,
+                        skipToast: true,
+                        path: 'question'
+                    });
+                    showStepToast('יפה. עכשיו כבר יותר קל להתחיל. אם צריך, אפשר לפתוח גם עוד כלים.');
+                }
             } catch (err) {
                 setScanStatus(getFriendlyScanErrorMessage(err), true);
             } finally {
@@ -12567,7 +12755,7 @@ Rules:
         }
 
         function startGuidedStartFromGuide() {
-            if (document.body.classList.contains('viewport-mobile') && !sessionStarted) {
+            if (!sessionStarted) {
                 beginGuidedWorkspaceTour();
                 return;
             }
@@ -12723,9 +12911,10 @@ Rules:
             if (document.body.classList.contains('embed-mode')) return false;
             if (ENTRY_FLOW_QUERY.clean === true) return true;
             if (ENTRY_FLOW_QUERY.clean === false) return false;
+            if (firstTimeWorkspaceFocusLock) return true;
             if (cleanModeManualEnabled === true) return true;
             if (cleanModeManualEnabled === false) return false;
-            if (isStudentSafeModeEnabled()) return true;
+            if (isStudentSafeModeEnabled() && !hasAdvancedToolsUnlocked()) return true;
             let q = getCurrentQuestion();
             if (q?.ui?.practiceCleanMode === true) return true;
             return false;
@@ -12736,6 +12925,11 @@ Rules:
             let paramIntroClean = !!sessionStarted && isWorkspaceEntryMode() && !practiceClean && !!paramIntroCleanActive;
             document.body.classList.toggle('session-started', sessionStarted);
             document.body.classList.toggle('student-safe-mode', isStudentSafeModeEnabled());
+            document.body.classList.toggle('first-time-student-flow', isFirstTimeStudentFlowActive());
+            document.body.classList.toggle('returning-user-mode', isReturningUserMode());
+            document.body.classList.toggle('advanced-tools-unlocked', hasAdvancedToolsUnlocked());
+            document.body.classList.toggle('advanced-tools-locked', !hasAdvancedToolsUnlocked());
+            document.body.classList.toggle('first-time-workspace-focus', isFirstTimeWorkspaceFocusLocked());
             document.body.classList.toggle('practice-clean-mode', practiceClean);
             document.body.classList.toggle('param-intro-clean', paramIntroClean);
             document.body.classList.toggle('prestart-only', isLandingEntryMode());
