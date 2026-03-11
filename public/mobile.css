@@ -39,6 +39,26 @@ body {
     min-width: min(100%, 320px);
 }
 
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+a:focus-visible {
+    outline: 3px solid #2563eb;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 4px rgba(219, 234, 254, 0.95);
+}
+
+body.viewport-mobile.session-started #graph-area,
+body.viewport-mobile.session-started #graph-area-wrapper {
+    overscroll-behavior: contain;
+}
+
+body.viewport-mobile.session-started #graph-area {
+    touch-action: none;
+}
+
 body.admob-banner-visible {
     --mobile-banner-offset: 60px;
 }
@@ -317,10 +337,13 @@ body.embed-mode #build-badge.embed-build-chip {
     font-size: 0.9rem;
     font-weight: 900;
     color: #7f1d1d;
-    line-height: 1.25;
+    line-height: 1.35;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 #practice-function-inline {
@@ -395,7 +418,8 @@ body.embed-mode #build-badge.embed-build-chip {
     color: #7f1d1d;
     font-weight: 800;
     font-size: 0.78rem;
-    padding: 5px 9px;
+    min-height: var(--tap-min);
+    padding: 8px 12px;
     cursor: pointer;
     white-space: nowrap;
 }
@@ -546,9 +570,9 @@ body.param-intro-clean #btn-param-intro-open-tools:not(.hidden) {
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    min-height: 34px;
+    min-height: var(--tap-min);
     border-radius: 999px;
-    padding: 6px 10px;
+    padding: 8px 12px;
     font-size: 0.82rem;
     font-weight: 800;
     white-space: nowrap;
@@ -964,8 +988,9 @@ body.builder-workspace-mode #top-actions {
 
 #top-actions button {
     border-radius: 999px;
-    font-weight: 700;
-    padding: 4px 8px;
+    min-height: var(--tap-min);
+    font-weight: 800;
+    padding: 8px 12px;
     white-space: nowrap;
     cursor: pointer;
     box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
@@ -982,6 +1007,66 @@ body.builder-workspace-mode #top-actions {
     border-color: #60a5fa;
     background: linear-gradient(120deg, #eff6ff, #dbeafe);
     color: #1d4ed8;
+}
+
+body.student-safe-mode #home-adults,
+body.student-safe-mode #home-advanced,
+body.student-safe-mode #btn-replay-opening,
+body.student-safe-mode #btn-feedback,
+body.student-safe-mode #btn-side-feedback,
+body.student-safe-mode #btn-top-builder,
+body.student-safe-mode #btn-top-init-builder,
+body.student-safe-mode #btn-top-function-edit,
+body.student-safe-mode #btn-side-builder,
+body.student-safe-mode #scan-admin-entry-row,
+body.student-safe-mode #scan-admin-modal,
+body.student-safe-mode #feedback-modal,
+body.student-safe-mode #top-version-badge,
+body.student-safe-mode #build-debug-panel,
+body.student-safe-mode #opening-splash-copy-build-btn,
+body.student-safe-mode #btn-practice-sound,
+body.student-safe-mode #btn-practice-params {
+    display: none !important;
+}
+
+body.student-safe-mode #practice-clean-actions {
+    gap: 8px;
+}
+
+body.student-safe-mode:not(.practice-clean-mode):not(.builder-workspace-mode) #top-formulas,
+body.student-safe-mode:not(.practice-clean-mode):not(.builder-workspace-mode) #acc-item-formulas,
+body.student-safe-mode:not(.practice-clean-mode):not(.builder-workspace-mode) #top-track-badge,
+body.student-safe-mode:not(.practice-clean-mode):not(.builder-workspace-mode) #progress-hint,
+body.student-safe-mode:not(.practice-clean-mode):not(.builder-workspace-mode) #prestart-hint,
+body.student-safe-mode:not(.practice-clean-mode):not(.builder-workspace-mode) #learner-progress-chip,
+body.student-safe-mode:not(.practice-clean-mode):not(.builder-workspace-mode) #btn-scan-question,
+body.student-safe-mode:not(.practice-clean-mode):not(.builder-workspace-mode) #btn-start-guide,
+body.student-safe-mode:not(.practice-clean-mode):not(.builder-workspace-mode) #btn-open-params-inline,
+body.student-safe-mode:not(.practice-clean-mode):not(.builder-workspace-mode) #btn-param-intro-open-params,
+body.student-safe-mode #builder-advanced-details,
+body.student-safe-mode #btn-builder-free-explore,
+body.student-safe-mode #builder-free-explore-note,
+body.student-safe-mode #btn-notebook-clear-history {
+    display: none !important;
+}
+
+body.student-safe-mode:not(.practice-clean-mode):not(.builder-workspace-mode) #top-actions {
+    gap: 8px;
+}
+
+body.student-safe-mode:not(.practice-clean-mode):not(.builder-workspace-mode) #top-question-wrap {
+    max-width: none;
+    flex: 1 1 440px;
+}
+
+body.student-safe-mode:not(.practice-clean-mode):not(.builder-workspace-mode) #top-brief-card {
+    border-color: #fde68a;
+    background: #fffbea;
+}
+
+body.student-safe-mode #top-help,
+body.student-safe-mode #btn-top-help {
+    font-weight: 900;
 }
 
 @media (min-width: 981px) {
@@ -1427,8 +1512,8 @@ body:not(.session-started) #btn-focus-steps-inline {
     justify-content: center;
     border: 2px solid #7f1d1d;
     border-radius: 999px;
-    padding: 5px 10px;
-    min-height: 34px;
+    padding: 8px 12px;
+    min-height: var(--tap-min);
     background: linear-gradient(135deg, #fff7cc 0%, #fedf76 48%, #f59e0b 100%);
     color: #3f2300;
     font-weight: 900;
@@ -2374,7 +2459,8 @@ body.overlay-start-mode #btn-overlay-primary {
     background: #ffffff;
     color: #0f172a;
     font-weight: 700;
-    padding: 7px 10px;
+    min-height: var(--tap-min);
+    padding: 9px 12px;
     cursor: pointer;
     text-align: right;
 }
@@ -2984,7 +3070,11 @@ body.session-started #builder-template-panel {
     align-items: center;
     justify-content: center;
     z-index: 2710;
-    padding: 14px;
+    padding:
+        calc(14px + var(--safe-top))
+        calc(14px + var(--safe-right))
+        calc(14px + var(--safe-bottom))
+        calc(14px + var(--safe-left));
 }
 
 #feedback-modal-card {
@@ -3006,7 +3096,11 @@ body.session-started #builder-template-panel {
     align-items: center;
     justify-content: center;
     z-index: 2740;
-    padding: 14px;
+    padding:
+        calc(14px + var(--safe-top))
+        calc(14px + var(--safe-right))
+        calc(14px + var(--safe-bottom))
+        calc(14px + var(--safe-left));
 }
 
 #scan-admin-modal {
@@ -3017,7 +3111,11 @@ body.session-started #builder-template-panel {
     align-items: center;
     justify-content: center;
     z-index: 2745;
-    padding: 14px;
+    padding:
+        calc(14px + var(--safe-top))
+        calc(14px + var(--safe-right))
+        calc(14px + var(--safe-bottom))
+        calc(14px + var(--safe-left));
 }
 
 #scan-modal-card {
@@ -3115,7 +3213,8 @@ body.session-started #builder-template-panel {
     color: #1e3a8a;
     font-weight: 800;
     font-size: 0.84rem;
-    padding: 6px 11px;
+    min-height: var(--tap-min);
+    padding: 8px 12px;
     cursor: pointer;
     white-space: nowrap;
 }
@@ -3265,6 +3364,7 @@ body.session-started #builder-template-panel {
     color: #0f172a;
     font-size: 0.94rem;
     font-weight: 700;
+    min-height: var(--tap-min);
     padding: 10px 11px;
 }
 
@@ -3290,8 +3390,8 @@ body.session-started #builder-template-panel {
     color: #1e3a8a;
     font-size: 0.78rem;
     font-weight: 800;
-    padding: 5px 10px;
-    min-height: 34px;
+    padding: 8px 12px;
+    min-height: var(--tap-min);
     cursor: pointer;
 }
 
@@ -4247,7 +4347,11 @@ body.session-started #builder-template-panel {
     align-items: center;
     justify-content: center;
     z-index: 2720;
-    padding: 14px;
+    padding:
+        calc(14px + var(--safe-top))
+        calc(14px + var(--safe-right))
+        calc(14px + var(--safe-bottom))
+        calc(14px + var(--safe-left));
 }
 
 #normal-lab-card {
@@ -4303,7 +4407,8 @@ body.session-started #builder-template-panel {
     background: #e9f2ff;
     color: #12356a;
     font-weight: 700;
-    padding: 7px 10px;
+    min-height: var(--tap-min);
+    padding: 9px 12px;
     cursor: pointer;
 }
 
@@ -4323,7 +4428,11 @@ body.session-started #builder-template-panel {
     align-items: center;
     justify-content: center;
     z-index: 2750;
-    padding: 14px;
+    padding:
+        calc(14px + var(--safe-top))
+        calc(14px + var(--safe-right))
+        calc(14px + var(--safe-bottom))
+        calc(14px + var(--safe-left));
     overflow-y: auto;
 }
 
@@ -4388,7 +4497,7 @@ body.session-started #builder-template-panel {
     color: #ffffff;
     font-weight: 900;
     font-size: 0.9rem;
-    min-height: 42px;
+    min-height: var(--tap-min);
     padding: 8px 14px;
     cursor: pointer;
     box-shadow: 0 10px 22px rgba(37, 99, 235, 0.22);
@@ -4662,7 +4771,7 @@ body.session-started #builder-template-panel {
     background: #eff6ff;
     color: #12356a;
     font-weight: 800;
-    min-height: 40px;
+    min-height: var(--tap-min);
     padding: 8px 14px;
     cursor: pointer;
 }
@@ -4691,6 +4800,7 @@ body.session-started #builder-template-panel {
     background: #ffffff;
     color: #0f172a;
     font-weight: 700;
+    min-height: var(--tap-min);
     padding: 8px 12px;
     cursor: pointer;
     transition: transform 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
@@ -4726,7 +4836,11 @@ body.session-started #builder-template-panel {
     align-items: flex-start;
     justify-content: flex-start;
     z-index: 2790;
-    padding: calc(var(--overlay-top-offset) + var(--safe-top)) 14px calc(18px + var(--safe-bottom));
+    padding:
+        calc(var(--overlay-top-offset) + var(--safe-top))
+        calc(14px + var(--safe-right))
+        calc(18px + var(--safe-bottom))
+        calc(14px + var(--safe-left));
     overflow-y: auto;
 }
 
@@ -4843,6 +4957,7 @@ body.session-started #builder-template-panel {
 #quick-tour-actions button {
     border: 1px solid #e2b9b9;
     border-radius: 10px;
+    min-height: var(--tap-min);
     padding: 8px 12px;
     background: #fff;
     color: #0f172a;
@@ -4929,7 +5044,11 @@ body.session-started #builder-template-panel {
     align-items: center;
     justify-content: center;
     z-index: 2760;
-    padding: 12px;
+    padding:
+        calc(12px + var(--safe-top))
+        calc(12px + var(--safe-right))
+        calc(12px + var(--safe-bottom))
+        calc(12px + var(--safe-left));
     overflow-y: auto;
 }
 
@@ -4952,7 +5071,11 @@ body.session-started #builder-template-panel {
     align-items: center;
     justify-content: center;
     z-index: 2765;
-    padding: 12px;
+    padding:
+        calc(12px + var(--safe-top))
+        calc(12px + var(--safe-right))
+        calc(12px + var(--safe-bottom))
+        calc(12px + var(--safe-left));
     overflow-y: auto;
 }
 
@@ -5011,6 +5134,7 @@ body.session-started #builder-template-panel {
     background: #ffffff;
     color: #0f172a;
     font-weight: 700;
+    min-height: var(--tap-min);
     padding: 8px 12px;
     cursor: pointer;
 }

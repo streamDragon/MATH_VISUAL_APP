@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0, s-maxage=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -250,11 +250,11 @@
     </div>
 
     <button id="sound-toggle" onclick="toggleSound()" hidden>🔊</button>
-    <button id="btn-tools-menu" onclick="toggleDrawer()" aria-expanded="false" hidden>☰ כלים ומשימות</button>
+    <button id="btn-tools-menu" onclick="toggleDrawer()" aria-expanded="false" hidden>☰ המשימה והכלים</button>
     <div id="side-quick-actions" class="hidden" aria-label="קיצורי דרך" style="display:none !important;" aria-hidden="true">
         <button id="btn-side-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
         <button id="btn-side-questions" onclick="toggleQuestionsFromTop()">שאלות</button>
-        <button id="btn-side-scan" onclick="openScanModal()">📷 סריקת שאלה</button>
+        <button id="btn-side-scan" onclick="openScanModal()">יש לי שאלה</button>
         <button id="btn-side-feedback" onclick="openFeedbackModal()">כיכר השוק</button>
         <button id="btn-side-overlay" onclick="openQuestionOverlay()">הסבר שאלה מלא</button>
         <button id="btn-side-normal" class="hidden" onclick="openNormalLabGuide()">מעבדת האנך</button>
@@ -275,7 +275,7 @@
         </div>
     </div>
 
-    <div id="question-overlay" class="hidden">
+    <div id="question-overlay" class="hidden" role="dialog" aria-modal="true" aria-label="כרטיס המשימה">
         <div id="question-overlay-card">
             <div class="overlay-head">
                 <div class="overlay-title-wrap">
@@ -356,7 +356,7 @@
         </div>
     </div>
 
-    <div id="video-modal" class="hidden" onclick="onVideoBackdropClick(event)">
+    <div id="video-modal" class="hidden" role="dialog" aria-modal="true" aria-label="סרטון הסבר" onclick="onVideoBackdropClick(event)">
         <div id="video-modal-card">
             <div class="overlay-head">
                 <div class="video-modal-head-copy">
@@ -371,7 +371,7 @@
                     <source id="video-modal-source" src="">
                     <track id="video-modal-track" kind="subtitles">
                 </video>
-                <iframe id="video-iframe" class="hidden" src="" title="Video explanation" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                <iframe id="video-iframe" class="hidden" src="" title="סרטון הסבר" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                 <div id="video-modal-fallback" aria-live="polite">הסרטון עדיין לא זמין</div>
             </div>
             <div class="overlay-actions">
@@ -380,7 +380,7 @@
         </div>
     </div>
 
-    <div id="feedback-modal" class="hidden" onclick="onFeedbackBackdropClick(event)">
+    <div id="feedback-modal" class="hidden" role="dialog" aria-modal="true" aria-label="שליחת משוב" onclick="onFeedbackBackdropClick(event)">
         <div id="feedback-modal-card">
             <div class="overlay-head">
                 <h3>כיכר השוק</h3>
@@ -411,7 +411,7 @@
         </div>
     </div>
 
-    <div id="normal-lab-modal" class="hidden" onclick="onNormalLabBackdropClick(event)">
+    <div id="normal-lab-modal" class="hidden" role="dialog" aria-modal="true" aria-label="הסבר מעבדת האנך" onclick="onNormalLabBackdropClick(event)">
         <div id="normal-lab-card">
             <div class="overlay-head">
                 <h3>הסבר מעבדת האנך</h3>
@@ -484,7 +484,7 @@
         </div>
     </div>
 
-    <div id="quick-tour-modal" class="hidden" onclick="onQuickTourBackdropClick(event)">
+    <div id="quick-tour-modal" class="hidden" role="dialog" aria-modal="true" aria-label="סיור קצר" onclick="onQuickTourBackdropClick(event)">
         <div id="quick-tour-card">
             <div class="modal-mobile-exit-row">
                 <button class="modal-mobile-exit-btn" type="button" onclick="skipQuickTour()">✕ סגור סיור וחזור</button>
@@ -561,7 +561,7 @@
         </div>
     </div>
 
-    <div id="scan-modal" class="hidden">
+    <div id="scan-modal" class="hidden" role="dialog" aria-modal="true" aria-label="יש לי שאלה">
         <div id="scan-modal-card">
             <div class="overlay-head">
                 <h3>יש לי שאלה. תעזרו לי להבין אותה.</h3>
@@ -587,7 +587,7 @@
 
                 <div class="scan-primary-actions">
                     <button id="btn-scan-analyze" type="button">פרק איתי לציור, נתונים ומשוואות</button>
-                    <button id="btn-scan-inject" class="hidden" type="button">הוסף לאפליקציה ופתח</button>
+                    <button id="btn-scan-inject" class="hidden" type="button">פתח את זה לתרגול</button>
                 </div>
                 <div id="scan-device-hint" class="scan-device-hint">בחרו אם לצלם מהטלפון או להעלות תמונה מהמחשב.</div>
 
@@ -658,8 +658,8 @@
         <section id="home-landing" aria-labelledby="home-hero-title">
             <section id="home-hero" class="home-surface">
                 <div class="home-kicker">מתמטיקה שאפשר לראות</div>
-                <h1 id="home-hero-title">אתה לא טיפש — חסרה לך דרך לראות</h1>
-                <p id="home-hero-subtitle">כאן לומדים להבין פונקציות, גרפים ושיפועים בצורה ויזואלית, פשוטה וצעד־צעד.</p>
+                <h1 id="home-hero-title">כאן רואים מתמטיקה בדרך ברורה</h1>
+                <p id="home-hero-subtitle">לומדים להבין פונקציות, גרפים ושיפועים בצורה ויזואלית, פשוטה, רגועה וצעד־צעד.</p>
                 <div class="help-video-cta-row">
                     <button class="help-video-cta" type="button" onclick="openHelpVideo('landing_intro')">צפה בהסבר קצר</button>
                 </div>
@@ -792,7 +792,7 @@
                     <div id="build-debug-values"></div>
                     <div id="build-debug-scripts"></div>
                 </div>
-                <span id="learner-progress-chip">רמה 1 | XP 0 | רצף 0 | 0/0</span>
+                <span id="learner-progress-chip">רמה 1 | נקודות 0 | רצף 0 | 0/0</span>
                 <div id="top-brief-card">
                     <div id="top-brief-head">המשימה עכשיו</div>
                     <div id="top-brief-main">כאן נציג את המשימה של הצעד הזה.</div>
@@ -829,12 +829,12 @@
                 <select id="top-question-select" title="בחירת שאלה"></select>
                 <button id="btn-mobile-feed" class="hidden" type="button">📰 פיד גלילה</button>
                 <button id="btn-back-to-feed" class="hidden" type="button">↩ חזרה לפיד</button>
-                <button id="btn-top-questions" onclick="toggleQuestionsFromTop()" title="הצג/הסתר משימות ורמזים">משימות/רמזים ▼</button>
-                <button id="btn-clean-mode-toggle" type="button" onclick="togglePracticeCleanModeFromUi()">מצב ריכוז</button>
-                <button id="btn-top-help" type="button" onclick="openGlobalHelpModal()">? עזרה</button>
+                <button id="btn-top-questions" onclick="toggleQuestionsFromTop()" title="הצג או הסתר את המשימה">המשימה ▼</button>
+                <button id="btn-clean-mode-toggle" type="button" onclick="togglePracticeCleanModeFromUi()">מצב מתחילים</button>
+                <button id="btn-top-help" type="button" onclick="openGlobalHelpModal()">עזרה</button>
                 <button id="btn-param-intro-open-params" class="hidden" type="button" onclick="openBuilderFromTop()">⚙ פתח פרמטרים</button>
                 <button id="btn-param-intro-open-tools" class="hidden" type="button" onclick="openParamIntroTools()">☰ משימה/כלים</button>
-                <button id="btn-scan-question" onclick="openScanModal()">📷 סריקת שאלה</button>
+                <button id="btn-scan-question" onclick="openScanModal()">יש לי שאלה</button>
                 <button id="btn-replay-opening" onclick="replayOpeningSplash()">פתיח+שיר</button>
                 <button id="btn-top-init-builder" onclick="openInitialBuilderFromTop()">בנייה ראשונית</button>
                 <button id="btn-start-guide" onclick="openStartGuideModal()">סיור מודרך</button>
@@ -855,11 +855,11 @@
             </span>
             <div id="practice-minbar">
                 <div id="practice-clean-actions">
-                    <button id="btn-practice-tools" type="button" onclick="openToolsFromPracticeCleanMode()">☰ כלים</button>
+                    <button id="btn-practice-tools" type="button" onclick="openToolsFromPracticeCleanMode()">המשימה</button>
                     <button id="btn-practice-params" class="hidden" type="button" onclick="openParamsFromPracticeCleanMode()">⚙ פרמטרים</button>
                     <button id="btn-practice-sound" type="button" onclick="toggleSound()">🔊 סאונד</button>
-                    <button id="btn-practice-help" type="button" onclick="openGlobalHelpModal()">? עזרה</button>
-                    <button id="btn-practice-exit" type="button" onclick="disablePracticeCleanModeFromUi()">יציאה ממצב ריכוז</button>
+                    <button id="btn-practice-help" type="button" onclick="openGlobalHelpModal()">עזרה</button>
+                    <button id="btn-practice-exit" type="button" onclick="disablePracticeCleanModeFromUi()">עוד אפשרויות</button>
                 </div>
             </div>
         </div>
@@ -874,7 +874,7 @@
     </div>
 
     <div id="sidebar" class="drawer-collapsed">
-        <button id="drawer-handle" onclick="toggleDrawer()">כלים ומשימות</button>
+        <button id="drawer-handle" onclick="toggleDrawer()">המשימה והכלים</button>
         <div id="drawer-content">
             <div id="drawer-question-head" style="text-align:center; display:none;">
                 <h2 id="q-title">כאן תופיע השאלה הפעילה</h2>
@@ -886,7 +886,7 @@
                 <div id="acc-steps" class="acc-panel">
                     <div id="step-mission-box" class="info-box blue-box">
                         <div id="mission-panel-toolbar">
-                            <button id="btn-hide-mission-panel" type="button" onclick="hideMissionPanel()">הסתר משימות/רמזים</button>
+                            <button id="btn-hide-mission-panel" type="button" onclick="hideMissionPanel()">הסתר את המשימה</button>
                         </div>
                         <div class="info-title">משימה נוכחית</div>
                         <div id="mission-step-text">שלב 1/1: כאן נציג את המשימה ברגע שייפתח תרגיל.</div>
@@ -1166,6 +1166,30 @@
                 return false;
             }
         })();
+
+        const TEACHER_ACCESS_ENABLED = (() => {
+            try {
+                let params = new URLSearchParams(window.location.search);
+                let raw = parseBooleanQueryValue(
+                    params.get('teacher')
+                    || params.get('teacher_view')
+                    || params.get('teacher_mode')
+                    || params.get('adult')
+                    || params.get('admin')
+                );
+                return SHOW_BUILD_DEBUG || SHOW_SCAN_ADMIN || ENABLE_OPTIONAL_ADMIN_EXTENSIONS || raw === true;
+            } catch (err) {
+                return SHOW_BUILD_DEBUG || SHOW_SCAN_ADMIN || ENABLE_OPTIONAL_ADMIN_EXTENSIONS;
+            }
+        })();
+
+        function isStudentSafeModeEnabled() {
+            return !TEACHER_ACCESS_ENABLED;
+        }
+
+        function canAccessTeacherUi() {
+            return !isStudentSafeModeEnabled();
+        }
 
         function readEntryFlowQueryParams() {
             try {
@@ -1543,7 +1567,7 @@
         let appEntryMode = 'landing';
         let guidedStartStep = 0;
         let questionIntroActive = false;
-        let cleanModeManualEnabled = false;
+        let cleanModeManualEnabled = null;
         let paramIntroCleanActive = false;
         let helpVoiceEnabled = false;
         let helpHighlightTimer = null;
@@ -1956,6 +1980,7 @@
         }
 
         function getQuickTourSteps() {
+            let studentSafe = isStudentSafeModeEnabled();
             if (document.body.classList.contains('viewport-mobile') && quickTourVariant === 'guided_mobile') {
                 return [
                     {
@@ -1998,6 +2023,30 @@
                         title: 'מתחילים מהצעד הראשון',
                         text: 'עכשיו פותחים את כרטיס המשימה, מבינים מה מבקשים, ורק אחר כך ניגשים לגרף.',
                         nextLabel: 'פתח את כרטיס המשימה'
+                    }
+                ];
+            }
+            if (studentSafe) {
+                return [
+                    {
+                        selectors: ['#top-question', '#q-title'],
+                        title: 'שלב 1: קוראים את המשימה',
+                        text: 'כאן רואים מה מבקשים עכשיו. תמיד מתחילים בקריאה של המשימה.'
+                    },
+                    {
+                        selectors: ['#top-question-select'],
+                        title: 'שלב 2: בוחרים שאלה',
+                        text: 'כאן מחליפים שאלה לפי מה שרוצים לתרגל.'
+                    },
+                    {
+                        selectors: ['#btn-tools-menu', '#btn-top-questions', '#btn-practice-tools'],
+                        title: 'שלב 3: פותחים את המשימה',
+                        text: 'מכאן פותחים את אזור המשימה, הרמזים והשלבים, ורואים רק את הצעד הבא.'
+                    },
+                    {
+                        selectors: ['#btn-top-help', '#btn-overlay-open', '#btn-practice-help'],
+                        title: 'שלב 4: מבקשים עזרה',
+                        text: 'אם נתקעתם, לוחצים על עזרה או על הסבר מלא ומקבלים כיוון ברור.'
                     }
                 ];
             }
@@ -2231,14 +2280,21 @@
 
         function readCleanModePreference() {
             try {
-                return localStorage.getItem(CLEAN_MODE_STORAGE_KEY) === '1';
+                let raw = localStorage.getItem(CLEAN_MODE_STORAGE_KEY);
+                if (raw === '1') return true;
+                if (raw === '0') return false;
+                return null;
             } catch (err) {
-                return false;
+                return null;
             }
         }
 
         function persistCleanModePreference(enabled) {
             try {
+                if (enabled === null || typeof enabled === 'undefined') {
+                    localStorage.removeItem(CLEAN_MODE_STORAGE_KEY);
+                    return;
+                }
                 localStorage.setItem(CLEAN_MODE_STORAGE_KEY, enabled ? '1' : '0');
             } catch (err) {
                 // Continue when localStorage is unavailable.
@@ -2275,7 +2331,9 @@
             if (document.body.classList.contains('embed-mode')) return 'embed';
             if (ENTRY_FLOW_QUERY.clean === true) return 'query_true';
             if (ENTRY_FLOW_QUERY.clean === false) return 'query_false';
-            if (cleanModeManualEnabled) return 'manual';
+            if (cleanModeManualEnabled === true) return 'manual_on';
+            if (cleanModeManualEnabled === false) return 'manual_off';
+            if (isStudentSafeModeEnabled()) return 'student_default';
             let q = getCurrentQuestion();
             if (q?.ui?.practiceCleanMode === true) return 'question';
             return 'none';
@@ -2286,7 +2344,7 @@
         }
 
         function setCleanModeManualEnabled(enabled) {
-            cleanModeManualEnabled = !!enabled;
+            cleanModeManualEnabled = typeof enabled === 'boolean' ? enabled : null;
             persistCleanModePreference(cleanModeManualEnabled);
             syncSessionUiState();
         }
@@ -2297,7 +2355,8 @@
                 showStepToast('מצב ריכוז נקבע דרך הקישור (clean=0/1).');
                 return;
             }
-            setCleanModeManualEnabled(!cleanModeManualEnabled);
+            let nextEnabled = !document.body.classList.contains('practice-clean-mode');
+            setCleanModeManualEnabled(nextEnabled);
         }
 
         function disablePracticeCleanModeFromUi() {
@@ -2347,14 +2406,14 @@
             if (topToggleBtn) {
                 let showTopToggle = !!sessionStarted && isWorkspaceEntryMode() && !cleanModeActive && !paramIntroActive;
                 topToggleBtn.classList.toggle('hidden', !showTopToggle);
-                topToggleBtn.innerText = cleanModeManualEnabled ? 'מצב ריכוז פעיל' : 'מצב ריכוז';
+                topToggleBtn.innerText = cleanModeManualEnabled === false ? 'הפעל מצב מתחילים' : 'מצב מתחילים';
                 topToggleBtn.disabled = !canTogglePracticeCleanModeManually();
             }
 
             let cleanExitBtn = document.getElementById('btn-practice-exit');
             if (cleanExitBtn) {
                 let blocked = false;
-                let label = 'יציאה ממצב ריכוז';
+                let label = 'עוד אפשרויות';
                 if (source === 'query_true') {
                     blocked = true;
                     label = 'מצב ריכוז נעול (?clean=1)';
@@ -2368,22 +2427,33 @@
 
             let practiceParamsBtn = document.getElementById('btn-practice-params');
             if (practiceParamsBtn) {
-                practiceParamsBtn.classList.toggle('hidden', !(cleanModeActive && canBuilder));
+                practiceParamsBtn.classList.toggle('hidden', !(cleanModeActive && canBuilder && !isStudentSafeModeEnabled()));
             }
 
             let practiceSoundBtn = document.getElementById('btn-practice-sound');
             if (practiceSoundBtn) {
-                practiceSoundBtn.classList.toggle('hidden', !cleanModeActive);
+                practiceSoundBtn.classList.toggle('hidden', !cleanModeActive || isStudentSafeModeEnabled());
             }
+
+            let practiceToolsBtn = document.getElementById('btn-practice-tools');
+            if (practiceToolsBtn) practiceToolsBtn.innerText = 'המשימה';
+
+            let practiceHelpBtn = document.getElementById('btn-practice-help');
+            if (practiceHelpBtn) practiceHelpBtn.innerText = 'עזרה';
 
             let cleanSourceChip = document.getElementById('practice-clean-source-chip');
             let cleanSourceText = document.getElementById('practice-clean-source-text');
             let cleanSourceReason = '';
             if (source === 'query_true') cleanSourceReason = 'מצב ריכוז הופעל דרך הקישור (?clean=1).';
+            else if (source === 'student_default') cleanSourceReason = 'כדי לראות רק את הצעד החשוב עכשיו, המסך נפתח קודם במצב מתחילים רגוע ופשוט.';
             else if (source === 'question') cleanSourceReason = 'השאלה הנוכחית מגדירה מצב ריכוז אוטומטי.';
             let showSourceChip = cleanModeActive && !!cleanSourceReason;
             if (cleanSourceChip) cleanSourceChip.classList.toggle('hidden', !showSourceChip);
-            if (cleanSourceText && showSourceChip) cleanSourceText.innerText = 'מצב ריכוז הופעל אוטומטית';
+            if (cleanSourceText && showSourceChip) {
+                cleanSourceText.innerText = source === 'student_default'
+                    ? 'נפתח מצב מתחילים'
+                    : 'מצב ריכוז הופעל אוטומטית';
+            }
             let cleanSourceWhyBtn = document.getElementById('btn-practice-clean-why');
             if (cleanSourceWhyBtn) {
                 cleanSourceWhyBtn.dataset.cleanReason = cleanSourceReason;
@@ -2391,7 +2461,7 @@
 
             let paramIntroParamsBtn = document.getElementById('btn-param-intro-open-params');
             if (paramIntroParamsBtn) {
-                paramIntroParamsBtn.classList.toggle('hidden', !(paramIntroActive && canBuilder));
+                paramIntroParamsBtn.classList.toggle('hidden', !(paramIntroActive && canBuilder && !isStudentSafeModeEnabled()));
             }
             let paramIntroToolsBtn = document.getElementById('btn-param-intro-open-tools');
             if (paramIntroToolsBtn) {
@@ -3469,7 +3539,7 @@
             let level = getProgressLevel(learnerProgress.totalXp);
             let solved = Array.isArray(learnerProgress.uniqueSolved) ? learnerProgress.uniqueSolved.length : 0;
             let totalQuestions = getVisibleQuestionIndexes().length || getQuestionsList().length;
-            chip.innerText = `רמה ${level} | XP ${learnerProgress.totalXp} | רצף ${learnerProgress.streakDays} | ${Math.min(solved, totalQuestions)}/${totalQuestions}`;
+            chip.innerText = `רמה ${level} | נקודות ${learnerProgress.totalXp} | רצף ${learnerProgress.streakDays} | ${Math.min(solved, totalQuestions)}/${totalQuestions}`;
         }
 
         function initLearnerProgress() {
@@ -6022,7 +6092,7 @@
             let btn = document.getElementById('btn-overlay-primary');
             let mini = document.getElementById('overlay-mini-label');
             if (btn) btn.innerText = questionIntroActive
-                ? (sessionStarted ? 'הבנתי, התחל שאלה' : 'עברו לגרף ולמחברת')
+                ? (sessionStarted ? 'הבנתי, התחל שאלה' : (isStudentSafeModeEnabled() ? 'עברו לגרף ולמשימה' : 'עברו לגרף ולמחברת'))
                 : 'סגור כרטיס';
             if (mini) mini.innerText = questionIntroActive
                 ? (sessionStarted ? 'לפני תחילת השאלה' : 'לפני שמתחילים')
@@ -6045,7 +6115,7 @@
         function syncTopInlineQuickActions() {
             let paramsBtn = document.getElementById('btn-open-params-inline');
             let focusBtn = document.getElementById('btn-focus-steps-inline');
-            let canBuilder = canOpenBuilderForQuestion(getCurrentQuestion());
+            let canBuilder = canOpenBuilderForQuestion(getCurrentQuestion()) && !isStudentSafeModeEnabled();
             let builderOpen = isBuilderPanelExpanded();
 
             if (paramsBtn) {
@@ -6249,8 +6319,8 @@
                 drawerHandle.classList.toggle('hidden', isEmbed);
                 if (!isEmbed) {
                     drawerHandle.innerText = drawerOpen
-                        ? '▲ סגור כלים ומשימות'
-                        : '▼ פתח כלים ומשימות';
+                        ? '▲ סגור משימה וכלים'
+                        : '▼ פתח משימה וכלים';
                 }
             }
             let toolsBtn = document.getElementById('btn-tools-menu');
@@ -6258,8 +6328,8 @@
                 if (isEmbed) toolsBtn.style.display = 'inline-flex';
                 else toolsBtn.style.removeProperty('display');
                 toolsBtn.innerText = drawerOpen
-                    ? '✕ סגור כלים'
-                    : '☰ כלים ומשימות';
+                    ? '✕ סגור משימה'
+                    : '☰ המשימה והכלים';
                 toolsBtn.setAttribute('aria-expanded', drawerOpen ? 'true' : 'false');
                 toolsBtn.classList.toggle('is-open', drawerOpen);
             }
@@ -6296,13 +6366,13 @@
             let btn = document.getElementById('btn-top-questions');
             if (!btn) return;
             let stepsOpen = isTopQuestionsPanelOpen();
-            btn.innerText = stepsOpen ? 'משימות/רמזים ▲' : 'משימות/רמזים ▼';
+            btn.innerText = stepsOpen ? 'המשימה ▲' : 'המשימה ▼';
         }
 
         function hideMissionPanel() {
             closeAllAccordions();
             setDrawerOpen(false);
-            showStepToast('פאנל המשימות הוסתר. אפשר להחזיר עם "משימות/רמזים" למעלה.');
+            showStepToast('המשימה הוסתרה. אפשר להחזיר אותה עם הכפתור "המשימה" למעלה.');
         }
 
         function isTopQuestionsPanelOpen() {
@@ -9294,7 +9364,7 @@
             let message = suppressCelebration
                 ? 'יפה. השלמתם את הצעד הראשון, ועכשיו נפתח את מרחב העבודה המלא.'
                 : 'כל הכבוד! השלמת את המשימה.';
-            if (!suppressCelebration && progressAward.gainedXp > 0) message += ` +${progressAward.gainedXp} XP`;
+            if (!suppressCelebration && progressAward.gainedXp > 0) message += ` +${progressAward.gainedXp} נקודות`;
             if (!suppressCelebration && progressAward.leveledUp) message += ` | עלית לרמה ${progressAward.level}!`;
             showStepToast(message);
             let missionLine = document.getElementById('mission-step-text');
@@ -9913,6 +9983,7 @@
         }
 
         function openFeedbackModal() {
+            if (!canAccessTeacherUi()) return;
             loadFeedbackMessages();
             renderFeedbackList();
             setFeedbackStatus('');
@@ -10022,14 +10093,15 @@
             let box = document.getElementById('scan-config-box');
             let entryRow = document.getElementById('scan-admin-entry-row');
             let entryBtn = document.getElementById('btn-open-scan-admin');
-            let visible = SHOW_SCAN_ADMIN || scanAdminConfigRevealed;
+            let visible = !isStudentSafeModeEnabled() && (SHOW_SCAN_ADMIN || scanAdminConfigRevealed);
             if (box) box.classList.toggle('scan-admin-revealed', visible);
             if (entryRow) entryRow.classList.toggle('hidden', !visible);
             if (entryBtn) entryBtn.classList.toggle('scan-admin-entry-visible', visible);
-            if (options.forceOpen) openScanAdminModal();
+            if (options.forceOpen && visible) openScanAdminModal();
         }
 
         function toggleScanAdminConfig(forceOpen) {
+            if (!canAccessTeacherUi()) return;
             if (typeof forceOpen === 'boolean' && !forceOpen) {
                 closeScanAdminModal();
                 return;
@@ -10039,11 +10111,13 @@
         }
 
         function revealScanAdminConfig() {
+            if (!canAccessTeacherUi()) return;
             scanAdminConfigRevealed = true;
             syncScanAdminConfigUi({ forceOpen: true });
         }
 
         function openScanAdminModal() {
+            if (!canAccessTeacherUi()) return;
             scanAdminConfigRevealed = true;
             let modal = document.getElementById('scan-admin-modal');
             if (!modal) return;
@@ -11515,15 +11589,15 @@
             let meta = getVisualSkillRegistryMeta(tag, skillObject);
             let title = getShortText(skillObject?.title || '', meta.heTitle || tag);
             let exerciseType = skillObject?.ui_exercise_type || meta.defaultExerciseType || 'classification';
-            let line = `נפתח שלב ויזואלי: ${title} | מודול ${meta.launcherKey} | תרגול ${exerciseType}`;
-            setScanStatus(`נפתח שלב ויזואלי: ${title}`, false);
-            showStepToast(`שלב ויזואלי: ${title}`);
+            let line = `נפתח תרגול קצר: ${title} | מודול ${meta.launcherKey} | תרגול ${exerciseType}`;
+            setScanStatus(`נפתח תרגול קצר: ${title}`, false);
+            showStepToast(`נפתח תרגול קצר: ${title}`);
             console.log(line, { skillCategory: tag, skillObject: skillObject || null });
         }
 
         function onScanActionPlanReturnToProblem() {
             setScanStatus('חזרתם לשאלה המקורית. עכשיו אפשר לעבור לבניית השאלה או להמשיך באימון.', false);
-            showStepToast('חזרתם לשאלה המקורית. המשיכו לאימון/הזרקה.');
+            showStepToast('חזרתם לשאלה המקורית. עכשיו אפשר להמשיך לשאלה בצורה מסודרת.');
         }
 
         function renderScanVisualActionPlan(visionPayload) {
@@ -12524,6 +12598,8 @@ Rules:
             if (ENTRY_FLOW_QUERY.clean === true) return true;
             if (ENTRY_FLOW_QUERY.clean === false) return false;
             if (cleanModeManualEnabled === true) return true;
+            if (cleanModeManualEnabled === false) return false;
+            if (isStudentSafeModeEnabled()) return true;
             let q = getCurrentQuestion();
             if (q?.ui?.practiceCleanMode === true) return true;
             return false;
@@ -12533,6 +12609,7 @@ Rules:
             let practiceClean = shouldUsePracticeCleanMode();
             let paramIntroClean = !!sessionStarted && isWorkspaceEntryMode() && !practiceClean && !!paramIntroCleanActive;
             document.body.classList.toggle('session-started', sessionStarted);
+            document.body.classList.toggle('student-safe-mode', isStudentSafeModeEnabled());
             document.body.classList.toggle('practice-clean-mode', practiceClean);
             document.body.classList.toggle('param-intro-clean', paramIntroClean);
             document.body.classList.toggle('prestart-only', isLandingEntryMode());
@@ -12610,12 +12687,13 @@ Rules:
             let topBuilderBtn = document.getElementById('btn-top-builder');
             let sideBuilderBtn = document.getElementById('btn-side-builder');
             let topFunctionEditBtn = document.getElementById('btn-top-function-edit');
+            let showQuickBuilder = shouldAllowBuilder && !isStudentSafeModeEnabled();
             btn.closest('.accordion-item').classList.toggle('hidden', !shouldAllowBuilder);
-            if (topBuilderBtn) topBuilderBtn.classList.toggle('hidden', !shouldAllowBuilder);
-            if (sideBuilderBtn) sideBuilderBtn.classList.toggle('hidden', !shouldAllowBuilder);
+            if (topBuilderBtn) topBuilderBtn.classList.toggle('hidden', !showQuickBuilder);
+            if (sideBuilderBtn) sideBuilderBtn.classList.toggle('hidden', !showQuickBuilder);
             if (topFunctionEditBtn) {
                 topFunctionEditBtn.disabled = !shouldAllowBuilder;
-                topFunctionEditBtn.classList.toggle('hidden', !shouldAllowBuilder);
+                topFunctionEditBtn.classList.toggle('hidden', !showQuickBuilder);
             }
             if (!shouldAllowBuilder) {
                 panel.classList.add('hidden');
@@ -12666,6 +12744,7 @@ Rules:
         }
 
         function openFreeExploreBuilder() {
+            if (!canAccessTeacherUi()) return;
             let questions = getQuestionsList();
             let freeIdx = questions.findIndex((q) => q?.goal === 'free');
             if (freeIdx < 0) {
@@ -12703,6 +12782,7 @@ Rules:
 
         function openInitialBuilderFromTop() {
             if (sessionStarted) return;
+            if (!canAccessTeacherUi()) return;
             openInitialBuilderModal();
         }
 

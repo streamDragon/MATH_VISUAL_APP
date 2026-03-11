@@ -49,18 +49,18 @@ const FUNCTION_TEMPLATES = [
   },
   {
     id: "quintic_abcdef",
-    title: "Polynomial degree 5: f(x)=ax^5+bx^4+cx^3+dx^2+ex+f",
+    title: "פולינום ממעלה 5: f(x)=ax^5+bx^4+cx^3+dx^2+ex+f",
     kind: "poly5",
     toggleLabel: "x5",
     defaults: { a: 0.02, b: 0, c: 0, d: -0.3, e: 0.5, f: 0 },
     params: ["a", "b", "c", "d", "e", "f"],
     paramDescriptions: {
-      a: "coeff x^5",
-      b: "coeff x^4",
-      c: "coeff x^3",
-      d: "coeff x^2",
-      e: "coeff x",
-      f: "constant term",
+      a: "המקדם של x^5",
+      b: "המקדם של x^4",
+      c: "המקדם של x^3",
+      d: "המקדם של x^2",
+      e: "המקדם של x",
+      f: "האיבר החופשי",
     },
     domain: { xMin: -4.5, xMax: 4.5 },
   },
@@ -68,7 +68,7 @@ const FUNCTION_TEMPLATES = [
     id: "line_ab",
     title: "קו ישר: f(x)=mx+n",
     kind: "line",
-    toggleLabel: "line",
+    toggleLabel: "ישר",
     defaults: { a: 0, b: 0, c: 1, d: 0 },
     params: ["c", "d"],
     paramDescriptions: {
@@ -249,7 +249,7 @@ const QUESTIONS = [
       goal: "להבין שנקודה על ציר x פירושה f(2)=0, ומשם לבנות משוואה על הפרמטרים של הישר או של הפונקציה שבחרתם.",
       material: "ישר ושיפוע, חיתוך עם הצירים, והדרך שבה נקודה על הגרף הופכת למשוואה.",
       howTo: [
-        "פתחו פרמטרים ובחרו סוג פונקציה. לשאלה זו מומלץ line.",
+        "פתחו פרמטרים ובחרו סוג פונקציה. לשאלה זו מומלץ לבחור ישר.",
         "אפשר ללחוץ על \"ציור פתיחה\" כדי להתחיל מציור עזר שמבליט את הרמז החשוב.",
         "תרגמו את הנקודה (2,0) לתנאי f(2)=0 והוסיפו אותו למחברת.",
         "בדקו שהפונקציה שבניתם באמת מקיימת את התנאי על הגרף ולא רק נראית קרובה אליו."
