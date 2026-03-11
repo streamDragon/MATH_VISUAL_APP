@@ -126,6 +126,221 @@ function getDomain(template) {
   };
 }
 
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function clamp01(value) {
+  return clamp(value, 0, 1);
+}
+
+function normalizeDistanceToScore(delta, scale) {
+  return clamp01(1 - Math.abs(delta) / Math.max(0.0001, scale));
+}
+
+function formatNum(value) {
+  if (!Number.isFinite(value)) return String(value);
+  return Number(value.toFixed(3)).toString();
+}
+
+function getQuestionGoalData(q) {
+  const data = q?.data && typeof q.data === 'object' ? { ...q.data } : {};
+  if (!Array.isArray(data.targets) && Array.isArray(q?.targets)) data.targets = q.targets;
+  return data;
+}
+
+function clampXToDomain(x, domain) {
+  if (!Number.isFinite(x)) return 0;
+  return clamp(x, domain.xMin, domain.xMax);
+}
+
+function getInitialAnchorX(q, domain) {
+  const data = getQuestionGoalData(q);
+  const span = Math.max(1, domain.xMax - domain.xMin);
+  const mid = (domain.xMin + domain.xMax) / 2;
+  const offset = Math.max(0.9, Math.min(2.4, span * 0.14));
+
+  if (Number.isFinite(data?.initialX)) {
+    return clampXToDomain(Number(data.initialX), domain);
+  }
+
+  let candidate = 0;
+  let shouldOffset = false;
+  if (Number.isFinite(data?.fixedX0)) {
+    candidate = data.fixedX0;
+    shouldOffset = true;
+  } else if (Array.isArray(data?.targets) && data.targets.length > 0) {
+    const xs = data.targets.map((t) => Number(t?.x)).filter(Number.isFinite);
+    if (xs.length > 0) {
+      candidate = xs.reduce((sum, x) => sum + x, 0) / xs.length;
+      shouldOffset = true;
+    }
+  } else if (Number.isFinite(data?.point?.x)) {
+    candidate = data.point.x;
+    shouldOffset = true;
+  }
+
+  if (shouldOffset) candidate += candidate <= mid ? offset : -offset;
+  return clampXToDomain(candidate, domain);
+}
+
+function buildStartProbeXs(q, domain, preferredX) {
+  const span = Math.max(1, domain.xMax - domain.xMin);
+  const near = Math.max(0.8, Math.min(1.6, span * 0.08));
+  const values = [
+    preferredX,
+    preferredX - near,
+    preferredX + near,
+    preferredX - near * 2,
+    preferredX + near * 2,
+    (domain.xMin + domain.xMax) / 2,
+    domain.xMin + span * 0.12,
+    domain.xMin + span * 0.22,
+    domain.xMin + span * 0.34,
+    domain.xMin + span * 0.5,
+    domain.xMin + span * 0.66,
+    domain.xMin + span * 0.78,
+    domain.xMin + span * 0.88
+  ];
+
+  const data = getQuestionGoalData(q);
+  if (Number.isFinite(data?.fixedX0)) {
+    values.push(data.fixedX0 - near, data.fixedX0 + near);
+  }
+  if (Array.isArray(data?.targets) && data.targets.length > 0) {
+    data.targets.forEach((target) => {
+      const tx = Number(target?.x);
+      if (!Number.isFinite(tx)) return;
+      values.push(tx - near, tx + near);
+    });
+  }
+  if (Number.isFinite(data?.point?.x)) {
+    values.push(data.point.x - near, data.point.x + near);
+  }
+
+  const seen = new Set();
+  const out = [];
+  values.forEach((value) => {
+    const x = clampXToDomain(value, domain);
+    const key = x.toFixed(4);
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push(x);
+  });
+  return out;
+}
+
+function getInitialGoalScore(q, template, params, x) {
+  const goalType = q.goal;
+  const goalParams = getQuestionGoalData(q);
+  const y = evaluateFunction(template.kind, params, x);
+  const m = evaluateDerivative(template.kind, params, x);
+
+  if (goalType === 'slope_zero' || goalType === 'min_point') {
+    const tol = goalParams.toleranceM ?? 0.1;
+    return normalizeDistanceToScore(m, Math.max(0.8, tol * 8));
+  }
+  if (goalType === 'slope_equals') {
+    const tol = goalParams.toleranceM ?? 0.1;
+    const target = goalParams.targetM ?? 0;
+    return normalizeDistanceToScore(m - target, Math.max(0.8, tol * 8));
+  }
+  if (goalType === 'y_equals') {
+    const tol = goalParams.toleranceY ?? 0.2;
+    const target = goalParams.targetY ?? 0;
+    return normalizeDistanceToScore(y - target, Math.max(1, tol * 8));
+  }
+  if (goalType === 'hit_target' || goalType === 'hit_targets') {
+    const list = getTargets(q);
+    if (list.length === 0) return 0;
+    const tol = goalParams.toleranceY ?? goalParams.tolerance ?? 0.25;
+    const avgError = list.reduce((sum, t) => sum + Math.abs(evaluateFunction(template.kind, params, t.x) - t.y), 0) / list.length;
+    const curveScore = normalizeDistanceToScore(avgError, Math.max(1, tol * 8));
+    const nearestDx = list.reduce((best, t) => Math.min(best, Math.abs(x - t.x)), Number.POSITIVE_INFINITY);
+    const xScore = normalizeDistanceToScore(nearestDx, Math.max(0.8, (goalParams.toleranceX ?? 0.2) * 8));
+    return clamp01(curveScore * 0.78 + xScore * 0.22);
+  }
+  if (goalType === 'read_slope' || goalType === 'read_y') {
+    const x0 = goalParams.fixedX0 ?? 0;
+    const tol = goalParams.answerTolerance ?? 0.2;
+    const expected = goalType === 'read_slope'
+      ? evaluateDerivative(template.kind, params, x0)
+      : evaluateFunction(template.kind, params, x0);
+    const probe = goalType === 'read_slope' ? m : y;
+    const xScore = normalizeDistanceToScore(x - x0, Math.max(0.7, 0.12 * 8));
+    const valueScore = normalizeDistanceToScore(probe - expected, Math.max(1, tol * 10));
+    return clamp01(xScore * 0.45 + valueScore * 0.55);
+  }
+  if (goalType === 'tangent_through_point' && goalParams.point) {
+    const yOnTangent = m * (goalParams.point.x - x) + y;
+    const tol = goalParams.tolerance ?? 0.25;
+    return normalizeDistanceToScore(yOnTangent - goalParams.point.y, Math.max(1, tol * 8));
+  }
+  return 0;
+}
+
+function isInitialGoalSatisfied(q, template, params, x) {
+  const goalType = q.goal;
+  const goalParams = getQuestionGoalData(q);
+  const y = evaluateFunction(template.kind, params, x);
+  const m = evaluateDerivative(template.kind, params, x);
+
+  if (goalType === 'slope_zero') return Math.abs(m) < (goalParams.toleranceM ?? 0.1);
+  if (goalType === 'min_point') return Math.abs(m) < (goalParams.toleranceM ?? 0.1) && evaluateSecondDerivative(template.kind, params, x) > 0;
+  if (goalType === 'slope_equals') return Math.abs(m - (goalParams.targetM ?? 0)) < (goalParams.toleranceM ?? 0.1);
+  if (goalType === 'y_equals') return Math.abs(y - (goalParams.targetY ?? 0)) < (goalParams.toleranceY ?? 0.2);
+  if (goalType === 'hit_target' || goalType === 'hit_targets') {
+    const list = getTargets(q);
+    const tol = goalParams.toleranceY ?? goalParams.tolerance ?? 0.25;
+    return list.length > 0 && list.every((t) => Math.abs(evaluateFunction(template.kind, params, t.x) - t.y) <= tol);
+  }
+  if (goalType === 'read_slope' || goalType === 'read_y') return false;
+  if (goalType === 'tangent_through_point' && goalParams.point) {
+    const yOnTangent = m * (goalParams.point.x - x) + y;
+    return Math.abs(yOnTangent - goalParams.point.y) <= (goalParams.tolerance ?? 0.25);
+  }
+  if (goalType === 'choose_function_template' || goalType === 'free') return false;
+  return false;
+}
+
+function getPreferredStartX(q, template, params) {
+  const domain = getDomain(template);
+  const preferredX = clampXToDomain(getInitialAnchorX(q, domain), domain);
+  const probeXs = buildStartProbeXs(q, domain, preferredX);
+  const span = Math.max(1, domain.xMax - domain.xMin);
+
+  let best = null;
+  probeXs.forEach((candidateX) => {
+    const x = clampXToDomain(candidateX, domain);
+    const score = getInitialGoalScore(q, template, params, x);
+    const done = isInitialGoalSatisfied(q, template, params, x);
+    const distancePenalty = Math.min(0.18, (Math.abs(x - preferredX) / span) * 0.18);
+    const metric = (done ? 5 : 0) + score + distancePenalty;
+    if (!best || metric < best.metric || (Math.abs(metric - best.metric) < 1e-9 && Math.abs(x - preferredX) < Math.abs(best.x - preferredX))) {
+      best = { x, score, done, metric };
+    }
+  });
+
+  return best || { x: preferredX, score: 0, done: false, metric: 0 };
+}
+
+function initialStateCheck(q, templateById) {
+  const template = templateById.get(q.startTemplateId);
+  if (!template || q.goal === 'free' || q.goal === 'choose_function_template') {
+    return { ok: true, score: 0, startX: 0 };
+  }
+  const params = normalizeParams(template, q);
+  const startState = getPreferredStartX(q, template, params);
+  return {
+    ok: !startState.done,
+    score: startState.score,
+    startX: startState.x,
+    reason: startState.done
+      ? `initial state already matches goal at x=${formatNum(startState.x)}`
+      : ''
+  };
+}
+
 function existsX(domain, predicate) {
   const span = Math.max(0.0001, domain.xMax - domain.xMin);
   const steps = Math.max(1200, Math.floor(span / 0.01));
@@ -399,6 +614,13 @@ async function main() {
     const solvability = solvabilityCheck(q, templateById);
     if (!solvability.ok) {
       errors.push(`${prefix} בדיקת פתרון נכשלה: ${solvability.reason || 'לא נמצא פתרון בתחום הנתמך'}`);
+    }
+
+    const initialState = initialStateCheck(q, templateById);
+    if (!initialState.ok) {
+      errors.push(`${prefix} מצב הפתיחה כבר עומד ביעד: ${initialState.reason}`);
+    } else if (initialState.score >= 0.92) {
+      warnings.push(`${prefix} מצב הפתיחה קרוב מדי ליעד (score=${formatNum(initialState.score)}, x=${formatNum(initialState.startX)})`);
     }
   });
 

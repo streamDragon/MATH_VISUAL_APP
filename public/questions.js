@@ -297,6 +297,10 @@ const QUESTIONS = [
       toleranceY: 0.2,
       preferredEditableParams: ["c", "d", "b"],
     },
+    defaults: {
+      c: 1,
+      d: -1,
+    },
     ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
   },
   {

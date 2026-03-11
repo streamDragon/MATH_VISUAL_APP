@@ -3915,7 +3915,7 @@
                         let targetIndex = entry.nextQuestionIndex >= 0 ? entry.nextQuestionIndex : (entry.activeQuestions[0] ?? -1);
                         if (targetIndex < 0) return;
                         if (!sessionStarted) markSessionStarted({ preserveCurrentFunction: true });
-                        loadQ(targetIndex, { autoOpenOverlay: true });
+                        loadQ(targetIndex, { autoOpenOverlay: false });
                         scheduleViewportTopReset({ onlyWhilePrestart: false, delays: [0, 90] });
                     });
 
@@ -4585,7 +4585,7 @@
             if (!Number.isFinite(idx)) return;
             if (!sessionStarted) markSessionStarted({ preserveCurrentFunction: true });
             closeMobileFeed({ skipFocus: true });
-            loadQ(idx, { autoOpenOverlay: options.autoOpenOverlay !== false });
+            loadQ(idx, { autoOpenOverlay: options.autoOpenOverlay === true });
             setDrawerOpen(false);
             snapViewportToTop({ onlyEmbed: false, force: true });
         }
@@ -6074,24 +6074,157 @@
             }
         }
 
-        function getPreferredStartXForQuestion(q = getCurrentQuestion()) {
-            let data = getQuestionGoalData(q);
-            let candidate = 0;
-            if (Number.isFinite(data?.fixedX0)) {
-                candidate = data.fixedX0;
-            } else if (Array.isArray(data?.targets) && data.targets.length > 0) {
-                let xs = data.targets.map((t) => Number(t?.x)).filter(Number.isFinite);
-                if (xs.length > 0) candidate = xs.reduce((sum, x) => sum + x, 0) / xs.length;
-            } else if (Number.isFinite(data?.point?.x)) {
-                candidate = data.point.x;
-            }
-
-            let xMin = activeTemplate?.domain?.xMin;
-            let xMax = activeTemplate?.domain?.xMax;
+        function clampXToTemplateDomain(x, template = activeTemplate) {
+            let candidate = Number(x);
+            if (!Number.isFinite(candidate)) return 0;
+            let xMin = template?.domain?.xMin;
+            let xMax = template?.domain?.xMax;
             if (Number.isFinite(xMin) && Number.isFinite(xMax) && xMax > xMin) {
                 candidate = Math.max(xMin, Math.min(xMax, candidate));
             }
-            return Number.isFinite(candidate) ? candidate : 0;
+            return candidate;
+        }
+
+        function getQuestionStartAnchorX(q = getCurrentQuestion()) {
+            let data = getQuestionGoalData(q);
+            let xMin = activeTemplate?.domain?.xMin;
+            let xMax = activeTemplate?.domain?.xMax;
+            let hasDomain = Number.isFinite(xMin) && Number.isFinite(xMax) && xMax > xMin;
+            let span = hasDomain ? (xMax - xMin) : 12;
+            let mid = hasDomain ? ((xMin + xMax) / 2) : 0;
+            let offset = Math.max(0.9, Math.min(2.4, span * 0.14));
+
+            if (Number.isFinite(data?.initialX)) {
+                return clampXToTemplateDomain(data.initialX);
+            }
+
+            let candidate = 0;
+            let shouldOffset = false;
+            if (Number.isFinite(data?.fixedX0)) {
+                candidate = data.fixedX0;
+                shouldOffset = true;
+            } else if (Array.isArray(data?.targets) && data.targets.length > 0) {
+                let xs = data.targets.map((t) => Number(t?.x)).filter(Number.isFinite);
+                if (xs.length > 0) {
+                    candidate = xs.reduce((sum, x) => sum + x, 0) / xs.length;
+                    shouldOffset = true;
+                }
+            } else if (Number.isFinite(data?.point?.x)) {
+                candidate = data.point.x;
+                shouldOffset = true;
+            }
+
+            if (shouldOffset) {
+                candidate += candidate <= mid ? offset : -offset;
+            }
+            return clampXToTemplateDomain(candidate);
+        }
+
+        function buildQuestionStartProbeXs(q, preferredX) {
+            let xMin = activeTemplate?.domain?.xMin;
+            let xMax = activeTemplate?.domain?.xMax;
+            let hasDomain = Number.isFinite(xMin) && Number.isFinite(xMax) && xMax > xMin;
+            if (!hasDomain) {
+                xMin = -10;
+                xMax = 10;
+            }
+            let span = Math.max(1, xMax - xMin);
+            let near = Math.max(0.8, Math.min(1.6, span * 0.08));
+            let values = [
+                preferredX,
+                preferredX - near,
+                preferredX + near,
+                preferredX - near * 2,
+                preferredX + near * 2,
+                (xMin + xMax) / 2,
+                xMin + span * 0.12,
+                xMin + span * 0.22,
+                xMin + span * 0.34,
+                xMin + span * 0.5,
+                xMin + span * 0.66,
+                xMin + span * 0.78,
+                xMin + span * 0.88
+            ];
+
+            let data = getQuestionGoalData(q);
+            if (Number.isFinite(data?.fixedX0)) {
+                values.push(data.fixedX0 - near, data.fixedX0 + near);
+            }
+            if (Array.isArray(data?.targets) && data.targets.length > 0) {
+                data.targets.forEach((target) => {
+                    let tx = Number(target?.x);
+                    if (!Number.isFinite(tx)) return;
+                    values.push(tx - near, tx + near);
+                });
+            }
+            if (Number.isFinite(data?.point?.x)) {
+                values.push(data.point.x - near, data.point.x + near);
+            }
+
+            let seen = new Set();
+            let out = [];
+            values.forEach((value) => {
+                let x = clampXToTemplateDomain(value);
+                let key = x.toFixed(4);
+                if (seen.has(key)) return;
+                seen.add(key);
+                out.push(x);
+            });
+            return out;
+        }
+
+        function getQuestionPreviewGoalStateAtX(q, x) {
+            if (!q || !Number.isFinite(x)) return { active: false, score: 0, done: false };
+            let y = evaluateFunctionAt(x);
+            let m = getSlope(x);
+            if (!Number.isFinite(y) || !Number.isFinite(m)) return { active: false, score: 0, done: false };
+
+            let goalData = getQuestionGoalData(q);
+            let fallbackGoal = {
+                type: q.goal || 'free',
+                params: Object.assign({}, goalData, {
+                    targetM: q.targetM,
+                    targets: q.targets || goalData.targets
+                })
+            };
+            let goal = activeSteps[currentStepIndex]?.goal || fallbackGoal;
+            let scoreState = getStepGoalScore(goal, m, x, y);
+            if (!scoreState || !scoreState.active) {
+                scoreState = getLegacyGoalScore(q.goal, goalData, m, x, y);
+            }
+
+            return {
+                active: !!scoreState?.active,
+                score: Number.isFinite(scoreState?.score) ? scoreState.score : 0,
+                done: isCurrentStepDone(goal, m, x, y)
+            };
+        }
+
+        function getPreferredStartXForQuestion(q = getCurrentQuestion()) {
+            let template = activeTemplate;
+            let xMin = template?.domain?.xMin;
+            let xMax = template?.domain?.xMax;
+            if (!Number.isFinite(xMin) || !Number.isFinite(xMax) || xMax <= xMin) {
+                xMin = -10;
+                xMax = 10;
+            }
+            let span = Math.max(1, xMax - xMin);
+            let preferredX = clampXToTemplateDomain(getQuestionStartAnchorX(q), template);
+            let probeXs = buildQuestionStartProbeXs(q, preferredX);
+            if (probeXs.length === 0) return preferredX;
+
+            let best = null;
+            probeXs.forEach((candidateX) => {
+                let x = clampXToTemplateDomain(candidateX, template);
+                let state = getQuestionPreviewGoalStateAtX(q, x);
+                let distancePenalty = Math.min(0.18, (Math.abs(x - preferredX) / span) * 0.18);
+                let metric = (state.done ? 5 : 0) + (state.active ? state.score : 0) + distancePenalty;
+                if (!best || metric < best.metric || (Math.abs(metric - best.metric) < 1e-9 && Math.abs(x - preferredX) < Math.abs(best.x - preferredX))) {
+                    best = { x, metric };
+                }
+            });
+
+            return best ? best.x : preferredX;
         }
 
         function getRuntimeModeLabel() {
@@ -6984,7 +7117,7 @@
             refreshTopQuestionSelect(0);
             topSelect.addEventListener('change', (ev) => {
                 let idx = parseInt(ev.target.value, 10);
-                loadQ(idx, { autoOpenOverlay: true });
+                loadQ(idx, { autoOpenOverlay: false });
             });
             let homeSelect = document.getElementById('home-question-select');
             if (homeSelect) {
@@ -11842,7 +11975,7 @@
             if (!Number.isFinite(idx)) return;
             closeScanModal();
             if (!sessionStarted) markSessionStarted();
-            loadQ(idx, { autoOpenOverlay: true });
+            loadQ(idx, { autoOpenOverlay: false });
             showStepToast('פתחתי תרגיל דומה כדי להמשיך לתרגל בצורה ברורה.');
         }
 
@@ -12568,7 +12701,7 @@ Rules:
             let newIndex = questions.length - 1;
             closeScanModal();
             if (!sessionStarted) markSessionStarted();
-            loadQ(newIndex, { autoOpenOverlay: true });
+            loadQ(newIndex, { autoOpenOverlay: false });
             showStepToast(`פתחתי את השאלה שהעליתם: ${toInsert.title}`);
         }
 
@@ -13177,10 +13310,10 @@ Rules:
 
             if (!preserveCurrentFunction) {
                 if (q.goal === 'choose_function_template') {
-                    let startTemplate = getQuestionStartTemplate(q, idx);
+                    let startTemplate = getQuestionStartTemplate(q, safeIdx);
                     if (startTemplate) applyTemplateById(startTemplate.id, false);
                 } else {
-                    let startTemplate = getQuestionStartTemplate(q, idx);
+                    let startTemplate = getQuestionStartTemplate(q, safeIdx);
                     if (startTemplate) applyTemplateById(startTemplate.id, false);
                     if (Array.isArray(q.params) || (q.defaults && typeof q.defaults === 'object')) {
                         let qParams = getQuestionParamsArray(q);
