@@ -568,8 +568,8 @@
                 <button id="btn-scan-close" type="button">סגור</button>
             </div>
             <div class="scan-body">
-                <p class="scan-intro">בחרו איך להביא את השאלה: לצלם, להעלות תמונה, או פשוט לכתוב אותה.</p>
-                <div class="scan-promise">נפרק יחד את השאלה לציור, לנתונים, ולמשוואות, כדי שתדעו מה פותרים עכשיו.</div>
+                <p class="scan-intro">בחרו דרך אחת פשוטה כדי להתחיל. אחר כך אראה לכם רק את הצעד הבא.</p>
+                <div class="scan-promise">נפרק יחד את השאלה לציור, לנתונים, ולמשוואות, כדי שיהיה ברור איך ממשיכים.</div>
                 <div class="help-video-cta-row scan-help-video-row">
                     <button id="btn-scan-help-video" class="help-video-cta help-video-cta-inline" type="button">צפה בהסבר קצר</button>
                 </div>
@@ -579,19 +579,21 @@
                     <button id="btn-scan-upload" type="button">העלאת תמונה</button>
                     <button id="btn-scan-text" type="button">כתוב לי את השאלה</button>
                 </div>
+                <button id="btn-scan-more-options" class="scan-more-options hidden" type="button" aria-expanded="false">אפשרות נוספת</button>
+                <div id="scan-flow-note" class="scan-flow-note"></div>
                 <div id="scan-text-wrap" class="hidden">
                     <label for="scan-question-text">כתבו כאן את נוסח השאלה או את הנתונים החשובים</label>
                     <textarea id="scan-question-text" rows="5" placeholder="לדוגמה: מצאו פונקציה ריבועית העוברת דרך (2,5), עם קיצון ב-x=1, ומשיק בשיפוע 0 בנקודת הקיצון."></textarea>
                     <div class="scan-text-hint">לא צריך לנסח מושלם. מספיק לכתוב נקודות, קיצון, שיפוע, משיק, או מה מבקשים למצוא.</div>
                 </div>
 
-                <div class="scan-primary-actions">
-                    <button id="btn-scan-analyze" type="button">פרק איתי לציור, נתונים ומשוואות</button>
+                <div class="scan-primary-actions hidden">
+                    <button id="btn-scan-analyze" class="hidden" type="button">פרק איתי לציור, נתונים ומשוואות</button>
                     <button id="btn-scan-inject" class="hidden" type="button">פתח את זה לתרגול</button>
                 </div>
                 <div id="scan-device-hint" class="scan-device-hint">בחרו אם לצלם מהטלפון או להעלות תמונה מהמחשב.</div>
 
-                <div id="scan-preview-wrap" class="scan-preview-empty">
+                <div id="scan-preview-wrap" class="scan-preview-empty hidden">
                     <img id="scan-preview-image" alt="תצוגה מקדימה לשאלה שנסרקה">
                     <div id="scan-preview-placeholder">כאן תופיע התמונה שתבחרו כדי שנוכל לפרק אותה יחד לציור, נתונים ומשוואות.</div>
                 </div>
@@ -1627,6 +1629,7 @@
         let lastScanInputMode = '';
         let scanEntryMode = '';
         let scanManualQuestionText = '';
+        let scanMoreOptionsExpanded = false;
         let scanAdminConfigRevealed = SHOW_SCAN_ADMIN;
         let notebookHistory = [];
         let notebookAutoGenerateOnDrag = true;
@@ -6547,6 +6550,7 @@
             document.getElementById('btn-scan-camera')?.addEventListener('click', () => triggerScanImageInput('camera'));
             document.getElementById('btn-scan-upload')?.addEventListener('click', () => triggerScanImageInput('file'));
             document.getElementById('btn-scan-text')?.addEventListener('click', () => setScanEntryMode('text'));
+            document.getElementById('btn-scan-more-options')?.addEventListener('click', toggleScanMoreOptions);
             document.getElementById('scan-question-text')?.addEventListener('input', onScanQuestionTextInput);
             document.getElementById('btn-scan-analyze')?.addEventListener('click', analyzeScannedQuestion);
             document.getElementById('btn-scan-inject')?.addEventListener('click', injectScannedQuestion);
@@ -10078,7 +10082,7 @@
 
         function setScanBusy(busy) {
             scanInFlight = !!busy;
-            ['btn-scan-camera', 'btn-scan-upload', 'btn-scan-text', 'btn-scan-analyze', 'btn-scan-inject', 'btn-scan-copy'].forEach((id) => {
+            ['btn-scan-camera', 'btn-scan-upload', 'btn-scan-text', 'btn-scan-more-options', 'btn-scan-analyze', 'btn-scan-inject', 'btn-scan-copy'].forEach((id) => {
                 let el = document.getElementById(id);
                 if (!el) return;
                 el.disabled = !!busy;
@@ -10087,6 +10091,128 @@
             if (textArea) textArea.disabled = !!busy;
             let spinner = document.getElementById('scan-spinner');
             if (spinner) spinner.classList.toggle('hidden', !busy);
+            syncScanProgressiveUi();
+        }
+
+        function getScanManualText() {
+            return String(document.getElementById('scan-question-text')?.value || scanManualQuestionText || '').trim();
+        }
+
+        function isScanReadyToAnalyze() {
+            return !!scanImageFile || !!getScanManualText();
+        }
+
+        function getScanPrimaryModes() {
+            return (isLikelyPhoneDevice() || isMobileViewportNow())
+                ? ['camera', 'text']
+                : ['file', 'text'];
+        }
+
+        function getScanSecondaryMode(primaryModes = getScanPrimaryModes()) {
+            return primaryModes.includes('camera') ? 'file' : 'camera';
+        }
+
+        function getScanMoreOptionsLabel(mode) {
+            return mode === 'camera' ? 'אפשר גם לצלם עכשיו' : 'יש לי כבר תמונה';
+        }
+
+        function syncScanProgressiveUi() {
+            let primaryModes = getScanPrimaryModes();
+            let secondaryMode = getScanSecondaryMode(primaryModes);
+            let manualText = getScanManualText();
+            let readyToAnalyze = isScanReadyToAnalyze();
+            let hasDraft = !!scannedQuestionDraft;
+            let usingSecondaryMode = scanEntryMode === secondaryMode || (!!scanImageFile && lastScanInputMode === secondaryMode);
+            if (usingSecondaryMode) scanMoreOptionsExpanded = true;
+
+            let showCamera = primaryModes.includes('camera') || scanMoreOptionsExpanded || scanEntryMode === 'camera' || (!!scanImageFile && lastScanInputMode === 'camera');
+            let showUpload = primaryModes.includes('file') || scanMoreOptionsExpanded || scanEntryMode === 'file' || (!!scanImageFile && lastScanInputMode === 'file');
+
+            let cameraBtn = document.getElementById('btn-scan-camera');
+            let uploadBtn = document.getElementById('btn-scan-upload');
+            let textBtn = document.getElementById('btn-scan-text');
+            let moreBtn = document.getElementById('btn-scan-more-options');
+            let textWrap = document.getElementById('scan-text-wrap');
+            let previewWrap = document.getElementById('scan-preview-wrap');
+            let flowNote = document.getElementById('scan-flow-note');
+            let hint = document.getElementById('scan-device-hint');
+            let primaryActions = document.querySelector('.scan-primary-actions');
+            let analyzeBtn = document.getElementById('btn-scan-analyze');
+            let injectBtn = document.getElementById('btn-scan-inject');
+
+            if (cameraBtn) cameraBtn.classList.toggle('hidden', !showCamera);
+            if (uploadBtn) uploadBtn.classList.toggle('hidden', !showUpload);
+
+            if (cameraBtn) {
+                let active = scanEntryMode === 'camera';
+                cameraBtn.classList.toggle('is-active', active);
+                cameraBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
+            }
+            if (uploadBtn) {
+                let active = scanEntryMode === 'file';
+                uploadBtn.classList.toggle('is-active', active);
+                uploadBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
+            }
+            if (textBtn) {
+                let active = scanEntryMode === 'text';
+                textBtn.classList.toggle('is-active', active);
+                textBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
+            }
+
+            if (moreBtn) {
+                moreBtn.classList.toggle('hidden', false);
+                moreBtn.innerText = scanMoreOptionsExpanded ? 'פחות אפשרויות' : getScanMoreOptionsLabel(secondaryMode);
+                moreBtn.setAttribute('aria-expanded', scanMoreOptionsExpanded ? 'true' : 'false');
+            }
+
+            if (textWrap) textWrap.classList.toggle('hidden', scanEntryMode !== 'text');
+            if (previewWrap) {
+                previewWrap.classList.toggle('hidden', !scanImageFile);
+                previewWrap.classList.toggle('scan-preview-empty', !scanImageFile);
+            }
+
+            if (primaryActions) primaryActions.classList.toggle('hidden', !(readyToAnalyze || hasDraft));
+            if (analyzeBtn) analyzeBtn.classList.toggle('hidden', !readyToAnalyze);
+            if (injectBtn) injectBtn.classList.toggle('hidden', !hasDraft);
+
+            if (flowNote) {
+                let note = 'בחרו איך להתחיל, ואני אראה לכם רק את הצעד הבא.';
+                if (hasDraft) note = 'מעולה. הפירוק מוכן. עכשיו אפשר לעבור עליו ואז לפתוח לתרגול.';
+                else if (scanImageFile) note = 'התמונה מוכנה. השלב הבא הוא לפרק אותה לציור, לנתונים ולמשוואות.';
+                else if (scanEntryMode === 'text' && manualText) note = 'הטקסט מוכן. השלב הבא הוא לפרק אותו לציור, לנתונים ולמשוואות.';
+                else if (scanEntryMode === 'text') note = 'כתבו כאן את הנתונים החשובים, וגם ניסוח קצר ולא מושלם מספיק.';
+                else if (scanEntryMode === 'camera') note = 'השלב הבא הוא לצלם או לבחור תמונה אחת ברורה של השאלה.';
+                else if (scanEntryMode === 'file') note = 'השלב הבא הוא לבחור תמונה אחת ברורה מהמכשיר.';
+                flowNote.innerText = note;
+                flowNote.classList.toggle('is-ready', readyToAnalyze || hasDraft);
+            }
+
+            if (hint) {
+                let inSites = isInSitesContext();
+                let inIframe = false;
+                try {
+                    inIframe = window.self !== window.top;
+                } catch (err) {
+                    inIframe = true;
+                }
+                let warning = inSites && inIframe;
+                let hintText = (isLikelyPhoneDevice() || isMobileViewportNow())
+                    ? 'בטלפון בדרך כלל הכי קל להתחיל מצילום או מכתיבה קצרה.'
+                    : 'במחשב בדרך כלל הכי קל להתחיל מהעלאת תמונה או מכתיבה קצרה.';
+                if (scanEntryMode === 'text') hintText = 'לא צריך לכתוב פתרון מלא. מספיק לכתוב את הנתונים, הנקודות ומה מבקשים למצוא.';
+                if (scanImageFile) hintText = 'בחרו תמונה אחת ברורה ומלאה של השאלה. אין צורך להעלות כמה תמונות.';
+                if (hasDraft) hintText = 'עברו קודם על הפירוק שנבנה. אם זה נראה נכון, פתחו את השאלה לתרגול.';
+                if (warning) {
+                    hintText += ' אם המצלמה לא נפתחת בתוך Google Sites, פתחו את האפליקציה בלשונית חדשה ונסו שוב.';
+                }
+                hint.innerText = hintText;
+                hint.classList.toggle('scan-warning', warning);
+            }
+        }
+
+        function toggleScanMoreOptions() {
+            scanMoreOptionsExpanded = !scanMoreOptionsExpanded;
+            syncScanProgressiveUi();
         }
 
         function syncScanAdminConfigUi(options = {}) {
@@ -10141,28 +10267,20 @@
                 ? 'text'
                 : (mode === 'camera' || mode === 'file' ? mode : resolveDefaultScanInputMode());
             scanEntryMode = normalized;
-
-            let previewWrap = document.getElementById('scan-preview-wrap');
-            let textWrap = document.getElementById('scan-text-wrap');
-            if (previewWrap) previewWrap.classList.toggle('hidden', normalized === 'text');
-            if (textWrap) textWrap.classList.toggle('hidden', normalized !== 'text');
-
-            ['btn-scan-camera', 'btn-scan-upload', 'btn-scan-text'].forEach((id) => {
-                let el = document.getElementById(id);
-                if (!el) return;
-                let active = (id === 'btn-scan-text' && normalized === 'text')
-                    || (id === 'btn-scan-camera' && normalized === 'camera')
-                    || (id === 'btn-scan-upload' && normalized === 'file');
-                el.classList.toggle('is-active', active);
-                el.setAttribute('aria-pressed', active ? 'true' : 'false');
-            });
+            if (normalized === 'camera' || normalized === 'file') scanMoreOptionsExpanded = (normalized === getScanSecondaryMode());
+            syncScanProgressiveUi();
 
             if (!options.skipStatus) {
                 if (normalized === 'text') {
-                    setScanStatus('כתבו את השאלה, ואני אפרק אותה לציור, לנתונים, ולמשוואות שאפשר לבנות ממנה.');
+                    setScanStatus(getScanManualText()
+                        ? 'הטקסט מוכן. כשתרצו, אפרק אותו לציור, לנתונים ולמשוואות.'
+                        : 'כתבו את השאלה או את הנתונים החשובים, ואחר כך אמשיך אתכם.');
                 } else if (scanImageFile) {
-                    let sourceLabel = normalized === 'camera' ? 'צילום' : 'תמונה';
-                    setScanStatus(`נבחרה ${sourceLabel} לשאלה. כשתרצו, לחצו על "פרק איתי לציור, נתונים ומשוואות".`);
+                    setScanStatus('התמונה מוכנה. כשתרצו, אפרק אותה לציור, לנתונים ולמשוואות.');
+                } else {
+                    setScanStatus(normalized === 'camera'
+                        ? 'כשתהיה תמונה ברורה, אראה לכם את הצעד הבא.'
+                        : 'בחרו תמונה ברורה, ואחר כך אפרק אותה יחד אתכם.');
                 }
             }
 
@@ -10173,9 +10291,13 @@
         }
 
         function onScanQuestionTextInput(event) {
-            scanManualQuestionText = String(event?.target?.value || '').trim();
+            let nextText = String(event?.target?.value || '').trim();
+            let changed = nextText !== scanManualQuestionText;
+            scanManualQuestionText = nextText;
+            if (changed) resetScanResultUi();
             if (!scanManualQuestionText) {
-                setScanStatus('כתבו את השאלה, או עברו לצילום/העלאת תמונה.');
+                syncScanProgressiveUi();
+                setScanStatus('כתבו את השאלה, או חזרו לתמונה אם זה נוח יותר.');
                 return;
             }
             setScanEntryMode('text', { skipFocus: true, skipStatus: true });
@@ -10233,6 +10355,7 @@
             if (planFill) planFill.style.width = '0%';
             if (planComplete) planComplete.classList.add('hidden');
             if (planWrap) planWrap.classList.add('hidden');
+            syncScanProgressiveUi();
         }
 
         function loadScanConfig() {
@@ -10309,14 +10432,14 @@
             let hint = document.getElementById('scan-device-hint');
 
             if (cameraBtn) {
-                cameraBtn.innerText = isPhone ? 'צלם שאלה (מצלמה)' : 'מצלמה / צילום מסמך';
+                cameraBtn.innerText = isPhone ? 'צלם שאלה' : 'צלם עכשיו';
                 cameraBtn.title = isPhone
                     ? 'בטלפון בדרך כלל תיפתח המצלמה האחורית.'
                     : 'במחשב ייתכן שתיפתח בחירת קובץ במקום מצלמה, בהתאם לדפדפן.';
             }
 
             if (uploadBtn) {
-                uploadBtn.innerText = isPhone ? 'בחר תמונה מהגלריה' : 'העלאת תמונה מהמחשב';
+                uploadBtn.innerText = isPhone ? 'בחר תמונה' : 'העלה תמונה';
                 uploadBtn.title = isPhone
                     ? 'בחירת תמונה שכבר צולמה.'
                     : 'בחירת JPG/PNG/WEBP מהמחשב.';
@@ -10337,6 +10460,7 @@
             }
             hint.innerText = parts.join(' ');
             hint.classList.toggle('scan-warning', inSites && inIframe);
+            syncScanProgressiveUi();
         }
 
         function triggerScanImageInput(mode) {
@@ -10367,6 +10491,7 @@
             syncScanAdminConfigUi();
             closeScanAdminModal();
             resetScanResultUi();
+            scanMoreOptionsExpanded = false;
             scanManualQuestionText = '';
             let textArea = document.getElementById('scan-question-text');
             if (textArea) textArea.value = '';
@@ -10381,7 +10506,7 @@
             scanImageFile = null;
             scanImageDataUrl = '';
             setScanEntryMode(resolveDefaultScanInputMode(), { skipStatus: true, skipFocus: true });
-            setScanStatus('בחרו איך להביא את השאלה, ואני אפרק אותה לציור, לנתונים, ולמשוואות שאפשר לעבוד איתן.');
+            setScanStatus('');
             document.getElementById('scan-modal').classList.remove('hidden');
         }
 
@@ -10421,6 +10546,7 @@
             scanPreviewObjectUrl = URL.createObjectURL(file);
             if (image) image.src = scanPreviewObjectUrl;
             if (wrap) wrap.classList.remove('scan-preview-empty');
+            syncScanProgressiveUi();
             let sourceLabel = lastScanInputMode === 'camera' ? 'מצלמה/צילום' : 'קובץ/גלריה';
             setScanStatus(`התמונה מוכנה (${sourceLabel}): ${file.name}. כשתרצו, לחצו על "פרק איתי לציור, נתונים ומשוואות".`);
         }
@@ -12105,8 +12231,8 @@ Rules:
             renderScanRecommendedQuestions(questionDraft, visualPlan);
 
             result.classList.remove('hidden');
-            injectBtn.classList.remove('hidden');
             copyBtn.classList.toggle('hidden', !(SHOW_SCAN_ADMIN || scanAdminConfigRevealed));
+            syncScanProgressiveUi();
         }
 
         async function analyzeScannedQuestion() {

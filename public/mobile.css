@@ -3539,8 +3539,8 @@ body.session-started #builder-template-panel {
 .scan-actions-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 8px;
+    gap: 8px;
+    margin-bottom: 6px;
 }
 
 .scan-actions-row button {
@@ -3549,13 +3549,44 @@ body.session-started #builder-template-panel {
     background: #ffffff;
     color: #0f172a;
     font-weight: 800;
-    padding: 7px 11px;
+    min-height: var(--tap-min);
+    padding: 9px 12px;
+    flex: 1 1 220px;
     cursor: pointer;
 }
 
 .scan-actions-row button.is-active {
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
     transform: translateY(-1px);
+}
+
+.scan-more-options {
+    border: 1px dashed #bfd4f6;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #1d4ed8;
+    font-weight: 800;
+    min-height: var(--tap-min);
+    padding: 8px 14px;
+    margin: 0 0 8px 0;
+    cursor: pointer;
+}
+
+.scan-flow-note {
+    margin-bottom: 8px;
+    border: 1px solid #d8e8fb;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #f8fbff 0%, #ffffff 100%);
+    color: #12356a;
+    font-weight: 700;
+    line-height: 1.45;
+    padding: 9px 11px;
+}
+
+.scan-flow-note.is-ready {
+    border-color: #93c5fd;
+    background: linear-gradient(145deg, #eef6ff 0%, #f8fbff 100%);
+    color: #0f3d85;
 }
 
 #btn-scan-camera {
@@ -3579,14 +3610,16 @@ body.session-started #builder-template-panel {
 .scan-primary-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 8px;
     margin-bottom: 8px;
 }
 
 .scan-primary-actions button {
     border-radius: 10px;
     font-weight: 800;
-    padding: 8px 12px;
+    min-height: var(--tap-min);
+    padding: 10px 14px;
+    flex: 1 1 240px;
     cursor: pointer;
 }
 
@@ -3763,6 +3796,7 @@ body.session-started #builder-template-panel {
     min-height: 220px;
     background: #f8fbff;
     overflow: hidden;
+    margin-top: 2px;
     margin-bottom: 8px;
 }
 
