@@ -871,6 +871,32 @@
                 </div>
             </div>
         </div>
+        <section id="mobile-focus-card" hidden aria-live="polite" aria-labelledby="mobile-focus-title">
+            <div class="mobile-focus-head">
+                <span id="mobile-focus-status">שאלה 1/4</span>
+                <span id="mobile-focus-formula" class="inline-math-bidi hidden">f(x) = ...</span>
+            </div>
+            <div class="mobile-focus-copy">
+                <div class="mobile-focus-kicker">מה עושים עכשיו?</div>
+                <h2 id="mobile-focus-title">כאן תופיע השאלה הפעילה.</h2>
+                <div id="mobile-focus-main">כאן נסביר בפשטות מה מחפשים בצעד הזה.</div>
+            </div>
+            <div class="mobile-focus-grid">
+                <div class="mobile-focus-panel">
+                    <div class="mobile-focus-label">מה המטרה?</div>
+                    <div id="mobile-focus-goal" class="mobile-focus-text">כאן ננסח מה צריך למצוא.</div>
+                </div>
+                <div class="mobile-focus-panel">
+                    <div class="mobile-focus-label">מה לחפש בגרף?</div>
+                    <div id="mobile-focus-visual" class="mobile-focus-text">כאן נכתוב איזה רמז חשוב לראות בציור.</div>
+                </div>
+            </div>
+            <div id="mobile-focus-actions" class="mobile-focus-actions" data-has-builder="1">
+                <button id="btn-mobile-focus-tools" class="mobile-focus-action mobile-focus-action-primary" type="button" onclick="toggleMobileFocusTools()">שלבים</button>
+                <button id="btn-mobile-focus-overlay" class="mobile-focus-action mobile-focus-action-secondary" type="button" onclick="openQuestionOverlay({ trackCoach: false, source: 'mobile_focus_card' })">הסבר מלא</button>
+                <button id="btn-mobile-focus-params" class="mobile-focus-action mobile-focus-action-tertiary" type="button" onclick="toggleMobileFocusBuilder()">פרמטרים</button>
+            </div>
+        </section>
         <div id="home-preview-column">
             <section id="home-graph-preview" aria-hidden="true">
                 <div class="home-preview-kicker">טעימה חיה</div>
@@ -881,6 +907,7 @@
         </div>
     </div>
 
+    <div id="mobile-panel-scrim" aria-hidden="true" onclick="onMobilePanelScrimClick()"></div>
     <div id="sidebar" class="drawer-collapsed">
         <button id="drawer-handle" onclick="toggleDrawer()">המשימה והכלים</button>
         <div id="drawer-content">
@@ -6579,6 +6606,41 @@
             sidebar.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
         }
 
+        function toggleMobileFocusTools() {
+            let stepsOpen = drawerOpen && activeAccordion === 'steps';
+            if (stepsOpen) {
+                closeAllAccordions();
+                setDrawerOpen(false);
+                renderMobileFocusCard();
+                return;
+            }
+            focusStepsFromTop();
+        }
+
+        function toggleMobileFocusBuilder() {
+            let q = getCurrentQuestion();
+            if (!q) return;
+            if (!canOpenBuilderForQuestion(q) || isStudentSafeModeEnabled()) return;
+            let builderOpen = drawerOpen && activeAccordion === 'params' && isBuilderPanelExpanded();
+            if (builderOpen) {
+                focusStepsFromTop();
+                renderMobileFocusCard();
+                return;
+            }
+            openBuilderFromTop();
+        }
+
+        function onMobilePanelScrimClick() {
+            if (mobileFeedOpen) {
+                closeMobileFeed();
+                return;
+            }
+            if (!drawerOpen) return;
+            closeAllAccordions();
+            setDrawerOpen(false);
+            renderMobileFocusCard();
+        }
+
         function closeAllAccordions(options = {}) {
             let keepOpenPanels = options.keepOpenPanels || new Set();
             activeAccordion = '';
@@ -6644,6 +6706,7 @@
             syncBuilderWorkspaceMode();
             applyTopStripFocusMode();
             syncMobilePresentationMode();
+            renderMobileFocusCard();
             updateTopQuestionsToggleLabel();
             queueBoardResize();
         }
@@ -9615,6 +9678,82 @@
             if (clarityGoal) clarityGoal.innerText = `מטרת התרגיל: ${clarity.target}`;
             if (clarityAction) clarityAction.innerText = `מה מצופה מהתלמיד עכשיו: ${clarity.action}`;
             if (clarityTip) clarityTip.innerText = 'רוצים להבין גם את ההסבר המלא, הרקע והדרך? לחצו "להעמקה והסבר מלא".';
+            renderMobileFocusCard(step);
+        }
+
+        function renderMobileFocusCard(stepOverride = null) {
+            let card = document.getElementById('mobile-focus-card');
+            if (!card) return;
+
+            let active = isMobileStudentWorkspaceFlow();
+            card.hidden = !active;
+            if (!active) return;
+
+            let q = getCurrentQuestion();
+            if (!q) {
+                card.hidden = true;
+                return;
+            }
+
+            let shortDesc = getQuestionShortDesc(q);
+            let totalSteps = Math.max(1, activeSteps.length || 1);
+            let safeStepIndex = Math.min(Math.max(currentStepIndex, 0), totalSteps - 1);
+            let step = stepOverride || activeSteps[safeStepIndex] || null;
+            let stepInstruction = sessionStarted
+                ? getShortText(step?.instruction, getGoalInstructionText(q))
+                : getShortText(q?.overlay?.essence, shortDesc.first);
+            let clarity = getGoalClarityCopy(q, stepInstruction, shortDesc);
+            let visualText = sessionStarted
+                ? getShortText(step?.visualNotice, getQuestionVisualNoticeText(q))
+                : getQuestionVisualNoticeText(q);
+
+            let visiblePos = getVisibleQuestionPosition(currentQ);
+            let questionNumber = (visiblePos.total > 0 && visiblePos.position >= 0) ? (visiblePos.position + 1) : (currentQ + 1);
+            let totalQuestions = visiblePos.total > 0
+                ? visiblePos.total
+                : Math.max(1, Array.isArray(getQuestionsList()) ? getQuestionsList().length : 1);
+            let stepSuffix = totalSteps > 1 ? ` • צעד ${safeStepIndex + 1}/${totalSteps}` : '';
+
+            let statusEl = document.getElementById('mobile-focus-status');
+            let titleEl = document.getElementById('mobile-focus-title');
+            let mainEl = document.getElementById('mobile-focus-main');
+            let goalEl = document.getElementById('mobile-focus-goal');
+            let visualEl = document.getElementById('mobile-focus-visual');
+            let formulaEl = document.getElementById('mobile-focus-formula');
+            let actionsEl = document.getElementById('mobile-focus-actions');
+            let toolsBtn = document.getElementById('btn-mobile-focus-tools');
+            let paramsBtn = document.getElementById('btn-mobile-focus-params');
+
+            if (statusEl) statusEl.innerText = `שאלה ${questionNumber}/${totalQuestions}${stepSuffix}`;
+            if (titleEl) titleEl.innerText = q?.title || `שאלה ${questionNumber}`;
+            if (mainEl) setMixedBidiText(mainEl, stepInstruction);
+            if (goalEl) setMixedBidiText(goalEl, clarity.target);
+            if (visualEl) setMixedBidiText(visualEl, visualText);
+
+            let formulaText = String(
+                document.getElementById('top-formula-f')?.innerText
+                || document.getElementById('top-function-bar-fx')?.innerText
+                || ''
+            ).trim();
+            if (formulaEl) {
+                formulaEl.innerText = formulaText || 'f(x) = ...';
+                formulaEl.classList.toggle('hidden', !formulaText || formulaText.includes('...'));
+            }
+
+            let stepsOpen = drawerOpen && activeAccordion === 'steps';
+            if (toolsBtn) {
+                toolsBtn.innerText = stepsOpen ? 'סגור' : 'שלבים';
+                toolsBtn.setAttribute('aria-expanded', stepsOpen ? 'true' : 'false');
+            }
+
+            let canBuilder = canOpenBuilderForQuestion(q) && !isStudentSafeModeEnabled();
+            let builderOpen = drawerOpen && activeAccordion === 'params' && isBuilderPanelExpanded();
+            if (actionsEl) actionsEl.dataset.hasBuilder = canBuilder ? '1' : '0';
+            if (paramsBtn) {
+                paramsBtn.classList.toggle('hidden', !canBuilder);
+                paramsBtn.innerText = builderOpen ? 'חזרה' : 'פרמטרים';
+                paramsBtn.setAttribute('aria-expanded', builderOpen ? 'true' : 'false');
+            }
         }
 
         function showStepResult(step, solveData, m, x, y) {
@@ -13038,12 +13177,26 @@ Rules:
             return true;
         }
 
+        function isMobileStudentWorkspaceFlow(options = {}) {
+            if (!document.body) return false;
+            let practiceClean = typeof options.practiceClean === 'boolean'
+                ? options.practiceClean
+                : document.body.classList.contains('practice-clean-mode');
+            if (!sessionStarted) return false;
+            if (!isWorkspaceEntryMode()) return false;
+            if (!document.body.classList.contains('viewport-mobile')) return false;
+            if (document.body.classList.contains('embed-mode')) return false;
+            if (practiceClean) return false;
+            return true;
+        }
+
         function shouldUsePracticeCleanMode() {
             if (!sessionStarted) return false;
             if (!isWorkspaceEntryMode()) return false;
             if (document.body.classList.contains('embed-mode')) return false;
             if (ENTRY_FLOW_QUERY.clean === true) return true;
             if (ENTRY_FLOW_QUERY.clean === false) return false;
+            if (document.body.classList.contains('viewport-mobile')) return false;
             if (firstTimeWorkspaceFocusLock) return true;
             if (cleanModeManualEnabled === true) return true;
             if (cleanModeManualEnabled === false) return false;
@@ -13065,6 +13218,7 @@ Rules:
             document.body.classList.toggle('first-time-workspace-focus', isFirstTimeWorkspaceFocusLocked());
             document.body.classList.toggle('practice-clean-mode', practiceClean);
             document.body.classList.toggle('param-intro-clean', paramIntroClean);
+            document.body.classList.toggle('mobile-student-flow', isMobileStudentWorkspaceFlow({ practiceClean }));
             document.body.classList.toggle('prestart-only', isLandingEntryMode());
             document.body.classList.toggle('news-feed-enabled', isNewsFeedFeatureEnabled());
             syncGuidedStartUiState();
@@ -13073,6 +13227,7 @@ Rules:
             syncNewsFeedActionButtons();
             updateMobileFeedTickerMessages(false);
             renderMobileFeedCards();
+            renderMobileFocusCard();
         }
 
         function syncSessionUiState() {
@@ -13109,6 +13264,7 @@ Rules:
             updateBuilderVisibility(getCurrentQuestion());
             syncBuilderTemplatePanel(getCurrentQuestion());
             syncTopInlineQuickActions();
+            renderMobileFocusCard();
             queueBoardResize();
         }
 
@@ -13153,12 +13309,14 @@ Rules:
                 builderPanelOpen = false;
                 if (activeAccordion === 'params') openAccordion('steps');
                 syncBuilderWorkspaceMode();
+                renderMobileFocusCard();
                 return;
             }
             if (activeAccordion === 'params') panel.classList.remove('hidden');
             btn.innerText = 'פרמטרים';
             syncBuilderWorkspaceMode();
             syncTopInlineQuickActions();
+            renderMobileFocusCard();
         }
 
         function toggleBuilderPanel() {
