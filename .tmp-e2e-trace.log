@@ -1,14 +1,5 @@
-2026-03-14T03:50:31.367Z WAIT_SERVER
-2026-03-14T03:50:32.777Z SERVER_READY
-2026-03-14T03:50:32.893Z BROWSER_LAUNCHED
-2026-03-14T03:50:32.967Z PAGE_CREATED
-2026-03-14T03:50:32.968Z STEP_A_START
-2026-03-14T03:50:49.550Z FAILED page.waitForSelector: Timeout 15000ms exceeded.
-Call log:
-[2m  - waiting for locator('#opening-splash.is-visible') to be visible[22m
-[2m    - waiting for" http://127.0.0.1:4173/?v=v59&cb=mmpsfmv9n68zvl&hard=1773460234629" navigation to finish...[22m
-[2m    - navigated to "http://127.0.0.1:4173/?v=v59&cb=mmpsfmv9n68zvl&hard=1773460234629"[22m
-[2m    - waiting for" http://127.0.0.1:4173/?v=v59&cb=mmpsfn6mr5vu4b&hard=1773460235038" navigation to finish...[22m
-[2m    - navigated to "http://127.0.0.1:4173/?v=v59&cb=mmpsfn6mr5vu4b&hard=1773460235038"[22m
-
-2026-03-14T03:50:50.004Z FINALLY_DONE
+2026-03-14T03:52:50.083Z WAIT_SERVER
+2026-03-14T03:52:51.467Z SERVER_READY
+2026-03-14T03:52:51.615Z BROWSER_LAUNCHED
+2026-03-14T03:52:51.695Z PAGE_CREATED
+2026-03-14T03:52:51.696Z STEP_A_START

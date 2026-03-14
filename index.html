@@ -3694,19 +3694,26 @@
 
         function isRemoteVersionNewer(data) {
             if (!data || typeof data !== 'object') return false;
+            let remoteVersion = parseVersionNumber(data.app_version);
+            let localVersion = parseVersionNumber(APP_VERSION);
+            let remoteBuildComparable = getRemoteBuildComparable(data);
+
+            // In Vite dev, public/version.json keeps placeholder build fields.
+            // Do not force-reload endlessly when the semantic app version is unchanged.
+            if (!remoteBuildComparable && Number.isFinite(remoteVersion) && Number.isFinite(localVersion) && remoteVersion <= localVersion) {
+                return false;
+            }
+
             let remoteToken = getRemoteVersionToken(data);
             let urlToken = getUrlVersionToken();
             if (remoteToken && (!urlToken || urlToken !== remoteToken)) {
                 return true;
             }
 
-            let remoteVersion = parseVersionNumber(data.app_version);
-            let localVersion = parseVersionNumber(APP_VERSION);
             if (Number.isFinite(remoteVersion) && Number.isFinite(localVersion) && remoteVersion > localVersion) {
                 return true;
             }
 
-            let remoteBuildComparable = getRemoteBuildComparable(data);
             if (!remoteBuildComparable) return false;
 
             let localBuildComparable = APP_BUILD_SHA !== 'unknown'
