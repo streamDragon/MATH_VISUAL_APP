@@ -948,6 +948,7 @@
                 <p>רואים בזמן אמת מה קורה לפונקציה, לשיפוע ולנקודה על הגרף. זו בדיוק השכבה שחסרה כשהנוסחה לבדה לא מספיקה.</p>
             </section>
             <div id="graph-area"></div>
+            <div id="graph-live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
         </div>
     </div>
 
@@ -1658,6 +1659,11 @@
         let coachLastStepEnterKey = '';
         let coachLastWrongAttemptAtMs = 0;
         let helpVideoModalA11y = null;
+        let questionOverlayA11y = null;
+        let feedbackModalA11y = null;
+        let normalLabModalA11y = null;
+        let quickTourModalA11y = null;
+        let scanModalA11y = null;
         let startGuideModalA11y = null;
         let initialBuilderModalA11y = null;
         let globalHelpModalA11y = null;
@@ -1697,6 +1703,16 @@
         let sidebarFocusPulseTimer = null;
         let buildWatchInterval = null;
         let buildWatchEventsBound = false;
+        let graphAnnouncementQueue = [];
+        let graphAnnouncementQueueTimer = null;
+        let graphFormulaAnnouncementTimer = null;
+        let graphPointAnnouncementTimer = null;
+        let pendingGraphFormulaText = '';
+        let lastAnnouncedGraphFormula = '';
+        let lastAnnouncedGraphPoint = '';
+        let lastAnnouncedGraphTangentLine = '';
+        let lastAnnouncedGraphNormalLine = '';
+        let graphPointDragActive = false;
         let scanImageFile = null;
         let scanImageDataUrl = '';
         let scanPreviewObjectUrl = '';
@@ -2296,6 +2312,7 @@
             if (skipBtn) skipBtn.innerText = quickTourVariant === 'guided_start' ? 'חזרה למסך הפתיחה' : 'דלג כרגע';
 
             modal.classList.remove('hidden');
+            if (quickTourModalA11y) quickTourModalA11y.activate();
             syncEntryModalBodyState();
             renderQuickTourStep();
             let demoVideo = document.getElementById('quick-tour-demo-video');
@@ -2324,6 +2341,7 @@
             quickTourVariant = 'default';
             quickTourCompletionAction = '';
             syncEntryModalBodyState();
+            if (quickTourModalA11y) quickTourModalA11y.deactivate();
             if (markSeen !== false) {
                 try {
                     localStorage.setItem(QUICK_TOUR_STORAGE_KEY, 'done');
@@ -3150,6 +3168,41 @@
             if (videoModal && videoCard) {
                 helpVideoModalA11y = attachModalA11y(videoModal, videoCard, {
                     onClose: closeVideoModal
+                });
+            }
+            let questionOverlayModal = document.getElementById('question-overlay');
+            let questionOverlayCard = document.getElementById('question-overlay-card');
+            if (questionOverlayModal && questionOverlayCard) {
+                questionOverlayA11y = attachModalA11y(questionOverlayModal, questionOverlayCard, {
+                    onClose: closeQuestionOverlay
+                });
+            }
+            let feedbackModal = document.getElementById('feedback-modal');
+            let feedbackCard = document.getElementById('feedback-modal-card');
+            if (feedbackModal && feedbackCard) {
+                feedbackModalA11y = attachModalA11y(feedbackModal, feedbackCard, {
+                    onClose: closeFeedbackModal
+                });
+            }
+            let normalLabModal = document.getElementById('normal-lab-modal');
+            let normalLabCard = document.getElementById('normal-lab-card');
+            if (normalLabModal && normalLabCard) {
+                normalLabModalA11y = attachModalA11y(normalLabModal, normalLabCard, {
+                    onClose: closeNormalLabGuide
+                });
+            }
+            let quickTourModal = document.getElementById('quick-tour-modal');
+            let quickTourCard = document.getElementById('quick-tour-card');
+            if (quickTourModal && quickTourCard) {
+                quickTourModalA11y = attachModalA11y(quickTourModal, quickTourCard, {
+                    onClose: skipQuickTour
+                });
+            }
+            let scanModal = document.getElementById('scan-modal');
+            let scanCard = document.getElementById('scan-modal-card');
+            if (scanModal && scanCard) {
+                scanModalA11y = attachModalA11y(scanModal, scanCard, {
+                    onClose: closeScanModal
                 });
             }
             let startGuideModal = document.getElementById('start-guide-modal');
@@ -5524,6 +5577,118 @@
             return value.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
         }
 
+        function getGraphLiveRegion() {
+            return document.getElementById('graph-live-region');
+        }
+
+        function formatAccessibleGraphValue(value) {
+            if (value === Infinity) return 'אינסוף';
+            if (value === -Infinity) return 'מינוס אינסוף';
+            if (!Number.isFinite(value)) return 'לא מוגדר';
+            return formatNumber(value);
+        }
+
+        function pumpGraphAnnouncementQueue() {
+            let region = getGraphLiveRegion();
+            if (!region || graphAnnouncementQueue.length === 0 || graphAnnouncementQueueTimer) return;
+            let nextMessage = graphAnnouncementQueue.shift();
+            region.textContent = '';
+            graphAnnouncementQueueTimer = setTimeout(() => {
+                region.textContent = nextMessage;
+                graphAnnouncementQueueTimer = setTimeout(() => {
+                    graphAnnouncementQueueTimer = null;
+                    pumpGraphAnnouncementQueue();
+                }, 900);
+            }, 40);
+        }
+
+        function queueGraphAnnouncement(text) {
+            let message = String(text || '').replace(/\s+/g, ' ').trim();
+            if (!message) return;
+            let region = getGraphLiveRegion();
+            let lastQueued = graphAnnouncementQueue[graphAnnouncementQueue.length - 1] || '';
+            if (lastQueued === message) return;
+            if (region && !graphAnnouncementQueueTimer && graphAnnouncementQueue.length === 0 && region.textContent === message) return;
+            graphAnnouncementQueue.push(message);
+            pumpGraphAnnouncementQueue();
+        }
+
+        function resetGraphAnnouncementState() {
+            graphAnnouncementQueue = [];
+            if (graphAnnouncementQueueTimer) {
+                clearTimeout(graphAnnouncementQueueTimer);
+                graphAnnouncementQueueTimer = null;
+            }
+            if (graphFormulaAnnouncementTimer) {
+                clearTimeout(graphFormulaAnnouncementTimer);
+                graphFormulaAnnouncementTimer = null;
+            }
+            if (graphPointAnnouncementTimer) {
+                clearTimeout(graphPointAnnouncementTimer);
+                graphPointAnnouncementTimer = null;
+            }
+            pendingGraphFormulaText = '';
+            lastAnnouncedGraphFormula = '';
+            lastAnnouncedGraphPoint = '';
+            lastAnnouncedGraphTangentLine = '';
+            lastAnnouncedGraphNormalLine = '';
+            graphPointDragActive = false;
+            let region = getGraphLiveRegion();
+            if (region) region.textContent = '';
+        }
+
+        function scheduleGraphFunctionAnnouncement(formulaText, delayMs = 320) {
+            let normalizedFormula = String(formulaText || '').trim();
+            if (!normalizedFormula || normalizedFormula === lastAnnouncedGraphFormula) return;
+            pendingGraphFormulaText = normalizedFormula;
+            if (graphFormulaAnnouncementTimer) clearTimeout(graphFormulaAnnouncementTimer);
+            graphFormulaAnnouncementTimer = setTimeout(() => {
+                graphFormulaAnnouncementTimer = null;
+                let latestFormula = String(pendingGraphFormulaText || '').trim();
+                if (!latestFormula || latestFormula === lastAnnouncedGraphFormula) return;
+                lastAnnouncedGraphFormula = latestFormula;
+                queueGraphAnnouncement(`הפונקציה ${latestFormula} מוצגת בגרף`);
+            }, Math.max(120, Number(delayMs) || 320));
+        }
+
+        function scheduleGraphPointAnnouncement(x, y, slope, options = {}) {
+            let message = `הנקודה ב-x=${formatAccessibleGraphValue(x)}, y=${formatAccessibleGraphValue(y)}, שיפוע=${formatAccessibleGraphValue(slope)}`;
+            let immediate = !!options.immediate;
+            if (graphPointAnnouncementTimer) {
+                clearTimeout(graphPointAnnouncementTimer);
+                graphPointAnnouncementTimer = null;
+            }
+            let announce = () => {
+                if (message === lastAnnouncedGraphPoint) return;
+                lastAnnouncedGraphPoint = message;
+                queueGraphAnnouncement(message);
+            };
+            if (immediate) {
+                announce();
+                return;
+            }
+            graphPointAnnouncementTimer = setTimeout(() => {
+                graphPointAnnouncementTimer = null;
+                announce();
+            }, 220);
+        }
+
+        function announceGraphLineDisplay(kind, slope) {
+            let normalizedKind = kind === 'normal' ? 'normal' : 'tangent';
+            let slopeText = formatAccessibleGraphValue(slope);
+            let message = normalizedKind === 'normal'
+                ? `קו אנך מוצג בשיפוע ${slopeText}`
+                : `קו משיק מוצג בשיפוע ${slopeText}`;
+            if (normalizedKind === 'normal') {
+                if (message === lastAnnouncedGraphNormalLine) return;
+                lastAnnouncedGraphNormalLine = message;
+            } else {
+                if (message === lastAnnouncedGraphTangentLine) return;
+                lastAnnouncedGraphTangentLine = message;
+            }
+            queueGraphAnnouncement(message);
+        }
+
         function getQuestionGoalData(q) {
             return q?.data || {};
         }
@@ -7245,6 +7410,8 @@
                 exitParamIntroClean('drag_point');
                 dismissQuestionIntro();
                 updateInfo();
+                graphPointDragActive = true;
+                scheduleGraphPointAnnouncement(p.X(), p.Y(), getSlope(p.X()));
             });
             testAnchor.on('drag', () => {
                 dismissQuestionIntro();
@@ -7260,6 +7427,10 @@
                 dismissQuestionIntro();
                 ensureFocusPointsVisibleOnBoard();
                 updateInfo();
+                if (graphPointDragActive) {
+                    graphPointDragActive = false;
+                    scheduleGraphPointAnnouncement(p.X(), p.Y(), getSlope(p.X()), { immediate: true });
+                }
                 if (sessionStarted && !questionSolved) {
                     let step = activeSteps[currentStepIndex];
                     if (step && !stepCompleted) {
@@ -7629,6 +7800,7 @@
             if (builderFx) builderFx.innerText = fxText;
             if (builderDx) builderDx.innerText = dText;
             if (builderEquationAuto) builderEquationAuto.innerText = `${fxText} | ${dText}`;
+            scheduleGraphFunctionAnnouncement(fxText);
             if (labelText) labelText.setAttribute({ visible: !isGuidedEntryMode() });
             syncGuidedStartActionReadout(x, m);
 
@@ -8265,6 +8437,12 @@
         function toggleNormal() {
             updateInfo();
             board.update();
+            if (!document.getElementById('chk-normal').checked) {
+                lastAnnouncedGraphNormalLine = '';
+                return;
+            }
+            let normalSlope = getNormalDirection(getSlope(p.X())).normalSlope;
+            announceGraphLineDisplay('normal', normalSlope);
         }
 
         function toggleLabPanel() {
@@ -8302,6 +8480,7 @@
                 }
             }
             document.getElementById('normal-lab-modal').classList.remove('hidden');
+            if (normalLabModalA11y) normalLabModalA11y.activate();
         }
 
         function openNormalLabWorkspaceFromGuide() {
@@ -8329,6 +8508,7 @@
 
         function closeNormalLabGuide() {
             document.getElementById('normal-lab-modal').classList.add('hidden');
+            if (normalLabModalA11y) normalLabModalA11y.deactivate();
         }
 
         function onNormalLabBackdropClick(event) {
@@ -8644,6 +8824,7 @@
             syncOverlayPrimaryAction();
             document.body.classList.toggle('overlay-start-mode', questionIntroActive);
             document.getElementById('question-overlay').classList.remove('hidden');
+            if (questionOverlayA11y) questionOverlayA11y.activate();
             syncMobilePresentationMode();
             if (options.trackCoach !== false) {
                 pushCoachEvent('HINT_REQUESTED', {
@@ -8655,6 +8836,7 @@
         function closeQuestionOverlay() {
             document.body.classList.remove('overlay-start-mode');
             document.getElementById('question-overlay').classList.add('hidden');
+            if (questionOverlayA11y) questionOverlayA11y.deactivate();
             syncMobilePresentationMode();
         }
 
@@ -10662,10 +10844,12 @@
             renderFeedbackList();
             setFeedbackStatus('');
             document.getElementById('feedback-modal').classList.remove('hidden');
+            if (feedbackModalA11y) feedbackModalA11y.activate();
         }
 
         function closeFeedbackModal() {
             document.getElementById('feedback-modal').classList.add('hidden');
+            if (feedbackModalA11y) feedbackModalA11y.deactivate();
         }
 
         function onFeedbackBackdropClick(event) {
@@ -11174,10 +11358,12 @@
             setScanEntryMode(resolveDefaultScanInputMode(), { skipStatus: true, skipFocus: true });
             setScanStatus('');
             document.getElementById('scan-modal').classList.remove('hidden');
+            if (scanModalA11y) scanModalA11y.activate();
         }
 
         function closeScanModal() {
             document.getElementById('scan-modal').classList.add('hidden');
+            if (scanModalA11y) scanModalA11y.deactivate();
             closeScanAdminModal();
         }
 
@@ -13619,6 +13805,12 @@ Rules:
             refreshTestLineControlVisibility();
             board.update();
             updateInfo();
+            if (!show) {
+                lastAnnouncedGraphNormalLine = '';
+                return;
+            }
+            let normalSlope = getNormalDirection(getSlope(p.X())).normalSlope;
+            announceGraphLineDisplay('normal', normalSlope);
         }
 
         function loadQ(idx, options = {}) {
@@ -13679,6 +13871,7 @@ Rules:
             if (typeof resetWarmColdFeedback === 'function') resetWarmColdFeedback();
             applyReadAnswerHeatState(0, false);
             applyHandleHeatState(0, false);
+            resetGraphAnnouncementState();
 
             if (!preserveCurrentFunction) {
                 if (q.goal === 'choose_function_template') {
@@ -13792,6 +13985,10 @@ Rules:
             fitBoardToCurrentFunction();
             board.update();
             updateInfo();
+            setTimeout(() => {
+                if (currentQ !== safeIdx) return;
+                announceGraphLineDisplay('tangent', getSlope(p.X()));
+            }, 760);
             renderQuestionOverlay(q);
             if (shouldOpenQuestionIntro) openQuestionOverlay({ trackCoach: false, source: 'auto_intro' });
             else closeQuestionOverlay();
