@@ -6,6 +6,7 @@ export default function handler(req, res) {
 
     let hasGeminiKey = !!String(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '').trim();
     let scanProxyOptIn = String(process.env.ENABLE_CLOUD_SCAN_PROXY || '').trim() === '1';
+    let scanAvailable = hasGeminiKey && scanProxyOptIn;
 
     res.setHeader('Cache-Control', 'no-store, max-age=0');
     return res.status(200).json({
@@ -13,7 +14,7 @@ export default function handler(req, res) {
         cloud: {
             provider: hasGeminiKey ? 'gemini' : '',
             tutorAvailable: hasGeminiKey,
-            scanAvailable: false,
+            scanAvailable,
             scanOptInEnabled: scanProxyOptIn
         },
         endpoints: {

@@ -1693,6 +1693,7 @@
             tutorCloudAvailable: false,
             scanCloudAvailable: false,
             scanOptInEnabled: false,
+            scanEndpoint: '',
             provider: ''
         };
         let currentAiMode = AI_MODE_VALUES.LOCAL;
@@ -5606,6 +5607,7 @@
                 tutorCloudAvailable: false,
                 scanCloudAvailable: false,
                 scanOptInEnabled: false,
+                scanEndpoint: '',
                 provider: ''
             };
         }
@@ -5638,7 +5640,7 @@
         }
 
         function isAnyCloudFeatureAvailable() {
-            return !!(runtimeCloudCapabilities.tutorCloudAvailable || runtimeCloudCapabilities.scanCloudAvailable);
+            return !!(runtimeCloudCapabilities.tutorCloudAvailable || runtimeCloudCapabilities.scanCloudAvailable || hasConfiguredScanProxyEndpoint());
         }
 
         function canUseTutorCloud() {
@@ -5650,7 +5652,7 @@
         }
 
         function canUseImageScanCloud() {
-            return currentAiMode === AI_MODE_VALUES.CLOUD && !!runtimeCloudCapabilities.scanCloudAvailable;
+            return currentAiMode === AI_MODE_VALUES.CLOUD && !!(runtimeCloudCapabilities.scanCloudAvailable || hasConfiguredScanProxyEndpoint());
         }
 
         function getAiModeBadgeText() {
@@ -5730,6 +5732,7 @@
                     tutorCloudAvailable: !!data?.cloud?.tutorAvailable,
                     scanCloudAvailable: !!data?.cloud?.scanAvailable,
                     scanOptInEnabled: !!data?.cloud?.scanOptInEnabled,
+                    scanEndpoint: String(data?.endpoints?.scanQuestion || '').trim(),
                     provider: String(data?.cloud?.provider || '').trim()
                 };
             } catch (err) {
@@ -5738,6 +5741,7 @@
                     tutorCloudAvailable: false,
                     scanCloudAvailable: false,
                     scanOptInEnabled: false,
+                    scanEndpoint: '',
                     provider: ''
                 };
             }
@@ -7418,6 +7422,9 @@
             document.getElementById('btn-scan-copy')?.addEventListener('click', copyScannedQuestionObject);
             document.getElementById('scan-question-input-camera')?.addEventListener('change', (event) => onScanImageSelected(event, 'camera'));
             document.getElementById('scan-question-input-file')?.addEventListener('change', (event) => onScanImageSelected(event, 'file'));
+            document.getElementById('scan-api-endpoint')?.addEventListener('input', onScanConfigChanged);
+            document.getElementById('scan-api-endpoint')?.addEventListener('change', onScanConfigChanged);
+            document.getElementById('scan-remember-config')?.addEventListener('change', onScanConfigChanged);
             document.getElementById('scan-admin-modal')?.addEventListener('click', onScanAdminBackdropClick);
             document.getElementById('btn-scan-admin-close')?.addEventListener('click', closeScanAdminModal);
 
@@ -11479,11 +11486,51 @@
             return /openai\.com|anthropic\.com|generativelanguage\.googleapis\.com|ai\.google\.dev|\/chat\/completions|\/responses|:generatecontent/.test(text);
         }
 
+        function normalizeConfiguredScanProxyEndpoint(endpoint) {
+            let value = String(endpoint || '').trim();
+            if (!value || isDirectAiVendorEndpoint(value)) return '';
+            return value;
+        }
+
+        function readStoredScanConfigObject() {
+            try {
+                let raw = localStorage.getItem(SCAN_CONFIG_STORAGE_KEY);
+                if (!raw) return null;
+                let cfg = JSON.parse(raw);
+                return (cfg && typeof cfg === 'object') ? cfg : null;
+            } catch (err) {
+                return null;
+            }
+        }
+
+        function getConfiguredScanProxyEndpoint() {
+            let endpoint = normalizeConfiguredScanProxyEndpoint(document.getElementById('scan-api-endpoint')?.value || '');
+            if (endpoint) return endpoint;
+            let cfg = readStoredScanConfigObject();
+            return normalizeConfiguredScanProxyEndpoint(cfg?.endpoint || '');
+        }
+
+        function hasConfiguredScanProxyEndpoint() {
+            return !!getConfiguredScanProxyEndpoint();
+        }
+
+        function getRuntimeScanProxyEndpoint() {
+            if (!runtimeCloudCapabilities?.scanCloudAvailable) return '';
+            return normalizeConfiguredScanProxyEndpoint(runtimeCloudCapabilities.scanEndpoint || '');
+        }
+
+        function getEffectiveScanProxyEndpoint() {
+            return getConfiguredScanProxyEndpoint() || getRuntimeScanProxyEndpoint() || DEFAULT_SCAN_API_ENDPOINT;
+        }
+
         function getFriendlyScanErrorMessage(err) {
             let raw = String(err?.message || '').trim();
             if (!raw) return 'לא הצלחתי לפרק את השאלה כרגע. נסו שוב עם צילום חד יותר או עם ניסוח כתוב קצר.';
             if (/scan_cloud_disabled/i.test(raw)) {
                 return 'סריקת תמונה כבויה כרגע. היא תופעל רק במצב Cloud עם Proxy פעיל, ובינתיים אפשר לעבוד עם פירוק טקסט מקומי.';
+            }
+            if (/cloud_scan_failed|cloud image scan/i.test(raw)) {
+                return 'לא הצלחתי להפעיל את סריקת התמונה כרגע. אפשר לנסות שוב, או להדביק את נוסח השאלה ולהמשיך מקומית.';
             }
             if (/scan_config_missing|proxy endpoint|server-side proxy|openai|anthropic|generativelanguage|gemini/i.test(raw)) {
                 revealScanAdminConfig();
@@ -11542,46 +11589,52 @@
             let remember = document.getElementById('scan-remember-config');
             if (!endpointInput || !modelInput) return;
 
-            endpointInput.value = DEFAULT_SCAN_API_ENDPOINT;
+            endpointInput.value = getRuntimeScanProxyEndpoint() || DEFAULT_SCAN_API_ENDPOINT;
             modelInput.value = DEFAULT_SCAN_MODEL;
             if (remember) remember.checked = true;
 
             try {
-                let raw = localStorage.getItem(SCAN_CONFIG_STORAGE_KEY);
-                if (!raw) return;
-                let cfg = JSON.parse(raw);
+                let cfg = readStoredScanConfigObject();
+                if (!cfg) {
+                    syncAiModeUi();
+                    return;
+                }
                 if (cfg && typeof cfg === 'object') {
-                    if (typeof cfg.endpoint === 'string' && cfg.endpoint.trim() && !isDirectAiVendorEndpoint(cfg.endpoint.trim())) {
-                        endpointInput.value = cfg.endpoint.trim();
-                    }
+                    let normalizedEndpoint = normalizeConfiguredScanProxyEndpoint(cfg.endpoint);
+                    if (normalizedEndpoint) endpointInput.value = normalizedEndpoint;
                     if (typeof cfg.model === 'string' && cfg.model.trim()) modelInput.value = cfg.model.trim();
                     if (remember && typeof cfg.remember === 'boolean') remember.checked = cfg.remember;
                 }
             } catch (err) {
                 // Keep defaults if config parsing fails.
             }
+            syncAiModeUi();
         }
 
         function saveScanConfig() {
-            let endpoint = (document.getElementById('scan-api-endpoint')?.value || '').trim();
+            let endpoint = normalizeConfiguredScanProxyEndpoint(document.getElementById('scan-api-endpoint')?.value || '');
             let model = (document.getElementById('scan-api-model')?.value || '').trim() || DEFAULT_SCAN_MODEL;
             let remember = !!document.getElementById('scan-remember-config')?.checked;
-            if (isDirectAiVendorEndpoint(endpoint)) {
-                endpoint = '';
-            }
             try {
                 if (!remember) {
                     localStorage.removeItem(SCAN_CONFIG_STORAGE_KEY);
-                    return;
+                } else {
+                    localStorage.setItem(SCAN_CONFIG_STORAGE_KEY, JSON.stringify({
+                        endpoint,
+                        model,
+                        remember: true
+                    }));
                 }
-                localStorage.setItem(SCAN_CONFIG_STORAGE_KEY, JSON.stringify({
-                    endpoint,
-                    model,
-                    remember: true
-                }));
             } catch (err) {
                 // Continue even if storage is blocked.
             }
+            reconcileAiModeWithCapabilities({ silent: true });
+            syncAiModeUi();
+        }
+
+        function onScanConfigChanged() {
+            reconcileAiModeWithCapabilities({ silent: true });
+            syncAiModeUi();
         }
 
         function resolveDefaultScanInputMode() {
@@ -13127,7 +13180,7 @@ Rules:
             if (!canUseImageScanCloud()) {
                 throw new Error('scan_cloud_disabled');
             }
-            let endpoint = (document.getElementById('scan-api-endpoint')?.value || '').trim() || DEFAULT_SCAN_API_ENDPOINT;
+            let endpoint = getEffectiveScanProxyEndpoint();
             let model = (document.getElementById('scan-api-model')?.value || '').trim() || DEFAULT_SCAN_MODEL;
 
             let systemPrompt = getScanSystemPrompt();
@@ -13150,7 +13203,16 @@ Rules:
                 body: JSON.stringify(proxyPayload)
             });
             let proxyText = await proxyRes.text();
-            if (!proxyRes.ok) throw new Error(`שגיאת Proxy: ${proxyText || proxyRes.status}`);
+            if (!proxyRes.ok) {
+                let proxyError = null;
+                try {
+                    proxyError = parseVisionJsonText(proxyText);
+                } catch (err) {
+                    proxyError = null;
+                }
+                let message = String(proxyError?.message || proxyError?.error || '').trim();
+                throw new Error(message || `שגיאת Proxy: ${proxyText || proxyRes.status}`);
+            }
             let proxyData = parseVisionJsonText(proxyText);
             if (proxyData?.vision && typeof proxyData.vision === 'object') return proxyData.vision;
             if (proxyData?.question && typeof proxyData.question === 'object') return proxyData.question;
