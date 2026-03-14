@@ -1745,6 +1745,7 @@ body.session-started #btn-scan-question {
     border-radius: 10px;
     padding: 6px 8px;
     box-sizing: border-box;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
 
 #hot-cold-head {
@@ -1780,7 +1781,8 @@ body.session-started #btn-scan-question {
     height: 100%;
     border-radius: inherit;
     background: #1e88e5;
-    transition: width 0.16s linear, background 0.16s linear;
+    transition: width 0.16s linear, background 0.16s linear, box-shadow 0.16s linear;
+    box-shadow: 0 0 16px rgba(30, 136, 229, 0.28);
 }
 
 #hot-cold-note {
@@ -1791,20 +1793,49 @@ body.session-started #btn-scan-question {
 
 #hot-cold-widget.cold {
     border-color: #bfdbfe;
+    box-shadow: 0 7px 20px rgba(59, 130, 246, 0.08);
+}
+
+#hot-cold-widget.cold #hot-cold-fill {
+    background: linear-gradient(90deg, #38bdf8 0%, #2563eb 100%);
 }
 
 #hot-cold-widget.warm {
     border-color: #f7d58d;
     background: linear-gradient(125deg, #fff7e8 0%, #ffffff 100%);
+    box-shadow: 0 9px 24px rgba(245, 158, 11, 0.14);
+    transform: translateY(-1px);
+}
+
+#hot-cold-widget.warm #hot-cold-fill {
+    background: linear-gradient(90deg, #fbbf24 0%, #f97316 100%);
+    box-shadow: 0 0 18px rgba(249, 115, 22, 0.28);
 }
 
 #hot-cold-widget.hot {
     border-color: #f6b2b2;
     background: linear-gradient(125deg, #fff0f0 0%, #ffffff 100%);
+    box-shadow: 0 12px 28px rgba(239, 68, 68, 0.18);
+    transform: translateY(-1px) scale(1.01);
+    animation: hotColdPulse 1.15s ease-in-out infinite alternate;
 }
 
 #hot-cold-widget.hot #hot-cold-band {
     color: #b91c1c;
+}
+
+#hot-cold-widget.hot #hot-cold-fill {
+    background: linear-gradient(90deg, #fb7185 0%, #ef4444 100%);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.32);
+}
+
+@keyframes hotColdPulse {
+    0% {
+        box-shadow: 0 10px 24px rgba(239, 68, 68, 0.14);
+    }
+    100% {
+        box-shadow: 0 14px 30px rgba(239, 68, 68, 0.24);
+    }
 }
 
 #opening-splash {
@@ -2203,10 +2234,10 @@ body.practice-clean-mode #math-gym-popup {
     transform: translate(-50%, -50%);
     width: min(92vw, 640px);
     max-height: min(84vh, 640px);
-    background: white;
+    background: linear-gradient(180deg, #fffef7 0%, #ffffff 26%, #fff7ed 100%);
     border-radius: 16px;
     border: 3px solid #2ecc71;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 18px 60px rgba(15, 23, 42, 0.28);
     text-align: right;
     z-index: 2800;
     display: none;
@@ -2214,15 +2245,42 @@ body.practice-clean-mode #math-gym-popup {
     direction: rtl;
 }
 
+#win-overlay::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 18% 18%, rgba(250, 204, 21, 0.2), transparent 28%),
+        radial-gradient(circle at 82% 16%, rgba(244, 114, 182, 0.16), transparent 24%),
+        radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.12), transparent 34%);
+}
+
 #win-overlay-body {
+    position: relative;
     padding: 16px 18px 12px;
     overflow-y: auto;
     max-height: calc(84vh - 78px);
 }
 
+#win-overlay-stars {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+}
+
+#win-overlay-body > * {
+    position: relative;
+    z-index: 2;
+}
+
 #win-overlay-icon {
     font-size: clamp(2.1rem, 7vw, 3.1rem);
     text-align: center;
+    text-shadow: 0 0 18px rgba(250, 204, 21, 0.55), 0 0 28px rgba(245, 158, 11, 0.3);
+    animation: winTrophyBounce 1.2s ease-in-out;
 }
 
 #win-overlay h1 {
@@ -2255,8 +2313,9 @@ body.practice-clean-mode #math-gym-popup {
     font-weight: 900;
     border: 1px solid #bbf7d0;
     border-radius: 999px;
-    background: #f0fdf4;
+    background: linear-gradient(90deg, #ecfccb 0%, #dcfce7 55%, #dbeafe 100%);
     padding: 7px 12px;
+    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.12);
 }
 
 #win-overlay img {
@@ -2467,11 +2526,15 @@ body.overlay-start-mode #btn-overlay-primary {
 .success-star {
     position: absolute;
     transform: translate(-50%, -50%);
-    color: #facc15;
-    font-size: 1.6rem;
+    color: var(--star-color, #facc15);
+    font-size: var(--star-size, 1.6rem);
     font-weight: 800;
-    text-shadow: 0 0 8px rgba(250, 204, 21, 0.8), 0 0 16px rgba(245, 158, 11, 0.45);
+    text-shadow: 0 0 8px var(--star-glow, rgba(250, 204, 21, 0.8)), 0 0 16px var(--star-glow, rgba(245, 158, 11, 0.45));
     animation: starPopFade 0.78s ease-out forwards;
+}
+
+.win-overlay-star {
+    animation: winOverlayStarPop 1.18s ease-out forwards;
 }
 
 @keyframes starPopFade {
@@ -2486,6 +2549,36 @@ body.overlay-start-mode #btn-overlay-primary {
     100% {
         opacity: 0;
         transform: translate(-50%, -145%) scale(0.7) rotate(14deg);
+    }
+}
+
+@keyframes winOverlayStarPop {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.3) rotate(-18deg);
+    }
+    16% {
+        opacity: 1;
+        transform: translate(-50%, -58%) scale(1.15) rotate(8deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -165%) scale(0.78) rotate(18deg);
+    }
+}
+
+@keyframes winTrophyBounce {
+    0% {
+        transform: translateY(14px) scale(0.88);
+        opacity: 0;
+    }
+    55% {
+        transform: translateY(-6px) scale(1.06);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
     }
 }
 

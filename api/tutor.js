@@ -1,73 +1,159 @@
-// api/tutor.js — Vercel Serverless Function
-// מספק endpoint לצ'אט עם המורה הפרטי דרך Claude API.
-// משתנה סביבה נדרש: ANTHROPIC_API_KEY
+const SYSTEM_PROMPT = `אתה מורה מתמטי ידידותי ומעודד לתלמידי תיכון בישראל.
+ענה בעברית קצרה וברורה, בלי לפתור מיד את כל השאלה.
+עדיף 2-4 משפטים, עם צעד אחד ברור להמשך.
+אם התלמיד תקוע, עזור לו לראות מה אפשר לקרוא מהגרף, מה הנתון, ואיזו משוואה זה יוצר.
+אל תכתוב תשובות ארוכות, ואל תיתן פתרון מלא אלא אם ממש מבקשים.`;
 
-const SYSTEM_PROMPT = `אתה מורה מתמטיקה ידידותי ומעודד לתלמידי תיכון ישראלים הלומדים 4 יחידות מתמטיקה.
-אתה מסביר בעברית, בצורה קצרה וברורה, עם דוגמאות פשוטות.
-אתה מעודד, סבלני, ולא שופט. אם תלמיד נתקע — אתה שואל שאלה שתעזור לו לחשוב, לא נותן תשובה ישר.
-השתמש בסמיילים ובשפה נעימה לנוער. תשובות קצרות — 3-5 משפטים מקסימום.
-הקשר: התלמיד עובד עם גרפים של פונקציות, נגזרות, משיקים, פרמטרים, קיצונים.`;
+const GEMINI_MODEL = String(process.env.GEMINI_MODEL || 'gemini-2.5-flash').trim();
+const GEMINI_API_KEY = String(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '').trim();
+
+function normalizeMessages(rawMessages) {
+    if (!Array.isArray(rawMessages)) return [];
+    return rawMessages
+        .filter((message) => (
+            (message?.role === 'user' || message?.role === 'assistant')
+            && typeof message?.content === 'string'
+            && message.content.trim()
+        ))
+        .slice(-10)
+        .map((message) => ({
+            role: message.role,
+            content: message.content.trim()
+        }));
+}
+
+function buildTranscript(messages) {
+    return messages.map((message) => {
+        let speaker = message.role === 'assistant' ? 'מורה' : 'תלמיד';
+        return `${speaker}: ${message.content}`;
+    }).join('\n');
+}
+
+function buildLocalTutorReply(messages) {
+    let lastUserText = '';
+    for (let i = messages.length - 1; i >= 0; i -= 1) {
+        if (messages[i].role === 'user') {
+            lastUserText = messages[i].content;
+            break;
+        }
+    }
+
+    let text = String(lastUserText || '').toLowerCase();
+    if (!text) {
+        return 'בואו נתחיל ממה שרואים בגרף: מה נתון, מה צריך למצוא, ואיזה רמז חזותי כבר יש לכם?';
+    }
+
+    if (/שיפוע|נגזרת|f'|slope/.test(text)) {
+        return 'התמקדו קודם בשאלה אחת: צריך לקרוא שיפוע קיים, או להביא את השיפוע לערך מסוים? גררו את הנקודה ובדקו מה קורה ל־f\'(x). אם מחפשים משיק אופקי, חפשו מקום שבו השיפוע מתקרב ל־0.';
+    }
+
+    if (/משיק|tangent/.test(text)) {
+        return 'משיק תמיד מתחיל בנקודת מגע על הגרף. קודם מצאו את הנקודה שמתאימה לתנאי, אחר כך קראו את השיפוע שם, ורק אז כתבו את משוואת המשיק.';
+    }
+
+    if (/אנך|נורמל|normal/.test(text)) {
+        return 'באנך בודקים קודם את שיפוע המשיק. אחרי שיש שיפוע למשיק, לאנך יש שיפוע הופכי ושלילי, ואז בודקים שהוא באמת עובר דרך נקודת המגע.';
+    }
+
+    if (/קיצון|מינימום|מקסימום|extrem/.test(text)) {
+        return 'בקיצון שווה לבדוק שני דברים: קודם שהשיפוע מתקרב ל־0, ואז שהגרף באמת מחליף כיוון סביב הנקודה. אל תעצרו רק ב־m=0 בלי בדיקה נוספת.';
+    }
+
+    if (/פרמטר|a|b|c|d|e|f/.test(text)) {
+        return 'לא קופצים ישר לערכי הפרמטרים. רשמו אילו נתונים ניתנים מהגרף או מהטקסט, וכל נתון כזה הופך למשוואה על הפרמטרים. רק אחרי שיש מספיק תנאים פותרים.';
+    }
+
+    if (/שורש|חיתוך|ציר x|x-?intercept/.test(text)) {
+        return 'שורש הוא מקום שבו הגרף פוגש את ציר ה־x, כלומר y=0. חפשו קודם איפה זה קורה בציור, ואז כתבו את התנאי האלגברי המתאים.';
+    }
+
+    if (/לא הבנתי|תקוע|עזרה|help/.test(text)) {
+        return 'בואו נפרק את זה לצעד אחד קטן: מה הכי לא ברור עכשיו, הקריאה מהגרף או המעבר למשוואה? התחילו מלכתוב במילים מה רואים על הגרף בנקודה החשובה.';
+    }
+
+    return 'נסו לעצור רגע ולנסח את השאלה מחדש במילים שלכם: מה נתון, מה צריך למצוא, ומה אפשר כבר לקרוא מהגרף. משם בוחרים צעד אחד קטן ולא את כל הפתרון בבת אחת.';
+}
+
+async function callGemini(messages) {
+    if (!GEMINI_API_KEY) return null;
+
+    let prompt = [
+        'שיחה עד כה:',
+        buildTranscript(messages),
+        '',
+        'ענה עכשיו רק להודעה האחרונה של התלמיד.'
+    ].join('\n');
+
+    let response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                systemInstruction: {
+                    parts: [{ text: SYSTEM_PROMPT }]
+                },
+                contents: [
+                    {
+                        role: 'user',
+                        parts: [{ text: prompt }]
+                    }
+                ],
+                generationConfig: {
+                    temperature: 0.6,
+                    maxOutputTokens: 350,
+                    thinkingConfig: {
+                        thinkingBudget: 0
+                    }
+                }
+            })
+        }
+    );
+
+    if (!response.ok) {
+        let errText = await response.text();
+        throw new Error(`Gemini API error ${response.status}: ${errText}`);
+    }
+
+    let data = await response.json();
+    let reply = (data?.candidates?.[0]?.content?.parts || [])
+        .map((part) => String(part?.text || '').trim())
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+
+    return reply || null;
+}
 
 export default async function handler(req, res) {
-    // רק POST מותר
     if (req.method !== 'POST') {
         res.setHeader('Allow', 'POST');
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-        return res.status(500).json({ error: 'ANTHROPIC_API_KEY לא מוגדר בסביבה' });
+    let messages = normalizeMessages(req.body?.messages);
+    if (messages.length === 0) {
+        return res.status(400).json({ error: 'messages חסר או ריק' });
     }
 
-    // קבלת הודעות מהלקוח
-    let messages;
-    try {
-        messages = req.body?.messages;
-        if (!Array.isArray(messages) || messages.length === 0) {
-            return res.status(400).json({ error: 'messages חסר או ריק' });
-        }
-    } catch (e) {
-        return res.status(400).json({ error: 'גוף הבקשה לא תקין' });
-    }
-
-    // סינון הודעות — רק user ו-assistant, ללא תוכן ריק
-    const cleanMessages = messages
-        .filter(m => (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string' && m.content.trim())
-        .slice(-10); // עד 10 הודעות אחרונות
-
-    if (cleanMessages.length === 0) {
-        return res.status(400).json({ error: 'אין הודעות תקינות' });
+    if (process.env.ANTHROPIC_API_KEY) {
+        console.warn('[tutor] ANTHROPIC_API_KEY is still set but no longer used. Remove it to avoid accidental billing.');
     }
 
     try {
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': apiKey,
-                'anthropic-version': '2023-06-01'
-            },
-            body: JSON.stringify({
-                model: 'claude-sonnet-4-6',
-                max_tokens: 350,
-                system: SYSTEM_PROMPT,
-                messages: cleanMessages
-            })
+        let reply = await callGemini(messages);
+        if (!reply) reply = buildLocalTutorReply(messages);
+        return res.status(200).json({
+            reply,
+            provider: GEMINI_API_KEY ? 'gemini' : 'local'
         });
-
-        if (!response.ok) {
-            const errText = await response.text();
-            console.error('[tutor] Claude API error:', response.status, errText);
-            return res.status(response.status).json({ error: `שגיאת API: ${response.status}` });
-        }
-
-        const data = await response.json();
-        const reply = data?.content?.[0]?.text || 'מצטער, לא הצלחתי לענות. נסה שוב.';
-        return res.status(200).json({ reply });
-
     } catch (err) {
-        console.error('[tutor] fetch error:', err);
-        return res.status(500).json({ error: 'שגיאת רשת פנימית' });
+        console.error('[tutor] Falling back to local tutor:', err);
+        return res.status(200).json({
+            reply: buildLocalTutorReply(messages),
+            provider: 'local'
+        });
     }
 }

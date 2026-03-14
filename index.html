@@ -674,20 +674,20 @@
                 <button id="btn-scan-admin-close" type="button">סגור</button>
             </div>
             <div id="scan-config-box" class="scan-admin-box">
-                <div class="scan-admin-lead">האזור הזה מיועד להגדרת שירות הניתוח במכשיר. תלמידים לא צריכים לגעת בו.</div>
+                <div class="scan-admin-lead">האזור הזה מיועד להגדרת שירות הניתוח במכשיר. ברירת המחדל כאן היא בלי API ובלי עלות, ותלמידים לא צריכים לגעת בו.</div>
                 <div class="scan-config-grid">
                     <label for="scan-api-endpoint">כתובת שרת התיווך</label>
-                    <input id="scan-api-endpoint" type="url" autocomplete="off" placeholder="https://school-proxy.example/api/scan-question">
+                    <input id="scan-api-endpoint" type="url" autocomplete="off" placeholder="https://your-free-proxy.example/api/scan-question">
 
                     <label for="scan-api-model">שם המודל</label>
-                    <input id="scan-api-model" type="text" autocomplete="off" placeholder="gpt-4o">
+                    <input id="scan-api-model" type="text" autocomplete="off" placeholder="gemini-2.5-flash">
 
                     <label for="scan-remember-config" class="scan-checkbox-row">
                         <input id="scan-remember-config" type="checkbox" checked>
                         שמור את כתובת החיבור ושם המודל בדפדפן
                     </label>
                 </div>
-                <div class="scan-admin-note">החיבור כאן צריך להיות לשרת מתווך בצד השרת. תלמידים לא מכניסים מפתחות API בדפדפן.</div>
+                <div class="scan-admin-note">פירוק טקסט עובד מקומית גם בלי API. אם מחברים סריקת תמונה, עושים זאת רק דרך שרת תיווך בצד השרת ולא עם מפתח בדפדפן.</div>
                 <div class="overlay-actions scan-admin-actions">
                     <button id="btn-scan-copy" class="hidden" type="button">העתק נתוני שאלה</button>
                 </div>
@@ -1396,8 +1396,8 @@
         const FEEDBACK_STORAGE_KEY = 'math_visual_feedback_v1';
         const SCAN_CONFIG_STORAGE_KEY = 'math_visual_scan_config_v1';
         const SCANNED_QUESTIONS_STORAGE_KEY = 'math_visual_scanned_questions_v1';
-        const DEFAULT_SCAN_API_ENDPOINT = '/api/scan-question';
-        const DEFAULT_SCAN_MODEL = 'gpt-4.1-mini';
+        const DEFAULT_SCAN_API_ENDPOINT = '';
+        const DEFAULT_SCAN_MODEL = 'gemini-2.5-flash';
         const FOUR_UNIT_TOPIC_DEFS = [
             {
                 key: 'graph_reading',
@@ -8118,8 +8118,8 @@
             let noteEl = document.getElementById('hot-cold-note');
             if (!widget || !bandEl || !fillEl || !noteEl) return;
 
-            // Keep the widget visible on most phones; hide only on ultra-small widths.
-            if (window.matchMedia('(max-width: 420px)').matches) {
+            // Keep the widget visible on almost every phone; hide only on ultra-small widths.
+            if (window.matchMedia('(max-width: 360px)').matches) {
                 widget.classList.add('hidden');
                 return;
             }
@@ -8152,15 +8152,18 @@
 
             widget.classList.remove('hot', 'warm', 'cold', 'hidden');
             widget.classList.add(band);
+            widget.dataset.trend = delta > 0.03 ? 'positive' : (delta < -0.03 ? 'negative' : 'steady');
             fillEl.style.width = `${percent}%`;
             fillEl.style.background = getHeatColor(normalized);
             bandEl.innerText = `${icon} ${bandLabel} ${percent}%`;
 
             if (state.useReadInputHeat) {
-                noteEl.innerText = `מדד קריאה: ${trendText}`;
+                noteEl.innerText = band === 'hot' ? 'קרובים מאוד לקריאה הנכונה.' : `מדד קריאה: ${trendText}`;
                 return;
             }
-            noteEl.innerText = `מדד מטרה: ${trendText}`;
+            noteEl.innerText = band === 'hot'
+                ? 'חם מאוד. עוד תיקון קטן ואתם שם.'
+                : `מדד מטרה: ${trendText}`;
         }
 
         function clearReadAnswerHeatState() {
@@ -8338,10 +8341,33 @@
             return Number.isFinite(parsed) ? parsed : 0;
         }
 
-        function spawnStepSuccessStars(x, y) {
+        function styleCelebrationStar(star, isVictory) {
+            let glyphs = isVictory ? ['★', '✦', '✶', '✹', '✷'] : ['★', '✦', '✶'];
+            let palette = isVictory
+                ? [
+                    { color: '#facc15', glow: 'rgba(250, 204, 21, 0.95)' },
+                    { color: '#fb7185', glow: 'rgba(251, 113, 133, 0.9)' },
+                    { color: '#38bdf8', glow: 'rgba(56, 189, 248, 0.9)' },
+                    { color: '#34d399', glow: 'rgba(52, 211, 153, 0.9)' },
+                    { color: '#c084fc', glow: 'rgba(192, 132, 252, 0.9)' }
+                ]
+                : [
+                    { color: '#facc15', glow: 'rgba(250, 204, 21, 0.9)' },
+                    { color: '#f59e0b', glow: 'rgba(245, 158, 11, 0.8)' },
+                    { color: '#60a5fa', glow: 'rgba(96, 165, 250, 0.82)' }
+                ];
+            let choice = palette[Math.floor(Math.random() * palette.length)];
+            star.innerText = glyphs[Math.floor(Math.random() * glyphs.length)];
+            star.style.setProperty('--star-color', choice.color);
+            star.style.setProperty('--star-glow', choice.glow);
+            star.style.setProperty('--star-size', `${isVictory ? (1.2 + Math.random() * 1.15) : (1 + Math.random() * 0.55)}rem`);
+        }
+
+        function spawnStepSuccessStars(x, y, options = {}) {
             let layer = ensureStarLayer();
             let pt = boardToScreenPoint(x, y);
             if (!layer || !pt) return;
+            let victoryMode = options.variant === 'victory';
 
             let graphRect = layer.getBoundingClientRect();
             let isCompactMobile = window.matchMedia('(max-width: 600px)').matches;
@@ -8349,22 +8375,57 @@
             let safeTopPx = isCompactMobile ? 28 : 16;
             let safeBottomPx = Math.max(safeTopPx + 28, graphRect.height - bottomUnsafe);
             let clampedY = Math.min(Math.max(pt.y, safeTopPx), safeBottomPx);
-            let starCount = isCompactMobile ? 2 : 3;
-            let xSpread = isCompactMobile ? 22 : 34;
-            let ySpread = isCompactMobile ? 12 : 16;
-            let yLift = isCompactMobile ? 18 : 8;
+            let starCount = victoryMode
+                ? (isCompactMobile ? 5 : 8)
+                : (isCompactMobile ? 2 : 3);
+            let xSpread = victoryMode
+                ? (isCompactMobile ? 48 : 72)
+                : (isCompactMobile ? 22 : 34);
+            let ySpread = victoryMode
+                ? (isCompactMobile ? 28 : 36)
+                : (isCompactMobile ? 12 : 16);
+            let yLift = victoryMode
+                ? (isCompactMobile ? 24 : 14)
+                : (isCompactMobile ? 18 : 8);
 
             for (let i = 0; i < starCount; i++) {
-                let delay = i * 70;
+                let delay = i * (victoryMode ? 40 : 70);
                 setTimeout(() => {
                     let star = document.createElement('div');
                     star.className = 'success-star';
-                    star.innerText = '★';
+                    styleCelebrationStar(star, victoryMode);
                     star.style.left = `${pt.x + (Math.random() - 0.5) * xSpread}px`;
                     star.style.top = `${clampedY - yLift - Math.random() * ySpread}px`;
                     layer.appendChild(star);
-                    setTimeout(() => star.remove(), 820);
+                    setTimeout(() => star.remove(), victoryMode ? 1180 : 820);
                 }, delay);
+            }
+        }
+
+        function ensureWinOverlayStarLayer() {
+            let body = document.getElementById('win-overlay-body');
+            if (!body) return null;
+            let layer = document.getElementById('win-overlay-stars');
+            if (layer) return layer;
+            layer = document.createElement('div');
+            layer.id = 'win-overlay-stars';
+            body.prepend(layer);
+            return layer;
+        }
+
+        function spawnWinOverlayStars(count = 16) {
+            let layer = ensureWinOverlayStarLayer();
+            if (!layer) return;
+            layer.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                let star = document.createElement('div');
+                star.className = 'success-star win-overlay-star';
+                styleCelebrationStar(star, true);
+                star.style.left = `${8 + Math.random() * 84}%`;
+                star.style.top = `${6 + Math.random() * 48}%`;
+                star.style.animationDelay = `${Math.random() * 0.3}s`;
+                layer.appendChild(star);
+                setTimeout(() => star.remove(), 1300);
             }
         }
 
@@ -10132,6 +10193,10 @@
             if (nextBtn) nextBtn.classList.toggle('hidden', nextIdx < 0);
 
             winOverlay.style.display = 'block';
+            spawnWinOverlayStars(window.matchMedia('(max-width: 600px)').matches ? 12 : 18);
+            if (p && typeof p.X === 'function' && typeof p.Y === 'function') {
+                spawnStepSuccessStars(p.X(), p.Y(), { variant: 'victory' });
+            }
             try {
                 if (typeof window.confetti === 'function') {
                     window.confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
@@ -10186,6 +10251,9 @@
             }
             if (!wasWin && !suppressCelebration) {
                 playSound('win');
+                if (p && typeof p.X === 'function' && typeof p.Y === 'function') {
+                    spawnStepSuccessStars(p.X(), p.Y(), { variant: 'victory' });
+                }
                 triggerVictoryConfetti();
             }
             wasWin = true;
@@ -10201,6 +10269,8 @@
         function closeWinOverlay() {
             let winOverlay = document.getElementById('win-overlay');
             if (winOverlay) winOverlay.style.display = 'none';
+            let stars = document.getElementById('win-overlay-stars');
+            if (stars) stars.innerHTML = '';
             if (winOverlayTimer) {
                 clearTimeout(winOverlayTimer);
                 winOverlayTimer = null;
@@ -11154,12 +11224,18 @@
             setScanStatus('הטקסט מוכן. עכשיו אפרק אותו לציור, לנתונים, ולמשוואות.');
         }
 
+        function isDirectAiVendorEndpoint(endpoint) {
+            let text = String(endpoint || '').trim().toLowerCase();
+            if (!text) return false;
+            return /openai\.com|anthropic\.com|generativelanguage\.googleapis\.com|ai\.google\.dev|\/chat\/completions|\/responses|:generatecontent/.test(text);
+        }
+
         function getFriendlyScanErrorMessage(err) {
             let raw = String(err?.message || '').trim();
             if (!raw) return 'לא הצלחתי לפרק את השאלה כרגע. נסו שוב עם צילום חד יותר או עם ניסוח כתוב קצר.';
-            if (/scan_config_missing|proxy endpoint|server-side proxy|openai/i.test(raw)) {
+            if (/scan_config_missing|proxy endpoint|server-side proxy|openai|anthropic|generativelanguage|gemini/i.test(raw)) {
                 revealScanAdminConfig();
-                return 'שירות הניתוח עדיין לא הוגדר במכשיר הזה. אם צריך, מורה או אדמין יכולים לפתוח את הגדרות שרת התיווך.';
+                return 'סריקת התמונה כבויה כברירת מחדל כדי לא להשתמש ב־API בתשלום. פירוק טקסט עדיין עובד מקומית, ואם צריך אפשר לחבר שרת תיווך חינמי דרך אזור המורה/האדמין.';
             }
             if (/json|תשובה ריקה|לא התקבל תוכן/i.test(raw)) {
                 return 'לא הצלחתי להבין את השאלה בצורה יציבה. נסו צילום חד יותר, חיתוך קרוב יותר, או כתיבה ידנית של הנתונים.';
@@ -11223,7 +11299,7 @@
                 if (!raw) return;
                 let cfg = JSON.parse(raw);
                 if (cfg && typeof cfg === 'object') {
-                    if (typeof cfg.endpoint === 'string' && cfg.endpoint.trim() && !/openai\.com|\/chat\/completions|\/responses/i.test(cfg.endpoint.trim())) {
+                    if (typeof cfg.endpoint === 'string' && cfg.endpoint.trim() && !isDirectAiVendorEndpoint(cfg.endpoint.trim())) {
                         endpointInput.value = cfg.endpoint.trim();
                     }
                     if (typeof cfg.model === 'string' && cfg.model.trim()) modelInput.value = cfg.model.trim();
@@ -11235,11 +11311,11 @@
         }
 
         function saveScanConfig() {
-            let endpoint = (document.getElementById('scan-api-endpoint')?.value || '').trim() || DEFAULT_SCAN_API_ENDPOINT;
+            let endpoint = (document.getElementById('scan-api-endpoint')?.value || '').trim();
             let model = (document.getElementById('scan-api-model')?.value || '').trim() || DEFAULT_SCAN_MODEL;
             let remember = !!document.getElementById('scan-remember-config')?.checked;
-            if (/openai\.com|\/chat\/completions|\/responses/i.test(endpoint)) {
-                endpoint = DEFAULT_SCAN_API_ENDPOINT;
+            if (isDirectAiVendorEndpoint(endpoint)) {
+                endpoint = '';
             }
             try {
                 if (!remember) {
@@ -12788,7 +12864,7 @@ Rules:
             let systemPrompt = getScanSystemPrompt();
             let userPrompt = 'Analyze the attached math problem image and produce a pedagogy-first visual action plan JSON (visual layers + normalized skill tags) following the exact schema. Do not solve the problem.';
             if (!endpoint || /example/i.test(endpoint)) throw new Error('scan_config_missing_server_side_proxy');
-            if (/openai\.com|\/chat\/completions|\/responses/i.test(endpoint)) {
+            if (isDirectAiVendorEndpoint(endpoint)) {
                 throw new Error('scan_config_missing_server_side_proxy');
             }
 
