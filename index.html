@@ -873,6 +873,14 @@
                 <button id="btn-overlay-open" onclick="openQuestionOverlay()">הסבר שאלה מלא</button>
             </div>
             <div id="top-actions">
+                <div id="ai-mode-control" aria-label="מצב עבודה" role="group">
+                    <div id="ai-mode-badge" aria-live="polite">AI: Local</div>
+                    <div id="ai-mode-selector">
+                        <button id="btn-ai-mode-local" type="button" onclick="setAiModeFromUi('local')">Local</button>
+                        <button id="btn-ai-mode-cloud" type="button" onclick="setAiModeFromUi('cloud')">Cloud</button>
+                        <button id="btn-ai-mode-off" type="button" onclick="setAiModeFromUi('off')">Off</button>
+                    </div>
+                </div>
                 <span id="top-question-select-label">כאן בוחרים שאלה:</span>
                 <select id="top-question-select" title="בחירת שאלה"></select>
                 <button id="btn-mobile-feed" class="hidden" type="button">📰 פיד גלילה</button>
@@ -1396,8 +1404,15 @@
         const FEEDBACK_STORAGE_KEY = 'math_visual_feedback_v1';
         const SCAN_CONFIG_STORAGE_KEY = 'math_visual_scan_config_v1';
         const SCANNED_QUESTIONS_STORAGE_KEY = 'math_visual_scanned_questions_v1';
+        const AI_MODE_STORAGE_KEY = 'math_visual_ai_mode_v1';
+        const RUNTIME_CONFIG_ENDPOINT = '/api/runtime-config';
+        const AI_MODE_VALUES = Object.freeze({
+            LOCAL: 'local',
+            CLOUD: 'cloud',
+            OFF: 'off'
+        });
         const DEFAULT_SCAN_API_ENDPOINT = '';
-        const DEFAULT_SCAN_MODEL = 'gemini-2.5-flash';
+        const DEFAULT_SCAN_MODEL = '';
         const FOUR_UNIT_TOPIC_DEFS = [
             {
                 key: 'graph_reading',
@@ -1673,6 +1688,14 @@
         let startCoachSpeechTimer = null;
         let learnerProgress = null;
         let feedbackMessages = [];
+        let runtimeCloudCapabilities = {
+            loaded: false,
+            tutorCloudAvailable: false,
+            scanCloudAvailable: false,
+            scanOptInEnabled: false,
+            provider: ''
+        };
+        let currentAiMode = AI_MODE_VALUES.LOCAL;
         const ADMOB_TEST_BANNER_ID = 'ca-app-pub-3940256099942544/6300978111';
         let adMobInitPromise = null;
         let adMobBannerShown = false;
@@ -5577,6 +5600,180 @@
             return value.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
         }
 
+        function getDefaultRuntimeCloudCapabilities() {
+            return {
+                loaded: false,
+                tutorCloudAvailable: false,
+                scanCloudAvailable: false,
+                scanOptInEnabled: false,
+                provider: ''
+            };
+        }
+
+        function normalizeAiMode(mode) {
+            let value = String(mode || '').trim().toLowerCase();
+            if (value === AI_MODE_VALUES.CLOUD) return AI_MODE_VALUES.CLOUD;
+            if (value === AI_MODE_VALUES.OFF) return AI_MODE_VALUES.OFF;
+            return AI_MODE_VALUES.LOCAL;
+        }
+
+        function readStoredAiModePreference() {
+            try {
+                return normalizeAiMode(localStorage.getItem(AI_MODE_STORAGE_KEY));
+            } catch (err) {
+                return AI_MODE_VALUES.LOCAL;
+            }
+        }
+
+        function persistAiModePreference(mode) {
+            try {
+                localStorage.setItem(AI_MODE_STORAGE_KEY, normalizeAiMode(mode));
+            } catch (err) {
+                // Continue when storage is unavailable.
+            }
+        }
+
+        function getRuntimeAiCapabilities() {
+            return Object.assign({}, runtimeCloudCapabilities || getDefaultRuntimeCloudCapabilities());
+        }
+
+        function isAnyCloudFeatureAvailable() {
+            return !!(runtimeCloudCapabilities.tutorCloudAvailable || runtimeCloudCapabilities.scanCloudAvailable);
+        }
+
+        function canUseTutorCloud() {
+            return currentAiMode === AI_MODE_VALUES.CLOUD && !!runtimeCloudCapabilities.tutorCloudAvailable;
+        }
+
+        function canUseTextAnalysis() {
+            return currentAiMode !== AI_MODE_VALUES.OFF;
+        }
+
+        function canUseImageScanCloud() {
+            return currentAiMode === AI_MODE_VALUES.CLOUD && !!runtimeCloudCapabilities.scanCloudAvailable;
+        }
+
+        function getAiModeBadgeText() {
+            if (currentAiMode === AI_MODE_VALUES.OFF) return 'AI: Off';
+            if (currentAiMode === AI_MODE_VALUES.CLOUD) return 'AI: Cloud';
+            return 'AI: Local';
+        }
+
+        function reconcileAiModeWithCapabilities(options = {}) {
+            if (currentAiMode !== AI_MODE_VALUES.CLOUD || isAnyCloudFeatureAvailable()) return false;
+            currentAiMode = AI_MODE_VALUES.LOCAL;
+            persistAiModePreference(currentAiMode);
+            if (!options.silent && typeof showStepToast === 'function') {
+                showStepToast('Cloud לא זמין כרגע, עברנו ל־Local.');
+            }
+            return true;
+        }
+
+        function syncAiModeUi() {
+            document.body.classList.toggle('ai-mode-local', currentAiMode === AI_MODE_VALUES.LOCAL);
+            document.body.classList.toggle('ai-mode-cloud', currentAiMode === AI_MODE_VALUES.CLOUD);
+            document.body.classList.toggle('ai-mode-off', currentAiMode === AI_MODE_VALUES.OFF);
+
+            let badge = document.getElementById('ai-mode-badge');
+            let control = document.getElementById('ai-mode-control');
+            let cloudBtn = document.getElementById('btn-ai-mode-cloud');
+            let localBtn = document.getElementById('btn-ai-mode-local');
+            let offBtn = document.getElementById('btn-ai-mode-off');
+
+            if (control) {
+                control.dataset.mode = currentAiMode;
+                control.dataset.cloudAvailable = isAnyCloudFeatureAvailable() ? '1' : '0';
+            }
+            if (badge) {
+                badge.innerText = getAiModeBadgeText();
+                badge.dataset.mode = currentAiMode;
+                badge.title = currentAiMode === AI_MODE_VALUES.CLOUD
+                    ? 'מצב ענן פעיל רק כשיש זמינות שרת ומפתח.'
+                    : (currentAiMode === AI_MODE_VALUES.OFF
+                        ? 'כל פיצ\'רי ה-AI כבויים במפורש.'
+                        : 'מצב מקומי: בלי שליחת תוכן לענן.');
+            }
+
+            [localBtn, cloudBtn, offBtn].forEach((btn) => {
+                if (!btn) return;
+                let isActive = btn.id.endsWith(currentAiMode);
+                btn.classList.toggle('is-active', isActive);
+                btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            });
+            if (cloudBtn) {
+                let cloudAvailable = isAnyCloudFeatureAvailable();
+                cloudBtn.disabled = !cloudAvailable;
+                cloudBtn.title = cloudAvailable
+                    ? 'Cloud זמין ויפעל רק אם תבחרו בו.'
+                    : 'Cloud לא זמין כרגע כי אין מפתח/Proxy פעיל.';
+            }
+
+            if (typeof syncScanProgressiveUi === 'function') syncScanProgressiveUi();
+            window.dispatchEvent(new CustomEvent('ai-mode-changed', {
+                detail: {
+                    mode: currentAiMode,
+                    capabilities: getRuntimeAiCapabilities()
+                }
+            }));
+        }
+
+        async function loadRuntimeAiCapabilities() {
+            runtimeCloudCapabilities = getDefaultRuntimeCloudCapabilities();
+            try {
+                let response = await fetch(`${RUNTIME_CONFIG_ENDPOINT}?cb=${Date.now()}`, {
+                    cache: 'no-store'
+                });
+                if (!response.ok) throw new Error(`runtime_config_status_${response.status}`);
+                let data = await response.json();
+                runtimeCloudCapabilities = {
+                    loaded: true,
+                    tutorCloudAvailable: !!data?.cloud?.tutorAvailable,
+                    scanCloudAvailable: !!data?.cloud?.scanAvailable,
+                    scanOptInEnabled: !!data?.cloud?.scanOptInEnabled,
+                    provider: String(data?.cloud?.provider || '').trim()
+                };
+            } catch (err) {
+                runtimeCloudCapabilities = {
+                    loaded: true,
+                    tutorCloudAvailable: false,
+                    scanCloudAvailable: false,
+                    scanOptInEnabled: false,
+                    provider: ''
+                };
+            }
+            reconcileAiModeWithCapabilities({ silent: true });
+            syncAiModeUi();
+        }
+
+        function setAiMode(nextMode, options = {}) {
+            let normalized = normalizeAiMode(nextMode);
+            if (normalized === AI_MODE_VALUES.CLOUD && !isAnyCloudFeatureAvailable()) {
+                if (!options.silent && typeof showStepToast === 'function') {
+                    showStepToast('Cloud לא זמין כרגע. Local נשאר פעיל.');
+                }
+                syncAiModeUi();
+                return false;
+            }
+            currentAiMode = normalized;
+            persistAiModePreference(currentAiMode);
+            syncAiModeUi();
+            if (!options.silent && typeof showStepToast === 'function') {
+                let label = currentAiMode === AI_MODE_VALUES.OFF
+                    ? 'Off'
+                    : (currentAiMode === AI_MODE_VALUES.CLOUD ? 'Cloud' : 'Local');
+                showStepToast(`מצב עבודה פעיל: ${label}`);
+            }
+            return true;
+        }
+
+        function setAiModeFromUi(mode) {
+            setAiMode(mode);
+        }
+
+        window.setAiModeFromUi = setAiModeFromUi;
+        window.getActiveAiMode = () => currentAiMode;
+        window.getRuntimeAiCapabilities = getRuntimeAiCapabilities;
+
         function getGraphLiveRegion() {
             return document.getElementById('graph-live-region');
         }
@@ -7241,6 +7438,8 @@
             } catch (err) {
                 // Ignore browser restrictions.
             }
+            currentAiMode = readStoredAiModePreference();
+            syncAiModeUi();
             applyStoredCleanModePreference();
             helpVoiceEnabled = readHelpVoicePreference();
             syncStartCoachPanel(false);
@@ -7269,6 +7468,7 @@
             updateDisplayedVersionBadges();
             exposeBuildBadgeInEmbedMode();
             loadFeedbackMessages();
+            await loadRuntimeAiCapabilities();
             loadScanConfig();
             syncScanAdminConfigUi();
             let defaultDrawerOpen = false;
@@ -11040,6 +11240,10 @@
             let primaryModes = getScanPrimaryModes();
             let secondaryMode = getScanSecondaryMode(primaryModes);
             let manualText = getScanManualText();
+            let offMode = currentAiMode === AI_MODE_VALUES.OFF;
+            let imageCloudEnabled = canUseImageScanCloud();
+            let textAnalysisEnabled = canUseTextAnalysis();
+            let imageSelected = !!scanImageFile;
             let readyToAnalyze = isScanReadyToAnalyze();
             let hasDraft = !!scannedQuestionDraft;
             let usingSecondaryMode = scanEntryMode === secondaryMode || (!!scanImageFile && lastScanInputMode === secondaryMode);
@@ -11053,12 +11257,14 @@
             let textBtn = document.getElementById('btn-scan-text');
             let moreBtn = document.getElementById('btn-scan-more-options');
             let textWrap = document.getElementById('scan-text-wrap');
+            let textAreaEl = document.getElementById('scan-question-text');
             let previewWrap = document.getElementById('scan-preview-wrap');
             let flowNote = document.getElementById('scan-flow-note');
             let hint = document.getElementById('scan-device-hint');
             let primaryActions = document.querySelector('.scan-primary-actions');
             let analyzeBtn = document.getElementById('btn-scan-analyze');
             let injectBtn = document.getElementById('btn-scan-inject');
+            let canAnalyzeCurrentSource = textAnalysisEnabled && (manualText || (imageSelected && imageCloudEnabled));
 
             if (cameraBtn) cameraBtn.classList.toggle('hidden', !showCamera);
             if (uploadBtn) uploadBtn.classList.toggle('hidden', !showUpload);
@@ -11078,12 +11284,32 @@
                 textBtn.classList.toggle('is-active', active);
                 textBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
             }
+            if (cameraBtn) {
+                cameraBtn.disabled = scanInFlight || !imageCloudEnabled;
+                cameraBtn.title = imageCloudEnabled
+                    ? 'צילום שאלה זמין רק במצב Cloud עם Proxy פעיל.'
+                    : 'סריקת תמונה כבויה כרגע. עברו ל-Cloud וחברו Proxy כדי להפעיל אותה.';
+            }
+            if (uploadBtn) {
+                uploadBtn.disabled = scanInFlight || !imageCloudEnabled;
+                uploadBtn.title = imageCloudEnabled
+                    ? 'העלאת תמונה זמינה רק במצב Cloud עם Proxy פעיל.'
+                    : 'העלאת תמונה כבויה כרגע. כרגע אפשר לעבוד רק עם טקסט מקומי.';
+            }
+            if (textBtn) {
+                textBtn.disabled = scanInFlight || offMode;
+                textBtn.title = offMode
+                    ? 'מצב Off מכבה גם את הפירוק המקומי.'
+                    : 'פירוק הטקסט עובד מקומית.';
+            }
 
             if (moreBtn) {
                 moreBtn.classList.toggle('hidden', false);
                 moreBtn.innerText = scanMoreOptionsExpanded ? 'פחות אפשרויות' : getScanMoreOptionsLabel(secondaryMode);
                 moreBtn.setAttribute('aria-expanded', scanMoreOptionsExpanded ? 'true' : 'false');
+                moreBtn.disabled = scanInFlight || !imageCloudEnabled;
             }
+            if (textAreaEl) textAreaEl.disabled = scanInFlight || offMode;
 
             if (textWrap) textWrap.classList.toggle('hidden', scanEntryMode !== 'text');
             if (previewWrap) {
@@ -11092,17 +11318,28 @@
             }
 
             if (primaryActions) primaryActions.classList.toggle('hidden', !(readyToAnalyze || hasDraft));
-            if (analyzeBtn) analyzeBtn.classList.toggle('hidden', !readyToAnalyze);
+            if (analyzeBtn) {
+                analyzeBtn.classList.toggle('hidden', !readyToAnalyze);
+                analyzeBtn.disabled = scanInFlight || !canAnalyzeCurrentSource;
+                analyzeBtn.title = !textAnalysisEnabled
+                    ? 'מצב Off מכבה את הפירוק האוטומטי.'
+                    : (!imageCloudEnabled && imageSelected ? 'פירוק תמונה זמין רק ב-Cloud עם Proxy פעיל.' : 'מפרקים את הקלט לציור, נתונים ומשוואות.');
+            }
             if (injectBtn) injectBtn.classList.toggle('hidden', !hasDraft);
 
             if (flowNote) {
                 let note = 'בחרו איך להתחיל, ואני אראה לכם רק את הצעד הבא.';
-                if (hasDraft) note = 'מעולה. הפירוק מוכן. עכשיו אפשר לעבור עליו ואז לפתוח לתרגול.';
+                if (offMode) note = 'מצב Off פעיל. הפירוק האוטומטי כבוי עד שתחזרו ל־Local או Cloud.';
+                else if (hasDraft) note = 'מעולה. הפירוק מוכן. עכשיו אפשר לעבור עליו ואז לפתוח לתרגול.';
                 else if (scanImageFile) note = 'התמונה מוכנה. השלב הבא הוא לפרק אותה לציור, לנתונים ולמשוואות.';
                 else if (scanEntryMode === 'text' && manualText) note = 'הטקסט מוכן. השלב הבא הוא לפרק אותו לציור, לנתונים ולמשוואות.';
                 else if (scanEntryMode === 'text') note = 'כתבו כאן את הנתונים החשובים, וגם ניסוח קצר ולא מושלם מספיק.';
-                else if (scanEntryMode === 'camera') note = 'השלב הבא הוא לצלם או לבחור תמונה אחת ברורה של השאלה.';
-                else if (scanEntryMode === 'file') note = 'השלב הבא הוא לבחור תמונה אחת ברורה מהמכשיר.';
+                else if (scanEntryMode === 'camera') note = imageCloudEnabled
+                    ? 'השלב הבא הוא לצלם או לבחור תמונה אחת ברורה של השאלה.'
+                    : 'סריקת תמונה כבויה כרגע. עברו ל־Cloud וחברו Proxy כדי להשתמש בה.';
+                else if (scanEntryMode === 'file') note = imageCloudEnabled
+                    ? 'השלב הבא הוא לבחור תמונה אחת ברורה מהמכשיר.'
+                    : 'העלאת תמונה כבויה כרגע. בינתיים אפשר להשתמש בפירוק הטקסט המקומי.';
                 flowNote.innerText = note;
                 flowNote.classList.toggle('is-ready', readyToAnalyze || hasDraft);
             }
@@ -11119,9 +11356,13 @@
                 let hintText = (isLikelyPhoneDevice() || isMobileViewportNow())
                     ? 'בטלפון בדרך כלל הכי קל להתחיל מצילום או מכתיבה קצרה.'
                     : 'במחשב בדרך כלל הכי קל להתחיל מהעלאת תמונה או מכתיבה קצרה.';
+                if (offMode) hintText = 'מצב Off פעיל. כדי לנתח אוטומטית, עברו ל־Local או Cloud.';
                 if (scanEntryMode === 'text') hintText = 'לא צריך לכתוב פתרון מלא. מספיק לכתוב את הנתונים, הנקודות ומה מבקשים למצוא.';
                 if (scanImageFile) hintText = 'בחרו תמונה אחת ברורה ומלאה של השאלה. אין צורך להעלות כמה תמונות.';
                 if (hasDraft) hintText = 'עברו קודם על הפירוק שנבנה. אם זה נראה נכון, פתחו את השאלה לתרגול.';
+                if (!imageCloudEnabled && !offMode && !hasDraft && !manualText) {
+                    hintText = 'פירוק טקסט מקומי זמין עכשיו. סריקת תמונה תיפתח רק ב־Cloud עם Proxy פעיל.';
+                }
                 if (warning) {
                     hintText += ' אם המצלמה לא נפתחת בתוך Google Sites, פתחו את האפליקציה בלשונית חדשה ונסו שוב.';
                 }
@@ -11186,6 +11427,14 @@
             let normalized = mode === 'text'
                 ? 'text'
                 : (mode === 'camera' || mode === 'file' ? mode : resolveDefaultScanInputMode());
+            if ((normalized === 'camera' || normalized === 'file') && !canUseImageScanCloud()) {
+                normalized = 'text';
+                if (!options.skipStatus) {
+                    setScanStatus(currentAiMode === AI_MODE_VALUES.OFF
+                        ? 'מצב Off פעיל. כדי לפרק שאלה, עברו ל־Local או Cloud.'
+                        : 'סריקת תמונה כבויה כרגע. בינתיים אפשר להשתמש בפירוק הטקסט המקומי.');
+                }
+            }
             scanEntryMode = normalized;
             if (normalized === 'camera' || normalized === 'file') scanMoreOptionsExpanded = (normalized === getScanSecondaryMode());
             syncScanProgressiveUi();
@@ -11333,6 +11582,7 @@
         }
 
         function resolveDefaultScanInputMode() {
+            if (!canUseImageScanCloud()) return 'text';
             return (isLikelyPhoneDevice() || isMobileViewportNow()) ? 'camera' : 'file';
         }
 
@@ -11390,6 +11640,13 @@
         }
 
         function triggerScanImageInput(mode) {
+            if (!canUseImageScanCloud()) {
+                setScanEntryMode('text', { skipFocus: false, skipStatus: true });
+                setScanStatus(currentAiMode === AI_MODE_VALUES.OFF
+                    ? 'מצב Off פעיל. כדי להשתמש בסריקה אוטומטית, עברו ל־Local או Cloud.'
+                    : 'סריקת תמונה זמינה רק במצב Cloud עם Proxy פעיל. בינתיים אפשר לכתוב את השאלה.');
+                return;
+            }
             let normalizedMode = mode === 'camera' || mode === 'file' ? mode : resolveDefaultScanInputMode();
             let input = getScanInputElement(normalizedMode);
             if (!input) {
@@ -11432,7 +11689,13 @@
             scanImageFile = null;
             scanImageDataUrl = '';
             setScanEntryMode(resolveDefaultScanInputMode(), { skipStatus: true, skipFocus: true });
-            setScanStatus('');
+            if (currentAiMode === AI_MODE_VALUES.OFF) {
+                setScanStatus('מצב Off פעיל. Local או Cloud יפעילו שוב את הפירוק האוטומטי.');
+            } else if (!canUseImageScanCloud()) {
+                setScanStatus('פירוק טקסט מקומי זמין. סריקת תמונה תיפתח רק ב־Cloud עם Proxy פעיל.');
+            } else {
+                setScanStatus('');
+            }
             document.getElementById('scan-modal').classList.remove('hidden');
             if (scanModalA11y) scanModalA11y.activate();
         }
@@ -13165,10 +13428,18 @@ Rules:
 
         async function analyzeScannedQuestion() {
             if (scanInFlight) return;
+            if (!canUseTextAnalysis()) {
+                setScanStatus('מצב Off פעיל. עברו ל־Local או Cloud כדי להפעיל פירוק אוטומטי.', true);
+                return;
+            }
             let manualText = (document.getElementById('scan-question-text')?.value || scanManualQuestionText || '').trim();
             let shouldUseTextInput = scanEntryMode === 'text' || (!!manualText && !scanImageFile);
             if (!shouldUseTextInput && !scanImageFile) {
                 setScanStatus('קודם בחרו תמונה או כתבו את השאלה.', true);
+                return;
+            }
+            if (!shouldUseTextInput && !canUseImageScanCloud()) {
+                setScanStatus('סריקת תמונה כבויה כרגע. עברו ל־Cloud וחברו Proxy כדי להפעיל אותה.', true);
                 return;
             }
 
@@ -14179,6 +14450,7 @@ Rules:
                 <span class="tutor-dot"></span>
                 <span class="tutor-dot"></span>
             </div>
+            <div id="tutor-mode-note" aria-live="polite">מצב Local: ההסבר נשאר במכשיר.</div>
             <div id="tutor-input-row">
                 <input id="tutor-input" type="text" placeholder="שאל/י שאלה..." maxlength="300" dir="auto" autocomplete="off"/>
                 <button id="tutor-send" type="button" aria-label="שלח שאלה">⬅</button>
@@ -14477,6 +14749,17 @@ Rules:
         justify-content: center;
         border-top: 1px solid #f1f5f9;
         flex-shrink: 0;
+    }
+    #tutor-mode-note {
+        margin: 0 10px 6px;
+        padding: 6px 10px;
+        border-radius: 10px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1.4;
+        text-align: center;
     }
     #tutor-restart {
         background: none;

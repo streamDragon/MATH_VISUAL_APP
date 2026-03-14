@@ -1050,6 +1050,84 @@ body.track-visual-explore #top-question-wrap {
     box-shadow: 0 2px 8px rgba(40, 72, 126, 0.08);
 }
 
+#ai-mode-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    border-radius: 999px;
+    background: linear-gradient(120deg, rgba(241, 245, 249, 0.96), rgba(255, 255, 255, 0.98));
+    border: 1px solid rgba(191, 219, 254, 0.95);
+}
+
+#ai-mode-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 900;
+    color: #0f172a;
+    background: #e2e8f0;
+    white-space: nowrap;
+}
+
+#ai-mode-badge[data-mode="local"] {
+    color: #1d4ed8;
+    background: #dbeafe;
+}
+
+#ai-mode-badge[data-mode="cloud"] {
+    color: #7c3aed;
+    background: #ede9fe;
+}
+
+#ai-mode-badge[data-mode="off"] {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+#ai-mode-selector {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+#ai-mode-selector button {
+    min-height: 32px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    font-size: 0.75rem;
+    font-weight: 900;
+    box-shadow: none;
+}
+
+#ai-mode-selector button.is-active {
+    color: #ffffff;
+    background: #2563eb;
+    border-color: #2563eb;
+}
+
+#btn-ai-mode-cloud.is-active {
+    background: #7c3aed;
+    border-color: #7c3aed;
+}
+
+#btn-ai-mode-off.is-active {
+    background: #dc2626;
+    border-color: #dc2626;
+}
+
+#ai-mode-selector button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(0.12);
+}
+
 body.builder-workspace-mode #top-overlay-cta,
 body.builder-workspace-mode #top-actions {
     display: none;
@@ -6940,6 +7018,18 @@ body.track-equation-modeling #builder-notebook-box {
         flex: 1 1 170px;
     }
 
+    #ai-mode-control {
+        flex: 0 0 auto;
+    }
+
+    #ai-mode-badge {
+        font-size: 0.82rem;
+    }
+
+    #ai-mode-selector button {
+        font-size: 0.82rem;
+    }
+
     #top-actions button {
         font-size: 0.95rem;
         min-height: var(--tap-min);
@@ -6965,6 +7055,23 @@ body.track-equation-modeling #builder-notebook-box {
         font-size: 0.84rem;
         min-height: 38px;
         padding: 7px 10px;
+    }
+
+    body.embed-mode #ai-mode-control {
+        gap: 6px;
+        padding: 4px 5px;
+    }
+
+    body.embed-mode #ai-mode-badge {
+        min-height: 28px;
+        padding: 0 8px;
+        font-size: 0.72rem;
+    }
+
+    body.embed-mode #ai-mode-selector button {
+        min-height: 30px;
+        padding: 6px 8px;
+        font-size: 0.72rem;
     }
 
     body.embed-mode #top-overlay-cta {

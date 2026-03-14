@@ -1,3 +1,10 @@
+import {
+    enforceJsonBodySize,
+    enforceRateLimit,
+    fetchWithTimeout,
+    safeErrorMeta
+} from './_lib/cloud_guardrails.js';
+
 const SYSTEM_PROMPT = `אתה מורה מתמטי ידידותי ומעודד לתלמידי תיכון בישראל.
 ענה בעברית קצרה וברורה, בלי לפתור מיד את כל השאלה.
 עדיף 2-4 משפטים, עם צעד אחד ברור להמשך.
@@ -6,6 +13,8 @@ const SYSTEM_PROMPT = `אתה מורה מתמטי ידידותי ומעודד ל
 
 const GEMINI_MODEL = String(process.env.GEMINI_MODEL || 'gemini-2.5-flash').trim();
 const GEMINI_API_KEY = String(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '').trim();
+const MAX_BODY_BYTES = 24 * 1024;
+const PROVIDER_TIMEOUT_MS = 8_000;
 
 function normalizeMessages(rawMessages) {
     if (!Array.isArray(rawMessages)) return [];
@@ -78,23 +87,23 @@ async function callGemini(messages) {
     if (!GEMINI_API_KEY) return null;
 
     let prompt = [
+        SYSTEM_PROMPT,
+        '',
         'שיחה עד כה:',
         buildTranscript(messages),
         '',
         'ענה עכשיו רק להודעה האחרונה של התלמיד.'
     ].join('\n');
 
-    let response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`,
+    let response = await fetchWithTimeout(
+        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`,
         {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'x-goog-api-key': GEMINI_API_KEY
             },
             body: JSON.stringify({
-                systemInstruction: {
-                    parts: [{ text: SYSTEM_PROMPT }]
-                },
                 contents: [
                     {
                         role: 'user',
@@ -103,18 +112,15 @@ async function callGemini(messages) {
                 ],
                 generationConfig: {
                     temperature: 0.6,
-                    maxOutputTokens: 350,
-                    thinkingConfig: {
-                        thinkingBudget: 0
-                    }
+                    maxOutputTokens: 350
                 }
             })
-        }
+        },
+        PROVIDER_TIMEOUT_MS
     );
 
     if (!response.ok) {
-        let errText = await response.text();
-        throw new Error(`Gemini API error ${response.status}: ${errText}`);
+        throw new Error(`Gemini API error ${response.status}`);
     }
 
     let data = await response.json();
@@ -133,6 +139,10 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    res.setHeader('Cache-Control', 'no-store, max-age=0');
+    if (!enforceRateLimit(req, res, { scope: 'tutor', limit: 18, windowMs: 60_000 })) return;
+    if (!enforceJsonBodySize(res, req.body, MAX_BODY_BYTES, 'tutor_payload_too_large')) return;
+
     let messages = normalizeMessages(req.body?.messages);
     if (messages.length === 0) {
         return res.status(400).json({ error: 'messages חסר או ריק' });
@@ -150,7 +160,7 @@ export default async function handler(req, res) {
             provider: GEMINI_API_KEY ? 'gemini' : 'local'
         });
     } catch (err) {
-        console.error('[tutor] Falling back to local tutor:', err);
+        console.warn('[tutor] Falling back to local tutor:', safeErrorMeta(err));
         return res.status(200).json({
             reply: buildLocalTutorReply(messages),
             provider: 'local'
