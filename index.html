@@ -11482,6 +11482,9 @@
         function getFriendlyScanErrorMessage(err) {
             let raw = String(err?.message || '').trim();
             if (!raw) return 'לא הצלחתי לפרק את השאלה כרגע. נסו שוב עם צילום חד יותר או עם ניסוח כתוב קצר.';
+            if (/scan_cloud_disabled/i.test(raw)) {
+                return 'סריקת תמונה כבויה כרגע. היא תופעל רק במצב Cloud עם Proxy פעיל, ובינתיים אפשר לעבוד עם פירוק טקסט מקומי.';
+            }
             if (/scan_config_missing|proxy endpoint|server-side proxy|openai|anthropic|generativelanguage|gemini/i.test(raw)) {
                 revealScanAdminConfig();
                 return 'סריקת התמונה כבויה כברירת מחדל כדי לא להשתמש ב־API בתשלום. פירוק טקסט עדיין עובד מקומית, ואם צריך אפשר לחבר שרת תיווך חינמי דרך אזור המורה/האדמין.';
@@ -13121,6 +13124,9 @@ Rules:
         }
 
         async function callScanVisionApi(imageDataUrl) {
+            if (!canUseImageScanCloud()) {
+                throw new Error('scan_cloud_disabled');
+            }
             let endpoint = (document.getElementById('scan-api-endpoint')?.value || '').trim() || DEFAULT_SCAN_API_ENDPOINT;
             let model = (document.getElementById('scan-api-model')?.value || '').trim() || DEFAULT_SCAN_MODEL;
 
@@ -14761,6 +14767,14 @@ Rules:
         line-height: 1.4;
         text-align: center;
     }
+    #tutor-mode-note[data-mode="cloud"] {
+        background: #f3e8ff;
+        color: #7c3aed;
+    }
+    #tutor-mode-note[data-mode="off"] {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
     #tutor-restart {
         background: none;
         border: 1px solid #e2e8f0;
@@ -14860,6 +14874,7 @@ Rules:
         const sendBtn    = document.getElementById('tutor-send');
         const restartBtn = document.getElementById('tutor-restart');
         const bubbleEl   = document.getElementById('tutor-bubble');
+        const noteEl     = document.getElementById('tutor-mode-note');
         const eyesNormal = document.getElementById('tutor-eyes-normal');
         const eyesHappy  = document.getElementById('tutor-eyes-happy');
         const blinkLeft  = document.getElementById('tutor-blink-left');
@@ -14898,6 +14913,85 @@ Rules:
             messagesEl.scrollTop = messagesEl.scrollHeight;
         }
 
+        function buildLocalTutorReply(text) {
+            let raw = String(text || '').trim();
+            let normalized = raw.toLowerCase();
+
+            if (!normalized) {
+                return 'בואו נתחיל ממה שרואים: מה נתון בגרף, מה צריך למצוא, ואיזה רמז כבר יש לכם?';
+            }
+            if (/שיפוע|נגזרת|f'|slope/.test(normalized)) {
+                return 'בדקו קודם אם צריך רק לקרוא שיפוע מהגרף או להגיע לשיפוע מסוים. גררו את הנקודה וחפשו איפה השיפוע מתקרב לערך המבוקש.';
+            }
+            if (/משיק|tangent/.test(normalized)) {
+                return 'במשיק קודם מזהים את נקודת המגע על הגרף, אחר כך קוראים שם את השיפוע, ורק אז כותבים משוואה.';
+            }
+            if (/אנך|נורמל|normal/.test(normalized)) {
+                return 'באנך מתחילים מהשיפוע של המשיק. אחרי שמצאתם אותו, הופכים והופכים סימן כדי לקבל את שיפוע האנך.';
+            }
+            if (/קיצון|מינימום|מקסימום|extrem/.test(normalized)) {
+                return 'בקיצון שווה לבדוק שני דברים: שהשיפוע מתקרב ל־0, ושהגרף באמת מחליף כיוון סביב הנקודה.';
+            }
+            if (/שורש|חיתוך|ציר x|x-?intercept/.test(normalized)) {
+                return 'שורש הוא מקום שבו y=0. חפשו קודם איפה הגרף פוגש את ציר x, ואז תרגמו את זה לתנאי אלגברי.';
+            }
+            if (/פרמטר|a|b|c|d|e|f/.test(normalized)) {
+                return 'אל תקפצו ישר לערכי הפרמטרים. רשמו אילו נתונים מתקבלים מהגרף, וכל נתון כזה הופך למשוואה על הפרמטרים.';
+            }
+            if (/תקוע|לא הבנתי|עזרה|help/.test(normalized)) {
+                return 'בואו נפרק את זה לצעד קטן אחד: קודם כתבו במילים מה רואים על הגרף, ואז בחרו רק תנאי אחד לתרגם למשוואה.';
+            }
+            return 'נסו לנסח מחדש בשורה אחת: מה נתון, מה מחפשים, ומה כבר אפשר לקרוא מהגרף. משם בוחרים רק את הצעד הבא.';
+        }
+
+        function getTutorAiState() {
+            let mode = (typeof window.getActiveAiMode === 'function')
+                ? window.getActiveAiMode()
+                : AI_MODE_VALUES.LOCAL;
+            let capabilities = (typeof window.getRuntimeAiCapabilities === 'function')
+                ? window.getRuntimeAiCapabilities()
+                : getDefaultRuntimeCloudCapabilities();
+            return {
+                mode,
+                tutorCloudAvailable: !!capabilities?.tutorCloudAvailable
+            };
+        }
+
+        function syncTutorAiState() {
+            let state = getTutorAiState();
+            let cloudReady = state.mode === AI_MODE_VALUES.CLOUD && state.tutorCloudAvailable;
+            let offMode = state.mode === AI_MODE_VALUES.OFF;
+            let disabled = offMode || (state.mode === AI_MODE_VALUES.CLOUD && !state.tutorCloudAvailable) || isLoading;
+
+            if (noteEl) {
+                noteEl.dataset.mode = state.mode;
+                noteEl.innerText = offMode
+                    ? 'מצב Off: המורה הפרטי כבוי עד שתחזרו ל־Local או Cloud.'
+                    : (cloudReady
+                        ? 'מצב Cloud: תשובות נשלחות רק עכשיו לשרת המאובטח.'
+                        : (state.mode === AI_MODE_VALUES.CLOUD
+                            ? 'מצב Cloud נעול: אין כרגע מפתח Gemini פעיל, לכן אין שליחה לענן.'
+                            : 'מצב Local: ההסבר נשאר במכשיר ולא נשלח לענן.'));
+            }
+
+            if (inputEl) {
+                inputEl.disabled = disabled;
+                inputEl.placeholder = offMode
+                    ? 'מצב Off פעיל'
+                    : (state.mode === AI_MODE_VALUES.CLOUD && !state.tutorCloudAvailable
+                        ? 'Cloud לא זמין כרגע'
+                        : 'כתבו כאן מה קשה לכם');
+            }
+            if (sendBtn) {
+                sendBtn.disabled = disabled;
+                sendBtn.title = offMode
+                    ? 'מצב Off מכבה את המורה הפרטי.'
+                    : (state.mode === AI_MODE_VALUES.CLOUD && !state.tutorCloudAvailable
+                        ? 'Cloud לא זמין כי אין מפתח Gemini פעיל.'
+                        : 'שלחו שאלה למורה הפרטי.');
+            }
+        }
+
         /* --- אתחול תצוגת שיחה --- */
         function initChat() {
             messagesEl.innerHTML = '';
@@ -14921,7 +15015,8 @@ Rules:
             btn.classList.add('bounce');
             loadHistory();
             initChat();
-            inputEl.focus();
+            syncTutorAiState();
+            if (!inputEl.disabled) inputEl.focus();
             hideBubble();
         }
 
@@ -14943,10 +15038,9 @@ Rules:
             const text = (inputEl.value || '').trim();
             if (!text || isLoading) return;
             isLoading = true;
-
-            inputEl.value = '';
             inputEl.disabled = true;
             sendBtn.disabled = true;
+            inputEl.value = '';
 
             addMessage(text, 'student');
 
@@ -14958,38 +15052,59 @@ Rules:
             history.push({ role: 'user', content: text });
             saveHistory();
 
-            typingEl.classList.remove('hidden');
-            messagesEl.scrollTop = messagesEl.scrollHeight;
+            let aiState = getTutorAiState();
+            let reply = '';
 
             try {
-                const res = await fetch(TUTOR_ENDPOINT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ messages: history.slice(-MAX_HISTORY) })
-                });
+                if (aiState.mode === AI_MODE_VALUES.OFF) {
+                    reply = 'מצב Off פעיל, אז המורה הפרטי כבוי כרגע. חזרו ל־Local כדי לקבל עזרה מקומית בלי ענן.';
+                } else if (aiState.mode === AI_MODE_VALUES.LOCAL) {
+                    reply = buildLocalTutorReply(text);
+                } else if (!aiState.tutorCloudAvailable) {
+                    reply = 'Cloud נבחר אבל אין כרגע מפתח Gemini פעיל, לכן לא נשלחת שום פנייה לשרת. אפשר לעבור ל־Local ולהמשיך מקומית.';
+                } else {
+                    typingEl.classList.remove('hidden');
+                    messagesEl.scrollTop = messagesEl.scrollHeight;
 
-                typingEl.classList.add('hidden');
+                    const res = await fetch(TUTOR_ENDPOINT, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ messages: history.slice(-MAX_HISTORY) })
+                    });
 
-                if (!res.ok) throw new Error('status ' + res.status);
+                    typingEl.classList.add('hidden');
 
-                const data  = await res.json();
-                const reply = data.reply || 'מצטער, קרתה שגיאה. נסה שוב.';
+                    if (!res.ok) {
+                        let cloudMsg = 'Cloud לא זמין כרגע. עברו ל־Local כדי לקבל עזרה בלי להמתין.';
+                        try {
+                            const errorData = await res.json();
+                            if (typeof errorData?.message === 'string' && errorData.message.trim()) {
+                                cloudMsg = errorData.message.trim();
+                            }
+                        } catch (parseErr) {}
+                        throw new Error(cloudMsg);
+                    }
+
+                    const data = await res.json();
+                    reply = data.reply || 'Cloud לא החזיר תשובה. עברו ל־Local כדי להמשיך מיד.';
+                }
 
                 addMessage(reply, 'tutor');
                 history.push({ role: 'assistant', content: reply });
                 saveHistory();
                 showHappyFace();
-
             } catch (err) {
                 typingEl.classList.add('hidden');
-                addMessage('אופס 😅 משהו לא עבד. נסה שוב עוד רגע.', 'tutor');
+                let fallbackText = String(err?.message || '').trim() || 'Cloud לא זמין כרגע. עברו ל־Local כדי להמשיך מקומית.';
+                addMessage(fallbackText, 'tutor');
+                history.push({ role: 'assistant', content: fallbackText });
+                saveHistory();
                 showOopsFace();
             }
 
             isLoading = false;
-            inputEl.disabled = false;
-            sendBtn.disabled = false;
-            inputEl.focus();
+            syncTutorAiState();
+            if (!inputEl.disabled) inputEl.focus();
         }
 
         sendBtn.addEventListener('click', sendMessage);
@@ -15006,6 +15121,7 @@ Rules:
             try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
             messagesEl.innerHTML = '';
             addMessage(WELCOME_MSG, 'tutor');
+            syncTutorAiState();
         });
 
         /* --- אנימציות פנים --- */
@@ -15056,6 +15172,8 @@ Rules:
         // הצג בועה ראשונה אחרי 3 שניות, ואחר כך כל 30 שניות
         setTimeout(showBubble, 3000);
         setInterval(showBubble, 30000);
+        window.addEventListener('ai-mode-changed', syncTutorAiState);
+        syncTutorAiState();
 
     })();
     </script>

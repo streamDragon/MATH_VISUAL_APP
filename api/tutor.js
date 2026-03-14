@@ -7,7 +7,7 @@ import {
 
 const SYSTEM_PROMPT = `אתה מורה מתמטי ידידותי ומעודד לתלמידי תיכון בישראל.
 ענה בעברית קצרה וברורה, בלי לפתור מיד את כל השאלה.
-עדיף 2-4 משפטים, עם צעד אחד ברור להמשך.
+העדף 2-4 משפטים, עם צעד אחד ברור להמשך.
 אם התלמיד תקוע, עזור לו לראות מה אפשר לקרוא מהגרף, מה הנתון, ואיזו משוואה זה יוצר.
 אל תכתוב תשובות ארוכות, ואל תיתן פתרון מלא אלא אם ממש מבקשים.`;
 
@@ -38,58 +38,11 @@ function buildTranscript(messages) {
     }).join('\n');
 }
 
-function buildLocalTutorReply(messages) {
-    let lastUserText = '';
-    for (let i = messages.length - 1; i >= 0; i -= 1) {
-        if (messages[i].role === 'user') {
-            lastUserText = messages[i].content;
-            break;
-        }
-    }
-
-    let text = String(lastUserText || '').toLowerCase();
-    if (!text) {
-        return 'בואו נתחיל ממה שרואים בגרף: מה נתון, מה צריך למצוא, ואיזה רמז חזותי כבר יש לכם?';
-    }
-
-    if (/שיפוע|נגזרת|f'|slope/.test(text)) {
-        return 'התמקדו קודם בשאלה אחת: צריך לקרוא שיפוע קיים, או להביא את השיפוע לערך מסוים? גררו את הנקודה ובדקו מה קורה ל־f\'(x). אם מחפשים משיק אופקי, חפשו מקום שבו השיפוע מתקרב ל־0.';
-    }
-
-    if (/משיק|tangent/.test(text)) {
-        return 'משיק תמיד מתחיל בנקודת מגע על הגרף. קודם מצאו את הנקודה שמתאימה לתנאי, אחר כך קראו את השיפוע שם, ורק אז כתבו את משוואת המשיק.';
-    }
-
-    if (/אנך|נורמל|normal/.test(text)) {
-        return 'באנך בודקים קודם את שיפוע המשיק. אחרי שיש שיפוע למשיק, לאנך יש שיפוע הופכי ושלילי, ואז בודקים שהוא באמת עובר דרך נקודת המגע.';
-    }
-
-    if (/קיצון|מינימום|מקסימום|extrem/.test(text)) {
-        return 'בקיצון שווה לבדוק שני דברים: קודם שהשיפוע מתקרב ל־0, ואז שהגרף באמת מחליף כיוון סביב הנקודה. אל תעצרו רק ב־m=0 בלי בדיקה נוספת.';
-    }
-
-    if (/פרמטר|a|b|c|d|e|f/.test(text)) {
-        return 'לא קופצים ישר לערכי הפרמטרים. רשמו אילו נתונים ניתנים מהגרף או מהטקסט, וכל נתון כזה הופך למשוואה על הפרמטרים. רק אחרי שיש מספיק תנאים פותרים.';
-    }
-
-    if (/שורש|חיתוך|ציר x|x-?intercept/.test(text)) {
-        return 'שורש הוא מקום שבו הגרף פוגש את ציר ה־x, כלומר y=0. חפשו קודם איפה זה קורה בציור, ואז כתבו את התנאי האלגברי המתאים.';
-    }
-
-    if (/לא הבנתי|תקוע|עזרה|help/.test(text)) {
-        return 'בואו נפרק את זה לצעד אחד קטן: מה הכי לא ברור עכשיו, הקריאה מהגרף או המעבר למשוואה? התחילו מלכתוב במילים מה רואים על הגרף בנקודה החשובה.';
-    }
-
-    return 'נסו לעצור רגע ולנסח את השאלה מחדש במילים שלכם: מה נתון, מה צריך למצוא, ומה אפשר כבר לקרוא מהגרף. משם בוחרים צעד אחד קטן ולא את כל הפתרון בבת אחת.';
-}
-
 async function callGemini(messages) {
-    if (!GEMINI_API_KEY) return null;
-
     let prompt = [
         SYSTEM_PROMPT,
         '',
-        'שיחה עד כה:',
+        'שיחה עד כאן:',
         buildTranscript(messages),
         '',
         'ענה עכשיו רק להודעה האחרונה של התלמיד.'
@@ -145,25 +98,34 @@ export default async function handler(req, res) {
 
     let messages = normalizeMessages(req.body?.messages);
     if (messages.length === 0) {
-        return res.status(400).json({ error: 'messages חסר או ריק' });
+        return res.status(400).json({ error: 'messages_missing' });
     }
 
     if (process.env.ANTHROPIC_API_KEY) {
         console.warn('[tutor] ANTHROPIC_API_KEY is still set but no longer used. Remove it to avoid accidental billing.');
     }
 
+    if (!GEMINI_API_KEY) {
+        return res.status(503).json({
+            error: 'cloud_tutor_disabled',
+            message: 'Cloud tutor is disabled until GEMINI_API_KEY or GOOGLE_API_KEY is configured.'
+        });
+    }
+
     try {
         let reply = await callGemini(messages);
-        if (!reply) reply = buildLocalTutorReply(messages);
+        if (!reply) {
+            throw new Error('Gemini returned an empty reply');
+        }
         return res.status(200).json({
             reply,
-            provider: GEMINI_API_KEY ? 'gemini' : 'local'
+            provider: 'gemini'
         });
     } catch (err) {
-        console.warn('[tutor] Falling back to local tutor:', safeErrorMeta(err));
-        return res.status(200).json({
-            reply: buildLocalTutorReply(messages),
-            provider: 'local'
+        console.warn('[tutor] Gemini request failed:', safeErrorMeta(err));
+        return res.status(502).json({
+            error: 'cloud_tutor_failed',
+            message: 'Cloud tutor is unavailable right now. Switch to Local mode to keep working offline.'
         });
     }
 }

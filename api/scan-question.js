@@ -13,6 +13,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    res.setHeader('Cache-Control', 'no-store, max-age=0');
     if (!enforceRateLimit(req, res, { scope: 'scan_question', limit: 6, windowMs: 60_000 })) return;
     if (!enforceJsonBodySize(res, req.body, MAX_BODY_BYTES, 'scan_payload_too_large')) return;
 
