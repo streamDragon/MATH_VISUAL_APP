@@ -521,7 +521,7 @@
             </div>
             <div class="start-guide-actions">
                 <button type="button" onclick="closeStartGuide(true)">חזרה</button>
-                <button id="btn-start-guide-primary" class="start-primary" onclick="startGuidedStartFromGuide()">התחל סיור קצר</button>
+                <button id="btn-start-guide-primary" class="start-primary" onclick="startGuidedStartFromGuide()">כניסה לאפליקציה</button>
             </div>
         </div>
     </div>
@@ -2070,7 +2070,7 @@
                 }
                 if (noteEl) noteEl.innerText = 'זהו סיור קצר ורגוע. הוא לא מעמיס עליכם, ורק מראה מאיפה נכון להתחיל.';
                 if (audioNoteEl) audioNoteEl.innerText = 'אפשר גם לשמוע הסבר קצר לפני שמתחילים.';
-                if (primaryBtn) primaryBtn.innerText = 'התחל סיור קצר';
+                if (primaryBtn) primaryBtn.innerText = 'כניסה לאפליקציה';
                 return;
             }
 
@@ -3513,11 +3513,16 @@
         }
 
         function shouldAutoOpenLobby() {
-            return ENTRY_FLOW_QUERY.lobby === true;
+            if (ENTRY_FLOW_QUERY.lobby === true) return true;
+            if (ENTRY_FLOW_QUERY.lobby === false) return false;
+            return !hasSeenEntryIntro();
         }
 
         function shouldShowOpeningSplash() {
-            return false;
+            if (sessionStarted) return false;
+            if (ENTRY_FLOW_QUERY.splash === true) return true;
+            if (ENTRY_FLOW_QUERY.splash === false) return false;
+            return !hasSeenEntryIntro();
         }
 
         function maybeCompleteEntryFlowAfterSplash(trigger) {
@@ -3541,6 +3546,14 @@
             if (shouldAutoOpenLobby()) {
                 entryFlowCompleted = true;
                 openStartGuideModal({ forceLaunchChoice: true });
+                return;
+            }
+            if (hasSeenEntryIntro()) {
+                if (!appInitialized) return;
+                entryFlowCompleted = true;
+                markSessionStarted({ preserveCurrentFunction: true });
+                closeQuestionOverlay();
+                setDrawerOpen(false);
                 return;
             }
             entryFlowCompleted = true;
@@ -7751,7 +7764,7 @@
             window.showStepToast = showStepToast;
             if (typeof window.__flushQueuedUiToasts === 'function') window.__flushQueuedUiToasts();
             scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 80, 220, 520] });
-            if (entryFlowStarted && shouldShowOpeningSplash() && !openingSplashDone) {
+            if (entryFlowStarted && !shouldShowOpeningSplash() && !openingSplashDone) {
                 hideOpeningSplash();
             }
             setTimeout(() => {
