@@ -107,14 +107,15 @@ body.embed-mode #graph-area {
 /* Compact layout specifically for embedded iframes (e.g. Google Sites). */
 body.embed-mode #top-strip {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: auto 1fr;
     grid-template-areas:
-        "version"
-        "function"
-        "question"
-        "formulas"
-        "overlay"
-        "actions";
+        "home version"
+        "function function"
+        "question question"
+        "formulas formulas"
+        "overlay overlay"
+        "actions actions"
+        "progress progress";
     gap: 6px;
     padding: 6px 8px;
     position: sticky;
@@ -124,12 +125,18 @@ body.embed-mode #top-strip {
 
 body.embed-mode.question-intro-active #top-strip {
     grid-template-areas:
-        "version"
-        "function"
-        "question"
-        "formulas"
-        "overlay"
-        "actions";
+        "home version"
+        "function function"
+        "question question"
+        "formulas formulas"
+        "overlay overlay"
+        "actions actions"
+        "progress progress";
+}
+
+body.embed-mode #btn-return-home {
+    grid-area: home;
+    justify-self: start;
 }
 
 body.embed-mode #top-version-badge {
@@ -145,6 +152,10 @@ body.embed-mode #top-question-wrap {
 body.embed-mode #top-function-bar {
     grid-area: function;
     width: 100%;
+}
+
+body.embed-mode #question-progress {
+    grid-area: progress;
 }
 
 body.embed-mode #btn-open-params-inline,
@@ -289,6 +300,55 @@ body.embed-mode #build-badge.embed-build-chip {
     position: sticky;
     top: 0;
     animation: topStripReveal 0.45s ease-out;
+}
+
+#btn-return-home {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+    border: 1px solid #bfd2e8;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #0f172a;
+    font-size: 1.05rem;
+    font-weight: 900;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    cursor: pointer;
+}
+
+#btn-return-home:hover {
+    background: #eff6ff;
+}
+
+#question-progress {
+    flex: 1 1 100%;
+    display: grid;
+    gap: 6px;
+    margin-top: -2px;
+}
+
+#question-progress-text {
+    font-size: 0.8rem;
+    font-weight: 900;
+    color: #0f3b66;
+}
+
+#question-progress-bar {
+    width: 100%;
+    height: 3px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.26);
+    overflow: hidden;
+}
+
+#question-progress-fill {
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #2563eb 0%, #22c55e 100%);
+    transition: width 0.3s ease;
 }
 
 #practice-question-bar {
@@ -2146,9 +2206,14 @@ body.practice-clean-mode #math-gym-popup {
 }
 
 #win-overlay-body {
-    padding: 14px 16px 10px;
+    padding: 16px 18px 12px;
     overflow-y: auto;
     max-height: calc(84vh - 78px);
+}
+
+#win-overlay-icon {
+    font-size: clamp(2.1rem, 7vw, 3.1rem);
+    text-align: center;
 }
 
 #win-overlay h1 {
@@ -2163,6 +2228,26 @@ body.practice-clean-mode #math-gym-popup {
     font-size: 1.02rem;
     text-align: center;
     color: #14532d;
+}
+
+#win-overlay-question {
+    font-weight: 900;
+}
+
+#win-overlay-summary {
+    line-height: 1.55;
+}
+
+#win-overlay-xp {
+    margin-top: 12px;
+    text-align: center;
+    color: #166534;
+    font-size: 0.92rem;
+    font-weight: 900;
+    border: 1px solid #bbf7d0;
+    border-radius: 999px;
+    background: #f0fdf4;
+    padding: 7px 12px;
 }
 
 #win-overlay img {
@@ -3111,6 +3196,16 @@ body.session-started #builder-template-panel {
     padding: 14px;
 }
 
+.feedback-local-note {
+    border: 1px solid #dbeafe;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 0.84rem;
+    font-weight: 800;
+    padding: 8px 10px;
+}
+
 #scan-modal {
     position: fixed;
     inset: 0;
@@ -3441,6 +3536,20 @@ body.session-started #builder-template-panel {
     color: #334155;
     font-size: 0.86rem;
     font-weight: 700;
+    display: grid;
+    gap: 10px;
+}
+
+#btn-mobile-feed-clear {
+    justify-self: start;
+    border: 1px solid #c7d2fe;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #3730a3;
+    font-size: 0.82rem;
+    font-weight: 900;
+    padding: 7px 12px;
+    cursor: pointer;
 }
 
 .mobile-feed-card {
@@ -5166,6 +5275,19 @@ body.session-started #builder-template-panel {
 
 #global-help-list li {
     font-size: 0.9rem;
+}
+
+#btn-help-restart-tour {
+    margin-top: 6px;
+    align-self: flex-start;
+    border: 1px dashed #93c5fd;
+    border-radius: 10px;
+    background: #f8fbff;
+    color: #0f4aa8;
+    font-size: 0.86rem;
+    font-weight: 900;
+    padding: 8px 10px;
+    cursor: pointer;
 }
 
 #global-help-clean-reason {

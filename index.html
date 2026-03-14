@@ -97,6 +97,31 @@
             window.__APP_ASSET_TOKEN__ = token;
             window.__APP_ASSET_QUERY = `v=${encodeURIComponent(token)}&cb=${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
         })();
+
+        (function prepareDeferredUiMessaging() {
+            window.__pendingUiToasts = Array.isArray(window.__pendingUiToasts) ? window.__pendingUiToasts : [];
+            window.__queueUiToast = window.__queueUiToast || function (message) {
+                let text = String(message || '').trim();
+                if (!text) return;
+                if (typeof window.showStepToast === 'function') {
+                    window.showStepToast(text);
+                    return;
+                }
+                window.__pendingUiToasts.push(text);
+            };
+            window.__flushQueuedUiToasts = window.__flushQueuedUiToasts || function () {
+                if (typeof window.showStepToast !== 'function') return;
+                let queued = Array.isArray(window.__pendingUiToasts) ? window.__pendingUiToasts.splice(0) : [];
+                queued.forEach((text, idx) => {
+                    setTimeout(() => window.showStepToast(text), idx * 260);
+                });
+            };
+            window.__toggleSoundFallback = window.__toggleSoundFallback || function () {
+                console.warn('Sound module not loaded');
+                window.__queueUiToast('מודול הצלילים לא זמין');
+            };
+            window.toggleSound = window.toggleSound || window.__toggleSoundFallback;
+        })();
     </script>
 
     <script
@@ -184,10 +209,13 @@
                     window.__ASSET_BASE = '/';
                 }
 
-                await loadScriptWithFallback('sound', [
+                let soundPath = await loadScriptWithFallback('sound', [
                     '/sound.js',
                     '/public/sound.js'
-                ], () => typeof toggleSound === 'function');
+                ], () => typeof playWarmColdFeedback === 'function' && typeof resetWarmColdFeedback === 'function');
+                if (!soundPath || typeof playWarmColdFeedback !== 'function') {
+                    window.__queueUiToast('מודול הצלילים לא זמין');
+                }
 
                 await loadScriptWithFallback('help_content', [
                     '/helpContent.he.js',
@@ -267,10 +295,14 @@
 
     <div id="win-overlay" role="dialog" aria-modal="true" aria-live="polite" dir="rtl">
         <div id="win-overlay-body">
-            <h1>🏆 כל הכבוד!</h1>
-            <p>פיצחת את המשימה.</p>
+            <div id="win-overlay-icon" aria-hidden="true">🏆</div>
+            <h1>כל הכבוד!</h1>
+            <p id="win-overlay-question">פיצחתם את המשימה.</p>
+            <p id="win-overlay-summary">כאן נסכם בקצרה מה למדתם בשאלה הזאת.</p>
+            <div id="win-overlay-xp" class="hidden">+0 נקודות</div>
         </div>
         <div id="win-overlay-actions">
+            <button id="btn-win-next" type="button" class="hidden" onclick="goToNextQuestionFromWin()">לשאלה הבאה</button>
             <button type="button" onclick="closeWinOverlay()">המשך</button>
         </div>
     </div>
@@ -352,7 +384,10 @@
                 </div>
             </div>
             <div id="mobile-feed-list" aria-live="polite"></div>
-            <div id="mobile-feed-empty" class="hidden">לא נמצאו פריטים לפי הסינון.</div>
+            <div id="mobile-feed-empty" class="hidden">
+                <div id="mobile-feed-empty-text">לא נמצאו שאלות עבור החיפוש הזה.</div>
+                <button id="btn-mobile-feed-clear" type="button" onclick="clearMobileFeedSearch()">נקה חיפוש</button>
+            </div>
         </div>
     </div>
 
@@ -397,8 +432,11 @@
                     <textarea id="feedback-text" maxlength="300" placeholder="מה כדאי לשפר?"></textarea>
                 </div>
                 <div id="feedback-status"></div>
+                <div class="feedback-local-note">הפידבק נשמר במכשיר שלכם</div>
                 <div class="feedback-actions">
                     <button id="btn-send-feedback" onclick="submitFeedback()">שלח לכיכר השוק</button>
+                    <button id="btn-feedback-whatsapp" type="button" onclick="shareFeedbackViaWhatsApp()">שלח ב-WhatsApp</button>
+                    <button id="btn-feedback-email" type="button" onclick="shareFeedbackViaEmail()">שלח באימייל</button>
                     <button id="btn-copy-feedback" onclick="copyFeedbackSummary()">העתק משובים</button>
                     <button id="btn-clear-feedback" onclick="clearFeedbackMessages()">נקה מקומי</button>
                 </div>
@@ -546,6 +584,7 @@
             </div>
             <div class="global-help-body">
                 <ul id="global-help-list"></ul>
+                <button id="btn-help-restart-tour" type="button" onclick="closeGlobalHelpModal(); openQuickTour({ force: true })">🔄 סיור חוזר במסך</button>
                 <div id="global-help-clean-reason" class="hidden"></div>
                 <div class="overlay-actions global-help-actions">
                     <button id="btn-help-show-me" type="button" onclick="triggerGlobalHelpShowMe()">תראה לי</button>
@@ -772,6 +811,7 @@
             </div>
         </section>
         <div id="top-strip" hidden>
+            <button id="btn-return-home" type="button" onclick="returnToLanding()" aria-label="חזרה לדף הפתיחה">⌂</button>
             <div id="top-version-badge"></div>
             <div id="top-function-bar" aria-live="polite">
                 <span id="top-function-bar-label">הפונקציה</span>
@@ -850,6 +890,10 @@
                 <button id="btn-video" class="hidden" onclick="openVideoForCurrentQuestion()">וידאו הסבר</button>
                 <button id="btn-feedback" onclick="openFeedbackModal()">כיכר השוק</button>
                 <button id="btn-top-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
+            </div>
+            <div id="question-progress" aria-live="polite">
+                <div id="question-progress-text">שאלה 1 מתוך 1</div>
+                <div id="question-progress-bar"><div id="question-progress-fill"></div></div>
             </div>
         </div>
         <div id="practice-question-bar" aria-live="polite" hidden>
@@ -1890,6 +1934,31 @@
             showStepToast('חזרתם למסך הפתיחה. אפשר להתחיל שוב כשתרצו.');
         }
 
+        function returnToLanding() {
+            if (!window.confirm('לחזור לדף הפתיחה?')) return;
+            closeWinOverlay();
+            closeQuestionOverlay();
+            closeGlobalHelpModal();
+            closeVideoModal();
+            closeFeedbackModal();
+            closeScanModal();
+            closeQuickTour(false);
+            closeStartGuideModal({ skipOverlay: true, preserveMode: true });
+            setDrawerOpen(false);
+            mobileFeedSearchTerm = '';
+            mobileFeedCategory = 'all';
+            questionSolved = false;
+            stepCompleted = false;
+            pendingStepSolve = null;
+            currentStepIndex = 0;
+            activeSteps = [];
+            sessionStarted = false;
+            currentQ = Math.max(0, getFirstPracticeQuestionIndex());
+            setAppEntryMode(APP_ENTRY_MODES.LANDING);
+            renderMobileFeedCards();
+            showStepToast('חזרתם למסך הפתיחה. אפשר להתחיל מחדש כשתרצו.');
+        }
+
         function beginGuidedWorkspaceTour() {
             closeStartGuideModal({ skipOverlay: true, preserveMode: true });
             prepareFocusedFirstTimeWorkspace('start:guided_tour');
@@ -2397,6 +2466,12 @@
             }
             let nextEnabled = !document.body.classList.contains('practice-clean-mode');
             setCleanModeManualEnabled(nextEnabled);
+            showStepToast(
+                nextEnabled
+                    ? "מצב מרוכז: רק המשימה והגרף. לחצו '⋯' לאפשרויות נוספות"
+                    : 'חזרתם למצב מלא',
+                3000
+            );
         }
 
         function disablePracticeCleanModeFromUi() {
@@ -2415,6 +2490,7 @@
             }
             firstTimeWorkspaceFocusLock = false;
             setCleanModeManualEnabled(false);
+            showStepToast('חזרתם למצב מלא', 3000);
         }
 
         function openToolsFromPracticeCleanMode() {
@@ -2700,11 +2776,26 @@
                 ? raw.bullets.map((item) => String(item || '').trim()).filter(Boolean).slice(0, 3)
                 : [];
             if (bullets.length === 0) bullets = DEFAULT_HELP_CONTENT_HE.bullets.slice();
+            let contexts = (raw.contexts && typeof raw.contexts === 'object') ? raw.contexts : {};
             return {
                 ...DEFAULT_HELP_CONTENT_HE,
                 ...raw,
-                bullets
+                bullets,
+                contexts
             };
+        }
+
+        function getGlobalHelpContextKey() {
+            if (builderPanelOpen || activeAccordion === 'params' || document.body.classList.contains('builder-workspace-mode')) return 'builder';
+            if (document.body.classList.contains('practice-clean-mode') || activeAccordion === 'steps') return 'steps';
+            if (sessionStarted && isWorkspaceEntryMode()) return 'workspace';
+            return 'graph';
+        }
+
+        function getGlobalHelpContextBullets(content) {
+            let key = getGlobalHelpContextKey();
+            let source = Array.isArray(content?.contexts?.[key]) ? content.contexts[key] : [];
+            return source.map((line) => String(line || '').trim()).filter(Boolean).slice(0, 3);
         }
 
         function getCurrentTaskHelpContent() {
@@ -2890,12 +2981,14 @@
             let dynamicBullets = Array.isArray(options.bullets) && options.bullets.length > 0
                 ? options.bullets
                 : taskHelp.bullets;
+            let contextBullets = getGlobalHelpContextBullets(content);
+            let mergedBullets = Array.from(new Set([...(dynamicBullets || []), ...contextBullets])).slice(0, 6);
             let titleEl = document.getElementById('global-help-title');
             if (titleEl) titleEl.innerText = String(options.title || taskHelp.title || content.title || DEFAULT_HELP_CONTENT_HE.title).trim();
             let listEl = document.getElementById('global-help-list');
             if (listEl) {
                 listEl.innerHTML = '';
-                dynamicBullets.forEach((line) => {
+                mergedBullets.forEach((line) => {
                     let li = document.createElement('li');
                     li.innerText = line;
                     listEl.appendChild(li);
@@ -3720,6 +3813,7 @@
             let solved = Array.isArray(learnerProgress.uniqueSolved) ? learnerProgress.uniqueSolved.length : 0;
             let totalQuestions = getVisibleQuestionIndexes().length || getQuestionsList().length;
             chip.innerText = `רמה ${level} | נקודות ${learnerProgress.totalXp} | רצף ${learnerProgress.streakDays} | ${Math.min(solved, totalQuestions)}/${totalQuestions}`;
+            updateQuestionProgressIndicator();
         }
 
         function initLearnerProgress() {
@@ -3810,6 +3904,29 @@
                 total: visible.length,
                 position: visible.indexOf(questionIndex)
             };
+        }
+
+        function getNextVisibleQuestionIndex(questionIndex = currentQ) {
+            let visible = getVisibleQuestionIndexes();
+            let pos = visible.indexOf(Number(questionIndex));
+            if (pos >= 0 && pos < visible.length - 1) return visible[pos + 1];
+            return -1;
+        }
+
+        function updateQuestionProgressIndicator(questionIndex = currentQ) {
+            let textEl = document.getElementById('question-progress-text');
+            let fillEl = document.getElementById('question-progress-fill');
+            if (!textEl || !fillEl) return;
+
+            let visible = getVisibleQuestionIndexes();
+            let total = visible.length || Math.max(1, getQuestionsList().length);
+            let position = visible.indexOf(Number(questionIndex));
+            let current = position >= 0 ? position + 1 : Math.min(Math.max(Number(questionIndex) + 1, 1), total);
+            let solved = visible.filter((idx) => isQuestionSolvedByProgress(idx)).length;
+            let percent = total > 0 ? (solved / total) * 100 : 0;
+
+            textEl.innerText = `שאלה ${current} מתוך ${total}`;
+            fillEl.style.width = `${Math.max(0, Math.min(100, percent)).toFixed(1)}%`;
         }
 
         function getQuestionProgressKeyByIndex(questionIndex) {
@@ -4517,11 +4634,18 @@
         function renderMobileFeedCards() {
             let list = document.getElementById('mobile-feed-list');
             let empty = document.getElementById('mobile-feed-empty');
+            let emptyText = document.getElementById('mobile-feed-empty-text');
             if (!list) return;
             let items = getFilteredMobileFeedItems();
             list.innerHTML = '';
 
             if (!items.length) {
+                let query = String(mobileFeedSearchTerm || '').trim();
+                if (emptyText) {
+                    emptyText.innerText = query
+                        ? `לא נמצאו שאלות עבור '${query}'`
+                        : 'לא נמצאו שאלות עבור החיפוש הזה.';
+                }
                 if (empty) empty.classList.remove('hidden');
                 return;
             }
@@ -4604,6 +4728,13 @@
 
         function onMobileFeedSearchInput(event) {
             mobileFeedSearchTerm = String(event?.target?.value || '').trim();
+            renderMobileFeedCards();
+        }
+
+        function clearMobileFeedSearch() {
+            mobileFeedSearchTerm = '';
+            let input = document.getElementById('mobile-feed-search');
+            if (input) input.value = '';
             renderMobileFeedCards();
         }
 
@@ -7223,6 +7354,8 @@
                 window.visualViewport.addEventListener('resize', handleViewportResize);
             }
             appInitialized = true;
+            window.showStepToast = showStepToast;
+            if (typeof window.__flushQueuedUiToasts === 'function') window.__flushQueuedUiToasts();
             scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 80, 220, 520] });
             if (entryFlowStarted && shouldShowOpeningSplash() && !openingSplashDone) {
                 hideOpeningSplash();
@@ -8525,12 +8658,13 @@
             syncMobilePresentationMode();
         }
 
-        function showStepToast(text) {
+        function showStepToast(text, durationMs = 2400) {
             let toast = document.getElementById('step-toast');
             toast.innerText = text || 'יפה! מצאת את מה שצריך.';
             toast.classList.remove('hidden');
             if (stepToastTimer) clearTimeout(stepToastTimer);
-            stepToastTimer = setTimeout(() => toast.classList.add('hidden'), 2400);
+            let timeoutMs = Number.isFinite(Number(durationMs)) ? Math.max(1200, Number(durationMs)) : 2400;
+            stepToastTimer = setTimeout(() => toast.classList.add('hidden'), timeoutMs);
         }
 
         function updateSpecialPanels() {
@@ -9790,6 +9924,47 @@
             }
         }
 
+        function openWinOverlay(progressAward = {}) {
+            let winOverlay = document.getElementById('win-overlay');
+            if (!winOverlay) return;
+            let q = getCurrentQuestion();
+            let visiblePos = getVisibleQuestionPosition(currentQ);
+            let displayNumber = (visiblePos.total > 0 && visiblePos.position >= 0) ? (visiblePos.position + 1) : (currentQ + 1);
+            let questionEl = document.getElementById('win-overlay-question');
+            let summaryEl = document.getElementById('win-overlay-summary');
+            let xpEl = document.getElementById('win-overlay-xp');
+            let nextBtn = document.getElementById('btn-win-next');
+            let nextIdx = getNextVisibleQuestionIndex(currentQ);
+            let shortDesc = getQuestionShortDesc(q);
+            let summary = getShortText(q?.overlay?.goal, shortDesc.first || q?.desc || 'חיזקתם את הקריאה של הגרף והקשר שלו לאלגברה.');
+
+            if (questionEl) setMixedBidiText(questionEl, `שאלה ${displayNumber}: ${q?.title || 'המשימה'} הושלמה.`);
+            if (summaryEl) setMixedBidiText(summaryEl, `מה למדתם: ${summary}`);
+            if (xpEl) {
+                let xpParts = [];
+                if (progressAward.gainedXp > 0) xpParts.push(`+${progressAward.gainedXp} נקודות`);
+                if (progressAward.leveledUp && progressAward.level) xpParts.push(`עליתם לרמה ${progressAward.level}`);
+                xpEl.innerText = xpParts.join(' | ');
+                xpEl.classList.toggle('hidden', xpParts.length === 0);
+            }
+            if (nextBtn) nextBtn.classList.toggle('hidden', nextIdx < 0);
+
+            winOverlay.style.display = 'block';
+            try {
+                if (typeof window.confetti === 'function') {
+                    window.confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                }
+            } catch (err) {
+                // Ignore confetti failures and fall back to the existing effect.
+            }
+        }
+
+        function goToNextQuestionFromWin() {
+            let nextIdx = getNextVisibleQuestionIndex(currentQ);
+            closeWinOverlay();
+            if (nextIdx >= 0) loadQ(nextIdx, { autoOpenOverlay: false });
+        }
+
         function markQuestionSolved() {
             clearPendingStepRecheckTimer();
             questionSolved = true;
@@ -9798,15 +9973,11 @@
             let box = document.querySelector('.jxgbox');
             let winOverlay = document.getElementById('win-overlay');
             let suppressCelebration = isGuidedEntryMode();
+            let progressAward = registerQuestionSolvedProgress();
             if (winOverlay && !suppressCelebration) {
-                winOverlay.style.display = 'block';
-                if (winOverlayTimer) clearTimeout(winOverlayTimer);
-                winOverlayTimer = setTimeout(() => {
-                    closeWinOverlay();
-                }, 2200);
+                openWinOverlay(progressAward);
             }
             if (box) box.classList.toggle('winning-box', !suppressCelebration);
-            let progressAward = registerQuestionSolvedProgress();
             let unlockingAdvanced = !suppressCelebration && !hasAdvancedToolsUnlocked() && firstTimeWorkspaceFocusLock;
             if (unlockingAdvanced) {
                 unlockAdvancedTools('practice_first_success', {
@@ -10375,6 +10546,53 @@
             return `${day}/${month}/${year} ${hour}:${min}`;
         }
 
+        function buildFeedbackSummaryPayload() {
+            return feedbackMessages.map((item, idx) => {
+                let question = Number.isFinite(item.questionIndex) ? `שאלה ${item.questionIndex}` : 'ללא שאלה';
+                let author = item.name || 'אנונימי';
+                return `${idx + 1}. ${formatFeedbackTime(item.ts)} | ${question} | ${author} | ${item.text}`;
+            }).join('\n');
+        }
+
+        function buildFeedbackDraftText() {
+            let name = (document.getElementById('feedback-name')?.value || '').trim();
+            let text = (document.getElementById('feedback-text')?.value || '').replace(/\s+/g, ' ').trim();
+            if (!text) return '';
+            let q = getCurrentQuestion();
+            let parts = ['פידבק על מעבדת הפונקציות'];
+            if (q?.title) parts.push(`שאלה: ${q.title}`);
+            if (name) parts.push(`שם: ${name}`);
+            if (text) parts.push(`הודעה: ${text}`);
+            return parts.filter(Boolean).join('\n');
+        }
+
+        function getFeedbackShareText() {
+            let draft = buildFeedbackDraftText();
+            if (draft) return draft;
+            loadFeedbackMessages();
+            return buildFeedbackSummaryPayload();
+        }
+
+        function shareFeedbackViaWhatsApp() {
+            let text = getFeedbackShareText();
+            if (!text) {
+                setFeedbackStatus('אין עדיין טקסט או משובים לשיתוף.', true);
+                return;
+            }
+            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+        }
+
+        function shareFeedbackViaEmail() {
+            let text = getFeedbackShareText();
+            if (!text) {
+                setFeedbackStatus('אין עדיין טקסט או משובים לשיתוף.', true);
+                return;
+            }
+            let subject = encodeURIComponent('פידבק על מעבדת הפונקציות');
+            let body = encodeURIComponent(text);
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        }
+
         function setFeedbackStatus(text, isError) {
             let status = document.getElementById('feedback-status');
             if (!status) return;
@@ -10489,12 +10707,7 @@
                 return;
             }
 
-            let lines = feedbackMessages.map((item, idx) => {
-                let question = Number.isFinite(item.questionIndex) ? `שאלה ${item.questionIndex}` : 'ללא שאלה';
-                let author = item.name || 'אנונימי';
-                return `${idx + 1}. ${formatFeedbackTime(item.ts)} | ${question} | ${author} | ${item.text}`;
-            });
-            let payload = lines.join('\n');
+            let payload = buildFeedbackSummaryPayload();
             try {
                 if (navigator.clipboard && window.isSecureContext) {
                     await navigator.clipboard.writeText(payload);
@@ -10507,6 +10720,7 @@
                     document.body.removeChild(ta);
                 }
                 setFeedbackStatus('המשובים הועתקו ללוח.');
+                showStepToast('הועתק!');
             } catch (err) {
                 setFeedbackStatus('לא הצלחתי להעתיק. נסה שוב.', true);
             }
@@ -14106,7 +14320,11 @@ Rules:
             try {
                 const raw = sessionStorage.getItem(SESSION_KEY);
                 if (raw) history = JSON.parse(raw);
-            } catch (e) { history = []; }
+            } catch (e) {
+                history = [];
+                sessionStorage.removeItem(SESSION_KEY);
+                console.warn('Cleared corrupted tutor history');
+            }
         }
         function saveHistory() {
             try {
@@ -14168,11 +14386,11 @@ Rules:
         async function sendMessage() {
             const text = (inputEl.value || '').trim();
             if (!text || isLoading) return;
+            isLoading = true;
 
             inputEl.value = '';
             inputEl.disabled = true;
             sendBtn.disabled = true;
-            isLoading = true;
 
             addMessage(text, 'student');
 
@@ -14263,7 +14481,7 @@ Rules:
                         scheduleBlink();
                     }, 150);
                 } else {
-                    scheduleBlink();
+                    setTimeout(scheduleBlink, delay);
                 }
             }, delay);
         }

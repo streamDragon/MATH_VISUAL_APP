@@ -106,6 +106,13 @@ const QUESTIONS = [
       "אחרי שהגרף נהיה קריא, עוברים לעריכת פרמטרים כדי להפיק ממנו תנאים ומשוואות.",
     mode: "setup",
     goal: "choose_function_template",
+    visualCategories: [
+      "function_object",
+      "parameterized_family",
+      "visual_planning_sequence",
+      "prerequisite_order"
+    ],
+    ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
   },
   {
     id: 1,
@@ -120,6 +127,11 @@ const QUESTIONS = [
       toleranceM: 0.15,
       requireSecondDerivCheck: false,
     },
+    visualCategories: [
+      "extreme_point",
+      "derivative_to_slope",
+      "slope_at_point"
+    ],
     ui: { allowNormal: true, defaultNormalOn: false, allowLineTool: false },
   },
   {
@@ -135,6 +147,11 @@ const QUESTIONS = [
       toleranceM: 0.15,
       requireSecondDerivCheck: true,
     },
+    visualCategories: [
+      "extreme_point",
+      "derivative_to_slope",
+      "monotonicity_sign"
+    ],
     ui: { allowNormal: true, defaultNormalOn: true, allowLineTool: false },
   },
   {
@@ -150,6 +167,12 @@ const QUESTIONS = [
       targetM: 2,
       toleranceM: 0.15,
     },
+    visualCategories: [
+      "tangent_condition",
+      "slope_at_point",
+      "derivative_to_slope",
+      "parallel_tangent_condition"
+    ],
     ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
   },
   {
@@ -165,6 +188,11 @@ const QUESTIONS = [
       targetM: -1,
       toleranceM: 0.15,
     },
+    visualCategories: [
+      "tangent_condition",
+      "slope_at_point",
+      "derivative_to_slope"
+    ],
     ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
   },
   {
@@ -180,6 +208,12 @@ const QUESTIONS = [
       targetY: 3,
       toleranceY: 0.2,
     },
+    visualCategories: [
+      "equation_to_intersection",
+      "single_solution_visual",
+      "translation",
+      "parameter_shift"
+    ],
     ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
   },
   {
@@ -195,6 +229,11 @@ const QUESTIONS = [
       fixedX0: 1,
       answerTolerance: 0.2,
     },
+    visualCategories: [
+      "derivative_related_object",
+      "derivative_to_slope",
+      "slope_at_point"
+    ],
     ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
   },
   {
@@ -210,6 +249,11 @@ const QUESTIONS = [
       fixedX0: -2,
       answerTolerance: 0.25,
     },
+    visualCategories: [
+      "function_object",
+      "axis_intersection",
+      "equation_to_intersection"
+    ],
     ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
   },
   {
@@ -227,6 +271,13 @@ const QUESTIONS = [
       preferredEditableParams: ["e", "d", "c"],
     },
     locked: [],
+    visualCategories: [
+      "parameterized_family",
+      "function_object",
+      "axis_intersection",
+      "equation_to_intersection",
+      "parameter_case_split"
+    ],
     ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
   },
   {
@@ -295,12 +346,19 @@ const QUESTIONS = [
         { x: 2, y: 4, label: "B" },
       ],
       toleranceY: 0.2,
-      preferredEditableParams: ["c", "d", "b"],
+      preferredEditableParams: ["c", "d"],
     },
     defaults: {
       c: 1,
       d: -1,
     },
+    visualCategories: [
+      "parameterized_family",
+      "translation",
+      "parameter_shift",
+      "solution_count_visualization",
+      "equation_to_intersection"
+    ],
     ui: { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
   },
   {
@@ -316,6 +374,23 @@ const QUESTIONS = [
       point: { x: 0, y: -1 },
       tolerance: 0.25,
     },
+    overlay: {
+      essence: "בשאלה הזאת לא מספיק למצוא נקודה על הגרף. צריך למצוא נקודת מגע שבה המשיק עובר דרך נקודה חיצונית נתונה.",
+      goal: "ללמוד לקשור בין נקודת המגע, שיפוע המשיק והעובדה שהמשיק חייב לעבור דרך P=(0,-1).",
+      material: "משוואת משיק: y - y0 = m(x - x0), שיפוע משיק m=f'(x0), ונקודה על הישר מקיימת את משוואת המשיק.",
+      howTo: [
+        "גררו את נקודת המגע על הגרף ובדקו איך המשיק הכתום משתנה.",
+        "בכל עצירה שאלו את עצמכם אם הקו באמת עובר דרך P=(0,-1), לא רק מתקרב אליה.",
+        "קשרו בין מיקום נקודת המגע לבין השיפוע שמופיע בחלונית.",
+        "אחרי שמצאתם התאמה, נסחו את התנאי: גם שיפוע המשיק מתאים וגם הנקודה P שייכת למשיק."
+      ]
+    },
+    visualCategories: [
+      "tangent_condition",
+      "slope_at_point",
+      "derivative_to_slope",
+      "function_object"
+    ],
     ui: { allowNormal: true, defaultNormalOn: false, allowLineTool: true },
   },
   {
@@ -330,6 +405,12 @@ const QUESTIONS = [
     data: {
       toleranceM: 0.15,
     },
+    visualCategories: [
+      "extreme_point",
+      "derivative_to_slope",
+      "slope_at_point",
+      "tangent_condition"
+    ],
     ui: { allowNormal: true, defaultNormalOn: true, allowLineTool: false },
   },
   {
@@ -426,6 +507,17 @@ const QUESTIONS = [
       fixedX0: 0,
       answerTolerance: 0.25,
     },
+    overlay: {
+      essence: "פולינום ממעלה 5 יכול להיראות מורכב, אבל גם כאן השיפוע בנקודה נקבע על ידי הנגזרת בדיוק כמו בפונקציות פשוטות יותר.",
+      goal: "ללמוד לקרוא שיפוע מתוך הגרף גם כשמבנה הפונקציה עשיר יותר, ולהבין איזה פרמטר משפיע ישירות על השיפוע המקומי.",
+      material: "נגזרת של פולינום ממעלה 5, קריאת שיפוע בנקודה x=0, וקשר בין המקדמים לבין f'(x).",
+      howTo: [
+        "קבעו את הנקודה על x=0 וקראו את ערך השיפוע מתוך החלונית.",
+        "רשמו לעצמכם מהו m=f'(0) לפני שמשנים פרמטרים.",
+        "שנו רק את e והשוו בין השינוי במשוואה לבין השינוי בשיפוע שנקרא.",
+        "בדקו אילו פרטים בגרף השתנו ואילו נשארו קבועים כדי להבין מה באמת שולט בשיפוע המקומי."
+      ]
+    },
     visualCategories: [
       "derivative_related_object",
       "derivative_to_slope",
@@ -452,6 +544,17 @@ const QUESTIONS = [
       preferredEditableParams: ["c", "d", "b"],
     },
     locked: [],
+    overlay: {
+      essence: "כאן שני שורשים על ציר x נותנים שני תנאים נפרדים על אותה פונקציה, ולכן מתקבלת מערכת משוואות על הפרמטרים.",
+      goal: "להבין שכל חיתוך עם ציר x מתורגם לתנאי מהצורה f(x)=0, וששילוב של שני תנאים כאלה מצמצם את חופש הבחירה של הפרמטרים.",
+      material: "אם נקודה נמצאת על ציר x אז y=0, ולכן עבור השורשים מתקבלים התנאים f(-1)=0 ו-f(2)=0.",
+      howTo: [
+        "זהו על הגרף את שתי הנקודות שבהן הפונקציה אמורה לפגוש את ציר x.",
+        "תרגמו כל נקודה לתנאי נפרד: f(-1)=0 וגם f(2)=0.",
+        "הוסיפו את שני התנאים למחברת ובדקו אילו פרמטרים כדאי לשנות כדי לספק את שניהם יחד.",
+        "אשרו בסוף שהפונקציה באמת חותכת את ציר x בשתי הנקודות, ולא רק בנקודה אחת."
+      ]
+    },
     visualCategories: [
       "parameterized_family",
       "axis_intersection",

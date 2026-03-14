@@ -15,18 +15,24 @@
         QUESTION_LOADED: 'השאלה נטענה. קראו את ההנחיה והתחילו.',
         STEP_ENTER: 'שלב חדש: {stepLabel}.',
         STEP_ADVANCE: 'כל הכבוד, מתקדמים לשלב הבא.',
-        ATTEMPT_WRONG: 'עדיין לא. נסו שוב.',
+        ATTEMPT_WRONG: 'נסו לבדוק שוב את הגרף - האם הנקודה במקום הנכון?',
         ATTEMPT_CORRECT: 'יפה מאוד! הצלחתם.',
-        HINT_REQUESTED: 'רמז: שינוי קטן ובדיקה מדויקת בכל צעד.',
-        TIMEOUT: 'אם נתקעתם, לחצו על רמז.',
+        HINT_REQUESTED: 'נסו לקרוא שוב את ההוראות בכרטיס המשימה ולהסתכל על הגרף',
+        TIMEOUT: 'קחו רגע, הסתכלו על הגרף ונסו שוב',
         RESET: 'בוצע איפוס. מתחילים מחדש.'
     };
+    const GENERAL_FALLBACK_MESSAGE = 'הסתכלו על הגרף ועל ההוראות למעלה - מה אתם רואים?';
+    const VOICE_RETRY_DELAYS_MS = [1000, 3000, 5000];
 
     const dom = {};
     const roundRobinState = new Map();
     let voicesListenerAttached = false;
     let catalog = deepClone(DEFAULT_CATALOG);
     let initPromise = null;
+    let voiceRetryTimer = null;
+    let voiceRetryAttempt = 0;
+    let voiceRetryToastShown = false;
+    let voiceFeaturesSkippedUntilReload = false;
 
     const state = {
         initialized: false,
@@ -127,7 +133,7 @@
 
     function normalizeMessage(rawMessage, eventType, fallbackId) {
         const source = (rawMessage && typeof rawMessage === 'object') ? rawMessage : {};
-        const text = String(source.text || DEFAULT_EVENT_MESSAGE[eventType] || 'המשיכו לפי ההנחיה.').trim();
+        const text = String(source.text || DEFAULT_EVENT_MESSAGE[eventType] || GENERAL_FALLBACK_MESSAGE).trim();
         const priority = Number(source.priority);
         return {
             id: String(source.id || fallbackId || `fallback_${eventType}`),
@@ -191,8 +197,8 @@
                 priority: 5,
                 sticky: false,
                 ttlMs: 2600,
-                text: DEFAULT_EVENT_MESSAGE[eventType] || 'אין כרגע תוכן עזרה זמין.',
-                voiceText: DEFAULT_EVENT_MESSAGE[eventType] || 'אין כרגע תוכן עזרה זמין.',
+                text: DEFAULT_EVENT_MESSAGE[eventType] || GENERAL_FALLBACK_MESSAGE,
+                voiceText: DEFAULT_EVENT_MESSAGE[eventType] || GENERAL_FALLBACK_MESSAGE,
                 next: null,
                 ui: { variant: 'bubble', icon: '💡', pulse: false }
             }, eventType, `fallback_${eventType}`);
@@ -257,10 +263,29 @@
         }
     }
 
-    function updateVoiceSupportState() {
+    function clearVoiceRetryTimer() {
+        if (!voiceRetryTimer) return;
+        clearTimeout(voiceRetryTimer);
+        voiceRetryTimer = null;
+    }
+
+    function updateVoiceSupportState(options = {}) {
         state.ttsSupported = hasSpeechApi();
-        state.voicesReady = hasVoices();
-        if (!state.ttsSupported || !state.voicesReady) state.voiceEnabled = false;
+        state.voicesReady = !!findHebrewVoice();
+        if (!state.ttsSupported || !state.voicesReady || voiceFeaturesSkippedUntilReload) state.voiceEnabled = false;
+        if (!state.ttsSupported) {
+            clearVoiceRetryTimer();
+            voiceRetryAttempt = 0;
+            return;
+        }
+        if (state.voicesReady) {
+            clearVoiceRetryTimer();
+            voiceRetryAttempt = 0;
+            return;
+        }
+        if (options.allowRetry !== false && !voiceFeaturesSkippedUntilReload) {
+            scheduleVoiceSupportRetry();
+        }
     }
 
     function readStoredVoicePreference() {
@@ -289,11 +314,16 @@
     function syncVoiceUi() {
         if (dom.voiceToggle) {
             dom.voiceToggle.checked = !!state.voiceEnabled;
-            dom.voiceToggle.disabled = !state.ttsSupported || !state.voicesReady;
+            dom.voiceToggle.disabled = !state.ttsSupported || !state.voicesReady || voiceFeaturesSkippedUntilReload;
         }
         if (dom.voiceLabel) {
-            if (!state.ttsSupported || !state.voicesReady) dom.voiceLabel.innerText = 'הסבר בקול (לא זמין)';
+            if (voiceFeaturesSkippedUntilReload) dom.voiceLabel.innerText = 'הסבר בקול (בטעינה הבאה)';
+            else if (!state.ttsSupported || !state.voicesReady) dom.voiceLabel.innerText = 'הסבר בקול (לא זמין)';
             else dom.voiceLabel.innerText = state.voiceEnabled ? 'הסבר בקול (דולק)' : 'הסבר בקול (כבוי)';
+        }
+        if (voiceFeaturesSkippedUntilReload) {
+            updateVoiceStatus('הקול יהיה זמין בטעינה הבאה');
+            return;
         }
         if (!state.ttsSupported || !state.voicesReady) {
             updateVoiceStatus('אין תמיכה בקול בדפדפן הזה');
@@ -305,7 +335,7 @@
     function setVoiceEnabled(enabled, options = {}) {
         const persist = options.persist !== false;
         updateVoiceSupportState();
-        const next = !!enabled && state.ttsSupported && state.voicesReady;
+        const next = !!enabled && state.ttsSupported && state.voicesReady && !voiceFeaturesSkippedUntilReload;
         state.voiceEnabled = next;
         if (persist) persistVoicePreference(next);
         syncVoiceUi();
@@ -368,6 +398,32 @@
         } catch (err) {
             return null;
         }
+    }
+
+    function scheduleVoiceSupportRetry() {
+        if (voiceRetryTimer || voiceFeaturesSkippedUntilReload) return;
+        if (voiceRetryAttempt >= VOICE_RETRY_DELAYS_MS.length) return;
+        const delay = VOICE_RETRY_DELAYS_MS[voiceRetryAttempt];
+        voiceRetryAttempt += 1;
+        voiceRetryTimer = setTimeout(() => {
+            voiceRetryTimer = null;
+            updateVoiceSupportState({ allowRetry: false });
+            syncVoiceUi();
+            if (state.voicesReady) return;
+            if (voiceRetryAttempt < VOICE_RETRY_DELAYS_MS.length) {
+                scheduleVoiceSupportRetry();
+                return;
+            }
+            voiceFeaturesSkippedUntilReload = true;
+            state.voiceEnabled = false;
+            syncVoiceUi();
+            if (!voiceRetryToastShown) {
+                voiceRetryToastShown = true;
+                if (typeof window.showStepToast === 'function') {
+                    window.showStepToast('הקול יהיה זמין בטעינה הבאה');
+                }
+            }
+        }, delay);
     }
 
     function speakMessage(message, payload) {
@@ -542,7 +598,7 @@
         const handleVoicesChanged = () => {
             const wasEnabled = state.voiceEnabled;
             updateVoiceSupportState();
-            if (!state.voicesReady) state.voiceEnabled = false;
+            if (!state.voicesReady || voiceFeaturesSkippedUntilReload) state.voiceEnabled = false;
             else if (wasEnabled || readStoredVoicePreference()) state.voiceEnabled = true;
             syncVoiceUi();
         };

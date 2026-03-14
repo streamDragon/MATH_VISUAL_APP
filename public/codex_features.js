@@ -124,7 +124,7 @@ function injectModals(){
   if(!id('codex-presets'))document.body.insertAdjacentHTML('beforeend','<div id=\"codex-presets\" class=\"hidden cmodal\"><div class=\"ccard\"><div class=\"mh\"><h3>Preset Gallery</h3><button class=\"btn-close-modal\" data-close=\"codex-presets\">סגור</button></div><div id=\"preset-grid\"></div></div></div>');
   if(!id('codex-profile'))document.body.insertAdjacentHTML('beforeend','<div id=\"codex-profile\" class=\"hidden cmodal\"><div class=\"ccard\"><div class=\"mh\"><h3>פרופיל והגדרות</h3><button class=\"btn-close-modal\" data-close=\"codex-profile\">סגור</button></div><div class=\"pgrid\"><label>Nickname<input id=\"p-name\" type=\"text\" maxlength=\"24\"></label><label>Avatar color<input id=\"p-color\" type=\"color\"></label><button id=\"btn-save-profile\">שמור פרופיל</button></div><div class=\"sec\"><h4>Video Slots</h4><label>לתלמידים — 60 שניות<input id=\"v-students\" type=\"url\" dir=\"ltr\" placeholder=\"https://youtu.be/...\"/></label><label>איך משתמשים — 2 דקות<input id=\"v-howto\" type=\"url\" dir=\"ltr\" placeholder=\"https://youtu.be/...\"/></label><label>למורים — 4 דקות<input id=\"v-teachers\" type=\"url\" dir=\"ltr\" placeholder=\"https://youtu.be/...\"/></label><button id=\"btn-save-video\">שמור וידאו</button></div><div class=\"sec\"><button id=\"btn-replay-onboard\">הפעל onboarding מחדש</button></div><div class=\"sec\"><h4>My notebook</h4><div id=\"profile-notes\"></div><button id=\"btn-clear-pnote\">נקה מחברת פרופיל</button></div></div></div>');
   if(!id('codex-debug'))document.body.insertAdjacentHTML('beforeend','<div id=\"codex-debug\" class=\"hidden cmodal\"><div class=\"ccard\"><div class=\"mh\"><h3>Debug Reset</h3><button class=\"btn-close-modal\" data-close=\"codex-debug\">סגור</button></div><button id=\"btn-reset-ext\">איפוס נתוני הרחבה בלבד</button><button id=\"btn-reset-all\">איפוס כל נתוני האפליקציה המקומיים</button></div></div>');
-  if(!id('neuro-panel'))document.body.insertAdjacentHTML('beforeend','<div id=\"neuro-panel\" class=\"hidden\"><h4>Neural Imagination Mode</h4><label>סימן שיפוע ב-x0<select id=\"n-slope\"><option value=\"\"></option><option value=\"negative\">negative</option><option value=\"zero\">zero</option><option value=\"positive\">positive</option></select></label><label>יש קיצון קרוב?<select id=\"n-ext\"><option value=\"\"></option><option value=\"yes\">yes</option><option value=\"no\">no</option></select></label><label>y(x0) מעל/מתחת ל-0<select id=\"n-y\"><option value=\"\"></option><option value=\"above\">above</option><option value=\"below\">below</option></select></label><div><button id=\"btn-neuro-reveal\">Reveal</button><button id=\"btn-neuro-close\">סגור</button></div><div id=\"n-feed\"></div><div id=\"n-chip\"></div></div>');
+  if(!id('neuro-panel'))document.body.insertAdjacentHTML('beforeend','<div id=\"neuro-panel\" class=\"hidden\"><h4>מצב דמיון חזותי</h4><label>סימן השיפוע ב-x0<select id=\"n-slope\"><option value=\"\"></option><option value=\"negative\">שלילי</option><option value=\"zero\">אפס</option><option value=\"positive\">חיובי</option></select></label><label>יש קיצון קרוב?<select id=\"n-ext\"><option value=\"\"></option><option value=\"yes\">כן</option><option value=\"no\">לא</option></select></label><label>y(x0) מעל/מתחת ל-0<select id=\"n-y\"><option value=\"\"></option><option value=\"above\">מעל</option><option value=\"below\">מתחת</option></select></label><div><button id=\"btn-neuro-reveal\">חשפו תשובה</button><button id=\"btn-neuro-close\">סגור</button></div><div id=\"n-feed\"></div><div id=\"n-chip\"></div></div>');
 }
 function mode(){return safeMode(S.mode||MODES.P);}
 function safeMode(m){return m===MODES.L||m===MODES.T?m:MODES.P;}
@@ -238,7 +238,10 @@ function applyShared(){
     typeof window.updateParams==='function'&&window.updateParams();typeof window.fitBoardToCurrentFunction==='function'&&window.fitBoardToCurrentFunction();
     let x0=Number(p.get('x0'));if(Number.isFinite(x0)&&typeof window.p!=='undefined'&&window.p&&typeof window.p.setCoords==='function')window.p.setCoords(x0,fx(x0));
     board()?.update();
-  }catch(_){}
+  }catch(_){
+    console.error('Failed to apply shared params:', _);
+    if(window.showStepToast)window.showStepToast('לא הצלחנו לטעון את הקישור המשותף');
+  }
 }
 function pKey(){return ((S.profile?.name||'guest').trim().toLowerCase()||'guest');}
 function saveProfileNote(s){
@@ -357,10 +360,10 @@ function bindNeuroTriggers(){
 }
 function startNeuro(src){
   if(neuro.on)return;
-  if(hasParamSpec()){toast('Neural mode פעיל כרגע רק בשאלות תבנית רגילות.');return;}
+  if(hasParamSpec()){toast('מצב דמיון חזותי פעיל כרגע רק בשאלות תבנית רגילות.');return;}
   neuro.on=true;neuro.frozen={src,kind:kind(),p:liveP(),x0:curX()};
-  document.body.classList.add('neuro-on');id('neuro-panel')?.classList.remove('hidden');id('n-feed')&&(id('n-feed').textContent='שנו פרמטרים/מיקום, נבאו, ואז לחצו Reveal.');
-  toast('Neural Imagination Mode הופעל.');typeof window.updateInfo==='function'&&window.updateInfo();board()?.update();
+  document.body.classList.add('neuro-on');id('neuro-panel')?.classList.remove('hidden');id('n-feed')&&(id('n-feed').textContent='שנו פרמטרים או מיקום, נסו לנבא, ואז לחצו על "חשפו תשובה".');
+  toast('מצב דמיון חזותי הופעל.');typeof window.updateInfo==='function'&&window.updateInfo();board()?.update();
 }
 function stopNeuro(){neuro.on=false;document.body.classList.remove('neuro-on');typeof window.updateInfo==='function'&&window.updateInfo();board()?.update();}
 function revealNeuro(){
@@ -368,10 +371,11 @@ function revealNeuro(){
   let ss=d>0.05?'positive':d<-0.05?'negative':'zero',ex=(Math.abs(d)<0.12||dl*dr<0)?'yes':'no',ys=y>0?'above':'below';
   let ps=id('n-slope')?.value||'',pe=id('n-ext')?.value||'',py=id('n-y')?.value||'';let hit=0;if(ps===ss)hit++;if(pe===ex)hit++;if(py===ys)hit++;
   let acc=Math.round(hit/3*100),gain=hit*10;S.neuro.xp=Number(S.neuro?.xp||0)+gain;S.neuro.streak=hit>=2?Number(S.neuro?.streak||0)+1:0;S.neuro.last=acc;save();
-  let map=[];if(neuro.frozen){let f=neuro.frozen.p||{};if(Math.abs((p.e||0)-(f.e||0))>0.15)map.push('You correctly linked e -> הזזה למעלה/למטה.');if(Math.abs((p.a||0)-(f.a||0))>0.15)map.push('You correctly linked a -> פתיחה/רוחב.');if(Math.abs((p.d||0)-(f.d||0))>0.15)map.push('You correctly linked d -> שיפוע מקומי.');}
-  id('n-feed')&&(id('n-feed').textContent='Prediction accuracy: '+acc+'% ('+hit+'/3)\\nמציאות: slope='+ss+', extremum='+ex+', y='+ys+(map[0]?('\\n'+map[0]):''));renderNeuroChip();stopNeuro();toast('Reveal: דיוק '+acc+'%');
+  let he={positive:'חיובי',negative:'שלילי',zero:'אפס',yes:'כן',no:'לא',above:'מעל',below:'מתחת'};
+  let map=[];if(neuro.frozen){let f=neuro.frozen.p||{};if(Math.abs((p.e||0)-(f.e||0))>0.15)map.push('קישרתם נכון בין e לבין הזזה למעלה או למטה.');if(Math.abs((p.a||0)-(f.a||0))>0.15)map.push('קישרתם נכון בין a לבין פתיחה או רוחב.');if(Math.abs((p.d||0)-(f.d||0))>0.15)map.push('קישרתם נכון בין d לבין השיפוע המקומי.');}
+  id('n-feed')&&(id('n-feed').textContent='דיוק החיזוי: '+acc+'% ('+hit+'/3)\\nמציאות: שיפוע='+he[ss]+', קיצון='+he[ex]+', y='+he[ys]+(map[0]?('\\n'+map[0]):''));renderNeuroChip();stopNeuro();toast('חשיפה: דיוק '+acc+'%');
 }
-function renderNeuroChip(){id('n-chip')&&(id('n-chip').textContent='Neuro XP '+Number(S.neuro?.xp||0)+' | רצף '+Number(S.neuro?.streak||0)+' | דיוק אחרון '+Number(S.neuro?.last||0)+'%');}
+function renderNeuroChip(){id('n-chip')&&(id('n-chip').textContent='נקודות דמיון '+Number(S.neuro?.xp||0)+' | רצף '+Number(S.neuro?.streak||0)+' | דיוק אחרון '+Number(S.neuro?.last||0)+'%');}
 function bindDebugUnlock(){let a=[id('top-version-badge'),id('build-badge')].filter(Boolean),t=[];a.forEach(e=>e.addEventListener('click',()=>{t.push(Date.now());t=t.filter(x=>Date.now()-x<2000);if(t.length>=5){t=[];openM('codex-debug');}}));}
 function curQi(){let s=id('top-question-select');let n=Number(s?.value);return Number.isFinite(n)?n:0;}
 function curX(){if(typeof window.p!=='undefined'&&window.p&&typeof window.p.X==='function'){let v=Number(window.p.X());if(Number.isFinite(v))return v;}let t=document.querySelector('.jxgbox')?.textContent||'',m=t.match(/x\\s*=\\s*(-?\\d+(?:\\.\\d+)?)/i);return m?Number(m[1]):0;}
