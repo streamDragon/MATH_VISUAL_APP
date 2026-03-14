@@ -35,13 +35,17 @@
         (function ensureBuildQueryParam() {
             const GUARD_KEY = 'math_visual_head_reload_guard_v3';
 
+            function isTemplateBuildToken(value) {
+                return /^__[\w-]+__$/i.test(String(value || '').trim());
+            }
+
             function resolveExpectedToken() {
                 let buildSha = '__BUILD_SHA__';
-                if (buildSha && buildSha !== '__BUILD_SHA__') return buildSha;
+                if (buildSha && !isTemplateBuildToken(buildSha) && buildSha !== 'unknown') return buildSha;
                 let build = '__BUILD_ID__';
                 let version = '__APP_VERSION__';
-                if (build && build !== '__BUILD_ID__') return build;
-                if (version && version !== '__APP_VERSION__') return `v${version}`;
+                if (build && !isTemplateBuildToken(build)) return build;
+                if (version && !isTemplateBuildToken(version)) return `v${version}`;
                 return '';
             }
 
@@ -1335,18 +1339,22 @@
             return new Date(parsed).toISOString();
         }
 
+        function isUnresolvedBuildToken(value) {
+            return /^__[\w-]+__$/i.test(String(value || '').trim());
+        }
+
         const APP_BUILD_ENV = normalizeBuildEnv('__BUILD_ENV__');
         const APP_BUILD_SHA = sanitizeBuildSha('__BUILD_SHA__');
         const APP_BUILD_SHA_SHORT = APP_BUILD_SHA === 'unknown' ? 'unknown' : APP_BUILD_SHA.slice(0, 7);
         const APP_BUILD_TIME = sanitizeBuildTime('__BUILD_TIME__');
         const APP_BUILD = (() => {
             let build = String('__BUILD_ID__' || '').trim();
-            if (build && build.toLowerCase() !== '__build_id__') return build;
+            if (build && !isUnresolvedBuildToken(build)) return build;
             return APP_BUILD_SHA !== 'unknown' ? APP_BUILD_SHA : 'unknown';
         })();
         const APP_VERSION = (() => {
             const version = String('__APP_VERSION__' || '').trim();
-            if (!version || version.toLowerCase() === '__app_version__') return 'local';
+            if (!version || isUnresolvedBuildToken(version)) return 'local';
             return version;
         })();
 
@@ -3637,10 +3645,11 @@
 
         function getRemoteVersionToken(data) {
             if (!data || typeof data !== 'object') return '';
-            let remoteSha = (typeof data.build_sha === 'string') ? data.build_sha.trim().toLowerCase() : '';
-            if (remoteSha && remoteSha !== '__build_sha__') return remoteSha;
+            let rawRemoteSha = (typeof data.build_sha === 'string') ? data.build_sha.trim() : '';
+            let remoteSha = rawRemoteSha.toLowerCase();
+            if (remoteSha && !isUnresolvedBuildToken(rawRemoteSha)) return remoteSha;
             let remoteBuild = (typeof data.build === 'string') ? data.build.trim() : '';
-            if (remoteBuild && remoteBuild !== '__BUILD_ID__') return remoteBuild;
+            if (remoteBuild && !isUnresolvedBuildToken(remoteBuild)) return remoteBuild;
             let remoteVersion = (typeof data.app_version === 'string') ? data.app_version.trim() : '';
             if (/^\d+$/.test(remoteVersion)) return `v${remoteVersion}`;
             return '';
@@ -3651,7 +3660,7 @@
             let remoteSha = sanitizeBuildSha(data.build_sha);
             if (remoteSha !== 'unknown') return remoteSha;
             let remoteBuild = (typeof data.build === 'string') ? data.build.trim() : '';
-            if (remoteBuild && remoteBuild !== '__BUILD_ID__') return remoteBuild;
+            if (remoteBuild && !isUnresolvedBuildToken(remoteBuild)) return remoteBuild;
             return '';
         }
 
@@ -3703,7 +3712,7 @@
             let localBuildComparable = APP_BUILD_SHA !== 'unknown'
                 ? APP_BUILD_SHA
                 : ((typeof APP_BUILD === 'string') ? APP_BUILD.trim() : '');
-            if (!localBuildComparable || localBuildComparable === '__BUILD_ID__' || localBuildComparable === 'unknown') return true;
+            if (!localBuildComparable || isUnresolvedBuildToken(localBuildComparable) || localBuildComparable === 'unknown') return true;
             return remoteBuildComparable !== localBuildComparable;
         }
 
@@ -14886,7 +14895,7 @@ Rules:
         } catch (e) {}
         if (!fullHash) {
             const metaSha = document.querySelector('meta[name="app-build-sha"]');
-            if (metaSha && metaSha.content && metaSha.content !== '__BUILD_SHA__') {
+            if (metaSha && metaSha.content && !isUnresolvedBuildToken(metaSha.content)) {
                 fullHash = metaSha.content;
             }
         }

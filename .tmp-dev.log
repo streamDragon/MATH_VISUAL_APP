@@ -3,44 +3,6 @@
 > node ./node_modules/vite/bin/vite.js --host 127.0.0.1 --port 4173 --strictPort
 
 
-  [32m[1mVITE[22m v7.3.1[39m  [2mready in [0m[1m389[22m[2m[0m ms[22m
+  [32m[1mVITE[22m v7.3.1[39m  [2mready in [0m[1m409[22m[2m[0m ms[22m
 
   [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m4173[22m/[39m
-[33mFiles in the public directory are served at the root path.
-Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
-[33mFiles in the public directory are served at the root path.
-Instead of [36m/public/math-gym-promo.png[33m, use [36m/math-gym-promo.png[33m.[39m
-[33mFiles in the public directory are served at the root path.
-Instead of [36m/public/math-gym-promo.png[33m, use [36m/math-gym-promo.png[33m.[39m
-[33mFiles in the public directory are served at the root path.
-Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
-[33mFiles in the public directory are served at the root path.
-Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
-[33mFiles in the public directory are served at the root path.
-Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
-[33mFiles in the public directory are served at the root path.
-Instead of [36m/public/math-gym-promo.png[33m, use [36m/math-gym-promo.png[33m.[39m
-[33mFiles in the public directory are served at the root path.
-Instead of [36m/public/math-gym-promo.png[33m, use [36m/math-gym-promo.png[33m.[39m
-[33mFiles in the public directory are served at the root path.
-Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
-[33mFiles in the public directory are served at the root path.
-Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
-[33mFiles in the public directory are served at the root path.
-Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
-[33mFiles in the public directory are served at the root path.
-Instead of [36m/public/math-gym-promo.png[33m, use [36m/math-gym-promo.png[33m.[39m
-[33mFiles in the public directory are served at the root path.
-Instead of [36m/public/math-gym-promo.png[33m, use [36m/math-gym-promo.png[33m.[39m
-[33mFiles in the public directory are served at the root path.
-Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
-[33mFiles in the public directory are served at the root path.
-Instead of [36m/public/opening-poster.png[33m, use [36m/opening-poster.png[33m.[39m
-[2m3:43:51[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mindex.html[22m
-[2m3:52:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mindex.html[22m
-[2m3:54:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mindex.html[22m
-[2m3:54:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mindex.html[22m
-[2m3:55:43[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mindex.html[22m
-[2m3:55:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mindex.html[22m
-[2m4:02:54[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mindex.html[22m
-[2m4:04:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mindex.html[22m
