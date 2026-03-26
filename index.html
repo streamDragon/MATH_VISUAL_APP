@@ -7320,6 +7320,7 @@
                 scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 80, 220] });
                 syncMobileFeedAutostart();
                 maybeCompleteEntryFlowAfterSplash('splash_hidden');
+                if (typeof showMascotMood === 'function') setTimeout(function () { showMascotMood('idle', 'שלום! בואו נלמד מתמטיקה? 👋', 4000); }, 800);
             };
             if (immediate) {
                 finalizeHide();
@@ -9955,6 +9956,7 @@
             let expected = q.goal === 'read_slope' ? getSlope(x0) : evaluateFunctionAt(x0);
             if (Math.abs(inputVal - expected) <= tol) {
                 readAnswerValidated = true;
+                if (typeof showMascotMood === 'function') showMascotMood('celebrating', '✅ ענית נכון! כל הכבוד! 🎉', 3000);
                 document.getElementById('read-answer-feedback').innerText = `נכון מאוד. התשובה שלך בטווח הנכון (בערך ${formatNumber(expected)}, עם סובלנות של ±${formatNumber(tol)}).`;
                 pushCoachEvent('ATTEMPT_CORRECT', {
                     source: 'read_answer',
@@ -9983,6 +9985,7 @@
                 }
             } else {
                 readAnswerValidated = false;
+                if (typeof showMascotMood === 'function') showMascotMood('thinking', 'עוד לא — בדקו שוב על פי הגרף!', 3000);
                 document.getElementById('read-answer-feedback').innerText = `עדיין לא. בדקו שוב את החלונית ליד הנקודה ונסו שוב. מותר להיות בערך בטווח ±${formatNumber(tol)}.`;
                 pushCoachWrongAttempt('עדיין לא. נסו שוב לפי החלונית ליד הנקודה.', {
                     source: 'read_answer',
@@ -10451,6 +10454,7 @@
         function markQuestionSolved() {
             clearPendingStepRecheckTimer();
             questionSolved = true;
+            if (typeof showMascotMood === 'function') showMascotMood('happy', 'סיימתם שאלה! מעולה! 🎓', 4000);
             pushCoachEvent('STEP_EXIT', { reason: 'question_solved' });
             pushCoachEvent('ATTEMPT_CORRECT', { reason: 'question_solved' });
             let box = document.querySelector('.jxgbox');
@@ -11754,6 +11758,7 @@
         }
 
         function openScanModal() {
+            if (typeof showMascotMood === 'function') showMascotMood('thinking', 'אוקיי, בואו נפרק את השאלה ביחד 📐', 3000);
             loadScanConfig();
             updateScanCaptureUi();
             syncScanAdminConfigUi();
