@@ -4038,6 +4038,14 @@
             // Flash +N animation
             let badge = document.getElementById('gam-points');
             if (badge) {
+                if (badge.__gamPopTimer) clearTimeout(badge.__gamPopTimer);
+                badge.classList.remove('gam-pop');
+                void badge.offsetWidth;
+                badge.classList.add('gam-pop');
+                badge.__gamPopTimer = setTimeout(function () {
+                    badge.classList.remove('gam-pop');
+                    badge.__gamPopTimer = null;
+                }, 400);
                 let flash = document.createElement('span');
                 flash.className = 'gam-flash';
                 flash.textContent = '+' + amount;
@@ -15206,6 +15214,47 @@ Rules:
         #tutor-container {
             right: 8px;
             bottom: calc(8px + var(--safe-bottom, 0px));
+        }
+    }
+
+    @media (max-width: 500px) {
+        body.mobile-student-flow #tutor-container,
+        #tutor-container {
+            position: fixed;
+            right: 16px;
+            bottom: calc(16px + var(--safe-bottom, 0px));
+            z-index: 900;
+        }
+
+        body.mobile-student-flow #tutor-btn,
+        #tutor-btn {
+            width: 52px;
+            height: 52px;
+        }
+
+        body.mobile-student-flow #tutor-svg,
+        #tutor-svg {
+            width: 46px;
+            height: 46px;
+        }
+
+        body.mobile-student-flow #tutor-bubble,
+        #tutor-bubble {
+            display: block !important;
+            position: absolute;
+            bottom: 60px;
+            right: 0;
+            left: auto;
+            width: min(200px, calc(100vw - 32px));
+            max-width: min(200px, calc(100vw - 32px));
+            font-size: 13px;
+            direction: rtl;
+            background: white;
+            border-radius: 12px;
+            padding: 8px 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            white-space: normal;
+            text-align: right;
         }
     }
 
