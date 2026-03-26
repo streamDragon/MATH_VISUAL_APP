@@ -9186,3 +9186,153 @@ body.prestart-only #home-preview-column #graph-area {
     70%  { opacity: 0.8; transform: translateY(-10px) scale(1.05); }
     100% { opacity: 0; transform: translateY(-16px) scale(0.9); }
 }
+
+/* ============================================================
+   P6: AI Visual Decomposition Cards
+   ============================================================ */
+
+#btn-scan-decompose {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-family: 'Assistant', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: opacity 0.15s, transform 0.15s;
+}
+#btn-scan-decompose:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+#scan-decompose-wrap {
+    margin-top: 18px;
+    direction: rtl;
+}
+
+.scan-decompose-header {
+    margin-bottom: 12px;
+}
+
+.scan-decompose-title {
+    font-size: 1rem;
+    font-weight: 900;
+    color: #0f172a;
+    margin-bottom: 8px;
+}
+
+.decompose-skill-tag {
+    display: inline-block;
+    background: rgba(124,58,237,0.1);
+    color: #7c3aed;
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 800;
+    margin: 2px 3px 2px 0;
+}
+
+.decompose-skill-inline {
+    font-size: 11px;
+    background: rgba(15,118,110,0.1);
+    color: #0f766e;
+    margin-top: 6px;
+    display: inline-block;
+}
+
+.decompose-step-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    background: linear-gradient(180deg, #ffffff, #f8faff);
+    direction: rtl;
+    animation: decompStepIn 0.3s ease;
+}
+
+@keyframes decompStepIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.decompose-step-title {
+    font-size: 0.95rem;
+    font-weight: 900;
+    color: #0f172a;
+    margin-bottom: 8px;
+}
+
+.decompose-step-vis {
+    font-size: 0.9rem;
+    color: #334155;
+    line-height: 1.6;
+    margin-bottom: 6px;
+}
+
+.decompose-step-hint {
+    font-size: 0.88rem;
+    color: #64748b;
+    background: rgba(241,245,249,0.8);
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin-top: 8px;
+    line-height: 1.55;
+}
+
+.decompose-next-btn {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    min-height: 40px;
+    border: 1.5px solid #7c3aed;
+    border-radius: 10px;
+    background: none;
+    color: #7c3aed;
+    font-family: 'Assistant', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.decompose-next-btn:hover {
+    background: #7c3aed;
+    color: white;
+}
+
+#scan-decompose-exprs {
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: #f1f5f9;
+    border-radius: 12px;
+    direction: rtl;
+}
+
+.decompose-exprs-title {
+    font-weight: 900;
+    font-size: 0.9rem;
+    color: #0f172a;
+    margin-bottom: 8px;
+}
+
+.decompose-expr {
+    display: inline-block;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-family: monospace;
+    font-size: 13px;
+    margin: 3px 4px 3px 0;
+    color: #1e293b;
+}
+
+#scan-decompose-status {
+    font-size: 13px;
+    color: #64748b;
+    padding: 6px 0;
+    direction: rtl;
+}

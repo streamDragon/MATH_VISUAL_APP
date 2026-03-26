@@ -11643,6 +11643,7 @@
             }
             setScanEntryMode('text', { skipFocus: true, skipStatus: true });
             setScanStatus('הטקסט מוכן. עכשיו אפרק אותו לציור, לנתונים, ולמשוואות.');
+            if (typeof maybeShowDecomposeButton === 'function') maybeShowDecomposeButton();
         }
 
         function isDirectAiVendorEndpoint(endpoint) {
@@ -13710,6 +13711,174 @@ Rules:
                 setScanStatus(getFriendlyScanErrorMessage(err), true);
             } finally {
                 setScanBusy(false);
+            }
+        }
+
+        /* --- P6: decomposeForVisualization --- */
+        async function decomposeForVisualization(questionText) {
+            let wrapEl   = document.getElementById('scan-decompose-wrap');
+            let stepsEl  = document.getElementById('scan-decompose-steps');
+            let skillsEl = document.getElementById('scan-decompose-skills');
+            let exprsEl  = document.getElementById('scan-decompose-exprs');
+            let statusEl = document.getElementById('scan-decompose-status');
+            if (!wrapEl) return;
+
+            wrapEl.classList.remove('hidden');
+            if (stepsEl) stepsEl.innerHTML = '';
+            if (skillsEl) skillsEl.innerHTML = '';
+            if (exprsEl) { exprsEl.innerHTML = ''; exprsEl.classList.add('hidden'); }
+            if (statusEl) statusEl.textContent = 'מפרק את השאלה... ⏳';
+
+            let prompt = `אתה עוזר מתמטיקה. פרק את השאלה הבאה לשלבים לומדים — מה צריך להדמות ויזואלית בכל שלב.
+
+השאלה: ${questionText}
+
+החזר JSON בפורמט (ללא markdown):
+{"steps":[{"title":"שם השלב","what_to_visualize":"מה להראות בגרף","visual_skill":"סוג כישור (קריאת קואורדינטה/שיפוע/נקודה/קיצון/סימטריה/ועוד)","hint":"רמז קצר"}],"required_skills":["כישורים מרכזיים"],"expressions":["ביטויים אלגבריים"]}`;
+
+            try {
+                let res = await fetch('/api/tutor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
+                });
+
+                if (!res.ok) {
+                    throw new Error('שרת לא זמין');
+                }
+
+                let data = await res.json();
+                let rawReply = String(data.reply || '').trim();
+
+                // Remove markdown code fences if present
+                rawReply = rawReply.replace(/^```[a-z]*\n?/i, '').replace(/```\s*$/,'').trim();
+
+                let parsed = null;
+                try { parsed = JSON.parse(rawReply); } catch (e) {
+                    let jsonMatch = rawReply.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        try { parsed = JSON.parse(jsonMatch[0]); } catch (e2) {}
+                    }
+                }
+
+                if (!parsed || !Array.isArray(parsed.steps)) {
+                    if (statusEl) statusEl.textContent = 'לא הצלחתי לפרק. ניסחו את השאלה קצת אחרת ונסו שוב.';
+                    return;
+                }
+
+                if (statusEl) statusEl.textContent = '';
+
+                // Render required_skills tags
+                if (skillsEl && Array.isArray(parsed.required_skills) && parsed.required_skills.length > 0) {
+                    parsed.required_skills.forEach(function (skill) {
+                        let tag = document.createElement('span');
+                        tag.className = 'decompose-skill-tag';
+                        tag.textContent = skill;
+                        skillsEl.appendChild(tag);
+                    });
+                }
+
+                // Render step cards (revealed one at a time)
+                if (stepsEl && Array.isArray(parsed.steps)) {
+                    let revealedCount = 0;
+                    function revealNextStep() {
+                        if (revealedCount >= parsed.steps.length) return;
+                        let step = parsed.steps[revealedCount];
+                        revealedCount++;
+
+                        let card = document.createElement('div');
+                        card.className = 'decompose-step-card';
+
+                        let title = document.createElement('div');
+                        title.className = 'decompose-step-title';
+                        title.textContent = `שלב ${revealedCount}: ${step.title || ''}`;
+                        card.appendChild(title);
+
+                        if (step.what_to_visualize) {
+                            let vis = document.createElement('div');
+                            vis.className = 'decompose-step-vis';
+                            vis.textContent = '🎯 ' + step.what_to_visualize;
+                            card.appendChild(vis);
+                        }
+
+                        if (step.visual_skill) {
+                            let skillTag = document.createElement('span');
+                            skillTag.className = 'decompose-skill-tag decompose-skill-inline';
+                            skillTag.textContent = step.visual_skill;
+                            card.appendChild(skillTag);
+                        }
+
+                        if (step.hint) {
+                            let hint = document.createElement('div');
+                            hint.className = 'decompose-step-hint';
+                            hint.textContent = '💡 ' + step.hint;
+                            card.appendChild(hint);
+                        }
+
+                        if (revealedCount < parsed.steps.length) {
+                            let nextBtn = document.createElement('button');
+                            nextBtn.className = 'decompose-next-btn';
+                            nextBtn.textContent = 'שלב הבא ←';
+                            nextBtn.type = 'button';
+                            nextBtn.addEventListener('click', function () {
+                                nextBtn.remove();
+                                revealNextStep();
+                            });
+                            card.appendChild(nextBtn);
+                        }
+
+                        stepsEl.appendChild(card);
+                        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                    revealNextStep();
+                }
+
+                // Render expressions
+                if (exprsEl && Array.isArray(parsed.expressions) && parsed.expressions.length > 0) {
+                    exprsEl.classList.remove('hidden');
+                    let title = document.createElement('div');
+                    title.className = 'decompose-exprs-title';
+                    title.textContent = 'ביטויים אלגבריים';
+                    exprsEl.appendChild(title);
+                    parsed.expressions.forEach(function (expr) {
+                        let el = document.createElement('code');
+                        el.className = 'decompose-expr';
+                        el.textContent = expr;
+                        exprsEl.appendChild(el);
+                    });
+                }
+
+            } catch (err) {
+                if (statusEl) statusEl.textContent = 'אין אפשרות לפרק שאלות — יש לוודא שהאפליקציה מחוברת לשרת AI תקין.';
+            }
+        }
+
+        /* bind decompose button */
+        document.addEventListener('DOMContentLoaded', function () {
+            let decompBtn = document.getElementById('btn-scan-decompose');
+            if (decompBtn) {
+                decompBtn.addEventListener('click', function () {
+                    let text = (document.getElementById('scan-question-text')?.value || '').trim()
+                        || (window.scanManualQuestionText || '');
+                    if (!text) {
+                        let statusEl = document.getElementById('scan-decompose-status');
+                        let wrapEl = document.getElementById('scan-decompose-wrap');
+                        if (wrapEl) wrapEl.classList.remove('hidden');
+                        if (statusEl) statusEl.textContent = 'כתבו קודם את השאלה בתיבת הטקסט.';
+                        return;
+                    }
+                    decomposeForVisualization(text);
+                });
+            }
+        });
+
+        /* show decompose button when scan text is ready */
+        function maybeShowDecomposeButton() {
+            let btn = document.getElementById('btn-scan-decompose');
+            if (!btn) return;
+            let text = (document.getElementById('scan-question-text')?.value || '').trim();
+            if (text && text.length > 10) {
+                btn.classList.remove('hidden');
             }
         }
 
