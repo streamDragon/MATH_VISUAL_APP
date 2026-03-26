@@ -8937,3 +8937,133 @@ body.prestart-only #home-preview-column #graph-area {
         display: none;
     }
 }
+
+/* ============================================================
+   P1: Mobile-First Landing — @media max-width 500px
+   ============================================================ */
+
+@keyframes landingFadeUp {
+    0%  { opacity: 0; transform: translateY(18px); }
+    100%{ opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 500px) {
+    /* --- Hero section --- */
+    #home-hero {
+        gap: 10px;
+        padding: 16px;
+    }
+
+    #home-hero-title {
+        font-size: 22px !important;
+        max-width: none;
+        line-height: 1.2;
+    }
+
+    #home-hero-subtitle {
+        font-size: 14px !important;
+        line-height: 1.65;
+    }
+
+    #home-hero-support {
+        font-size: 13px !important;
+    }
+
+    .home-kicker,
+    .home-section-kicker {
+        font-size: 11px;
+    }
+
+    .home-hook-question {
+        font-size: 15px;
+    }
+
+    /* --- Hide secondary sections on mobile --- */
+    #home-benefits,
+    #home-roadmap,
+    #home-adults,
+    #home-advanced {
+        display: none !important;
+    }
+
+    /* --- Paths section: dominant --- */
+    #home-paths-section {
+        padding: 16px;
+    }
+
+    #home-paths-section .home-section-head h2 {
+        font-size: 17px;
+    }
+
+    #home-paths {
+        gap: 10px;
+    }
+
+    .home-path-card {
+        min-height: 72px !important;
+        padding: 14px 16px !important;
+        border-radius: 18px;
+        gap: 6px;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .home-path-index {
+        display: none;
+    }
+
+    .home-path-title {
+        font-size: 15px !important;
+        font-weight: 900;
+        flex: 1;
+        text-align: right;
+    }
+
+    .home-path-desc {
+        display: none;
+    }
+
+    /* add arrow chevron on left side */
+    .home-path-card::after {
+        content: "←";
+        font-size: 18px;
+        color: #0f766e;
+        flex-shrink: 0;
+        margin-inline-start: 4px;
+    }
+
+    #btn-home-returning {
+        font-size: 13px;
+    }
+
+    /* --- Entrance animations --- */
+    body.prestart-only #home-hero {
+        animation: landingFadeUp 0.45s ease both;
+        animation-delay: 0.05s;
+    }
+
+    body.prestart-only #home-paths-section {
+        animation: landingFadeUp 0.45s ease both;
+        animation-delay: 0.15s;
+    }
+
+    body.prestart-only #home-paths .home-path-card:nth-child(1) {
+        animation: landingFadeUp 0.4s ease both;
+        animation-delay: 0.22s;
+    }
+
+    body.prestart-only #home-paths .home-path-card:nth-child(2) {
+        animation: landingFadeUp 0.4s ease both;
+        animation-delay: 0.32s;
+    }
+
+    body.prestart-only #home-paths .home-path-card:nth-child(3) {
+        animation: landingFadeUp 0.4s ease both;
+        animation-delay: 0.42s;
+    }
+
+    body.prestart-only #home-returning-row {
+        animation: landingFadeUp 0.4s ease both;
+        animation-delay: 0.52s;
+    }
+}
