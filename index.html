@@ -17,6 +17,15 @@
     <link rel="icon" type="image/png" href="/opening-poster.png">
 
     <script>
+        window.SUPABASE_URL = 'https://qaxuqliefevglwtntmmw.supabase.co';
+        window.SUPABASE_ANON_KEY = 'sb_publishable_oJhyw_cLpt4iE2VfzVNWng_lVpUzq6I';
+        window.__SUPABASE_CONFIG__ = Object.freeze({
+            url: window.SUPABASE_URL,
+            anonKey: window.SUPABASE_ANON_KEY
+        });
+    </script>
+
+    <script>
         (function initScriptLoadRegistry() {
             let store = window.__SCRIPT_LOAD_STATUS;
             if (!store || typeof store !== 'object') store = {};
@@ -1178,7 +1187,7 @@
                     <h3 id="video-modal-title">וידאו הסבר</h3>
                     <div id="video-modal-duration" class="video-modal-duration hidden">משך: --</div>
                 </div>
-                <button onclick="closeVideoModal()">סגור</button>
+                <button id="video-modal-close-icon" type="button" onclick="closeVideoModal()" aria-label="סגור">✕</button>
             </div>
             <p id="video-modal-description" class="hidden"></p>
             <div id="video-embed-wrap">
@@ -1189,7 +1198,10 @@
                 <iframe id="video-iframe" class="hidden" src="" title="סרטון הסבר" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                 <div id="video-modal-fallback" aria-live="polite">נפתח כאן הסבר חלופי קצר</div>
             </div>
-            <div class="overlay-actions">
+            <div class="overlay-actions video-modal-actions">
+                <button id="video-speed-toggle" class="hidden" type="button" aria-pressed="false" onclick="toggleVideoModalSpeed()">×2</button>
+                <button id="video-restart-btn" class="hidden" type="button" onclick="restartVideoModal()">התחל מחדש</button>
+                <button id="video-close-btn" type="button" onclick="closeVideoModal()">סגור</button>
                 <a id="video-open-link" class="hidden" href="#" target="_blank" rel="noopener noreferrer">פתח בלשונית חדשה</a>
             </div>
         </div>
@@ -1241,6 +1253,19 @@
                 <p><b>מה זה אנך מתכוונן?</b> זה קו אנך "ניסוי" שמוזז לאורך המשיק בעזרת הסליידר. המטרה היא להביא אותו למיקום הנכון בדיוק בנקודת המגע.</p>
                 <p><b>מה רואים בכלים?</b> מוצגים שיפוע המשיק, שיפוע האנך, ונקודת <code>I</code> (חיתוך האנך המתכוונן עם המשיק).</p>
                 <p><b>איך עובדים נכון?</b> קודם מסמנים "הצג אנך מתכוונן", מזיזים את הסליידר, ומשווים לסימון הזווית הישרה ולמצב "קרוב לאנך האמיתי".</p>
+                <div class="vizy-help-card" data-help-video-id="perpendicular_lab_intro">
+                    <div class="vizy-help-card-top">
+                        <div class="vizy-help-card-badge" aria-hidden="true">ויזי</div>
+                        <div class="vizy-help-card-copy">
+                            <div class="vizy-help-card-title">הסבר וידאו: מעבדת האנך</div>
+                            <div class="vizy-help-card-note">ויזי מסביר איך להבין ולעבוד עם מעבדת האנך.</div>
+                        </div>
+                    </div>
+                    <div class="vizy-help-card-actions">
+                        <button class="help-video-cta help-video-cta-inline" type="button" data-vizy-video-open onclick="openHelpVideo('perpendicular_lab_intro')">צפו בהסבר עם ויזי</button>
+                        <div class="vizy-help-card-dev-note hidden" data-vizy-video-missing>הסרטון יופיע כאן ברגע שקובץ הווידאו יהיה זמין.</div>
+                    </div>
+                </div>
                 <div class="normal-lab-list-wrap">
                     <div class="normal-lab-list-title">שאלות שבהן יש שימוש במעבדת האנך:</div>
                     <ul id="normal-lab-questions"></ul>
@@ -1286,11 +1311,23 @@
                     <li>לומדים איך להתקדם בלי ללכת לאיבוד.</li>
                 </ol>
                 <p id="start-guide-note">זהו סיור קצר ורגוע. הוא לא מעמיס עליכם, ורק מראה מאיפה נכון להתחיל.</p>
+                <div class="vizy-help-card" data-help-video-id="guided_intro">
+                    <div class="vizy-help-card-top">
+                        <div class="vizy-help-card-badge" aria-hidden="true">ויזי</div>
+                        <div class="vizy-help-card-copy">
+                            <div class="vizy-help-card-title">הסבר וידאו: התמצאות כללית</div>
+                            <div class="vizy-help-card-note">לא בטוחים מה עושים כאן? ויזי מסביר בדקה.</div>
+                        </div>
+                    </div>
+                    <div class="vizy-help-card-actions">
+                        <button class="help-video-cta help-video-cta-inline" type="button" data-vizy-video-open onclick="openHelpVideo('guided_intro')">צפו בהסבר עם ויזי</button>
+                        <div class="vizy-help-card-dev-note hidden" data-vizy-video-missing>הסרטון יופיע כאן ברגע שקובץ הווידאו יהיה זמין.</div>
+                    </div>
+                </div>
                 <div class="start-guide-audio-box">
                     <div id="start-guide-audio-note" class="start-guide-audio-note">אפשר גם לשמוע הסבר קצר לפני שמתחילים.</div>
                     <div class="start-guide-help-actions">
                         <button id="btn-start-guide-voice" type="button" onclick="playStartGuideVoice()">שמע הסבר קצר</button>
-                        <button class="help-video-cta help-video-cta-inline" type="button" onclick="openHelpVideo('guided_intro')">צפה בהסבר קצר</button>
                     </div>
                     <div id="start-guide-voice-status" aria-live="polite"></div>
                 </div>
@@ -1956,8 +1993,18 @@
                         <div class="section-title" id="builder-main-title">מהמילים למשוואות</div>
                         <div id="builder-main-subtitle" class="builder-section-subtitle">בשאלות פרמטרים לא מנסים לנחש פונקציה.<br>קודם בונים ציור מהנתונים,<br>אחר כך מוציאים מהציור תנאים,<br>ואז מתרגמים כל תנאי למשוואה.</div>
                         <div id="builder-main-helper" class="builder-section-helper">המטרה כאן היא לעבור מהשאלה הכתובה אל ציור, מהציור אל תנאים, ומהתנאים אל משוואות.</div>
-                        <div class="help-video-cta-row builder-help-video-row">
-                            <button class="help-video-cta help-video-cta-inline" type="button" onclick="openHelpVideo('parameters_intro')">צפה בהסבר קצר</button>
+                        <div class="vizy-help-card builder-help-video-row" data-help-video-id="parameters_intro">
+                            <div class="vizy-help-card-top">
+                                <div class="vizy-help-card-badge" aria-hidden="true">ויזי</div>
+                                <div class="vizy-help-card-copy">
+                                    <div class="vizy-help-card-title">הסבר וידאו: עבודה עם פרמטרים</div>
+                                    <div class="vizy-help-card-note">ויזי מסביר איך לראות מה כל פרמטר משנה בגרף.</div>
+                                </div>
+                            </div>
+                            <div class="vizy-help-card-actions">
+                                <button class="help-video-cta help-video-cta-inline" type="button" data-vizy-video-open onclick="openHelpVideo('parameters_intro')">צפו בהסבר עם ויזי</button>
+                                <div class="vizy-help-card-dev-note hidden" data-vizy-video-missing>הסרטון יופיע כאן ברגע שקובץ הווידאו יהיה זמין.</div>
+                            </div>
                         </div>
                     </div>
                     <div id="builder-flow-box" class="builder-pedagogy-box">
@@ -8599,6 +8646,7 @@
             document.getElementById('question-overlay')?.addEventListener('click', onOverlayBackdropClick);
             document.getElementById('btn-close-overlay')?.addEventListener('click', closeQuestionOverlay);
             document.getElementById('btn-overlay-primary')?.addEventListener('click', onOverlayPrimaryAction);
+            document.getElementById('video-modal-player')?.addEventListener('ratechange', syncVideoModalSpeedToggle);
             document.querySelectorAll('[data-overlay-section]').forEach((btn) => {
                 btn.addEventListener('click', () => toggleOverlaySection(btn.dataset.overlaySection || 'essence'));
             });
@@ -8666,6 +8714,7 @@
             scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 90, 260, 520, 1100] });
             setupOpeningSplashMedia();
             setupVizyIntroMedia();
+            syncVizyHelpCards();
             runEntryFlow();
             await ensureQuestionsLoadedAtRuntime();
             if (isNewsFeedFeatureEnabled()) await ensureFeedManifestLoaded();
@@ -11847,6 +11896,70 @@
             return `משך: ${minutes}:${String(seconds).padStart(2, '0')} דק׳`;
         }
 
+        function shouldShowMissingHelpVideoNote() {
+            let host = String(window.location.hostname || '').trim().toLowerCase();
+            return window.location.protocol === 'file:' || host === 'localhost' || host === '127.0.0.1';
+        }
+
+        function setVideoModalControlVisibility(hasHtml5Video) {
+            let speedToggle = document.getElementById('video-speed-toggle');
+            let restartBtn = document.getElementById('video-restart-btn');
+            if (speedToggle) {
+                speedToggle.classList.toggle('hidden', !hasHtml5Video);
+                speedToggle.setAttribute('aria-pressed', 'false');
+            }
+            if (restartBtn) restartBtn.classList.toggle('hidden', !hasHtml5Video);
+        }
+
+        function syncVideoModalSpeedToggle() {
+            let speedToggle = document.getElementById('video-speed-toggle');
+            let player = document.getElementById('video-modal-player');
+            let isDoubleSpeed = !!player && !player.classList.contains('hidden') && Number(player.playbackRate) > 1.5;
+            if (speedToggle) speedToggle.setAttribute('aria-pressed', isDoubleSpeed ? 'true' : 'false');
+        }
+
+        async function syncVizyHelpCards() {
+            let cards = Array.from(document.querySelectorAll('.vizy-help-card[data-help-video-id]'));
+            if (!cards.length) return;
+
+            let itemsById = new Map();
+            try {
+                let registryApi = window.HelpVideoRegistry;
+                let items = registryApi && typeof registryApi.load === 'function' ? await registryApi.load() : [];
+                if (Array.isArray(items)) {
+                    items.forEach((item) => {
+                        if (item?.id) itemsById.set(item.id, item);
+                    });
+                }
+            } catch (err) {
+                // Keep cards hidden unless we can confirm a working video source.
+            }
+
+            let showMissingNote = shouldShowMissingHelpVideoNote();
+            cards.forEach((card) => {
+                let videoId = String(card.dataset.helpVideoId || '').trim();
+                let entry = itemsById.get(videoId);
+                let hasVideo = !!entry && !!(normalizeHelpVideoAssetUrl(entry.src) || normalizeHelpVideoAssetUrl(entry.externalUrl));
+                let openBtn = card.querySelector('[data-vizy-video-open]');
+                let missingNote = card.querySelector('[data-vizy-video-missing]');
+
+                if (hasVideo) {
+                    card.classList.remove('hidden');
+                    if (openBtn) openBtn.classList.remove('hidden');
+                    if (missingNote) missingNote.classList.add('hidden');
+                    return;
+                }
+
+                if (openBtn) openBtn.classList.add('hidden');
+                if (showMissingNote) {
+                    card.classList.remove('hidden');
+                    if (missingNote) missingNote.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
         function showVideoModalShell() {
             let modal = document.getElementById('video-modal');
             if (!modal) return;
@@ -11888,6 +12001,13 @@
                 } catch (err) {
                     // Ignore pause errors when nothing is loaded.
                 }
+                try {
+                    player.currentTime = 0;
+                } catch (err) {
+                    // Ignore seek errors when nothing is loaded.
+                }
+                player.playbackRate = 1;
+                player.defaultPlaybackRate = 1;
                 player.classList.add('hidden');
                 player.removeAttribute('poster');
             }
@@ -11914,6 +12034,8 @@
                 openLink.classList.add('hidden');
                 openLink.removeAttribute('href');
             }
+            setVideoModalControlVisibility(false);
+            syncVideoModalSpeedToggle();
         }
 
         function renderVideoModalUnavailable(options = {}) {
@@ -11966,7 +12088,11 @@
                 openLink.href = src;
                 openLink.classList.remove('hidden');
             }
+            player.defaultPlaybackRate = 1;
+            player.playbackRate = 1;
             player.classList.remove('hidden');
+            setVideoModalControlVisibility(true);
+            syncVideoModalSpeedToggle();
             player.load();
         }
 
@@ -11992,10 +12118,29 @@
             if (!iframe) return;
             iframe.src = embedUrl;
             iframe.classList.remove('hidden');
+            setVideoModalControlVisibility(false);
             if (openLink) {
                 openLink.href = url;
                 openLink.classList.remove('hidden');
             }
+        }
+
+        function toggleVideoModalSpeed() {
+            let player = document.getElementById('video-modal-player');
+            if (!player || player.classList.contains('hidden')) return;
+            player.playbackRate = Number(player.playbackRate) > 1.5 ? 1 : 2;
+            syncVideoModalSpeedToggle();
+        }
+
+        function restartVideoModal() {
+            let player = document.getElementById('video-modal-player');
+            if (!player || player.classList.contains('hidden')) return;
+            try {
+                player.currentTime = 0;
+            } catch (err) {
+                // Ignore seek errors until metadata is available.
+            }
+            player.play().catch(() => {});
         }
 
         function openVideoFromUrl(options = {}) {

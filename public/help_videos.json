@@ -9,19 +9,27 @@
   },
   {
     "id": "guided_intro",
-    "title": "איך מתחילים",
-    "description": "הסבר קצר על תהליך ההדרכה",
-    "src": "",
-    "poster": "",
-    "durationSec": 35
+    "title": "הסבר וידאו: התמצאות כללית",
+    "description": "לא בטוחים מה עושים כאן? ויזי מסביר בדקה.",
+    "src": "/help-videos/vizy-general-orientation.mp4",
+    "poster": "/opening-poster.png",
+    "durationSec": 0
+  },
+  {
+    "id": "perpendicular_lab_intro",
+    "title": "הסבר וידאו: מעבדת האנך",
+    "description": "ויזי מסביר איך להבין ולעבוד עם מעבדת האנך.",
+    "src": "/help-videos/vizy-perpendicular-lab.mp4",
+    "poster": "/opening-poster.png",
+    "durationSec": 0
   },
   {
     "id": "parameters_intro",
-    "title": "איך עובדים עם פרמטרים",
-    "description": "מהמילים למשוואות",
-    "src": "",
-    "poster": "",
-    "durationSec": 55
+    "title": "הסבר וידאו: עבודה עם פרמטרים",
+    "description": "ויזי מסביר איך לראות מה כל פרמטר משנה בגרף.",
+    "src": "/help-videos/vizy-working-with-parameters.mp4",
+    "poster": "/opening-poster.png",
+    "durationSec": 0
   },
   {
     "id": "question_intro",
