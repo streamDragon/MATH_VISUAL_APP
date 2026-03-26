@@ -9067,3 +9067,84 @@ body.prestart-only #home-preview-column #graph-area {
         animation-delay: 0.52s;
     }
 }
+
+/* ============================================================
+   P4: Mobile UX — Exercise Screen @media max-width 500px
+   ============================================================ */
+
+@media (max-width: 500px) {
+    /* --- Graph area: full width with padding --- */
+    body.session-started #graph-area,
+    #graph-area {
+        width: calc(100% - 16px) !important;
+        margin: 0 auto !important;
+        max-height: 45vh !important;
+    }
+
+    /* --- Answer input: larger, no iOS zoom (font-size 16px) --- */
+    #read-answer-input {
+        min-height: 48px !important;
+        font-size: 16px !important;
+        width: 100% !important;
+        box-sizing: border-box;
+        padding: 10px 14px !important;
+        border-radius: 10px !important;
+    }
+
+    /* --- Submit button: sticky at bottom of viewport --- */
+    #btn-read-answer-submit {
+        min-height: 48px !important;
+        font-size: 15px !important;
+        width: 100% !important;
+        position: sticky !important;
+        bottom: calc(0px + var(--safe-bottom, 0px)) !important;
+        z-index: 50 !important;
+        border-radius: 0 !important;
+        box-shadow: 0 -2px 8px rgba(0,0,0,0.1) !important;
+        margin-top: 8px;
+    }
+
+    /* --- Normal/point slider: full width, bigger thumb --- */
+    #normal-shift {
+        width: calc(100% - 32px) !important;
+        height: 8px !important;
+        cursor: pointer;
+    }
+    #normal-shift::-webkit-slider-thumb {
+        width: 28px !important;
+        height: 28px !important;
+        border-radius: 50%;
+        cursor: grab;
+    }
+    #normal-shift::-moz-range-thumb {
+        width: 28px !important;
+        height: 28px !important;
+        border-radius: 50%;
+        cursor: grab;
+    }
+
+    /* --- Mobile focus card: readable --- */
+    #mobile-focus-card {
+        font-size: 14px !important;
+        padding: 12px 14px !important;
+    }
+
+    /* --- Step progress bar at top of top-bar --- */
+    #top-bar::before {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 3px;
+        width: calc(var(--step-progress, 0) * 1%);
+        background: linear-gradient(90deg, #0f766e, #06b6d4);
+        border-radius: 0 0 0 3px;
+        transition: width 0.4s ease;
+        pointer-events: none;
+    }
+    #top-bar {
+        position: relative;
+        overflow: visible;
+    }
+}

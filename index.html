@@ -10228,6 +10228,11 @@
         }
 
         function renderMission() {
+            // P4: עדכן progress bar של CSS variable
+            if (activeSteps && activeSteps.length > 0) {
+                let pct = Math.round(((currentStepIndex + 1) / activeSteps.length) * 100);
+                document.documentElement.style.setProperty('--step-progress', pct);
+            }
             if (!sessionStarted) {
                 let q = getCurrentQuestion();
                 let shortDesc = getQuestionShortDesc(q);
