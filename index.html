@@ -608,18 +608,29 @@
         }
 
         #hero-replay-video-btn {
-            border: none;
-            background: none;
-            color: #6c5ce7;
+            width: 100%;
+            max-width: 320px;
+            min-height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(108, 92, 231, 0.22);
+            border-radius: 16px;
+            background: rgba(108, 92, 231, 0.08);
+            color: #5f50e6;
             font-family: 'Assistant', sans-serif;
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 14px;
+            font-weight: 800;
             cursor: pointer;
-            padding: 4px 8px 0;
+            padding: 12px 16px;
+            box-shadow: 0 10px 24px rgba(108, 92, 231, 0.12);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
         }
 
         #hero-replay-video-btn:hover {
-            color: #5649d4;
+            background: rgba(108, 92, 231, 0.12);
+            box-shadow: 0 14px 30px rgba(108, 92, 231, 0.18);
+            transform: translateY(-1px);
         }
 
         #opening-splash-content.hero-shell #opening-splash-audio-hint {
@@ -994,6 +1005,10 @@
                         </div>
                     </div>
 
+                    <button id="hero-replay-video-btn" class="hero-fade hero-delay-6" type="button" onclick="replayVizyVideo()">
+                        🎬 לראות קודם את סרט הפתיחה של ויזי
+                    </button>
+
                     <button id="btn-hero-start" class="hero-primary-cta hero-fade hero-delay-6" type="button" onclick="startOnboarding()">
                         בואו נתחיל ←
                     </button>
@@ -1010,10 +1025,6 @@
 
                     <button id="hero-skip-btn" class="hero-fade hero-delay-7" type="button" onclick="skipToApp()">
                         כבר הייתי כאן — דלגו
-                    </button>
-
-                    <button id="hero-replay-video-btn" class="hero-fade hero-delay-7" type="button" onclick="replayVizyVideo()">
-                        🎬 צפו בסרטון שוב
                     </button>
                 </div>
 
@@ -1561,7 +1572,7 @@
                 </div>
                 <p id="home-hero-subtitle">הרבה תלמידים מנסים ישר נוסחאות.<br>אבל בלי לראות קיצון, משיק, שיפוע וצורה קשה להבין מה באמת קורה.<br>כאן לומדים לראות מתמטיקה.</p>
                 <p id="home-hero-support">לא צריך להבין הכול עכשיו. בוחרים דרך אחת ומתחילים.</p>
-                <button id="btn-home-back-to-hero" type="button" onclick="replayOpeningSplash()">חזרה למסך הפתיחה</button>
+                <button id="btn-home-back-to-hero" type="button" onclick="replayOpeningSplash()">🎬 לצפייה בסרט הפתיחה של ויזי</button>
             </section>
 
             <section id="home-paths-section" class="home-surface" aria-labelledby="home-paths-title">
