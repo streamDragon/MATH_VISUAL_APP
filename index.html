@@ -14530,6 +14530,10 @@ Rules:
                 <line id="tutor-blink-left" x1="23.5" y1="28" x2="28.5" y2="28" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round" visibility="hidden"/>
                 <!-- פה — חיוך -->
                 <path id="tutor-mouth" d="M26 35 Q32 40 38 35" stroke="#1e293b" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <!-- פה — חשיבה (קו ישר) -->
+                <line id="tutor-mouth-thinking" x1="27" y1="37" x2="37" y2="37" stroke="#1e293b" stroke-width="2" stroke-linecap="round" visibility="hidden"/>
+                <!-- סמל מתמטי מעל הראש (מופיע בחגיגה) -->
+                <text id="tutor-hat-symbol" x="32" y="8" text-anchor="middle" font-size="8" fill="#7c3aed" font-weight="900" visibility="hidden">⊕</text>
                 <!-- עניבה -->
                 <polygon points="32,46 29,52 32,50 35,52" fill="#2563eb"/>
             </svg>
@@ -14897,6 +14901,60 @@ Rules:
             right: 8px;
             bottom: calc(8px + var(--safe-bottom, 0px));
         }
+    }
+
+    /* ============================================================
+       P2: MASCOT MOOD STATES
+    ============================================================ */
+
+    /* בועת הודעה — RTL Hebrew, רחבה יותר */
+    #tutor-bubble {
+        max-width: 200px;
+        white-space: normal;
+        text-align: right;
+        direction: rtl;
+        font-size: 13px;
+        line-height: 1.5;
+        border-radius: 12px 12px 0 12px;
+        padding: 8px 12px;
+    }
+
+    /* Idle — נשימה עדינה (כבר קיים tutorBreathe, משתמשים בו) */
+    #tutor-btn.tutor-idle #tutor-svg {
+        animation: tutorBreathe 3s ease-in-out infinite;
+    }
+
+    /* Happy — עיניים שמחות + bounce קל */
+    #tutor-btn.tutor-happy #tutor-svg {
+        animation: tutorMoodHappy 0.5s ease;
+    }
+    @keyframes tutorMoodHappy {
+        0%   { transform: scale(1); }
+        40%  { transform: scale(1.15) translateY(-5px); }
+        70%  { transform: scale(1.05) translateY(2px); }
+        100% { transform: scale(1); }
+    }
+
+    /* Thinking — הטיית ראש 5° ותנועה עדינה */
+    #tutor-btn.tutor-thinking #tutor-svg {
+        animation: tutorMoodThink 1.4s ease-in-out infinite;
+    }
+    @keyframes tutorMoodThink {
+        0%, 100% { transform: rotate(0deg); }
+        30%       { transform: rotate(-5deg); }
+        70%       { transform: rotate(5deg); }
+    }
+
+    /* Celebrating — פולס גדול + סיבוב קל */
+    #tutor-btn.tutor-celebrating #tutor-svg {
+        animation: tutorMoodCelebrate 0.6s ease-in-out 2;
+    }
+    @keyframes tutorMoodCelebrate {
+        0%   { transform: scale(1) rotate(0deg); }
+        25%  { transform: scale(1.2) rotate(-8deg); }
+        50%  { transform: scale(1.25) translateY(-8px); }
+        75%  { transform: scale(1.2) rotate(8deg); }
+        100% { transform: scale(1) rotate(0deg); }
     }
     </style>
 
@@ -15266,6 +15324,75 @@ Rules:
         window.addEventListener('ai-mode-changed', syncTutorAiState);
         syncTutorAiState();
 
+    })();
+
+    /* ============================================================
+       P2: showMascotMood — פונקציה גלובלית למצבי מסקוט
+    ============================================================ */
+    (function () {
+        var _mascotTimer = null;
+        var MOODS = ['tutor-idle', 'tutor-happy', 'tutor-thinking', 'tutor-celebrating'];
+
+        window.showMascotMood = function (mood, message, duration) {
+            if (duration === undefined) duration = 3000;
+
+            var btn      = document.getElementById('tutor-btn');
+            var bubble   = document.getElementById('tutor-bubble');
+            var eyesNorm = document.getElementById('tutor-eyes-normal');
+            var eyesHap  = document.getElementById('tutor-eyes-happy');
+            var mouth    = document.getElementById('tutor-mouth');
+            var mouthThk = document.getElementById('tutor-mouth-thinking');
+            var hatSym   = document.getElementById('tutor-hat-symbol');
+
+            if (!btn) return;
+
+            // נקה טיימר קיים
+            if (_mascotTimer) { clearTimeout(_mascotTimer); _mascotTimer = null; }
+
+            // הסר כל מצב mood קיים
+            MOODS.forEach(function (m) { btn.classList.remove(m); });
+
+            // אפס visibility של רכיבים
+            if (eyesNorm) eyesNorm.setAttribute('visibility', 'visible');
+            if (eyesHap)  eyesHap.setAttribute('visibility', 'hidden');
+            if (mouth)    mouth.setAttribute('visibility', 'visible');
+            if (mouthThk) mouthThk.setAttribute('visibility', 'hidden');
+            if (hatSym)   hatSym.setAttribute('visibility', 'hidden');
+
+            // הגדר מצב חדש
+            btn.classList.add('tutor-' + mood);
+
+            if (mood === 'happy' || mood === 'celebrating') {
+                if (eyesNorm) eyesNorm.setAttribute('visibility', 'hidden');
+                if (eyesHap)  eyesHap.setAttribute('visibility', 'visible');
+            }
+            if (mood === 'thinking') {
+                if (mouth)    mouth.setAttribute('visibility', 'hidden');
+                if (mouthThk) mouthThk.setAttribute('visibility', 'visible');
+            }
+            if (mood === 'celebrating') {
+                if (hatSym) hatSym.setAttribute('visibility', 'visible');
+            }
+
+            // הצג בועה עם הודעה
+            if (message && bubble) {
+                bubble.textContent = message;
+                bubble.classList.add('show');
+            }
+
+            // חזור למצב idle לאחר duration
+            _mascotTimer = setTimeout(function () {
+                MOODS.forEach(function (m) { btn.classList.remove(m); });
+                btn.classList.add('tutor-idle');
+                if (eyesNorm) eyesNorm.setAttribute('visibility', 'visible');
+                if (eyesHap)  eyesHap.setAttribute('visibility', 'hidden');
+                if (mouth)    mouth.setAttribute('visibility', 'visible');
+                if (mouthThk) mouthThk.setAttribute('visibility', 'hidden');
+                if (hatSym)   hatSym.setAttribute('visibility', 'hidden');
+                if (bubble)   bubble.classList.remove('show');
+                _mascotTimer = null;
+            }, duration);
+        };
     })();
     </script>
 </body>
