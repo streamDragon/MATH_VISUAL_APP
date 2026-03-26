@@ -949,7 +949,12 @@
 
         @media (max-width: 600px) {
             #auth-screen {
-                padding: 24px 16px !important;
+                padding: 16px !important;
+            }
+
+            #auth-modal-card {
+                max-height: calc(100vh - 32px) !important;
+                overflow-y: auto !important;
             }
 
             #auth-screen button,
@@ -1256,26 +1261,35 @@
 </head>
 <body class="prestart-only">
 
-    <div id="auth-screen" dir="rtl" aria-hidden="true" style="display:none; position:fixed; inset:0; background:#FAFAFD; z-index:10000; flex-direction:column; align-items:center; justify-content:center; padding:24px;">
-        <h2 style="font-size:24px; font-weight:700; margin:0 0 8px;">ברוכים הבאים!</h2>
-        <p style="font-size:14px; color:#666; margin:0 0 24px; text-align:center;">התחברו כדי לשמור את ההתקדמות</p>
+    <div id="auth-screen" dir="rtl" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" onclick="onAuthScreenBackdropClick(event)" style="display:none; position:fixed; inset:0; background:rgba(17,24,39,0.5); z-index:10000; align-items:center; justify-content:center; padding:16px; opacity:0;">
+        <div id="auth-modal-card" style="background:white; border-radius:24px; max-width:360px; width:100%; padding:28px 24px; text-align:center; position:relative; box-shadow:0 8px 40px rgba(0,0,0,0.15); transform:translateY(18px); opacity:0;">
+            <button id="btn-auth-close" type="button" onclick="dismissAuth()" aria-label="סגור" style="position:absolute; top:12px; left:12px; width:40px; min-height:40px; border:none; border-radius:999px; background:transparent; color:#999; font-size:24px; line-height:1; cursor:pointer;">×</button>
 
-        <button id="btn-auth-google" type="button" onclick="loginWithGoogle()" style="width:100%; max-width:300px; min-height:48px; padding:14px; border:2px solid #E8E6F0; border-radius:14px; font-size:15px; font-weight:600; cursor:pointer; background:white; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:10px;">
-            <img src="https://www.google.com/favicon.ico" width="20" height="20" alt="G">
-            התחברות עם Google
-        </button>
+            <div style="font-size:44px; margin-bottom:8px;">🎉</div>
 
-        <div id="email-auth-section" style="width:100%; max-width:300px;">
-            <input id="auth-email" type="email" placeholder="כתובת אימייל" dir="ltr" style="width:100%; min-height:48px; padding:12px; border:2px solid #E8E6F0; border-radius:12px; font-size:15px; margin-bottom:8px; box-sizing:border-box;">
-            <button id="btn-auth-email" type="button" onclick="loginWithEmail()" style="width:100%; min-height:48px; padding:14px; background:linear-gradient(135deg,#6C5CE7,#A29BFE); color:white; border:none; border-radius:14px; font-size:15px; font-weight:600; cursor:pointer;">
-                שלח לי קישור כניסה
+            <h2 id="auth-modal-title" style="font-size:20px; font-weight:700; color:#2D3436; margin:0 0 6px;">אתם מתקדמים יפה!</h2>
+            <p style="font-size:14px; color:#666; margin:0 0 20px; line-height:1.6;">
+                רוצים לשמור את ההתקדמות שלכם?<br>
+                ככה תוכלו להמשיך מאיפה שעצרתם גם ממכשיר אחר.
+            </p>
+
+            <button id="btn-auth-google" type="button" onclick="loginWithGoogle()" style="width:100%; min-height:48px; padding:13px 16px; border:2px solid #E8E6F0; border-radius:14px; font-size:14px; font-weight:600; cursor:pointer; background:white; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:8px; direction:rtl;">
+                <img src="https://www.google.com/favicon.ico" width="18" height="18" alt="">
+                שמירה עם חשבון Google
             </button>
-            <p id="auth-email-msg" style="font-size:12px; color:#888; margin-top:8px; display:none;"></p>
-        </div>
 
-        <button id="btn-auth-guest" type="button" onclick="loginAsGuest()" style="background:none; border:none; min-height:48px; font-size:13px; color:#999; cursor:pointer; margin-top:16px; padding:8px 12px;">
-            המשך כאורח/ת (בלי שמירה בין מכשירים)
-        </button>
+            <div id="email-auth-section" style="width:100%;">
+                <input id="auth-email" type="email" placeholder="או הזינו אימייל" dir="ltr" style="width:100%; min-height:48px; padding:12px; border:2px solid #E8E6F0; border-radius:12px; font-size:14px; margin-bottom:6px; box-sizing:border-box;">
+                <button id="btn-auth-email" type="button" onclick="loginWithEmail()" style="width:100%; min-height:48px; padding:12px; background:linear-gradient(135deg,#6C5CE7,#A29BFE); color:white; border:none; border-radius:12px; font-size:14px; font-weight:600; cursor:pointer;">
+                    שלחו קישור כניסה
+                </button>
+                <p id="auth-email-msg" style="font-size:11px; color:#888; margin-top:6px; display:none;"></p>
+            </div>
+
+            <button id="btn-auth-guest" type="button" onclick="loginAsGuest()" style="background:none; border:none; min-height:48px; font-size:13px; color:#999; cursor:pointer; margin-top:14px; padding:8px 12px; direction:rtl;">
+                לא עכשיו - אמשיך בלי שמירה
+            </button>
+        </div>
     </div>
 
     <div id="opening-splash" class="hidden hero-mode" aria-label="מסך פתיחה">
@@ -2686,6 +2700,11 @@
         const SCAN_CONFIG_STORAGE_KEY = 'math_visual_scan_config_v1';
         const SCANNED_QUESTIONS_STORAGE_KEY = 'math_visual_scanned_questions_v1';
         const AI_MODE_STORAGE_KEY = 'math_visual_ai_mode_v1';
+        const AUTH_DISMISS_SESSION_KEY = 'mathviz_auth_dismissed';
+        const AUTH_DEFERRED_PROMPT_THRESHOLD = 2;
+        const AUTH_SIGNUP_BONUS_POINTS = 50;
+        const AUTH_WELCOME_BACK_MESSAGE = 'שלום! טוב לראות אותך שוב 👋';
+        const AUTH_SIGNIN_SUCCESS_MESSAGE = 'מחובר! ההתקדמות שלך נשמרת 🎉';
         const RUNTIME_CONFIG_ENDPOINT = '/api/runtime-config';
         const AI_MODE_VALUES = Object.freeze({
             LOCAL: 'local',
@@ -3002,6 +3021,11 @@
         let vizyVideoFallbackTimer = null;
         let appBootPromise = null;
         let authListenerBound = false;
+        let correctAnswerCount = 0;
+        let authPromptShown = false;
+        let authPromptTimer = null;
+        let authWelcomeTimer = null;
+        let authSignInHandled = false;
         let appInitialized = false;
         let winOverlayTimer = null;
         let runtimeDisplayedVersion = APP_VERSION;
@@ -9054,13 +9078,40 @@
             return !!getSupabaseClient() && typeof window.isSupabaseConfigured === 'function' && window.isSupabaseConfigured();
         }
 
+        function cancelDeferredAuthTimer() {
+            if (!authPromptTimer) return;
+            clearTimeout(authPromptTimer);
+            authPromptTimer = null;
+        }
+
+        function cancelAuthWelcomeTimer() {
+            if (!authWelcomeTimer) return;
+            clearTimeout(authWelcomeTimer);
+            authWelcomeTimer = null;
+        }
+
         function showAuthScreen() {
+            if (!isSupabaseAuthEnabled() || window.currentUser) return;
             let authScreen = document.getElementById('auth-screen');
             if (!authScreen) return;
+            let authCard = document.getElementById('auth-modal-card');
             authScreen.style.display = 'flex';
+            authScreen.style.transition = 'opacity 0.28s ease';
+            authScreen.style.opacity = '0';
             authScreen.setAttribute('aria-hidden', 'false');
             document.body.classList.add('auth-active');
+            if (authCard) {
+                authCard.style.transition = 'transform 0.28s ease, opacity 0.28s ease';
+                authCard.style.transform = 'translateY(18px)';
+                authCard.style.opacity = '0';
+            }
             let emailInput = document.getElementById('auth-email');
+            let emailMsg = document.getElementById('auth-email-msg');
+            if (emailMsg && emailMsg.dataset.keepMessage !== '1') {
+                emailMsg.style.display = 'none';
+                emailMsg.textContent = '';
+                emailMsg.style.color = '#888';
+            }
             if (emailInput) {
                 if (emailInput.dataset.authBound !== '1') {
                     emailInput.dataset.authBound = '1';
@@ -9071,21 +9122,66 @@
                     });
                 }
                 requestAnimationFrame(() => {
+                    authScreen.style.opacity = '1';
+                    if (authCard) {
+                        authCard.style.transform = 'translateY(0)';
+                        authCard.style.opacity = '1';
+                    }
+                });
+                requestAnimationFrame(() => {
                     try {
                         emailInput.focus({ preventScroll: true });
                     } catch (err) {
                         // Ignore focus issues on restricted browsers.
                     }
                 });
+                return;
             }
+            requestAnimationFrame(() => {
+                authScreen.style.opacity = '1';
+                if (authCard) {
+                    authCard.style.transform = 'translateY(0)';
+                    authCard.style.opacity = '1';
+                }
+            });
+        }
+
+        function onAuthScreenBackdropClick(event) {
+            if (event.target?.id !== 'auth-screen') return;
+            dismissAuth();
         }
 
         function hideAuthScreen() {
             let authScreen = document.getElementById('auth-screen');
+            let authCard = document.getElementById('auth-modal-card');
             if (!authScreen) return;
             authScreen.style.display = 'none';
+            authScreen.style.opacity = '0';
             authScreen.setAttribute('aria-hidden', 'true');
             document.body.classList.remove('auth-active');
+            if (authCard) {
+                authCard.style.transform = 'translateY(18px)';
+                authCard.style.opacity = '0';
+            }
+        }
+
+        function markAuthPromptDismissed() {
+            authPromptShown = 'dismissed';
+            try {
+                sessionStorage.setItem(AUTH_DISMISS_SESSION_KEY, '1');
+            } catch (err) {
+                // Continue when sessionStorage is unavailable.
+            }
+        }
+
+        function restoreDeferredAuthState() {
+            try {
+                if (sessionStorage.getItem(AUTH_DISMISS_SESSION_KEY)) {
+                    authPromptShown = 'dismissed';
+                }
+            } catch (err) {
+                // Continue when sessionStorage is unavailable.
+            }
         }
 
         function getAuthRedirectUrl() {
@@ -9098,46 +9194,81 @@
             }
         }
 
-        async function checkAuth() {
-            let client = getSupabaseClient();
-            if (!isSupabaseAuthEnabled()) {
-                return showApp();
+        function notifySignedInUser(message, awardBonus) {
+            authSignInHandled = true;
+            authPromptShown = 'completed';
+            cancelDeferredAuthTimer();
+            cancelAuthWelcomeTimer();
+            try {
+                sessionStorage.removeItem(AUTH_DISMISS_SESSION_KEY);
+            } catch (err) {
+                // Continue when sessionStorage is unavailable.
             }
+            hideAuthScreen();
+            if (typeof showMascotMood === 'function') {
+                showMascotMood('celebrating', message || AUTH_SIGNIN_SUCCESS_MESSAGE, 3000);
+            }
+            if (awardBonus && typeof addPoints === 'function') addPoints(AUTH_SIGNUP_BONUS_POINTS);
+        }
+
+        async function silentAuthCheck() {
+            let client = getSupabaseClient();
+            if (!isSupabaseAuthEnabled()) return null;
 
             try {
                 let result = await client.auth.getSession();
                 let session = result?.data?.session || null;
                 if (session) {
                     window.currentUser = session.user;
-                    return showApp();
+                    authPromptShown = 'completed';
+                    hideAuthScreen();
+                    if (!authSignInHandled && typeof showMascotMood === 'function') {
+                        cancelAuthWelcomeTimer();
+                        authWelcomeTimer = setTimeout(function () {
+                            authWelcomeTimer = null;
+                            if (!window.currentUser) return;
+                            showMascotMood('happy', AUTH_WELCOME_BACK_MESSAGE, 3000);
+                        }, 2000);
+                    }
+                    return session;
                 }
             } catch (err) {
-                console.warn('Supabase auth check failed; continuing as guest.', err);
-                return showApp();
+                console.warn('Silent auth check:', err);
             }
 
-            showAuthScreen();
             return null;
+        }
+
+        async function checkAuth() {
+            return silentAuthCheck();
         }
 
         async function loginWithGoogle() {
             let client = getSupabaseClient();
-            if (!client) {
-                loginAsGuest();
+            if (!isSupabaseAuthEnabled() || !client) {
+                dismissAuth();
                 return;
             }
-            await client.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: getAuthRedirectUrl()
+            try {
+                let result = await client.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: getAuthRedirectUrl()
+                    }
+                });
+                if (result?.error) throw result.error;
+            } catch (err) {
+                console.warn('Google auth failed:', err);
+                if (typeof showStepToast === 'function') {
+                    showStepToast('לא הצלחנו לפתוח כרגע את ההתחברות עם Google.');
                 }
-            });
+            }
         }
 
         async function loginWithEmail() {
             let client = getSupabaseClient();
-            if (!client) {
-                loginAsGuest();
+            if (!isSupabaseAuthEnabled() || !client) {
+                dismissAuth();
                 return;
             }
             let email = String(document.getElementById('auth-email')?.value || '').trim();
@@ -9154,16 +9285,22 @@
             if (msgEl) {
                 msgEl.style.display = 'block';
                 msgEl.style.color = '#888888';
+                msgEl.dataset.keepMessage = '1';
                 msgEl.textContent = 'שולח קישור...';
             }
 
-            let result = await client.auth.signInWithOtp({
-                email,
-                options: {
-                    emailRedirectTo: getAuthRedirectUrl()
-                }
-            });
-            let error = result?.error || null;
+            let error = null;
+            try {
+                let result = await client.auth.signInWithOtp({
+                    email,
+                    options: {
+                        emailRedirectTo: getAuthRedirectUrl()
+                    }
+                });
+                error = result?.error || null;
+            } catch (err) {
+                error = err;
+            }
 
             if (!msgEl) return;
             if (error) {
@@ -9177,9 +9314,7 @@
         }
 
         function loginAsGuest() {
-            window.currentUser = null;
-            hideAuthScreen();
-            return showApp();
+            dismissAuth();
         }
 
         function showApp() {
@@ -9200,6 +9335,33 @@
             return appBootPromise;
         }
 
+        function showDeferredAuth() {
+            if (!isSupabaseAuthEnabled()) return;
+            if (window.currentUser) return;
+            if (authPromptShown === 'dismissed' || authPromptShown === 'completed') return;
+            authPromptShown = true;
+            showAuthScreen();
+        }
+
+        function dismissAuth() {
+            cancelDeferredAuthTimer();
+            hideAuthScreen();
+            markAuthPromptDismissed();
+        }
+
+        function onCorrectAnswer() {
+            correctAnswerCount += 1;
+            if (correctAnswerCount < AUTH_DEFERRED_PROMPT_THRESHOLD) return;
+            if (!isSupabaseAuthEnabled() || window.currentUser) return;
+            if (authPromptShown) return;
+            authPromptShown = true;
+            cancelDeferredAuthTimer();
+            authPromptTimer = setTimeout(function () {
+                authPromptTimer = null;
+                showDeferredAuth();
+            }, 1500);
+        }
+
         function bindSupabaseAuthStateChange() {
             let client = getSupabaseClient();
             if (!client || authListenerBound) return;
@@ -9207,7 +9369,7 @@
             client.auth.onAuthStateChange(function (event, session) {
                 if (event === 'SIGNED_IN' && session) {
                     window.currentUser = session.user;
-                    hideAuthScreen();
+                    notifySignedInUser(AUTH_SIGNIN_SUCCESS_MESSAGE, true);
                     showApp();
                 }
             });
@@ -11704,6 +11866,7 @@
                 readAnswerValidated = true;
                 if (typeof showMascotMood === 'function') showMascotMood('celebrating', '✅ ענית נכון! כל הכבוד! 🎉', 3000);
                 if (typeof addPoints === 'function') addPoints(10);
+                onCorrectAnswer();
                 document.getElementById('read-answer-feedback').innerText = `נכון מאוד. התשובה שלך בטווח הנכון (בערך ${formatNumber(expected)}, עם סובלנות של ±${formatNumber(tol)}).`;
                 pushCoachEvent('ATTEMPT_CORRECT', {
                     source: 'read_answer',
@@ -15987,6 +16150,12 @@ Rules:
             }
 
             if (key !== 'Escape') return;
+            let authScreen = document.getElementById('auth-screen');
+            if (authScreen && authScreen.style.display === 'flex') {
+                event.preventDefault();
+                dismissAuth();
+                return;
+            }
             if (mobileFeedOpen) {
                 event.preventDefault();
                 closeMobileFeed({ skipFocus: true });
@@ -16469,8 +16638,10 @@ Rules:
         }
 
         window.onload = function () {
+            restoreDeferredAuthState();
             bindSupabaseAuthStateChange();
-            checkAuth();
+            showApp();
+            silentAuthCheck();
         };
     </script>
     <script>
