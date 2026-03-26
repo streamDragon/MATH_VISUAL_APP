@@ -1402,6 +1402,7 @@
                 </div>
                 <p id="home-hero-subtitle">הרבה תלמידים מנסים ישר נוסחאות.<br>אבל בלי לראות קיצון, משיק, שיפוע וצורה קשה להבין מה באמת קורה.<br>כאן לומדים לראות מתמטיקה.</p>
                 <p id="home-hero-support">לא צריך להבין הכול עכשיו. בוחרים דרך אחת ומתחילים.</p>
+                <button id="btn-home-back-to-hero" type="button" onclick="replayOpeningSplash()">חזרה למסך הפתיחה</button>
             </section>
 
             <section id="home-paths-section" class="home-surface" aria-labelledby="home-paths-title">
@@ -4235,7 +4236,7 @@
             if (sessionStarted) return false;
             if (ENTRY_FLOW_QUERY.splash === true) return true;
             if (ENTRY_FLOW_QUERY.splash === false) return false;
-            return !hasSeenEntryIntro();
+            return true;
         }
 
         function maybeCompleteEntryFlowAfterSplash(trigger) {
