@@ -699,6 +699,79 @@
         </div>
     </div>
 
+    <!-- P7: מודל מידע להורים -->
+    <div id="parents-modal" role="dialog" aria-modal="true" aria-label="מידע להורים ומורים" dir="rtl"
+         style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.52); z-index:9999; align-items:center; justify-content:center; padding:16px;"
+         onclick="if(event.target===this)this.style.display='none'">
+        <div style="background:white; border-radius:20px; max-width:480px; width:100%; max-height:88vh; overflow-y:auto; padding:24px 24px 28px; direction:rtl; font-family:'Assistant',sans-serif; position:relative;">
+            <button onclick="document.getElementById('parents-modal').style.display='none'"
+                aria-label="סגור"
+                style="position:absolute; top:14px; left:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#64748b; line-height:1;">✕</button>
+
+            <h2 style="margin:0 0 12px; font-size:1.3rem; color:#0f172a; line-height:1.35;">למה להשתמש בהדמיות מתמטיקה?</h2>
+            <p style="margin:0 0 18px; color:#334155; font-size:0.95rem; line-height:1.75;">
+                הדמיות מתמטיות הן כלים חזקים — הם עוזרים במיוחד לשפר הבנה ויזואלית.
+                מחקרים של 30 שנה מראים קשר חזק בין שימוש בהדמיות ושיפור בהישגים.
+                האפליקציה בנויה על מחקר קוגניטיבי תקף ונוסתה עם תלמידי תיכון.
+            </p>
+
+            <h3 style="margin:0 0 10px; font-size:1rem; color:#0f766e;">מה אומר המחקר?</h3>
+
+            <details style="margin-bottom:8px; border:1px solid #e2e8f0; border-radius:12px; padding:12px;">
+                <summary style="cursor:pointer; font-weight:800; color:#0f172a; font-size:0.94rem;">
+                    מחקר RCT עם 287 תלמידים (Lowrie et al., 2023)
+                </summary>
+                <p style="margin:10px 0 0; color:#334155; font-size:0.9rem; line-height:1.7;">
+                    תלמידים שהשתמשו בהדמיות ויזואליות השיגו ציונים גבוהים משמעותית בהשוואה לקבוצת הביקורת שלמדה בשיטה מסורתית.
+                </p>
+            </details>
+
+            <details style="margin-bottom:8px; border:1px solid #e2e8f0; border-radius:12px; padding:12px;">
+                <summary style="cursor:pointer; font-weight:800; color:#0f172a; font-size:0.94rem;">
+                    מטה-ניתוח: קשר ויזואלי–מתמטי (Xie et al., 2020)
+                </summary>
+                <p style="margin:10px 0 0; color:#334155; font-size:0.9rem; line-height:1.7;">
+                    נמצא שלכלל ההדמיות יש חוזקות אפקט חיובי — במיוחד כשהן משולבות בתרגול פעיל ולא רק בצפייה.
+                </p>
+            </details>
+
+            <details style="margin-bottom:18px; border:1px solid #e2e8f0; border-radius:12px; padding:12px;">
+                <summary style="cursor:pointer; font-weight:800; color:#0f172a; font-size:0.94rem;">
+                    מחקר Sorby — NSF
+                </summary>
+                <p style="margin:10px 0 0; color:#334155; font-size:0.9rem; line-height:1.7;">
+                    הראה שתרגול הדמיות מעלה ציוני קורסים מתמטיים מתקדמים — בעיקר בקרב תלמידים עם קשיים מוקדמים.
+                </p>
+            </details>
+
+            <h3 style="margin:0 0 10px; font-size:1rem; color:#0f766e;">שאלות נפוצות</h3>
+
+            <div style="display:grid; gap:8px;">
+                <div style="background:#f8fafc; border-radius:12px; padding:12px 14px;">
+                    <div style="font-weight:900; color:#0f172a; font-size:0.92rem; margin-bottom:4px;">כמה זה לוקח?</div>
+                    <div style="color:#475569; font-size:0.9rem; line-height:1.6;">10–15 דקות לפגישה. מחקרים מראים שגם 40 דקות בשבוע מספיקות.</div>
+                </div>
+                <div style="background:#f8fafc; border-radius:12px; padding:12px 14px;">
+                    <div style="font-weight:900; color:#0f172a; font-size:0.92rem; margin-bottom:4px;">למי זה מתאים?</div>
+                    <div style="color:#475569; font-size:0.9rem; line-height:1.6;">לתלמידים 14–18, במיוחד לאלו שמתקשים ולא מצליחים לתקשר עם גרפים.</div>
+                </div>
+                <div style="background:#f8fafc; border-radius:12px; padding:12px 14px;">
+                    <div style="font-weight:900; color:#0f172a; font-size:0.92rem; margin-bottom:4px;">האם יעזור בבגרות?</div>
+                    <div style="color:#475569; font-size:0.9rem; line-height:1.6;">תרגול כאן = פרוצדורות. בגרות = הבנה מעמיקה. השניים משלימים זה את זה.</div>
+                </div>
+                <div style="background:#f8fafc; border-radius:12px; padding:12px 14px;">
+                    <div style="font-weight:900; color:#0f172a; font-size:0.92rem; margin-bottom:4px;">מה המורה צריך לעשות?</div>
+                    <div style="color:#475569; font-size:0.9rem; line-height:1.6;">לצפות, לעודד, ולחפש הזדמנויות לשיחה על מה שהתלמיד ראה.</div>
+                </div>
+            </div>
+
+            <button onclick="document.getElementById('parents-modal').style.display='none'"
+                style="display:block; width:100%; margin-top:20px; min-height:44px; border:none; border-radius:12px; background:#0f766e; color:white; font-family:'Assistant',sans-serif; font-size:1rem; font-weight:900; cursor:pointer;">
+                סגור
+            </button>
+        </div>
+    </div>
+
     <div id="graph-area-wrapper">
         <section id="home-landing" aria-labelledby="home-hero-title">
             <section id="home-hero" class="home-surface">
@@ -737,6 +810,16 @@
                 </div>
                 <div id="home-returning-row">
                     <button id="btn-home-returning" type="button" onclick="continueAsReturningUserFromLanding()">כבר הייתי כאן / דלג למסך העבודה</button>
+                </div>
+                <!-- P7: כפתור מידע להורים -->
+                <div style="display:flex; justify-content:center; margin-top:10px;">
+                    <button id="btn-parents-info" type="button"
+                        onclick="document.getElementById('parents-modal').style.display='flex'"
+                        style="background:none; border:1px solid #cbd5e1; border-radius:12px; padding:9px 18px; font-size:13px; color:#64748b; cursor:pointer; font-family:'Assistant',sans-serif; font-weight:700; direction:rtl; transition:background 0.15s, color 0.15s;"
+                        onmouseover="this.style.background='#f1f5f9'; this.style.color='#0f172a';"
+                        onmouseout="this.style.background='none'; this.style.color='#64748b';">
+                        👨‍👩‍👧 להורים ומורים — למה זה עוזר?
+                    </button>
                 </div>
             </section>
 
