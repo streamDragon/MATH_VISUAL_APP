@@ -65,6 +65,17 @@
                 return /^__[\w-]+__$/i.test(String(value || '').trim());
             }
 
+            function cleanupVisibleBuildParams(url) {
+                if (!window.history || typeof window.history.replaceState !== 'function') return;
+                let cleaned = new URL(url.toString());
+                cleaned.searchParams.delete('v');
+                cleaned.searchParams.delete('cb');
+                cleaned.searchParams.delete('hard');
+                if (cleaned.toString() === url.toString()) return;
+                let nextPath = `${cleaned.pathname}${cleaned.search}${cleaned.hash}`;
+                window.history.replaceState(null, '', nextPath);
+            }
+
             function resolveExpectedToken() {
                 let buildSha = '__BUILD_SHA__';
                 if (buildSha && !isTemplateBuildToken(buildSha) && buildSha !== 'unknown') return buildSha;
@@ -83,7 +94,10 @@
                 window.__APP_ASSET_TOKEN__ = nextToken;
 
                 let shouldReplace = !currentToken || (!!expectedToken && currentToken !== expectedToken);
-                if (!shouldReplace) return;
+                if (!shouldReplace) {
+                    cleanupVisibleBuildParams(url);
+                    return;
+                }
 
                 let transitionKey = `${currentToken || '-'}=>${nextToken}`;
                 let alreadyReloaded = false;
@@ -17203,6 +17217,10 @@ Rules:
     (function initVersionBadge() {
         const el = document.getElementById('version-badge');
         if (!el) return;
+        if (typeof SHOW_BUILD_DEBUG !== 'undefined' && !SHOW_BUILD_DEBUG) {
+            el.remove();
+            return;
+        }
 
         // קריאת ה-hash מה-URL, מה-meta, או מה-token הגלובלי
         let fullHash = '';
