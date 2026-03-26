@@ -299,10 +299,106 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             direction: rtl;
             text-align: center;
             z-index: 1;
+        }
+
+        #hero-video-section {
+            width: 100%;
+            max-width: 390px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin: 0 auto;
+        }
+
+        #hero-video-frame {
+            position: relative;
+            width: 100%;
+        }
+
+        #vizy-video {
+            width: 100%;
+            display: block;
+            max-height: min(68dvh, 560px);
+            border-radius: 18px;
+            background: #000000;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.24);
+        }
+
+        #vizy-play-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            border-radius: 18px;
+            background: linear-gradient(180deg, rgba(22, 22, 36, 0.08), rgba(22, 22, 36, 0.38));
+            transition: opacity 0.3s ease;
+        }
+
+        #vizy-play-overlay.is-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .vizy-play-badge {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(108, 92, 231, 0.92);
+            box-shadow: 0 10px 26px rgba(108, 92, 231, 0.38);
+        }
+
+        .vizy-play-icon {
+            font-size: 32px;
+            line-height: 1;
+            color: white;
+            transform: translateX(-1px);
+        }
+
+        #vizy-skip {
+            display: none;
+            border: none;
+            background: none;
+            color: #8b8b8b;
+            font-family: 'Assistant', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 8px 10px;
+        }
+
+        #vizy-skip.is-visible {
+            display: inline-flex;
+        }
+
+        #hero-content {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #hero-content.hidden {
+            display: none !important;
+        }
+
+        #opening-splash-meta {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
         }
 
         .hero-orb {
@@ -511,6 +607,21 @@
             color: #8b8b8b;
         }
 
+        #hero-replay-video-btn {
+            border: none;
+            background: none;
+            color: #6c5ce7;
+            font-family: 'Assistant', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 4px 8px 0;
+        }
+
+        #hero-replay-video-btn:hover {
+            color: #5649d4;
+        }
+
         #opening-splash-content.hero-shell #opening-splash-audio-hint {
             margin: 0;
             font-size: 12px;
@@ -563,7 +674,7 @@
             animation: none;
         }
 
-        #opening-splash.is-visible .hero-fade {
+        #opening-splash.is-visible #hero-content.is-visible .hero-fade {
             animation: heroFadeUp 0.6s ease forwards;
         }
 
@@ -727,6 +838,25 @@
                 border-radius: 24px;
             }
 
+            #hero-video-section {
+                max-width: 100%;
+                gap: 10px;
+            }
+
+            #vizy-video,
+            #vizy-play-overlay {
+                border-radius: 14px;
+            }
+
+            .vizy-play-badge {
+                width: 64px;
+                height: 64px;
+            }
+
+            .vizy-play-icon {
+                font-size: 28px;
+            }
+
             .hero-promise-grid {
                 gap: 7px;
             }
@@ -742,6 +872,13 @@
 
             .promise-card-subtitle {
                 font-size: 10px;
+            }
+
+            #hero-replay-video-btn,
+            #hero-skip-btn,
+            #vizy-skip,
+            #opening-splash-content.hero-shell #opening-splash-audio-hint {
+                font-size: 12px;
             }
 
             #onboarding-shell {
@@ -781,94 +918,116 @@
                 <div class="hero-orb hero-orb-one" aria-hidden="true"></div>
                 <div class="hero-orb hero-orb-two" aria-hidden="true"></div>
 
-                <div id="hero-mascot" class="hero-fade hero-delay-1" aria-hidden="true">
-                    <svg class="hero-mascot-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="hero-mascot-body" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#a29bfe"></stop>
-                                <stop offset="100%" stop-color="#6c5ce7"></stop>
-                            </linearGradient>
-                        </defs>
-                        <ellipse cx="50" cy="92" rx="22" ry="4" fill="rgba(0,0,0,0.1)"></ellipse>
-                        <ellipse cx="50" cy="56" rx="28" ry="30" fill="url(#hero-mascot-body)"></ellipse>
-                        <ellipse cx="50" cy="48" rx="22" ry="20" fill="#ede7f6"></ellipse>
-                        <circle cx="42" cy="44" r="4.2" fill="#2d3436"></circle>
-                        <circle cx="58" cy="44" r="4.2" fill="#2d3436"></circle>
-                        <circle cx="43.2" cy="42.5" r="1.5" fill="white"></circle>
-                        <circle cx="59.2" cy="42.5" r="1.5" fill="white"></circle>
-                        <path d="M 40 55 Q 50 64 60 55" fill="none" stroke="#2d3436" stroke-width="2.5" stroke-linecap="round"></path>
-                        <g class="hero-mascot-wave-arm">
-                            <line x1="22" y1="55" x2="8" y2="35" stroke="#a29bfe" stroke-width="5" stroke-linecap="round"></line>
-                            <circle cx="7" cy="33" r="4" fill="#ede7f6"></circle>
-                        </g>
-                        <line x1="78" y1="55" x2="88" y2="65" stroke="#a29bfe" stroke-width="5" stroke-linecap="round"></line>
-                        <text x="50" y="29" text-anchor="middle" font-size="16" font-weight="900" fill="#6c5ce7">⊕</text>
-                        <circle cx="17" cy="26" r="3" fill="#fdcb6e" opacity="0.82"></circle>
-                        <circle cx="82" cy="20" r="2.5" fill="#00b894" opacity="0.82"></circle>
-                        <circle cx="75" cy="30" r="2.2" fill="#ff6b6b" opacity="0.78"></circle>
-                    </svg>
-                </div>
-
-                <div class="hero-tagline hero-fade hero-delay-2">
-                    <span class="hero-tagline-emoji">👋</span>
-                    <span>היי!</span>
-                </div>
-
-                <h1 class="hero-title hero-fade hero-delay-3">
-                    מה אם הייתם <span class="hero-title-accent">רואים</span> את המתמטיקה
-                    <br>במקום רק לשמוע עליה?
-                </h1>
-
-                <p class="hero-subtitle hero-fade hero-delay-4">
-                    כאן לא מלמדים נוסחאות. כאן מאמנים את העיניים.<br>
-                    <strong>ברגע שתראו, תבינו.</strong>
-                </p>
-
-                <div class="hero-promise-grid hero-fade hero-delay-5">
-                    <div class="promise-card">
-                        <span class="promise-card-icon">📈</span>
-                        <div class="promise-card-title">שיפור של 10+ נקודות</div>
-                        <div class="promise-card-subtitle">מבוסס מחקר</div>
+                <div id="hero-video-section" aria-label="סרטון פתיחה של ויזי">
+                    <div id="hero-video-frame">
+                        <video id="vizy-video" playsinline webkit-playsinline preload="metadata" poster="/opening-poster.png" aria-label="סרטון פתיחה של ויזי">
+                            <source id="vizy-video-source" src="/vizy-intro.mp4" type="video/mp4">
+                        </video>
+                        <button id="vizy-play-overlay" type="button" onclick="playVizyVideo()" aria-label="הפעלת סרטון הפתיחה">
+                            <span class="vizy-play-badge" aria-hidden="true">
+                                <span class="vizy-play-icon">▶</span>
+                            </span>
+                        </button>
                     </div>
-                    <div class="promise-card">
-                        <span class="promise-card-icon">⏱️</span>
-                        <div class="promise-card-title">15 דקות ביום</div>
-                        <div class="promise-card-subtitle">זה כל מה שצריך</div>
-                    </div>
-                    <div class="promise-card">
-                        <span class="promise-card-icon">📱</span>
-                        <div class="promise-card-title">מהטלפון</div>
-                        <div class="promise-card-subtitle">בכל מקום, בכל זמן</div>
-                    </div>
+                    <button id="vizy-skip" type="button" onclick="skipVideo()">דלגו על הסרטון ←</button>
                 </div>
 
-                <button id="btn-hero-start" class="hero-primary-cta hero-fade hero-delay-6" type="button" onclick="startOnboarding()">
-                    בואו נתחיל — זה בחינם ←
-                </button>
-
-                <div class="hero-proof hero-fade hero-delay-7">
-                    <div class="hero-avatar-stack" aria-hidden="true">
-                        <span class="hero-mini-avatar">ד</span>
-                        <span class="hero-mini-avatar">מ</span>
-                        <span class="hero-mini-avatar">ש</span>
-                        <span class="hero-mini-avatar">י</span>
+                <div id="hero-content" class="hidden">
+                    <div id="hero-mascot" class="hero-fade hero-delay-1" aria-hidden="true">
+                        <svg class="hero-mascot-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="hero-mascot-body" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#a29bfe"></stop>
+                                    <stop offset="100%" stop-color="#6c5ce7"></stop>
+                                </linearGradient>
+                            </defs>
+                            <ellipse cx="50" cy="92" rx="22" ry="4" fill="rgba(0,0,0,0.1)"></ellipse>
+                            <ellipse cx="50" cy="56" rx="28" ry="30" fill="url(#hero-mascot-body)"></ellipse>
+                            <ellipse cx="50" cy="48" rx="22" ry="20" fill="#ede7f6"></ellipse>
+                            <circle cx="42" cy="44" r="4.2" fill="#2d3436"></circle>
+                            <circle cx="58" cy="44" r="4.2" fill="#2d3436"></circle>
+                            <circle cx="43.2" cy="42.5" r="1.5" fill="white"></circle>
+                            <circle cx="59.2" cy="42.5" r="1.5" fill="white"></circle>
+                            <path d="M 40 55 Q 50 64 60 55" fill="none" stroke="#2d3436" stroke-width="2.5" stroke-linecap="round"></path>
+                            <g class="hero-mascot-wave-arm">
+                                <line x1="22" y1="55" x2="8" y2="35" stroke="#a29bfe" stroke-width="5" stroke-linecap="round"></line>
+                                <circle cx="7" cy="33" r="4" fill="#ede7f6"></circle>
+                            </g>
+                            <line x1="78" y1="55" x2="88" y2="65" stroke="#a29bfe" stroke-width="5" stroke-linecap="round"></line>
+                            <text x="50" y="29" text-anchor="middle" font-size="16" font-weight="900" fill="#6c5ce7">⊕</text>
+                            <circle cx="17" cy="26" r="3" fill="#fdcb6e" opacity="0.82"></circle>
+                            <circle cx="82" cy="20" r="2.5" fill="#00b894" opacity="0.82"></circle>
+                            <circle cx="75" cy="30" r="2.2" fill="#ff6b6b" opacity="0.78"></circle>
+                        </svg>
                     </div>
-                    <span>1,200+ תלמידים כבר משתמשים</span>
+
+                    <div class="hero-tagline hero-fade hero-delay-2">
+                        <span class="hero-tagline-emoji">👋</span>
+                        <span>היי!</span>
+                    </div>
+
+                    <h1 class="hero-title hero-fade hero-delay-3">
+                        מה אם הייתם <span class="hero-title-accent">רואים</span> את המתמטיקה
+                        <br>במקום רק לשמוע עליה?
+                    </h1>
+
+                    <p class="hero-subtitle hero-fade hero-delay-4">
+                        ברגע שתראו — תבינו.<br>
+                        <strong>15 דקות ביום. מהטלפון. זה הכול.</strong>
+                    </p>
+
+                    <div class="hero-promise-grid hero-fade hero-delay-5">
+                        <div class="promise-card">
+                            <span class="promise-card-icon">📈</span>
+                            <div class="promise-card-title">שיפור של 10+ נקודות</div>
+                            <div class="promise-card-subtitle">מבוסס מחקר</div>
+                        </div>
+                        <div class="promise-card">
+                            <span class="promise-card-icon">⏱️</span>
+                            <div class="promise-card-title">15 דקות ביום</div>
+                            <div class="promise-card-subtitle">זה כל מה שצריך</div>
+                        </div>
+                        <div class="promise-card">
+                            <span class="promise-card-icon">📱</span>
+                            <div class="promise-card-title">מהטלפון</div>
+                            <div class="promise-card-subtitle">בכל מקום, בכל זמן</div>
+                        </div>
+                    </div>
+
+                    <button id="btn-hero-start" class="hero-primary-cta hero-fade hero-delay-6" type="button" onclick="startOnboarding()">
+                        בואו נתחיל ←
+                    </button>
+
+                    <div class="hero-proof hero-fade hero-delay-7">
+                        <div class="hero-avatar-stack" aria-hidden="true">
+                            <span class="hero-mini-avatar">ד</span>
+                            <span class="hero-mini-avatar">מ</span>
+                            <span class="hero-mini-avatar">ש</span>
+                            <span class="hero-mini-avatar">י</span>
+                        </div>
+                        <span>1,200+ תלמידים כבר משתמשים</span>
+                    </div>
+
+                    <button id="hero-skip-btn" class="hero-fade hero-delay-7" type="button" onclick="skipToApp()">
+                        כבר הייתי כאן — דלגו
+                    </button>
+
+                    <button id="hero-replay-video-btn" class="hero-fade hero-delay-7" type="button" onclick="replayVizyVideo()">
+                        🎬 צפו בסרטון שוב
+                    </button>
                 </div>
 
-                <button id="hero-skip-btn" class="hero-fade hero-delay-7" type="button" onclick="skipToApp()">
-                    כבר הייתי כאן — תעבירו אותי ישר
-                </button>
+                <div id="opening-splash-meta">
+                    <p id="opening-splash-audio-hint">להפעלת שיר בפתיח לחצו על "נגן שיר".</p>
 
-                <p id="opening-splash-audio-hint" class="hero-fade hero-delay-7">להפעלת שיר בפתיח לחצו על "נגן שיר".</p>
+                    <div id="opening-splash-actions">
+                        <button id="opening-splash-audio-btn" type="button" onclick="retrySplashMusic()">נגן שיר</button>
+                        <button id="opening-splash-copy-build-btn" class="hidden" type="button" onclick="copyBuildStampFromSplash()">העתק build</button>
+                    </div>
 
-                <div id="opening-splash-actions" class="hero-fade hero-delay-7">
-                    <button id="opening-splash-audio-btn" type="button" onclick="retrySplashMusic()">נגן שיר</button>
-                    <button id="opening-splash-copy-build-btn" class="hidden" type="button" onclick="copyBuildStampFromSplash()">העתק build</button>
+                    <p id="opening-splash-version"></p>
+                    <div id="opening-splash-progress" class="hidden" aria-hidden="true"><span></span></div>
                 </div>
-
-                <p id="opening-splash-version"></p>
-                <div id="opening-splash-progress" class="hidden" aria-hidden="true"><span></span></div>
             </div>
         </div>
     </div>
@@ -1597,7 +1756,7 @@
                 <button id="btn-param-intro-open-params" class="hidden" type="button" onclick="openBuilderFromTop()">⚙ פתח פרמטרים</button>
                 <button id="btn-param-intro-open-tools" class="hidden" type="button" onclick="openParamIntroTools()">☰ משימה/כלים</button>
                 <button id="btn-scan-question" onclick="openScanModal()">יש לי שאלה</button>
-                <button id="btn-replay-opening" onclick="replayOpeningSplash()">פתיח+שיר</button>
+                <button id="btn-replay-opening" onclick="replayOpeningSplash(true)">פתיח+שיר</button>
                 <button id="btn-top-init-builder" onclick="openInitialBuilderFromTop()">בנייה ראשונית</button>
                 <button id="btn-start-guide" onclick="openStartGuideModal()">סיור מודרך</button>
                 <button id="btn-normal-top" class="hidden" onclick="openNormalLabGuide()">מעבדת האנך</button>
@@ -2264,6 +2423,8 @@
         })();
         const OPENING_MUSIC_FILE = `${RUNTIME_ASSET_BASE}opening-theme.mp3`;
         const OPENING_VIDEO_FILE = `${RUNTIME_ASSET_BASE}opening-theme.mp4`;
+        const VIZY_INTRO_VIDEO_FILE = `${RUNTIME_ASSET_BASE}vizy-intro.mp4`;
+        const VIZY_INTRO_POSTER_FILE = `${RUNTIME_ASSET_BASE}opening-poster.png`;
         const BUILDER_FOCUSED_GOALS = new Set([
             'choose_function_template',
             'hit_target',
@@ -2429,6 +2590,7 @@
         let splashMusicUnlockBound = false;
         let obStep = 0;
         let obAnswers = {};
+        let vizyVideoFallbackTimer = null;
         let appInitialized = false;
         let winOverlayTimer = null;
         let runtimeDisplayedVersion = APP_VERSION;
@@ -2546,6 +2708,65 @@
                 if (poster) poster.classList.remove('hidden');
             });
             video.src = OPENING_VIDEO_FILE;
+            video.load();
+        }
+
+        function clearVizyVideoFallbackTimer() {
+            if (!vizyVideoFallbackTimer) return;
+            clearTimeout(vizyVideoFallbackTimer);
+            vizyVideoFallbackTimer = null;
+        }
+
+        function stopVizyVideoPlayback(options = {}) {
+            clearVizyVideoFallbackTimer();
+            let video = document.getElementById('vizy-video');
+            if (video) {
+                video.pause();
+                if (options.reset !== false) {
+                    try {
+                        video.currentTime = 0;
+                    } catch (err) {
+                        // Ignore seek failures before metadata is ready.
+                    }
+                }
+            }
+            let overlay = document.getElementById('vizy-play-overlay');
+            if (overlay) overlay.classList.remove('is-hidden');
+            let skipBtn = document.getElementById('vizy-skip');
+            if (skipBtn) skipBtn.classList.remove('is-visible');
+        }
+
+        function scheduleVizyVideoFallback() {
+            clearVizyVideoFallbackTimer();
+            let video = document.getElementById('vizy-video');
+            let videoSection = document.getElementById('hero-video-section');
+            if (!video || !videoSection || videoSection.classList.contains('hidden')) return;
+            vizyVideoFallbackTimer = setTimeout(function () {
+                if (!videoSection.classList.contains('hidden') && video.readyState < 1) {
+                    showHeroContent();
+                }
+            }, 2200);
+        }
+
+        function setupVizyIntroMedia() {
+            let video = document.getElementById('vizy-video');
+            if (!video) return;
+            let source = document.getElementById('vizy-video-source');
+            if (source) source.setAttribute('src', VIZY_INTRO_VIDEO_FILE);
+            video.setAttribute('poster', VIZY_INTRO_POSTER_FILE);
+            if (video.dataset.ready === '1') {
+                if (!video.currentSrc || !video.currentSrc.includes('vizy-intro.mp4')) video.load();
+                return;
+            }
+            video.dataset.ready = '1';
+            video.addEventListener('loadedmetadata', clearVizyVideoFallbackTimer);
+            video.addEventListener('loadeddata', clearVizyVideoFallbackTimer);
+            video.addEventListener('canplay', clearVizyVideoFallbackTimer);
+            video.addEventListener('ended', showHeroContent);
+            video.addEventListener('error', function () {
+                clearVizyVideoFallbackTimer();
+                showHeroContent();
+            });
             video.load();
         }
 
@@ -8039,6 +8260,53 @@
             if (stepsPanel) stepsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
+        function playVizyVideo() {
+            let video = document.getElementById('vizy-video');
+            if (!video) {
+                showHeroContent();
+                return;
+            }
+            let overlay = document.getElementById('vizy-play-overlay');
+            let skipBtn = document.getElementById('vizy-skip');
+            if (overlay) overlay.classList.add('is-hidden');
+            if (skipBtn) skipBtn.classList.add('is-visible');
+            clearVizyVideoFallbackTimer();
+            video.play().catch(function (err) {
+                console.log('Vizy intro play blocked:', err);
+                showHeroContent();
+            });
+        }
+
+        function skipVideo() {
+            stopVizyVideoPlayback();
+            showHeroContent();
+        }
+
+        function showHeroContent() {
+            clearVizyVideoFallbackTimer();
+            stopVizyVideoPlayback();
+            let videoSection = document.getElementById('hero-video-section');
+            let heroContent = document.getElementById('hero-content');
+            if (videoSection) videoSection.classList.add('hidden');
+            if (!heroContent) return;
+            heroContent.classList.remove('is-visible');
+            heroContent.classList.remove('hidden');
+            void heroContent.offsetWidth;
+            heroContent.classList.add('is-visible');
+        }
+
+        function replayVizyVideo() {
+            let videoSection = document.getElementById('hero-video-section');
+            let heroContent = document.getElementById('hero-content');
+            stopVizyVideoPlayback();
+            if (heroContent) {
+                heroContent.classList.remove('is-visible');
+                heroContent.classList.add('hidden');
+            }
+            if (videoSection) videoSection.classList.remove('hidden');
+            scheduleVizyVideoFallback();
+        }
+
         function dismissOpeningSplashForOnboarding() {
             if (openingSplashExitTimer) {
                 clearTimeout(openingSplashExitTimer);
@@ -8055,6 +8323,7 @@
             }
             let splashVideo = document.getElementById('opening-splash-video');
             if (splashVideo) splashVideo.pause();
+            stopVizyVideoPlayback();
             unbindSplashMusicUnlock();
         }
 
@@ -8192,6 +8461,7 @@
             splash.classList.add('is-exiting');
             let splashVideo = document.getElementById('opening-splash-video');
             if (splashVideo) splashVideo.pause();
+            stopVizyVideoPlayback();
             unbindSplashMusicUnlock();
             let finalizeHide = () => {
                 openingSplashHideTimer = null;
@@ -8265,6 +8535,7 @@
             openingSplashDone = false;
             let splash = document.getElementById('opening-splash');
             if (!splash) return;
+            setupVizyIntroMedia();
             scheduleViewportTopReset({ onlyWhileSplash: true, delays: [0, 60, 160, 420, 900] });
             if (openingSplashExitTimer) {
                 clearTimeout(openingSplashExitTimer);
@@ -8288,18 +8559,18 @@
                 splashVideo.currentTime = 0;
                 splashVideo.play().catch(() => {});
             }
+            replayVizyVideo();
             let hint = document.getElementById('opening-splash-audio-hint');
             let btn = document.getElementById('opening-splash-audio-btn');
             if (hint) hint.classList.remove('hidden');
             if (btn) btn.innerText = 'נגן שיר';
-            bindSplashMusicUnlock();
             splash.classList.remove('hidden');
             requestAnimationFrame(() => splash.classList.add('is-visible'));
         }
 
-        function replayOpeningSplash() {
+        function replayOpeningSplash(withMusic) {
             startOpeningSplash(true);
-            retrySplashMusic();
+            if (withMusic) retrySplashMusic();
         }
 
         function bindAuditFlowEvents() {
@@ -8372,6 +8643,7 @@
             updateResponsiveLayoutMetrics();
             scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 90, 260, 520, 1100] });
             setupOpeningSplashMedia();
+            setupVizyIntroMedia();
             runEntryFlow();
             await ensureQuestionsLoadedAtRuntime();
             if (isNewsFeedFeatureEnabled()) await ensureFeedManifestLoaded();
