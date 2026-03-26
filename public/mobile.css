@@ -8429,23 +8429,24 @@ body.prestart-only #home-preview-column {
     align-items: center;
     justify-content: center;
     align-self: flex-start;
-    border: 1px solid rgba(15, 118, 110, 0.2);
+    width: min(100%, 320px);
+    border: 1px solid rgba(108, 92, 231, 0.2);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.76);
-    color: #0f766e;
+    background: rgba(108, 92, 231, 0.08);
+    color: #5f50e6;
     font-family: 'Assistant', sans-serif;
     font-size: 0.95rem;
     font-weight: 800;
     line-height: 1;
     cursor: pointer;
     padding: 10px 14px;
-    box-shadow: 0 10px 24px rgba(15, 118, 110, 0.08);
+    box-shadow: 0 10px 24px rgba(108, 92, 231, 0.12);
     transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 }
 
 #btn-home-back-to-hero:hover {
-    background: #ffffff;
-    box-shadow: 0 14px 30px rgba(15, 118, 110, 0.12);
+    background: rgba(108, 92, 231, 0.12);
+    box-shadow: 0 14px 30px rgba(108, 92, 231, 0.18);
     transform: translateY(-1px);
 }
 

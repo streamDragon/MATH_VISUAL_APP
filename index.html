@@ -1005,7 +1005,7 @@
                         </div>
                     </div>
 
-                    <button id="hero-replay-video-btn" class="hero-fade hero-delay-6" type="button" onclick="replayVizyVideo()">
+                    <button id="hero-replay-video-btn" class="hero-fade hero-delay-6" type="button" onclick="watchOpeningIntroVideo()">
                         🎬 לראות קודם את סרט הפתיחה של ויזי
                     </button>
 
@@ -1572,7 +1572,7 @@
                 </div>
                 <p id="home-hero-subtitle">הרבה תלמידים מנסים ישר נוסחאות.<br>אבל בלי לראות קיצון, משיק, שיפוע וצורה קשה להבין מה באמת קורה.<br>כאן לומדים לראות מתמטיקה.</p>
                 <p id="home-hero-support">לא צריך להבין הכול עכשיו. בוחרים דרך אחת ומתחילים.</p>
-                <button id="btn-home-back-to-hero" type="button" onclick="replayOpeningSplash()">🎬 לצפייה בסרט הפתיחה של ויזי</button>
+                <button id="btn-home-back-to-hero" type="button" onclick="watchOpeningIntroVideo()">🎬 לצפייה בסרט הפתיחה של ויזי</button>
             </section>
 
             <section id="home-paths-section" class="home-surface" aria-labelledby="home-paths-title">
@@ -8286,6 +8286,17 @@
                 console.log('Vizy intro play blocked:', err);
                 showHeroContent();
             });
+        }
+
+        function watchOpeningIntroVideo() {
+            let splash = document.getElementById('opening-splash');
+            let splashHidden = !splash || splash.classList.contains('hidden');
+            if (openingSplashDone || splashHidden) {
+                startOpeningSplash(true);
+            } else {
+                replayVizyVideo();
+            }
+            playVizyVideo();
         }
 
         function skipVideo() {
