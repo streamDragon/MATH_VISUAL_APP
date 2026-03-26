@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0, s-maxage=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -16,9 +16,26 @@
     <title>מעבדת הפונקציות - המלא והשלם</title>
     <link rel="icon" type="image/png" href="/opening-poster.png">
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        window.SUPABASE_URL = 'https://qaxuqliefevglwtntmmw.supabase.co';
-        window.SUPABASE_ANON_KEY = 'sb_publishable_oJhyw_cLpt4iE2VfzVNWng_lVpUzq6I';
+        var SUPABASE_URL = 'https://qaxuqliefevglwtntmmw.supabase.co';
+        var SUPABASE_ANON_KEY = 'sb_publishable_oJhyw_cLpt4iE2VfzVNWng_lVpUzq6I';
+
+        function isSupabasePlaceholderValue(value) {
+            let text = String(value || '').trim();
+            if (!text) return true;
+            return /^YOUR_SUPABASE_/i.test(text) || /^\[.*\]$/.test(text);
+        }
+
+        window.SUPABASE_URL = SUPABASE_URL;
+        window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
+        window.isSupabaseConfigured = function () {
+            return !isSupabasePlaceholderValue(window.SUPABASE_URL)
+                && !isSupabasePlaceholderValue(window.SUPABASE_ANON_KEY);
+        };
+        window.__APP_SUPABASE__ = (window.supabase && window.isSupabaseConfigured())
+            ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
+            : null;
         window.__SUPABASE_CONFIG__ = Object.freeze({
             url: window.SUPABASE_URL,
             anonKey: window.SUPABASE_ANON_KEY
@@ -924,8 +941,342 @@
             }
         }
     </style>
+    <style>
+        /* ===== P10: MOBILE OVERRIDES ===== */
+        body.auth-active {
+            overflow: hidden;
+        }
+
+        @media (max-width: 600px) {
+            #auth-screen {
+                padding: 24px 16px !important;
+            }
+
+            #auth-screen button,
+            #auth-screen input {
+                min-height: 48px !important;
+                font-size: 15px !important;
+            }
+
+            #opening-splash {
+                width: 100% !important;
+                min-height: 100vh !important;
+                overflow-y: auto !important;
+                padding: 0 !important;
+            }
+
+            #opening-splash.hero-mode #opening-splash-content.hero-shell {
+                width: 100% !important;
+                max-width: none !important;
+                min-height: 100vh !important;
+                border-radius: 0 !important;
+                padding: 16px !important;
+            }
+
+            #hero-video-section {
+                width: 100% !important;
+            }
+
+            #vizy-video {
+                width: 100% !important;
+                max-height: 55vh !important;
+                object-fit: contain !important;
+                border-radius: 12px !important;
+            }
+
+            #hero-content {
+                width: 100% !important;
+                padding: 16px !important;
+                box-sizing: border-box;
+            }
+
+            .promise-card {
+                min-width: 0 !important;
+            }
+
+            #opening-splash button,
+            #hero-content button,
+            #onboarding-flow button {
+                min-height: 48px !important;
+                font-size: 15px !important;
+            }
+
+            #onboarding-flow {
+                width: 100% !important;
+                min-height: 100vh !important;
+                padding: 16px !important;
+                box-sizing: border-box;
+            }
+
+            #onboarding-shell {
+                width: 100% !important;
+                max-height: calc(100vh - 32px) !important;
+            }
+
+            #ob-options {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 8px !important;
+            }
+
+            #ob-options button,
+            .ob-option-btn {
+                min-height: 52px !important;
+                font-size: 14px !important;
+            }
+
+            #home-landing {
+                width: 100% !important;
+                overflow-y: auto !important;
+                padding: 16px !important;
+                box-sizing: border-box;
+            }
+
+            #home-paths {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 12px !important;
+            }
+
+            #home-paths > .home-path-card {
+                width: 100% !important;
+                min-height: 64px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 12px !important;
+                padding: 16px !important;
+                box-sizing: border-box;
+            }
+
+            #home-hero h1,
+            #home-hero-title {
+                font-size: 22px !important;
+                line-height: 1.3 !important;
+            }
+
+            #home-benefits,
+            #home-roadmap,
+            #home-adults,
+            #home-advanced,
+            #home-benefits p,
+            #home-roadmap p,
+            #home-adults li,
+            #home-advanced p,
+            #home-advanced button {
+                font-size: 13px !important;
+            }
+
+            #graph-area-wrapper {
+                width: 100% !important;
+                padding: 0 !important;
+            }
+
+            #graph-area,
+            #home-preview-column #graph-area {
+                width: 100% !important;
+                height: 50vh !important;
+                max-height: 400px !important;
+                margin: 0 !important;
+            }
+
+            #home-graph-preview {
+                width: 100% !important;
+            }
+
+            #mobile-panel-scrim {
+                position: fixed !important;
+                inset: 0 !important;
+                background: rgba(0, 0, 0, 0.3) !important;
+                z-index: 799 !important;
+            }
+
+            #sidebar {
+                position: fixed !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 85vw !important;
+                max-width: 320px !important;
+                height: 100vh !important;
+                transform: translateX(-100%) !important;
+                transition: transform 0.3s ease !important;
+                z-index: 800 !important;
+                background: white !important;
+                box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1) !important;
+                overflow-y: auto !important;
+                border-radius: 0 18px 18px 0 !important;
+            }
+
+            #sidebar.open,
+            #sidebar.drawer-open {
+                transform: translateX(0) !important;
+            }
+
+            #drawer-handle {
+                position: fixed !important;
+                left: 0 !important;
+                top: 50% !important;
+                z-index: 801 !important;
+                width: 28px !important;
+                height: 56px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                background: #6C5CE7 !important;
+                color: white !important;
+                border-radius: 0 8px 8px 0 !important;
+                cursor: pointer !important;
+                font-size: 0 !important;
+                transform: translateY(-50%) !important;
+            }
+
+            #drawer-handle::before {
+                content: '☰';
+                font-size: 18px;
+                line-height: 1;
+            }
+
+            #top-strip,
+            #top-bar {
+                position: sticky !important;
+                top: 0 !important;
+                z-index: 100 !important;
+                width: 100% !important;
+            }
+
+            .gam-badge {
+                font-size: 12px !important;
+                padding: 2px 8px !important;
+            }
+
+            #read-answer-input {
+                width: 100% !important;
+                min-height: 48px !important;
+                font-size: 16px !important;
+            }
+
+            #btn-read-answer-submit,
+            #btn-check-answer {
+                width: 100% !important;
+                min-height: 48px !important;
+                font-size: 15px !important;
+                position: sticky !important;
+                bottom: 0 !important;
+                z-index: 50 !important;
+                background: white !important;
+                box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08) !important;
+                border-radius: 12px 12px 0 0 !important;
+            }
+
+            input[type=range] {
+                width: calc(100% - 24px) !important;
+                height: 8px !important;
+                -webkit-appearance: none !important;
+                appearance: none !important;
+            }
+
+            input[type=range]::-webkit-slider-thumb {
+                -webkit-appearance: none !important;
+                appearance: none !important;
+                width: 28px !important;
+                height: 28px !important;
+                border-radius: 50% !important;
+                background: #6C5CE7 !important;
+                border: none !important;
+            }
+
+            input[type=range]::-moz-range-thumb {
+                width: 28px !important;
+                height: 28px !important;
+                border-radius: 50% !important;
+                background: #6C5CE7 !important;
+                border: none !important;
+            }
+
+            #question-overlay,
+            #video-modal,
+            #feedback-modal,
+            #scan-modal,
+            #scan-admin-modal,
+            #normal-lab-modal,
+            #start-guide-modal,
+            #quick-tour-modal,
+            #initial-builder-modal,
+            #global-help-modal {
+                width: 100% !important;
+                height: 100vh !important;
+                top: 0 !important;
+                left: 0 !important;
+                padding: 16px !important;
+                box-sizing: border-box;
+            }
+
+            #question-overlay-card,
+            #video-modal-card,
+            #feedback-modal-card,
+            #scan-modal-card,
+            #scan-admin-card,
+            #normal-lab-card,
+            #start-guide-card,
+            #quick-tour-card,
+            #initial-builder-card,
+            #global-help-card {
+                width: 100% !important;
+                max-height: calc(100vh - 32px) !important;
+                min-height: calc(100vh - 32px) !important;
+                overflow-y: auto !important;
+                border-radius: 0 !important;
+                padding: 16px !important;
+                box-sizing: border-box;
+            }
+
+            #tutor-container,
+            #tutor-btn {
+                position: fixed !important;
+                bottom: 16px !important;
+                right: 16px !important;
+                z-index: 700 !important;
+            }
+
+            #tutor-bubble {
+                max-width: 200px !important;
+                font-size: 13px !important;
+                direction: rtl !important;
+                bottom: 60px !important;
+                right: 0 !important;
+            }
+
+            body.session-started #mobile-focus-card,
+            body.session-started #mobile-focus-card[hidden] {
+                display: block !important;
+                width: 100% !important;
+                padding: 12px !important;
+                font-size: 14px !important;
+            }
+        }
+    </style>
 </head>
 <body class="prestart-only">
+
+    <div id="auth-screen" dir="rtl" aria-hidden="true" style="display:none; position:fixed; inset:0; background:#FAFAFD; z-index:10000; flex-direction:column; align-items:center; justify-content:center; padding:24px;">
+        <h2 style="font-size:24px; font-weight:700; margin:0 0 8px;">ברוכים הבאים!</h2>
+        <p style="font-size:14px; color:#666; margin:0 0 24px; text-align:center;">התחברו כדי לשמור את ההתקדמות</p>
+
+        <button id="btn-auth-google" type="button" onclick="loginWithGoogle()" style="width:100%; max-width:300px; min-height:48px; padding:14px; border:2px solid #E8E6F0; border-radius:14px; font-size:15px; font-weight:600; cursor:pointer; background:white; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:10px;">
+            <img src="https://www.google.com/favicon.ico" width="20" height="20" alt="G">
+            התחברות עם Google
+        </button>
+
+        <div id="email-auth-section" style="width:100%; max-width:300px;">
+            <input id="auth-email" type="email" placeholder="כתובת אימייל" dir="ltr" style="width:100%; min-height:48px; padding:12px; border:2px solid #E8E6F0; border-radius:12px; font-size:15px; margin-bottom:8px; box-sizing:border-box;">
+            <button id="btn-auth-email" type="button" onclick="loginWithEmail()" style="width:100%; min-height:48px; padding:14px; background:linear-gradient(135deg,#6C5CE7,#A29BFE); color:white; border:none; border-radius:14px; font-size:15px; font-weight:600; cursor:pointer;">
+                שלח לי קישור כניסה
+            </button>
+            <p id="auth-email-msg" style="font-size:12px; color:#888; margin-top:8px; display:none;"></p>
+        </div>
+
+        <button id="btn-auth-guest" type="button" onclick="loginAsGuest()" style="background:none; border:none; min-height:48px; font-size:13px; color:#999; cursor:pointer; margin-top:16px; padding:8px 12px;">
+            המשך כאורח/ת (בלי שמירה בין מכשירים)
+        </button>
+    </div>
 
     <div id="opening-splash" class="hidden hero-mode" aria-label="מסך פתיחה">
         <div id="opening-splash-backdrop" aria-hidden="true">
@@ -2649,6 +3000,8 @@
         let obStep = 0;
         let obAnswers = {};
         let vizyVideoFallbackTimer = null;
+        let appBootPromise = null;
+        let authListenerBound = false;
         let appInitialized = false;
         let winOverlayTimer = null;
         let runtimeDisplayedVersion = APP_VERSION;
@@ -8233,6 +8586,7 @@
         function setDrawerOpen(open) {
             drawerOpen = !!open;
             document.getElementById('sidebar').classList.toggle('drawer-open', drawerOpen);
+            document.getElementById('sidebar').classList.toggle('open', drawerOpen);
             document.getElementById('sidebar').classList.toggle('drawer-collapsed', !drawerOpen);
             document.body.classList.toggle('drawer-open-state', drawerOpen);
             let isEmbed = document.body.classList.contains('embed-mode');
@@ -8690,6 +9044,173 @@
 
             document.getElementById('btn-apply-solution')?.addEventListener('click', applyStepSolution);
             document.getElementById('btn-next-step')?.addEventListener('click', goToNextStep);
+        }
+
+        function getSupabaseClient() {
+            return window.__APP_SUPABASE__ || null;
+        }
+
+        function isSupabaseAuthEnabled() {
+            return !!getSupabaseClient() && typeof window.isSupabaseConfigured === 'function' && window.isSupabaseConfigured();
+        }
+
+        function showAuthScreen() {
+            let authScreen = document.getElementById('auth-screen');
+            if (!authScreen) return;
+            authScreen.style.display = 'flex';
+            authScreen.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('auth-active');
+            let emailInput = document.getElementById('auth-email');
+            if (emailInput) {
+                if (emailInput.dataset.authBound !== '1') {
+                    emailInput.dataset.authBound = '1';
+                    emailInput.addEventListener('keydown', function (event) {
+                        if (event.key !== 'Enter') return;
+                        event.preventDefault();
+                        loginWithEmail();
+                    });
+                }
+                requestAnimationFrame(() => {
+                    try {
+                        emailInput.focus({ preventScroll: true });
+                    } catch (err) {
+                        // Ignore focus issues on restricted browsers.
+                    }
+                });
+            }
+        }
+
+        function hideAuthScreen() {
+            let authScreen = document.getElementById('auth-screen');
+            if (!authScreen) return;
+            authScreen.style.display = 'none';
+            authScreen.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('auth-active');
+        }
+
+        function getAuthRedirectUrl() {
+            try {
+                let url = new URL(window.location.href);
+                url.hash = '';
+                return url.toString();
+            } catch (err) {
+                return window.location.origin;
+            }
+        }
+
+        async function checkAuth() {
+            let client = getSupabaseClient();
+            if (!isSupabaseAuthEnabled()) {
+                return showApp();
+            }
+
+            try {
+                let result = await client.auth.getSession();
+                let session = result?.data?.session || null;
+                if (session) {
+                    window.currentUser = session.user;
+                    return showApp();
+                }
+            } catch (err) {
+                console.warn('Supabase auth check failed; continuing as guest.', err);
+                return showApp();
+            }
+
+            showAuthScreen();
+            return null;
+        }
+
+        async function loginWithGoogle() {
+            let client = getSupabaseClient();
+            if (!client) {
+                loginAsGuest();
+                return;
+            }
+            await client.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: getAuthRedirectUrl()
+                }
+            });
+        }
+
+        async function loginWithEmail() {
+            let client = getSupabaseClient();
+            if (!client) {
+                loginAsGuest();
+                return;
+            }
+            let email = String(document.getElementById('auth-email')?.value || '').trim();
+            let msgEl = document.getElementById('auth-email-msg');
+            if (!email) {
+                if (msgEl) {
+                    msgEl.style.display = 'block';
+                    msgEl.style.color = '#FF6B6B';
+                    msgEl.textContent = 'כתבו קודם כתובת אימייל תקינה.';
+                }
+                return;
+            }
+
+            if (msgEl) {
+                msgEl.style.display = 'block';
+                msgEl.style.color = '#888888';
+                msgEl.textContent = 'שולח קישור...';
+            }
+
+            let result = await client.auth.signInWithOtp({
+                email,
+                options: {
+                    emailRedirectTo: getAuthRedirectUrl()
+                }
+            });
+            let error = result?.error || null;
+
+            if (!msgEl) return;
+            if (error) {
+                msgEl.textContent = `שגיאה: ${error.message}`;
+                msgEl.style.color = '#FF6B6B';
+                return;
+            }
+
+            msgEl.textContent = 'נשלח! בדקו את המייל שלכם';
+            msgEl.style.color = '#00B894';
+        }
+
+        function loginAsGuest() {
+            window.currentUser = null;
+            hideAuthScreen();
+            return showApp();
+        }
+
+        function showApp() {
+            hideAuthScreen();
+            if (appInitialized) return Promise.resolve();
+            if (appBootPromise) return appBootPromise;
+
+            appBootPromise = new Promise((resolve, reject) => {
+                requestAnimationFrame(() => {
+                    Promise.resolve(init())
+                        .then(resolve)
+                        .catch((err) => {
+                            appBootPromise = null;
+                            reject(err);
+                        });
+                });
+            });
+            return appBootPromise;
+        }
+
+        function bindSupabaseAuthStateChange() {
+            let client = getSupabaseClient();
+            if (!client || authListenerBound) return;
+            authListenerBound = true;
+            client.auth.onAuthStateChange(function (event, session) {
+                if (event === 'SIGNED_IN' && session) {
+                    window.currentUser = session.user;
+                    hideAuthScreen();
+                    showApp();
+                }
+            });
         }
 
         async function init() {
@@ -15947,7 +16468,10 @@ Rules:
             }
         }
 
-        window.onload = init;
+        window.onload = function () {
+            bindSupabaseAuthStateChange();
+            checkAuth();
+        };
     </script>
     <script>
         (function loadOptionalFeatureScripts() {
