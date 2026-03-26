@@ -985,6 +985,9 @@
                 <button id="btn-video" class="hidden" onclick="openVideoForCurrentQuestion()">וידאו הסבר</button>
                 <button id="btn-feedback" onclick="openFeedbackModal()">כיכר השוק</button>
                 <button id="btn-top-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
+                <!-- P5: gamification badges -->
+                <span id="gam-streak" class="gam-badge" title="רצף ימים">🔥 <span id="gam-streak-num">0</span></span>
+                <span id="gam-points" class="gam-badge" title="נקודות כולל">⭐ <span id="gam-points-num">0</span></span>
             </div>
             <div id="question-progress" aria-live="polite">
                 <div id="question-progress-text">שאלה 1 מתוך 1</div>
@@ -4005,6 +4008,32 @@
             updateQuestionProgressIndicator();
         }
 
+        /* --- P5: Gamification badges + addPoints() --- */
+        function updateGamificationBadges() {
+            if (!learnerProgress) return;
+            let streakEl = document.getElementById('gam-streak-num');
+            let pointsEl = document.getElementById('gam-points-num');
+            if (streakEl) streakEl.textContent = learnerProgress.streakDays || 0;
+            if (pointsEl) pointsEl.textContent = learnerProgress.totalXp || 0;
+        }
+
+        function addPoints(amount) {
+            if (!learnerProgress) return;
+            learnerProgress.totalXp = (learnerProgress.totalXp || 0) + amount;
+            saveLearnerProgress();
+            updateLearnerProgressChip();
+            updateGamificationBadges();
+            // Flash +N animation
+            let badge = document.getElementById('gam-points');
+            if (badge) {
+                let flash = document.createElement('span');
+                flash.className = 'gam-flash';
+                flash.textContent = '+' + amount;
+                badge.appendChild(flash);
+                setTimeout(function () { flash.remove(); }, 900);
+            }
+        }
+
         function initLearnerProgress() {
             learnerProgress = loadLearnerProgress();
             if (!Array.isArray(learnerProgress.uniqueSolved)) learnerProgress.uniqueSolved = [];
@@ -4017,6 +4046,7 @@
             if (typeof learnerProgress.lastSolvedQuestionId !== 'string') learnerProgress.lastSolvedQuestionId = '';
             saveLearnerProgress();
             updateLearnerProgressChip();
+            updateGamificationBadges();
         }
 
         function registerQuestionSolvedProgress() {
@@ -10040,6 +10070,7 @@
             if (Math.abs(inputVal - expected) <= tol) {
                 readAnswerValidated = true;
                 if (typeof showMascotMood === 'function') showMascotMood('celebrating', '✅ ענית נכון! כל הכבוד! 🎉', 3000);
+                if (typeof addPoints === 'function') addPoints(10);
                 document.getElementById('read-answer-feedback').innerText = `נכון מאוד. התשובה שלך בטווח הנכון (בערך ${formatNumber(expected)}, עם סובלנות של ±${formatNumber(tol)}).`;
                 pushCoachEvent('ATTEMPT_CORRECT', {
                     source: 'read_answer',
@@ -10543,6 +10574,7 @@
             clearPendingStepRecheckTimer();
             questionSolved = true;
             if (typeof showMascotMood === 'function') showMascotMood('happy', 'סיימתם שאלה! מעולה! 🎓', 4000);
+            if (typeof addPoints === 'function') addPoints(25);
             pushCoachEvent('STEP_EXIT', { reason: 'question_solved' });
             pushCoachEvent('ATTEMPT_CORRECT', { reason: 'question_solved' });
             let box = document.querySelector('.jxgbox');

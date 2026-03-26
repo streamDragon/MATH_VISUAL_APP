@@ -9148,3 +9148,41 @@ body.prestart-only #home-preview-column #graph-area {
         overflow: visible;
     }
 }
+
+/* ============================================================
+   P5: Gamification Badges
+   ============================================================ */
+
+.gam-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(203,213,225,0.7);
+    border-radius: 12px;
+    padding: 2px 9px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #0f172a;
+    white-space: nowrap;
+    position: relative;
+    cursor: default;
+    user-select: none;
+}
+
+.gam-flash {
+    position: absolute;
+    top: -16px;
+    right: 4px;
+    font-size: 11px;
+    font-weight: 900;
+    color: #0f766e;
+    pointer-events: none;
+    animation: gamPointsFlash 0.85s ease-out forwards;
+}
+
+@keyframes gamPointsFlash {
+    0%   { opacity: 1; transform: translateY(0) scale(1.1); }
+    70%  { opacity: 0.8; transform: translateY(-10px) scale(1.05); }
+    100% { opacity: 0; transform: translateY(-16px) scale(0.9); }
+}
