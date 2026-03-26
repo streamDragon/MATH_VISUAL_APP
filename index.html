@@ -633,6 +633,8 @@
                 <div class="scan-primary-actions hidden">
                     <button id="btn-scan-analyze" class="hidden" type="button">פרק איתי לציור, נתונים ומשוואות</button>
                     <button id="btn-scan-inject" class="hidden" type="button">פתח את זה לתרגול</button>
+                    <!-- P6: AI visual decomposition -->
+                    <button id="btn-scan-decompose" class="hidden" type="button">🔍 פרק לצעדים ויזואליים (AI)</button>
                 </div>
                 <div id="scan-device-hint" class="scan-device-hint">בחרו אם לצלם מהטלפון או להעלות תמונה מהמחשב.</div>
 
@@ -663,6 +665,16 @@
                     </div>
                     <ol id="scan-subquestions-list"></ol>
                     <div id="scan-recommended-questions" class="hidden"></div>
+                    <!-- P6: AI decomposition result -->
+                    <div id="scan-decompose-wrap" class="hidden">
+                        <div class="scan-decompose-header">
+                            <div class="scan-decompose-title">פירוק ויזואלי לצעדים</div>
+                            <div id="scan-decompose-skills"></div>
+                        </div>
+                        <div id="scan-decompose-steps"></div>
+                        <div id="scan-decompose-exprs" class="hidden"></div>
+                        <div id="scan-decompose-status"></div>
+                    </div>
                 </div>
                 <div id="scan-admin-entry-row" class="scan-admin-entry-row hidden">
                     <button id="btn-open-scan-admin" class="scan-admin-entry" type="button">למורה/אדמין בלבד</button>
