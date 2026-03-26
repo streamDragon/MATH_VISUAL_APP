@@ -240,6 +240,10 @@
             overflow: hidden !important;
         }
 
+        body.onboarding-active {
+            overflow: hidden !important;
+        }
+
         body.lobby-open #start-guide-modal {
             align-items: center !important;
             justify-content: center !important;
@@ -259,25 +263,627 @@
             padding: 5px 8px;
             opacity: 0.9;
         }
+
+        #opening-splash.hero-mode #opening-splash-content.hero-shell {
+            position: relative;
+            inset-inline: auto;
+            bottom: auto;
+            width: min(440px, calc(100% - 24px));
+            margin: 0 auto;
+            padding: 24px 18px 20px;
+            border-radius: 28px;
+            background: rgba(250, 250, 253, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            box-shadow: 0 24px 64px rgba(15, 23, 42, 0.34);
+            color: #2d3436;
+            text-align: center;
+            backdrop-filter: blur(14px);
+            overflow: hidden;
+        }
+
+        #opening-splash.hero-mode #opening-splash-backdrop {
+            background:
+                radial-gradient(circle at 14% 18%, rgba(108, 92, 231, 0.22), transparent 42%),
+                radial-gradient(circle at 86% 84%, rgba(0, 184, 148, 0.2), transparent 40%),
+                rgba(8, 16, 32, 0.92);
+        }
+
+        #opening-splash.hero-mode #opening-splash-shade {
+            background:
+                linear-gradient(170deg, rgba(8, 16, 32, 0.2), rgba(8, 16, 32, 0.5)),
+                radial-gradient(circle at center, rgba(8, 16, 32, 0) 34%, rgba(8, 16, 32, 0.44) 100%);
+        }
+
+        #hero-landing {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            direction: rtl;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .hero-orb {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(2px);
+            opacity: 0.95;
+        }
+
+        .hero-orb-one {
+            top: -62px;
+            inset-inline-end: -58px;
+            width: 170px;
+            height: 170px;
+            background: radial-gradient(circle, rgba(108, 92, 231, 0.18), rgba(108, 92, 231, 0));
+        }
+
+        .hero-orb-two {
+            bottom: 26px;
+            inset-inline-start: -52px;
+            width: 138px;
+            height: 138px;
+            background: radial-gradient(circle, rgba(0, 184, 148, 0.14), rgba(0, 184, 148, 0));
+        }
+
+        #hero-mascot {
+            width: 112px;
+            height: 112px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 12px 20px rgba(108, 92, 231, 0.16));
+        }
+
+        .hero-mascot-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .hero-mascot-wave-arm {
+            transform-origin: 11px 43px;
+            animation: heroWave 2.4s ease-in-out infinite;
+        }
+
+        .hero-tagline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #2d3436;
+        }
+
+        .hero-tagline-emoji {
+            font-size: 27px;
+        }
+
+        .hero-title {
+            margin: 0;
+            font-size: 22px;
+            line-height: 1.4;
+            color: #2d3436;
+            font-weight: 800;
+        }
+
+        .hero-title-accent {
+            color: #6c5ce7;
+        }
+
+        .hero-subtitle {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #666666;
+        }
+
+        .hero-subtitle strong {
+            color: #2d3436;
+        }
+
+        .hero-promise-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .promise-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 106px;
+            gap: 5px;
+            background: white;
+            border-radius: 14px;
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid #F0EDF5;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .promise-card-icon {
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .promise-card-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #2d3436;
+            line-height: 1.4;
+        }
+
+        .promise-card-subtitle {
+            font-size: 11px;
+            color: #888888;
+            line-height: 1.4;
+        }
+
+        .hero-primary-cta {
+            width: 100%;
+            max-width: 320px;
+            border: none;
+            border-radius: 16px;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+            color: white;
+            font-size: 17px;
+            font-weight: 700;
+            font-family: 'Assistant', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .hero-primary-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(108, 92, 231, 0.28);
+        }
+
+        .hero-proof {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            color: #888888;
+            font-size: 12px;
+        }
+
+        .hero-avatar-stack {
+            position: relative;
+            width: 82px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+
+        .hero-mini-avatar {
+            position: absolute;
+            top: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 3px 8px rgba(15, 23, 42, 0.1);
+        }
+
+        .hero-mini-avatar:nth-child(1) {
+            inset-inline-end: 0;
+            background: #ff6b6b;
+        }
+
+        .hero-mini-avatar:nth-child(2) {
+            inset-inline-end: 18px;
+            background: #6c5ce7;
+        }
+
+        .hero-mini-avatar:nth-child(3) {
+            inset-inline-end: 36px;
+            background: #00b894;
+        }
+
+        .hero-mini-avatar:nth-child(4) {
+            inset-inline-end: 54px;
+            background: #fdcb6e;
+        }
+
+        #hero-skip-btn {
+            background: none;
+            border: none;
+            font-size: 12px;
+            color: #aaaaaa;
+            cursor: pointer;
+            padding: 8px;
+            font-family: 'Assistant', sans-serif;
+        }
+
+        #hero-skip-btn:hover {
+            color: #8b8b8b;
+        }
+
+        #opening-splash-content.hero-shell #opening-splash-audio-hint {
+            margin: 0;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #7b5d18;
+            background: rgba(253, 203, 110, 0.18);
+            border: 1px solid rgba(253, 203, 110, 0.4);
+            border-radius: 12px;
+            padding: 8px 10px;
+        }
+
+        #opening-splash-content.hero-shell #opening-splash-actions {
+            margin-top: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        #opening-splash-content.hero-shell #opening-splash-actions button {
+            min-height: 42px;
+            border-radius: 14px;
+            border: 1px solid #dedaf0;
+            background: white;
+            color: #2d3436;
+            font-family: 'Assistant', sans-serif;
+            font-weight: 700;
+            padding: 9px 14px;
+        }
+
+        #opening-splash-content.hero-shell #opening-splash-audio-btn {
+            border-color: rgba(253, 203, 110, 0.78) !important;
+            color: #8a5b00 !important;
+            background: linear-gradient(135deg, rgba(255, 244, 214, 0.96), rgba(253, 203, 110, 0.78)) !important;
+            box-shadow: 0 8px 22px rgba(253, 203, 110, 0.26);
+        }
+
+        #opening-splash-content.hero-shell #opening-splash-version {
+            margin: 0;
+            font-size: 0.74rem;
+            color: #8b93a6;
+            font-weight: 700;
+        }
+
+        .hero-fade {
+            opacity: 0;
+            transform: translateY(16px);
+            animation: none;
+        }
+
+        #opening-splash.is-visible .hero-fade {
+            animation: heroFadeUp 0.6s ease forwards;
+        }
+
+        .hero-delay-1 { animation-delay: 0.12s; }
+        .hero-delay-2 { animation-delay: 0.42s; }
+        .hero-delay-3 { animation-delay: 0.72s; }
+        .hero-delay-4 { animation-delay: 1.02s; }
+        .hero-delay-5 { animation-delay: 1.32s; }
+        .hero-delay-6 { animation-delay: 1.62s; }
+        .hero-delay-7 { animation-delay: 1.92s; }
+
+        #onboarding-flow {
+            position: fixed;
+            inset: 0;
+            z-index: 3095;
+            align-items: center;
+            justify-content: center;
+            padding: 14px;
+            background:
+                radial-gradient(circle at 14% 14%, rgba(108, 92, 231, 0.14), transparent 32%),
+                radial-gradient(circle at 84% 82%, rgba(0, 184, 148, 0.12), transparent 28%),
+                linear-gradient(180deg, rgba(247, 249, 253, 0.96), rgba(250, 250, 253, 0.98));
+        }
+
+        #onboarding-shell {
+            width: min(420px, 100%);
+            max-height: calc(100dvh - 28px);
+            overflow-y: auto;
+            border-radius: 28px;
+            background: #fafafd;
+            box-shadow: 0 22px 48px rgba(15, 23, 42, 0.16);
+            border: 1px solid rgba(225, 224, 235, 0.95);
+            padding: 18px 18px calc(22px + var(--safe-bottom, 0px));
+            direction: rtl;
+        }
+
+        #ob-progress-bar {
+            height: 4px;
+            background: #F0EDF5;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        #ob-progress-fill {
+            height: 100%;
+            width: 25%;
+            background: linear-gradient(90deg, #6C5CE7, #A29BFE);
+            border-radius: 999px;
+            transition: width 0.4s ease;
+        }
+
+        #ob-question-area {
+            text-align: center;
+            padding: 36px 4px 14px;
+        }
+
+        #ob-emoji {
+            font-size: 48px;
+            line-height: 1;
+        }
+
+        #ob-question {
+            margin: 16px 0 32px;
+            font-size: 22px;
+            line-height: 1.4;
+            color: #2d3436;
+        }
+
+        #ob-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .ob-option-btn {
+            min-height: 74px;
+            border: 2px solid #E8E6F0;
+            border-radius: 16px;
+            padding: 16px 12px;
+            background: white;
+            color: #2d3436;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Assistant', sans-serif;
+            line-height: 1.45;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+        }
+
+        .ob-option-btn:hover {
+            transform: translateY(-1px);
+            border-color: #d9cff8;
+            box-shadow: 0 10px 18px rgba(108, 92, 231, 0.08);
+        }
+
+        .ob-option-btn.is-selected {
+            background: #6C5CE7;
+            color: white;
+            border-color: #6C5CE7;
+            transform: scale(0.98);
+            box-shadow: 0 10px 24px rgba(108, 92, 231, 0.22);
+        }
+
+        #ob-dots {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            padding: 8px 0 0;
+        }
+
+        .ob-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: #E8E6F0;
+            transition: all 0.3s ease;
+        }
+
+        .ob-dot.is-active,
+        .ob-dot.is-complete {
+            background: #6C5CE7;
+        }
+
+        .ob-dot.is-active {
+            width: 20px;
+        }
+
+        @keyframes heroFadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes heroWave {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+
+            20% {
+                transform: rotate(16deg);
+            }
+
+            40% {
+                transform: rotate(-8deg);
+            }
+
+            60% {
+                transform: rotate(14deg);
+            }
+
+            80% {
+                transform: rotate(-4deg);
+            }
+        }
+
+        @media (max-width: 500px) {
+            #opening-splash.hero-mode #opening-splash-content.hero-shell {
+                width: min(100%, calc(100% - 20px));
+                padding: 22px 16px 18px;
+                border-radius: 24px;
+            }
+
+            .hero-promise-grid {
+                gap: 7px;
+            }
+
+            .promise-card {
+                min-height: 100px;
+                padding: 10px 7px;
+            }
+
+            .promise-card-title {
+                font-size: 12px;
+            }
+
+            .promise-card-subtitle {
+                font-size: 10px;
+            }
+
+            #onboarding-shell {
+                width: 100%;
+                max-height: calc(100dvh - 20px);
+                border-radius: 24px;
+                padding: 16px 14px calc(20px + var(--safe-bottom, 0px));
+            }
+
+            #ob-question-area {
+                padding-top: 30px;
+            }
+
+            #ob-question {
+                font-size: 20px;
+                margin-bottom: 26px;
+            }
+
+            .ob-option-btn {
+                min-height: 68px;
+                font-size: 14px;
+                padding: 14px 10px;
+            }
+        }
     </style>
 </head>
 <body class="prestart-only">
 
-    <div id="opening-splash" class="hidden" aria-label="מסך פתיחה">
+    <div id="opening-splash" class="hidden hero-mode" aria-label="מסך פתיחה">
         <div id="opening-splash-backdrop" aria-hidden="true">
             <video id="opening-splash-video" class="hidden" muted loop playsinline preload="metadata" poster="/opening-poster.png"></video>
             <img id="opening-splash-poster" src="/opening-poster.png" onerror="this.onerror=null;this.src='opening-poster.png';" alt="">
         </div>
         <div id="opening-splash-shade" aria-hidden="true"></div>
-        <div id="opening-splash-content">
-            <div id="opening-splash-progress" aria-hidden="true"><span></span></div>
-            <p id="opening-splash-version"></p>
-            <p id="opening-splash-audio-hint">להפעלת שיר בפתיח לחצו על "נגן שיר".</p>
-            <div id="opening-splash-actions">
-                <button id="opening-splash-audio-btn" onclick="retrySplashMusic()">נגן שיר</button>
-                <button onclick="skipOpeningSplash()">המשך למסך הראשי</button>
-                <button id="opening-splash-copy-build-btn" class="hidden" type="button" onclick="copyBuildStampFromSplash()">העתק build</button>
+        <div id="opening-splash-content" class="hero-shell">
+            <div id="hero-landing" dir="rtl">
+                <div class="hero-orb hero-orb-one" aria-hidden="true"></div>
+                <div class="hero-orb hero-orb-two" aria-hidden="true"></div>
+
+                <div id="hero-mascot" class="hero-fade hero-delay-1" aria-hidden="true">
+                    <svg class="hero-mascot-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="hero-mascot-body" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#a29bfe"></stop>
+                                <stop offset="100%" stop-color="#6c5ce7"></stop>
+                            </linearGradient>
+                        </defs>
+                        <ellipse cx="50" cy="92" rx="22" ry="4" fill="rgba(0,0,0,0.1)"></ellipse>
+                        <ellipse cx="50" cy="56" rx="28" ry="30" fill="url(#hero-mascot-body)"></ellipse>
+                        <ellipse cx="50" cy="48" rx="22" ry="20" fill="#ede7f6"></ellipse>
+                        <circle cx="42" cy="44" r="4.2" fill="#2d3436"></circle>
+                        <circle cx="58" cy="44" r="4.2" fill="#2d3436"></circle>
+                        <circle cx="43.2" cy="42.5" r="1.5" fill="white"></circle>
+                        <circle cx="59.2" cy="42.5" r="1.5" fill="white"></circle>
+                        <path d="M 40 55 Q 50 64 60 55" fill="none" stroke="#2d3436" stroke-width="2.5" stroke-linecap="round"></path>
+                        <g class="hero-mascot-wave-arm">
+                            <line x1="22" y1="55" x2="8" y2="35" stroke="#a29bfe" stroke-width="5" stroke-linecap="round"></line>
+                            <circle cx="7" cy="33" r="4" fill="#ede7f6"></circle>
+                        </g>
+                        <line x1="78" y1="55" x2="88" y2="65" stroke="#a29bfe" stroke-width="5" stroke-linecap="round"></line>
+                        <text x="50" y="29" text-anchor="middle" font-size="16" font-weight="900" fill="#6c5ce7">⊕</text>
+                        <circle cx="17" cy="26" r="3" fill="#fdcb6e" opacity="0.82"></circle>
+                        <circle cx="82" cy="20" r="2.5" fill="#00b894" opacity="0.82"></circle>
+                        <circle cx="75" cy="30" r="2.2" fill="#ff6b6b" opacity="0.78"></circle>
+                    </svg>
+                </div>
+
+                <div class="hero-tagline hero-fade hero-delay-2">
+                    <span class="hero-tagline-emoji">👋</span>
+                    <span>היי!</span>
+                </div>
+
+                <h1 class="hero-title hero-fade hero-delay-3">
+                    מה אם הייתם <span class="hero-title-accent">רואים</span> את המתמטיקה
+                    <br>במקום רק לשמוע עליה?
+                </h1>
+
+                <p class="hero-subtitle hero-fade hero-delay-4">
+                    כאן לא מלמדים נוסחאות. כאן מאמנים את העיניים.<br>
+                    <strong>ברגע שתראו, תבינו.</strong>
+                </p>
+
+                <div class="hero-promise-grid hero-fade hero-delay-5">
+                    <div class="promise-card">
+                        <span class="promise-card-icon">📈</span>
+                        <div class="promise-card-title">שיפור של 10+ נקודות</div>
+                        <div class="promise-card-subtitle">מבוסס מחקר</div>
+                    </div>
+                    <div class="promise-card">
+                        <span class="promise-card-icon">⏱️</span>
+                        <div class="promise-card-title">15 דקות ביום</div>
+                        <div class="promise-card-subtitle">זה כל מה שצריך</div>
+                    </div>
+                    <div class="promise-card">
+                        <span class="promise-card-icon">📱</span>
+                        <div class="promise-card-title">מהטלפון</div>
+                        <div class="promise-card-subtitle">בכל מקום, בכל זמן</div>
+                    </div>
+                </div>
+
+                <button id="btn-hero-start" class="hero-primary-cta hero-fade hero-delay-6" type="button" onclick="startOnboarding()">
+                    בואו נתחיל — זה בחינם ←
+                </button>
+
+                <div class="hero-proof hero-fade hero-delay-7">
+                    <div class="hero-avatar-stack" aria-hidden="true">
+                        <span class="hero-mini-avatar">ד</span>
+                        <span class="hero-mini-avatar">מ</span>
+                        <span class="hero-mini-avatar">ש</span>
+                        <span class="hero-mini-avatar">י</span>
+                    </div>
+                    <span>1,200+ תלמידים כבר משתמשים</span>
+                </div>
+
+                <button id="hero-skip-btn" class="hero-fade hero-delay-7" type="button" onclick="skipToApp()">
+                    כבר הייתי כאן — תעבירו אותי ישר
+                </button>
+
+                <p id="opening-splash-audio-hint" class="hero-fade hero-delay-7">להפעלת שיר בפתיח לחצו על "נגן שיר".</p>
+
+                <div id="opening-splash-actions" class="hero-fade hero-delay-7">
+                    <button id="opening-splash-audio-btn" type="button" onclick="retrySplashMusic()">נגן שיר</button>
+                    <button id="opening-splash-copy-build-btn" class="hidden" type="button" onclick="copyBuildStampFromSplash()">העתק build</button>
+                </div>
+
+                <p id="opening-splash-version"></p>
+                <div id="opening-splash-progress" class="hidden" aria-hidden="true"><span></span></div>
             </div>
+        </div>
+    </div>
+
+    <div id="onboarding-flow" class="hidden" dir="rtl" style="display:none;" aria-hidden="true">
+        <div id="onboarding-shell">
+            <div id="ob-progress-bar">
+                <div id="ob-progress-fill"></div>
+            </div>
+            <div id="ob-question-area">
+                <div id="ob-emoji" aria-hidden="true"></div>
+                <h2 id="ob-question"></h2>
+                <div id="ob-options"></div>
+            </div>
+            <div id="ob-dots"></div>
         </div>
     </div>
 
@@ -1606,8 +2212,15 @@
         const OPENING_SPLASH_DURATION_MS = 5000;
         const OPENING_MUSIC_DURATION_SECONDS = 30;
         const QUICK_TOUR_STORAGE_KEY = 'math_visual_quick_tour_v1';
+        const HERO_ONBOARDING_STORAGE_KEY = 'mathviz_onboarding';
         const START_GUIDE_ONBOARDING_STORAGE_KEY = 'math_visual_start_guide_onboarding_v1';
         const CLEAN_MODE_STORAGE_KEY = 'math_visual_clean_mode_v1';
+        const HERO_ONBOARDING_QUESTIONS = [
+            { q: 'מה הכיתה שלך?', options: ['ט׳', 'י׳', 'י״א', 'י״ב'], key: 'grade', emoji: '🎓' },
+            { q: 'כמה יחידות מתמטיקה?', options: ['3 יחידות', '4 יחידות', '5 יחידות', 'עוד לא יודע/ת'], key: 'units', emoji: '📐' },
+            { q: 'מה הכי קשה לך?', options: ['להבין מה הגרף אומר', 'לתרגם מילים למשוואות', 'שאלות פרמטרים', 'הכול קשה 😅'], key: 'difficulty', emoji: '😵' },
+            { q: 'מה המטרה שלך?', options: ['לעבור את הבגרות', 'לשפר ציון', 'להבין סוף סוף', 'סתם לנסות'], key: 'goal', emoji: '🎯' }
+        ];
         const HELP_VOICE_STORAGE_KEY = 'math_visual_voice_enabled_v1';
         const MATH_GYM_POPUP_STORAGE_KEY = 'math_gym_popup_seen_v1';
         const COACH_CATALOG_URL = '/coach_feedback_catalog.json';
@@ -1813,6 +2426,8 @@
         let openingSplashExitTimer = null;
         let openingSplashHideTimer = null;
         let splashMusicUnlockBound = false;
+        let obStep = 0;
+        let obAnswers = {};
         let appInitialized = false;
         let winOverlayTimer = null;
         let runtimeDisplayedVersion = APP_VERSION;
@@ -7423,8 +8038,138 @@
             if (stepsPanel) stepsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
+        function dismissOpeningSplashForOnboarding() {
+            if (openingSplashExitTimer) {
+                clearTimeout(openingSplashExitTimer);
+                openingSplashExitTimer = null;
+            }
+            if (openingSplashHideTimer) {
+                clearTimeout(openingSplashHideTimer);
+                openingSplashHideTimer = null;
+            }
+            let splash = document.getElementById('opening-splash');
+            if (splash) {
+                splash.classList.remove('is-visible', 'is-exiting');
+                splash.classList.add('hidden');
+            }
+            let splashVideo = document.getElementById('opening-splash-video');
+            if (splashVideo) splashVideo.pause();
+            unbindSplashMusicUnlock();
+        }
+
+        function closeOnboardingFlow(options = {}) {
+            let flow = document.getElementById('onboarding-flow');
+            if (flow) {
+                flow.style.display = 'none';
+                flow.classList.add('hidden');
+                flow.setAttribute('aria-hidden', 'true');
+            }
+            document.body.classList.remove('onboarding-active');
+            if (options.reset !== false) {
+                obStep = 0;
+                obAnswers = {};
+            }
+        }
+
+        function startOnboarding() {
+            let flow = document.getElementById('onboarding-flow');
+            if (!flow) {
+                skipToApp();
+                return;
+            }
+            obStep = 0;
+            obAnswers = {};
+            dismissOpeningSplashForOnboarding();
+            document.body.classList.add('onboarding-active');
+            flow.classList.remove('hidden');
+            flow.style.display = 'flex';
+            flow.setAttribute('aria-hidden', 'false');
+            renderObStep();
+        }
+
+        function renderObStep() {
+            let q = HERO_ONBOARDING_QUESTIONS[obStep];
+            if (!q) {
+                finishOnboarding();
+                return;
+            }
+            let emojiEl = document.getElementById('ob-emoji');
+            let questionEl = document.getElementById('ob-question');
+            let progressFill = document.getElementById('ob-progress-fill');
+            let optionsDiv = document.getElementById('ob-options');
+            let dotsDiv = document.getElementById('ob-dots');
+            let shell = document.getElementById('onboarding-shell');
+            if (!emojiEl || !questionEl || !progressFill || !optionsDiv || !dotsDiv) return;
+
+            if (shell) shell.scrollTop = 0;
+            emojiEl.textContent = q.emoji;
+            questionEl.textContent = q.q;
+            progressFill.style.width = `${((obStep + 1) / HERO_ONBOARDING_QUESTIONS.length) * 100}%`;
+
+            optionsDiv.innerHTML = '';
+            q.options.forEach(function (opt) {
+                let btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'ob-option-btn';
+                btn.textContent = opt;
+                btn.onclick = function () {
+                    obAnswers[q.key] = opt;
+                    Array.from(optionsDiv.children).forEach((node) => node.classList.remove('is-selected'));
+                    btn.classList.add('is-selected');
+                    setTimeout(function () {
+                        if (obStep < HERO_ONBOARDING_QUESTIONS.length - 1) {
+                            obStep += 1;
+                            renderObStep();
+                        } else {
+                            finishOnboarding();
+                        }
+                    }, 300);
+                };
+                optionsDiv.appendChild(btn);
+            });
+
+            dotsDiv.innerHTML = '';
+            for (let i = 0; i < HERO_ONBOARDING_QUESTIONS.length; i += 1) {
+                let dot = document.createElement('div');
+                dot.className = 'ob-dot';
+                if (i < obStep) dot.classList.add('is-complete');
+                if (i === obStep) dot.classList.add('is-active');
+                dotsDiv.appendChild(dot);
+            }
+
+            let firstOption = optionsDiv.querySelector('button');
+            if (firstOption) firstOption.focus({ preventScroll: true });
+        }
+
+        function finishOnboarding() {
+            let savedAnswers = Object.assign({}, obAnswers);
+            try {
+                localStorage.setItem(HERO_ONBOARDING_STORAGE_KEY, JSON.stringify(savedAnswers));
+            } catch (err) {
+                // Continue when localStorage is unavailable.
+            }
+
+            closeOnboardingFlow();
+
+            let gradeText = savedAnswers.grade ? `כיתה ${savedAnswers.grade}` : '';
+            let mascotText = gradeText ? `שלום! ${gradeText} — בואו נתחיל! 🎉` : 'שלום! בואו נתחיל! 🎉';
+            hideOpeningSplash({
+                mascotMood: 'happy',
+                mascotText,
+                mascotDuration: 4000
+            });
+        }
+
+        function skipToApp() {
+            closeOnboardingFlow();
+            skipOpeningSplash();
+        }
+
         function hideOpeningSplash(options = {}) {
             let immediate = !!options.immediate;
+            let mascotMood = String(options.mascotMood || '').trim();
+            let mascotText = String(options.mascotText || '').trim();
+            let mascotDuration = Number.isFinite(options.mascotDuration) ? Math.max(1200, Math.round(options.mascotDuration)) : 4000;
             if (openingSplashExitTimer) {
                 clearTimeout(openingSplashExitTimer);
                 openingSplashExitTimer = null;
@@ -7436,6 +8181,7 @@
             let splash = document.getElementById('opening-splash');
             if (!splash) {
                 openingSplashDone = true;
+                document.body.classList.remove('onboarding-active');
                 maybeCompleteEntryFlowAfterSplash('missing_splash_element');
                 return;
             }
@@ -7448,12 +8194,17 @@
             unbindSplashMusicUnlock();
             let finalizeHide = () => {
                 openingSplashHideTimer = null;
+                document.body.classList.remove('onboarding-active');
                 splash.classList.add('hidden');
                 splash.classList.remove('is-exiting');
                 scheduleViewportTopReset({ onlyWhilePrestart: true, delays: [0, 80, 220] });
                 syncMobileFeedAutostart();
                 maybeCompleteEntryFlowAfterSplash('splash_hidden');
-                if (typeof showMascotMood === 'function') setTimeout(function () { showMascotMood('idle', 'שלום! בואו נלמד מתמטיקה? 👋', 4000); }, 800);
+                if (typeof showMascotMood === 'function') {
+                    let nextMood = mascotMood || 'idle';
+                    let nextText = mascotText || 'שלום! בואו נלמד מתמטיקה? 👋';
+                    setTimeout(function () { showMascotMood(nextMood, nextText, mascotDuration); }, 800);
+                }
             };
             if (immediate) {
                 finalizeHide();
@@ -7509,6 +8260,7 @@
 
         function startOpeningSplash(forceReplay) {
             if (openingSplashDone && !forceReplay) return;
+            closeOnboardingFlow();
             openingSplashDone = false;
             let splash = document.getElementById('opening-splash');
             if (!splash) return;
@@ -7539,13 +8291,9 @@
             let btn = document.getElementById('opening-splash-audio-btn');
             if (hint) hint.classList.remove('hidden');
             if (btn) btn.innerText = 'נגן שיר';
+            bindSplashMusicUnlock();
             splash.classList.remove('hidden');
             requestAnimationFrame(() => splash.classList.add('is-visible'));
-
-            openingSplashExitTimer = setTimeout(() => {
-                openingSplashExitTimer = null;
-                hideOpeningSplash();
-            }, OPENING_SPLASH_DURATION_MS);
         }
 
         function replayOpeningSplash() {
