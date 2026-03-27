@@ -3,6 +3,7 @@ const APP_SHELL = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/offline.html',
   '/privacy.html',
   '/version.json',
   '/mobile.css',
@@ -80,7 +81,7 @@ async function networkFirst(request) {
     const cached = await caches.match(request, { ignoreSearch: true });
     if (cached) return cached;
     if (request.mode === 'navigate') {
-      return (await caches.match('/index.html')) || Response.error();
+      return (await caches.match('/index.html')) || (await caches.match('/offline.html')) || Response.error();
     }
     return Response.error();
   }
