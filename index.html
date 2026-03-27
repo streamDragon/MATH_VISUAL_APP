@@ -1636,7 +1636,7 @@
                 transition: transform 0.3s ease !important;
                 z-index: 800 !important;
                 background: white !important;
-                box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1) !important;
+                box-shadow: 4px 0 20px rgba(0,0,0,0.15) !important;
                 overflow-y: auto !important;
                 border-radius: 0 18px 18px 0 !important;
             }
@@ -1727,6 +1727,7 @@
             }
 
             .gam-badge {
+                display: inline-flex !important;
                 font-size: 12px !important;
                 padding: 2px 8px !important;
             }
@@ -2773,7 +2774,7 @@
                     <button id="btn-top-function-edit" type="button" onclick="openBuilderFromTop()">✎ עריכה</button>
                 </div>
             </div>
-            <div id="question-nav-bar" class="hidden" aria-label="מעבר בין שאלות"></div>
+            <div id="question-nav-bar" aria-label="מעבר בין שאלות"></div>
             <div id="top-question-wrap">
                 <span id="top-question-index">שאלה 1/4</span>
                 <span id="top-question">כשתתחילו תרגיל, כאן תופיע השאלה הנוכחית.</span>
@@ -2929,7 +2930,7 @@
 
     <div id="mobile-panel-scrim" aria-hidden="true" onclick="onMobilePanelScrimClick()"></div>
     <div id="sidebar" class="drawer-collapsed">
-        <button id="drawer-handle" type="button" onclick="toggleDrawer()" aria-label="פתח את המשימה והכלים">
+        <button id="drawer-handle" type="button" onclick="toggleSidebar()" aria-label="פתח את המשימה והכלים">
             <span class="drawer-handle-icon" aria-hidden="true">☰</span>
             <span class="drawer-handle-state">כלים</span>
         </button>
@@ -9597,6 +9598,16 @@
 
         function toggleDrawer() {
             setDrawerOpen(!drawerOpen);
+        }
+
+        function toggleSidebar() {
+            var sb = document.getElementById('sidebar');
+            if (!sb) return;
+            if (typeof setDrawerOpen === 'function') {
+                setDrawerOpen(!sb.classList.contains('open'));
+                return;
+            }
+            sb.classList.toggle('open');
         }
 
         function exposeBuildBadgeInEmbedMode() {
