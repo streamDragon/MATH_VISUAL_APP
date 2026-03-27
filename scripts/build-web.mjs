@@ -69,6 +69,15 @@ async function replaceInFile(filePath, replacements) {
   }
 }
 
+async function copyFileIfExists(sourcePath, targetPath) {
+  try {
+    await fs.copyFile(sourcePath, targetPath);
+  } catch (err) {
+    if (err && err.code === 'ENOENT') return;
+    throw err;
+  }
+}
+
 async function readAppVersion() {
   const sourceVersionFile = path.join(rootDir, 'public', 'version.json');
   try {
@@ -87,6 +96,11 @@ exitOnFailure(runNode([viteBin, 'build']));
 
 const distDir = path.join(rootDir, 'dist');
 await fs.mkdir(distDir, { recursive: true });
+
+await Promise.all([
+  copyFileIfExists(path.join(rootDir, 'public', 'privacy.html'), path.join(distDir, 'privacy.html')),
+  copyFileIfExists(path.join(rootDir, 'public', 'offline.html'), path.join(distDir, 'offline.html'))
+]);
 
 await replaceInFile(path.join(distDir, 'index.html'), [
   ['__BUILD_ID__', buildId],
