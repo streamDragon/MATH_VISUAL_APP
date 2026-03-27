@@ -305,8 +305,141 @@
             overflow: hidden !important;
         }
 
+        body.age-gate-active {
+            overflow: hidden !important;
+        }
+
         body.onboarding-active {
             overflow: hidden !important;
+        }
+
+        #age-gate-screen {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background:
+                linear-gradient(180deg, rgba(8, 16, 32, 0.7), rgba(8, 16, 32, 0.82)),
+                radial-gradient(circle at 18% 16%, rgba(108, 92, 231, 0.18), transparent 34%),
+                radial-gradient(circle at 82% 84%, rgba(0, 184, 148, 0.14), transparent 30%);
+            z-index: 11000;
+        }
+
+        #age-gate-card {
+            width: min(420px, 100%);
+            padding: 28px 22px 22px;
+            border-radius: 28px;
+            background: rgba(250, 250, 253, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            box-shadow: 0 26px 68px rgba(15, 23, 42, 0.3);
+            text-align: center;
+            color: #1f2937;
+        }
+
+        .age-gate-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 60px;
+            min-height: 36px;
+            padding: 6px 14px;
+            margin-bottom: 12px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #6c5ce7, #8f7cf5);
+            color: #fff;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+
+        #age-gate-title {
+            margin: 0 0 8px;
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .age-gate-copy {
+            margin: 0;
+            line-height: 1.7;
+            color: #475569;
+        }
+
+        .age-gate-choice-panel,
+        .age-gate-block-panel {
+            margin-top: 18px;
+        }
+
+        .age-gate-choice-panel {
+            display: grid;
+            gap: 10px;
+        }
+
+        .age-gate-choice-btn,
+        .age-gate-secondary-btn {
+            width: 100%;
+            min-height: 52px;
+            border: none;
+            border-radius: 18px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+        }
+
+        .age-gate-choice-btn:hover,
+        .age-gate-secondary-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .age-gate-choice-btn-primary {
+            background: linear-gradient(135deg, #6c5ce7, #7f6cf3);
+            color: #fff;
+            box-shadow: 0 14px 32px rgba(108, 92, 231, 0.24);
+        }
+
+        .age-gate-choice-btn-secondary {
+            background: #fff4eb;
+            color: #9a3412;
+            border: 1px solid rgba(249, 115, 22, 0.18);
+        }
+
+        .age-gate-block-panel {
+            padding: 16px 14px 14px;
+            border-radius: 20px;
+            background: #fff7ed;
+            border: 1px solid rgba(251, 146, 60, 0.24);
+        }
+
+        .age-gate-block-title {
+            margin: 0 0 8px;
+            font-weight: 800;
+            color: #9a3412;
+        }
+
+        .age-gate-block-copy {
+            margin: 0 0 12px;
+            line-height: 1.7;
+            color: #7c2d12;
+        }
+
+        .age-gate-secondary-btn {
+            background: #ffffff;
+            color: #92400e;
+            border: 1px solid rgba(146, 64, 14, 0.14);
+        }
+
+        .age-gate-footnote {
+            margin: 16px 0 0;
+            font-size: 0.92rem;
+            line-height: 1.6;
+            color: #64748b;
+        }
+
+        .age-gate-footnote a,
+        .age-gate-block-copy a {
+            color: #5b4bc4;
+            font-weight: 700;
         }
 
         body.lobby-open #start-guide-modal {
@@ -1457,6 +1590,38 @@
             <button id="btn-auth-guest" type="button" onclick="loginAsGuest()" style="background:none; border:none; min-height:48px; font-size:13px; color:#999; cursor:pointer; margin-top:14px; padding:8px 12px; direction:rtl;">
                 לא עכשיו - אמשיך בלי שמירה
             </button>
+        </div>
+    </div>
+
+    <div id="age-gate-screen" dir="rtl" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="age-gate-title">
+        <div id="age-gate-card">
+            <div class="age-gate-badge" aria-hidden="true">13+</div>
+            <h2 id="age-gate-title">לפני שמתחילים</h2>
+            <p class="age-gate-copy">
+                כדי להשתמש בגרסת Android הזו צריך לאשר אם המשתמש או המשתמשת הם בני 13 ומעלה.
+            </p>
+            <div id="age-gate-choice-panel" class="age-gate-choice-panel">
+                <button id="btn-age-gate-eligible" class="age-gate-choice-btn age-gate-choice-btn-primary" type="button" onclick="confirmAgeGateEligible()">
+                    אני בן/בת 13 ומעלה
+                </button>
+                <button id="btn-age-gate-under13" class="age-gate-choice-btn age-gate-choice-btn-secondary" type="button" onclick="confirmAgeGateBlocked()">
+                    אני מתחת לגיל 13
+                </button>
+            </div>
+            <div id="age-gate-block-panel" class="age-gate-block-panel hidden">
+                <p class="age-gate-block-title">הגישה באפליקציית Android הזו פתוחה כרגע רק מגיל 13 ומעלה.</p>
+                <p class="age-gate-block-copy">
+                    אם זו הייתה בחירה לא נכונה אפשר לחזור לבחירה. לפרטים נוספים אפשר לעיין גם ב־
+                    <a href="/privacy.html" target="_blank" rel="noopener">מדיניות הפרטיות</a>.
+                </p>
+                <button id="btn-age-gate-reset" class="age-gate-secondary-btn" type="button" onclick="resetAgeGateChoice()">
+                    חזרה לבחירת גיל
+                </button>
+            </div>
+            <p class="age-gate-footnote">
+                אם אתם הורה או מורה ומבקשים להבין מה נשמר מקומית ומה לא, אפשר לפתוח את
+                <a href="/privacy.html" target="_blank" rel="noopener">מדיניות הפרטיות</a>.
+            </p>
         </div>
     </div>
 
@@ -2989,6 +3154,11 @@
         const HERO_ONBOARDING_STORAGE_KEY = 'mathviz_onboarding';
         const START_GUIDE_ONBOARDING_STORAGE_KEY = 'math_visual_start_guide_onboarding_v1';
         const CLEAN_MODE_STORAGE_KEY = 'math_visual_clean_mode_v1';
+        const AGE_GATE_STORAGE_KEY = 'math_visual_age_gate_v1';
+        const AGE_GATE_STATUS = Object.freeze({
+            ELIGIBLE: '13_plus',
+            BLOCKED: 'under_13'
+        });
         const HERO_ONBOARDING_QUESTIONS = [
             { q: 'מה הכיתה שלך?', options: ['ט׳', 'י׳', 'י״א', 'י״ב'], key: 'grade', emoji: '🎓' },
             { q: 'כמה יחידות מתמטיקה?', options: ['3 יחידות', '4 יחידות', '5 יחידות', 'עוד לא יודע/ת'], key: 'units', emoji: '📐' },
@@ -9595,6 +9765,80 @@
             }
         }
 
+        function readAgeGateChoice() {
+            try {
+                let raw = String(localStorage.getItem(AGE_GATE_STORAGE_KEY) || '').trim();
+                if (raw === AGE_GATE_STATUS.ELIGIBLE || raw === AGE_GATE_STATUS.BLOCKED) return raw;
+            } catch (err) {
+                // Continue without persistence.
+            }
+            return '';
+        }
+
+        function writeAgeGateChoice(value) {
+            try {
+                if (!value) {
+                    localStorage.removeItem(AGE_GATE_STORAGE_KEY);
+                    return;
+                }
+                localStorage.setItem(AGE_GATE_STORAGE_KEY, value);
+            } catch (err) {
+                // Continue without persistence.
+            }
+        }
+
+        function syncAgeGateUi(choice) {
+            let normalized = choice === AGE_GATE_STATUS.BLOCKED ? AGE_GATE_STATUS.BLOCKED : '';
+            let choicePanel = document.getElementById('age-gate-choice-panel');
+            let blockPanel = document.getElementById('age-gate-block-panel');
+            if (choicePanel) choicePanel.classList.toggle('hidden', normalized === AGE_GATE_STATUS.BLOCKED);
+            if (blockPanel) blockPanel.classList.toggle('hidden', normalized !== AGE_GATE_STATUS.BLOCKED);
+        }
+
+        function showAgeGateScreen(choice) {
+            let gate = document.getElementById('age-gate-screen');
+            if (!gate) return;
+            let normalized = choice || readAgeGateChoice();
+            syncAgeGateUi(normalized);
+            gate.style.display = 'flex';
+            gate.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('entry-modal-open', 'age-gate-active');
+            requestAnimationFrame(() => {
+                let focusTarget = normalized === AGE_GATE_STATUS.BLOCKED
+                    ? document.getElementById('btn-age-gate-reset')
+                    : document.getElementById('btn-age-gate-eligible');
+                try {
+                    focusTarget?.focus({ preventScroll: true });
+                } catch (err) {
+                    // Ignore focus issues on restricted browsers.
+                }
+            });
+        }
+
+        function hideAgeGateScreen() {
+            let gate = document.getElementById('age-gate-screen');
+            if (!gate) return;
+            gate.style.display = 'none';
+            gate.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('entry-modal-open', 'age-gate-active');
+        }
+
+        function confirmAgeGateEligible() {
+            writeAgeGateChoice(AGE_GATE_STATUS.ELIGIBLE);
+            hideAgeGateScreen();
+            showApp();
+        }
+
+        function confirmAgeGateBlocked() {
+            writeAgeGateChoice(AGE_GATE_STATUS.BLOCKED);
+            showAgeGateScreen(AGE_GATE_STATUS.BLOCKED);
+        }
+
+        function resetAgeGateChoice() {
+            writeAgeGateChoice('');
+            showAgeGateScreen('');
+        }
+
         function getAuthRedirectUrl() {
             try {
                 let url = new URL(window.location.href);
@@ -9730,6 +9974,12 @@
 
         function showApp() {
             hideAuthScreen();
+            let ageGateChoice = readAgeGateChoice();
+            if (ageGateChoice !== AGE_GATE_STATUS.ELIGIBLE) {
+                showAgeGateScreen(ageGateChoice);
+                return Promise.resolve(false);
+            }
+            hideAgeGateScreen();
             if (appInitialized) return Promise.resolve();
             if (appBootPromise) return appBootPromise;
 
