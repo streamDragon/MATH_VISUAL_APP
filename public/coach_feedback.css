@@ -285,4 +285,8 @@ body.embed-mode #coach-feedback {
         margin-inline-start: 30px;
         font-size: 0.72rem;
     }
+
+    body.prestart-only.viewport-mobile #coach-feedback {
+        display: none !important;
+    }
 }
