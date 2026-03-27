@@ -385,6 +385,14 @@
             width: 100%;
         }
 
+        .hero-video-actions {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+
         #vizy-video {
             width: 100%;
             display: block;
@@ -444,6 +452,31 @@
 
         #vizy-skip.is-visible {
             display: inline-flex;
+        }
+
+        .splash-enter-cta {
+            width: 100%;
+            min-height: 50px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 16px;
+            padding: 13px 16px;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            color: #ffffff;
+            font-family: 'Assistant', sans-serif;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 14px 30px rgba(79, 70, 229, 0.24);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+        }
+
+        .splash-enter-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 34px rgba(79, 70, 229, 0.3);
+            filter: saturate(1.04);
         }
 
         #hero-content {
@@ -956,6 +989,10 @@
                 gap: 10px;
             }
 
+            .hero-video-actions {
+                gap: 8px;
+            }
+
             #vizy-video,
             #vizy-play-overlay {
                 border-radius: 14px;
@@ -1445,7 +1482,10 @@
                             </span>
                         </button>
                     </div>
-                    <button id="vizy-skip" type="button" onclick="skipVideo()">דלגו על הסרטון ←</button>
+                    <div class="hero-video-actions">
+                        <button id="btn-splash-enter-app" class="splash-enter-cta" type="button" onclick="skipToApp()">כניסה לאפליקציה עכשיו</button>
+                        <button id="vizy-skip" type="button" onclick="skipVideo()">דלגו על הסרטון ←</button>
+                    </div>
                 </div>
 
                 <div id="hero-content" class="hidden">
@@ -1534,7 +1574,7 @@
                 </div>
 
                 <div id="opening-splash-meta">
-                    <p id="opening-splash-audio-hint">להפעלת שיר בפתיח לחצו על "נגן שיר".</p>
+                    <p id="opening-splash-audio-hint">אפשר להפעיל שיר לפתיח, או להיכנס מיד לאפליקציה בלי לחכות לסרט.</p>
 
                     <div id="opening-splash-actions">
                         <button id="opening-splash-audio-btn" type="button" onclick="toggleSplashMusic()">🎵 נגן שיר</button>
@@ -5033,7 +5073,9 @@
         function shouldAutoOpenLobby() {
             if (ENTRY_FLOW_QUERY.lobby === true) return true;
             if (ENTRY_FLOW_QUERY.lobby === false) return false;
-            return !hasSeenEntryIntro();
+            // Keep the startup flow stable: after the splash we land on the feature screen
+            // unless the lobby was explicitly requested.
+            return false;
         }
 
         function shouldShowOpeningSplash() {
