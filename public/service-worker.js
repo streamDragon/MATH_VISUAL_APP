@@ -1,9 +1,10 @@
-const CACHE_NAME = 'mathviz-v1.1';
+const CACHE_NAME = 'mathviz-v1.2';
+const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/offline.html',
+  OFFLINE_URL,
   '/privacy.html',
   '/version.json',
   '/mobile.css',
@@ -29,8 +30,10 @@ const APP_SHELL = [
   '/icons/icon-384.png',
   '/icons/icon-512.png',
   '/icons/icon-maskable-512.png',
+  '/icons/apple-touch-icon.png',
   '/icons/shortcut-practice.png',
   '/icons/shortcut-scan.png',
+  '/screenshots/functions-workplace.png',
   '/screenshots/mobile-home.png',
   '/screenshots/mobile-exercise.png',
   '/screenshots/mobile-win.png'
@@ -69,9 +72,14 @@ async function addAppShell(cache) {
   });
 }
 
-async function networkFirst(request) {
+async function networkFirst(request, event) {
   const cache = await caches.open(CACHE_NAME);
   try {
+    const preload = event ? await event.preloadResponse : null;
+    if (shouldCacheResponse(preload)) {
+      cache.put(request, preload.clone());
+      return preload;
+    }
     const response = await fetch(request);
     if (shouldCacheResponse(response)) {
       cache.put(request, response.clone());
@@ -81,7 +89,7 @@ async function networkFirst(request) {
     const cached = await caches.match(request, { ignoreSearch: true });
     if (cached) return cached;
     if (request.mode === 'navigate') {
-      return (await caches.match('/index.html')) || (await caches.match('/offline.html')) || Response.error();
+      return (await caches.match('/index.html')) || (await caches.match(OFFLINE_URL)) || Response.error();
     }
     return Response.error();
   }
@@ -121,7 +129,12 @@ self.addEventListener('activate', (event) => {
       keys
         .filter((key) => key !== CACHE_NAME && CACHE_PREFIXES.some((prefix) => key.startsWith(prefix)))
         .map((key) => caches.delete(key))
-    )).then(() => self.clients.claim())
+    )).then(async () => {
+      if ('navigationPreload' in self.registration) {
+        await self.registration.navigationPreload.enable();
+      }
+      await self.clients.claim();
+    })
   );
 });
 
@@ -130,7 +143,7 @@ self.addEventListener('fetch', (event) => {
   if (!isCacheableSameOriginRequest(request)) return;
 
   if (request.mode === 'navigate') {
-    event.respondWith(networkFirst(request));
+    event.respondWith(networkFirst(request, event));
     return;
   }
 
@@ -139,7 +152,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  event.respondWith(networkFirst(request));
+  event.respondWith(networkFirst(request, event));
 });
 
 self.addEventListener('message', (event) => {

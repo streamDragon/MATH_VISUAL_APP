@@ -8,6 +8,11 @@
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait",
   "theme_color": "#6C5CE7",
   "background_color": "#FAFAFD",
@@ -16,6 +21,13 @@
     "productivity"
   ],
   "screenshots": [
+    {
+      "src": "/screenshots/functions-workplace.png",
+      "sizes": "1200x801",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "מסך עבודה עם משימה, גרף וכלי פתרון"
+    },
     {
       "src": "/screenshots/mobile-home.png",
       "sizes": "390x844",

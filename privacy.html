@@ -1,104 +1,255 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>מדיניות פרטיות — Math Visual App</title>
-  <style>
-    body{font-family:Arial,Helvetica,sans-serif;line-height:1.75;margin:0;background:#f7f9fc;color:#16213e}
-    main{max-width:900px;margin:0 auto;padding:40px 22px 80px}
-    h1,h2{line-height:1.25}
-    h1{font-size:2rem;margin-bottom:0.2rem}
-    h2{margin-top:2.2rem}
-    .note{background:#fff8dd;border:1px solid #eedb95;border-radius:14px;padding:14px 16px;margin:20px 0}
-    .card{background:white;border-radius:18px;padding:22px 20px;box-shadow:0 6px 24px rgba(0,0,0,.06)}
-    ul{padding-right:1.2rem}
-    code{background:#eef1fb;padding:2px 6px;border-radius:6px}
-    a{color:#4b48d1}
-    .small{color:#5b6475;font-size:0.95rem}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>מדיניות פרטיות | מעבדת הפונקציות</title>
+    <meta name="description" content="מדיניות הפרטיות של אפליקציית מעבדת הפונקציות.">
+    <meta name="theme-color" content="#6C5CE7">
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f4f6fb;
+            --card: rgba(255, 255, 255, 0.95);
+            --text: #1f2937;
+            --muted: #64748b;
+            --line: #dbe4ff;
+            --accent: #6c5ce7;
+            --accent-2: #a29bfe;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Assistant", "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(162, 155, 254, 0.2), transparent 28%),
+                linear-gradient(180deg, #f8f9ff 0%, var(--bg) 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        main {
+            width: min(920px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 28px 0 40px;
+        }
+
+        .hero,
+        .section {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+        }
+
+        .hero {
+            padding: 28px 24px;
+            margin-bottom: 18px;
+        }
+
+        .kicker {
+            display: inline-flex;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(108, 92, 231, 0.1);
+            color: var(--accent);
+            font-size: 0.84rem;
+            font-weight: 800;
+        }
+
+        h1 {
+            margin: 14px 0 8px;
+            font-size: clamp(1.9rem, 4vw, 2.5rem);
+            line-height: 1.2;
+        }
+
+        .hero p,
+        .section p,
+        .section li {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text);
+        }
+
+        .hero p {
+            color: var(--muted);
+            max-width: 58ch;
+        }
+
+        .section {
+            padding: 22px 20px;
+            margin-bottom: 14px;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.15rem;
+            color: #312e81;
+        }
+
+        ul {
+            margin: 10px 0 0;
+            padding: 0 18px 0 0;
+        }
+
+        li + li {
+            margin-top: 8px;
+        }
+
+        .note {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(108, 92, 231, 0.06);
+            color: #4338ca;
+            font-weight: 700;
+        }
+
+        .footer-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .footer-actions a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 46px;
+            padding: 10px 16px;
+            border-radius: 16px;
+            text-decoration: none;
+            font-weight: 800;
+        }
+
+        .footer-actions a.primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #ffffff;
+            box-shadow: 0 12px 24px rgba(108, 92, 231, 0.18);
+        }
+
+        .footer-actions a.secondary {
+            border: 1px solid var(--line);
+            background: #ffffff;
+            color: var(--text);
+        }
+
+        .meta {
+            margin-top: 18px;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        @media (max-width: 640px) {
+            main {
+                width: min(100%, calc(100% - 20px));
+                padding-top: 18px;
+            }
+
+            .hero,
+            .section {
+                border-radius: 20px;
+            }
+
+            .hero {
+                padding: 22px 18px;
+            }
+
+            .section {
+                padding: 18px 16px;
+            }
+
+            .footer-actions a {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-<main>
-  <div class="card">
-    <h1>מדיניות פרטיות — Math Visual App</h1>
-    <p class="small">עדכון אחרון: 27 במרץ 2026</p>
+    <main>
+        <section class="hero">
+            <div class="kicker">מדיניות פרטיות</div>
+            <h1>מעבדת הפונקציות</h1>
+            <p>
+                הדף הזה מסביר בקצרה איזה מידע נשמר באפליקציה, מתי הוא נשאר רק במכשיר,
+                ומתי נשלח מידע לשירותי ענן לפי בחירת המשתמש.
+            </p>
+            <div class="note">ברירת המחדל של האפליקציה היא שימוש מקומי ככל האפשר, עם עזרה בענן רק כאשר בוחרים בכך או מתחברים לחשבון.</div>
+        </section>
 
-    <div class="note">
-      <strong>חשוב:</strong> זהו נוסח בסיס מוכן לפרסום, אבל לפני העלאה ל־Google Play כדאי לעבור עליו פעם אחת מול מה שהאפליקציה באמת עושה בפועל:
-      אחסון מקומי, אנליטיקות, התחברות, שירותי צד שלישי, ותמיכה בפניות משתמשים.
-    </div>
+        <section class="section">
+            <h2>איזה מידע נשמר במכשיר</h2>
+            <p>
+                האפליקציה שומרת נתוני שימוש מקומיים בדפדפן כדי לאפשר חוויית לימוד רציפה.
+                זה כולל לדוגמה התקדמות, רצף ימים, נקודות, תשובות onboarding, העדפות סאונד,
+                מדריכים שכבר נסגרו והעדפות תצוגה.
+            </p>
+            <ul>
+                <li>המידע הזה נשמר ב־<code>localStorage</code> או ב־<code>sessionStorage</code> של הדפדפן.</li>
+                <li>המידע המקומי לא נשלח אוטומטית לשרת רק כדי להפעיל את מסלול הלמידה הרגיל.</li>
+                <li>אפשר למחוק אותו על ידי ניקוי נתוני האתר בדפדפן.</li>
+            </ul>
+        </section>
 
-    <h2>1. מי אנחנו</h2>
-    <p>
-      Math Visual App היא אפליקציית למידה ויזואלית למתמטיקה, שנועדה לעזור לתלמידים להבין גרפים, שיפועים, נגזרות ונושאים קרובים באמצעות המחשה, תרגול אינטראקטיבי ופידבק מיידי.
-    </p>
+        <section class="section">
+            <h2>התחברות לחשבון</h2>
+            <p>
+                אם בוחרים להתחבר באמצעות Google או אימייל, תהליך ההזדהות מנוהל באמצעות Supabase.
+                במצב כזה Supabase עשויה לשמור את כתובת האימייל ונתוני אימות טכניים שנדרשים לניהול החשבון והסשן.
+            </p>
+            <ul>
+                <li>ההתחברות היא אופציונלית ואינה נדרשת כדי להתחיל ללמוד.</li>
+                <li>אם לא מתחברים, האפליקציה ממשיכה לפעול כאורחת עם שמירת נתונים מקומית.</li>
+            </ul>
+        </section>
 
-    <h2>2. איזה מידע עשוי להישמר</h2>
-    <p>בהתאם לאופן שבו האפליקציה מוגדרת בזמן השימוש, ייתכן שיישמר אחד או יותר מסוגי המידע הבאים:</p>
-    <ul>
-      <li>העדפות שימוש בסיסיות, למשל מצב קול, שפה, או התקדמות בתרגול.</li>
-      <li>מידע שנשמר באופן מקומי בדפדפן או במכשיר שלך, כגון <code>localStorage</code>, מטמון, או קבצי PWA.</li>
-      <li>אם תתווסף בעתיד התחברות לחשבון — ייתכן שיישמרו גם פרטי זיהוי בסיסיים הנדרשים להפעלת החשבון.</li>
-    </ul>
+        <section class="section">
+            <h2>שירותי ענן אופציונליים</h2>
+            <p>
+                בחלק מהמסכים יש אפשרות לבחור מצב Cloud או לשלוח שאלה/צילום לבדיקה. רק אם בוחרים בפעולה כזאת,
+                התוכן שנשלח לצורך קבלת תשובה עשוי לעבור לשירות ענן רלוונטי.
+            </p>
+            <ul>
+                <li>במצב Local, ההסבר נשאר במכשיר ככל שהפיצ'ר מאפשר זאת.</li>
+                <li>במצב Cloud או בעת שליחת שאלה/צילום, הטקסט או התמונה שנשלחו משמשים כדי להחזיר תשובה או ניתוח.</li>
+                <li>האפליקציה לא נועדה לאיסוף מידע אישי רגיש, ולכן מומלץ לא להעלות מידע אישי מיותר בתוך שאלות או קבצים.</li>
+            </ul>
+        </section>
 
-    <h2>3. מה אנחנו לא עושים כברירת מחדל</h2>
-    <ul>
-      <li>לא מבקשים מידע אישי רגיש מעבר למה שנדרש להפעלת השירות.</li>
-      <li>לא מוכרים מידע אישי לצדדים שלישיים.</li>
-      <li>לא אוספים מיקום מדויק של המשתמש לצורכי שיווק.</li>
-    </ul>
+        <section class="section">
+            <h2>Cookies ופרסום</h2>
+            <p>
+                גרסת הווב של האפליקציה אינה משתמשת ב־cookies שיווקיים או בפרופיילינג לצורכי פרסום.
+                רכיבי אימות ושירותי דפדפן מסוימים עשויים להשתמש במנגנוני אחסון סטנדרטיים כדי לשמור סשן פעיל.
+            </p>
+        </section>
 
-    <h2>4. שימוש במידע</h2>
-    <p>אם מידע נשמר, הוא משמש בדרך כלל למטרות הבאות:</p>
-    <ul>
-      <li>שמירת התקדמות והעדפות בין ביקורים.</li>
-      <li>הפעלת פיצ'רים של האפליקציה, כולל עבודה אופליין.</li>
-      <li>שיפור היציבות, האבטחה, וחוויית המשתמש.</li>
-    </ul>
+        <section class="section">
+            <h2>בחירה ושליטה</h2>
+            <ul>
+                <li>אפשר להמשיך כאורחת בלי להתחבר.</li>
+                <li>אפשר לכבות סאונד, לסגור מודלים והדרכות, ולנקות את נתוני האתר בדפדפן בכל שלב.</li>
+                <li>אפשר להימנע משימוש בפיצ'רי ענן אם לא רוצים לשלוח תוכן מחוץ למכשיר.</li>
+            </ul>
+        </section>
 
-    <h2>5. שירותי צד שלישי</h2>
-    <p>
-      אם האפליקציה תשתמש בעתיד בשירותי צד שלישי כגון אחסון, התחברות, אנליטיקות, או תשלומים,
-      מדיניות זו תעודכן בהתאם. מומלץ לפרט כאן כל שירות כזה בשמו כאשר הוא נכנס לשימוש בפועל.
-    </p>
-
-    <h2>6. אחסון מקומי ו־PWA</h2>
-    <p>
-      האפליקציה עשויה להשתמש בטכנולוגיות של Progressive Web App, כולל קבצי manifest, service worker, ואחסון מקומי,
-      כדי לאפשר טעינה מהירה יותר, גישה חלקית אופליין, ושמירת העדפות משתמש.
-    </p>
-
-    <h2>7. קטינים</h2>
-    <p>
-      האפליקציה מיועדת גם לתלמידים. אם אתה הורה או אפוטרופוס וסבור שנאסף מידע באופן שאינו מתאים,
-      ניתן לפנות אלינו כדי לבדוק, לתקן או למחוק מידע רלוונטי ככל שהדבר אפשרי.
-    </p>
-
-    <h2>8. אבטחת מידע</h2>
-    <p>
-      אנו נוקטים צעדים סבירים לשמירה על המידע, אך אין מערכת מאובטחת באופן מוחלט.
-      לכן מומלץ לא להזין באפליקציה מידע רגיש שאין בו צורך.
-    </p>
-
-    <h2>9. הזכויות שלך</h2>
-    <p>
-      ככל שהדבר רלוונטי ובכפוף לדין החל, תוכל לבקש לעיין, לתקן או למחוק מידע אישי שנשמר עליך.
-      אם רוב המידע נשמר רק מקומית בדפדפן שלך, תוכל לעיתים למחוק אותו בעצמך דרך הגדרות הדפדפן או מחיקת נתוני האתר.
-    </p>
-
-    <h2>10. יצירת קשר</h2>
-    <p>
-      לצורך פניות בנושא פרטיות אפשר להוסיף כאן כתובת דוא״ל ייעודית, לדוגמה:
-      <br />
-      <strong>privacy@example.com</strong>
-    </p>
-
-    <h2>11. שינויים במדיניות</h2>
-    <p>
-      ייתכן שנעדכן את המדיניות מעת לעת. במקרה כזה נפרסם גרסה מעודכנת בעמוד זה ונעדכן את תאריך העדכון האחרון.
-    </p>
-  </div>
-</main>
+        <section class="section">
+            <h2>יצירת קשר</h2>
+            <p>
+                לשאלות על פרטיות או מחיקת נתונים אפשר לפנות דרך כפתור המשוב באפליקציה
+                או דרך ערוץ ההפצה שממנו קיבלתם את הקישור לאתר.
+            </p>
+            <div class="footer-actions">
+                <a class="primary" href="/">חזרה לאפליקציה</a>
+                <a class="secondary" href="/?action=feedback">פתיחת האפליקציה עם משוב</a>
+            </div>
+            <div class="meta">עודכן לאחרונה: 27 במרץ 2026</div>
+        </section>
+    </main>
 </body>
 </html>
