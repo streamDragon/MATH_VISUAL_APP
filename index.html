@@ -2371,7 +2371,13 @@
                 <h2>כך הגרף מתחיל לספר את הסיפור</h2>
                 <p>רואים בזמן אמת מה קורה לפונקציה, לשיפוע ולנקודה על הגרף. זו בדיוק השכבה שחסרה כשהנוסחה לבדה לא מספיקה.</p>
             </section>
-            <div id="graph-area"></div>
+            <div id="graph-stage">
+                <div id="graph-area"></div>
+                <div id="graph-board-tools" aria-label="כלי גרף">
+                    <button id="btn-graph-reset-view" type="button" onclick="centerGraphView()" aria-label="מרכז והתאם את הגרף מחדש">⌖ מרכז גרף</button>
+                    <span id="graph-pan-hint">אפשר לגרור את הרקע כדי להזיז את הגרף</span>
+                </div>
+            </div>
             <div id="graph-live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
         </div>
     </div>
@@ -9789,10 +9795,11 @@
 
             board = JXG.JSXGraph.initBoard('graph-area', {
                 boundingbox: [-5, 8, 5, -8], axis: true, keepaspectratio: true, showCopyright: false,
-                pan: {enabled:false},
+                pan: {enabled: !isMobileViewportNow()},
                 // Reduce accidental wheel zoom on desktop mice/touchpads; zoom still works with Shift.
                 zoom: {enabled:true, needshift: true, factorX: 1.15, factorY: 1.15}
             });
+            syncBoardPanMode();
 
             curve = board.create('functiongraph', [
                 x => evaluateFunctionAt(x)
@@ -10066,6 +10073,7 @@
             applyTopStripFocusMode();
             updateResponsiveLayoutMetrics();
             if (!board) return;
+            syncBoardPanMode();
             if (boardResizeRaf !== null) cancelAnimationFrame(boardResizeRaf);
             boardResizeRaf = requestAnimationFrame(() => {
                 boardResizeRaf = null;
@@ -10084,6 +10092,22 @@
                     positionQuickTourIndicators(target);
                 }
             });
+        }
+
+        function shouldEnableGraphPan() {
+            if (isMobileViewportNow()) return false;
+            if (document.body.classList.contains('prestart-only')) return false;
+            if (document.body.classList.contains('app-mode-guided')) return false;
+            return true;
+        }
+
+        function syncBoardPanMode() {
+            let allowPan = shouldEnableGraphPan();
+            let graphStage = document.getElementById('graph-stage');
+            if (graphStage) graphStage.classList.toggle('is-pan-enabled', allowPan);
+            if (!board) return;
+            if (board.attr?.pan) board.attr.pan.enabled = allowPan;
+            if (board.options?.pan) board.options.pan.enabled = allowPan;
         }
 
         function getSlope(x) {
@@ -10185,6 +10209,11 @@
             board.setBoundingBox([xMin - xPad, yMax + yPad, xMax + xPad, yMin - yPad], true);
             ensureFocusPointsVisibleOnBoard(q);
             board.fullUpdate();
+        }
+
+        function centerGraphView() {
+            if (!board) return;
+            fitBoardToCurrentFunction();
         }
 
         function formatPoly(coeffs) {
