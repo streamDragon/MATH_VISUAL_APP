@@ -19154,6 +19154,9 @@ Rules:
         const eyesHappy  = document.getElementById('tutor-eyes-happy');
         const blinkLeft  = document.getElementById('tutor-blink-left');
         const mouthEl    = document.getElementById('tutor-mouth');
+        if (bubbleEl && !bubbleEl.dataset.defaultText) {
+            bubbleEl.dataset.defaultText = (bubbleEl.textContent || '').trim() || 'יש שאלה? 💡';
+        }
 
         if (!btn || !panel) return;
 
@@ -19436,6 +19439,14 @@ Rules:
 
         /* --- בועת "יש שאלה?" --- */
         function showBubble() {
+            let suppressLandingBubble = !!(document.body
+                && document.body.classList.contains('prestart-only')
+                && document.body.classList.contains('viewport-mobile'));
+            if (suppressLandingBubble) {
+                if (bubbleEl && bubbleEl.dataset.defaultText) bubbleEl.textContent = bubbleEl.dataset.defaultText;
+                hideBubble();
+                return;
+            }
             if (isOpen) return;
             bubbleEl.classList.add('show');
             setTimeout(hideBubble, 4000);
@@ -19469,6 +19480,9 @@ Rules:
             var mouth    = document.getElementById('tutor-mouth');
             var mouthThk = document.getElementById('tutor-mouth-thinking');
             var hatSym   = document.getElementById('tutor-hat-symbol');
+            var suppressLandingBubble = !!(document.body
+                && document.body.classList.contains('prestart-only')
+                && document.body.classList.contains('viewport-mobile'));
 
             if (!btn) return;
 
@@ -19501,9 +19515,12 @@ Rules:
             }
 
             // הצג בועה עם הודעה
-            if (message && bubble) {
+            if (message && bubble && !suppressLandingBubble) {
                 bubble.textContent = message;
                 bubble.classList.add('show');
+            } else if (bubble && suppressLandingBubble) {
+                if (bubble.dataset.defaultText) bubble.textContent = bubble.dataset.defaultText;
+                bubble.classList.remove('show');
             }
 
             // חזור למצב idle לאחר duration
