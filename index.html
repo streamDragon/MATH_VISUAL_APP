@@ -5709,10 +5709,12 @@
             let topSelect = document.getElementById('top-question-select');
             let homeSelect = document.getElementById('home-question-select');
             let selects = [topSelect, homeSelect].filter(Boolean);
-            if (selects.length === 0) return selectedIndex;
-
             let questions = getQuestionsList();
             let visible = getVisibleQuestionIndexes();
+            if (selects.length === 0) {
+                renderQuestionNavBar(selectedIndex);
+                return selectedIndex;
+            }
             selects.forEach((select) => {
                 select.innerHTML = '';
             });
@@ -5737,13 +5739,51 @@
             });
             let homeOpenBtn = document.getElementById('btn-home-open-question');
             if (homeOpenBtn) homeOpenBtn.disabled = visible.length === 0;
-            if (visible.length === 0) return selectedIndex;
+            if (visible.length === 0) {
+                renderQuestionNavBar(selectedIndex);
+                return selectedIndex;
+            }
 
             let nextSelected = visible.includes(selectedIndex) ? selectedIndex : visible[0];
             selects.forEach((select) => {
                 select.value = String(nextSelected);
             });
+            renderQuestionNavBar(nextSelected);
             return nextSelected;
+        }
+
+        function renderQuestionNavBar(selectedIndex = currentQ) {
+            let navBar = document.getElementById('question-nav-bar');
+            if (!navBar) return;
+            let questions = getQuestionsList();
+            let visible = getVisibleQuestionIndexes();
+            navBar.innerHTML = '';
+            if (visible.length === 0) {
+                navBar.classList.add('hidden');
+                return;
+            }
+
+            let fragment = document.createDocumentFragment();
+            visible.forEach((realIdx, visibleOrder) => {
+                let q = questions[realIdx];
+                let chip = document.createElement('button');
+                let solved = isQuestionSolvedByProgress(realIdx);
+                chip.type = 'button';
+                chip.className = 'question-nav-chip';
+                chip.innerText = String(visibleOrder + 1);
+                chip.title = q?.title || `שאלה ${visibleOrder + 1}`;
+                chip.setAttribute('aria-label', `מעבר לשאלה ${visibleOrder + 1}: ${q?.title || ''}`.trim());
+                if (realIdx === selectedIndex) chip.classList.add('is-active');
+                if (solved) chip.classList.add('is-solved');
+                chip.onclick = function () {
+                    if (realIdx === currentQ) return;
+                    loadQ(realIdx, { autoOpenOverlay: false });
+                };
+                fragment.appendChild(chip);
+            });
+
+            navBar.appendChild(fragment);
+            navBar.classList.remove('hidden');
         }
 
         function sanitizeFeedManifestItem(rawItem) {
@@ -6628,6 +6668,7 @@
             let topStep = document.getElementById('top-step-status');
             let mission = document.getElementById('mission-step-text');
             let topSelect = document.getElementById('top-question-select');
+            let navBar = document.getElementById('question-nav-bar');
             if (topIndex) topIndex.innerText = 'שאלות: 0';
             if (topQuestion) topQuestion.innerText = 'לא נטענה רשימת שאלות';
             if (topStep) topStep.innerText = 'רענן את הדף או פתח שוב את האתר.';
@@ -6636,6 +6677,10 @@
             if (topSelect) {
                 topSelect.innerHTML = '';
                 topSelect.disabled = true;
+            }
+            if (navBar) {
+                navBar.innerHTML = '';
+                navBar.classList.add('hidden');
             }
             renderExamBridge(false);
             renderHomeRoadmap();
@@ -8724,6 +8769,18 @@
             queueBoardResize();
         }
 
+        function syncDrawerHandleState() {
+            let drawerHandle = document.getElementById('drawer-handle');
+            if (!drawerHandle) return;
+            let isEmbed = document.body.classList.contains('embed-mode');
+            let stateEl = drawerHandle.querySelector('.drawer-handle-state');
+            drawerHandle.classList.toggle('hidden', isEmbed);
+            drawerHandle.classList.toggle('is-open', drawerOpen);
+            drawerHandle.setAttribute('aria-expanded', drawerOpen ? 'true' : 'false');
+            drawerHandle.setAttribute('aria-label', drawerOpen ? 'סגור את המשימה והכלים' : 'פתח את המשימה והכלים');
+            if (stateEl && !isEmbed) stateEl.innerText = drawerOpen ? 'סגור' : 'כלים';
+        }
+
         function setDrawerOpen(open) {
             drawerOpen = !!open;
             document.getElementById('sidebar').classList.toggle('drawer-open', drawerOpen);
@@ -8731,15 +8788,7 @@
             document.getElementById('sidebar').classList.toggle('drawer-collapsed', !drawerOpen);
             document.body.classList.toggle('drawer-open-state', drawerOpen);
             let isEmbed = document.body.classList.contains('embed-mode');
-            let drawerHandle = document.getElementById('drawer-handle');
-            if (drawerHandle) {
-                drawerHandle.classList.toggle('hidden', isEmbed);
-                if (!isEmbed) {
-                    drawerHandle.innerText = drawerOpen
-                        ? '▲ סגור משימה וכלים'
-                        : '▼ פתח משימה וכלים';
-                }
-            }
+            syncDrawerHandleState();
             let toolsBtn = document.getElementById('btn-tools-menu');
             if (toolsBtn) {
                 if (isEmbed) toolsBtn.style.display = 'inline-flex';
@@ -8871,7 +8920,100 @@
             scheduleVizyVideoFallback();
         }
 
-        function dismissOpeningSplashForOnboarding() {
+        function fadeScreen(element, mode, options = {}) {
+            if (!element) return Promise.resolve();
+            let durationMs = Number.isFinite(options.durationMs)
+                ? Math.max(120, Math.round(options.durationMs))
+                : SCREEN_FADE_DURATION_MS;
+            element.classList.remove('screen-fade-in', 'screen-fade-out');
+            if (mode === 'in') {
+                element.classList.remove('hidden');
+                if (typeof options.displayValue === 'string' && options.displayValue) {
+                    element.style.display = options.displayValue;
+                } else {
+                    element.style.removeProperty('display');
+                }
+                return new Promise((resolve) => {
+                    requestAnimationFrame(function () {
+                        element.classList.add('screen-fade-in');
+                        window.setTimeout(function () {
+                            element.classList.remove('screen-fade-in');
+                            resolve();
+                        }, durationMs);
+                    });
+                });
+            }
+            return new Promise((resolve) => {
+                element.classList.add('screen-fade-out');
+                window.setTimeout(function () {
+                    element.classList.remove('screen-fade-out');
+                    if (options.hideClass !== false) element.classList.add('hidden');
+                    if (options.hideDisplay !== false) element.style.display = 'none';
+                    resolve();
+                }, durationMs);
+            });
+        }
+
+        function clearSplashMusicStateTimer() {
+            if (!splashMusicStateTimer) return;
+            clearTimeout(splashMusicStateTimer);
+            splashMusicStateTimer = null;
+        }
+
+        function syncOpeningSplashMusicUi() {
+            let hint = document.getElementById('opening-splash-audio-hint');
+            let btn = document.getElementById('opening-splash-audio-btn');
+            if (hint) hint.classList.toggle('hidden', musicPlaying);
+            if (!btn) return;
+            btn.classList.toggle('is-playing', musicPlaying);
+            btn.innerText = musicPlaying ? '⏹ עצור שיר' : '🎵 נגן שיר';
+            btn.setAttribute('aria-pressed', musicPlaying ? 'true' : 'false');
+        }
+
+        function stopOpeningSplashMusic(resetPosition = true) {
+            clearSplashMusicStateTimer();
+            if (typeof stopBackgroundTrack === 'function') stopBackgroundTrack(resetPosition);
+            musicPlaying = false;
+            syncOpeningSplashMusicUi();
+        }
+
+        function playOpeningSplashMusic() {
+            if (typeof playTimedBackgroundTrack !== 'function') {
+                musicPlaying = false;
+                syncOpeningSplashMusicUi();
+                return Promise.resolve(false);
+            }
+            clearSplashMusicStateTimer();
+            let triedFallback = false;
+            let tryPlay = (src) => playTimedBackgroundTrack(src, OPENING_MUSIC_DURATION_SECONDS);
+            return tryPlay(OPENING_MUSIC_FILE).then((played) => {
+                if (!played && !triedFallback && OPENING_MUSIC_FILE !== 'opening-theme.mp3') {
+                    triedFallback = true;
+                    return tryPlay('opening-theme.mp3');
+                }
+                return played;
+            }).then((played) => {
+                musicPlaying = !!played;
+                if (musicPlaying) {
+                    splashMusicStateTimer = setTimeout(function () {
+                        musicPlaying = false;
+                        syncOpeningSplashMusicUi();
+                    }, (OPENING_MUSIC_DURATION_SECONDS * 1000) + 160);
+                }
+                syncOpeningSplashMusicUi();
+                return musicPlaying;
+            });
+        }
+
+        function toggleSplashMusic() {
+            if (musicPlaying) {
+                stopOpeningSplashMusic();
+                return Promise.resolve(false);
+            }
+            return playOpeningSplashMusic();
+        }
+
+        function dismissOpeningSplashForOnboarding(options = {}) {
             if (openingSplashExitTimer) {
                 clearTimeout(openingSplashExitTimer);
                 openingSplashExitTimer = null;
@@ -8881,28 +9023,51 @@
                 openingSplashHideTimer = null;
             }
             let splash = document.getElementById('opening-splash');
-            if (splash) {
-                splash.classList.remove('is-visible', 'is-exiting');
-                splash.classList.add('hidden');
-            }
             let splashVideo = document.getElementById('opening-splash-video');
             if (splashVideo) splashVideo.pause();
             stopVizyVideoPlayback();
+            stopOpeningSplashMusic();
             unbindSplashMusicUnlock();
+            if (!splash) return Promise.resolve();
+            splash.classList.remove('is-visible', 'is-exiting');
+            if (options.smooth === true && !splash.classList.contains('hidden')) {
+                return fadeScreen(splash, 'out', {
+                    durationMs: SCREEN_FADE_DURATION_MS,
+                    hideDisplay: false
+                }).then(function () {
+                    splash.style.removeProperty('display');
+                });
+            }
+            splash.classList.add('hidden');
+            return Promise.resolve();
         }
 
         function closeOnboardingFlow(options = {}) {
             let flow = document.getElementById('onboarding-flow');
-            if (flow) {
-                flow.style.display = 'none';
-                flow.classList.add('hidden');
-                flow.setAttribute('aria-hidden', 'true');
+            let finalizeClose = function () {
+                if (flow) {
+                    flow.style.display = 'none';
+                    flow.classList.add('hidden');
+                    flow.setAttribute('aria-hidden', 'true');
+                }
+                document.body.classList.remove('onboarding-active');
+                if (options.reset !== false) {
+                    obStep = 0;
+                    obAnswers = {};
+                }
+            };
+            if (!flow) {
+                finalizeClose();
+                return Promise.resolve();
             }
-            document.body.classList.remove('onboarding-active');
-            if (options.reset !== false) {
-                obStep = 0;
-                obAnswers = {};
+            if (options.smooth === true && !flow.classList.contains('hidden')) {
+                return fadeScreen(flow, 'out', {
+                    durationMs: SCREEN_FADE_DURATION_MS,
+                    hideDisplay: true
+                }).then(finalizeClose);
             }
+            finalizeClose();
+            return Promise.resolve();
         }
 
         function startOnboarding() {
@@ -8913,12 +9078,17 @@
             }
             obStep = 0;
             obAnswers = {};
-            dismissOpeningSplashForOnboarding();
-            document.body.classList.add('onboarding-active');
-            flow.classList.remove('hidden');
-            flow.style.display = 'flex';
-            flow.setAttribute('aria-hidden', 'false');
-            renderObStep();
+            dismissOpeningSplashForOnboarding({ smooth: true }).then(function () {
+                document.body.classList.add('onboarding-active');
+                flow.classList.remove('hidden');
+                flow.style.display = 'flex';
+                flow.setAttribute('aria-hidden', 'false');
+                renderObStep();
+                fadeScreen(flow, 'in', {
+                    displayValue: 'flex',
+                    durationMs: SCREEN_FADE_DURATION_MS + 20
+                });
+            });
         }
 
         function renderObStep() {
@@ -8983,20 +9153,20 @@
                 // Continue when localStorage is unavailable.
             }
 
-            closeOnboardingFlow();
-
             let gradeText = savedAnswers.grade ? `כיתה ${savedAnswers.grade}` : '';
             let mascotText = gradeText ? `שלום! ${gradeText} — בואו נתחיל! 🎉` : 'שלום! בואו נתחיל! 🎉';
             hideOpeningSplash({
+                immediate: true,
                 mascotMood: 'happy',
                 mascotText,
                 mascotDuration: 4000
             });
+            closeOnboardingFlow({ smooth: true });
         }
 
         function skipToApp() {
-            closeOnboardingFlow();
-            skipOpeningSplash();
+            hideOpeningSplash({ immediate: true });
+            closeOnboardingFlow({ smooth: true });
         }
 
         function hideOpeningSplash(options = {}) {
@@ -9026,6 +9196,7 @@
             let splashVideo = document.getElementById('opening-splash-video');
             if (splashVideo) splashVideo.pause();
             stopVizyVideoPlayback();
+            stopOpeningSplashMusic();
             unbindSplashMusicUnlock();
             let finalizeHide = () => {
                 openingSplashHideTimer = null;
@@ -9045,7 +9216,10 @@
                 finalizeHide();
                 return;
             }
-            openingSplashHideTimer = setTimeout(finalizeHide, 420);
+            fadeScreen(splash, 'out', {
+                durationMs: 260,
+                hideDisplay: false
+            }).then(finalizeHide);
         }
 
         function showOpeningSplash(forceReplay) {
@@ -9076,21 +9250,7 @@
         }
 
         function retrySplashMusic() {
-            if (typeof playTimedBackgroundTrack !== 'function') return;
-            let triedFallback = false;
-            let tryPlay = (src) => playTimedBackgroundTrack(src, OPENING_MUSIC_DURATION_SECONDS);
-            tryPlay(OPENING_MUSIC_FILE).then((played) => {
-                if (!played && !triedFallback && OPENING_MUSIC_FILE !== 'opening-theme.mp3') {
-                    triedFallback = true;
-                    return tryPlay('opening-theme.mp3');
-                }
-                return played;
-            }).then((played) => {
-                let hint = document.getElementById('opening-splash-audio-hint');
-                let btn = document.getElementById('opening-splash-audio-btn');
-                if (hint) hint.classList.toggle('hidden', played);
-                if (btn) btn.innerText = played ? 'נגן שוב' : 'נגן שיר';
-            });
+            return playOpeningSplashMusic();
         }
 
         function startOpeningSplash(forceReplay) {
@@ -9109,6 +9269,7 @@
                 clearTimeout(openingSplashHideTimer);
                 openingSplashHideTimer = null;
             }
+            stopOpeningSplashMusic();
             splash.classList.remove('hidden', 'is-exiting');
             let progressFill = document.querySelector('#opening-splash-progress span');
             if (progressFill) {
@@ -9124,17 +9285,14 @@
                 splashVideo.play().catch(() => {});
             }
             replayVizyVideo();
-            let hint = document.getElementById('opening-splash-audio-hint');
-            let btn = document.getElementById('opening-splash-audio-btn');
-            if (hint) hint.classList.remove('hidden');
-            if (btn) btn.innerText = 'נגן שיר';
+            syncOpeningSplashMusicUi();
             splash.classList.remove('hidden');
             requestAnimationFrame(() => splash.classList.add('is-visible'));
         }
 
         function replayOpeningSplash(withMusic) {
             startOpeningSplash(true);
-            if (withMusic) retrySplashMusic();
+            if (withMusic) playOpeningSplashMusic();
         }
 
         function bindAuditFlowEvents() {
