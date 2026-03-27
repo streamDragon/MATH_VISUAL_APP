@@ -13,7 +13,10 @@
     <meta name="app-build-sha" content="__BUILD_SHA__">
     <meta name="app-build-time" content="__BUILD_TIME__">
     <meta name="app-version" content="__APP_VERSION__">
-    <title>מעבדת הפונקציות - המלא והשלם</title>
+    <title>מעבדת הפונקציות – מחשבון גרפים אינטראקטיבי</title>
+    <meta name="description" content="אפליקציה ללמידה אינטראקטיבית של פונקציות מתמטיות. גרפים אינטראקטיביים, תרגול מונחה, משוב מיידי.">
+    <meta property="og:title" content="מעבדת הפונקציות">
+    <meta property="og:description" content="למידה גרפית אינטראקטיבית – 15 שאלות עם ניקוד ומשוב">
     <link rel="icon" type="image/png" href="/opening-poster.png">
     <link rel="manifest" href="/manifest.json">
     <meta name="application-name" content="מעבדת הפונקציות">
@@ -9960,7 +9963,8 @@
                 });
             });
 
-            document.getElementById('normal-shift').addEventListener('input', () => {
+            var _normalShiftEl = document.getElementById('normal-shift');
+            if (_normalShiftEl) _normalShiftEl.addEventListener('input', () => {
                 noteQuestionInteraction();
                 dismissQuestionIntro();
                 updateNormalShiftLabel();
