@@ -754,6 +754,36 @@
         .hero-delay-6 { animation-delay: 1.62s; }
         .hero-delay-7 { animation-delay: 1.92s; }
 
+        .screen-fade-in {
+            animation: screenFadeIn 0.24s ease both;
+        }
+
+        .screen-fade-out {
+            animation: screenFadeOut 0.22s ease both;
+        }
+
+        @keyframes screenFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes screenFadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+        }
+
         #onboarding-flow {
             position: fixed;
             inset: 0;
@@ -1151,23 +1181,36 @@
                 left: 0 !important;
                 top: 50% !important;
                 z-index: 801 !important;
-                width: 28px !important;
-                height: 56px !important;
+                width: 42px !important;
+                height: 90px !important;
                 display: flex !important;
+                flex-direction: column !important;
                 align-items: center !important;
                 justify-content: center !important;
-                background: #6C5CE7 !important;
+                gap: 6px !important;
+                padding: 10px 6px !important;
+                background: linear-gradient(180deg, #6C5CE7, #5846dd) !important;
                 color: white !important;
-                border-radius: 0 8px 8px 0 !important;
+                border: 0 !important;
+                border-radius: 0 14px 14px 0 !important;
+                box-shadow: 0 14px 28px rgba(108, 92, 231, 0.3) !important;
                 cursor: pointer !important;
-                font-size: 0 !important;
                 transform: translateY(-50%) !important;
             }
 
             #drawer-handle::before {
-                content: '☰';
-                font-size: 18px;
-                line-height: 1;
+                content: none !important;
+            }
+
+            #drawer-handle .drawer-handle-icon {
+                font-size: 18px !important;
+                line-height: 1 !important;
+            }
+
+            #drawer-handle .drawer-handle-state {
+                font-size: 11px !important;
+                font-weight: 900 !important;
+                letter-spacing: 0.02em !important;
             }
 
             #top-strip,
@@ -1176,6 +1219,41 @@
                 top: 0 !important;
                 z-index: 100 !important;
                 width: 100% !important;
+            }
+
+            #top-function-bar,
+            #top-formulas,
+            #question-nav-bar {
+                width: 100% !important;
+                max-width: none !important;
+            }
+
+            #top-function-bar {
+                padding: 10px 12px !important;
+                gap: 8px !important;
+            }
+
+            #top-function-bar-fx {
+                font-size: 1.12rem !important;
+                min-height: 42px !important;
+                padding: 8px 10px !important;
+            }
+
+            #top-formulas {
+                padding: 10px 12px !important;
+                gap: 8px !important;
+            }
+
+            #top-formula-f,
+            #top-formula-tag,
+            .formula-chip {
+                font-size: 1.12rem !important;
+                font-weight: 900 !important;
+                padding: 8px 10px !important;
+            }
+
+            #question-nav-bar {
+                padding: 8px 10px !important;
             }
 
             .gam-badge {
@@ -1437,7 +1515,7 @@
                     <p id="opening-splash-audio-hint">להפעלת שיר בפתיח לחצו על "נגן שיר".</p>
 
                     <div id="opening-splash-actions">
-                        <button id="opening-splash-audio-btn" type="button" onclick="retrySplashMusic()">נגן שיר</button>
+                        <button id="opening-splash-audio-btn" type="button" onclick="toggleSplashMusic()">🎵 נגן שיר</button>
                         <button id="opening-splash-copy-build-btn" class="hidden" type="button" onclick="copyBuildStampFromSplash()">העתק build</button>
                     </div>
 
@@ -1488,7 +1566,7 @@
         </div>
         <div id="win-overlay-actions">
             <button id="btn-win-next" type="button" class="hidden" onclick="goToNextQuestionFromWin()">לשאלה הבאה</button>
-            <button type="button" onclick="closeWinOverlay()">המשך</button>
+            <button id="btn-win-return" type="button" onclick="closeWinOverlay()">חזרה לגרף</button>
         </div>
     </div>
 
@@ -2094,6 +2172,7 @@
                     </div>
                 </div>
             </details>
+            <div id="home-release-version" aria-label="גרסה">v1.0</div>
         </section>
         <section id="guided-start-shell" hidden aria-labelledby="guided-shell-title">
             <div id="guided-shell-card" class="guided-shell-card">
@@ -2129,6 +2208,7 @@
                     <button id="btn-top-function-edit" type="button" onclick="openBuilderFromTop()">✎ עריכה</button>
                 </div>
             </div>
+            <div id="question-nav-bar" class="hidden" aria-label="מעבר בין שאלות"></div>
             <div id="top-question-wrap">
                 <span id="top-question-index">שאלה 1/4</span>
                 <span id="top-question">כשתתחילו תרגיל, כאן תופיע השאלה הנוכחית.</span>
@@ -2274,7 +2354,10 @@
 
     <div id="mobile-panel-scrim" aria-hidden="true" onclick="onMobilePanelScrimClick()"></div>
     <div id="sidebar" class="drawer-collapsed">
-        <button id="drawer-handle" onclick="toggleDrawer()">המשימה והכלים</button>
+        <button id="drawer-handle" type="button" onclick="toggleDrawer()" aria-label="פתח את המשימה והכלים">
+            <span class="drawer-handle-icon" aria-hidden="true">☰</span>
+            <span class="drawer-handle-state">כלים</span>
+        </button>
         <div id="drawer-content">
             <div id="drawer-question-head" style="text-align:center; display:none;">
                 <h2 id="q-title">כאן תופיע השאלה הפעילה</h2>
@@ -2829,6 +2912,7 @@
             prerequisite_order: { heTitle: 'סדר קדימויות', colorToken: 'slate', icon: '1-2', defaultExerciseType: 'classification', launcherKey: 'startPrerequisiteOrderModule' }
         };
         const OPENING_SPLASH_DURATION_MS = 5000;
+        const SCREEN_FADE_DURATION_MS = 220;
         const OPENING_MUSIC_DURATION_SECONDS = 30;
         const QUICK_TOUR_STORAGE_KEY = 'math_visual_quick_tour_v1';
         const HERO_ONBOARDING_STORAGE_KEY = 'mathviz_onboarding';
@@ -3046,6 +3130,8 @@
         let openingSplashDone = false;
         let openingSplashExitTimer = null;
         let openingSplashHideTimer = null;
+        let musicPlaying = false;
+        let splashMusicStateTimer = null;
         let splashMusicUnlockBound = false;
         let obStep = 0;
         let obAnswers = {};
@@ -16730,6 +16816,7 @@ Rules:
     <!-- ==========================================================
          TUTOR CHARACTER — מורה פרטי בפינה ימין-תחתון
     =========================================================== -->
+    <!-- TODO(v1.1): when the mascot video badge is ready, attach it here without replacing the current tutor entry. -->
     <div id="tutor-container" dir="rtl">
         <!-- בועת הודעה שמופיעה ונעלמת -->
         <div id="tutor-bubble" aria-hidden="true">יש שאלה? 💡</div>
