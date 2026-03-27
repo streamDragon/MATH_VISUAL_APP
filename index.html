@@ -729,6 +729,13 @@
             box-shadow: 0 8px 22px rgba(253, 203, 110, 0.26);
         }
 
+        #opening-splash-content.hero-shell #opening-splash-audio-btn.is-playing {
+            border-color: rgba(191, 219, 254, 0.94) !important;
+            color: #eff6ff !important;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.94), rgba(99, 102, 241, 0.94)) !important;
+            box-shadow: 0 10px 24px rgba(79, 70, 229, 0.24);
+        }
+
         #opening-splash-content.hero-shell #opening-splash-version {
             margin: 0;
             font-size: 0.74rem;
@@ -1365,6 +1372,13 @@
                 padding: 12px !important;
                 font-size: 14px !important;
             }
+        }
+        /* P14: voice toggle button */
+        #btn-voice-toggle {
+            transition: transform 0.2s ease;
+        }
+        #btn-voice-toggle:active {
+            transform: scale(0.9);
         }
     </style>
 </head>
@@ -2290,6 +2304,8 @@
                 <!-- P5: gamification badges -->
                 <span id="gam-streak" class="gam-badge" title="רצף ימים">🔥 <span id="gam-streak-num">0</span></span>
                 <span id="gam-points" class="gam-badge" title="נקודות כולל">⭐ <span id="gam-points-num">0</span></span>
+                <!-- P14: voice toggle -->
+                <button id="btn-voice-toggle" onclick="toggleVoice()" title="הפעל/כבה קולנות" style="background:none; border:none; font-size:18px; cursor:pointer; padding:2px 6px; opacity:0.7;">🔊</button>
             </div>
             <div id="question-progress" aria-live="polite">
                 <div id="question-progress-text">שאלה 1 מתוך 1</div>
@@ -5487,8 +5503,13 @@
 
             if (learnerProgress.lastSolveDay !== today) {
                 let diff = dayDiff(learnerProgress.lastSolveDay, today);
-                if (diff === 1) learnerProgress.streakDays += 1;
-                else learnerProgress.streakDays = 1;
+                if (diff === 1) {
+                    learnerProgress.streakDays += 1;
+                    let s = learnerProgress.streakDays;
+                    if (s === 3 || s === 5 || s === 7 || s === 10) {
+                        playVoiceSmart('streak', 'רצף מדהים!');
+                    }
+                } else learnerProgress.streakDays = 1;
                 learnerProgress.lastSolveDay = today;
             }
 
@@ -5502,6 +5523,64 @@
 
             return { gainedXp, leveledUp, level: newLevel };
         }
+
+        /* ===== P14: Voice Feedback System ===== */
+        var voiceEnabled = true;
+        var voiceClips = {
+            correct: ['correct-1.mp3','correct-2.mp3','correct-3.mp3','correct-4.mp3','correct-5.mp3'],
+            wrong: ['wrong-1.mp3','wrong-2.mp3','wrong-3.mp3','wrong-4.mp3'],
+            complete: ['complete-1.mp3','complete-2.mp3','complete-3.mp3'],
+            welcome: ['welcome-1.mp3','welcome-2.mp3'],
+            streak: ['streak-1.mp3']
+        };
+        var lastVoiceClip = {};
+
+        function playVoiceFallback(text) {
+            if (!voiceEnabled) return;
+            if (!window.speechSynthesis) return;
+            var utter = new SpeechSynthesisUtterance(text);
+            utter.lang = 'he-IL';
+            utter.rate = 1.1;
+            utter.volume = 0.8;
+            speechSynthesis.speak(utter);
+        }
+
+        function playVoiceSmart(category, fallbackText) {
+            if (!voiceEnabled) return;
+            var clips = voiceClips[category];
+            if (!clips || clips.length === 0) {
+                playVoiceFallback(fallbackText);
+                return;
+            }
+            var idx = Math.floor(Math.random() * clips.length);
+            if (clips.length > 1 && lastVoiceClip[category] === idx) {
+                idx = (idx + 1) % clips.length;
+            }
+            lastVoiceClip[category] = idx;
+            var audio = new Audio('./audio/' + clips[idx]);
+            audio.volume = 0.7;
+            audio.onerror = function() { playVoiceFallback(fallbackText); };
+            audio.play().catch(function() { playVoiceFallback(fallbackText); });
+        }
+
+        function toggleVoice() {
+            voiceEnabled = !voiceEnabled;
+            var btn = document.getElementById('btn-voice-toggle');
+            if (btn) btn.textContent = voiceEnabled ? '🔊' : '🔇';
+            try { localStorage.setItem('mathviz_voice', voiceEnabled ? '1' : '0'); } catch(e) {}
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                var saved = localStorage.getItem('mathviz_voice');
+                if (saved === '0') {
+                    voiceEnabled = false;
+                    var btn = document.getElementById('btn-voice-toggle');
+                    if (btn) btn.textContent = '🔇';
+                }
+            } catch(e) {}
+        });
+        /* ===== end P14 ===== */
 
         function getQuestionsList() {
             if (typeof QUESTIONS !== 'undefined' && Array.isArray(QUESTIONS)) return QUESTIONS;
@@ -12140,6 +12219,7 @@
             if (Math.abs(inputVal - expected) <= tol) {
                 readAnswerValidated = true;
                 if (typeof showMascotMood === 'function') showMascotMood('celebrating', '✅ ענית נכון! כל הכבוד! 🎉', 3000);
+                playVoiceSmart('correct', 'כל הכבוד!');
                 if (typeof addPoints === 'function') addPoints(10);
                 onCorrectAnswer();
                 document.getElementById('read-answer-feedback').innerText = `נכון מאוד. התשובה שלך בטווח הנכון (בערך ${formatNumber(expected)}, עם סובלנות של ±${formatNumber(tol)}).`;
@@ -12171,6 +12251,7 @@
             } else {
                 readAnswerValidated = false;
                 if (typeof showMascotMood === 'function') showMascotMood('thinking', 'עוד לא — בדקו שוב על פי הגרף!', 3000);
+                playVoiceSmart('wrong', 'נסו שוב, תסתכלו על הגרף');
                 document.getElementById('read-answer-feedback').innerText = `עדיין לא. בדקו שוב את החלונית ליד הנקודה ונסו שוב. מותר להיות בערך בטווח ±${formatNumber(tol)}.`;
                 pushCoachWrongAttempt('עדיין לא. נסו שוב לפי החלונית ליד הנקודה.', {
                     source: 'read_answer',
@@ -12638,13 +12719,17 @@
         function goToNextQuestionFromWin() {
             let nextIdx = getNextVisibleQuestionIndex(currentQ);
             closeWinOverlay();
-            if (nextIdx >= 0) loadQ(nextIdx, { autoOpenOverlay: false });
+            if (nextIdx >= 0) {
+                loadQ(nextIdx, { autoOpenOverlay: false });
+                queueBoardResize();
+            }
         }
 
         function markQuestionSolved() {
             clearPendingStepRecheckTimer();
             questionSolved = true;
             if (typeof showMascotMood === 'function') showMascotMood('happy', 'סיימתם שאלה! מעולה! 🎓', 4000);
+            playVoiceSmart('complete', 'שאלה סיימת! מעולה!');
             if (typeof addPoints === 'function') addPoints(25);
             pushCoachEvent('STEP_EXIT', { reason: 'question_solved' });
             pushCoachEvent('ATTEMPT_CORRECT', { reason: 'question_solved' });
@@ -12692,6 +12777,7 @@
             updateMobileFeedTickerMessages(false);
             renderMobileFeedCards();
             renderExamBridge(true);
+            renderQuestionNavBar(currentQ);
             if (suppressCelebration) {
                 completeGuidedStartAction();
             }
@@ -12706,6 +12792,9 @@
                 clearTimeout(winOverlayTimer);
                 winOverlayTimer = null;
             }
+            renderQuestionNavBar(currentQ);
+            if (board && typeof board.update === 'function') board.update();
+            queueBoardResize();
         }
 
         function evaluateCurrentStep(m, x, y) {
@@ -16586,6 +16675,7 @@ Rules:
             if (sessionStarted && appEntryMode === entryMode) return;
             sessionStarted = true;
             setAppEntryMode(entryMode);
+            setTimeout(function() { playVoiceSmart('welcome', 'שלום! מה נלמד היום?'); }, 1000);
             scheduleMathGymPopup();
             if (wasPreStartQuestion) {
                 let nextIdx = getFirstPracticeQuestionIndex();
@@ -16766,6 +16856,7 @@ Rules:
                 reason: 'loadQ'
             });
             refreshTopQuestionSelect(safeIdx);
+            renderQuestionNavBar(safeIdx);
             updateLearnerProgressChip();
             let winOverlay = document.getElementById('win-overlay');
             if (winOverlay) winOverlay.style.display = 'none';
@@ -16906,6 +16997,7 @@ Rules:
             renderHomeRoadmap();
             updateMobileFeedTickerMessages(false);
             renderMobileFeedCards();
+            queueBoardResize();
             if (mustStartFromFunctionSetup) {
                 showStepToast('שאלה חדשה: קודם קראו את הנתונים, בנו ציור עזר, אספו תנאים, ורק אז עברו לתרגול.');
                 setTimeout(pulseStartConfirmButton, 140);
