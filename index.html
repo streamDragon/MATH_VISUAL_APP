@@ -2227,6 +2227,7 @@
                 <span id="top-function-bar-label">הפונקציה</span>
                 <div id="top-function-bar-row">
                     <span id="top-function-bar-fx" class="inline-math-bidi">f(x) = ...</span>
+                    <button id="btn-top-fit-graph" type="button" onclick="centerGraphView()" title="מרכז את הגרף מחדש">⌖ גרף</button>
                     <button id="btn-top-function-edit" type="button" onclick="openBuilderFromTop()">✎ עריכה</button>
                 </div>
             </div>
@@ -12539,6 +12540,11 @@
             };
         }
 
+        function getQuestionLeadText(q) {
+            let shortDesc = getQuestionShortDesc(q);
+            return getShortText(shortDesc.first, getShortText(q?.overlay?.essence, q?.title || 'המשימה הנוכחית'));
+        }
+
         function getGoalClarityCopy(q, stepInstruction, shortDesc) {
             let goal = q?.goal || '';
             let data = q?.data || {};
@@ -12590,10 +12596,12 @@
             let stepInstruction = getShortText(step?.instruction, essence);
             let clarity = getGoalClarityCopy(q, stepInstruction, shortDesc);
 
+            let head = document.getElementById('top-brief-head');
             let main = document.getElementById('top-brief-main');
             let detail = document.getElementById('top-brief-detail');
-            if (main) setMixedBidiText(main, stepInstruction);
-            if (detail) setMixedBidiText(detail, `למה: ${goal}`);
+            if (head) head.innerText = 'מה עושים עכשיו?';
+            if (main) setMixedBidiText(main, clarity.action || stepInstruction);
+            if (detail) setMixedBidiText(detail, `מה מחפשים: ${clarity.target || goal}`);
 
             let clarityTitle = document.getElementById('top-clarity-title');
             let clarityGoal = document.getElementById('top-clarity-goal');
@@ -16886,7 +16894,7 @@ Rules:
                 topQuestionIndexChip.dataset.baseLabel = `שאלה ${displayNumber}/${displayTotal}`;
                 updateTopQuestionIndexDisplay();
             }
-            document.getElementById('top-question').innerText = `${q.title}`;
+            document.getElementById('top-question').innerText = getQuestionLeadText(q);
             updatePracticeQuestionBar(`שאלה ${displayNumber}/${displayTotal}`, `${q.title}`);
             pushCoachEvent('QUESTION_LOADED', {
                 questionId: getCoachQuestionId(q, safeIdx),
