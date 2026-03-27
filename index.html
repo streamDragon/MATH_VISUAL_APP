@@ -3357,7 +3357,8 @@
             provider: ''
         };
         let currentAiMode = AI_MODE_VALUES.LOCAL;
-        const ADMOB_TEST_BANNER_ID = 'ca-app-pub-3940256099942544/6300978111';
+        const ADMOB_PRODUCTION_APP_ID = '';
+        const ADMOB_PRODUCTION_BANNER_ID = '';
         let adMobInitPromise = null;
         let adMobBannerShown = false;
         let adMobListenersBound = false;
@@ -5311,6 +5312,12 @@
             return null;
         }
 
+        function hasProductionAdMobConfig() {
+            const appId = (typeof ADMOB_PRODUCTION_APP_ID === 'string') ? ADMOB_PRODUCTION_APP_ID.trim() : '';
+            const bannerId = (typeof ADMOB_PRODUCTION_BANNER_ID === 'string') ? ADMOB_PRODUCTION_BANNER_ID.trim() : '';
+            return !!appId && !!bannerId;
+        }
+
         async function initAdMobBanner() {
             if (adMobBannerShown) return;
             if (adMobInitPromise) return adMobInitPromise;
@@ -5318,6 +5325,10 @@
             adMobInitPromise = (async () => {
                 if (isUnder13AudienceSelected()) {
                     console.log('AdMob skipped: disabled for under-13 audience.');
+                    return;
+                }
+                if (!hasProductionAdMobConfig()) {
+                    console.log('AdMob skipped: no production AdMob IDs configured for release.');
                     return;
                 }
                 const cap = window.Capacitor;
@@ -5345,16 +5356,16 @@
 
                 console.log('Calling AdMob.initialize()');
                 await AdMob.initialize({
-                    initializeForTesting: true
+                    initializeForTesting: false
                 });
 
                 console.log('Calling AdMob.showBanner()');
                 await AdMob.showBanner({
-                    adId: ADMOB_TEST_BANNER_ID,
+                    adId: ADMOB_PRODUCTION_BANNER_ID,
                     adSize: 'ADAPTIVE_BANNER',
                     position: 'BOTTOM_CENTER',
                     margin: 0,
-                    isTesting: true
+                    isTesting: false
                 });
 
                 adMobBannerShown = true;
