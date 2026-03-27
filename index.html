@@ -307,6 +307,10 @@
             overflow: hidden !important;
         }
 
+        body.premium-modal-open {
+            overflow: hidden !important;
+        }
+
         body.onboarding-active {
             overflow: hidden !important;
         }
@@ -444,6 +448,236 @@
 
         body.age-group-under13 #age-gate-card .age-gate-badge {
             background: linear-gradient(135deg, #0f766e, #14b8a6);
+        }
+
+        .hero-pricing-note {
+            margin: 8px 0 0;
+            color: rgba(255, 255, 255, 0.88);
+            font-size: 0.96rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .hero-pricing-note span {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.24);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+        }
+
+        .plan-status-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.82);
+            color: #2d3436;
+            font-weight: 800;
+            font-size: 0.95rem;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .plan-status-chip[data-plan="premium"] {
+            background: linear-gradient(135deg, #f59e0b, #fb7185);
+            color: #fff;
+        }
+
+        #btn-premium-upgrade {
+            min-height: 42px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #f59e0b, #fb7185);
+            color: #fff;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 12px 28px rgba(244, 114, 182, 0.22);
+        }
+
+        #btn-premium-upgrade[data-plan="premium"] {
+            background: linear-gradient(135deg, #0f766e, #14b8a6);
+            box-shadow: 0 12px 28px rgba(20, 184, 166, 0.2);
+        }
+
+        #premium-modal {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background:
+                linear-gradient(180deg, rgba(8, 16, 32, 0.72), rgba(8, 16, 32, 0.86)),
+                radial-gradient(circle at 18% 16%, rgba(245, 158, 11, 0.18), transparent 34%),
+                radial-gradient(circle at 82% 84%, rgba(236, 72, 153, 0.12), transparent 30%);
+            z-index: 11020;
+        }
+
+        #premium-modal.hidden {
+            display: none !important;
+        }
+
+        #premium-modal-card {
+            width: min(720px, 100%);
+            max-height: calc(100vh - 36px);
+            overflow-y: auto;
+            border-radius: 28px;
+            background: rgba(250, 250, 253, 0.985);
+            box-shadow: 0 28px 76px rgba(15, 23, 42, 0.34);
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            padding: 24px;
+            color: #1f2937;
+        }
+
+        .premium-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #f59e0b, #fb7185);
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+        }
+
+        .premium-modal-body {
+            display: grid;
+            gap: 18px;
+        }
+
+        .premium-lead {
+            margin: 0;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #475569;
+        }
+
+        .premium-context-note {
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(245, 158, 11, 0.1);
+            color: #92400e;
+            font-weight: 700;
+            line-height: 1.7;
+        }
+
+        .premium-plan-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .premium-plan-card {
+            border-radius: 22px;
+            padding: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            background: #fff;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+        }
+
+        .premium-plan-card.is-premium {
+            border-color: rgba(245, 158, 11, 0.38);
+            background: linear-gradient(180deg, rgba(255, 247, 237, 0.96), rgba(255, 255, 255, 0.98));
+        }
+
+        .premium-plan-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            color: #64748b;
+            font-size: 0.82rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .premium-plan-card.is-premium .premium-plan-kicker {
+            color: #b45309;
+        }
+
+        .premium-plan-title {
+            margin: 0 0 8px;
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: #111827;
+        }
+
+        .premium-plan-copy {
+            margin: 0 0 12px;
+            line-height: 1.7;
+            color: #475569;
+        }
+
+        .premium-plan-list {
+            margin: 0;
+            padding-right: 18px;
+            display: grid;
+            gap: 8px;
+            color: #334155;
+            line-height: 1.65;
+        }
+
+        .premium-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .premium-actions button {
+            min-height: 48px;
+            border: none;
+            border-radius: 16px;
+            padding: 12px 18px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        #btn-premium-primary {
+            background: linear-gradient(135deg, #f59e0b, #fb7185);
+            color: #fff;
+            box-shadow: 0 14px 28px rgba(244, 114, 182, 0.24);
+        }
+
+        #btn-premium-secondary {
+            background: #fff;
+            color: #1f2937;
+            border: 1px solid rgba(148, 163, 184, 0.32);
+        }
+
+        .premium-tester-btn {
+            background: #0f172a;
+            color: #fff;
+        }
+
+        .premium-footnote {
+            margin: 0;
+            line-height: 1.7;
+            color: #64748b;
+            font-size: 0.94rem;
+        }
+
+        #premium-modal-status {
+            min-height: 22px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        #premium-modal-status.is-error {
+            color: #b91c1c;
+        }
+
+        #premium-modal-status.is-success {
+            color: #0f766e;
         }
 
         body.lobby-open #start-guide-modal {
@@ -1213,6 +1447,20 @@
                 font-size: 15px !important;
             }
 
+            .premium-plan-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .premium-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .premium-actions button,
+            #btn-premium-upgrade {
+                width: 100%;
+            }
+
             #opening-splash {
                 width: 100% !important;
                 min-height: 100vh !important;
@@ -1503,7 +1751,8 @@
             #start-guide-modal,
             #quick-tour-modal,
             #initial-builder-modal,
-            #global-help-modal {
+            #global-help-modal,
+            #premium-modal {
                 width: 100% !important;
                 height: 100vh !important;
                 top: 0 !important;
@@ -1521,7 +1770,8 @@
             #start-guide-card,
             #quick-tour-card,
             #initial-builder-card,
-            #global-help-card {
+            #global-help-card,
+            #premium-modal-card {
                 width: 100% !important;
                 max-height: calc(100vh - 32px) !important;
                 min-height: calc(100vh - 32px) !important;
@@ -1617,6 +1867,60 @@
                 לפרטים נוספים אפשר לפתוח את
                 <a href="/privacy.html" target="_blank" rel="noopener">מדיניות הפרטיות</a>.
             </p>
+        </div>
+    </div>
+
+    <div id="premium-modal" class="hidden" dir="rtl" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="premium-modal-title" onclick="onPremiumModalBackdropClick(event)">
+        <div id="premium-modal-card">
+            <div class="overlay-head">
+                <div class="overlay-title-wrap">
+                    <div class="premium-badge" aria-hidden="true">PREMIUM</div>
+                    <h3 id="premium-modal-title">כלים מתקדמים למסלול Premium</h3>
+                </div>
+                <button id="btn-premium-close" type="button" onclick="closePremiumModal()">סגור</button>
+            </div>
+            <div class="premium-modal-body">
+                <p class="premium-lead">
+                    האפליקציה נשארת חינמית להתחלה: תרגול רגיל, שאלות, גרף, וכלי Local. מסלול Premium מיועד רק למי שרוצה לפתוח כלים מתקדמים יותר.
+                </p>
+                <div id="premium-modal-context" class="premium-context-note">
+                    כאן נכתוב איזה כלי מתקדם ביקשתם לפתוח.
+                </div>
+                <div class="premium-plan-grid">
+                    <section class="premium-plan-card" aria-label="מסלול חינמי">
+                        <div class="premium-plan-kicker">Free</div>
+                        <h4 class="premium-plan-title">חינם להתחלה</h4>
+                        <p class="premium-plan-copy">המסלול הבסיסי נשאר זמין גם בלי תשלום.</p>
+                        <ul class="premium-plan-list">
+                            <li>תרגול רגיל ופתרון שאלות</li>
+                            <li>גרף, משימה, שלבים וכלי בנייה בסיסיים</li>
+                            <li>מצב Local והסברים מקומיים</li>
+                            <li>פרסומות רק בגרסה החינמית לגיל 13+</li>
+                        </ul>
+                    </section>
+                    <section class="premium-plan-card is-premium" aria-label="מסלול מתקדם">
+                        <div class="premium-plan-kicker">Premium</div>
+                        <h4 class="premium-plan-title">כלים מתקדמים בתשלום</h4>
+                        <p class="premium-plan-copy">מי שרוצה יכול לשדרג ולפתוח את השכבה המתקדמת.</p>
+                        <ul class="premium-plan-list">
+                            <li>Cloud AI כשיש שירות זמין</li>
+                            <li>סריקת תמונה מתוך מצלמה או קובץ</li>
+                            <li>פירוק מתקדם יותר של שאלות מצולמות</li>
+                            <li>ללא פרסומות אחרי שדרוג</li>
+                        </ul>
+                    </section>
+                </div>
+                <div id="premium-modal-status" aria-live="polite"></div>
+                <div class="premium-actions">
+                    <button id="btn-premium-primary" type="button" onclick="handlePremiumPurchaseIntent()">שדרוג ל־Premium</button>
+                    <button id="btn-premium-secondary" type="button" onclick="closePremiumModal()">להמשיך במסלול החינמי</button>
+                    <button id="btn-premium-test-unlock" class="premium-tester-btn hidden" type="button" onclick="activatePremiumForThisDevice()">הפעל Premium לבדיקה</button>
+                    <button id="btn-premium-test-reset" class="premium-tester-btn hidden" type="button" onclick="resetPremiumForThisDevice()">חזור ל־Free</button>
+                </div>
+                <p class="premium-footnote">
+                    חיבור הרכישה האמיתי יעבוד דרך Google Play Billing בגרסת החנות. עד אז אנחנו מכינים את ה־UI, החסימות והזרימה.
+                </p>
+            </div>
         </div>
     </div>
 
@@ -1716,6 +2020,10 @@
                     <button id="btn-hero-start" class="hero-primary-cta hero-fade hero-delay-6" type="button" onclick="startOnboarding()">
                         בואו נתחיל ←
                     </button>
+
+                    <div class="hero-pricing-note hero-fade hero-delay-7">
+                        <span>התחלה חינמית. כלים מתקדמים נפתחים רק למי שרוצה לשדרג.</span>
+                    </div>
 
                     <div class="hero-proof hero-fade hero-delay-7">
                         <div class="hero-avatar-stack" aria-hidden="true">
@@ -2493,6 +2801,8 @@
                         <button id="btn-ai-mode-off" type="button" onclick="setAiModeFromUi('off')">Off</button>
                     </div>
                 </div>
+                <span id="premium-status-chip" class="plan-status-chip" data-plan="free" aria-live="polite">Free</span>
+                <button id="btn-premium-upgrade" data-plan="free" type="button" onclick="openPremiumModal('top_upgrade')">שדרוג</button>
                 <span id="top-question-select-label">כאן בוחרים שאלה:</span>
                 <select id="top-question-select" title="בחירת שאלה"></select>
                 <button id="btn-mobile-feed" class="hidden" type="button">📰 פיד גלילה</button>
@@ -2945,6 +3255,18 @@
         }
 
         const ENTRY_FLOW_QUERY = readEntryFlowQueryParams();
+        const MONETIZATION_QUERY = (() => {
+            try {
+                let params = new URLSearchParams(window.location.search);
+                return {
+                    premiumTest: parseBooleanQueryValue(params.get('premium_test') || params.get('test_premium') || params.get('billing_test')) === true
+                };
+            } catch (err) {
+                return {
+                    premiumTest: false
+                };
+            }
+        })();
 
         function normalizeBuildEnv(raw) {
             let value = String(raw || '').trim().toLowerCase();
@@ -3045,6 +3367,7 @@
         const SCAN_CONFIG_STORAGE_KEY = 'math_visual_scan_config_v1';
         const SCANNED_QUESTIONS_STORAGE_KEY = 'math_visual_scanned_questions_v1';
         const AI_MODE_STORAGE_KEY = 'math_visual_ai_mode_v1';
+        const PREMIUM_ACCESS_STORAGE_KEY = 'math_visual_premium_access_v1';
         const AUTH_DISMISS_SESSION_KEY = 'mathviz_auth_dismissed';
         const AUTH_DEFERRED_PROMPT_THRESHOLD = 2;
         const AUTH_SIGNUP_BONUS_POINTS = 50;
@@ -3055,6 +3378,16 @@
             LOCAL: 'local',
             CLOUD: 'cloud',
             OFF: 'off'
+        });
+        const PREMIUM_PLAN_VALUES = Object.freeze({
+            FREE: 'free',
+            PREMIUM: 'premium'
+        });
+        const PREMIUM_TRIGGER_VALUES = Object.freeze({
+            GENERAL: 'general',
+            TOP_UPGRADE: 'top_upgrade',
+            CLOUD: 'cloud',
+            SCAN_IMAGE: 'scan_image'
         });
         const DEFAULT_SCAN_API_ENDPOINT = '';
         const DEFAULT_SCAN_MODEL = '';
@@ -3338,6 +3671,7 @@
         let feedbackModalA11y = null;
         let normalLabModalA11y = null;
         let quickTourModalA11y = null;
+        let premiumModalA11y = null;
         let scanModalA11y = null;
         let startGuideModalA11y = null;
         let initialBuilderModalA11y = null;
@@ -3356,6 +3690,12 @@
             scanEndpoint: '',
             provider: ''
         };
+        let premiumAccessState = {
+            plan: PREMIUM_PLAN_VALUES.FREE,
+            source: 'free',
+            activatedAt: ''
+        };
+        let premiumModalContext = PREMIUM_TRIGGER_VALUES.GENERAL;
         let currentAiMode = AI_MODE_VALUES.LOCAL;
         const ADMOB_PRODUCTION_APP_ID = '';
         const ADMOB_PRODUCTION_BANNER_ID = '';
@@ -4954,6 +5294,13 @@
                     onClose: skipQuickTour
                 });
             }
+            let premiumModal = document.getElementById('premium-modal');
+            let premiumCard = document.getElementById('premium-modal-card');
+            if (premiumModal && premiumCard) {
+                premiumModalA11y = attachModalA11y(premiumModal, premiumCard, {
+                    onClose: closePremiumModal
+                });
+            }
             let scanModal = document.getElementById('scan-modal');
             let scanCard = document.getElementById('scan-modal-card');
             if (scanModal && scanCard) {
@@ -5323,8 +5670,8 @@
             if (adMobInitPromise) return adMobInitPromise;
 
             adMobInitPromise = (async () => {
-                if (isUnder13AudienceSelected()) {
-                    console.log('AdMob skipped: disabled for under-13 audience.');
+                if (!shouldShowAdsForCurrentAudience()) {
+                    console.log('AdMob skipped: ads disabled for under-13 audience or Premium.');
                     return;
                 }
                 if (!hasProductionAdMobConfig()) {
@@ -7551,13 +7898,17 @@
             return Object.assign({}, runtimeCloudCapabilities || getDefaultRuntimeCloudCapabilities());
         }
 
-        function isAnyCloudFeatureAvailable() {
-            if (isUnder13AudienceSelected()) return false;
+        function hasAnyRuntimeCloudFeatureAvailable() {
             return !!(runtimeCloudCapabilities.tutorCloudAvailable || runtimeCloudCapabilities.scanCloudAvailable || hasConfiguredScanProxyEndpoint());
         }
 
+        function isAnyCloudFeatureAvailable() {
+            if (!canUsePremiumCloudFeatures()) return false;
+            return hasAnyRuntimeCloudFeatureAvailable();
+        }
+
         function canUseTutorCloud() {
-            if (isUnder13AudienceSelected()) return false;
+            if (!canUsePremiumCloudFeatures()) return false;
             return currentAiMode === AI_MODE_VALUES.CLOUD && !!runtimeCloudCapabilities.tutorCloudAvailable;
         }
 
@@ -7566,7 +7917,7 @@
         }
 
         function canUseImageScanCloud() {
-            if (isUnder13AudienceSelected()) return false;
+            if (!canUsePremiumCloudFeatures()) return false;
             return currentAiMode === AI_MODE_VALUES.CLOUD && !!(runtimeCloudCapabilities.scanCloudAvailable || hasConfiguredScanProxyEndpoint());
         }
 
@@ -7628,12 +7979,18 @@
             if (cloudBtn) {
                 cloudBtn.classList.toggle('hidden', isUnder13AudienceSelected());
                 let cloudAvailable = isAnyCloudFeatureAvailable();
-                cloudBtn.disabled = !cloudAvailable;
+                let lockedByPlan = !isUnder13AudienceSelected() && !hasPremiumAccess();
+                let usable = hasAnyRuntimeCloudFeatureAvailable();
+                cloudBtn.disabled = isUnder13AudienceSelected() ? true : (lockedByPlan ? false : !usable);
+                cloudBtn.dataset.locked = lockedByPlan ? '1' : '0';
+                cloudBtn.textContent = lockedByPlan ? 'Cloud+' : 'Cloud';
                 cloudBtn.title = isUnder13AudienceSelected()
                     ? 'מתחת לגיל 13 מצב Cloud כבוי ונשארים ב־Local.'
-                    : (cloudAvailable
-                    ? 'Cloud זמין ויפעל רק אם תבחרו בו.'
-                    : 'Cloud לא זמין כרגע כי אין מפתח/Proxy פעיל.');
+                    : (lockedByPlan
+                        ? 'Cloud הוא חלק ממסלול Premium. לחצו כדי לראות מה נפתח בשדרוג.'
+                        : (cloudAvailable
+                            ? 'Cloud זמין ויפעל רק אם תבחרו בו.'
+                            : 'Cloud לא זמין כרגע כי אין מפתח/Proxy פעיל.'));
             }
 
             if (typeof syncScanProgressiveUi === 'function') syncScanProgressiveUi();
@@ -7688,6 +8045,11 @@
                 if (!options.silent && typeof showStepToast === 'function') {
                     showStepToast('מתחת לגיל 13 מצב Cloud כבוי, אז נשארים ב־Local.');
                 }
+            }
+            if (normalized === AI_MODE_VALUES.CLOUD && !isUnder13AudienceSelected() && !hasPremiumAccess()) {
+                if (!options.silent) openPremiumModal(PREMIUM_TRIGGER_VALUES.CLOUD);
+                syncAiModeUi();
+                return false;
             }
             if (normalized === AI_MODE_VALUES.CLOUD && !isAnyCloudFeatureAvailable()) {
                 if (!options.silent && typeof showStepToast === 'function') {
@@ -9875,10 +10237,236 @@
             return choice === AGE_GATE_STATUS.OLDER || choice === AGE_GATE_STATUS.UNDER_13;
         }
 
+        function getDefaultPremiumAccessState() {
+            return {
+                plan: PREMIUM_PLAN_VALUES.FREE,
+                source: 'free',
+                activatedAt: ''
+            };
+        }
+
+        function normalizePremiumPlan(value) {
+            return String(value || '').trim().toLowerCase() === PREMIUM_PLAN_VALUES.PREMIUM
+                ? PREMIUM_PLAN_VALUES.PREMIUM
+                : PREMIUM_PLAN_VALUES.FREE;
+        }
+
+        function readStoredPremiumAccessState() {
+            try {
+                let raw = localStorage.getItem(PREMIUM_ACCESS_STORAGE_KEY);
+                if (!raw) return getDefaultPremiumAccessState();
+                let parsed = JSON.parse(raw);
+                if (typeof parsed === 'string') {
+                    return {
+                        plan: normalizePremiumPlan(parsed),
+                        source: 'legacy',
+                        activatedAt: ''
+                    };
+                }
+                return {
+                    plan: normalizePremiumPlan(parsed?.plan),
+                    source: String(parsed?.source || 'stored').trim() || 'stored',
+                    activatedAt: String(parsed?.activatedAt || '').trim()
+                };
+            } catch (err) {
+                return getDefaultPremiumAccessState();
+            }
+        }
+
+        function persistPremiumAccessState(state) {
+            let nextState = {
+                plan: normalizePremiumPlan(state?.plan),
+                source: String(state?.source || '').trim() || 'manual',
+                activatedAt: String(state?.activatedAt || '').trim()
+            };
+            premiumAccessState = nextState;
+            try {
+                localStorage.setItem(PREMIUM_ACCESS_STORAGE_KEY, JSON.stringify(nextState));
+            } catch (err) {
+                // Continue when storage is unavailable.
+            }
+            return nextState;
+        }
+
+        function loadPremiumAccessState() {
+            premiumAccessState = readStoredPremiumAccessState();
+            return premiumAccessState;
+        }
+
+        function hasPremiumAccess() {
+            return normalizePremiumPlan(premiumAccessState?.plan) === PREMIUM_PLAN_VALUES.PREMIUM;
+        }
+
+        function canUsePremiumCloudFeatures() {
+            return hasPremiumAccess() && !isUnder13AudienceSelected();
+        }
+
+        function shouldShowAdsForCurrentAudience() {
+            return !isUnder13AudienceSelected() && !hasPremiumAccess();
+        }
+
+        function isPremiumTesterModeEnabled() {
+            return SHOW_BUILD_DEBUG || MONETIZATION_QUERY.premiumTest;
+        }
+
+        function describePremiumTrigger(context) {
+            let normalized = String(context || '').trim().toLowerCase();
+            if (normalized === PREMIUM_TRIGGER_VALUES.CLOUD) {
+                return 'Cloud AI הוא כלי מתקדם. אפשר להמשיך חינם ב־Local, או לשדרג כדי לפתוח עבודה מול ענן.';
+            }
+            if (normalized === PREMIUM_TRIGGER_VALUES.SCAN_IMAGE) {
+                return 'צילום שאלה או העלאת תמונה הם חלק מהמסלול המתקדם. במסלול החינמי עדיין אפשר לכתוב את השאלה ולעבוד מקומית.';
+            }
+            if (normalized === PREMIUM_TRIGGER_VALUES.TOP_UPGRADE) {
+                return 'המסלול המתקדם מיועד למי שרוצה לפתוח כלי ענן, סריקת תמונה ופיצ\'רים מתקדמים נוספים.';
+            }
+            return 'התרגול הרגיל נשאר חינמי. רק הכלים המתקדמים יותר נפתחים דרך מסלול Premium.';
+        }
+
+        function setPremiumModalStatus(message, tone = '') {
+            let status = document.getElementById('premium-modal-status');
+            if (!status) return;
+            status.textContent = String(message || '').trim();
+            status.classList.toggle('is-error', tone === 'error');
+            status.classList.toggle('is-success', tone === 'success');
+        }
+
+        async function removeAdMobBanner(reason = '') {
+            adMobInitPromise = null;
+            adMobBannerShown = false;
+            document.body.classList.remove('admob-banner-visible');
+            const cap = window.Capacitor;
+            if (!isNativeCapacitorEnvironment(cap)) return;
+            const AdMob = resolveAdMobPlugin(cap);
+            if (!AdMob) return;
+            try {
+                if (typeof AdMob.removeBanner === 'function') {
+                    await AdMob.removeBanner();
+                } else if (typeof AdMob.hideBanner === 'function') {
+                    await AdMob.hideBanner();
+                }
+                if (reason) console.log(`AdMob banner removed: ${reason}`);
+            } catch (err) {
+                console.warn('Failed to remove AdMob banner.', err);
+            }
+        }
+
+        function syncPremiumUi() {
+            let isPremium = hasPremiumAccess();
+            let chip = document.getElementById('premium-status-chip');
+            let upgradeBtn = document.getElementById('btn-premium-upgrade');
+            let context = document.getElementById('premium-modal-context');
+            let primaryBtn = document.getElementById('btn-premium-primary');
+            let testUnlockBtn = document.getElementById('btn-premium-test-unlock');
+            let testResetBtn = document.getElementById('btn-premium-test-reset');
+
+            document.body.classList.toggle('premium-active', isPremium);
+            document.body.classList.toggle('premium-free', !isPremium);
+
+            if (chip) {
+                chip.dataset.plan = isPremium ? PREMIUM_PLAN_VALUES.PREMIUM : PREMIUM_PLAN_VALUES.FREE;
+                chip.textContent = isPremium ? 'Premium' : 'Free';
+                chip.title = isPremium
+                    ? 'מסלול Premium פעיל במכשיר הזה.'
+                    : 'כרגע האפליקציה במסלול החינמי עם פרסומות לגיל 13+.';
+            }
+            if (upgradeBtn) {
+                upgradeBtn.dataset.plan = isPremium ? PREMIUM_PLAN_VALUES.PREMIUM : PREMIUM_PLAN_VALUES.FREE;
+                upgradeBtn.textContent = isPremium ? 'Premium פעיל' : 'שדרוג';
+                upgradeBtn.title = isPremium
+                    ? 'מסלול Premium כבר פעיל.'
+                    : 'פתחו את הכלים המתקדמים רק אם תרצו.';
+            }
+            if (context) context.textContent = describePremiumTrigger(premiumModalContext);
+            if (primaryBtn) primaryBtn.textContent = isPremium ? 'Premium כבר פעיל' : 'שדרוג ל־Premium';
+            if (testUnlockBtn) testUnlockBtn.classList.toggle('hidden', !isPremiumTesterModeEnabled() || isPremium);
+            if (testResetBtn) testResetBtn.classList.toggle('hidden', !isPremiumTesterModeEnabled() || !isPremium);
+        }
+
+        async function refreshMonetizationUi(options = {}) {
+            syncPremiumUi();
+            reconcileAiModeWithCapabilities({ silent: true });
+            syncAiModeUi();
+            if (typeof syncScanProgressiveUi === 'function') syncScanProgressiveUi();
+            if (options.syncAds === false) return;
+            if (shouldShowAdsForCurrentAudience()) {
+                initAdMobBanner();
+                return;
+            }
+            await removeAdMobBanner(hasPremiumAccess() ? 'premium_active' : 'ads_not_allowed');
+        }
+
+        function openPremiumModal(context = PREMIUM_TRIGGER_VALUES.GENERAL) {
+            premiumModalContext = Object.values(PREMIUM_TRIGGER_VALUES).includes(context) ? context : PREMIUM_TRIGGER_VALUES.GENERAL;
+            syncPremiumUi();
+            setPremiumModalStatus(hasPremiumAccess() ? 'Premium כבר פעיל במכשיר הזה.' : '', hasPremiumAccess() ? 'success' : '');
+            let modal = document.getElementById('premium-modal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('entry-modal-open', 'premium-modal-open');
+            if (premiumModalA11y) premiumModalA11y.activate();
+        }
+
+        function closePremiumModal() {
+            let modal = document.getElementById('premium-modal');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('entry-modal-open', 'premium-modal-open');
+            if (premiumModalA11y) premiumModalA11y.deactivate();
+        }
+
+        function onPremiumModalBackdropClick(event) {
+            if (event.target?.id !== 'premium-modal') return;
+            closePremiumModal();
+        }
+
+        function activatePremiumForThisDevice(source = 'device_test') {
+            persistPremiumAccessState({
+                plan: PREMIUM_PLAN_VALUES.PREMIUM,
+                source,
+                activatedAt: new Date().toISOString()
+            });
+            setPremiumModalStatus('Premium הופעל לבדיקה במכשיר הזה.', 'success');
+            refreshMonetizationUi();
+        }
+
+        function resetPremiumForThisDevice() {
+            persistPremiumAccessState(getDefaultPremiumAccessState());
+            setPremiumModalStatus('חזרנו למסלול החינמי במכשיר הזה.', 'success');
+            refreshMonetizationUi();
+        }
+
+        async function handlePremiumPurchaseIntent() {
+            if (hasPremiumAccess()) {
+                setPremiumModalStatus('Premium כבר פעיל.', 'success');
+                return true;
+            }
+            if (isPremiumTesterModeEnabled()) {
+                activatePremiumForThisDevice();
+                return true;
+            }
+            setPremiumModalStatus('חיבור תשלום אמיתי דרך Google Play Billing עדיין לא חובר בגרסה הזאת.', 'error');
+            showStepToast('ה־UI של Premium מוכן. כדי להתחיל לחייב בפועל צריך לחבר Google Play Billing.');
+            return false;
+        }
+
+        function requirePremiumAccess(context = PREMIUM_TRIGGER_VALUES.GENERAL) {
+            if (isUnder13AudienceSelected()) {
+                showStepToast('מתחת לגיל 13 נשארים במסלול Local בלי Cloud ובלי סריקת תמונה.');
+                return false;
+            }
+            if (hasPremiumAccess()) return true;
+            openPremiumModal(context);
+            return false;
+        }
+
         function confirmAgeGateEligible() {
             writeAgeGateChoice(AGE_GATE_STATUS.OLDER);
             hideAgeGateScreen();
             if (typeof setAiMode === 'function') setAiMode(AI_MODE_VALUES.LOCAL, { silent: true });
+            refreshMonetizationUi();
             showApp();
         }
 
@@ -9886,11 +10474,13 @@
             writeAgeGateChoice(AGE_GATE_STATUS.UNDER_13);
             if (typeof setAiMode === 'function') setAiMode(AI_MODE_VALUES.LOCAL, { silent: true });
             hideAgeGateScreen();
+            refreshMonetizationUi();
             showApp();
         }
 
         function resetAgeGateChoice() {
             writeAgeGateChoice('');
+            refreshMonetizationUi();
             showAgeGateScreen('');
         }
 
@@ -10096,7 +10686,9 @@
             } catch (err) {
                 // Ignore browser restrictions.
             }
+            loadPremiumAccessState();
             currentAiMode = readStoredAiModePreference();
+            syncPremiumUi();
             syncAiModeUi();
             applyStoredCleanModePreference();
             helpVoiceEnabled = readHelpVoicePreference();
@@ -14050,6 +14642,7 @@
             let manualText = getScanManualText();
             let offMode = currentAiMode === AI_MODE_VALUES.OFF;
             let imageCloudEnabled = canUseImageScanCloud();
+            let imagePremiumLocked = !isUnder13AudienceSelected() && !hasPremiumAccess();
             let textAnalysisEnabled = canUseTextAnalysis();
             let imageSelected = !!scanImageFile;
             let readyToAnalyze = isScanReadyToAnalyze();
@@ -14093,16 +14686,24 @@
                 textBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
             }
             if (cameraBtn) {
-                cameraBtn.disabled = scanInFlight || !imageCloudEnabled;
-                cameraBtn.title = imageCloudEnabled
-                    ? 'צילום שאלה זמין רק במצב Cloud עם Proxy פעיל.'
-                    : 'סריקת תמונה כבויה כרגע. עברו ל-Cloud וחברו Proxy כדי להפעיל אותה.';
+                cameraBtn.disabled = scanInFlight || isUnder13AudienceSelected() || (!imagePremiumLocked && !imageCloudEnabled);
+                cameraBtn.title = isUnder13AudienceSelected()
+                    ? 'מתחת לגיל 13 צילום שאלה כבוי ונשארים במסלול מקומי.'
+                    : (imagePremiumLocked
+                        ? 'צילום שאלה הוא חלק ממסלול Premium.'
+                        : (imageCloudEnabled
+                            ? 'צילום שאלה זמין רק במצב Cloud עם Proxy פעיל.'
+                            : 'סריקת תמונה כבויה כרגע. עברו ל-Cloud וחברו Proxy כדי להפעיל אותה.'));
             }
             if (uploadBtn) {
-                uploadBtn.disabled = scanInFlight || !imageCloudEnabled;
-                uploadBtn.title = imageCloudEnabled
-                    ? 'העלאת תמונה זמינה רק במצב Cloud עם Proxy פעיל.'
-                    : 'העלאת תמונה כבויה כרגע. כרגע אפשר לעבוד רק עם טקסט מקומי.';
+                uploadBtn.disabled = scanInFlight || isUnder13AudienceSelected() || (!imagePremiumLocked && !imageCloudEnabled);
+                uploadBtn.title = isUnder13AudienceSelected()
+                    ? 'מתחת לגיל 13 העלאת תמונה כבויה ונשארים במסלול מקומי.'
+                    : (imagePremiumLocked
+                        ? 'העלאת תמונה היא חלק ממסלול Premium.'
+                        : (imageCloudEnabled
+                            ? 'העלאת תמונה זמינה רק במצב Cloud עם Proxy פעיל.'
+                            : 'העלאת תמונה כבויה כרגע. כרגע אפשר לעבוד רק עם טקסט מקומי.'));
             }
             if (textBtn) {
                 textBtn.disabled = scanInFlight || offMode;
@@ -14115,7 +14716,7 @@
                 moreBtn.classList.toggle('hidden', false);
                 moreBtn.innerText = scanMoreOptionsExpanded ? 'פחות אפשרויות' : getScanMoreOptionsLabel(secondaryMode);
                 moreBtn.setAttribute('aria-expanded', scanMoreOptionsExpanded ? 'true' : 'false');
-                moreBtn.disabled = scanInFlight || !imageCloudEnabled;
+                moreBtn.disabled = scanInFlight || isUnder13AudienceSelected() || (!imagePremiumLocked && !imageCloudEnabled);
             }
             if (textAreaEl) textAreaEl.disabled = scanInFlight || offMode;
 
@@ -14138,6 +14739,7 @@
             if (flowNote) {
                 let note = 'בחרו איך להתחיל, ואני אראה לכם רק את הצעד הבא.';
                 if (offMode) note = 'מצב Off פעיל. הפירוק האוטומטי כבוי עד שתחזרו ל־Local או Cloud.';
+                else if (imagePremiumLocked && !scanImageFile && scanEntryMode !== 'text') note = 'צילום שאלה והעלאת תמונה הם חלק ממסלול Premium. בינתיים אפשר לכתוב את השאלה ולעבוד מקומית.';
                 else if (hasDraft) note = 'מעולה. הפירוק מוכן. עכשיו אפשר לעבור עליו ואז לפתוח לתרגול.';
                 else if (scanImageFile) note = 'התמונה מוכנה. השלב הבא הוא לפרק אותה לציור, לנתונים ולמשוואות.';
                 else if (scanEntryMode === 'text' && manualText) note = 'הטקסט מוכן. השלב הבא הוא לפרק אותו לציור, לנתונים ולמשוואות.';
@@ -14453,6 +15055,7 @@
         function updateScanCaptureUi() {
             let isPhone = isLikelyPhoneDevice() || isMobileViewportNow();
             let inSites = isInSitesContext();
+            let scanPremiumLocked = !hasPremiumAccess() && !isUnder13AudienceSelected();
             let inIframe = false;
             try {
                 inIframe = window.self !== window.top;
@@ -14467,6 +15070,7 @@
 
             if (cameraBtn) {
                 cameraBtn.innerText = isPhone ? 'צלם שאלה' : 'צלם עכשיו';
+                if (scanPremiumLocked) cameraBtn.innerText += ' PRO';
                 cameraBtn.title = isPhone
                     ? 'בטלפון בדרך כלל תיפתח המצלמה האחורית.'
                     : 'במחשב ייתכן שתיפתח בחירת קובץ במקום מצלמה, בהתאם לדפדפן.';
@@ -14474,6 +15078,7 @@
 
             if (uploadBtn) {
                 uploadBtn.innerText = isPhone ? 'בחר תמונה' : 'העלה תמונה';
+                if (scanPremiumLocked) uploadBtn.innerText += ' PRO';
                 uploadBtn.title = isPhone
                     ? 'בחירת תמונה שכבר צולמה.'
                     : 'בחירת JPG/PNG/WEBP מהמחשב.';
@@ -14488,6 +15093,9 @@
             let parts = [];
             parts.push(isPhone ? 'בטלפון הכי נוח לצלם את השאלה עכשיו.' : 'במחשב הכי נוח להעלות צילום או תמונה של השאלה.');
             parts.push('אם אין תמונה, אפשר פשוט לכתוב את הנתונים במילים.');
+            if (!hasPremiumAccess() && !isUnder13AudienceSelected()) {
+                parts.push('צילום והעלאת תמונה מסומנים כמסלול Premium. כתיבה ידנית נשארת חינמית.');
+            }
             parts.push('אחרי הבחירה נפרק יחד את השאלה לציור, לנתונים, ולמשוואות.');
             if (inSites && inIframe) {
                 parts.push('אם המצלמה לא נפתחת בתוך Google Sites, פתחו את האפליקציה בלשונית חדשה ולחצו שוב על כפתור המצלמה.');
@@ -14498,6 +15106,10 @@
         }
 
         function triggerScanImageInput(mode) {
+            if (!hasPremiumAccess() && !isUnder13AudienceSelected()) {
+                openPremiumModal(PREMIUM_TRIGGER_VALUES.SCAN_IMAGE);
+                return;
+            }
             if (!canUseImageScanCloud()) {
                 setScanEntryMode('text', { skipFocus: false, skipStatus: true });
                 setScanStatus(currentAiMode === AI_MODE_VALUES.OFF
@@ -14550,6 +15162,8 @@
             setScanEntryMode(resolveDefaultScanInputMode(), { skipStatus: true, skipFocus: true });
             if (currentAiMode === AI_MODE_VALUES.OFF) {
                 setScanStatus('מצב Off פעיל. Local או Cloud יפעילו שוב את הפירוק האוטומטי.');
+            } else if (!hasPremiumAccess() && !isUnder13AudienceSelected()) {
+                setScanStatus('פירוק טקסט חינמי זמין. צילום שאלה והעלאת תמונה נפתחים במסלול Premium.');
             } else if (!canUseImageScanCloud()) {
                 setScanStatus('פירוק טקסט מקומי זמין. סריקת תמונה תיפתח רק ב־Cloud עם Proxy פעיל.');
             } else {
@@ -17013,6 +17627,7 @@ Rules:
             document.body.classList.toggle('mobile-student-flow', isMobileStudentWorkspaceFlow({ practiceClean }));
             document.body.classList.toggle('prestart-only', isLandingEntryMode());
             document.body.classList.toggle('news-feed-enabled', isNewsFeedFeatureEnabled());
+            syncPremiumUi();
             syncGuidedStartUiState();
             syncPracticeCleanModeControls();
             syncMobilePresentationMode();
