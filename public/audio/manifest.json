@@ -1,0 +1,77 @@
+[
+  {
+    "filename": "correct-1.mp3",
+    "hebrew": "כל הכבוד! הבנת את זה!",
+    "transliteration_used": "Kol hakavod! Hevanta et ze!"
+  },
+  {
+    "filename": "correct-2.mp3",
+    "hebrew": "יאללה! ככה ממשיכים!",
+    "transliteration_used": "Yalla! Kaha mamshikhim!"
+  },
+  {
+    "filename": "correct-3.mp3",
+    "hebrew": "מדהים, ראית את זה על הגרף?",
+    "transliteration_used": "Madhim, ra ita et ze al ha-graf?"
+  },
+  {
+    "filename": "correct-4.mp3",
+    "hebrew": "בום! תשובה נכונה!",
+    "transliteration_used": "Boom! Tshuva nekhona!"
+  },
+  {
+    "filename": "correct-5.mp3",
+    "hebrew": "אלוף! עוד אחת כזאת!",
+    "transliteration_used": "Aloof! Od achat kazot!"
+  },
+  {
+    "filename": "wrong-1.mp3",
+    "hebrew": "אחי, מה קרה? תסתכל שוב על הגרף",
+    "transliteration_used": "Akhi, ma kara? Tistakel shuv al ha-graf."
+  },
+  {
+    "filename": "wrong-2.mp3",
+    "hebrew": "קרוב! תנסה שוב, אתה מסוגל",
+    "transliteration_used": "Karov! Tenase shuv, ata mesugal."
+  },
+  {
+    "filename": "wrong-3.mp3",
+    "hebrew": "לא נורא, תזיז את הנקודה ותראה",
+    "transliteration_used": "Lo nora, taziz et ha-nekuda ve-tireh."
+  },
+  {
+    "filename": "wrong-4.mp3",
+    "hebrew": "עוד קצת... תסתכל איפה השיפוע משתנה",
+    "transliteration_used": "Od ktsat... Tistakel eifo ha-shipua mishtaneh."
+  },
+  {
+    "filename": "complete-1.mp3",
+    "hebrew": "שאלה סגורה! ממשיכים הלאה!",
+    "transliteration_used": "She ela sgura! Mamshikhim hala!"
+  },
+  {
+    "filename": "complete-2.mp3",
+    "hebrew": "עוד שאלה מאחוריך! אתה עף!",
+    "transliteration_used": "Od she ela me-akhorecha! Ata af!"
+  },
+  {
+    "filename": "complete-3.mp3",
+    "hebrew": "סיימת! בוא נראה מה הבא",
+    "transliteration_used": "Siyamta! Bo nireh ma ha-ba."
+  },
+  {
+    "filename": "welcome-1.mp3",
+    "hebrew": "היי! מה נלמד היום?",
+    "transliteration_used": "Hey! Ma nilmad ha-yom?"
+  },
+  {
+    "filename": "welcome-2.mp3",
+    "hebrew": "שלום! יאללה בוא נתחיל",
+    "transliteration_used": "Shalom! Yalla bo nathil."
+  },
+  {
+    "filename": "streak-1.mp3",
+    "hebrew": "חמישה ימים ברצף! וואו!",
+    "transliteration_used": "Hamisha yamim be-retzef! Wow!"
+  }
+]
