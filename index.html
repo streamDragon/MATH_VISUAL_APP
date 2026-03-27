@@ -58,9 +58,7 @@
             return !isSupabasePlaceholderValue(window.SUPABASE_URL)
                 && !isSupabasePlaceholderValue(window.SUPABASE_ANON_KEY);
         };
-        window.__APP_SUPABASE__ = (window.supabase && window.isSupabaseConfigured())
-            ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
-            : null;
+        window.__APP_SUPABASE__ = null;
         window.__SUPABASE_CONFIG__ = Object.freeze({
             url: window.SUPABASE_URL,
             anonKey: window.SUPABASE_ANON_KEY
@@ -393,15 +391,17 @@
         }
 
         .age-gate-choice-btn-primary {
-            background: linear-gradient(135deg, #6c5ce7, #7f6cf3);
-            color: #fff;
-            box-shadow: 0 14px 32px rgba(108, 92, 231, 0.24);
+            background: #ffffff;
+            color: #1f2937;
+            border: 1px solid rgba(100, 116, 139, 0.24);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
         }
 
         .age-gate-choice-btn-secondary {
-            background: #fff4eb;
-            color: #9a3412;
-            border: 1px solid rgba(249, 115, 22, 0.18);
+            background: #ffffff;
+            color: #1f2937;
+            border: 1px solid rgba(100, 116, 139, 0.24);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
         }
 
         .age-gate-block-panel {
@@ -440,6 +440,10 @@
         .age-gate-block-copy a {
             color: #5b4bc4;
             font-weight: 700;
+        }
+
+        body.age-group-under13 #age-gate-card .age-gate-badge {
+            background: linear-gradient(135deg, #0f766e, #14b8a6);
         }
 
         body.lobby-open #start-guide-modal {
@@ -1595,10 +1599,10 @@
 
     <div id="age-gate-screen" dir="rtl" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="age-gate-title">
         <div id="age-gate-card">
-            <div class="age-gate-badge" aria-hidden="true">13+</div>
-            <h2 id="age-gate-title">לפני שמתחילים</h2>
+            <div class="age-gate-badge" id="age-gate-badge" aria-hidden="true">גיל</div>
+            <h2 id="age-gate-title">בחירת קבוצת גיל</h2>
             <p class="age-gate-copy">
-                כדי להשתמש בגרסת Android הזו צריך לאשר אם המשתמש או המשתמשת הם בני 13 ומעלה.
+                כדי להתאים את החוויה ולכבות פיצ'רים שלא מיועדים לילדים, בחרו את קבוצת הגיל של המשתמש או המשתמשת.
             </p>
             <div id="age-gate-choice-panel" class="age-gate-choice-panel">
                 <button id="btn-age-gate-eligible" class="age-gate-choice-btn age-gate-choice-btn-primary" type="button" onclick="confirmAgeGateEligible()">
@@ -1608,18 +1612,9 @@
                     אני מתחת לגיל 13
                 </button>
             </div>
-            <div id="age-gate-block-panel" class="age-gate-block-panel hidden">
-                <p class="age-gate-block-title">הגישה באפליקציית Android הזו פתוחה כרגע רק מגיל 13 ומעלה.</p>
-                <p class="age-gate-block-copy">
-                    אם זו הייתה בחירה לא נכונה אפשר לחזור לבחירה. לפרטים נוספים אפשר לעיין גם ב־
-                    <a href="/privacy.html" target="_blank" rel="noopener">מדיניות הפרטיות</a>.
-                </p>
-                <button id="btn-age-gate-reset" class="age-gate-secondary-btn" type="button" onclick="resetAgeGateChoice()">
-                    חזרה לבחירת גיל
-                </button>
-            </div>
             <p class="age-gate-footnote">
-                אם אתם הורה או מורה ומבקשים להבין מה נשמר מקומית ומה לא, אפשר לפתוח את
+                מתחת לגיל 13 האפליקציה תמשיך במצב מקומי בלבד, בלי התחברות, בלי Cloud ובלי פרסומות.
+                לפרטים נוספים אפשר לפתוח את
                 <a href="/privacy.html" target="_blank" rel="noopener">מדיניות הפרטיות</a>.
             </p>
         </div>
@@ -2913,7 +2908,7 @@
         })();
 
         function isStudentSafeModeEnabled() {
-            return !TEACHER_ACCESS_ENABLED;
+            return isUnder13AudienceSelected() || !TEACHER_ACCESS_ENABLED;
         }
 
         function canAccessTeacherUi() {
@@ -3156,8 +3151,8 @@
         const CLEAN_MODE_STORAGE_KEY = 'math_visual_clean_mode_v1';
         const AGE_GATE_STORAGE_KEY = 'math_visual_age_gate_v1';
         const AGE_GATE_STATUS = Object.freeze({
-            ELIGIBLE: '13_plus',
-            BLOCKED: 'under_13'
+            OLDER: '13_plus',
+            UNDER_13: 'under_13'
         });
         const HERO_ONBOARDING_QUESTIONS = [
             { q: 'מה הכיתה שלך?', options: ['ט׳', 'י׳', 'י״א', 'י״ב'], key: 'grade', emoji: '🎓' },
@@ -5321,6 +5316,10 @@
             if (adMobInitPromise) return adMobInitPromise;
 
             adMobInitPromise = (async () => {
+                if (isUnder13AudienceSelected()) {
+                    console.log('AdMob skipped: disabled for under-13 audience.');
+                    return;
+                }
                 const cap = window.Capacitor;
                 if (!isNativeCapacitorEnvironment(cap)) {
                     console.log('AdMob skipped: not running in native Capacitor.');
@@ -7542,10 +7541,12 @@
         }
 
         function isAnyCloudFeatureAvailable() {
+            if (isUnder13AudienceSelected()) return false;
             return !!(runtimeCloudCapabilities.tutorCloudAvailable || runtimeCloudCapabilities.scanCloudAvailable || hasConfiguredScanProxyEndpoint());
         }
 
         function canUseTutorCloud() {
+            if (isUnder13AudienceSelected()) return false;
             return currentAiMode === AI_MODE_VALUES.CLOUD && !!runtimeCloudCapabilities.tutorCloudAvailable;
         }
 
@@ -7554,6 +7555,7 @@
         }
 
         function canUseImageScanCloud() {
+            if (isUnder13AudienceSelected()) return false;
             return currentAiMode === AI_MODE_VALUES.CLOUD && !!(runtimeCloudCapabilities.scanCloudAvailable || hasConfiguredScanProxyEndpoint());
         }
 
@@ -7564,6 +7566,14 @@
         }
 
         function reconcileAiModeWithCapabilities(options = {}) {
+            if (isUnder13AudienceSelected() && currentAiMode === AI_MODE_VALUES.CLOUD) {
+                currentAiMode = AI_MODE_VALUES.LOCAL;
+                persistAiModePreference(currentAiMode);
+                if (!options.silent && typeof showStepToast === 'function') {
+                    showStepToast('במצב עד גיל 13 עובדים רק ב־Local.');
+                }
+                return true;
+            }
             if (currentAiMode !== AI_MODE_VALUES.CLOUD || isAnyCloudFeatureAvailable()) return false;
             currentAiMode = AI_MODE_VALUES.LOCAL;
             persistAiModePreference(currentAiMode);
@@ -7605,11 +7615,14 @@
                 btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
             });
             if (cloudBtn) {
+                cloudBtn.classList.toggle('hidden', isUnder13AudienceSelected());
                 let cloudAvailable = isAnyCloudFeatureAvailable();
                 cloudBtn.disabled = !cloudAvailable;
-                cloudBtn.title = cloudAvailable
+                cloudBtn.title = isUnder13AudienceSelected()
+                    ? 'מתחת לגיל 13 מצב Cloud כבוי ונשארים ב־Local.'
+                    : (cloudAvailable
                     ? 'Cloud זמין ויפעל רק אם תבחרו בו.'
-                    : 'Cloud לא זמין כרגע כי אין מפתח/Proxy פעיל.';
+                    : 'Cloud לא זמין כרגע כי אין מפתח/Proxy פעיל.');
             }
 
             if (typeof syncScanProgressiveUi === 'function') syncScanProgressiveUi();
@@ -7623,6 +7636,12 @@
 
         async function loadRuntimeAiCapabilities() {
             runtimeCloudCapabilities = getDefaultRuntimeCloudCapabilities();
+            if (isUnder13AudienceSelected()) {
+                runtimeCloudCapabilities.loaded = true;
+                reconcileAiModeWithCapabilities({ silent: true });
+                syncAiModeUi();
+                return;
+            }
             try {
                 let response = await fetch(`${RUNTIME_CONFIG_ENDPOINT}?cb=${Date.now()}`, {
                     cache: 'no-store'
@@ -7653,6 +7672,12 @@
 
         function setAiMode(nextMode, options = {}) {
             let normalized = normalizeAiMode(nextMode);
+            if (isUnder13AudienceSelected() && normalized === AI_MODE_VALUES.CLOUD) {
+                normalized = AI_MODE_VALUES.LOCAL;
+                if (!options.silent && typeof showStepToast === 'function') {
+                    showStepToast('מתחת לגיל 13 מצב Cloud כבוי, אז נשארים ב־Local.');
+                }
+            }
             if (normalized === AI_MODE_VALUES.CLOUD && !isAnyCloudFeatureAvailable()) {
                 if (!options.silent && typeof showStepToast === 'function') {
                     showStepToast('Cloud לא זמין כרגע. Local נשאר פעיל.');
@@ -9652,10 +9677,17 @@
         }
 
         function getSupabaseClient() {
+            if (isUnder13AudienceSelected()) return null;
+            if (window.__APP_SUPABASE__) return window.__APP_SUPABASE__;
+            if (!window.supabase || typeof window.isSupabaseConfigured !== 'function' || !window.isSupabaseConfigured()) {
+                return null;
+            }
+            window.__APP_SUPABASE__ = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
             return window.__APP_SUPABASE__ || null;
         }
 
         function isSupabaseAuthEnabled() {
+            if (isUnder13AudienceSelected()) return false;
             return !!getSupabaseClient() && typeof window.isSupabaseConfigured === 'function' && window.isSupabaseConfigured();
         }
 
@@ -9768,7 +9800,7 @@
         function readAgeGateChoice() {
             try {
                 let raw = String(localStorage.getItem(AGE_GATE_STORAGE_KEY) || '').trim();
-                if (raw === AGE_GATE_STATUS.ELIGIBLE || raw === AGE_GATE_STATUS.BLOCKED) return raw;
+                if (raw === AGE_GATE_STATUS.OLDER || raw === AGE_GATE_STATUS.UNDER_13) return raw;
             } catch (err) {
                 // Continue without persistence.
             }
@@ -9788,11 +9820,10 @@
         }
 
         function syncAgeGateUi(choice) {
-            let normalized = choice === AGE_GATE_STATUS.BLOCKED ? AGE_GATE_STATUS.BLOCKED : '';
-            let choicePanel = document.getElementById('age-gate-choice-panel');
-            let blockPanel = document.getElementById('age-gate-block-panel');
-            if (choicePanel) choicePanel.classList.toggle('hidden', normalized === AGE_GATE_STATUS.BLOCKED);
-            if (blockPanel) blockPanel.classList.toggle('hidden', normalized !== AGE_GATE_STATUS.BLOCKED);
+            let normalized = choice === AGE_GATE_STATUS.UNDER_13 ? AGE_GATE_STATUS.UNDER_13 : '';
+            let badge = document.getElementById('age-gate-badge');
+            document.body.classList.toggle('age-group-under13', normalized === AGE_GATE_STATUS.UNDER_13);
+            if (badge) badge.textContent = normalized === AGE_GATE_STATUS.UNDER_13 ? 'ילדים' : 'גיל';
         }
 
         function showAgeGateScreen(choice) {
@@ -9804,8 +9835,8 @@
             gate.setAttribute('aria-hidden', 'false');
             document.body.classList.add('entry-modal-open', 'age-gate-active');
             requestAnimationFrame(() => {
-                let focusTarget = normalized === AGE_GATE_STATUS.BLOCKED
-                    ? document.getElementById('btn-age-gate-reset')
+                let focusTarget = normalized === AGE_GATE_STATUS.UNDER_13
+                    ? document.getElementById('btn-age-gate-under13')
                     : document.getElementById('btn-age-gate-eligible');
                 try {
                     focusTarget?.focus({ preventScroll: true });
@@ -9820,18 +9851,31 @@
             if (!gate) return;
             gate.style.display = 'none';
             gate.setAttribute('aria-hidden', 'true');
-            document.body.classList.remove('entry-modal-open', 'age-gate-active');
+            document.body.classList.remove('entry-modal-open', 'age-gate-active', 'age-group-under13');
+            document.body.classList.toggle('age-group-under13', readAgeGateChoice() === AGE_GATE_STATUS.UNDER_13);
+        }
+
+        function isUnder13AudienceSelected() {
+            return readAgeGateChoice() === AGE_GATE_STATUS.UNDER_13;
+        }
+
+        function hasAgeGateChoice() {
+            let choice = readAgeGateChoice();
+            return choice === AGE_GATE_STATUS.OLDER || choice === AGE_GATE_STATUS.UNDER_13;
         }
 
         function confirmAgeGateEligible() {
-            writeAgeGateChoice(AGE_GATE_STATUS.ELIGIBLE);
+            writeAgeGateChoice(AGE_GATE_STATUS.OLDER);
             hideAgeGateScreen();
+            if (typeof setAiMode === 'function') setAiMode(AI_MODE_VALUES.LOCAL, { silent: true });
             showApp();
         }
 
         function confirmAgeGateBlocked() {
-            writeAgeGateChoice(AGE_GATE_STATUS.BLOCKED);
-            showAgeGateScreen(AGE_GATE_STATUS.BLOCKED);
+            writeAgeGateChoice(AGE_GATE_STATUS.UNDER_13);
+            if (typeof setAiMode === 'function') setAiMode(AI_MODE_VALUES.LOCAL, { silent: true });
+            hideAgeGateScreen();
+            showApp();
         }
 
         function resetAgeGateChoice() {
@@ -9974,9 +10018,8 @@
 
         function showApp() {
             hideAuthScreen();
-            let ageGateChoice = readAgeGateChoice();
-            if (ageGateChoice !== AGE_GATE_STATUS.ELIGIBLE) {
-                showAgeGateScreen(ageGateChoice);
+            if (!hasAgeGateChoice()) {
+                showAgeGateScreen(readAgeGateChoice());
                 return Promise.resolve(false);
             }
             hideAgeGateScreen();
