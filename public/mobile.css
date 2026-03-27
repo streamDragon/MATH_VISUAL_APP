@@ -9487,6 +9487,24 @@ body.prestart-only #home-preview-column #graph-area {
     body.prestart-only #home-hero {
         animation: landingFadeUp 0.45s ease both;
         animation-delay: 0.05s;
+        gap: 8px;
+        padding: 14px 14px 12px;
+    }
+
+    body.prestart-only #home-hero-subtitle {
+        line-height: 1.56;
+    }
+
+    body.prestart-only #home-hero-support {
+        line-height: 1.45;
+    }
+
+    body.prestart-only #btn-home-back-to-hero {
+        padding-block: 7px;
+    }
+
+    body.prestart-only #home-landing {
+        gap: 10px;
     }
 
     body.prestart-only #home-paths-section {
