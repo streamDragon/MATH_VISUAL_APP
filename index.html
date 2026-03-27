@@ -189,6 +189,17 @@
             };
             window.toggleSound = window.toggleSound || window.__toggleSoundFallback;
         })();
+
+        (function primeAgeGateFirstPaint() {
+            let hasChoice = false;
+            try {
+                let raw = String(localStorage.getItem('math_visual_age_gate_v1') || '').trim();
+                hasChoice = raw === '13_plus' || raw === 'under_13';
+            } catch (err) {
+                hasChoice = false;
+            }
+            document.documentElement.classList.toggle('age-gate-pending', !hasChoice);
+        })();
     </script>
 
     <script
@@ -299,6 +310,22 @@
         })();
     </script>
     <style>
+        .hidden {
+            display: none !important;
+        }
+
+        html.age-gate-pending body {
+            overflow: hidden !important;
+        }
+
+        html.age-gate-pending body > *:not(#age-gate-screen) {
+            display: none !important;
+        }
+
+        html.age-gate-pending #age-gate-screen {
+            display: flex !important;
+        }
+
         body.entry-modal-open {
             overflow: hidden !important;
         }
@@ -10235,6 +10262,10 @@
             return '';
         }
 
+        function releaseInitialAgeGatePaintLock() {
+            document.documentElement.classList.remove('age-gate-pending');
+        }
+
         function writeAgeGateChoice(value) {
             try {
                 if (!value) {
@@ -10262,6 +10293,7 @@
             gate.style.display = 'flex';
             gate.setAttribute('aria-hidden', 'false');
             document.body.classList.add('entry-modal-open', 'age-gate-active');
+            releaseInitialAgeGatePaintLock();
             requestAnimationFrame(() => {
                 let focusTarget = normalized === AGE_GATE_STATUS.UNDER_13
                     ? document.getElementById('btn-age-gate-under13')
@@ -10277,6 +10309,7 @@
         function hideAgeGateScreen() {
             let gate = document.getElementById('age-gate-screen');
             if (!gate) return;
+            releaseInitialAgeGatePaintLock();
             gate.style.display = 'none';
             gate.setAttribute('aria-hidden', 'true');
             document.body.classList.remove('entry-modal-open', 'age-gate-active', 'age-group-under13');
@@ -11076,6 +11109,7 @@
 
         function showApp() {
             hideAuthScreen();
+            releaseInitialAgeGatePaintLock();
             if (!hasAgeGateChoice()) {
                 showAgeGateScreen(readAgeGateChoice());
                 return Promise.resolve(false);
