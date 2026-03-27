@@ -30,6 +30,7 @@ const APP_SHELL = [
   '/icons/icon-384.png',
   '/icons/icon-512.png',
   '/icons/icon-maskable-512.png',
+  '/icons/apple-touch-icon.png',
   '/icons/shortcut-practice.png',
   '/icons/shortcut-scan.png',
   '/screenshots/functions-workplace.png',
