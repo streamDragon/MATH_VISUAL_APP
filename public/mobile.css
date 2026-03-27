@@ -9487,29 +9487,63 @@ body.prestart-only #home-preview-column #graph-area {
     body.prestart-only #home-hero {
         animation: landingFadeUp 0.45s ease both;
         animation-delay: 0.05s;
-        gap: 8px;
-        padding: 14px 14px 12px;
+        gap: 7px;
+        padding: 13px 14px 10px;
     }
 
     body.prestart-only #home-hero-subtitle {
-        line-height: 1.56;
+        color: #2f3d4f;
+        line-height: 1.5;
     }
 
     body.prestart-only #home-hero-support {
-        line-height: 1.45;
+        color: #0d6660;
+        line-height: 1.38;
     }
 
     body.prestart-only #btn-home-back-to-hero {
-        padding-block: 7px;
+        width: auto;
+        max-width: 100%;
+        color: #66708f;
+        background: rgba(255, 255, 255, 0.76);
+        border-color: rgba(148, 163, 184, 0.32);
+        box-shadow: none;
+        font-size: 12px !important;
+        padding: 6px 12px;
     }
 
     body.prestart-only #home-landing {
-        gap: 10px;
+        gap: 8px;
     }
 
     body.prestart-only #home-paths-section {
         animation: landingFadeUp 0.45s ease both;
         animation-delay: 0.15s;
+        padding-top: 14px;
+        border-color: rgba(15, 118, 110, 0.18);
+    }
+
+    body.prestart-only #home-paths-section .home-section-head {
+        gap: 4px;
+        margin-bottom: 10px;
+    }
+
+    body.prestart-only #home-paths-section .home-section-head h2 {
+        font-size: 18px;
+        color: var(--home-text-strong);
+    }
+
+    body.prestart-only #home-paths .home-path-card {
+        gap: 8px;
+    }
+
+    body.prestart-only #home-paths .home-path-card:nth-child(1) {
+        border-color: #cabcfb #cabcfb #cabcfb #6C5CE7;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82), 0 14px 28px rgba(108, 92, 231, 0.12);
+    }
+
+    body.prestart-only #home-paths .home-path-card:nth-child(1) .home-path-title {
+        color: #221c52;
     }
 
     body.prestart-only #home-paths .home-path-card:nth-child(1) {
