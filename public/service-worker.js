@@ -1,80 +1,148 @@
-const CACHE_NAME = 'math-functions-pwa-v1';
+const CACHE_NAME = 'mathviz-v1.1';
 const APP_SHELL = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/privacy.html',
+  '/version.json',
   '/mobile.css',
   '/questions.js',
   '/sound.js',
+  '/presets.js',
+  '/capacitor.js',
+  '/codex_features.js',
   '/coach_feedback.css',
   '/coach_feedback.js',
+  '/coach_feedback_catalog.json',
   '/help-video-registry.js',
   '/helpContent.he.js',
+  '/help_videos.json',
   '/feed_manifest.json',
   '/opening-poster.png',
+  '/icons/icon-72.png',
+  '/icons/icon-96.png',
+  '/icons/icon-128.png',
+  '/icons/icon-144.png',
+  '/icons/icon-152.png',
   '/icons/icon-192.png',
+  '/icons/icon-384.png',
   '/icons/icon-512.png',
-  '/icons/icon-maskable-512.png'
+  '/icons/icon-maskable-512.png',
+  '/icons/shortcut-practice.png',
+  '/icons/shortcut-scan.png',
+  '/screenshots/mobile-home.png',
+  '/screenshots/mobile-exercise.png',
+  '/screenshots/mobile-win.png'
 ];
 
-function isCacheableSameOriginRequest(requestUrl) {
-  return requestUrl.origin === self.location.origin
-    && !requestUrl.pathname.startsWith('/api/')
-    && !requestUrl.pathname.startsWith('/auth/');
+const CACHE_PREFIXES = ['mathviz-', 'math-functions-pwa-'];
+
+function isCacheableSameOriginRequest(request) {
+  const url = new URL(request.url);
+  if (request.method !== 'GET') return false;
+  if (request.headers.has('range')) return false;
+  if (url.origin !== self.location.origin) return false;
+  if (url.pathname.startsWith('/api/')) return false;
+  if (url.pathname.startsWith('/auth/')) return false;
+  return true;
+}
+
+function isStaticAssetRequest(request) {
+  if (request.mode === 'navigate') return false;
+  if (request.destination === 'audio' || request.destination === 'video') return false;
+  return true;
+}
+
+function shouldCacheResponse(response) {
+  return !!response && response.ok && response.type !== 'opaque';
+}
+
+async function addAppShell(cache) {
+  const settled = await Promise.allSettled(
+    APP_SHELL.map((asset) => cache.add(asset))
+  );
+  settled.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      console.warn('[SW] Failed to precache:', APP_SHELL[index], result.reason);
+    }
+  });
+}
+
+async function networkFirst(request) {
+  const cache = await caches.open(CACHE_NAME);
+  try {
+    const response = await fetch(request);
+    if (shouldCacheResponse(response)) {
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch (err) {
+    const cached = await caches.match(request, { ignoreSearch: true });
+    if (cached) return cached;
+    if (request.mode === 'navigate') {
+      return (await caches.match('/index.html')) || Response.error();
+    }
+    return Response.error();
+  }
+}
+
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const cached = await cache.match(request, { ignoreSearch: true });
+  const networkFetch = fetch(request)
+    .then((response) => {
+      if (shouldCacheResponse(response)) {
+        cache.put(request, response.clone());
+      }
+      return response;
+    })
+    .catch(() => null);
+
+  if (cached) {
+    return cached;
+  }
+
+  const response = await networkFetch;
+  return response || Response.error();
 }
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(APP_SHELL))
+      .then((cache) => addAppShell(cache))
       .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      ))
-      .then(() => self.clients.claim())
+    caches.keys().then((keys) => Promise.all(
+      keys
+        .filter((key) => key !== CACHE_NAME && CACHE_PREFIXES.some((prefix) => key.startsWith(prefix)))
+        .map((key) => caches.delete(key))
+    )).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
+  const { request } = event;
+  if (!isCacheableSameOriginRequest(request)) return;
 
-  const requestUrl = new URL(event.request.url);
-  if (!isCacheableSameOriginRequest(requestUrl)) return;
-
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          if (response && response.ok) {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', responseClone));
-          }
-          return response;
-        })
-        .catch(() => caches.match('/index.html'))
-    );
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirst(request));
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
+  if (isStaticAssetRequest(request)) {
+    event.respondWith(staleWhileRevalidate(request));
+    return;
+  }
 
-      return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || !networkResponse.ok) return networkResponse;
+  event.respondWith(networkFirst(request));
+});
 
-        const responseClone = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
-        return networkResponse;
-      });
-    })
-  );
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

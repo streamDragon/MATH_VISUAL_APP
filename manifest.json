@@ -1,0 +1,70 @@
+{
+  "id": "/",
+  "name": "Math Visual App",
+  "short_name": "Math Visual",
+  "description": "אפליקציית תרגול מתמטיקה ויזואלית שממחישה גרפים, שיפועים ונגזרות דרך אינטראקציה, פידבק מיידי ומשימות קצרות.",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#16213e",
+  "theme_color": "#6C5CE7",
+  "categories": [
+    "education",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "מעבדת האנך",
+      "short_name": "אנך",
+      "description": "כניסה מהירה לתרגול של שיפוע, משיק ואנך.",
+      "url": "/?feature=perpendicular-lab",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "תרגול מהיר",
+      "short_name": "תרגול",
+      "description": "כניסה מהירה לתרגול היומי.",
+      "url": "/?feature=daily-practice",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

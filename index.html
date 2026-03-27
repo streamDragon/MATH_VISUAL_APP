@@ -17,19 +17,24 @@
     <meta name="description" content="אפליקציה ללמידה אינטראקטיבית של פונקציות מתמטיות. גרפים אינטראקטיביים, תרגול מונחה, משוב מיידי.">
     <meta property="og:title" content="מעבדת הפונקציות">
     <meta property="og:description" content="למידה גרפית אינטראקטיבית – 15 שאלות עם ניקוד ומשוב">
-    <link rel="icon" type="image/png" href="/opening-poster.png">
+    <link rel="icon" type="image/png" href="/icons/icon-192.png">
     <link rel="manifest" href="/manifest.json">
     <meta name="application-name" content="מעבדת הפונקציות">
     <meta name="theme-color" content="#6C5CE7">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="פונקציות">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="מעבדת הפונקציות">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function () {
-                navigator.serviceWorker.register('/service-worker.js').catch(function (err) {
+                navigator.serviceWorker.register('/service-worker.js', {
+                    scope: '/',
+                    updateViaCache: 'none'
+                }).then(function () {
+                    console.info('Service worker registered');
+                }).catch(function (err) {
                     console.warn('Service worker registration failed:', err);
                 });
             });
