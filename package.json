@@ -4,6 +4,8 @@
     "check:questions": "node ./scripts/check-questions.mjs",
     "build": "npm run build:web",
     "build:web": "node ./scripts/build-web.mjs",
+    "test:mobile": "playwright test tests/mobile-smoke.spec.ts --project=mobile-iphone13",
+    "test:mobile:ui": "playwright test tests/mobile-smoke.spec.ts --project=mobile-iphone13 --ui",
     "cap:sync": "node ./scripts/cap.mjs sync",
     "cap:open:android": "node ./scripts/cap.mjs open-android"
   },
@@ -14,6 +16,7 @@
     "@capacitor/core": "^8.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "vite": "^7.3.1"
   }
 }
