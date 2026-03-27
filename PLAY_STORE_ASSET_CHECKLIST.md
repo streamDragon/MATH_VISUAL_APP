@@ -36,6 +36,21 @@ Audit date: 2026-03-27
 
 ### Required / effectively blocking
 
+- Google Play Billing product setup
+  - Missing artifact: actual Play Console products matching the IDs used in code:
+    - `premium_monthly`
+    - `premium_lifetime`
+  - Why it matters: until at least one product exists in Play Console, the Premium purchase flow cannot charge real users.
+
+- AdMob production IDs
+  - Missing artifacts:
+    - final AdMob App ID
+    - final banner ad unit ID
+  - Current repo status:
+    - `ADMOB_PRODUCTION_APP_ID` is blank in `index.html`
+    - `ADMOB_PRODUCTION_BANNER_ID` is blank in `index.html`
+  - Why it matters: the free tier is prepared for ads in code, but ads stay disabled until these real IDs are inserted.
+
 - Real content rating / IARC completion
   - Missing artifact: actual content rating result from Google Play Console / IARC flow.
   - Why it matters: Play submission cannot finish without completing content rating.
@@ -103,4 +118,6 @@ Audit date: 2026-03-27
 2. Create the Play feature graphic (`1024x500`).
 3. Complete Play Console content rating / IARC and Data safety.
 4. Decide the final production privacy-policy URL and support contact.
-5. Optional: replace current screenshot set with higher-resolution marketing captures before store launch.
+5. Create the Play Billing products `premium_monthly` and/or `premium_lifetime`.
+6. Add real AdMob production IDs before turning on ads for the free tier.
+7. Optional: replace current screenshot set with higher-resolution marketing captures before store launch.

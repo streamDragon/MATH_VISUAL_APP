@@ -653,6 +653,12 @@
             border: 1px solid rgba(148, 163, 184, 0.32);
         }
 
+        #btn-premium-restore {
+            background: rgba(15, 23, 42, 0.06);
+            color: #0f172a;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+        }
+
         .premium-tester-btn {
             background: #0f172a;
             color: #fff;
@@ -1913,12 +1919,13 @@
                 <div id="premium-modal-status" aria-live="polite"></div>
                 <div class="premium-actions">
                     <button id="btn-premium-primary" type="button" onclick="handlePremiumPurchaseIntent()">שדרוג ל־Premium</button>
+                    <button id="btn-premium-restore" type="button" onclick="restorePremiumPurchasesFromUi()">שחזור רכישה</button>
                     <button id="btn-premium-secondary" type="button" onclick="closePremiumModal()">להמשיך במסלול החינמי</button>
                     <button id="btn-premium-test-unlock" class="premium-tester-btn hidden" type="button" onclick="activatePremiumForThisDevice()">הפעל Premium לבדיקה</button>
                     <button id="btn-premium-test-reset" class="premium-tester-btn hidden" type="button" onclick="resetPremiumForThisDevice()">חזור ל־Free</button>
                 </div>
                 <p class="premium-footnote">
-                    חיבור הרכישה האמיתי יעבוד דרך Google Play Billing בגרסת החנות. עד אז אנחנו מכינים את ה־UI, החסימות והזרימה.
+                    בגרסת Android מהחנות הרכישה עובדת דרך Google Play Billing. במסך הזה אפשר גם לשחזר רכישה קיימת מאותו חשבון Google Play.
                 </p>
             </div>
         </div>
@@ -3389,6 +3396,24 @@
             CLOUD: 'cloud',
             SCAN_IMAGE: 'scan_image'
         });
+        const BILLING_PRODUCT_TYPES = Object.freeze({
+            SUBS: 'subs',
+            INAPP: 'inapp'
+        });
+        const PREMIUM_BILLING_PRODUCT_DEFS = Object.freeze([
+            {
+                productId: 'premium_monthly',
+                type: BILLING_PRODUCT_TYPES.SUBS,
+                label: 'Premium חודשי',
+                preferred: true
+            },
+            {
+                productId: 'premium_lifetime',
+                type: BILLING_PRODUCT_TYPES.INAPP,
+                label: 'Premium לכל החיים',
+                preferred: false
+            }
+        ]);
         const DEFAULT_SCAN_API_ENDPOINT = '';
         const DEFAULT_SCAN_MODEL = '';
         const FOUR_UNIT_TOPIC_DEFS = [
@@ -3696,6 +3721,19 @@
             activatedAt: ''
         };
         let premiumModalContext = PREMIUM_TRIGGER_VALUES.GENERAL;
+        let premiumBillingProducts = [];
+        let premiumBillingProductsPromise = null;
+        let premiumBillingSyncPromise = null;
+        let premiumBillingListenerBound = false;
+        let premiumBillingPluginProxy = null;
+        let premiumBillingState = {
+            available: false,
+            connected: false,
+            loaded: false,
+            loading: false,
+            lastError: '',
+            lastSyncAt: ''
+        };
         let currentAiMode = AI_MODE_VALUES.LOCAL;
         const ADMOB_PRODUCTION_APP_ID = '';
         const ADMOB_PRODUCTION_BANNER_ID = '';
@@ -5659,6 +5697,20 @@
             return null;
         }
 
+        function resolvePremiumBillingPlugin(cap = window.Capacitor) {
+            if (!cap || !isNativeCapacitorEnvironment(cap)) return null;
+            if (premiumBillingPluginProxy) return premiumBillingPluginProxy;
+            if (cap.Plugins?.MathVisualBilling) {
+                premiumBillingPluginProxy = cap.Plugins.MathVisualBilling;
+                return premiumBillingPluginProxy;
+            }
+            if (typeof cap.registerPlugin === 'function') {
+                premiumBillingPluginProxy = cap.registerPlugin('MathVisualBilling');
+                return premiumBillingPluginProxy;
+            }
+            return null;
+        }
+
         function hasProductionAdMobConfig() {
             const appId = (typeof ADMOB_PRODUCTION_APP_ID === 'string') ? ADMOB_PRODUCTION_APP_ID.trim() : '';
             const bannerId = (typeof ADMOB_PRODUCTION_BANNER_ID === 'string') ? ADMOB_PRODUCTION_BANNER_ID.trim() : '';
@@ -5703,7 +5755,10 @@
 
                 console.log('Calling AdMob.initialize()');
                 await AdMob.initialize({
-                    initializeForTesting: false
+                    initializeForTesting: false,
+                    maxAdContentRating: 'General',
+                    tagForChildDirectedTreatment: false,
+                    tagForUnderAgeOfConsent: false
                 });
 
                 console.log('Calling AdMob.showBanner()');
@@ -10237,6 +10292,323 @@
             return choice === AGE_GATE_STATUS.OLDER || choice === AGE_GATE_STATUS.UNDER_13;
         }
 
+        function getPremiumBillingProductRequests() {
+            return PREMIUM_BILLING_PRODUCT_DEFS.map((productDef) => ({
+                productId: productDef.productId,
+                type: productDef.type
+            }));
+        }
+
+        function normalizePremiumBillingProduct(rawProduct, index = 0) {
+            let productId = String(rawProduct?.productId || '').trim();
+            if (!productId) return null;
+            let type = String(rawProduct?.type || BILLING_PRODUCT_TYPES.INAPP).trim().toLowerCase() === BILLING_PRODUCT_TYPES.SUBS
+                ? BILLING_PRODUCT_TYPES.SUBS
+                : BILLING_PRODUCT_TYPES.INAPP;
+            let matchingDef = PREMIUM_BILLING_PRODUCT_DEFS.find((productDef) => productDef.productId === productId);
+            return {
+                productId,
+                type,
+                title: String(rawProduct?.title || rawProduct?.name || matchingDef?.label || productId).trim(),
+                description: String(rawProduct?.description || '').trim(),
+                formattedPrice: String(rawProduct?.formattedPrice || '').trim(),
+                priceCurrencyCode: String(rawProduct?.priceCurrencyCode || '').trim(),
+                priceAmountMicros: Number(rawProduct?.priceAmountMicros || 0) || 0,
+                billingPeriod: String(rawProduct?.billingPeriod || '').trim(),
+                offerToken: String(rawProduct?.offerToken || '').trim(),
+                basePlanId: String(rawProduct?.basePlanId || '').trim(),
+                offerId: String(rawProduct?.offerId || '').trim(),
+                preferredOrder: matchingDef ? PREMIUM_BILLING_PRODUCT_DEFS.indexOf(matchingDef) : (100 + index),
+                label: matchingDef?.label || String(rawProduct?.title || rawProduct?.name || productId).trim()
+            };
+        }
+
+        function sortPremiumBillingProducts(products) {
+            return [...products].sort((first, second) => {
+                let orderDiff = Number(first?.preferredOrder || 999) - Number(second?.preferredOrder || 999);
+                if (orderDiff !== 0) return orderDiff;
+                return String(first?.productId || '').localeCompare(String(second?.productId || ''));
+            });
+        }
+
+        function getPreferredPremiumBillingProduct(products = premiumBillingProducts) {
+            if (!Array.isArray(products) || !products.length) return null;
+            return sortPremiumBillingProducts(products)[0] || null;
+        }
+
+        function formatPremiumBillingProductSummary(product) {
+            if (!product) return 'Premium';
+            let label = String(product?.label || product?.title || 'Premium').trim();
+            let price = String(product?.formattedPrice || '').trim();
+            return price ? `${label} · ${price}` : label;
+        }
+
+        function getPremiumBillingErrorMessage(err, fallbackMessage) {
+            let message = String(
+                err?.message
+                || err?.errorMessage
+                || err?.localizedMessage
+                || err?.debugMessage
+                || fallbackMessage
+                || ''
+            ).trim();
+            return message || fallbackMessage;
+        }
+
+        function updatePremiumBillingState(partialState = {}) {
+            premiumBillingState = {
+                ...premiumBillingState,
+                ...partialState
+            };
+            return premiumBillingState;
+        }
+
+        function getPremiumActivationIsoFromBillingPayload(payload) {
+            let purchases = Array.isArray(payload?.purchases) ? payload.purchases : [];
+            let latestPurchaseTime = 0;
+            purchases.forEach((purchase) => {
+                let purchaseTime = Number(purchase?.purchaseTime || 0);
+                if (purchaseTime > latestPurchaseTime) latestPurchaseTime = purchaseTime;
+            });
+            if (latestPurchaseTime > 0) {
+                try {
+                    return new Date(latestPurchaseTime).toISOString();
+                } catch (err) {
+                    // Fall through to current time.
+                }
+            }
+            return new Date().toISOString();
+        }
+
+        async function applyPremiumAccessFromBillingPayload(payload, options = {}) {
+            let hasPremium = !!payload?.hasPremium;
+            let activeProductIds = Array.isArray(payload?.activeProductIds)
+                ? payload.activeProductIds.map((value) => String(value || '').trim()).filter(Boolean)
+                : [];
+            if (hasPremium) {
+                persistPremiumAccessState({
+                    plan: PREMIUM_PLAN_VALUES.PREMIUM,
+                    source: `billing:${activeProductIds[0] || 'google_play'}`,
+                    activatedAt: getPremiumActivationIsoFromBillingPayload(payload)
+                });
+                if (!options.silent) {
+                    setPremiumModalStatus('Premium הופעל דרך Google Play במכשיר הזה.', 'success');
+                    showStepToast('Premium פעיל. הכלים המתקדמים נפתחו.');
+                }
+            } else if (!isPremiumTesterModeEnabled()) {
+                persistPremiumAccessState({
+                    plan: PREMIUM_PLAN_VALUES.FREE,
+                    source: 'billing_none',
+                    activatedAt: ''
+                });
+                if (!options.silent) {
+                    setPremiumModalStatus('לא נמצאה כרגע רכישת Premium בחשבון Google Play הזה.', '');
+                }
+            }
+            updatePremiumBillingState({
+                loaded: true,
+                lastError: '',
+                lastSyncAt: new Date().toISOString()
+            });
+            await refreshMonetizationUi();
+            return hasPremium;
+        }
+
+        async function ensurePremiumBillingListenersBound() {
+            if (premiumBillingListenerBound) return true;
+            let billing = resolvePremiumBillingPlugin();
+            if (!billing || typeof billing.addListener !== 'function') return false;
+            premiumBillingListenerBound = true;
+
+            await billing.addListener('purchaseUpdated', async (payload) => {
+                let status = String(payload?.status || '').trim().toLowerCase();
+                if (status === 'purchased' || status === 'pending') {
+                    await applyPremiumAccessFromBillingPayload(payload, { silent: status === 'pending' });
+                    if (status === 'pending') {
+                        setPremiumModalStatus('הרכישה נפתחה. אם התשלום ממתין לאישור, Premium יופעל מיד אחרי ש־Google Play יאשר.', '');
+                    }
+                    return;
+                }
+                if (status === 'cancelled') {
+                    setPremiumModalStatus('הרכישה בוטלה לפני סיום. אפשר להמשיך בחינם או לנסות שוב.', '');
+                    return;
+                }
+                if (status.includes('error')) {
+                    setPremiumModalStatus(getPremiumBillingErrorMessage(payload, 'Google Play לא הצליח להשלים את הרכישה כרגע.'), 'error');
+                }
+            });
+
+            await billing.addListener('billingStateChanged', async (payload) => {
+                let status = String(payload?.status || '').trim().toLowerCase();
+                updatePremiumBillingState({
+                    available: true,
+                    connected: payload?.connected !== false,
+                    lastError: status.includes('error') ? getPremiumBillingErrorMessage(payload, 'Google Play Billing לא זמין כרגע.') : premiumBillingState.lastError
+                });
+                if (Array.isArray(payload?.activeProductIds) || typeof payload?.hasPremium === 'boolean') {
+                    await applyPremiumAccessFromBillingPayload(payload, { silent: true });
+                } else if (status === 'connected') {
+                    syncPremiumUi();
+                }
+            });
+
+            return true;
+        }
+
+        async function loadPremiumBillingProducts(options = {}) {
+            let billing = resolvePremiumBillingPlugin();
+            if (!billing || typeof billing.getProducts !== 'function') {
+                updatePremiumBillingState({
+                    available: false,
+                    connected: false,
+                    loaded: true,
+                    loading: false,
+                    lastError: ''
+                });
+                premiumBillingProducts = [];
+                syncPremiumUi();
+                return premiumBillingProducts;
+            }
+
+            if (premiumBillingProductsPromise && !options.force) return premiumBillingProductsPromise;
+
+            updatePremiumBillingState({
+                available: true,
+                loading: true,
+                lastError: options.silent ? premiumBillingState.lastError : ''
+            });
+            syncPremiumUi();
+
+            premiumBillingProductsPromise = (async () => {
+                try {
+                    await ensurePremiumBillingListenersBound();
+                    if (typeof billing.isAvailable === 'function') {
+                        let availability = await billing.isAvailable();
+                        updatePremiumBillingState({
+                            available: availability?.available !== false,
+                            connected: !!availability?.connected
+                        });
+                    }
+                    let result = await billing.getProducts({
+                        items: getPremiumBillingProductRequests()
+                    });
+                    let normalizedProducts = Array.isArray(result?.products)
+                        ? result.products.map((product, index) => normalizePremiumBillingProduct(product, index)).filter(Boolean)
+                        : [];
+                    premiumBillingProducts = sortPremiumBillingProducts(normalizedProducts);
+                    updatePremiumBillingState({
+                        loaded: true,
+                        loading: false,
+                        lastError: ''
+                    });
+                    syncPremiumUi();
+                    return premiumBillingProducts;
+                } catch (err) {
+                    premiumBillingProducts = [];
+                    updatePremiumBillingState({
+                        loaded: true,
+                        loading: false,
+                        available: true,
+                        lastError: getPremiumBillingErrorMessage(err, 'Google Play לא הצליח לטעון כרגע את מסלולי השדרוג.')
+                    });
+                    syncPremiumUi();
+                    if (!options.silent) {
+                        setPremiumModalStatus(premiumBillingState.lastError, 'error');
+                    }
+                    return premiumBillingProducts;
+                } finally {
+                    premiumBillingProductsPromise = null;
+                }
+            })();
+
+            return premiumBillingProductsPromise;
+        }
+
+        async function syncPremiumAccessFromBilling(options = {}) {
+            let billing = resolvePremiumBillingPlugin();
+            if (!billing || typeof billing.syncPurchases !== 'function') return false;
+            if (premiumBillingSyncPromise && !options.force) return premiumBillingSyncPromise;
+
+            premiumBillingSyncPromise = (async () => {
+                try {
+                    await ensurePremiumBillingListenersBound();
+                    let result = await billing.syncPurchases({
+                        items: getPremiumBillingProductRequests()
+                    });
+                    updatePremiumBillingState({
+                        available: true,
+                        connected: true
+                    });
+                    await applyPremiumAccessFromBillingPayload(result, { silent: options.silent !== false });
+                    return !!result?.hasPremium;
+                } catch (err) {
+                    updatePremiumBillingState({
+                        available: true,
+                        connected: false,
+                        loaded: true,
+                        lastError: getPremiumBillingErrorMessage(err, 'Google Play לא הצליח לסנכרן כרגע רכישות.')
+                    });
+                    syncPremiumUi();
+                    if (!options.silent) {
+                        setPremiumModalStatus(premiumBillingState.lastError, 'error');
+                    }
+                    return false;
+                } finally {
+                    premiumBillingSyncPromise = null;
+                }
+            })();
+
+            return premiumBillingSyncPromise;
+        }
+
+        async function restorePremiumPurchasesFromUi() {
+            if (isUnder13AudienceSelected()) {
+                setPremiumModalStatus('שחזור או רכישה זמינים רק במסלול גיל 13+.', 'error');
+                return false;
+            }
+            let billing = resolvePremiumBillingPlugin();
+            if (!billing || typeof billing.restorePurchases !== 'function') {
+                setPremiumModalStatus('שחזור רכישה זמין מתוך אפליקציית Android שמותקנת דרך Google Play.', 'error');
+                return false;
+            }
+            setPremiumModalStatus('בודקים אם כבר קיימת רכישת Premium בחשבון Google Play הזה...', '');
+            try {
+                await ensurePremiumBillingListenersBound();
+                let result = await billing.restorePurchases({
+                    items: getPremiumBillingProductRequests()
+                });
+                let restored = await applyPremiumAccessFromBillingPayload(result, { silent: true });
+                if (restored) {
+                    setPremiumModalStatus('Premium שוחזר מהחשבון הזה והופעל שוב במכשיר.', 'success');
+                } else {
+                    setPremiumModalStatus('לא נמצאה כרגע רכישת Premium בחשבון Google Play הזה.', '');
+                }
+                return restored;
+            } catch (err) {
+                setPremiumModalStatus(getPremiumBillingErrorMessage(err, 'שחזור הרכישה לא הצליח כרגע.'), 'error');
+                return false;
+            }
+        }
+
+        async function initPremiumBillingBridge() {
+            let billing = resolvePremiumBillingPlugin();
+            if (!billing) {
+                updatePremiumBillingState({
+                    available: false,
+                    connected: false,
+                    loaded: true,
+                    loading: false,
+                    lastError: ''
+                });
+                syncPremiumUi();
+                return false;
+            }
+            await ensurePremiumBillingListenersBound();
+            await loadPremiumBillingProducts({ silent: true });
+            await syncPremiumAccessFromBilling({ silent: true, force: true });
+            return true;
+        }
+
         function getDefaultPremiumAccessState() {
             return {
                 plan: PREMIUM_PLAN_VALUES.FREE,
@@ -10353,10 +10725,13 @@
 
         function syncPremiumUi() {
             let isPremium = hasPremiumAccess();
+            let isUnder13 = isUnder13AudienceSelected();
+            let preferredProduct = getPreferredPremiumBillingProduct();
             let chip = document.getElementById('premium-status-chip');
             let upgradeBtn = document.getElementById('btn-premium-upgrade');
             let context = document.getElementById('premium-modal-context');
             let primaryBtn = document.getElementById('btn-premium-primary');
+            let restoreBtn = document.getElementById('btn-premium-restore');
             let testUnlockBtn = document.getElementById('btn-premium-test-unlock');
             let testResetBtn = document.getElementById('btn-premium-test-reset');
 
@@ -10368,17 +10743,48 @@
                 chip.textContent = isPremium ? 'Premium' : 'Free';
                 chip.title = isPremium
                     ? 'מסלול Premium פעיל במכשיר הזה.'
-                    : 'כרגע האפליקציה במסלול החינמי עם פרסומות לגיל 13+.';
+                    : (isUnder13
+                        ? 'במסלול עד גיל 13 נשארים בחינם ב־Local, בלי רכישה ובלי פרסומות.'
+                        : 'כרגע האפליקציה במסלול החינמי עם פרסומות לגיל 13+.');
             }
             if (upgradeBtn) {
                 upgradeBtn.dataset.plan = isPremium ? PREMIUM_PLAN_VALUES.PREMIUM : PREMIUM_PLAN_VALUES.FREE;
-                upgradeBtn.textContent = isPremium ? 'Premium פעיל' : 'שדרוג';
+                upgradeBtn.disabled = isUnder13;
+                upgradeBtn.textContent = isPremium ? 'Premium פעיל' : (isUnder13 ? '13+' : 'שדרוג');
                 upgradeBtn.title = isPremium
                     ? 'מסלול Premium כבר פעיל.'
-                    : 'פתחו את הכלים המתקדמים רק אם תרצו.';
+                    : (isUnder13
+                        ? 'רכישות ושדרוגים זמינים רק במסלול גיל 13+.'
+                        : 'פתחו את הכלים המתקדמים רק אם תרצו.');
             }
-            if (context) context.textContent = describePremiumTrigger(premiumModalContext);
-            if (primaryBtn) primaryBtn.textContent = isPremium ? 'Premium כבר פעיל' : 'שדרוג ל־Premium';
+            if (context) {
+                context.textContent = isUnder13
+                    ? 'במסלול עד גיל 13 האפליקציה נשארת חינמית ב־Local בלבד, בלי רכישה, בלי Cloud ובלי סריקת תמונה.'
+                    : describePremiumTrigger(premiumModalContext);
+            }
+            if (primaryBtn) {
+                primaryBtn.disabled = isPremium || isUnder13 || premiumBillingState.loading;
+                primaryBtn.textContent = isPremium
+                    ? 'Premium כבר פעיל'
+                    : (isUnder13
+                        ? 'זמין מגיל 13+'
+                        : (premiumBillingState.loading
+                            ? 'טוען מסלולים...'
+                            : (preferredProduct ? `שדרוג · ${formatPremiumBillingProductSummary(preferredProduct)}` : 'שדרוג ל־Premium')));
+                primaryBtn.title = isUnder13
+                    ? 'רכישות זמינות רק במסלול גיל 13+.'
+                    : (preferredProduct
+                        ? `Google Play יפתח רכישה עבור ${formatPremiumBillingProductSummary(preferredProduct)}.`
+                        : 'Google Play יפתח את מסלול ה־Premium הזמין.');
+            }
+            if (restoreBtn) {
+                restoreBtn.classList.toggle('hidden', isUnder13 || !premiumBillingState.available);
+                restoreBtn.disabled = premiumBillingState.loading;
+                restoreBtn.title = 'שחזור Premium מחשבון Google Play הקיים על המכשיר.';
+            }
+            if (!isPremium && !isUnder13 && premiumBillingState.lastError) {
+                setPremiumModalStatus(premiumBillingState.lastError, 'error');
+            }
             if (testUnlockBtn) testUnlockBtn.classList.toggle('hidden', !isPremiumTesterModeEnabled() || isPremium);
             if (testResetBtn) testResetBtn.classList.toggle('hidden', !isPremiumTesterModeEnabled() || !isPremium);
         }
@@ -10399,13 +10805,31 @@
         function openPremiumModal(context = PREMIUM_TRIGGER_VALUES.GENERAL) {
             premiumModalContext = Object.values(PREMIUM_TRIGGER_VALUES).includes(context) ? context : PREMIUM_TRIGGER_VALUES.GENERAL;
             syncPremiumUi();
-            setPremiumModalStatus(hasPremiumAccess() ? 'Premium כבר פעיל במכשיר הזה.' : '', hasPremiumAccess() ? 'success' : '');
+            if (hasPremiumAccess()) {
+                setPremiumModalStatus('Premium כבר פעיל במכשיר הזה.', 'success');
+            } else if (isUnder13AudienceSelected()) {
+                setPremiumModalStatus('במסלול עד גיל 13 לא מציגים רכישה, ונשארים ב־Local בחינם.', '');
+            } else if (premiumBillingState.loading) {
+                setPremiumModalStatus('בודקים את מסלולי ה־Premium הזמינים ב־Google Play...', '');
+            } else {
+                let preferredProduct = getPreferredPremiumBillingProduct();
+                setPremiumModalStatus(
+                    preferredProduct
+                        ? `מסלול זמין כרגע: ${formatPremiumBillingProductSummary(preferredProduct)}.`
+                        : '',
+                    ''
+                );
+            }
             let modal = document.getElementById('premium-modal');
             if (!modal) return;
             modal.classList.remove('hidden');
             modal.setAttribute('aria-hidden', 'false');
             document.body.classList.add('entry-modal-open', 'premium-modal-open');
             if (premiumModalA11y) premiumModalA11y.activate();
+            if (!hasPremiumAccess() && !isUnder13AudienceSelected()) {
+                loadPremiumBillingProducts({ silent: true });
+                syncPremiumAccessFromBilling({ silent: true });
+            }
         }
 
         function closePremiumModal() {
@@ -10443,13 +10867,46 @@
                 setPremiumModalStatus('Premium כבר פעיל.', 'success');
                 return true;
             }
+            if (isUnder13AudienceSelected()) {
+                setPremiumModalStatus('רכישת Premium זמינה רק במסלול גיל 13+.', 'error');
+                return false;
+            }
             if (isPremiumTesterModeEnabled()) {
                 activatePremiumForThisDevice();
                 return true;
             }
-            setPremiumModalStatus('חיבור תשלום אמיתי דרך Google Play Billing עדיין לא חובר בגרסה הזאת.', 'error');
-            showStepToast('ה־UI של Premium מוכן. כדי להתחיל לחייב בפועל צריך לחבר Google Play Billing.');
-            return false;
+            let billing = resolvePremiumBillingPlugin();
+            if (!billing || typeof billing.purchaseProduct !== 'function') {
+                setPremiumModalStatus('רכישת Premium עובדת מתוך אפליקציית Android שמותקנת דרך Google Play.', 'error');
+                return false;
+            }
+            try {
+                setPremiumModalStatus('בודקים את מסלולי ה־Premium הזמינים ב־Google Play...', '');
+                await ensurePremiumBillingListenersBound();
+                let products = await loadPremiumBillingProducts({ force: true, silent: true });
+                let preferredProduct = getPreferredPremiumBillingProduct(products);
+                if (!preferredProduct) {
+                    setPremiumModalStatus('עדיין לא נמצא מוצר Premium פעיל ב־Google Play. צריך ליצור premium_monthly או premium_lifetime ב־Play Console.', 'error');
+                    return false;
+                }
+                let launchResult = await billing.purchaseProduct({
+                    productId: preferredProduct.productId,
+                    type: preferredProduct.type,
+                    offerToken: preferredProduct.offerToken || ''
+                });
+                if (launchResult?.started) {
+                    setPremiumModalStatus(`חלון הרכישה של Google Play נפתח עבור ${formatPremiumBillingProductSummary(preferredProduct)}.`, '');
+                    return true;
+                }
+                setPremiumModalStatus(
+                    getPremiumBillingErrorMessage(launchResult, 'Google Play לא הצליח לפתוח כרגע את הרכישה.'),
+                    'error'
+                );
+                return false;
+            } catch (err) {
+                setPremiumModalStatus(getPremiumBillingErrorMessage(err, 'הרכישה לא הצליחה להתחיל כרגע דרך Google Play.'), 'error');
+                return false;
+            }
         }
 
         function requirePremiumAccess(context = PREMIUM_TRIGGER_VALUES.GENERAL) {
@@ -10690,6 +11147,7 @@
             currentAiMode = readStoredAiModePreference();
             syncPremiumUi();
             syncAiModeUi();
+            initPremiumBillingBridge();
             applyStoredCleanModePreference();
             helpVoiceEnabled = readHelpVoicePreference();
             syncStartCoachPanel(false);
@@ -10729,7 +11187,13 @@
             setTimeout(initAdMobBanner, 1200);
             setTimeout(initAdMobBanner, 3000);
             document.addEventListener('visibilitychange', () => {
-                if (!document.hidden) initAdMobBanner();
+                if (!document.hidden) {
+                    initAdMobBanner();
+                    syncPremiumAccessFromBilling({ silent: true });
+                }
+            });
+            window.addEventListener('focus', () => {
+                syncPremiumAccessFromBilling({ silent: true });
             });
 
             board = JXG.JSXGraph.initBoard('graph-area', {
