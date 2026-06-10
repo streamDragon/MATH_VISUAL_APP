@@ -2919,6 +2919,9 @@
             </section>
             <div id="graph-stage">
                 <div id="graph-area"></div>
+                <div id="graph-predict-overlay" class="hidden" role="status" aria-live="polite">
+                    <div class="graph-predict-msg">👆 לחץ על הגרף — איפה לדעתך הקיצון?</div>
+                </div>
                 <div id="graph-board-tools" aria-label="כלי גרף">
                     <button id="btn-graph-reset-view" type="button" onclick="centerGraphView()" aria-label="מרכז והתאם את הגרף מחדש">⌖ מרכז גרף</button>
                     <span id="graph-pan-hint">אפשר לגרור את הרקע כדי להזיז את הגרף</span>
@@ -3817,6 +3820,7 @@
         let lastAnnouncedGraphTangentLine = '';
         let lastAnnouncedGraphNormalLine = '';
         let graphPointDragActive = false;
+        let predictionMarker = null; // JSXGraph point marking the student's graph-tap prediction
         let scanImageFile = null;
         let scanImageDataUrl = '';
         let scanPreviewObjectUrl = '';
@@ -11394,6 +11398,23 @@
                     graphPointDragActive = false;
                     scheduleGraphPointAnnouncement(p.X(), p.Y(), getSlope(p.X()), { immediate: true });
                 }
+                // Graph prediction gate: capture first touch as the student's prediction
+                if (predictionGateState?.phase === 'graph_predict' && !questionSolved) {
+                    let px = p.X();
+                    predictionGateState = { phase: 'graph_solve', value: px };
+                    syncGraphPredictOverlay();
+                    if (predictionMarker) { try { board.removeObject(predictionMarker); } catch(e) {} }
+                    predictionMarker = board.create('point', [px, evaluateFunctionAt(px)], {
+                        name: '?', fixed: true, size: 7,
+                        fillColor: '#ff9800', strokeColor: '#e65100', face: 'x',
+                        label: { strokeColor: '#e65100', offset: [8, 8] }
+                    });
+                    board.update();
+                    if (typeof showMascotMood === 'function') {
+                        showMascotMood('thinking', `ניחשת x ≈ ${formatNumber(px, 1)} — עכשיו מצא את הקיצון! 🔍`, 3500);
+                    }
+                }
+
                 if (sessionStarted && !questionSolved) {
                     let step = activeSteps[currentStepIndex];
                     if (step && !stepCompleted) {
@@ -11403,6 +11424,18 @@
                         let done = isCurrentStepDone(step.goal || { type: 'free' }, mNow, xNow, yNow);
                         if (!done) {
                             pushCoachWrongAttempt('עדיין לא שם. נסו שוב.', { source: 'graph_drag' });
+                        } else if (predictionGateState?.phase === 'graph_solve' && predictionGateState?.value != null) {
+                            // Step just solved — compare to prediction
+                            let predictedX = predictionGateState.value;
+                            let delta = Math.abs(xNow - predictedX);
+                            let accuracy = delta <= 0.3 ? 'מדויק! 🎯' : delta <= 1.0 ? 'קרוב!' : 'רחוק מהסימון';
+                            let bonus = delta <= 0.3 ? 10 : delta <= 1.0 ? 5 : 0;
+                            let msg = `ניחשת x≈${formatNumber(predictedX, 1)}, הקיצון ב-x≈${formatNumber(xNow, 1)} — ${accuracy}`;
+                            if (bonus > 0) {
+                                msg += ` (+${bonus} XP לניחוש!)`;
+                                if (typeof addPoints === 'function') addPoints(bonus);
+                            }
+                            showStepToast(msg, 5000);
                         }
                     }
                 }
@@ -12943,6 +12976,7 @@
                     if (!readAnswerValidated) document.getElementById('read-answer-feedback').innerText = '';
                 }
             }
+            syncGraphPredictOverlay();
             syncBuilderEquationPracticeBox(q);
         }
 
@@ -13778,6 +13812,15 @@
                     reason: 'answer_out_of_tolerance'
                 });
             }
+        }
+
+        function syncGraphPredictOverlay() {
+            let overlay = document.getElementById('graph-predict-overlay');
+            if (!overlay) return;
+            let q = getCurrentQuestion();
+            let show = (q?.goal === 'slope_zero' || q?.goal === 'min_point')
+                && predictionGateState?.phase === 'graph_predict';
+            overlay.classList.toggle('hidden', !show);
         }
 
         function handleReadAnswerAction() {
@@ -18503,9 +18546,18 @@ ${safeQuestionText}
             paramIntroCleanActive = !inGuidedEntry && shouldActivateParamIntroCleanForQuestion(q);
             syncSessionModeClasses();
             readAnswerValidated = false;
-            predictionGateState = (q?.goal === 'read_slope' || q?.goal === 'read_y')
-                ? { phase: 'predict', value: null }
-                : null;
+            if (q?.goal === 'read_slope' || q?.goal === 'read_y') {
+                predictionGateState = { phase: 'predict', value: null };
+            } else if (q?.goal === 'slope_zero' || q?.goal === 'min_point') {
+                predictionGateState = { phase: 'graph_predict', value: null };
+            } else {
+                predictionGateState = null;
+            }
+            if (predictionMarker && typeof board !== 'undefined' && board) {
+                try { board.removeObject(predictionMarker); } catch(e) {}
+                predictionMarker = null;
+            }
+            syncGraphPredictOverlay();
             let readInput = document.getElementById('read-answer-input');
             if (readInput) readInput.value = '';
             let readFeedback = document.getElementById('read-answer-feedback');
@@ -18761,6 +18813,39 @@ ${safeQuestionText}
             pointer-events: auto;
         }
     }
+
+    /* ============================================================
+       PREDICTION GATE OVERLAY — שכבת הניחוש על הגרף
+    ============================================================ */
+    #graph-predict-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 12px;
+        pointer-events: none;
+        z-index: 10;
+    }
+    #graph-predict-overlay.hidden { display: none; }
+    .graph-predict-msg {
+        background: rgba(108, 92, 231, 0.88);
+        color: #fff;
+        font-family: 'Assistant', sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        padding: 8px 16px;
+        border-radius: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+        animation: predPulse 1.8s ease-in-out infinite;
+        text-align: center;
+        direction: rtl;
+    }
+    @keyframes predPulse {
+        0%, 100% { transform: scale(1); opacity: 0.95; }
+        50%       { transform: scale(1.04); opacity: 1; }
+    }
+    #graph-stage { position: relative; }
 
     /* ============================================================
        TUTOR CONTAINER — עטיפת המורה הפרטי
