@@ -61,6 +61,39 @@ export function enforceRateLimit(req, res, options = {}) {
     return true;
 }
 
+// Emergency kill switch + coarse daily budget for all cloud AI endpoints.
+// The daily counter lives in the same in-memory store as the rate limiter,
+// so it resets on cold starts — it is a runaway-cost backstop, not an
+// accurate quota. Set CLOUD_AI_DISABLED=1 to stop all provider calls.
+export function enforceCloudAiBudget(res, options = {}) {
+    if (String(process.env.CLOUD_AI_DISABLED || '').trim() === '1') {
+        if (res?.status) {
+            res.status(503).json({
+                error: 'cloud_ai_disabled',
+                message: 'Cloud AI features are temporarily disabled.'
+            });
+        }
+        return false;
+    }
+    let cap = Number.parseInt(String(process.env.CLOUD_AI_DAILY_REQUEST_CAP || '').trim(), 10);
+    if (!Number.isFinite(cap) || cap <= 0) return true;
+    let scope = String(options.scope || 'global').trim() || 'global';
+    let dayKey = `daily:${scope}:${new Date().toISOString().slice(0, 10)}`;
+    let count = RATE_LIMIT_STORE.get(dayKey);
+    count = Number.isFinite(count) ? count : 0;
+    if (count >= cap) {
+        if (res?.status) {
+            res.status(429).json({
+                error: 'cloud_ai_daily_cap',
+                message: 'Daily cloud AI budget reached. Try again tomorrow.'
+            });
+        }
+        return false;
+    }
+    RATE_LIMIT_STORE.set(dayKey, count + 1);
+    return true;
+}
+
 export function getJsonByteLength(payload) {
     try {
         return Buffer.byteLength(JSON.stringify(payload || {}), 'utf8');

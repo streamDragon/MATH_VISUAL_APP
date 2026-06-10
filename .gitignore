@@ -5,3 +5,12 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 *Zone.Identifier
+
+# Local debug / scratch artifacts
+.tmp*
+.tmp_sri/
+.dom_dump*.html
+.headless.png
+.vite.log
+test-results/
+playwright-report/
