@@ -3704,6 +3704,7 @@
         let activeTemplate = null;
         let templateChosen = false;
         let readAnswerValidated = false;
+        let predictionGateState = null; // { phase: 'predict'|'solve', value: number|null }
         let sessionStarted = false;
         let appEntryMode = 'landing';
         let guidedStartStep = 0;
@@ -10131,11 +10132,11 @@
             document.getElementById('scan-admin-modal')?.addEventListener('click', onScanAdminBackdropClick);
             document.getElementById('btn-scan-admin-close')?.addEventListener('click', closeScanAdminModal);
 
-            document.getElementById('btn-read-answer-submit')?.addEventListener('click', submitReadAnswer);
+            document.getElementById('btn-read-answer-submit')?.addEventListener('click', handleReadAnswerAction);
             document.getElementById('read-answer-input')?.addEventListener('keydown', (event) => {
                 if (event.key !== 'Enter') return;
                 event.preventDefault();
-                submitReadAnswer();
+                handleReadAnswerAction();
             });
 
             document.getElementById('btn-apply-solution')?.addEventListener('click', applyStepSolution);
@@ -12905,20 +12906,42 @@
                 let data = getQuestionGoalData(q);
                 let x0 = data.fixedX0 ?? 0;
                 let tol = Number.isFinite(Number(data.answerTolerance)) ? Number(data.answerTolerance) : 0.2;
-                let prompt = q.goal === 'read_slope'
-                    ? `קבע x = ${formatNumber(x0)} (זהו x0), קרא את השיפוע, ואז הזן: m = f'(${formatNumber(x0)})`
-                    : `קבע x = ${formatNumber(x0)} (זהו x0), קרא את הערך, ואז הזן: y = f(${formatNumber(x0)})`;
-                setMixedBidiText(document.getElementById('read-answer-prompt'), prompt);
+                let submitBtn = document.getElementById('btn-read-answer-submit');
                 let readInputEl = document.getElementById('read-answer-input');
-                if (readInputEl) {
-                    readInputEl.placeholder = q.goal === 'read_slope' ? 'למשל 1.5 או 3/2' : 'למשל -2 או -1/2';
-                    readInputEl.title = 'כאן רושמים את התשובה ואז לוחצים "בדוק תשובה"';
-                }
                 let helper = document.getElementById('read-answer-helper');
-                if (helper) {
-                    helper.innerText = `אפשר לענות במספר עשרוני או בשבר פשוט כמו 1/2. הבדיקה כאן סלחנית בטווח ±${formatNumber(tol)}.`;
+
+                if (predictionGateState?.phase === 'predict') {
+                    // PREDICTION PHASE — student commits a guess before the graph unlocks
+                    let prompt = q.goal === 'read_slope'
+                        ? `קודם נחש: מה לדעתך השיפוע ב־x = ${formatNumber(x0)}? (הניחוש לא נבדק)`
+                        : `קודם נחש: מה לדעתך f(${formatNumber(x0)})? (הניחוש לא נבדק)`;
+                    setMixedBidiText(document.getElementById('read-answer-prompt'), prompt);
+                    if (readInputEl) {
+                        readInputEl.placeholder = 'כתוב ניחוש ראשוני…';
+                        readInputEl.title = 'כתוב מספר כלשהו — זה ניחוש ראשוני בלבד';
+                    }
+                    if (submitBtn) submitBtn.textContent = 'שלח ניחוש ←';
+                    if (helper) helper.innerText = 'הניחוש לא מחייב — כתוב מה נראה לך לפני שנבדוק על הגרף.';
+                    if (!readAnswerValidated) document.getElementById('read-answer-feedback').innerText = '';
+                } else {
+                    // SOLVE PHASE — normal answer, with prediction badge in helper text
+                    let prompt = q.goal === 'read_slope'
+                        ? `קבע x = ${formatNumber(x0)}, קרא את השיפוע והזן: m = f'(${formatNumber(x0)})`
+                        : `קבע x = ${formatNumber(x0)}, קרא את הערך והזן: y = f(${formatNumber(x0)})`;
+                    setMixedBidiText(document.getElementById('read-answer-prompt'), prompt);
+                    if (readInputEl) {
+                        readInputEl.placeholder = q.goal === 'read_slope' ? 'למשל 1.5 או 3/2' : 'למשל -2 או -1/2';
+                        readInputEl.title = 'כאן רושמים את התשובה ואז לוחצים "בדוק תשובה"';
+                    }
+                    if (submitBtn) submitBtn.textContent = 'בדוק תשובה';
+                    if (helper) {
+                        let predBadge = (predictionGateState?.value != null)
+                            ? ` · ניחוש שלך: ${formatNumber(predictionGateState.value)}`
+                            : '';
+                        helper.innerText = `אפשר לענות במספר עשרוני או בשבר פשוט. הבדיקה סלחנית בטווח ±${formatNumber(tol)}.${predBadge}`;
+                    }
+                    if (!readAnswerValidated) document.getElementById('read-answer-feedback').innerText = '';
                 }
-                if (!readAnswerValidated) document.getElementById('read-answer-feedback').innerText = '';
             }
             syncBuilderEquationPracticeBox(q);
         }
@@ -13708,7 +13731,18 @@
                 playVoiceSmart('correct', 'כל הכבוד!');
                 if (typeof addPoints === 'function') addPoints(10);
                 onCorrectAnswer();
-                document.getElementById('read-answer-feedback').innerText = `נכון מאוד. התשובה שלך בטווח הנכון (בערך ${formatNumber(expected)}, עם סובלנות של ±${formatNumber(tol)}).`;
+                let feedbackText = `נכון מאוד. התשובה שלך בטווח הנכון (בערך ${formatNumber(expected)}, עם סובלנות של ±${formatNumber(tol)}).`;
+                if (predictionGateState?.value != null) {
+                    let delta = Math.abs(inputVal - predictionGateState.value);
+                    let accuracy = delta <= tol ? 'מדויק! 🎯' : delta <= tol * 3 ? 'קרוב!' : 'רחוק';
+                    let bonus = delta <= tol ? 15 : delta <= tol * 3 ? 5 : 0;
+                    feedbackText += ` · ניחשת ${formatNumber(predictionGateState.value)} — ${accuracy}`;
+                    if (bonus > 0) {
+                        feedbackText += ` (+${bonus} XP לניחוש)`;
+                        if (typeof addPoints === 'function') addPoints(bonus);
+                    }
+                }
+                document.getElementById('read-answer-feedback').innerText = feedbackText;
                 pushCoachEvent('ATTEMPT_CORRECT', {
                     source: 'read_answer',
                     reason: 'answer_in_tolerance',
@@ -13744,6 +13778,32 @@
                     reason: 'answer_out_of_tolerance'
                 });
             }
+        }
+
+        function handleReadAnswerAction() {
+            if (predictionGateState?.phase === 'predict') {
+                submitPrediction();
+            } else {
+                submitReadAnswer();
+            }
+        }
+
+        function submitPrediction() {
+            let q = getCurrentQuestion();
+            if (!q || (q.goal !== 'read_slope' && q.goal !== 'read_y')) return;
+            let raw = document.getElementById('read-answer-input')?.value || '';
+            let parsed = parseStudentNumericInput(raw);
+            let predictedValue = parsed.ok ? parsed.value : null;
+            predictionGateState = { phase: 'solve', value: predictedValue };
+            let readInput = document.getElementById('read-answer-input');
+            if (readInput) { readInput.value = ''; readInput.focus(); }
+            if (typeof showMascotMood === 'function') {
+                let msg = predictedValue != null
+                    ? `ניחשת ${formatNumber(predictedValue)} — עכשיו בדוק על הגרף! 🔍`
+                    : 'ניחוש נשמר — עכשיו בדוק על הגרף! 🔍';
+                showMascotMood('thinking', msg, 3000);
+            }
+            updateSpecialPanels();
         }
 
         function getStepGoalParams(goal) {
@@ -18443,6 +18503,9 @@ ${safeQuestionText}
             paramIntroCleanActive = !inGuidedEntry && shouldActivateParamIntroCleanForQuestion(q);
             syncSessionModeClasses();
             readAnswerValidated = false;
+            predictionGateState = (q?.goal === 'read_slope' || q?.goal === 'read_y')
+                ? { phase: 'predict', value: null }
+                : null;
             let readInput = document.getElementById('read-answer-input');
             if (readInput) readInput.value = '';
             let readFeedback = document.getElementById('read-answer-feedback');
