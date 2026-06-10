@@ -287,6 +287,12 @@
                     window.__ASSET_BASE = '/';
                 }
 
+                // Annotated book-question bank (optional asset: failure is non-fatal).
+                await loadScriptWithFallback('book_questions', [
+                    '/book-questions.js',
+                    '/public/book-questions.js'
+                ], () => typeof BOOK_QUESTIONS !== 'undefined' || Array.isArray(window.BOOK_QUESTIONS));
+
                 let soundPath = await loadScriptWithFallback('sound', [
                     '/sound.js',
                     '/public/sound.js'
@@ -2111,6 +2117,7 @@
         <button id="btn-side-builder" onclick="openBuilderFromTop()">עריכת פרמטרים</button>
         <button id="btn-side-questions" onclick="toggleQuestionsFromTop()">שאלות</button>
         <button id="btn-side-scan" onclick="openScanModal()">יש לי שאלה</button>
+        <button id="btn-side-book" onclick="openBookModal()">📚 שאלות מהספר</button>
         <button id="btn-side-feedback" onclick="openFeedbackModal()">כיכר השוק</button>
         <button id="btn-side-overlay" onclick="openQuestionOverlay()">הסבר שאלה מלא</button>
         <button id="btn-side-normal" class="hidden" onclick="openNormalLabGuide()">מעבדת האנך</button>
@@ -2535,6 +2542,34 @@
         </div>
     </div>
 
+    <div id="book-modal" class="hidden" role="dialog" aria-modal="true" aria-label="שאלות מהספר" onclick="onBookModalBackdropClick(event)">
+        <div id="book-modal-card" dir="rtl">
+            <div class="overlay-head">
+                <h3 id="book-modal-title">📚 שאלות מהספר</h3>
+                <button id="btn-book-close" type="button" onclick="closeBookModal()">סגור</button>
+            </div>
+            <div id="book-list-view">
+                <p class="book-intro">שאלות בסגנון ספר ובגרות. מילים זוהרות בטקסט הן מושגים ויזואליים — לוחצים עליהן, חוקרים את הרעיון על הגרף של השאלה עצמה, וחוזרים עם ✓.</p>
+                <div id="book-question-cards"></div>
+            </div>
+            <div id="book-reader-view" class="hidden">
+                <button id="btn-book-back-to-list" type="button" onclick="backToBookList()">→ לרשימת השאלות</button>
+                <h4 id="book-reader-title"></h4>
+                <div id="book-reader-progress"></div>
+                <div id="book-reader-text"></div>
+                <div id="book-anchor-panel" class="hidden">
+                    <div id="book-anchor-panel-skill"></div>
+                    <p id="book-anchor-panel-explain"></p>
+                    <div class="book-anchor-panel-actions">
+                        <button id="btn-book-anchor-launch" type="button">🚀 לחקור את זה על הגרף</button>
+                        <button id="btn-book-anchor-dismiss" type="button" onclick="closeBookAnchorPanel()">סגירה</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button id="book-return-fab" class="hidden" type="button" onclick="returnFromBookAnchor()">📖 חזרה לשאלה מהספר</button>
+
     <div id="scan-admin-modal" class="hidden" role="dialog" aria-modal="true" aria-label="הגדרות אדמין לסריקת שאלה">
         <div id="scan-admin-card" tabindex="-1">
             <div class="overlay-head">
@@ -2671,6 +2706,11 @@
                         <span class="home-path-index">03</span>
                         <span class="home-path-title">יש לי שאלה משלי</span>
                         <span class="home-path-desc">מצלמים, מעלים או כותבים, ואז מפרקים יחד לציור, נתונים ומשוואות.</span>
+                    </button>
+                    <button class="home-path-card" type="button" onclick="openBookModal()">
+                        <span class="home-path-index">📚</span>
+                        <span class="home-path-title">שאלות מהספר</span>
+                        <span class="home-path-desc">שאלות בסגנון בגרות עם מילים זוהרות: לוחצים על מושג, חוקרים אותו על הגרף, וחוזרים להמשיך.</span>
                     </button>
                 </div>
                 <div id="home-returning-row">
@@ -2848,6 +2888,7 @@
                 <button id="btn-param-intro-open-params" class="hidden" type="button" onclick="openBuilderFromTop()">⚙ פתח פרמטרים</button>
                 <button id="btn-param-intro-open-tools" class="hidden" type="button" onclick="openParamIntroTools()">☰ משימה/כלים</button>
                 <button id="btn-scan-question" onclick="openScanModal()">יש לי שאלה</button>
+                <button id="btn-book-bank" onclick="openBookModal()">📚 שאלות מהספר</button>
                 <button id="btn-replay-opening" onclick="replayOpeningSplash(true)">פתיח+שיר</button>
                 <button id="btn-top-init-builder" onclick="openInitialBuilderFromTop()">בנייה ראשונית</button>
                 <button id="btn-start-guide" onclick="openStartGuideModal()">סיור מודרך</button>
@@ -2978,7 +3019,10 @@
                         </div>
                         <div id="drag-submit-panel" class="hidden">
                             <div id="drag-submit-prompt"></div>
-                            <button id="btn-drag-answer-submit" type="button">זו תשובתי! ✓</button>
+                            <div class="drag-submit-row">
+                                <button id="btn-drag-answer-submit" type="button">זו תשובתי! ✓</button>
+                                <div id="drag-strikes" aria-live="polite" title="פסילות"></div>
+                            </div>
                             <div id="drag-answer-feedback" aria-live="polite"></div>
                         </div>
                         <div id="step-result-panel" class="hidden">
@@ -4260,6 +4304,36 @@
             }
         }
 
+        // Prefer neural/online Hebrew voices (Edge "Natural", Google) over the
+        // legacy local SAPI voice, which sounds robotic.
+        window.pickHebrewVoice = function () {
+            try {
+                let synth = window.speechSynthesis;
+                if (!synth || typeof synth.getVoices !== 'function') return null;
+                let voices = synth.getVoices() || [];
+                let hebrew = voices.filter((v) => String(v.lang || '').toLowerCase().replace('_', '-').startsWith('he'));
+                if (hebrew.length === 0) return null;
+                let score = (v) => {
+                    let name = String(v.name || '').toLowerCase();
+                    let s = 0;
+                    if (name.includes('natural')) s += 4;
+                    if (name.includes('google')) s += 3;
+                    if (name.includes('online')) s += 2;
+                    if (v.localService === false) s += 1;
+                    return s;
+                };
+                hebrew.sort((a, b) => score(b) - score(a));
+                return hebrew[0];
+            } catch (err) {
+                return null;
+            }
+        };
+
+        function applyHebrewVoice(utter) {
+            let voice = window.pickHebrewVoice();
+            if (voice) utter.voice = voice;
+        }
+
         function playStartGuideVoice() {
             let phrase = getStartGuideVoiceText();
             if (!phrase) return;
@@ -4272,6 +4346,7 @@
                 synth.cancel();
                 let utter = new SpeechSynthesisUtterance(phrase);
                 utter.lang = 'he-IL';
+                applyHebrewVoice(utter);
                 utter.rate = 0.98;
                 utter.pitch = 1;
                 utter.onstart = () => setStartGuideVoiceStatus('מנגן הסבר קצר...', 0);
@@ -5129,6 +5204,7 @@
                 synth.cancel();
                 let utter = new SpeechSynthesisUtterance(phrase);
                 utter.lang = 'he-IL';
+                applyHebrewVoice(utter);
                 utter.rate = 1;
                 utter.pitch = 1;
                 utter.onstart = () => setHelpVoiceStatus(content.voicePlayingHint || DEFAULT_HELP_CONTENT_HE.voicePlayingHint);
@@ -5464,6 +5540,7 @@
                 synth.cancel();
                 let utter = new SpeechSynthesisUtterance(phrase);
                 utter.lang = 'he-IL';
+                applyHebrewVoice(utter);
                 utter.rate = 1;
                 utter.pitch = 1;
                 utter.onstart = () => animateStartCoachSpeech(Math.max(2200, phrase.length * 50));
@@ -6224,6 +6301,10 @@
             if (!window.speechSynthesis) return;
             var utter = new SpeechSynthesisUtterance(text);
             utter.lang = 'he-IL';
+            if (window.pickHebrewVoice) {
+                var bestVoice = window.pickHebrewVoice();
+                if (bestVoice) utter.voice = bestVoice;
+            }
             utter.rate = 1.1;
             utter.volume = 0.8;
             speechSynthesis.speak(utter);
@@ -13797,6 +13878,62 @@
             'עוד לא — בדקו: מהצד השמאלי הגרף יורד, ומהצד הימני הוא עולה? זו נקודת המינימום.',
             'לא גמרנו, אבל אתם קרובים. המינימום הוא בדיוק בתחתית הבקע — עוד קצת.'
         ];
+        const GROWTH_WRONG_DRAG_TARGET_SLOPE = [
+            'עוד לא — בדקו את הערך של f\'(x) בחלונית. כמה רחוק הוא מהשיפוע המבוקש?',
+            'כמעט! המשיכו לגרור לאט ושימו לב איך השיפוע משתנה בכל תזוזה.',
+            'בכיוון! חפשו מקום שבו נטיית המשיק הכתום מתאימה בדיוק לשיפוע שהשאלה ביקשה.',
+            'לא בדיוק — נסו לזוז קצת שמאלה או ימינה ולבדוק שוב את המספר בחלונית.'
+        ];
+        const GROWTH_WRONG_DRAG_Y = [
+            'עוד לא — שימו לב לגובה של הנקודה. הערך y בחלונית עדיין לא מתאים.',
+            'כמעט! המטרה היא הגובה הנכון על הגרף, לא רק מיקום שנראה טוב.',
+            'בכיוון! בדקו את הערך f(x) בחלונית — כמה חסר עד היעד?',
+            'לא בדיוק — גררו לאט לאורך העקומה ועקבו אחרי השינוי בערך y.'
+        ];
+        const GROWTH_WRONG_DRAG_TANGENT = [
+            'כמעט! הקו הכתום צריך לעבור ממש דרך הנקודה החיצונית, לא רק קרוב אליה.',
+            'עוד לא — הזיזו את נקודת המגע ושימו לב איך המשיק מסתובב.',
+            'בכיוון! בדקו: האם המשיק באמת חולף דרך הנקודה המסומנת?',
+            'לא בדיוק — לפעמים תזוזה קטנה של נקודת המגע משנה הרבה את המשיק. נסו שוב.'
+        ];
+        const GROWTH_WRONG_PARAMS = [
+            'עוד לא — הגרף עדיין לא עובר דרך כל הנקודות. בדקו כל נקודה בנפרד.',
+            'כמעט! שאלו על כל נקודה: איזה תנאי היא יוצרת על הפונקציה?',
+            'בכיוון! שנו פרמטר אחד בכל פעם ובדקו איך הגרף מגיב.',
+            'לא בדיוק — בדקו אם הגרף עובר ממש דרך הנקודות הירוקות, לא רק לידן.'
+        ];
+
+        // Goals where the student must press "זו תשובתי" instead of auto-completion while dragging.
+        const MANUAL_CHECK_GOALS = ['slope_zero', 'min_point', 'slope_equals', 'y_equals', 'tangent_through_point', 'hit_target', 'hit_targets'];
+        const DRAG_MAX_STRIKES = 3;
+        let dragStrikesUsed = 0;
+        let manualDragCheckActive = false;
+
+        function questionUsesManualCheck(q) {
+            return !!q && MANUAL_CHECK_GOALS.includes(q.goal);
+        }
+
+        function getWrongDragPool(goal) {
+            if (goal === 'min_point') return GROWTH_WRONG_DRAG_MIN;
+            if (goal === 'slope_equals') return GROWTH_WRONG_DRAG_TARGET_SLOPE;
+            if (goal === 'y_equals') return GROWTH_WRONG_DRAG_Y;
+            if (goal === 'tangent_through_point') return GROWTH_WRONG_DRAG_TANGENT;
+            if (goal === 'hit_target' || goal === 'hit_targets') return GROWTH_WRONG_PARAMS;
+            return GROWTH_WRONG_DRAG_SLOPE;
+        }
+
+        function renderDragStrikes() {
+            let el = document.getElementById('drag-strikes');
+            if (!el) return;
+            let left = Math.max(0, DRAG_MAX_STRIKES - dragStrikesUsed);
+            el.innerText = '❤️'.repeat(left) + '🤍'.repeat(DRAG_MAX_STRIKES - left);
+            el.setAttribute('aria-label', `נשארו ${left} ניסיונות מתוך ${DRAG_MAX_STRIKES}`);
+        }
+
+        function resetDragStrikes() {
+            dragStrikesUsed = 0;
+            renderDragStrikes();
+        }
 
         function submitReadAnswer() {
             let q = getCurrentQuestion();
@@ -13880,21 +14017,41 @@
             }
         }
 
+        function getDragSubmitPrompt(q) {
+            let data = getQuestionGoalData(q);
+            if (q.goal === 'min_point') return 'גרור לנקודת המינימום, ואז לחץ לאישור.';
+            if (q.goal === 'slope_zero') return 'גרור לנקודה שבה השיפוע אפס, ואז לחץ לאישור.';
+            if (q.goal === 'slope_equals') {
+                let targetM = Number.isFinite(data.targetM) ? formatNumber(data.targetM) : 'המבוקש';
+                return `גרור לנקודה שבה השיפוע m=${targetM}, ואז לחץ לאישור.`;
+            }
+            if (q.goal === 'y_equals') {
+                let targetY = Number.isFinite(data.targetY) ? formatNumber(data.targetY) : 'המבוקש';
+                return `גרור לנקודה שבה f(x)=${targetY}, ואז לחץ לאישור.`;
+            }
+            if (q.goal === 'tangent_through_point' && data.point) {
+                return `גרור עד שהמשיק עובר דרך (${formatNumber(data.point.x)},${formatNumber(data.point.y)}), ואז לחץ לאישור.`;
+            }
+            if (q.goal === 'hit_target' || q.goal === 'hit_targets') {
+                return 'כוונו את הפרמטרים כך שהגרף יעבור דרך הנקודות, ואז לחצו לאישור.';
+            }
+            return 'כשמצאתם את התשובה על הגרף, לחצו לאישור.';
+        }
+
         function syncDragSubmitPanel() {
             let q = getCurrentQuestion();
             let dragPanel = document.getElementById('drag-submit-panel');
             if (!dragPanel) return;
-            let showDrag = (q?.goal === 'slope_zero' || q?.goal === 'min_point')
+            let showDrag = questionUsesManualCheck(q)
                 && predictionGateState?.phase !== 'graph_predict'
-                && !stepCompleted;
+                && !stepCompleted
+                && !questionSolved
+                && !isGuidedEntryMode();
             dragPanel.classList.toggle('hidden', !showDrag);
             if (showDrag) {
                 let promptEl = document.getElementById('drag-submit-prompt');
-                if (promptEl) {
-                    promptEl.innerText = q.goal === 'min_point'
-                        ? 'גרור לנקודת המינימום, ואז לחץ לאישור.'
-                        : 'גרור לנקודה שבה השיפוע אפס, ואז לחץ לאישור.';
-                }
+                if (promptEl) promptEl.innerText = getDragSubmitPrompt(q);
+                renderDragStrikes();
             } else {
                 let feedEl = document.getElementById('drag-answer-feedback');
                 if (feedEl && !showDrag) feedEl.innerText = '';
@@ -13903,22 +14060,31 @@
 
         function submitDragAnswer() {
             let q = getCurrentQuestion();
-            if (!q || (q.goal !== 'slope_zero' && q.goal !== 'min_point')) return;
+            if (!questionUsesManualCheck(q)) return;
+            if (questionSolved || stepCompleted) return;
             noteQuestionInteraction();
             dismissQuestionIntro();
+            let step = activeSteps[currentStepIndex];
             let goalParams = getQuestionGoalData(q);
             let x = p.X(), y = p.Y(), m = getSlope(x);
-            let done = evalLegacyGoal(q.goal, goalParams, m, x, y);
+            let done = step?.goal
+                ? isCurrentStepDone(step.goal, m, x, y)
+                : evalLegacyGoal(q.goal, goalParams, m, x, y);
             let feedbackEl = document.getElementById('drag-answer-feedback');
             if (done) {
                 if (typeof showMascotMood === 'function') showMascotMood('celebrating', 'כל הכבוד! 🎉', 3500);
                 playVoiceSmart('correct', 'כל הכבוד!');
                 if (typeof addPoints === 'function') addPoints(10);
-                if (feedbackEl) feedbackEl.innerText = '✅ כל הכבוד! מצאת את הנקודה הנכונה!';
+                if (feedbackEl) feedbackEl.innerText = '✅ כל הכבוד! מצאת את התשובה הנכונה!';
                 onCorrectAnswer();
-                evaluateCurrentStep(m, x, y);
+                manualDragCheckActive = true;
+                try {
+                    evaluateCurrentStep(m, x, y);
+                } finally {
+                    manualDragCheckActive = false;
+                }
                 let currentStep = activeSteps[currentStepIndex];
-                if (!questionSolved && currentStep) {
+                if (!questionSolved && currentStep && !stepCompleted) {
                     stepCompleted = true;
                     syncDragSubmitPanel();
                     if (currentStepIndex >= activeSteps.length - 1) markQuestionSolved();
@@ -13926,8 +14092,14 @@
                 }
                 pushCoachEvent('ATTEMPT_CORRECT', { source: 'drag_submit' });
             } else {
-                let pool = q.goal === 'min_point' ? GROWTH_WRONG_DRAG_MIN : GROWTH_WRONG_DRAG_SLOPE;
+                dragStrikesUsed += 1;
+                renderDragStrikes();
+                let pool = getWrongDragPool(q.goal);
                 let msg = pool[Math.floor(Math.random() * pool.length)];
+                if (dragStrikesUsed >= DRAG_MAX_STRIKES) {
+                    let hint = getStepHintText(q, step);
+                    msg = hint ? `${msg}\n💡 ${hint}` : msg;
+                }
                 if (feedbackEl) feedbackEl.innerText = msg;
                 if (typeof showMascotMood === 'function') showMascotMood('thinking', msg, 3500);
                 playVoiceSmart('wrong', 'נסו שוב');
@@ -13981,6 +14153,12 @@
                 return Math.abs(m) < (goalParams.toleranceM ?? 0.15) && getSecondDerivativeAt(x) > 0;
             }
             if (goalType === 'slope_equals') return Math.abs(m - (goalParams.targetM ?? 0)) < (goalParams.toleranceM ?? 0.15);
+            if (goalType === 'slope_at_x_equals') {
+                // Glider-independent: the slope of the CURVE at a fixed x must reach a target.
+                // Used in find_param mode ("adjust the parameter until f'(x0)=m0"), e.g. book-bank anchors.
+                let mAtX = evaluateDerivativeAt(goalParams.x ?? 0);
+                return Math.abs(mAtX - (goalParams.m ?? 0)) <= (goalParams.toleranceM ?? 0.2);
+            }
             if (goalType === 'y_equals') return Math.abs(y - (goalParams.targetY ?? 0)) < (goalParams.toleranceY ?? 0.2);
             if (goalType === 'hit_target' && Array.isArray(goalParams.targets)) {
                 let tol = goalParams.toleranceY ?? goalParams.tolerance ?? 0.25;
@@ -14496,6 +14674,7 @@
             renderMobileFeedCards();
             renderExamBridge(true);
             renderQuestionNavBar(currentQ);
+            if (typeof notifyBookAnchorSolved === 'function') notifyBookAnchorSolved();
             if (suppressCelebration) {
                 completeGuidedStartAction();
             }
@@ -14523,6 +14702,15 @@
             if (!step || stepCompleted) return;
 
             if (!isCurrentStepDone(step.goal || { type: 'free' }, m, x, y)) return;
+            // Manual-check goals: reaching the right spot is not enough — the student must
+            // press "זו תשובתי" (submitDragAnswer), which sets manualDragCheckActive.
+            let stepGoalType = String(step.goal?.type || '');
+            if (MANUAL_CHECK_GOALS.includes(stepGoalType)
+                && !manualDragCheckActive
+                && !guidedDemoActive
+                && !isGuidedEntryMode()) {
+                return;
+            }
             if (!canAllowAutoStepCompletionNow()) {
                 if (!questionUserInteractedSinceLoad && !guidedDemoActive) return;
                 scheduleDeferredStepEvaluation();
@@ -15917,6 +16105,323 @@
             if (event.target.id === 'scan-modal') closeScanModal();
         }
 
+        /* ===== Book Question Bank (annotated book-style questions) =====
+         * Data: public/book-questions.js (BOOK_QUESTIONS). Each question text
+         * carries {{anchorId|phrase}} markers; tapping an anchor launches a
+         * micro-interaction on the regular mission engine, instantiated with
+         * the question's own function, then returns here with a ✓.
+         */
+        const BOOK_ANCHOR_PROGRESS_KEY = 'book_anchor_progress_v1';
+        let bookAnchorSession = null; // { bqId, anchorId, syntheticIndex, returnQuestionIndex, solved }
+        let bookActiveQuestionId = '';
+        let bookOpenAnchorId = '';
+
+        function getBookQuestionsList() {
+            if (typeof BOOK_QUESTIONS !== 'undefined' && Array.isArray(BOOK_QUESTIONS)) return BOOK_QUESTIONS;
+            if (Array.isArray(window.BOOK_QUESTIONS)) return window.BOOK_QUESTIONS;
+            return [];
+        }
+
+        function getBookQuestionById(bqId) {
+            return getBookQuestionsList().find((q) => q.id === bqId) || null;
+        }
+
+        async function ensureBookQuestionsLoadedAtRuntime() {
+            await waitForCoreAssetsReady();
+            if (getBookQuestionsList().length > 0) return true;
+            await loadRuntimeScriptWithFallback('book_questions', [
+                '/book-questions.js',
+                '/public/book-questions.js',
+            ], () => getBookQuestionsList().length > 0 || typeof BOOK_QUESTIONS !== 'undefined');
+            return getBookQuestionsList().length > 0;
+        }
+
+        function loadBookAnchorProgress() {
+            try {
+                let raw = localStorage.getItem(BOOK_ANCHOR_PROGRESS_KEY);
+                let parsed = raw ? JSON.parse(raw) : null;
+                return (parsed && typeof parsed === 'object') ? parsed : {};
+            } catch (err) {
+                return {};
+            }
+        }
+
+        function isBookAnchorDone(bqId, anchorId) {
+            let progress = loadBookAnchorProgress();
+            return !!progress?.[bqId]?.[anchorId];
+        }
+
+        function markBookAnchorDoneInStorage(bqId, anchorId) {
+            let progress = loadBookAnchorProgress();
+            if (!progress[bqId] || typeof progress[bqId] !== 'object') progress[bqId] = {};
+            progress[bqId][anchorId] = true;
+            try {
+                localStorage.setItem(BOOK_ANCHOR_PROGRESS_KEY, JSON.stringify(progress));
+            } catch (err) { /* storage unavailable - progress is session-only */ }
+        }
+
+        function countBookAnchorsDone(bq) {
+            if (!bq) return { done: 0, total: 0 };
+            let anchors = Array.isArray(bq.anchors) ? bq.anchors : [];
+            let done = anchors.filter((a) => isBookAnchorDone(bq.id, a.id)).length;
+            return { done, total: anchors.length };
+        }
+
+        async function openBookModal() {
+            let modal = document.getElementById('book-modal');
+            if (!modal) return;
+            let loaded = await ensureBookQuestionsLoadedAtRuntime();
+            if (!loaded) {
+                showStepToast('בנק השאלות מהספר לא נטען. נסו לרענן את הדף.');
+                return;
+            }
+            if (bookActiveQuestionId && getBookQuestionById(bookActiveQuestionId)) {
+                renderBookReader();
+            } else {
+                bookActiveQuestionId = '';
+                renderBookList();
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeBookModal() {
+            let modal = document.getElementById('book-modal');
+            if (modal) modal.classList.add('hidden');
+            closeBookAnchorPanel();
+        }
+
+        function onBookModalBackdropClick(event) {
+            if (event.target.id === 'book-modal') closeBookModal();
+        }
+
+        function backToBookList() {
+            bookActiveQuestionId = '';
+            closeBookAnchorPanel();
+            renderBookList();
+        }
+
+        function setBookModalView(view) {
+            let listView = document.getElementById('book-list-view');
+            let readerView = document.getElementById('book-reader-view');
+            if (listView) listView.classList.toggle('hidden', view !== 'list');
+            if (readerView) readerView.classList.toggle('hidden', view !== 'reader');
+        }
+
+        function renderBookList() {
+            setBookModalView('list');
+            let host = document.getElementById('book-question-cards');
+            if (!host) return;
+            host.innerHTML = '';
+            let questions = getBookQuestionsList();
+            questions.forEach((bq) => {
+                let { done, total } = countBookAnchorsDone(bq);
+                let card = document.createElement('button');
+                card.type = 'button';
+                card.className = 'book-q-card';
+                let solvedNote = (total > 0 && done >= total) ? ' <span class="book-q-card-done">✓ הושלם</span>' : '';
+                card.innerHTML = `
+                    <span class="book-q-card-title">${escapeBookHtml(bq.title || bq.id)}</span>
+                    <span class="book-q-card-meta">${escapeBookHtml(bookTopicLabel(bq))} · ${done}/${total} מושגים נחקרו${solvedNote}</span>
+                `;
+                card.addEventListener('click', () => openBookQuestionReader(bq.id));
+                host.appendChild(card);
+            });
+            if (questions.length === 0) {
+                host.innerHTML = '<p class="book-empty">אין עדיין שאלות בבנק.</p>';
+            }
+        }
+
+        function bookTopicLabel(bq) {
+            let topic = String(bq?.topic || '').trim();
+            if (topic === 'polynomials') return 'פולינומים';
+            return topic || 'כללי';
+        }
+
+        function escapeBookHtml(text) {
+            return String(text ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function openBookQuestionReader(bqId) {
+            bookActiveQuestionId = bqId;
+            closeBookAnchorPanel();
+            renderBookReader();
+        }
+
+        function renderBookAnchorMarkup(rawText, bq) {
+            // Escape everything, then turn {{id|phrase}} markers into anchor buttons.
+            let escaped = escapeBookHtml(rawText);
+            return escaped.replace(/\{\{(\w+)\|([^}]+)\}\}/g, (match, anchorId, phrase) => {
+                let anchor = (bq.anchors || []).find((a) => a.id === anchorId);
+                if (!anchor) return phrase;
+                let skillKey = (anchor.skills || [])[0] || '';
+                let skillMeta = (typeof VISUAL_SKILL_REGISTRY !== 'undefined' && VISUAL_SKILL_REGISTRY[skillKey]) || null;
+                let icon = skillMeta?.icon ? `<span class="book-anchor-icon">${escapeBookHtml(skillMeta.icon)}</span>` : '';
+                let done = isBookAnchorDone(bq.id, anchorId);
+                let doneMark = done ? '<span class="book-anchor-check">✓</span>' : '';
+                return `<button type="button" class="book-anchor${done ? ' book-anchor-done' : ''}" data-anchor-id="${anchorId}" onclick="onBookAnchorTap('${anchorId}')">${icon}${phrase}${doneMark}</button>`;
+            });
+        }
+
+        function renderBookReader() {
+            let bq = getBookQuestionById(bookActiveQuestionId);
+            if (!bq) {
+                backToBookList();
+                return;
+            }
+            setBookModalView('reader');
+            let titleEl = document.getElementById('book-reader-title');
+            if (titleEl) titleEl.innerText = bq.title || '';
+            let progressEl = document.getElementById('book-reader-progress');
+            if (progressEl) {
+                let { done, total } = countBookAnchorsDone(bq);
+                progressEl.innerText = total > 0 ? `מושגים ויזואליים שנחקרו: ${done}/${total}` : '';
+            }
+            let textEl = document.getElementById('book-reader-text');
+            if (!textEl) return;
+            let stemHtml = `<p class="book-stem">${renderBookAnchorMarkup(bq.stem || '', bq).replace(/\n/g, '<br>')}</p>`;
+            let partsHtml = (bq.parts || []).map((part) => `
+                <div class="book-part">
+                    <span class="book-part-letter">${escapeBookHtml(part.letter)}.</span>
+                    <span class="book-part-text">${renderBookAnchorMarkup(part.text || '', bq).replace(/\n/g, '<br>')}</span>
+                </div>
+            `).join('');
+            textEl.innerHTML = stemHtml + partsHtml;
+        }
+
+        function onBookAnchorTap(anchorId) {
+            let bq = getBookQuestionById(bookActiveQuestionId);
+            let anchor = (bq?.anchors || []).find((a) => a.id === anchorId);
+            if (!bq || !anchor) return;
+            bookOpenAnchorId = anchorId;
+            let panel = document.getElementById('book-anchor-panel');
+            let skillEl = document.getElementById('book-anchor-panel-skill');
+            let explainEl = document.getElementById('book-anchor-panel-explain');
+            let launchBtn = document.getElementById('btn-book-anchor-launch');
+            if (!panel || !skillEl || !explainEl || !launchBtn) return;
+            let skillTitles = (anchor.skills || [])
+                .map((key) => (typeof VISUAL_SKILL_REGISTRY !== 'undefined' && VISUAL_SKILL_REGISTRY[key]?.heTitle) || '')
+                .filter(Boolean);
+            skillEl.innerText = skillTitles.length ? `מיומנות: ${skillTitles.join(' · ')}` : '';
+            explainEl.innerText = anchor.heExplain || '';
+            launchBtn.onclick = () => launchBookAnchor(bq.id, anchor.id);
+            let alreadyDone = isBookAnchorDone(bq.id, anchor.id);
+            launchBtn.innerText = alreadyDone ? '🔁 לחקור שוב על הגרף' : '🚀 לחקור את זה על הגרף';
+            panel.classList.remove('hidden');
+            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function closeBookAnchorPanel() {
+            bookOpenAnchorId = '';
+            let panel = document.getElementById('book-anchor-panel');
+            if (panel) panel.classList.add('hidden');
+        }
+
+        function buildSyntheticBookQuestion(bq, anchor) {
+            let launch = anchor.launch || {};
+            let lockedInputIds = (launch.locked || []).map((key) => 'inp' + String(key).toUpperCase());
+            let primarySkillTitle = (typeof VISUAL_SKILL_REGISTRY !== 'undefined'
+                && VISUAL_SKILL_REGISTRY[(anchor.skills || [])[0]]?.heTitle) || 'חקירה ויזואלית';
+            let question = {
+                id: `book:${bq.id}:${anchor.id}`,
+                isBookAnchorMission: true,
+                startTemplateId: launch.startTemplateId || bq.startTemplateId,
+                title: `מתוך שאלה מהספר: ${primarySkillTitle}`,
+                desc: anchor.heExplain || '',
+                mode: launch.mode || 'move_x',
+                data: launch.data || {},
+                defaults: launch.defaults || {},
+                locked: lockedInputIds,
+                visualCategories: Array.isArray(anchor.skills) ? anchor.skills.slice() : [],
+                ui: launch.ui || { allowNormal: false, defaultNormalOn: false, allowLineTool: false },
+            };
+            if (Array.isArray(launch.steps) && launch.steps.length > 0) {
+                question.steps = launch.steps.map((step, i) => ({
+                    id: `book_step_${i + 1}`,
+                    instruction: step.heHint || '',
+                    goal: { type: step.goal, params: step.data || {} },
+                    onComplete: { toastText: 'יפה! עוד צעד בתוך השאלה.' },
+                }));
+                question.goal = launch.steps[0].goal;
+            } else {
+                question.goal = launch.goal || 'free';
+            }
+            return question;
+        }
+
+        function launchBookAnchor(bqId, anchorId) {
+            let bq = getBookQuestionById(bqId);
+            let anchor = (bq?.anchors || []).find((a) => a.id === anchorId);
+            if (!bq || !anchor) return;
+            let questions = getQuestionsList();
+            if (questions.length === 0) {
+                showStepToast('השאלות עוד נטענות. נסו שוב בעוד רגע.');
+                return;
+            }
+            cleanupBookSyntheticQuestion();
+            let synthetic = buildSyntheticBookQuestion(bq, anchor);
+            questions.push(synthetic);
+            bookAnchorSession = {
+                bqId,
+                anchorId,
+                syntheticIndex: questions.length - 1,
+                returnQuestionIndex: currentQ,
+                solved: false,
+            };
+            closeBookAnchorPanel();
+            closeBookModal();
+            if (!sessionStarted) markSessionStarted({ preserveCurrentFunction: true });
+            loadQ(questions.length - 1, { autoOpenOverlay: false });
+            setDrawerOpen(false);
+            updateBookReturnFab();
+            showStepToast('זהו קטע מתוך השאלה מהספר. כשמסיימים — חוזרים אליה עם ✓.');
+        }
+
+        function cleanupBookSyntheticQuestion() {
+            let questions = getQuestionsList();
+            for (let i = questions.length - 1; i >= 0; i -= 1) {
+                if (questions[i]?.isBookAnchorMission) questions.splice(i, 1);
+            }
+        }
+
+        function updateBookReturnFab() {
+            let fab = document.getElementById('book-return-fab');
+            if (!fab) return;
+            let active = !!bookAnchorSession;
+            fab.classList.toggle('hidden', !active);
+            if (!active) {
+                fab.classList.remove('book-return-fab-done');
+                return;
+            }
+            let solved = !!bookAnchorSession.solved;
+            fab.classList.toggle('book-return-fab-done', solved);
+            fab.innerText = solved ? '📖 ✓ חזרה לשאלה מהספר' : '📖 חזרה לשאלה מהספר';
+        }
+
+        function notifyBookAnchorSolved() {
+            if (!bookAnchorSession) return;
+            if (!getCurrentQuestion()?.isBookAnchorMission) return;
+            bookAnchorSession.solved = true;
+            markBookAnchorDoneInStorage(bookAnchorSession.bqId, bookAnchorSession.anchorId);
+            updateBookReturnFab();
+        }
+
+        function returnFromBookAnchor() {
+            if (!bookAnchorSession) return;
+            let session = bookAnchorSession;
+            bookAnchorSession = null;
+            updateBookReturnFab();
+            cleanupBookSyntheticQuestion();
+            let questions = getQuestionsList();
+            let backIdx = Math.min(Math.max(0, session.returnQuestionIndex), Math.max(0, questions.length - 1));
+            if (questions.length > 0) loadQ(backIdx, { autoOpenOverlay: false });
+            bookActiveQuestionId = session.bqId;
+            openBookModal();
+        }
+
         function onScanImageSelected(event, sourceMode) {
             let file = event?.target?.files?.[0];
             if (!file) return;
@@ -17108,15 +17613,89 @@
             syncScanVisualPlanCompletionUi();
         }
 
+        function getBestQuestionForSkill(skillCategory, skillObject) {
+            let tag = normalizeVisualCategoryTag(skillCategory, '');
+            if (!tag) return null;
+            let exerciseType = String(skillObject?.ui_exercise_type || '').trim();
+            let catalog = buildQuestionCoverageCatalog();
+            let visibleIndexes = new Set(getVisibleQuestionIndexes());
+            let EXERCISE_GOAL_BONUS = {
+                slope_match:      (g) => (g === 'slope_zero' || g === 'read_slope') ? 6 : 0,
+                point_placement:  (g) => (g === 'min_point' || g === 'read_y') ? 6 : 0,
+                graph_compare:    (g) => (g === 'hit_target' || g === 'hit_targets') ? 4 : 0,
+                drag_to_axis:     (g) => (g === 'min_point' || g === 'slope_zero') ? 5 : 0,
+                parameter_slider: (g) => g === 'find_param' ? 5 : 0,
+                sign_chart_visual:(g) => g === 'read_slope' ? 3 : 0
+            };
+            let goalBonus = EXERCISE_GOAL_BONUS[exerciseType] || (() => 0);
+            let scored = catalog
+                .filter((item) => item.q && item.q.goal !== 'choose_function_template')
+                .map((item) => {
+                    let score = 0;
+                    if (item.categories.includes(tag)) score += 20;
+                    if (visibleIndexes.has(item.index)) score += 2;
+                    if (item.q.meta?.source === 'vision_scan') score -= 5;
+                    score += goalBonus(item.q.goal);
+                    return Object.assign({}, item, { score });
+                })
+                .filter((item) => item.score > 0)
+                .sort((a, b) => {
+                    if (b.score !== a.score) return b.score - a.score;
+                    let aVis = visibleIndexes.has(a.index) ? 1 : 0;
+                    let bVis = visibleIndexes.has(b.index) ? 1 : 0;
+                    if (bVis !== aVis) return bVis - aVis;
+                    return (a.q?.id ?? a.index) - (b.q?.id ?? b.index);
+                });
+            return scored.length > 0 ? scored[0] : null;
+        }
+
         function startVisualSkill(skillCategory, skillObject) {
             let tag = normalizeVisualCategoryTag(skillCategory, 'visual_planning_sequence');
             let meta = getVisualSkillRegistryMeta(tag, skillObject);
-            let title = getShortText(skillObject?.title || '', meta.heTitle || tag);
-            let exerciseType = skillObject?.ui_exercise_type || meta.defaultExerciseType || 'classification';
-            let line = `נפתח תרגול קצר: ${title} | מודול ${meta.launcherKey} | תרגול ${exerciseType}`;
-            setScanStatus(`נפתח תרגול קצר: ${title}`, false);
-            showStepToast(`נפתח תרגול קצר: ${title}`);
-            console.log(line, { skillCategory: tag, skillObject: skillObject || null });
+            let best = getBestQuestionForSkill(tag, skillObject);
+
+            // Remove any previously opened launchers before showing a new one
+            document.querySelectorAll('.scan-skill-launcher').forEach((el) => el.remove());
+
+            // Find this skill's DOM row by data attribute
+            let targetRow = null;
+            document.querySelectorAll('.scan-skill-item').forEach((row) => {
+                if (row.dataset.skillCategory === tag) targetRow = row;
+            });
+
+            let launcher = document.createElement('div');
+            launcher.className = 'scan-skill-launcher';
+
+            if (!best) {
+                launcher.classList.add('scan-skill-launcher-empty');
+                let txt = document.createElement('div');
+                txt.className = 'scan-skill-launcher-text';
+                txt.innerText = 'עדיין אין תרגיל ספציפי לכישור הזה — נסו אחד מהתרגילים המומלצים למטה.';
+                launcher.appendChild(txt);
+            } else {
+                let q = best.q;
+                let txt = document.createElement('div');
+                txt.className = 'scan-skill-launcher-text';
+                txt.innerText = `תרגיל מתאים: ${q.title || 'ללא כותרת'}`;
+                launcher.appendChild(txt);
+
+                let openBtn = document.createElement('button');
+                openBtn.type = 'button';
+                openBtn.className = 'scan-skill-launch-btn';
+                openBtn.innerText = 'פתח תרגיל ▶';
+                openBtn.onclick = () => {
+                    markSkillCompleted(skillCategory);
+                    openRecommendedQuestionFromScan(best.index);
+                };
+                launcher.appendChild(openBtn);
+            }
+
+            if (targetRow) {
+                targetRow.appendChild(launcher);
+                launcher.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else if (best) {
+                openRecommendedQuestionFromScan(best.index);
+            }
         }
 
         function onScanActionPlanReturnToProblem() {
@@ -18686,6 +19265,7 @@ ${safeQuestionText}
             if (readFeedback) readFeedback.innerText = '';
             let dragFeedback = document.getElementById('drag-answer-feedback');
             if (dragFeedback) dragFeedback.innerText = '';
+            resetDragStrikes();
 
             syncParamInputsDisabledState(q);
             builderPanelOpen = false;
@@ -19066,6 +19646,18 @@ ${safeQuestionText}
         color: #333;
         min-height: 1.4em;
         line-height: 1.55;
+        white-space: pre-line;
+    }
+    .drag-submit-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    #drag-strikes {
+        font-size: 1.05rem;
+        letter-spacing: 2px;
+        user-select: none;
     }
 
     /* ============================================================
