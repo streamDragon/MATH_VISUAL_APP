@@ -14,3 +14,4 @@ Thumbs.db
 .vite.log
 test-results/
 playwright-report/
+verify-shots/

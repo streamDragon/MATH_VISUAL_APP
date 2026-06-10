@@ -2,6 +2,7 @@
   "scripts": {
     "dev": "node ./node_modules/vite/bin/vite.js",
     "check:questions": "node ./scripts/check-questions.mjs",
+    "voice:clips": "node ./scripts/generate-voice-clips.mjs",
     "build": "npm run build:web",
     "build:web": "node ./scripts/build-web.mjs",
     "test:mobile": "playwright test tests/mobile-smoke.spec.ts --project=mobile-iphone13",
@@ -17,6 +18,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
+    "msedge-tts": "^2.0.5",
     "vite": "^7.3.1"
   }
 }

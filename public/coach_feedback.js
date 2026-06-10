@@ -394,7 +394,20 @@
         try {
             const voices = window.speechSynthesis.getVoices();
             if (!Array.isArray(voices) || voices.length === 0) return null;
-            return voices.find((voice) => String(voice.lang || '').toLowerCase().startsWith('he')) || null;
+            const hebrew = voices.filter((voice) => String(voice.lang || '').toLowerCase().replace('_', '-').startsWith('he'));
+            if (hebrew.length === 0) return null;
+            // Prefer neural/online voices (Edge "Natural", Google) over the robotic local SAPI voice.
+            const score = (voice) => {
+                const name = String(voice.name || '').toLowerCase();
+                let s = 0;
+                if (name.includes('natural')) s += 4;
+                if (name.includes('google')) s += 3;
+                if (name.includes('online')) s += 2;
+                if (voice.localService === false) s += 1;
+                return s;
+            };
+            hebrew.sort((a, b) => score(b) - score(a));
+            return hebrew[0];
         } catch (err) {
             return null;
         }
