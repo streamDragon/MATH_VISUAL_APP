@@ -2922,6 +2922,14 @@
                 <div id="graph-predict-overlay" class="hidden" role="status" aria-live="polite">
                     <div class="graph-predict-msg">👆 לחץ על הגרף — איפה לדעתך הקיצון?</div>
                 </div>
+                <div id="mission-intro-card" class="hidden" role="dialog" aria-label="המשימה הבאה">
+                    <div id="mission-intro-label">המשימה הבאה</div>
+                    <div id="mission-intro-text"></div>
+                    <div class="mission-intro-actions">
+                        <button id="btn-mission-intro-start" type="button" onclick="onMissionIntroStart()">בואו נתחיל ▶</button>
+                        <button id="btn-mission-intro-deep" type="button" onclick="onMissionIntroDeepDive()">פרטים נוספים ▾</button>
+                    </div>
+                </div>
                 <div id="graph-board-tools" aria-label="כלי גרף">
                     <button id="btn-graph-reset-view" type="button" onclick="centerGraphView()" aria-label="מרכז והתאם את הגרף מחדש">⌖ מרכז גרף</button>
                     <span id="graph-pan-hint">אפשר לגרור את הרקע כדי להזיז את הגרף</span>
@@ -2967,6 +2975,11 @@
                             </div>
                             <div id="read-answer-helper">אפשר לכתוב גם שבר פשוט כמו 1/2. נבדוק בטווח הדיוק של השאלה.</div>
                             <div id="read-answer-feedback"></div>
+                        </div>
+                        <div id="drag-submit-panel" class="hidden">
+                            <div id="drag-submit-prompt"></div>
+                            <button id="btn-drag-answer-submit" type="button">זו תשובתי! ✓</button>
+                            <div id="drag-answer-feedback" aria-live="polite"></div>
                         </div>
                         <div id="step-result-panel" class="hidden">
                             <div id="step-result-title">✅ השלב הושלם</div>
@@ -4532,8 +4545,7 @@
                     setDrawerOpen(false);
                     setTimeout(() => {
                         if (!sessionStarted) return;
-                        showStepToast('בואו נתחיל: קודם קוראים את כרטיס המשימה, ורק אחר כך נוגעים בגרף.');
-                        openQuestionOverlay({ trackCoach: false, source: 'guided_start_intro' });
+                        showMissionIntroCard();
                     }, 120);
                 }
                 return;
@@ -9303,6 +9315,7 @@
 
         function dismissQuestionIntro() {
             if (!questionIntroActive) return;
+            hideMissionIntroCard();
             setQuestionIntroActive(false);
         }
 
@@ -10142,6 +10155,7 @@
                 event.preventDefault();
                 handleReadAnswerAction();
             });
+            document.getElementById('btn-drag-answer-submit')?.addEventListener('click', submitDragAnswer);
 
             document.getElementById('btn-apply-solution')?.addEventListener('click', applyStepSolution);
             document.getElementById('btn-next-step')?.addEventListener('click', goToNextStep);
@@ -11403,6 +11417,7 @@
                     let px = p.X();
                     predictionGateState = { phase: 'graph_solve', value: px };
                     syncGraphPredictOverlay();
+                    syncDragSubmitPanel();
                     if (predictionMarker) { try { board.removeObject(predictionMarker); } catch(e) {} }
                     predictionMarker = board.create('point', [px, evaluateFunctionAt(px)], {
                         name: '?', fixed: true, size: 7,
@@ -12914,10 +12929,38 @@
         }
 
         function closeQuestionOverlay() {
+            hideMissionIntroCard();
             document.body.classList.remove('overlay-start-mode');
             document.getElementById('question-overlay').classList.add('hidden');
             if (questionOverlayA11y) questionOverlayA11y.deactivate();
             syncMobilePresentationMode();
+        }
+
+        function showMissionIntroCard() {
+            let q = getCurrentQuestion();
+            let card = document.getElementById('mission-intro-card');
+            if (!q || !card) return;
+            let rich = getRichQuestionOverlayContent(q);
+            let text = q.overlay?.essence || rich.essence || q.title || '';
+            let textEl = document.getElementById('mission-intro-text');
+            if (textEl) textEl.innerText = text;
+            card.classList.remove('hidden');
+        }
+
+        function hideMissionIntroCard() {
+            let card = document.getElementById('mission-intro-card');
+            if (card) card.classList.add('hidden');
+        }
+
+        function onMissionIntroStart() {
+            hideMissionIntroCard();
+            dismissQuestionIntro();
+        }
+
+        function onMissionIntroDeepDive() {
+            hideMissionIntroCard();
+            dismissQuestionIntro();
+            openQuestionOverlay({ trackCoach: false, source: 'mission_card_deep' });
         }
 
         function showStepToast(text, durationMs = 2400) {
@@ -12971,12 +13014,13 @@
                         let predBadge = (predictionGateState?.value != null)
                             ? ` · ניחוש שלך: ${formatNumber(predictionGateState.value)}`
                             : '';
-                        helper.innerText = `אפשר לענות במספר עשרוני או בשבר פשוט. הבדיקה סלחנית בטווח ±${formatNumber(tol)}.${predBadge}`;
+                        helper.innerText = `אפשר לענות במספר עשרוני או בשבר פשוט.${predBadge}`;
                     }
                     if (!readAnswerValidated) document.getElementById('read-answer-feedback').innerText = '';
                 }
             }
             syncGraphPredictOverlay();
+            syncDragSubmitPanel();
             syncBuilderEquationPracticeBox(q);
         }
 
@@ -13733,6 +13777,27 @@
             return { ok: true, value: numeric, display: compact };
         }
 
+        const GROWTH_WRONG_READ = [
+            'כמעט! בדקו שוב — תסתכלו בעין של מתמטיקאי על הנקודה בגרף.',
+            'לא בדיוק, אבל אתם בכיוון. מה הגרף אומר לכם בנקודה הזו?',
+            'עוד לא — נסו פעם נוספת. לפעמים עוזר לזוז לאט ולשים לב לסרגל שלצד הנקודה.',
+            'קרוב! בדקו שוב את הערך שהגרף מראה בנקודה המסומנת.',
+            'לא גמרנו — הגרף מחכה שתקראו אותו שוב בזהירות. מה הסיפור שם?'
+        ];
+        const GROWTH_WRONG_DRAG_SLOPE = [
+            'כמעט! השיפוע עוד לא אפס ממש — הזזה קטנה לאחד הצדדים תעשה את ההבדל.',
+            'בכיוון! בנקודת קיצון השיפוע הוא אפס בדיוק — ממשיכים לחפש.',
+            'עוד לא, אבל קרוב. מה הגרף מספר לכם כשמסתכלים שמאלה וימינה מהנקודה?',
+            'כמעט בשיא! הזזה עדינה עוד קצת — ותגיע לשיפוע אפס.',
+            'לא עוד, אבל הניסיון מלמד. בשיא הגרף "שוכב שטוח" — ממשיכים.'
+        ];
+        const GROWTH_WRONG_DRAG_MIN = [
+            'קרוב לתחתית! בנקודת מינימום הגרף יורד לפניה ועולה אחריה — האם זה כך כאן?',
+            'כמעט! נקודת מינימום = השפל המקומי. ממשיכים לחפש.',
+            'עוד לא — בדקו: מהצד השמאלי הגרף יורד, ומהצד הימני הוא עולה? זו נקודת המינימום.',
+            'לא גמרנו, אבל אתם קרובים. המינימום הוא בדיוק בתחתית הבקע — עוד קצת.'
+        ];
+
         function submitReadAnswer() {
             let q = getCurrentQuestion();
             if (!q || (q.goal !== 'read_slope' && q.goal !== 'read_y')) return;
@@ -13740,7 +13805,7 @@
             dismissQuestionIntro();
             let data = getQuestionGoalData(q);
             let x0 = data.fixedX0 ?? 0;
-            let tol = data.answerTolerance ?? 0.2;
+            let tol = data.answerTolerance ?? 0.3;
             let xOk = Math.abs(p.X() - x0) <= 0.12;
             if (!xOk) {
                 document.getElementById('read-answer-feedback').innerText = `שלב 1: מקמים את הנקודה ב-x=${formatNumber(x0)} ורק אז בודקים תשובה.`;
@@ -13765,7 +13830,7 @@
                 playVoiceSmart('correct', 'כל הכבוד!');
                 if (typeof addPoints === 'function') addPoints(10);
                 onCorrectAnswer();
-                let feedbackText = `נכון מאוד. התשובה שלך בטווח הנכון (בערך ${formatNumber(expected)}, עם סובלנות של ±${formatNumber(tol)}).`;
+                let feedbackText = '✅ נכון מאוד! קראת את הגרף יפה.';
                 if (predictionGateState?.value != null) {
                     let delta = Math.abs(inputVal - predictionGateState.value);
                     let accuracy = delta <= tol ? 'מדויק! 🎯' : delta <= tol * 3 ? 'קרוב!' : 'רחוק';
@@ -13806,11 +13871,67 @@
                 readAnswerValidated = false;
                 if (typeof showMascotMood === 'function') showMascotMood('thinking', 'עוד לא — בדקו שוב על פי הגרף!', 3000);
                 playVoiceSmart('wrong', 'נסו שוב, תסתכלו על הגרף');
-                document.getElementById('read-answer-feedback').innerText = `עדיין לא. בדקו שוב את החלונית ליד הנקודה ונסו שוב. מותר להיות בערך בטווח ±${formatNumber(tol)}.`;
+                let wrongMsg = GROWTH_WRONG_READ[Math.floor(Math.random() * GROWTH_WRONG_READ.length)];
+                document.getElementById('read-answer-feedback').innerText = wrongMsg;
                 pushCoachWrongAttempt('עדיין לא. נסו שוב לפי החלונית ליד הנקודה.', {
                     source: 'read_answer',
                     reason: 'answer_out_of_tolerance'
                 });
+            }
+        }
+
+        function syncDragSubmitPanel() {
+            let q = getCurrentQuestion();
+            let dragPanel = document.getElementById('drag-submit-panel');
+            if (!dragPanel) return;
+            let showDrag = (q?.goal === 'slope_zero' || q?.goal === 'min_point')
+                && predictionGateState?.phase !== 'graph_predict'
+                && !stepCompleted;
+            dragPanel.classList.toggle('hidden', !showDrag);
+            if (showDrag) {
+                let promptEl = document.getElementById('drag-submit-prompt');
+                if (promptEl) {
+                    promptEl.innerText = q.goal === 'min_point'
+                        ? 'גרור לנקודת המינימום, ואז לחץ לאישור.'
+                        : 'גרור לנקודה שבה השיפוע אפס, ואז לחץ לאישור.';
+                }
+            } else {
+                let feedEl = document.getElementById('drag-answer-feedback');
+                if (feedEl && !showDrag) feedEl.innerText = '';
+            }
+        }
+
+        function submitDragAnswer() {
+            let q = getCurrentQuestion();
+            if (!q || (q.goal !== 'slope_zero' && q.goal !== 'min_point')) return;
+            noteQuestionInteraction();
+            dismissQuestionIntro();
+            let goalParams = getQuestionGoalData(q);
+            let x = p.X(), y = p.Y(), m = getSlope(x);
+            let done = evalLegacyGoal(q.goal, goalParams, m, x, y);
+            let feedbackEl = document.getElementById('drag-answer-feedback');
+            if (done) {
+                if (typeof showMascotMood === 'function') showMascotMood('celebrating', 'כל הכבוד! 🎉', 3500);
+                playVoiceSmart('correct', 'כל הכבוד!');
+                if (typeof addPoints === 'function') addPoints(10);
+                if (feedbackEl) feedbackEl.innerText = '✅ כל הכבוד! מצאת את הנקודה הנכונה!';
+                onCorrectAnswer();
+                evaluateCurrentStep(m, x, y);
+                let currentStep = activeSteps[currentStepIndex];
+                if (!questionSolved && currentStep) {
+                    stepCompleted = true;
+                    syncDragSubmitPanel();
+                    if (currentStepIndex >= activeSteps.length - 1) markQuestionSolved();
+                    else goToNextStep();
+                }
+                pushCoachEvent('ATTEMPT_CORRECT', { source: 'drag_submit' });
+            } else {
+                let pool = q.goal === 'min_point' ? GROWTH_WRONG_DRAG_MIN : GROWTH_WRONG_DRAG_SLOPE;
+                let msg = pool[Math.floor(Math.random() * pool.length)];
+                if (feedbackEl) feedbackEl.innerText = msg;
+                if (typeof showMascotMood === 'function') showMascotMood('thinking', msg, 3500);
+                playVoiceSmart('wrong', 'נסו שוב');
+                pushCoachWrongAttempt(msg, { source: 'drag_submit' });
             }
         }
 
@@ -13855,11 +13976,11 @@
         }
 
         function evalLegacyGoal(goalType, goalParams, m, x, y) {
-            if (goalType === 'slope_zero') return Math.abs(m) < (goalParams.toleranceM ?? 0.1);
+            if (goalType === 'slope_zero') return Math.abs(m) < (goalParams.toleranceM ?? 0.15);
             if (goalType === 'min_point') {
-                return Math.abs(m) < (goalParams.toleranceM ?? 0.1) && getSecondDerivativeAt(x) > 0;
+                return Math.abs(m) < (goalParams.toleranceM ?? 0.15) && getSecondDerivativeAt(x) > 0;
             }
-            if (goalType === 'slope_equals') return Math.abs(m - (goalParams.targetM ?? 0)) < (goalParams.toleranceM ?? 0.1);
+            if (goalType === 'slope_equals') return Math.abs(m - (goalParams.targetM ?? 0)) < (goalParams.toleranceM ?? 0.15);
             if (goalType === 'y_equals') return Math.abs(y - (goalParams.targetY ?? 0)) < (goalParams.toleranceY ?? 0.2);
             if (goalType === 'hit_target' && Array.isArray(goalParams.targets)) {
                 let tol = goalParams.toleranceY ?? goalParams.tolerance ?? 0.25;
@@ -14271,6 +14392,7 @@
                 nextBtn.classList.toggle('hidden', isLast);
                 if (isLast) markQuestionSolved();
             }
+            syncDragSubmitPanel();
         }
 
         function openWinOverlay(progressAward = {}) {
@@ -18562,6 +18684,8 @@ ${safeQuestionText}
             if (readInput) readInput.value = '';
             let readFeedback = document.getElementById('read-answer-feedback');
             if (readFeedback) readFeedback.innerText = '';
+            let dragFeedback = document.getElementById('drag-answer-feedback');
+            if (dragFeedback) dragFeedback.innerText = '';
 
             syncParamInputsDisabledState(q);
             builderPanelOpen = false;
@@ -18632,7 +18756,7 @@ ${safeQuestionText}
                 announceGraphLineDisplay('tangent', getSlope(p.X()));
             }, 760);
             renderQuestionOverlay(q);
-            if (shouldOpenQuestionIntro) openQuestionOverlay({ trackCoach: false, source: 'auto_intro' });
+            if (shouldOpenQuestionIntro) showMissionIntroCard();
             else closeQuestionOverlay();
             renderHomeRoadmap();
             updateMobileFeedTickerMessages(false);
@@ -18781,6 +18905,7 @@ ${safeQuestionText}
         opacity: 0.5;
         cursor: pointer;
         z-index: 9000;
+        -webkit-user-select: none;
         user-select: none;
         transition: opacity 0.2s;
         white-space: nowrap;
@@ -18846,6 +18971,102 @@ ${safeQuestionText}
         50%       { transform: scale(1.04); opacity: 1; }
     }
     #graph-stage { position: relative; }
+
+    /* ============================================================
+       MISSION INTRO CARD — כרטיס פתיחת שאלה קומפקטי
+    ============================================================ */
+    #mission-intro-card {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 6px 30px rgba(0,0,0,.22);
+        padding: 20px 24px 16px;
+        max-width: 300px;
+        width: 88%;
+        z-index: 40;
+        text-align: center;
+        direction: rtl;
+        pointer-events: all;
+    }
+    #mission-intro-card.hidden { display: none; }
+    #mission-intro-label {
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: #1565c0;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 10px;
+    }
+    #mission-intro-text {
+        font-size: 1rem;
+        color: #1a1a1a;
+        line-height: 1.6;
+        margin-bottom: 16px;
+    }
+    .mission-intro-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    #btn-mission-intro-start {
+        background: #1565c0;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: 'Assistant', sans-serif;
+    }
+    #btn-mission-intro-start:hover { background: #1976d2; }
+    #btn-mission-intro-deep {
+        background: transparent;
+        color: #1565c0;
+        border: 1.5px solid #1565c0;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        font-family: 'Assistant', sans-serif;
+    }
+    #btn-mission-intro-deep:hover { background: #e3f2fd; }
+
+    /* ============================================================
+       DRAG SUBMIT PANEL — כפתור "זו תשובתי" לגרירת נקודת קיצון
+    ============================================================ */
+    #drag-submit-panel {
+        margin-top: 10px;
+        padding: 6px 0;
+    }
+    #drag-submit-prompt {
+        font-size: 0.88rem;
+        color: #555;
+        margin-bottom: 6px;
+    }
+    #btn-drag-answer-submit {
+        background: linear-gradient(135deg, #2e7d32, #43a047);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 22px;
+        font-size: 0.97rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: 'Assistant', sans-serif;
+    }
+    #btn-drag-answer-submit:hover { opacity: 0.9; }
+    #drag-answer-feedback {
+        margin-top: 8px;
+        font-size: 0.93rem;
+        color: #333;
+        min-height: 1.4em;
+        line-height: 1.55;
+    }
 
     /* ============================================================
        TUTOR CONTAINER — עטיפת המורה הפרטי
