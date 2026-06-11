@@ -1821,6 +1821,13 @@
                 box-sizing: border-box;
             }
 
+            /* The quick-tour card holds ~3 lines of content — size it to content,
+               not full screen, so students don't face a huge empty card. */
+            #quick-tour-card {
+                min-height: 0 !important;
+                border-radius: 18px !important;
+            }
+
             #tutor-container,
             #tutor-btn {
                 position: fixed !important;
@@ -2976,6 +2983,14 @@
                     <span id="graph-pan-hint">אפשר לגרור את הרקע כדי להזיז את הגרף</span>
                 </div>
             </div>
+            <div id="drag-submit-panel" class="hidden">
+                <div id="drag-submit-prompt"></div>
+                <div class="drag-submit-row">
+                    <button id="btn-drag-answer-submit" type="button">זו תשובתי! ✓</button>
+                    <div id="drag-strikes" aria-live="polite" title="פסילות"></div>
+                </div>
+                <div id="drag-answer-feedback" aria-live="polite"></div>
+            </div>
             <div id="graph-live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
         </div>
     </div>
@@ -3016,14 +3031,6 @@
                             </div>
                             <div id="read-answer-helper">אפשר לכתוב גם שבר פשוט כמו 1/2. נבדוק בטווח הדיוק של השאלה.</div>
                             <div id="read-answer-feedback"></div>
-                        </div>
-                        <div id="drag-submit-panel" class="hidden">
-                            <div id="drag-submit-prompt"></div>
-                            <div class="drag-submit-row">
-                                <button id="btn-drag-answer-submit" type="button">זו תשובתי! ✓</button>
-                                <div id="drag-strikes" aria-live="polite" title="פסילות"></div>
-                            </div>
-                            <div id="drag-answer-feedback" aria-live="polite"></div>
                         </div>
                         <div id="step-result-panel" class="hidden">
                             <div id="step-result-title">✅ השלב הושלם</div>
@@ -14043,6 +14050,7 @@
             let dragPanel = document.getElementById('drag-submit-panel');
             if (!dragPanel) return;
             let showDrag = questionUsesManualCheck(q)
+                && !!sessionStarted
                 && predictionGateState?.phase !== 'graph_predict'
                 && !stepCompleted
                 && !questionSolved
@@ -14101,7 +14109,7 @@
                     msg = hint ? `${msg}\n💡 ${hint}` : msg;
                 }
                 if (feedbackEl) feedbackEl.innerText = msg;
-                if (typeof showMascotMood === 'function') showMascotMood('thinking', msg, 3500);
+                if (typeof showMascotMood === 'function') showMascotMood('thinking', 'עוד לא — נסו שוב 💪', 2200);
                 playVoiceSmart('wrong', 'נסו שוב');
                 pushCoachWrongAttempt(msg, { source: 'drag_submit' });
             }
@@ -19620,8 +19628,15 @@ ${safeQuestionText}
        DRAG SUBMIT PANEL — כפתור "זו תשובתי" לגרירת נקודת קיצון
     ============================================================ */
     #drag-submit-panel {
-        margin-top: 10px;
-        padding: 6px 0;
+        margin: 10px auto 0 auto;
+        width: 100%;
+        max-width: 560px;
+        box-sizing: border-box;
+        background: #ffffff;
+        border: 1.5px solid #c8e6c9;
+        border-radius: 14px;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.10);
+        padding: 10px 14px;
     }
     #drag-submit-prompt {
         font-size: 0.88rem;
@@ -19629,17 +19644,21 @@ ${safeQuestionText}
         margin-bottom: 6px;
     }
     #btn-drag-answer-submit {
+        flex: 1 1 auto;
+        min-height: 48px;
         background: linear-gradient(135deg, #2e7d32, #43a047);
         color: #fff;
         border: none;
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 10px 22px;
-        font-size: 0.97rem;
-        font-weight: 700;
+        font-size: 1.05rem;
+        font-weight: 800;
         cursor: pointer;
         font-family: 'Assistant', sans-serif;
+        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.30);
     }
     #btn-drag-answer-submit:hover { opacity: 0.9; }
+    #btn-drag-answer-submit:active { transform: scale(0.98); }
     #drag-answer-feedback {
         margin-top: 8px;
         font-size: 0.93rem;
