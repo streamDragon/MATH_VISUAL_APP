@@ -1,11 +1,11 @@
 {
   "id": "/",
-  "name": "מעבדת הפונקציות - לומדים לראות מתמטיקה",
-  "short_name": "מעבדת הפונקציות",
-  "description": "אפליקציית למידה ויזואלית לתלמידי חטיבה ותיכון עם גרפים אינטראקטיביים, תרגול מונחה, משוב מיידי ועבודה עם פרמטרים.",
+  "name": "Vizy - Visual Mathematics",
+  "short_name": "Vizy",
+  "description": "Picture, explore and understand mathematics. Hebrew and English, grades 9-11.",
   "lang": "he",
   "dir": "rtl",
-  "start_url": "/?source=pwa",
+  "start_url": "/learn.html",
   "scope": "/",
   "display": "standalone",
   "display_override": [
@@ -14,40 +14,47 @@
     "minimal-ui"
   ],
   "orientation": "portrait",
-  "theme_color": "#6C5CE7",
-  "background_color": "#FAFAFD",
+  "theme_color": "#11152b",
+  "background_color": "#0d1125",
   "categories": [
     "education",
     "productivity"
   ],
   "screenshots": [
     {
-      "src": "/screenshots/functions-workplace.png",
-      "sizes": "1200x801",
+      "src": "/screenshots/vizy-desktop-home.png",
+      "sizes": "1440x1000",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "מסך עבודה עם משימה, גרף וכלי פתרון"
+      "label": "Vizy challenges"
     },
     {
-      "src": "/screenshots/mobile-home.png",
-      "sizes": "390x844",
+      "src": "/screenshots/vizy-mobile-home.png",
+      "sizes": "390x664",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "מסך הבית"
+      "label": "Vizy mobile challenges"
     },
     {
-      "src": "/screenshots/mobile-exercise.png",
-      "sizes": "390x844",
+      "src": "/screenshots/vizy-mobile-lesson.png",
+      "sizes": "390x664",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "תרגול עם גרף"
+      "label": "Explore a visual model"
     },
     {
-      "src": "/screenshots/mobile-win.png",
-      "sizes": "390x844",
+      "src": "/screenshots/vizy-mobile-race.png",
+      "sizes": "390x664",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "מסך הצלחה ונקודות"
+      "label": "Avatar mountain trail"
+    },
+    {
+      "src": "/screenshots/vizy-mobile-win.png",
+      "sizes": "390x664",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mastery and transfer"
     }
   ],
   "icons": [
@@ -102,30 +109,16 @@
   ],
   "shortcuts": [
     {
-      "name": "תרגול מהיר",
-      "short_name": "תרגול",
-      "description": "כניסה מהירה ישר למסלול תרגול",
-      "url": "/?action=practice",
-      "icons": [
-        {
-          "src": "/icons/shortcut-practice.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
+      "name": "Challenges",
+      "url": "/learn.html#home"
     },
     {
-      "name": "יש לי שאלה",
-      "short_name": "שאלה",
-      "description": "פתיחה מהירה של מסך העלאת שאלה",
-      "url": "/?action=scan",
-      "icons": [
-        {
-          "src": "/icons/shortcut-scan.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
+      "name": "My trail",
+      "url": "/learn.html#race"
+    },
+    {
+      "name": "Request a question",
+      "url": "/learn.html#requests"
     }
   ],
   "related_applications": [],

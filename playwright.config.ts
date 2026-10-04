@@ -1,42 +1,58 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
-const HOST = '127.0.0.1';
+const HOST = "127.0.0.1";
 const PORT = 4173;
 const baseURL = `http://${HOST}:${PORT}`;
 
 export default defineConfig({
-  testDir: './tests',
+  testDir: "./tests",
+  testMatch: "**/*.spec.ts",
   timeout: 60_000,
   expect: {
-    timeout: 10_000
+    timeout: 10_000,
   },
   use: {
     baseURL,
     headless: true,
-    screenshot: 'only-on-failure',
-    trace: 'retain-on-failure',
-    video: 'retain-on-failure'
+    screenshot: "only-on-failure",
+    trace: "retain-on-failure",
+    video: process.env.PLAYWRIGHT_CHROMIUM_PATH ? "off" : "retain-on-failure",
   },
   webServer: {
     command: `npm run dev -- --host ${HOST} --port ${PORT} --strictPort`,
     url: baseURL,
     timeout: 120_000,
-    reuseExistingServer: true
+    reuseExistingServer: true,
   },
   projects: [
     {
-      name: 'desktop-chromium',
+      name: "desktop-chromium",
       use: {
-        browserName: 'chromium',
-        ...devices['Desktop Chrome']
-      }
+        browserName: "chromium",
+        channel: process.env.PLAYWRIGHT_CHROMIUM_PATH ? undefined : "chromium",
+        launchOptions: process.env.PLAYWRIGHT_CHROMIUM_PATH
+          ? {
+              executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH,
+              args: ["--no-sandbox", "--disable-gpu"],
+            }
+          : {},
+        ...devices["Desktop Chrome"],
+      },
     },
     {
-      name: 'mobile-iphone13',
+      name: "mobile-iphone13",
       use: {
-        browserName: 'webkit',
-        ...devices['iPhone 13']
-      }
-    }
-  ]
+        browserName: process.env.PLAYWRIGHT_CHROMIUM_PATH
+          ? "chromium"
+          : "webkit",
+        launchOptions: process.env.PLAYWRIGHT_CHROMIUM_PATH
+          ? {
+              executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH,
+              args: ["--no-sandbox", "--disable-gpu"],
+            }
+          : {},
+        ...devices["iPhone 13"],
+      },
+    },
+  ],
 });

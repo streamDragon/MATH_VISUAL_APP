@@ -15,3 +15,5 @@ Thumbs.db
 test-results/
 playwright-report/
 verify-shots/
+__pycache__/
+*.py[cod]

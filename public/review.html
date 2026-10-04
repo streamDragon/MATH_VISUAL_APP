@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Vizy · ניהול הבנק</title>
+    <link rel="stylesheet" href="learning.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <a class="brand" href="learn.html">VIZY · REVIEW</a
+      ><a href="learn.html">חזרה ללמידה</a>
+    </header>
+    <main>
+      <h1 class="page-title">בקשות והמחשות חדשות</h1>
+      <p class="page-subtitle">
+        תור העבודה של חגי. הרשאות ניהול נבדקות במסד הנתונים. אין הפעלת AI כאן.
+      </p>
+      <div id="review-status" class="feedback" role="status"></div>
+      <section id="review-login" class="panel">
+        <h2>כניסה לחשבון הניהול</h2>
+        <form id="review-signin" class="form-stack">
+          <label
+            >אימייל<input
+              id="review-email"
+              type="email"
+              required
+              dir="ltr" /></label
+          ><button class="primary">שליחת קישור כניסה</button>
+        </form>
+      </section>
+      <div id="review-work" hidden>
+        <section class="panel">
+          <h2>ייבוא המחשה מוכנה</h2>
+          <p>
+            הכינו JSON בצ׳אט שלכם. נדרשות שאלה, ניבוי, שלושה צעדי תיווך, נתונים,
+            תשובה, שאלה להעברה ואנגלית.
+          </p>
+          <input
+            id="activity-file"
+            type="file"
+            accept="application/json,.json"
+          /><textarea
+            id="activity-json"
+            rows="10"
+            dir="ltr"
+            aria-label="Activity JSON"
+            style="margin: 14px 0"
+          ></textarea>
+          <div class="form-actions">
+            <button id="validate-activity">בדיקה מקומית</button
+            ><button id="publish-activity" class="primary" disabled>
+              אישור ופרסום לבנק
+            </button>
+          </div>
+          <p id="activity-status" class="feedback" role="status"></p>
+        </section>
+        <div class="section-head">
+          <h2>תור בקשות</h2>
+          <button id="refresh-queue">רענון</button>
+        </div>
+        <div id="review-queue" class="request-list"></div>
+      </div>
+    </main>
+    <script src="learning-core.js"></script>
+    <script src="learning-service.js"></script>
+    <script src="learning-review.js"></script>
+  </body>
+</html>
