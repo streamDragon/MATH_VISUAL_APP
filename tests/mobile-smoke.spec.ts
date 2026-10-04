@@ -1,7 +1,9 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
+import { expect, test } from './browser-fixtures';
 
 const ENTRY_PATH = '/?splash=0';
 const FIRST_SCREEN_SELECTORS = [
+  '#continue-challenge',
   '#btn-age-gate-eligible',
   '#btn-splash-enter-app',
   '#btn-hero-start',

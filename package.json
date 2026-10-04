@@ -8,7 +8,11 @@
     "test:mobile": "playwright test tests/mobile-smoke.spec.ts --project=mobile-iphone13",
     "test:mobile:ui": "playwright test tests/mobile-smoke.spec.ts --project=mobile-iphone13 --ui",
     "cap:sync": "node ./scripts/cap.mjs sync",
-    "cap:open:android": "node ./scripts/cap.mjs open-android"
+    "cap:open:android": "node ./scripts/cap.mjs open-android",
+    "test": "node --test tests/*.test.mjs",
+    "test:e2e": "playwright test",
+    "bank:build": "node scripts/create-learning-bank.mjs && node scripts/localize-learning-bank.mjs && node scripts/seed-learning-bank.mjs",
+    "test:import": "python3 tests/question_import_test.py"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.0.0",
@@ -17,6 +21,7 @@
     "@capacitor/core": "^8.1.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@playwright/test": "^1.58.2",
     "msedge-tts": "^2.0.5",
     "vite": "^7.3.1"

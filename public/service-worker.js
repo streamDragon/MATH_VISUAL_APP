@@ -1,42 +1,24 @@
-const CACHE_NAME = 'mathviz-v1.2';
+const CACHE_NAME = 'mathviz-learning-v2.0';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  OFFLINE_URL,
-  '/privacy.html',
-  '/version.json',
-  '/mobile.css',
-  '/questions.js',
-  '/sound.js',
-  '/presets.js',
-  '/capacitor.js',
-  '/codex_features.js',
-  '/coach_feedback.css',
-  '/coach_feedback.js',
-  '/coach_feedback_catalog.json',
-  '/help-video-registry.js',
-  '/helpContent.he.js',
-  '/help_videos.json',
-  '/feed_manifest.json',
-  '/opening-poster.png',
-  '/icons/icon-72.png',
-  '/icons/icon-96.png',
-  '/icons/icon-128.png',
-  '/icons/icon-144.png',
-  '/icons/icon-152.png',
-  '/icons/icon-192.png',
-  '/icons/icon-384.png',
-  '/icons/icon-512.png',
-  '/icons/icon-maskable-512.png',
-  '/icons/apple-touch-icon.png',
-  '/icons/shortcut-practice.png',
-  '/icons/shortcut-scan.png',
-  '/screenshots/functions-workplace.png',
-  '/screenshots/mobile-home.png',
-  '/screenshots/mobile-exercise.png',
-  '/screenshots/mobile-win.png'
+  "/",
+  "/learn.html",
+  "/learning.css",
+  "/learning-app.js",
+  "/learning-core.js",
+  "/learning-service.js",
+  "/learning-visuals.js",
+  "/learning-audio.js",
+  "/learning-bank.json",
+  "/learning-voices.json",
+  "/manifest.json",
+  "/offline.html",
+  "/privacy.html",
+  "/version.json",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
+  "/icons/icon-maskable-512.png",
+  "/icons/apple-touch-icon.png"
 ];
 
 const CACHE_PREFIXES = ['mathviz-', 'math-functions-pwa-'];
@@ -89,7 +71,7 @@ async function networkFirst(request, event) {
     const cached = await caches.match(request, { ignoreSearch: true });
     if (cached) return cached;
     if (request.mode === 'navigate') {
-      return (await caches.match('/index.html')) || (await caches.match(OFFLINE_URL)) || Response.error();
+      return (await caches.match('/learn.html')) || (await caches.match(OFFLINE_URL)) || Response.error();
     }
     return Response.error();
   }

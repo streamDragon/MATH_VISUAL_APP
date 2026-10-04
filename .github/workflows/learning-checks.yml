@@ -1,0 +1,35 @@
+name: Learning checks
+
+on:
+  push:
+    branches: [main, feature/mobile-local-learning]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  learning:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run test:import
+      - run: npm run check:questions
+      - run: node scripts/check-book-questions.mjs
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run test:e2e -- --workers=1
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure
+          path: test-results/
+          retention-days: 7
