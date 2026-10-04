@@ -1,42 +1,26 @@
 import { test as base, expect } from "@playwright/test";
 
-// The optional portable headless-shell executable is unreliable when reused
-// across contexts in this sandbox. Isolate each test in a fresh process.
-// Standard Playwright Chrome/WebKit retains its default fixture lifecycle.
-export const test = process.env.PLAYWRIGHT_CHROMIUM_PATH
-  ? base.extend({
-      context: async ({ playwright }, use, testInfo) => {
-        const settings = testInfo.project.use;
-        const browser = await playwright.chromium.launch({
-          headless: true,
-          ...settings.launchOptions,
-        });
-        const options = {};
-        for (const key of [
-          "baseURL",
-          "viewport",
-          "screen",
-          "userAgent",
-          "deviceScaleFactor",
-          "isMobile",
-          "hasTouch",
-          "locale",
-          "timezoneId",
-          "colorScheme",
-          "reducedMotion",
-          "permissions",
-          "storageState",
-          "ignoreHTTPSErrors",
-          "serviceWorkers",
-        ])
-          if (settings[key] !== undefined) options[key] = settings[key];
-        const context = await browser.newContext(options);
-        try {
-          await use(context);
-        } finally {
-          await browser.close();
-        }
-      },
-    })
-  : base;
+// Chromium 145 can crash while opening a new context after earlier contexts
+// close on the Linux runner. Keep test isolation at the browser-process level.
+// Playwright's instrumentation still applies each test's context options and
+// records traces/screenshots, including serviceWorkers overrides for API mocks.
+export const test = base.extend({
+  context: async (
+    { playwright, browserName, launchOptions, channel, headless },
+    use,
+  ) => {
+    const browser = await playwright[browserName].launch({
+      ...launchOptions,
+      channel,
+      headless,
+    });
+    try {
+      const context = await browser.newContext();
+      await use(context);
+      await context.close();
+    } finally {
+      await browser.close();
+    }
+  },
+});
 export { expect };
