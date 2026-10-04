@@ -29,6 +29,7 @@ export default defineConfig({
       name: "desktop-chromium",
       use: {
         browserName: "chromium",
+        channel: process.env.PLAYWRIGHT_CHROMIUM_PATH ? undefined : "chromium",
         launchOptions: process.env.PLAYWRIGHT_CHROMIUM_PATH
           ? {
               executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH,

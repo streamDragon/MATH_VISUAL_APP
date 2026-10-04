@@ -2,7 +2,7 @@ name: Learning checks
 
 on:
   push:
-    branches: [main, feature/mobile-local-learning]
+    branches: [main]
   pull_request:
     branches: [main]
 

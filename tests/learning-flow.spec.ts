@@ -1,72 +1,76 @@
 import { test, expect } from "./browser-fixtures";
 import fs from "node:fs";
+import { createServer } from "node:http";
+import path from "node:path";
 
-test("a newly published free assignment opens without a startup catalog entry", async ({
-  page,
-}) => {
-  const a = {
-    ...JSON.parse(fs.readFileSync("content/learning-bank.json", "utf8"))[0],
-    id: "new-free-question",
-  };
-  await page.route("**/rest/v1/learning_content?**", (route) =>
-    route.fulfill({ json: [{ payload: a }] }),
-  );
-  await page.route("**/rest/v1/rpc/learning_catalog", (route) =>
-    route.fulfill({ json: [] }),
-  );
-  await page.goto("/learn.html?activity=" + a.id);
-  await expect(page.locator("#prediction-question")).toBeVisible();
-});
-test("signed-in learners see assigned tasks and durable verified bonus points", async ({
-  page,
-}) => {
-  await page.addInitScript(() => {
-    localStorage.setItem(
-      "vizy_learning_session",
-      JSON.stringify({
-        access_token: "test-token",
-        user: { id: "test-user" },
-        expires_at: Date.now() / 1000 + 3600,
+test.describe("remote records with mocked transport", () => {
+  test.use({ serviceWorkers: "block" });
+  test("a newly published free assignment opens without a startup catalog entry", async ({
+    page,
+  }) => {
+    const a = {
+      ...JSON.parse(fs.readFileSync("content/learning-bank.json", "utf8"))[0],
+      id: "new-free-question",
+    };
+    await page.route("**/rest/v1/learning_content?**", (route) =>
+      route.fulfill({ json: [{ payload: a }] }),
+    );
+    await page.route("**/rest/v1/rpc/learning_catalog", (route) =>
+      route.fulfill({ json: [] }),
+    );
+    await page.goto("/learn.html?activity=" + a.id);
+    await expect(page.locator("#prediction-question")).toBeVisible();
+  });
+  test("signed-in learners see assigned tasks and durable verified bonus points", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "vizy_learning_session",
+        JSON.stringify({
+          access_token: "test-token",
+          user: { id: "test-user" },
+          expires_at: Date.now() / 1000 + 3600,
+        }),
+      );
+      localStorage.setItem(
+        "vizy_cohort",
+        JSON.stringify({ id: "test-group", mode: "class" }),
+      );
+    });
+    await page.route("**/auth/v1/user", (route) =>
+      route.fulfill({ json: { id: "test-user" } }),
+    );
+    await page.route("**/rest/v1/learning_entitlements?**", (route) =>
+      route.fulfill({ json: [] }),
+    );
+    await page.route("**/rest/v1/rpc/learning_catalog", (route) =>
+      route.fulfill({ json: [] }),
+    );
+    await page.route("**/rest/v1/rpc/learning_progress", (route) =>
+      route.fulfill({ json: { xp: 60, mastered: ["linear-01"] } }),
+    );
+    await page.route("**/rest/v1/rpc/learning_race_board", (route) =>
+      route.fulfill({
+        json: {
+          goal: 2,
+          activity_ids: ["linear-01", "linear-02"],
+          completed_ids: ["linear-01"],
+          peers: [
+            { nickname: "Comet", avatar: "bot", is_self: true, completed: 1 },
+          ],
+        },
       }),
     );
-    localStorage.setItem(
-      "vizy_cohort",
-      JSON.stringify({ id: "test-group", mode: "class" }),
-    );
+    await page.goto("/learn.html#race");
+    await expect(page.locator("#server-xp")).toHaveText("60");
+    await expect(page.locator("#group-tasks button")).toHaveCount(2);
+    await page.locator("#group-tasks button").last().click();
+    await expect(page.locator("#prediction-question")).toBeVisible();
+    await page.reload();
+    await expect(page.locator("#server-xp")).toHaveText("60");
   });
-  await page.route("**/auth/v1/user", (route) =>
-    route.fulfill({ json: { id: "test-user" } }),
-  );
-  await page.route("**/rest/v1/learning_entitlements?**", (route) =>
-    route.fulfill({ json: [] }),
-  );
-  await page.route("**/rest/v1/rpc/learning_catalog", (route) =>
-    route.fulfill({ json: [] }),
-  );
-  await page.route("**/rest/v1/rpc/learning_progress", (route) =>
-    route.fulfill({ json: { xp: 60, mastered: ["linear-01"] } }),
-  );
-  await page.route("**/rest/v1/rpc/learning_race_board", (route) =>
-    route.fulfill({
-      json: {
-        goal: 2,
-        activity_ids: ["linear-01", "linear-02"],
-        completed_ids: ["linear-01"],
-        peers: [
-          { nickname: "Comet", avatar: "bot", is_self: true, completed: 1 },
-        ],
-      },
-    }),
-  );
-  await page.goto("/learn.html#race");
-  await expect(page.locator("#server-xp")).toHaveText("60");
-  await expect(page.locator("#group-tasks button")).toHaveCount(2);
-  await page.locator("#group-tasks button").last().click();
-  await expect(page.locator("#prediction-question")).toBeVisible();
-  await page.reload();
-  await expect(page.locator("#server-xp")).toHaveText("60");
 });
-
 test("mute stops a playing prerecorded voice", async ({ page }) => {
   await page.route("**/learning-voices.json", (route) =>
     route.fulfill({
@@ -260,28 +264,63 @@ test("all six models keep their focus visible and usable on a phone", async ({
     }
   }
 });
-test("cached free challenges work without a connection", async ({
+test("cached free challenges work when the origin becomes unreachable", async ({
   page,
-  context,
 }) => {
-  await page.goto("/learn.html");
-  await page.evaluate(async () => {
-    await navigator.serviceWorker.ready;
-    await new Promise((resolve) => {
-      if (navigator.serviceWorker.controller) return resolve(null);
-      navigator.serviceWorker.addEventListener(
-        "controllerchange",
-        () => resolve(null),
-        { once: true },
-      );
-    });
+  const root = path.resolve("public");
+  const server = createServer((req, res) => {
+    let pathname = new URL(req.url || "/", "http://127.0.0.1").pathname;
+    if (pathname === "/") pathname = "/learn.html";
+    const file = path.resolve(root, "." + pathname);
+    if (
+      !file.startsWith(root + path.sep) ||
+      !fs.existsSync(file) ||
+      !fs.statSync(file).isFile()
+    ) {
+      res.writeHead(404);
+      return res.end();
+    }
+    const type =
+      {
+        ".html": "text/html",
+        ".js": "text/javascript",
+        ".json": "application/json",
+        ".css": "text/css",
+        ".png": "image/png",
+      }[path.extname(file)] || "application/octet-stream";
+    res.writeHead(200, { "Content-Type": type });
+    res.end(fs.readFileSync(file));
   });
-  await context.setOffline(true);
-  await page.goto("/learn.html?activity=linear-01");
-  await expect(page.locator("#prediction-question")).toBeVisible();
-  await page.locator("[data-choice]").first().click();
-  await page.locator("#show-model").click();
-  await expect(page.locator("#model-svg")).toBeVisible();
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const origin = "http://127.0.0.1:" + server.address().port;
+  try {
+    await page.goto(origin + "/learn.html");
+    await page.evaluate(async () => {
+      await navigator.serviceWorker.ready;
+      if (!navigator.serviceWorker.controller)
+        await new Promise((resolve) =>
+          navigator.serviceWorker.addEventListener(
+            "controllerchange",
+            resolve,
+            { once: true },
+          ),
+        );
+    });
+    // Stop the actual origin: WebKit's setOffline emulation rejects even
+    // synthetic service-worker responses (Playwright issue #42775).
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+    await page.goto(origin + "/learn.html?activity=linear-01");
+    await expect(page.locator("#prediction-question")).toBeVisible();
+    await page.locator("[data-choice]").first().click();
+    await page.locator("#show-model").click();
+    await expect(page.locator("#model-svg")).toBeVisible();
+  } finally {
+    if (server.listening) {
+      server.closeAllConnections();
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
+  }
 });
 
 test("tangent focus remains in the graph at slider extremes", async ({
