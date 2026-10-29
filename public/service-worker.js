@@ -1,9 +1,13 @@
-const CACHE_NAME = 'mathviz-learning-v2.1';
+const CACHE_NAME = 'mathviz-learning-v2.2';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",
   "/learn.html",
   "/classroom-practice.html",
+  "/skill-lab.html",
+  "/skill-lab.css",
+  "/skill-lab-data.js",
+  "/skill-lab.js",
   "/classroom-practice.css",
   "/classroom-activities.js",
   "/classroom-visuals.js",
