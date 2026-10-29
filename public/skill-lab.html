@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10182f">
+  <meta name="description" content="מעבדת יכולת של Vizy: לזהות מבנה מתמטי ולבחור את הצעד הראשון לפני חישוב.">
+  <title>Vizy | מעבדת יכולת: זיהוי מבנה</title>
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="skill-lab.css">
+  <script src="skill-lab-data.js" defer></script>
+  <script src="skill-lab.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">דלגו לתוכן</a>
+<header class="top"><a class="brand" href="learn.html">VIZY <span>רואים מתמטיקה</span></a><nav><a href="classroom-practice.html">לתרגול השיעורים</a><a href="learn.html">לכל האתגרים</a></nav></header>
+<main id="main">
+<section class="hero">
+ <p class="eyebrow">מעבדת יכולת · לא עוד שאלון</p>
+ <h1>מה המבנה? מה הצעד הראשון?</h1>
+ <p>כאן מאמנים יכולת אחת: לזהות איזו בעיה עומדת מולנו ולבחור כלי מתאים, <strong>לפני</strong> שמתחילים לחשב. אותה יכולת עובדת במעגלים, פונקציות, שברים ואי־שוויונים.</p>
+ <div class="formula"><span>זיהוי</span><b aria-hidden="true">←</b><span>מבנה</span><b aria-hidden="true">←</b><span>כלי</span><b aria-hidden="true">←</b><span>פתרון</span></div>
+</section>
+<section id="intro" class="panel">
+ <div class="section-title"><h2>נבחר רמת תרגול</h2><p>היכולת זהה, הדוגמאות משתנות.</p></div>
+ <div id="gradeButtons" class="grade-buttons" role="group" aria-label="בחירת כיתה"><button type="button" data-grade="9" aria-pressed="true">כיתה ט׳</button><button type="button" data-grade="11" aria-pressed="false">כיתה י״א</button></div>
+ <div class="flow-steps" aria-label="שלבי האימון"><div><strong>1. אבחון קצר</strong><p>מה אתם מזהים בלי עזרה?</p></div><div><strong>2. אימון</strong><p>עוצרים, בוחרים ומקבלים רמז לפי הצורך.</p></div><div><strong>3. העברה</strong><p>דוגמה אחרת, בלי רמזים.</p></div></div>
+ <p id="lastResult" class="muted" aria-live="polite"></p>
+ <button id="start" class="primary" type="button">מתחילים אימון</button>
+ <p class="note">אין ניקוד על מהירות. תשובה שתוקנה היא למידה, אבל עצמאות נמדדת רק כשהבחירה נכונה בניסיון הראשון ללא רמז.</p>
+</section>
+<section id="work" class="panel hidden" aria-label="אימון פעיל" tabindex="-1">
+ <div class="work-top"><button type="button" id="back" class="ghost">בחזרה לבחירה</button><div><span id="phaseLabel" class="pill"></span><strong id="stepLabel"></strong></div></div>
+ <div class="meter" id="meter" role="progressbar" aria-label="התקדמות באימון" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="meterFill"></span></div>
+ <p id="skillTitle" class="eyebrow">היכולת: מבנה לפני חישוב</p>
+ <div class="question">
+  <p id="questionContext" class="muted"></p>
+  <div class="math" id="expression" dir="ltr"></div>
+  <h2 id="questionHeading"></h2><p id="questionSub" class="muted"></p>
+ </div>
+ <div id="answers" class="answers" role="group" aria-label="אפשרויות תשובה"></div>
+ <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+ <div id="help" class="help hidden" role="note"></div>
+ <div class="controls"><button id="hint" type="button" class="ghost">רמז על המבנה</button><button id="next" type="button" class="primary hidden">לצעד הבא</button></div>
+ <div id="bridge" class="bridge hidden"><h3>מרצדס: שלושה ייצוגים של אותו רעיון</h3><div class="triad"><div><span>מילים</span><p id="words"></p></div><div><span>ציור / דימוי</span><p id="sketch"></p></div><div><span>אלגברה</span><p id="algebra" dir="auto"></p></div></div><p id="why"></p></div>
+</section>
+<section id="done" class="panel hidden" aria-label="סיכום אימון" tabindex="-1">
+ <p class="eyebrow">סיכום אימון</p><h2>מה הצלחת לזהות לבד?</h2><div id="scores" class="scores"></div>
+ <p id="resultMessage"></p><p class="note">זהו מדד תרגול מקומי, לא ציון ולא אבחון פסיכומטרי. דיוק בהעברה חשוב יותר ממספר התרגילים שנפתרו.</p>
+ <div class="controls"><button id="again" class="primary" type="button">סיבוב נוסף, עם דוגמאות אחרות</button><button id="chooseGrade" class="ghost" type="button">בחירת כיתה</button></div>
+</section>
+</main>
+<footer>מעבדת Vizy · יכולת אחת מתוך ארגז הכלים המתמטי · תשובות והתקדמות נשמרות רק במכשיר · ללא חשבון או AI בזמן התרגול.</footer>
+</body>
+</html>
