@@ -40,7 +40,7 @@ The student entry is [Guided Classroom Practice](https://math-visual-app-pi.verc
 
 The four paths share one small flow controller (`public/classroom-flow.js`) and one visual adapter (`public/classroom-visuals.js`). Author lesson content only in `public/classroom-activities.js`. Practice works without signing in; progress stays in the device's browser and the service worker caches the assets for return visits. No runtime generative AI, paid access checks or remote answer submission are involved.
 
-Run `npm run test:classroom` for complete desktop/mobile student journeys, `npm test` for content/math checks and `npm run build` before deployment. GitHub CI also runs the new classroom journey.
+Run `npm run test:classroom` for complete desktop/mobile student journeys, `npm test` for content/math checks and `npm run build` before deployment. The new `tests/classroom-flow.spec.ts` is also discovered by the existing GitHub Playwright CI workflow; no workflow permissions are needed.
 
 ## Open This Folder In VS Code / Studio
 
