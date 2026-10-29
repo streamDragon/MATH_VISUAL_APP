@@ -5,6 +5,7 @@
     "voice:clips": "node ./scripts/generate-voice-clips.mjs",
     "build": "npm run build:web",
     "build:web": "node ./scripts/build-web.mjs",
+    "test:classroom": "node ./scripts/verify-classroom.cjs",
     "test:mobile": "playwright test tests/mobile-smoke.spec.ts --project=mobile-iphone13",
     "test:mobile:ui": "playwright test tests/mobile-smoke.spec.ts --project=mobile-iphone13 --ui",
     "cap:sync": "node ./scripts/cap.mjs sync",

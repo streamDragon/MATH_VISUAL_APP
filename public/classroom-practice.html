@@ -1,44 +1,79 @@
 <!doctype html>
-<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vizy | תרגול כיתה ובגרות</title><style>
-:root{font-family:system-ui,Arial,sans-serif;color:#f5f7ff;background:#10162e}*{box-sizing:border-box}body{margin:0}main{max-width:980px;margin:auto;padding:20px}header{display:flex;justify-content:space-between;align-items:center;gap:10px}a{color:#b9e9ff}h1{font-size:clamp(1.5rem,4vw,2.5rem);margin:20px 0 6px}.muted{color:#c2c9df}.bar,.panel{background:#1b2648;border:1px solid #445479;border-radius:19px;padding:18px;margin:16px 0}button,select,input{font:inherit;border-radius:12px;border:1px solid #7184ad;padding:12px;background:#111c38;color:white}button{cursor:pointer}button:hover,button:focus-visible{outline:2px solid #8de0ff}button.primary{background:#126cba;border-color:#3ea5f0;font-weight:700}.topics{display:flex;flex-wrap:wrap;gap:9px}button[aria-pressed=true]{background:#145887;border-color:#9adfff}.problem{font-size:1.28rem;font-weight:650;line-height:1.8}.step{display:flex;align-items:center;gap:10px;margin:12px 0}.step b{background:#30416f;padding:6px 12px;border-radius:50%}.explain{background:#263657;padding:12px;border-right:4px solid #79d4f7;border-radius:9px}.success{color:#9df1b5}.error{color:#ffd18f}input{width:min(100%,230px)}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}svg{display:block;max-width:100%;margin:10px auto;background:#101d39;border-radius:12px}.hidden{display:none!important}.progress{height:12px;background:#344364;border-radius:12px;overflow:hidden}.progress>div{height:100%;background:#65d3a2;transition:width .2s}footer{color:#b9c6df;margin:25px 0}small{color:#c0cbdf}</style></head>
-<body><main><header><strong>VIZY · לומדים לראות מתמטיקה</strong><a href="/learn.html">חזרה לאתגרים</a></header><h1>תרגול לשיעורים של ט׳ וי״א</h1><p class="muted">מתחילים ממה שיודעים. בכל שלב מזהים חלק שאפשר לפתור, ומתקדמים בלי לדלג על הבנה.</p>
-<section class="bar"><div class="topics" id="topics" aria-label="בחירת נושא"></div><p id="description" class="muted"></p><div class="progress" aria-label="התקדמות"><div id="progress" style="width:0%"></div></div><small id="progressText"></small></section>
-<section class="panel" id="lesson"><div class="step"><b id="stepNum">1</b><span id="stepLabel">מזהים מה יודעים</span></div><h2 id="heading"></h2><div id="problem" class="problem"></div><div id="visual"></div><p id="prompt"></p><label for="answer">התשובה שלי</label><div><input id="answer" autocomplete="off" inputmode="text" aria-describedby="feedback"></div><div class="actions"><button class="primary" id="check">בדיקת תשובה</button><button id="hint">רמז הדרגתי</button><button id="next" class="hidden">השלב הבא</button><button id="reset">להתחיל שוב</button></div><p id="feedback" role="status" aria-live="polite"></p><div id="hintBox" class="explain hidden"></div></section>
-<footer>מסלול חזרות מקורי לחומר שנלמד בכיתה. השאלות נועדו לתרגול ולהכנה, אינן שאלוני בגרות רשמיים. ההתקדמות נשמרת במכשיר בלבד.</footer></main>
-<script>
-const lessons=[
-{id:"g9-functions",grade:9,name:"ט׳ · פונקציות",description:"נקודות חיתוך, ערכי פונקציה, פרבולה ואי־שוויון מתוך גרף.",steps:[
-{heading:"מזהים את החלק המוכר",problem:"נתונה הפונקציה f(x)=x²−4. מהו f(0)?",prompt:"מציבים x=0. מה מתקבל?",answers:["-4"],hints:["הציבו 0 במקום כל x.","0²−4"],why:"זוהי נקודת החיתוך עם ציר y.",graph:"parabola"},
-{heading:"מוצאים נקודות חיתוך",problem:"f(x)=x²−4. מהו ערך ה־x החיובי שבו f(x)=0?",prompt:"כתבו רק את הערך החיובי.",answers:["2"],hints:["משווים את הפונקציה לאפס.","x²=4. יש שני פתרונות, אבל מבקשים רק את החיובי."],why:"חיתוכי ציר x הם x=−2 ו־x=2.",graph:"parabola"},
-{heading:"מתקדמים לאי־שוויון",problem:"f(x)=x²−4. האם f(3)>0?",prompt:"ענו כן או לא.",answers:["כן","yes"],hints:["הציבו 3 במקום x.","3²−4=5, ומכאן סימן התוצאה."],why:"f(3)=5 חיובי. בגרף הנקודה מעל ציר x.",graph:"parabola"},
-{heading:"העברה בלי הציור",problem:"נתונה g(x)=x²−9. מהו ערך ה־x החיובי שמאפס אותה?",prompt:"השתמשו באותו רעיון עם מספרים חדשים.",answers:["3"],hints:["פתרו x²−9=0.","x²=9"],why:"בדומה לתרגיל הקודם, השורש החיובי הוא 3."}
-]},
-{id:"g9-circles",grade:9,name:"ט׳ · מעגלים",description:"רדיוס, קוטר, משיק וזווית היקפית: מהנתון הפשוט למסקנה.",steps:[
-{heading:"מזהים רדיוס וקוטר",problem:"במעגל נתון רדיוס של 5 ס״מ. מה אורך הקוטר בס״מ?",prompt:"כתבו מספר בלבד.",answers:["10"],hints:["קוטר מורכב משני רדיוסים.","2×5"],why:"קוטר שווה לפעמיים הרדיוס.",graph:"circle"},
-{heading:"זוכרים תכונה בסיסית",problem:"מה גודל הזווית במעלות בין משיק למעגל לבין הרדיוס בנקודת ההשקה?",prompt:"כתבו מספר.",answers:["90"],hints:["המשיק ניצב לרדיוס בנקודת ההשקה.","זווית ישרה."],why:"משיק למעגל ניצב לרדיוס בנקודת ההשקה.",graph:"tangent"},
-{heading:"זווית היקפית",problem:"זווית מרכזית הנשענת על קשת מסוימת היא 100°. מה גודל הזווית ההיקפית הנשענת על אותה קשת?",prompt:"כתבו מספר מעלות.",answers:["50"],hints:["זווית היקפית שווה למחצית זווית מרכזית הנשענת על אותה קשת.","100÷2"],why:"הזווית ההיקפית היא 50°."},
-{heading:"העברה לבגרות",problem:"זווית היקפית הנשענת על קשת היא 35°. מה גודל הזווית המרכזית הנשענת על אותה קשת?",prompt:"כתבו מספר מעלות.",answers:["70"],hints:["עכשיו עוברים מהיקפית למרכזית.","מכפילים פי 2."],why:"הזווית המרכזית היא 70°."}
-]},
-{id:"g11-fractions",grade:11,name:"י״א · שברים אלגבריים",description:"תחום הצבה, פירוק, צמצום וניקוי מכנים בלי לאבד פתרונות.",steps:[
-{heading:"קודם תחום הצבה",problem:"נתון הביטוי (x²−9)/(x−3). איזה ערך של x אסור להציב?",prompt:"כתבו את הערך האסור.",answers:["3"],hints:["מכנה לא יכול להיות אפס.","פתרו x−3=0."],why:"x=3 אסור גם אם בהמשך מצמצמים."},
-{heading:"מזהים נוסחה",problem:"פרקו x²−9=(x−3)(x+?)",prompt:"איזה מספר חסר?",answers:["3"],hints:["זו נוסחת הפרש ריבועים.","a²−b²=(a−b)(a+b)."],why:"x²−9=(x−3)(x+3)."},
-{heading:"מצמצמים בלי לשכוח",problem:"ל־x≠3, מה ערך הביטוי (x²−9)/(x−3) כאשר x=5?",prompt:"כתבו מספר.",answers:["8"],hints:["צמצום נותן x+3, אבל רק בתחום המותר.","הציבו 5+3."],why:"מותר לצמצם את הגורם x−3 רק כאשר הוא שונה מאפס."},
-{heading:"מנקים מכנים במשוואה",problem:"פתרו את המשוואה (x+1)/2 = 4.",prompt:"מהו x?",answers:["7"],hints:["כופלים את שני האגפים ב־2.","x+1=8."],why:"מכפילים את כל אגפי המשוואה, לא רק איבר נוח."},
-{heading:"תרגיל העברה",problem:"פתרו (x²−16)/(x−4)=9, כאשר x≠4.",prompt:"מהו x?",answers:["5"],hints:["פרקו x²−16=(x−4)(x+4).","אחרי צמצום בתחום המותר: x+4=9."],why:"x=5 בתחום ההצבה, ולכן זהו פתרון תקף."}
-]},
-{id:"g11-inequality",grade:11,name:"י״א · אי־שוויונים",description:"העברת אגפים, שינוי כיוון סימן, תחום אסור וטבלת סימנים.",steps:[
-{heading:"מתחילים בקל",problem:"פתרו 2x+3>7. מהו המספר שמימינו מתקיים אי־השוויון?",prompt:"כתבו את גבול התחום (מספר בלבד).",answers:["2"],hints:["חסרו 3 משני האגפים.","2x>4 ולכן x>2."],why:"התשובה המלאה היא x>2."},
-{heading:"כפל במספר שלילי",problem:"פתרו −2x>6. איזה מספר הוא גבול התחום?",prompt:"כתבו מספר בלבד.",answers:["-3","−3"],hints:["מחלקים את שני האגפים ב־−2.","בחילוק במספר שלילי הופכים את סימן אי־השוויון."],why:"x<−3, לא x>−3."},
-{heading:"תחום הגדרה",problem:"בביטוי (x−2)/(x+1), איזה ערך x אסור להציב?",prompt:"כתבו מספר בלבד.",answers:["-1","−1"],hints:["בודקים קודם את המכנה.","x+1=0."],why:"x=−1 אסור גם כאשר המונה והמכנה בעלי אותו סימן."},
-{heading:"בודקים סימנים",problem:"האם (x−2)/(x+1)>0 כאשר x=3?",prompt:"ענו כן או לא.",answers:["כן","yes"],hints:["הציבו במונה ובמכנה בנפרד.","(3−2)=1 ו־(3+1)=4; שניהם חיוביים."],why:"היחס חיובי ולכן x=3 מתאים."},
-{heading:"תרגיל העברה",problem:"האם (x−2)/(x+1)>0 כאשר x=0?",prompt:"ענו כן או לא.",answers:["לא","no"],hints:["הציבו 0 במונה ובמכנה.","המונה שלילי והמכנה חיובי."],why:"−2/1 שלילי, ולכן 0 אינו מקיים את אי־השוויון."}
-]}];
-const $=id=>document.getElementById(id),key="vizy_classroom_20261029";let selected=0,index=0,hints=0;try{const p=JSON.parse(localStorage.getItem(key));if(p&&lessons.some(x=>x.id===p.id)){selected=lessons.findIndex(x=>x.id===p.id);index=Math.min(Math.max(0,p.index||0),lessons[selected].steps.length-1)}}catch{}
-function persist(){try{localStorage.setItem(key,JSON.stringify({id:lessons[selected].id,index}))}catch{}}
-function graph(type){if(!type)return "";let axes='<path d="M20 150H340 M180 15V280" stroke="#6882a9" stroke-width="1.8"/>';if(type==="parabola"){let p=[];for(let x=-3.2;x<=3.2;x+=.08){let y=x*x-4;p.push((180+x*43).toFixed(1)+","+(150-y*23).toFixed(1))}return '<svg viewBox="0 0 360 290" role="img" aria-label="גרף הפרבולה y שווה x בריבוע פחות ארבע">'+axes+'<polyline fill="none" stroke="#71d9ff" stroke-width="3" points="'+p.join(" ")+'"/></svg>'}return '<svg viewBox="0 0 360 290" role="img" aria-label="איור מעגל, רדיוס ומשיק">'+(type==="tangent"?'<circle cx="170" cy="140" r="85" fill="none" stroke="#8adcf7" stroke-width="4"/><path d="M170 140L255 140 M255 28V252" stroke="#ecad80" stroke-width="3"/><path d="M240 140V125H255" fill="none" stroke="#fff" stroke-width="2"/>':'<circle cx="170" cy="140" r="85" fill="none" stroke="#8adcf7" stroke-width="4"/><path d="M85 140H255" stroke="#edae83" stroke-width="3"/><circle cx="170" cy="140" r="4" fill="white"/>')+'</svg>'}
-function render(){const l=lessons[selected],s=l.steps[index];$('topics').innerHTML=lessons.map((v,i)=>'<button type="button" data-topic="'+i+'" aria-pressed="'+(i===selected)+'">'+v.name+'</button>').join('');$('description').textContent=l.description;$('progress').style.width=Math.round(index/l.steps.length*100)+"%";$('progressText').textContent="שלב "+(index+1)+" מתוך "+l.steps.length;$('stepNum').textContent=index+1;$('stepLabel').textContent=index===l.steps.length-1?"מעבירים את הרעיון לשאלה חדשה":"מזהים מה יודעים ומתקדמים";$('heading').textContent=s.heading;$('problem').textContent=s.problem;$('visual').innerHTML=graph(s.graph);$('prompt').textContent=s.prompt;$('feedback').textContent="";$('answer').value="";$('answer').disabled=false;$('check').disabled=false;$('hintBox').classList.add("hidden");$('next').classList.add("hidden");hints=0;persist()}
-$('topics').addEventListener('click',e=>{const b=e.target.closest('[data-topic]');if(!b)return;selected=Number(b.dataset.topic);index=0;render()});
-$('hint').addEventListener('click',()=>{const s=lessons[selected].steps[index];$('hintBox').classList.remove("hidden");$('hintBox').textContent=s.hints[Math.min(hints,s.hints.length-1)];hints++});
-function check(){const s=lessons[selected].steps[index],v=$('answer').value.trim().replace(/\s+/g,"").replace("−","-").toLowerCase();if(!v){$('feedback').textContent="כתבו ניסיון. גם צעד קטן הוא התקדמות.";return}if(s.answers.some(a=>a.toLowerCase().replace("−","-")===v)){$('feedback').className="success";$('feedback').textContent="נכון. "+s.why;$('answer').disabled=true;$('check').disabled=true;$('next').classList.remove("hidden");$('next').textContent=index===lessons[selected].steps.length-1?"סיום וחזרה לתחילת המסלול":"לשלב הבא"}else{$('feedback').className="error";$('feedback').textContent="עוד לא. נסו לזהות קודם את החלק המוכר, או פתחו רמז."}}
-$('check').addEventListener('click',check);$('answer').addEventListener('keydown',e=>{if(e.key==="Enter")check()});$('next').addEventListener('click',()=>{index=(index+1)%lessons[selected].steps.length;render()});$('reset').addEventListener('click',()=>{index=0;render()});render();
-</script></body></html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#11172d">
+  <meta name="description" content="תרגול חזותי מדורג במתמטיקה לכיתות ט׳ וי״א: מהחלק הפשוט לשאלת העברה.">
+  <title>Vizy | מהשיעור לפתרון עצמאי</title>
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="classroom-practice.css">
+  <script src="classroom-activities.js" defer></script>
+  <script src="classroom-visuals.js" defer></script>
+  <script src="classroom-flow.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">דלגו לתוכן</a>
+  <header class="topbar">
+    <a class="brand" href="/learn.html" aria-label="Vizy, לדף הלמידה הראשי">VIZY <span>רואים מתמטיקה</span></a>
+    <div class="top-actions">
+      <button id="shareTop" type="button" class="subtle">שיתוף המסלול</button>
+      <a href="/learn.html" class="subtle link-button">לכל האתגרים</a>
+    </div>
+  </header>
+  <main id="main">
+    <section class="hero">
+      <p class="eyebrow">ממה שאני יודע, למה שאני מסוגל לפתור</p>
+      <h1>מתקדמים צעד אחר צעד</h1>
+      <p>מזהים משהו מוכר, נעזרים בציור וברמז רק כשצריך, ואז פותרים שאלה חדשה לבד. בלי לחץ של זמן ובלי קנס על טעות.</p>
+    </section>
+    <section id="courses" aria-label="בחירת מסלול">
+      <div class="section-head"><h2>בוחרים את השיעור</h2><span id="summary" class="muted" aria-live="polite"></span></div>
+      <div id="gradeTabs" class="grade-tabs" role="group" aria-label="סינון לפי כיתה">
+        <button type="button" data-grade="9" aria-pressed="true">כיתה ט׳</button>
+        <button type="button" data-grade="11" aria-pressed="false">כיתה י״א</button>
+        <button type="button" data-grade="all" aria-pressed="false">כל המסלולים</button>
+      </div>
+      <div id="courseCards" class="course-cards"></div>
+      <p class="muted note">התקדמות נשמרת בדפדפן במכשיר זה. לא צריך להירשם כדי לתרגל.</p>
+    </section>
+    <section id="workspace" class="hidden" aria-label="מסלול תרגול" tabindex="-1">
+      <div class="workspace-head">
+        <button id="backToCourses" type="button" class="subtle">בחזרה למסלולים</button>
+        <div><p id="courseLabel" class="eyebrow"></p><h2 id="courseHeading"></h2></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span id="progressText"></span><span id="progressPercent"></span></div>
+        <div class="progress" role="progressbar" aria-label="התקדמות במסלול" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack"><div id="progressBar"></div></div>
+      </div>
+      <div class="workspace-grid">
+        <article class="challenge" aria-label="התרגיל הנוכחי">
+          <div class="stage-line"><span id="stageNumber" class="stage-number"></span><span id="stageName"></span></div>
+          <h3 id="questionHeading"></h3>
+          <div id="problem" class="problem" dir="rtl"></div>
+          <section id="visualArea" class="visual-area" aria-label="המחשה אינטראקטיבית"></section>
+          <p id="questionPrompt" class="prompt"></p>
+          <div id="choiceArea" class="choices" role="group" aria-label="בחירת תשובה"></div>
+          <label id="answerLabel" for="answerInput">התשובה שלי</label>
+          <div class="answer-row"><input id="answerInput" type="text" inputmode="text" spellcheck="false" autocomplete="off" enterkeyhint="done"><button id="checkAnswer" type="button" class="primary">בדיקה</button></div>
+          <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+          <div id="hintBox" class="hint-box hidden" role="note"></div>
+          <div class="step-actions"><button id="previousStep" type="button" class="subtle">לשלב הקודם</button><button id="hintButton" type="button" class="subtle">רמז ראשון</button><button id="visualToggle" type="button" class="subtle" aria-expanded="false">הצגת המחשה</button><button id="nextStep" type="button" class="primary hidden">לשלב הבא</button></div>
+        </article>
+        <aside class="guide" aria-label="מפת ההתקדמות">
+          <h3>מה כבר הצלחתי?</h3><p class="muted">גם זיהוי קטן הוא התקדמות. לחצו על שלב שכבר פתרתם כדי לחזור אליו.</p>
+          <ol id="stepTrail" class="step-trail"></ol>
+          <div class="principle"><strong>העיקרון שלנו</strong><p>לא מנסים להבין הכול בבת אחת. מוצאים קודם את מה שיודעים, ורק ממנו ממשיכים.</p></div>
+        </aside>
+      </div>
+    </section>
+    <section id="completion" class="completion hidden" aria-label="סיום המסלול" tabindex="-1">
+      <span class="completion-mark" aria-hidden="true">✓</span>
+      <h2 id="completionHeading">סיימתם מסלול!</h2>
+      <p id="completionText"></p>
+      <div class="completion-actions"><button id="repeatCourse" type="button" class="subtle">לעבור עליו שוב</button><button id="anotherCourse" type="button" class="primary">למסלול הבא</button></div>
+    </section>
+  </main>
+  <footer>תרגילים מקוריים לתרגול ולהכנה לקראת בגרות; לא שאלוני בגרות רשמיים. אין שירות AI או שליחת תשובות לשרת במהלך התרגול.</footer>
+</body>
+</html>

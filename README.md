@@ -34,6 +34,14 @@ GitHub Pages (`https://streamdragon.github.io/MATH_VISUAL_APP/`) is no longer a
 full deployment — it cannot serve the `/api` serverless functions. It now hosts
 only a redirect page to the Vercel URL (see `.github/workflows/deploy-pages.yml`).
 
+## Classroom practice: grades 9 and 11
+
+The student entry is [Guided Classroom Practice](https://math-visual-app-pi.vercel.app/classroom-practice.html). From `learn.html` there is also a direct button. Four original lesson paths contain 22 staged questions: grade 9 functions/circles and grade 11 algebraic fractions/inequalities. Each route includes interactive SVG exploration, progressive hints without time pressure, step-by-step mastery, a final transfer problem initially hiding the diagram, local resume and a shareable deep link (`?topic=g11-fractions`, etc.). The content is not an official matriculation question bank and still requires teacher curriculum review.
+
+The four paths share one small flow controller (`public/classroom-flow.js`) and one visual adapter (`public/classroom-visuals.js`). Author lesson content only in `public/classroom-activities.js`. Practice works without signing in; progress stays in the device's browser and the service worker caches the assets for return visits. No runtime generative AI, paid access checks or remote answer submission are involved.
+
+Run `npm run test:classroom` for complete desktop/mobile student journeys, `npm test` for content/math checks and `npm run build` before deployment. GitHub CI also runs the new classroom journey.
+
 ## Open This Folder In VS Code / Studio
 
 Open the local working copy directly (for example
