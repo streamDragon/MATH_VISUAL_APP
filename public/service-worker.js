@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mathviz-learning-v2.6-mobile-math';
+const CACHE_NAME = 'mathviz-learning-v2.7-student-buddy';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",
@@ -14,6 +14,8 @@ const APP_SHELL = [
   "/classroom-visuals.js",
   "/classroom-shared-model.js",
   "/classroom-flow.js",
+  "/student-buddy.css",
+  "/student-buddy.js",
   "/learning.css",
   "/mobile-polish.css",
   "/learning-app.js",
