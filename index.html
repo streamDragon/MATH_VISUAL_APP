@@ -2,8 +2,12 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <!-- The original mobile visual workspace is the primary app again.
-         Guided learning and focused skills remain optional routes, not redirects. -->
+    <script>
+      // The unified Vizy mobile home is the primary route; original graphs are a first-class tool.
+      if (new URLSearchParams(location.search).get('workspace') !== '1') {
+        location.replace(new URL('learn.html' + location.search + location.hash, location.href));
+      }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <style>
       /* Keep the original graph surface intact while containing its desktop-width decorations. */
