@@ -1,13 +1,13 @@
 (function(){
 "use strict";
 const bank=window.VizySkillLabData||[], $=id=>document.getElementById(id), KEY="vizy_structure_skill_v1";
-let grade=9,session=null,position=0,part=0,attempts=0,hinted=false,chosen="",completed=[],answered=false;
+let grade=9,session=null,position=0,part=0,attempts=0,hinted=false,chosen="",completed=[],answered=false,round=0;
 const phases=["אבחון","אימון","העברה"],sizes=[2,4,2],total=sizes.reduce((a,b)=>a+b,0);
 function read(){try{return JSON.parse(localStorage.getItem(KEY)||"{}")}catch{return {}}}
 function save(report){try{const all=read();all[grade]=report;localStorage.setItem(KEY,JSON.stringify(all))}catch{}}
 function stableShuffle(a,offset){return a.slice(offset%a.length).concat(a.slice(0,offset%a.length))}
 function source(){return bank.filter(x=>x.grades.includes(grade))}
-function selectCards(){const list=source();return Array.from({length:total},(_,i)=>({item:list[(i*3+Math.floor(i/3))%list.length],sample:i}));}
+function selectCards(){const list=source();return Array.from({length:total},(_,i)=>({item:list[(i+round)%list.length],sample:i+round}));}
 function phaseAt(i){return i<2?0:i<6?1:2}
 function current(){return session[position]}
 function task(){return part===0?"מה המבנה של הביטוי או של הבעיה?":"איזה כלי מתאים כצעד ראשון?"}
@@ -72,7 +72,7 @@ save({at:new Date().toISOString(),grade,summary:phaseData,transferIndependent:tr
 $("done").focus({preventScroll:true});
 }
 function start(){
-session=selectCards();position=0;part=0;completed=[];
+session=selectCards();round++;position=0;part=0;completed=[];
 $("intro").classList.add("hidden");$("done").classList.add("hidden");$("work").classList.remove("hidden");render();$("work").focus({preventScroll:true});
 }
 function showIntro(){
