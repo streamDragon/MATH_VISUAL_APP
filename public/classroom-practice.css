@@ -15,3 +15,13 @@ footer{max-width:1120px;margin:25px auto;padding:15px 20px 28px;border-top:1px s
 @media(max-width:760px){main{padding:14px}.topbar{padding:10px 14px}.brand span{display:none}.top-actions{gap:5px}.top-actions button,.top-actions a{font-size:.81rem;padding:7px 10px}.course-cards{grid-template-columns:1fr}.workspace-grid{grid-template-columns:1fr}.guide{order:2}.challenge,.guide{padding:14px}.hero{padding:16px 0}.grade-tabs button{flex:1;padding:10px 5px;font-size:.87rem}.step-actions button{flex-basis:100px}.answer-row input{flex:1}}
 @media(max-width:350px){.top-actions a{display:none}.answer-row{flex-wrap:wrap}.answer-row button{width:100%}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* Shared mobile navigation for the guided activities. */
+@media (max-width: 760px) {
+  body { padding-bottom: calc(74px + env(safe-area-inset-bottom)); }
+  .vizy-mobile-dock { position:fixed; inset-inline:0; bottom:0; z-index:30; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:3px; padding:7px 7px calc(8px + env(safe-area-inset-bottom)); background:#101a32f5; border-top:1px solid #536287; backdrop-filter:blur(12px); direction:rtl; }
+  .vizy-mobile-dock a {display:flex;align-items:center;justify-content:center;min-height:48px;min-width:0;text-align:center;padding:7px 1px;border-radius:12px;color:#dbe8fa;text-decoration:none;font-size:13px;font-weight:700;}
+  .vizy-mobile-dock a[aria-current="page"] {background:#24566b;color:#d0fff4;}
+  .vizy-mobile-dock a:focus-visible {outline:3px solid #a5f4b0;outline-offset:-3px;}
+}
+@media (min-width: 761px) {.vizy-mobile-dock {display:none;}}
