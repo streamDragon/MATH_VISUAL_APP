@@ -5,7 +5,7 @@
   "description": "Picture, explore and understand mathematics. Hebrew and English, grades 9-11.",
   "lang": "he",
   "dir": "rtl",
-  "start_url": "/learn.html",
+  "start_url": "/?splash=0",
   "scope": "/",
   "display": "standalone",
   "display_override": [
