@@ -129,7 +129,9 @@
   }
   window.VizyClassroomVisuals = {mount(host, lesson, step) {
     host.replaceChildren();
-    if (lesson.id === 'g9-functions') parabola(host,step);
+    if (lesson.id === 'g9-functions') {
+      if (!window.VizySharedGraph?.mount(host, step)) parabola(host, step);
+    }
     else if (lesson.id === 'g9-circles') circle(host,step);
     else if (lesson.id === 'g11-fractions') fraction(host,step);
     else if (lesson.id === 'g11-inequality') inequality(host,step);
