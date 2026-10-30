@@ -21,7 +21,7 @@
     progress = read("vizy_mastery", { xp: 0, mastered: [] }),
     profile = read("vizy_profile", { nickname: "", avatar: "orbit", grade: 9 }),
     bank = [],
-    grade = "all",
+    grade = read("vizy_home_grade", "all"),
     topic = "all",
     search = "",
     current = null,
@@ -444,10 +444,10 @@
     const available = C.filterBank(bank, { grade, topic, search }),
       next =
         bank.find(
-          (a) => a.tier === "free" && !progress.mastered?.includes(a.id),
-        ) || bank.find((a) => a.tier === "free");
+          (a) => a.tier === "free" && (String(grade) === "all" || String(a.grade) === String(grade)) && !progress.mastered?.includes(a.id),
+        ) || bank.find((a) => a.tier === "free" && (String(grade) === "all" || String(a.grade) === String(grade))) || bank.find((a) => a.tier === "free");
     shell(
-      `<section class="student-next-step"><div class="student-next-step-content"><span class="pill lime">${lang === "he" ? "האימון הבא" : "Your next challenge"}</span><h2>${lang === "he" ? "בואו ננסה משהו קטן" : "One small challenge"}</h2><p>${esc(localized(next).title)} · ${esc(t("grade"))} ${next.grade}</p><button class="primary" id="student-start-next">${lang === "he" ? "מתחילים עכשיו" : "Start now"} ↗</button></div></section><section class="unified-tools" aria-label="${lang === "he" ? "כל כלי המתמטיקה במקום אחד" : "All math tools in one place"}"><h2>${lang === "he" ? "במה מתאמנים היום?" : "What would you like to practice?"}</h2><div class="unified-tool-grid"><a class="unified-tool" href="/?workspace=1&amp;splash=0"><span class="unified-tool-symbol" aria-hidden="true">ƒ</span><strong>${lang === "he" ? "מעבדת גרפים" : "Graph lab"}</strong><small>${lang === "he" ? "הכלים החזותיים המקוריים · גרפים ופונקציות" : "Interactive functions and graphs"}</small></a><a class="unified-tool" href="/skill-lab.html"><span class="unified-tool-symbol" aria-hidden="true">◇</span><strong>${lang === "he" ? "אימון יכולת" : "Train a skill"}</strong><small>${lang === "he" ? "לזהות מבנה ולבחור כלי" : "Recognize the structure"}</small></a><a class="unified-tool" href="/classroom-practice.html"><span class="unified-tool-symbol" aria-hidden="true">∑</span><strong>${lang === "he" ? "תרגול מודרך" : "Guided practice"}</strong><small>${lang === "he" ? "כיתות ט׳ וי״א, צעד אחר צעד" : "Grades 9 and 11"}</small></a><a class="unified-tool" href="#challenges" data-scroll-challenges="true"><span class="unified-tool-symbol" aria-hidden="true">✦</span><strong>${lang === "he" ? "אתגרי Vizy" : "Vizy challenges"}</strong><small>${lang === "he" ? "חיזוי, משחק, פתרון והעברה" : "Predict, explore and transfer"}</small></a></div></section><section class="hero"><div><span class="pill">${esc(t("kicker"))}</span><h1>${esc(t("title"))}</h1><p>${esc(t("subtitle"))}</p><button class="primary" id="continue-challenge">${esc(t("continue"))} <span aria-hidden="true">↗</span></button></div>${heroArt()}</section><section class="journey-card"><span class="orb" aria-hidden="true">△</span><div><h3>${esc(t("journey"))}</h3><p>${esc(t("journeyCopy"))}</p></div><button id="go-race">${esc(t("journeyBtn"))}</button></section><section id="challenges"><div class="section-head"><h2>${esc(t("bank"))}</h2><span>${available.length} ${esc(t("count"))}</span></div><div class="filters" aria-label="${lang === "he" ? "סינון אתגרים" : "Challenge filters"}">${[
+      `<section class="student-next-step"><div class="student-next-step-content"><span class="pill lime">${lang === "he" ? "האימון הבא" : "Your next challenge"}</span><div class="student-grade-picker" role="group" aria-label="${lang === "he" ? "כיתה" : "Grade"}"><button data-home-grade="9" aria-pressed="${String(grade)==="9"}">${lang === "he" ? "ט׳" : "9"}</button><button data-home-grade="11" aria-pressed="${String(grade)==="11"}">${lang === "he" ? "י״א" : "11"}</button><button data-home-grade="all" aria-pressed="${String(grade)==="all"}">${lang === "he" ? "הכול" : "All"}</button></div><h2>${lang === "he" ? "בואו ננסה משהו קטן" : "One small challenge"}</h2><p>${esc(localized(next).title)} · ${esc(t("grade"))} ${next.grade}</p><button class="primary" id="student-start-next">${lang === "he" ? "מתחילים עכשיו" : "Start now"} ↗</button></div></section><section class="unified-tools" aria-label="${lang === "he" ? "כל כלי המתמטיקה במקום אחד" : "All math tools in one place"}"><h2>${lang === "he" ? "במה מתאמנים היום?" : "What would you like to practice?"}</h2><div class="unified-tool-grid"><a class="unified-tool" href="/?workspace=1&amp;splash=0"><span class="unified-tool-symbol" aria-hidden="true">ƒ</span><strong>${lang === "he" ? "מעבדת גרפים" : "Graph lab"}</strong><small>${lang === "he" ? "הכלים החזותיים המקוריים · גרפים ופונקציות" : "Interactive functions and graphs"}</small></a><a class="unified-tool" href="/skill-lab.html"><span class="unified-tool-symbol" aria-hidden="true">◇</span><strong>${lang === "he" ? "אימון יכולת" : "Train a skill"}</strong><small>${lang === "he" ? "לזהות מבנה ולבחור כלי" : "Recognize the structure"}</small></a><a class="unified-tool" href="/classroom-practice.html"><span class="unified-tool-symbol" aria-hidden="true">∑</span><strong>${lang === "he" ? "תרגול מודרך" : "Guided practice"}</strong><small>${lang === "he" ? "כיתות ט׳ וי״א, צעד אחר צעד" : "Grades 9 and 11"}</small></a><a class="unified-tool" href="#challenges" data-scroll-challenges="true"><span class="unified-tool-symbol" aria-hidden="true">✦</span><strong>${lang === "he" ? "אתגרי Vizy" : "Vizy challenges"}</strong><small>${lang === "he" ? "חיזוי, משחק, פתרון והעברה" : "Predict, explore and transfer"}</small></a></div></section><section class="hero"><div><span class="pill">${esc(t("kicker"))}</span><h1>${esc(t("title"))}</h1><p>${esc(t("subtitle"))}</p><button class="primary" id="continue-challenge">${esc(t("continue"))} <span aria-hidden="true">↗</span></button></div>${heroArt()}</section><section class="journey-card"><span class="orb" aria-hidden="true">△</span><div><h3>${esc(t("journey"))}</h3><p>${esc(t("journeyCopy"))}</p></div><button id="go-race">${esc(t("journeyBtn"))}</button></section><section id="challenges"><div class="section-head"><h2>${esc(t("bank"))}</h2><span>${available.length} ${esc(t("count"))}</span></div><div class="filters" aria-label="${lang === "he" ? "סינון אתגרים" : "Challenge filters"}">${[
         ["all", t("all")],
         [9, lang === "he" ? "ט׳" : "9"],
         [10, lang === "he" ? "י׳" : "10"],
@@ -462,6 +462,7 @@
         )}<select id="topic-filter" aria-label="${lang === "he" ? "נושא" : "Topic"}"><option value="all">${esc(t("all"))}</option>${[...new Set(bank.map((a) => a.topic))].map((k) => `<option value="${k}" ${topic === k ? "selected" : ""}>${esc(localized(bank.find((a) => a.topic === k)).topicLabel)}</option>`).join("")}</select><input id="bank-search" type="search" placeholder="${esc(t("search"))}" aria-label="${esc(t("search"))}" value="${esc(search)}"></div><div class="activities" id="bank-cards"></div></section>`,
       "home",
     );
+    document.querySelectorAll('[data-home-grade]').forEach(b => b.onclick = () => { grade = b.dataset.homeGrade; save('vizy_home_grade', grade); home(); });
     document.getElementById('student-start-next').onclick = () => openActivity(next.id);
     document.querySelector('[data-scroll-challenges]').addEventListener('click', (event) => {
       event.preventDefault();
@@ -474,6 +475,7 @@
       (b) =>
         (b.onclick = () => {
           grade = b.dataset.grade;
+          save("vizy_home_grade", grade);
           home();
         }),
     );
