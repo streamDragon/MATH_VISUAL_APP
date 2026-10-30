@@ -1,0 +1,2 @@
+import {test,expect} from '@playwright/test';
+for(const width of [320,390]) test('mobile one clear next step '+width,async({page})=>{await page.setViewportSize({width,height:760});await page.goto('/learn.html');await expect(page.locator('#student-start-next')).toBeVisible();await expect(page.locator('.vizy-buddy')).toHaveCount(1);await page.locator('#student-start-next').click();await expect(page.locator('#lesson-content')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(4);});

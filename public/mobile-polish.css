@@ -31,3 +31,5 @@
   .header-actions button { min-width:34px; padding:6px; }
   .bottom-nav a { font-size:10px; }
 }
+
+.student-next-step{border:1px solid #8ba777;background:linear-gradient(145deg,#233d39,#20314f);border-radius:18px;padding:16px;margin:0 0 14px}.student-next-step h2{font-size:clamp(1.15rem,4vw,1.5rem);margin:8px 0 4px}.student-next-step p{margin:0 0 12px;font-size:.94rem}.student-next-step .primary{min-height:48px;width:100%}@media(max-width:760px){.student-next-step{padding:13px;margin-bottom:10px}.unified-tools h2{font-size:1.07rem}.unified-tools~.hero{display:none}}
