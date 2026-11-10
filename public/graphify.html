@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vizy Graphify | מפת האתר והחשיבה המתמטית</title>
+<meta name="description" content="מפת תלות קבצים ומפת המודל הפדגוגי של Vizy. אבחון קריא בלבד.">
+<style>
+:root{color-scheme:dark;font-family:system-ui,"Segoe UI",Arial,sans-serif;background:#0a1020;color:#eaf3ff}
+*{box-sizing:border-box}body{margin:0}a{color:#89d7ff}button,input,select{font:inherit}
+button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #f4c76f;outline-offset:2px}
+header{padding:24px clamp(16px,3vw,40px);background:linear-gradient(130deg,#142746,#0c1224);border-bottom:1px solid #334765}
+header h1{font-size:clamp(24px,3.2vw,36px);margin:4px 0}header p{color:#b3c9dd;margin:5px 0;max-width:920px;line-height:1.6}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:#70d8b1;font-weight:700}
+.meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}.metric{padding:10px 15px;background:#17263b;border:1px solid #354765;border-radius:12px;min-width:120px}
+.metric b{display:block;font-size:19px}.metric span{color:#b7c7d8;font-size:12px}
+main{max-width:1700px;margin:auto;padding:18px clamp(12px,2vw,32px)}.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:5px 0 14px}
+.tabs{display:flex;border:1px solid #43536b;border-radius:12px;padding:3px;background:#16253c;gap:2px}
+.tabs button{background:transparent;color:#c6d7eb;border:0;padding:10px 15px;border-radius:9px}.tabs button[aria-selected=true]{background:#2466a1;color:white}
+.filter{background:#192841;color:#f1f6ff;border:1px solid #44556d;border-radius:10px;padding:10px;min-height:43px}
+#search{min-width:220px;max-width:350px;flex:1}#resetView{border:1px solid #44556d;border-radius:10px;background:#20324e;color:#d8ebff;padding:10px 14px}
+.workspace{display:grid;grid-template-columns:minmax(0,3fr) minmax(290px,1fr);gap:14px;align-items:stretch}
+.panel{background:#111d32;border:1px solid #2b4261;border-radius:15px;overflow:hidden}
+.graph-heading{display:flex;gap:8px;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:1px solid #33455f}
+.graph-heading strong{font-size:15px}.graph-heading small{color:#90aeca}
+#graph{width:100%;height:min(67vh,680px);min-height:390px;display:block;touch-action:none;background:radial-gradient(ellipse at center,#152940,#0c1627)}
+#graph .edge{stroke:#80a4c2;stroke-width:1.3;opacity:.24}#graph .edge.planned{stroke:#f8c46d;stroke-dasharray:7 5;opacity:.75}
+#graph .edge.active{opacity:.88;stroke:#a9e8e4;stroke-width:2.4}
+#graph .node{cursor:pointer;outline:none}#graph .node circle{stroke:#e1eef8;stroke-width:1.2;opacity:.96}
+#graph .node.selected circle{stroke:#fff2a8;stroke-width:3.8;filter:drop-shadow(0 0 7px #f3c674)}
+#graph .node.dim{opacity:.14}#graph text{font-family:system-ui,"Segoe UI",sans-serif;fill:#d9eaff;paint-order:stroke;stroke:#0c1627;stroke-width:3px;stroke-linejoin:round}
+#graph .groupname{fill:#8fa8c8;font-size:22px;font-weight:700}
+#graph .nlabel{font-size:13px;pointer-events:none}
+.legend{display:flex;gap:10px;flex-wrap:wrap;padding:12px 16px;min-height:43px;border-top:1px solid #33455f}
+.legend span{font-size:12px;color:#b9cee0}.dot{display:inline-block;width:10px;height:10px;border-radius:99px;margin-inline-end:5px}
+#detail{padding:18px;min-height:300px}#detail h2{margin:0 0 12px;font-size:19px;overflow-wrap:anywhere}
+#detail p{color:#c2d1e4;line-height:1.7;font-size:14px;overflow-wrap:anywhere}
+#detail .path{direction:ltr;text-align:left;background:#0c1424;white-space:normal;overflow-wrap:anywhere;border-radius:8px;padding:10px;font:12px Consolas,monospace;color:#9fd5ff}
+.labelbox{margin-top:14px;border-top:1px solid #354963;padding-top:12px}
+.labelbox h3{font-size:14px;margin:0 0 7px}.dep{display:block;background:#1d304a;color:#d3e4f5;border:1px solid #38516c;border-radius:8px;padding:7px 9px;width:100%;text-align:right;margin:5px 0;overflow-wrap:anywhere}
+.kicker{font-size:12px;color:#80caaa;margin:4px 0}.source{display:inline-block;margin-top:12px;padding:9px 12px;background:#183f59;border-radius:9px;text-decoration:none}
+#findings{display:none;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.finding{padding:17px 18px;border:1px solid #405571;border-radius:12px;background:#14243b}
+.finding h3{font-size:17px;margin:8px 0;color:#ecf6ff}.finding p{line-height:1.7;color:#bacfe4}.finding .priority{color:#f7d08a;font-size:12px}
+.note{font-size:13px;color:#a5b8d1;line-height:1.6;margin:12px 0}.footer{display:flex;gap:18px;flex-wrap:wrap;padding:18px 0;color:#9cb4c9;font-size:13px}
+@media(max-width:930px){.workspace{grid-template-columns:1fr}#graph{height:50vh;min-height:320px}.tabs{width:100%}.tabs button{flex:1;font-size:13px;padding:10px}.metric{min-width:100px;flex:1}.graph-heading small{font-size:10px}header{padding:18px 16px}}
+</style>
+</head>
+<body>
+<header>
+<div class="eyebrow">VIZY · GRAPHIFY · ANALYSIS WORKSPACE</div>
+<h1>מפת האתר והחשיבה המתמטית</h1>
+<p>גרף קבצים וקשרים מתוך <strong>main</strong>, לצד פיתוח שטרם שולב ומודל הלמידה העדכני. התצוגה מסבירה מה באמת קיים בקוד ומה עדיין מתוכנן. היא אינה משנה את האתר או את נתוני התלמידים.</p>
+<div class="meta">
+ <div class="metric"><b id="fileCount">-</b><span>קבצים במאגר</span></div>
+ <div class="metric"><b id="nodeCount">-</b><span>צמתים במפה</span></div>
+ <div class="metric"><b id="linkCount">-</b><span>קשרים במפה</span></div>
+ <div class="metric"><b id="featureCount">-</b><span>רכיבים בענף פיתוח בלבד</span></div>
+</div>
+</header>
+<main>
+<div class="toolbar">
+ <div class="tabs" role="tablist" aria-label="סוג המפה">
+  <button id="tab-code" role="tab" aria-selected="true" data-mode="code">מפת קוד האתר</button>
+  <button id="tab-concept" role="tab" aria-selected="false" data-mode="concept">מפת החשיבה המתמטית</button>
+  <button id="tab-findings" role="tab" aria-selected="false" data-mode="findings">פערים והחלטות</button>
+ </div>
+ <input class="filter" type="search" id="search" placeholder="חיפוש קובץ, רכיב או מושג" aria-label="חיפוש במפה">
+ <select class="filter" id="group" aria-label="סינון לפי סוג"><option value="all">כל הרכיבים</option></select>
+ <button id="resetView">מרכוז המפה</button>
+ <a href="graphify-map.json" download>נתוני המפה (JSON)</a>
+</div>
+<div id="workspace" class="workspace">
+ <section class="panel" aria-label="גרף אינטראקטיבי">
+  <div class="graph-heading"><strong id="graphTitle">קשרי הקוד והמסכים</strong><small>גררו להזזה · גלגלת להגדלה · לחצו על צומת</small></div>
+  <svg id="graph" viewBox="0 0 1600 1050" role="img" aria-label="קשרי קבצים במערכת Vizy"></svg>
+  <div class="legend" id="legend"></div>
+ </section>
+ <aside class="panel" aria-label="פרטי הצומת"><div id="detail"><h2>בחרו רכיב במפה</h2><p>לחצו על צומת כדי לראות את הקבצים המחוברים, התפקיד שלו והמיקום במאגר GitHub.</p></div></aside>
+</div>
+<section id="findings" aria-label="פערים בין הקוד למוקאפ"></section>
+<p class="note" id="provenance"></p>
+<div class="footer"><span>מצב המקור: main וענף הפיתוח המאומת</span><span>הגרף הפדגוגי הוא תכנון v3, לא הוכחת מימוש.</span><a href="https://github.com/streamDragon/MATH_VISUAL_APP">מאגר המקור</a></div>
+</main>
+<script src="graphify-data.js"></script>
+<script>
+(function(){
+"use strict";
+const D=window.VIZY_GRAPHIFY,svg=document.getElementById("graph"), detail=document.getElementById("detail");
+if(!D){detail.textContent="קובץ נתוני הגרף חסר. הריצו node scripts/generate-graphify.mjs";return;}
+const groups={
+ page:{label:"מסכים",color:"#65baf4",x:245,y:245},
+ logic:{label:"לוגיקה",color:"#52cbb9",x:720,y:240},
+ style:{label:"עיצוב",color:"#eec17a",x:1210,y:240},
+ data:{label:"נתונים",color:"#b19eff",x:1450,y:570},
+ service:{label:"שירותים",color:"#e88c9a",x:1030,y:650},
+ test:{label:"בדיקות",color:"#93c07b",x:355,y:680},
+ build:{label:"בנייה ותשתית",color:"#f2a76c",x:790,y:875},
+ other:{label:"תוספות",color:"#bac5d5",x:130,y:865},
+ concept:{label:"מודל החשיבה",color:"#66c8dd",x:780,y:520}
+};
+const statusDesc={main:"קיים ב-main",feature:"ענף פיתוח בלבד",design:"תכנון פדגוגי"};
+let mode="code",category="all",query="",selected=null,view={x:0,y:0,w:1600,h:1050};
+const ns="http://www.w3.org/2000/svg";
+const graphNodes=D.nodes, graphEdges=D.edges;
+const positions=new Map();
+function el(tag,attrs,text){
+ const e=document.createElementNS(ns,tag);
+ for(const [k,v] of Object.entries(attrs||{}))e.setAttribute(k,String(v));
+ if(text!==undefined)e.textContent=text;
+ return e;
+}
+function positionAll(){
+ for(const [key,g] of Object.entries(groups)){
+  const items=graphNodes.filter(n=>n.group===key).sort((a,b)=>a.id.localeCompare(b.id));
+  const count=items.length;
+  for(let i=0;i<count;i++){
+   const angle=i*2.399963+0.25;
+   const radius=(key==="concept"?335:Math.min(163,48+count*3.6))*Math.sqrt((i+.7)/Math.max(1,count));
+   const x=(key==="concept"?780:g.x)+Math.cos(angle)*radius;
+   const y=(key==="concept"?520:g.y)+Math.sin(angle)*radius;
+   positions.set(items[i].id,{x,y});
+  }
+ }
+}
+positionAll();
+function available(n){return mode==="concept"?n.group==="concept":n.group!=="concept";}
+function visible(n){return available(n)&&(category==="all"||n.group===category);}
+function matching(n){return !query || (n.label+" "+(n.path||"")+" "+n.id).toLowerCase().includes(query);}
+function focusedEdge(e){return selected&&(e.from===selected||e.to===selected);}
+function applyView(){svg.setAttribute("viewBox",[view.x,view.y,view.w,view.h].join(" "));}
+function render(){
+ svg.replaceChildren();applyView();
+ const shown=graphNodes.filter(visible),idset=new Set(shown.map(n=>n.id));
+ const usedGroups=[...new Set(shown.map(n=>n.group))];
+ for(const name of usedGroups){
+  if(name==="concept")continue;
+  const g=groups[name];
+  svg.appendChild(el("text",{class:"groupname",x:g.x,y:g.y-185,"text-anchor":"middle"},g.label));
+ }
+ for(const e of graphEdges){
+  if(!idset.has(e.from)||!idset.has(e.to))continue;
+  const p=positions.get(e.from),q=positions.get(e.to);if(!p||!q)continue;
+  const active=focusedEdge(e);
+  const line=el("line",{x1:p.x,y1:p.y,x2:q.x,y2:q.y,class:"edge"+(e.type==="planned"?" planned":"")+(active?" active":"")});
+  line.appendChild(el("title",{},e.type));svg.appendChild(line);
+ }
+ for(const n of shown){
+  const p=positions.get(n.id);if(!p)continue;
+  const g=el("g",{class:"node"+(n.id===selected?" selected":"")+(query&&!matching(n)?" dim":""),transform:"translate("+p.x+" "+p.y+")",tabindex:"0",role:"button","aria-label":n.label+" "+statusDesc[n.status]});
+  const color=n.status==="feature"?"#f6c572":groups[n.group].color;
+  g.appendChild(el("circle",{cx:0,cy:0,r:n.status==="feature"?11:(n.group==="page"?13:8),fill:color}));
+  const title=el("title",{},n.label+" · "+statusDesc[n.status]+"\n"+(n.path||""));g.appendChild(title);
+  if(n.group==="page"||n.group==="concept"||n.id===selected||query&&matching(n)){
+   const short=n.label.length>23?n.label.slice(0,21)+"…":n.label;
+   const lbl=el("text",{class:"nlabel",y:-16,"text-anchor":"middle"},short);
+   g.appendChild(lbl);
+  }
+  const choose=()=>select(n.id);
+  g.addEventListener("click",choose);
+  g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();choose();}});
+  svg.appendChild(g);
+ }
+ const legend=document.getElementById("legend");legend.replaceChildren();
+ for(const name of usedGroups){let item=document.createElement("span"),dot=document.createElement("i");dot.className="dot";dot.style.background=groups[name].color;item.append(dot,document.createTextNode(groups[name].label));legend.appendChild(item);}
+ if(mode==="code"){let item=document.createElement("span");item.textContent="צהוב: בענף הפיתוח בלבד";legend.appendChild(item);}
+}
+function select(id){
+ selected=id;const n=graphNodes.find(x=>x.id===id);if(!n)return;
+ detail.replaceChildren();
+ function txt(tag,text,cls){let e=document.createElement(tag);e.textContent=text;if(cls)e.className=cls;detail.appendChild(e);return e;}
+ txt("div",statusDesc[n.status],"kicker");
+ txt("h2",n.label);
+ txt("p",n.detail||"");
+ if(n.path)txt("div",n.path,"path");
+ if(n.url){let a=document.createElement("a");a.className="source";a.href=n.url;a.target="_blank";a.rel="noopener noreferrer";a.textContent="צפייה במקור ב-GitHub";detail.appendChild(a);}
+ const related=graphEdges.filter(e=>e.from===id||e.to===id);
+ const head=document.createElement("div");head.className="labelbox";let h=document.createElement("h3");h.textContent="קשרים ("+related.length+")";head.appendChild(h);
+ for(const edge of related.slice(0,24)){
+  const next=edge.from===id?edge.to:edge.from;
+  const other=graphNodes.find(x=>x.id===next);if(!other)continue;
+  let btn=document.createElement("button");btn.className="dep";btn.textContent=(edge.from===id?"← ":"→ ")+other.label+" · "+edge.type;btn.onclick=()=>{if(available(other)){category="all";document.getElementById("group").value="all";select(other.id);}};
+  head.appendChild(btn);
+ }
+ detail.appendChild(head);render();
+}
+function setMode(value){
+ mode=value;selected=null;category="all";view={x:0,y:0,w:1600,h:1050};
+ document.querySelectorAll("[data-mode]").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.mode===value)));
+ const findings=value==="findings";
+ document.getElementById("workspace").style.display=findings?"none":"grid";
+ document.getElementById("findings").style.display=findings?"grid":"none";
+ document.getElementById("search").hidden=findings;document.getElementById("group").hidden=findings;
+ document.getElementById("resetView").hidden=findings;
+ document.getElementById("graphTitle").textContent=value==="concept"?"המודל הפדגוגי, יעד v3":"קשרי הקוד והמסכים";
+ const selectEl=document.getElementById("group");
+ selectEl.replaceChildren();let all=document.createElement("option");all.value="all";all.textContent="כל הרכיבים";selectEl.appendChild(all);
+ for(const [id,g] of Object.entries(groups)){if(value==="concept"&&id!=="concept"||value!=="concept"&&id==="concept")continue;let o=document.createElement("option");o.value=id;o.textContent=g.label;selectEl.appendChild(o);}
+ detail.replaceChildren();let h=document.createElement("h2");h.textContent="בחרו רכיב במפה";let p=document.createElement("p");p.textContent="כל צומת מציג מה ידוע עליו ומה הוא מחבר.";detail.append(h,p);
+ render();
+}
+document.querySelectorAll("[data-mode]").forEach(b=>b.addEventListener("click",()=>setMode(b.dataset.mode)));
+document.getElementById("search").addEventListener("input",e=>{query=e.target.value.trim().toLowerCase();render();});
+document.getElementById("group").addEventListener("change",e=>{category=e.target.value;render();});
+document.getElementById("resetView").addEventListener("click",()=>{view={x:0,y:0,w:1600,h:1050};render();});
+svg.addEventListener("wheel",e=>{e.preventDefault();const ratio=e.deltaY>0?1.12:.88;const rect=svg.getBoundingClientRect(),relX=(e.clientX-rect.left)/rect.width,relY=(e.clientY-rect.top)/rect.height;const newW=Math.max(400,Math.min(2600,view.w*ratio));const newH=newW*1050/1600;view.x+=(view.w-newW)*relX;view.y+=(view.h-newH)*relY;view.w=newW;view.h=newH;applyView();},{passive:false});
+let drag=null;
+svg.addEventListener("pointerdown",e=>{if(e.target.closest(".node"))return;svg.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,vx:view.x,vy:view.y};});
+svg.addEventListener("pointermove",e=>{if(!drag)return;const rect=svg.getBoundingClientRect();view.x=drag.vx-(e.clientX-drag.x)*view.w/rect.width;view.y=drag.vy-(e.clientY-drag.y)*view.h/rect.height;applyView();});
+svg.addEventListener("pointerup",()=>drag=null);svg.addEventListener("pointercancel",()=>drag=null);
+document.getElementById("fileCount").textContent=D.meta.trackedFiles;
+document.getElementById("nodeCount").textContent=graphNodes.length;
+document.getElementById("linkCount").textContent=graphEdges.length;
+document.getElementById("featureCount").textContent=graphNodes.filter(n=>n.status==="feature").length;
+document.getElementById("provenance").textContent="מקור: "+D.meta.repository+" · main @ "+D.meta.mainSha.slice(0,8)+" · נוצר: "+D.meta.generatedAt.slice(0,16).replace("T"," ")+" UTC. "+D.meta.note;
+const findingEl=document.getElementById("findings");
+for(const f of D.findings){
+ let card=document.createElement("article");card.className="finding";let pri=document.createElement("div");pri.className="priority";pri.textContent=f.severity==="high"?"דורש התאמה":"לבדיקה";let h=document.createElement("h3");h.textContent=f.title;let p=document.createElement("p");p.textContent=f.detail;card.append(pri,h,p);findingEl.appendChild(card);
+}
+setMode("code");
+})();
+</script>
+</body>
+</html>

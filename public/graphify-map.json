@@ -1,0 +1,1923 @@
+{
+  "meta": {
+    "title": "Vizy Graphify",
+    "generatedAt": "2026-11-10T17:22:42.193Z",
+    "repository": "streamDragon/MATH_VISUAL_APP",
+    "mainSha": "c1242490fcfa3918f864819a898361919006728b",
+    "trackedFiles": 251,
+    "scannedFiles": 112,
+    "branch": "feature/vizy-graphify-20261110",
+    "note": "מפת קוד המבוססת על main בקומיט c124249 ומונגשת דרך ענף Graphify. מודל הלמידה מסומן design כדי להפריד בין מבנה פדגוגי לבין מימוש בפועל."
+  },
+  "nodes": [
+    {
+      "id": ".github/workflows/deploy-pages.yml",
+      "label": "deploy-pages.yml",
+      "path": ".github/workflows/deploy-pages.yml",
+      "group": "build",
+      "status": "main",
+      "detail": ".github/workflows/deploy-pages.yml",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/.github/workflows/deploy-pages.yml"
+    },
+    {
+      "id": ".github/workflows/learning-checks.yml",
+      "label": "learning-checks.yml",
+      "path": ".github/workflows/learning-checks.yml",
+      "group": "build",
+      "status": "main",
+      "detail": ".github/workflows/learning-checks.yml",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/.github/workflows/learning-checks.yml"
+    },
+    {
+      "id": "api/_lib/cloud_guardrails.js",
+      "label": "cloud_guardrails.js",
+      "path": "api/_lib/cloud_guardrails.js",
+      "group": "service",
+      "status": "main",
+      "detail": "api/_lib/cloud_guardrails.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/api/_lib/cloud_guardrails.js"
+    },
+    {
+      "id": "api/runtime-config.js",
+      "label": "runtime-config.js",
+      "path": "api/runtime-config.js",
+      "group": "service",
+      "status": "main",
+      "detail": "api/runtime-config.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/api/runtime-config.js"
+    },
+    {
+      "id": "api/scan-question.js",
+      "label": "scan-question.js",
+      "path": "api/scan-question.js",
+      "group": "service",
+      "status": "main",
+      "detail": "api/scan-question.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/api/scan-question.js"
+    },
+    {
+      "id": "api/tutor.js",
+      "label": "tutor.js",
+      "path": "api/tutor.js",
+      "group": "service",
+      "status": "main",
+      "detail": "api/tutor.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/api/tutor.js"
+    },
+    {
+      "id": "capacitor.config.ts",
+      "label": "capacitor.config.ts",
+      "path": "capacitor.config.ts",
+      "group": "other",
+      "status": "main",
+      "detail": "capacitor.config.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/capacitor.config.ts"
+    },
+    {
+      "id": "content/learning-bank.json",
+      "label": "learning-bank.json",
+      "path": "content/learning-bank.json",
+      "group": "data",
+      "status": "main",
+      "detail": "content/learning-bank.json",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/content/learning-bank.json"
+    },
+    {
+      "id": "index.html",
+      "label": "חקר פונקציות (מסך מתקדם)",
+      "path": "index.html",
+      "group": "page",
+      "status": "main",
+      "detail": "index.html",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/index.html"
+    },
+    {
+      "id": "manifest.json",
+      "label": "manifest.json",
+      "path": "manifest.json",
+      "group": "data",
+      "status": "main",
+      "detail": "manifest.json",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/manifest.json"
+    },
+    {
+      "id": "offline.html",
+      "label": "offline.html",
+      "path": "offline.html",
+      "group": "page",
+      "status": "main",
+      "detail": "offline.html",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/offline.html"
+    },
+    {
+      "id": "package.json",
+      "label": "הגדרות הפרויקט",
+      "path": "package.json",
+      "group": "build",
+      "status": "main",
+      "detail": "package.json",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/package.json"
+    },
+    {
+      "id": "playwright.config.ts",
+      "label": "playwright.config.ts",
+      "path": "playwright.config.ts",
+      "group": "other",
+      "status": "main",
+      "detail": "playwright.config.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/playwright.config.ts"
+    },
+    {
+      "id": "privacy.html",
+      "label": "privacy.html",
+      "path": "privacy.html",
+      "group": "page",
+      "status": "main",
+      "detail": "privacy.html",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/privacy.html"
+    },
+    {
+      "id": "public/ability-picker.css",
+      "label": "ability-picker.css",
+      "path": "public/ability-picker.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/ability-picker.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/ability-picker.css"
+    },
+    {
+      "id": "public/ability-picker.js",
+      "label": "ability-picker.js",
+      "path": "public/ability-picker.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/ability-picker.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/ability-picker.js"
+    },
+    {
+      "id": "public/book-questions.js",
+      "label": "book-questions.js",
+      "path": "public/book-questions.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/book-questions.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/book-questions.js"
+    },
+    {
+      "id": "public/capacitor.js",
+      "label": "capacitor.js",
+      "path": "public/capacitor.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/capacitor.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/capacitor.js"
+    },
+    {
+      "id": "public/classroom-activities.js",
+      "label": "תוכן שיעורים",
+      "path": "public/classroom-activities.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/classroom-activities.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/classroom-activities.js"
+    },
+    {
+      "id": "public/classroom-flow.js",
+      "label": "מנוע מסלול הכיתה",
+      "path": "public/classroom-flow.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/classroom-flow.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/classroom-flow.js"
+    },
+    {
+      "id": "public/classroom-math.js",
+      "label": "classroom-math.js",
+      "path": "public/classroom-math.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/classroom-math.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/classroom-math.js"
+    },
+    {
+      "id": "public/classroom-practice.css",
+      "label": "classroom-practice.css",
+      "path": "public/classroom-practice.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/classroom-practice.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/classroom-practice.css"
+    },
+    {
+      "id": "public/classroom-practice.html",
+      "label": "תרגול כיתתי",
+      "path": "public/classroom-practice.html",
+      "group": "page",
+      "status": "main",
+      "detail": "public/classroom-practice.html",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/classroom-practice.html"
+    },
+    {
+      "id": "public/classroom-shared-model.js",
+      "label": "classroom-shared-model.js",
+      "path": "public/classroom-shared-model.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/classroom-shared-model.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/classroom-shared-model.js"
+    },
+    {
+      "id": "public/classroom-visuals.js",
+      "label": "המחשות כיתתיות",
+      "path": "public/classroom-visuals.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/classroom-visuals.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/classroom-visuals.js"
+    },
+    {
+      "id": "public/coach_feedback.css",
+      "label": "coach_feedback.css",
+      "path": "public/coach_feedback.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/coach_feedback.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/coach_feedback.css"
+    },
+    {
+      "id": "public/coach_feedback.js",
+      "label": "coach_feedback.js",
+      "path": "public/coach_feedback.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/coach_feedback.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/coach_feedback.js"
+    },
+    {
+      "id": "public/coach_feedback_catalog.json",
+      "label": "coach_feedback_catalog.json",
+      "path": "public/coach_feedback_catalog.json",
+      "group": "data",
+      "status": "main",
+      "detail": "public/coach_feedback_catalog.json",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/coach_feedback_catalog.json"
+    },
+    {
+      "id": "public/codex_features.js",
+      "label": "לוח ייצוגים ניסיוני",
+      "path": "public/codex_features.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/codex_features.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/codex_features.js"
+    },
+    {
+      "id": "public/feed_manifest.json",
+      "label": "feed_manifest.json",
+      "path": "public/feed_manifest.json",
+      "group": "data",
+      "status": "main",
+      "detail": "public/feed_manifest.json",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/feed_manifest.json"
+    },
+    {
+      "id": "public/graphify-data.js",
+      "label": "graphify-data.js",
+      "path": "public/graphify-data.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/graphify-data.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/graphify-data.js"
+    },
+    {
+      "id": "public/graphify-map.json",
+      "label": "graphify-map.json",
+      "path": "public/graphify-map.json",
+      "group": "data",
+      "status": "main",
+      "detail": "public/graphify-map.json",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/graphify-map.json"
+    },
+    {
+      "id": "public/graphify.html",
+      "label": "graphify.html",
+      "path": "public/graphify.html",
+      "group": "page",
+      "status": "main",
+      "detail": "public/graphify.html",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/graphify.html"
+    },
+    {
+      "id": "public/help-video-registry.js",
+      "label": "help-video-registry.js",
+      "path": "public/help-video-registry.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/help-video-registry.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/help-video-registry.js"
+    },
+    {
+      "id": "public/helpContent.he.js",
+      "label": "helpContent.he.js",
+      "path": "public/helpContent.he.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/helpContent.he.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/helpContent.he.js"
+    },
+    {
+      "id": "public/help_videos.json",
+      "label": "help_videos.json",
+      "path": "public/help_videos.json",
+      "group": "data",
+      "status": "main",
+      "detail": "public/help_videos.json",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/help_videos.json"
+    },
+    {
+      "id": "public/inequality-discovery.css",
+      "label": "inequality-discovery.css",
+      "path": "public/inequality-discovery.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/inequality-discovery.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/inequality-discovery.css"
+    },
+    {
+      "id": "public/inequality-discovery.js",
+      "label": "inequality-discovery.js",
+      "path": "public/inequality-discovery.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/inequality-discovery.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/inequality-discovery.js"
+    },
+    {
+      "id": "public/learn.html",
+      "label": "הבית ואתגרי הלמידה",
+      "path": "public/learn.html",
+      "group": "page",
+      "status": "main",
+      "detail": "public/learn.html",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/learn.html"
+    },
+    {
+      "id": "public/learning-app.js",
+      "label": "ניהול חוויית הלמידה",
+      "path": "public/learning-app.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/learning-app.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/learning-app.js"
+    },
+    {
+      "id": "public/learning-audio.js",
+      "label": "learning-audio.js",
+      "path": "public/learning-audio.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/learning-audio.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/learning-audio.js"
+    },
+    {
+      "id": "public/learning-bank.json",
+      "label": "בנק הפעילויות",
+      "path": "public/learning-bank.json",
+      "group": "data",
+      "status": "main",
+      "detail": "public/learning-bank.json",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/learning-bank.json"
+    },
+    {
+      "id": "public/learning-core.js",
+      "label": "ליבת למידה",
+      "path": "public/learning-core.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/learning-core.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/learning-core.js"
+    },
+    {
+      "id": "public/learning-review.js",
+      "label": "learning-review.js",
+      "path": "public/learning-review.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/learning-review.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/learning-review.js"
+    },
+    {
+      "id": "public/learning-service.js",
+      "label": "learning-service.js",
+      "path": "public/learning-service.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/learning-service.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/learning-service.js"
+    },
+    {
+      "id": "public/learning-visuals.js",
+      "label": "מנוע ציור",
+      "path": "public/learning-visuals.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/learning-visuals.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/learning-visuals.js"
+    },
+    {
+      "id": "public/learning-voices.json",
+      "label": "learning-voices.json",
+      "path": "public/learning-voices.json",
+      "group": "data",
+      "status": "main",
+      "detail": "public/learning-voices.json",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/learning-voices.json"
+    },
+    {
+      "id": "public/learning.css",
+      "label": "learning.css",
+      "path": "public/learning.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/learning.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/learning.css"
+    },
+    {
+      "id": "public/manifest.json",
+      "label": "manifest.json",
+      "path": "public/manifest.json",
+      "group": "data",
+      "status": "main",
+      "detail": "public/manifest.json",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/manifest.json"
+    },
+    {
+      "id": "public/mobile-polish.css",
+      "label": "mobile-polish.css",
+      "path": "public/mobile-polish.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/mobile-polish.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/mobile-polish.css"
+    },
+    {
+      "id": "public/mobile.css",
+      "label": "mobile.css",
+      "path": "public/mobile.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/mobile.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/mobile.css"
+    },
+    {
+      "id": "public/offline.html",
+      "label": "offline.html",
+      "path": "public/offline.html",
+      "group": "page",
+      "status": "main",
+      "detail": "public/offline.html",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/offline.html"
+    },
+    {
+      "id": "public/presets.js",
+      "label": "presets.js",
+      "path": "public/presets.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/presets.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/presets.js"
+    },
+    {
+      "id": "public/privacy.html",
+      "label": "privacy.html",
+      "path": "public/privacy.html",
+      "group": "page",
+      "status": "main",
+      "detail": "public/privacy.html",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/privacy.html"
+    },
+    {
+      "id": "public/problem-map-core.js",
+      "label": "problem-map-core.js",
+      "path": "public/problem-map-core.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/problem-map-core.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/problem-map-core.js"
+    },
+    {
+      "id": "public/problem-map-data.js",
+      "label": "problem-map-data.js",
+      "path": "public/problem-map-data.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/problem-map-data.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/problem-map-data.js"
+    },
+    {
+      "id": "public/problem-map.css",
+      "label": "עיצוב מפת השאלה",
+      "path": "public/problem-map.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/problem-map.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/problem-map.css"
+    },
+    {
+      "id": "public/problem-map.html",
+      "label": "מפת השאלה",
+      "path": "public/problem-map.html",
+      "group": "page",
+      "status": "main",
+      "detail": "public/problem-map.html",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/problem-map.html"
+    },
+    {
+      "id": "public/problem-map.js",
+      "label": "לוגיקת מפת השאלה",
+      "path": "public/problem-map.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/problem-map.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/problem-map.js"
+    },
+    {
+      "id": "public/questions.js",
+      "label": "questions.js",
+      "path": "public/questions.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/questions.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/questions.js"
+    },
+    {
+      "id": "public/review.html",
+      "label": "review.html",
+      "path": "public/review.html",
+      "group": "page",
+      "status": "main",
+      "detail": "public/review.html",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/review.html"
+    },
+    {
+      "id": "public/service-worker.js",
+      "label": "service-worker.js",
+      "path": "public/service-worker.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/service-worker.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/service-worker.js"
+    },
+    {
+      "id": "public/sites-wrapper.html",
+      "label": "sites-wrapper.html",
+      "path": "public/sites-wrapper.html",
+      "group": "page",
+      "status": "main",
+      "detail": "public/sites-wrapper.html",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/sites-wrapper.html"
+    },
+    {
+      "id": "public/skill-lab-data.js",
+      "label": "תרגילי המיומנויות",
+      "path": "public/skill-lab-data.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/skill-lab-data.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/skill-lab-data.js"
+    },
+    {
+      "id": "public/skill-lab.css",
+      "label": "skill-lab.css",
+      "path": "public/skill-lab.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/skill-lab.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/skill-lab.css"
+    },
+    {
+      "id": "public/skill-lab.html",
+      "label": "מעבדת מיומנויות",
+      "path": "public/skill-lab.html",
+      "group": "page",
+      "status": "main",
+      "detail": "public/skill-lab.html",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/skill-lab.html"
+    },
+    {
+      "id": "public/skill-lab.js",
+      "label": "מנוע אימון מיומנויות",
+      "path": "public/skill-lab.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/skill-lab.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/skill-lab.js"
+    },
+    {
+      "id": "public/sound.js",
+      "label": "sound.js",
+      "path": "public/sound.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/sound.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/sound.js"
+    },
+    {
+      "id": "public/student-buddy.css",
+      "label": "student-buddy.css",
+      "path": "public/student-buddy.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/student-buddy.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/student-buddy.css"
+    },
+    {
+      "id": "public/student-buddy.js",
+      "label": "ליווי התלמיד",
+      "path": "public/student-buddy.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/student-buddy.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/student-buddy.js"
+    },
+    {
+      "id": "public/version.json",
+      "label": "version.json",
+      "path": "public/version.json",
+      "group": "data",
+      "status": "main",
+      "detail": "public/version.json",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/version.json"
+    },
+    {
+      "id": "scripts/build-web.mjs",
+      "label": "צינור בניית האתר",
+      "path": "scripts/build-web.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/build-web.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/build-web.mjs"
+    },
+    {
+      "id": "scripts/cap.mjs",
+      "label": "cap.mjs",
+      "path": "scripts/cap.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/cap.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/cap.mjs"
+    },
+    {
+      "id": "scripts/capture-learning-ui.mjs",
+      "label": "capture-learning-ui.mjs",
+      "path": "scripts/capture-learning-ui.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/capture-learning-ui.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/capture-learning-ui.mjs"
+    },
+    {
+      "id": "scripts/check-book-questions.mjs",
+      "label": "check-book-questions.mjs",
+      "path": "scripts/check-book-questions.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/check-book-questions.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/check-book-questions.mjs"
+    },
+    {
+      "id": "scripts/check-questions.mjs",
+      "label": "check-questions.mjs",
+      "path": "scripts/check-questions.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/check-questions.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/check-questions.mjs"
+    },
+    {
+      "id": "scripts/create-learning-bank.mjs",
+      "label": "create-learning-bank.mjs",
+      "path": "scripts/create-learning-bank.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/create-learning-bank.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/create-learning-bank.mjs"
+    },
+    {
+      "id": "scripts/generate-graphify.mjs",
+      "label": "generate-graphify.mjs",
+      "path": "scripts/generate-graphify.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/generate-graphify.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/generate-graphify.mjs"
+    },
+    {
+      "id": "scripts/generate-voice-clips.mjs",
+      "label": "generate-voice-clips.mjs",
+      "path": "scripts/generate-voice-clips.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/generate-voice-clips.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/generate-voice-clips.mjs"
+    },
+    {
+      "id": "scripts/import-question-candidates.py",
+      "label": "import-question-candidates.py",
+      "path": "scripts/import-question-candidates.py",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/import-question-candidates.py",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/import-question-candidates.py"
+    },
+    {
+      "id": "scripts/localize-learning-bank.mjs",
+      "label": "localize-learning-bank.mjs",
+      "path": "scripts/localize-learning-bank.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/localize-learning-bank.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/localize-learning-bank.mjs"
+    },
+    {
+      "id": "scripts/seed-learning-bank.mjs",
+      "label": "seed-learning-bank.mjs",
+      "path": "scripts/seed-learning-bank.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/seed-learning-bank.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/seed-learning-bank.mjs"
+    },
+    {
+      "id": "scripts/ui-splash-check.mjs",
+      "label": "ui-splash-check.mjs",
+      "path": "scripts/ui-splash-check.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/ui-splash-check.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/ui-splash-check.mjs"
+    },
+    {
+      "id": "scripts/ui-tour-probe.mjs",
+      "label": "ui-tour-probe.mjs",
+      "path": "scripts/ui-tour-probe.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/ui-tour-probe.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/ui-tour-probe.mjs"
+    },
+    {
+      "id": "scripts/ui-walkthrough.mjs",
+      "label": "ui-walkthrough.mjs",
+      "path": "scripts/ui-walkthrough.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/ui-walkthrough.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/ui-walkthrough.mjs"
+    },
+    {
+      "id": "scripts/ui-walkthrough2.mjs",
+      "label": "ui-walkthrough2.mjs",
+      "path": "scripts/ui-walkthrough2.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/ui-walkthrough2.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/ui-walkthrough2.mjs"
+    },
+    {
+      "id": "scripts/verify-book-bank.mjs",
+      "label": "verify-book-bank.mjs",
+      "path": "scripts/verify-book-bank.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/verify-book-bank.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/verify-book-bank.mjs"
+    },
+    {
+      "id": "scripts/verify-classroom.cjs",
+      "label": "verify-classroom.cjs",
+      "path": "scripts/verify-classroom.cjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/verify-classroom.cjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/verify-classroom.cjs"
+    },
+    {
+      "id": "service-worker.js",
+      "label": "מטמון עבודה לא מקוונת",
+      "path": "service-worker.js",
+      "group": "build",
+      "status": "main",
+      "detail": "service-worker.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/service-worker.js"
+    },
+    {
+      "id": "tests/ability-picker.spec.ts",
+      "label": "ability-picker.spec.ts",
+      "path": "tests/ability-picker.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/ability-picker.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/ability-picker.spec.ts"
+    },
+    {
+      "id": "tests/browser-fixtures.ts",
+      "label": "browser-fixtures.ts",
+      "path": "tests/browser-fixtures.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/browser-fixtures.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/browser-fixtures.ts"
+    },
+    {
+      "id": "tests/classroom-bank.test.mjs",
+      "label": "classroom-bank.test.mjs",
+      "path": "tests/classroom-bank.test.mjs",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/classroom-bank.test.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/classroom-bank.test.mjs"
+    },
+    {
+      "id": "tests/classroom-flow.spec.ts",
+      "label": "classroom-flow.spec.ts",
+      "path": "tests/classroom-flow.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/classroom-flow.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/classroom-flow.spec.ts"
+    },
+    {
+      "id": "tests/classroom-math.test.mjs",
+      "label": "classroom-math.test.mjs",
+      "path": "tests/classroom-math.test.mjs",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/classroom-math.test.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/classroom-math.test.mjs"
+    },
+    {
+      "id": "tests/grade-next-mobile.spec.ts",
+      "label": "grade-next-mobile.spec.ts",
+      "path": "tests/grade-next-mobile.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/grade-next-mobile.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/grade-next-mobile.spec.ts"
+    },
+    {
+      "id": "tests/learning-core.test.mjs",
+      "label": "learning-core.test.mjs",
+      "path": "tests/learning-core.test.mjs",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/learning-core.test.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/learning-core.test.mjs"
+    },
+    {
+      "id": "tests/learning-database.test.mjs",
+      "label": "learning-database.test.mjs",
+      "path": "tests/learning-database.test.mjs",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/learning-database.test.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/learning-database.test.mjs"
+    },
+    {
+      "id": "tests/learning-flow.spec.ts",
+      "label": "learning-flow.spec.ts",
+      "path": "tests/learning-flow.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/learning-flow.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/learning-flow.spec.ts"
+    },
+    {
+      "id": "tests/learning-service.test.mjs",
+      "label": "learning-service.test.mjs",
+      "path": "tests/learning-service.test.mjs",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/learning-service.test.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/learning-service.test.mjs"
+    },
+    {
+      "id": "tests/mobile-navigation.spec.ts",
+      "label": "mobile-navigation.spec.ts",
+      "path": "tests/mobile-navigation.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/mobile-navigation.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/mobile-navigation.spec.ts"
+    },
+    {
+      "id": "tests/mobile-polish.spec.ts",
+      "label": "mobile-polish.spec.ts",
+      "path": "tests/mobile-polish.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/mobile-polish.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/mobile-polish.spec.ts"
+    },
+    {
+      "id": "tests/mobile-smoke.spec.ts",
+      "label": "mobile-smoke.spec.ts",
+      "path": "tests/mobile-smoke.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/mobile-smoke.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/mobile-smoke.spec.ts"
+    },
+    {
+      "id": "tests/no-ai.test.mjs",
+      "label": "no-ai.test.mjs",
+      "path": "tests/no-ai.test.mjs",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/no-ai.test.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/no-ai.test.mjs"
+    },
+    {
+      "id": "tests/problem-map-core.test.mjs",
+      "label": "problem-map-core.test.mjs",
+      "path": "tests/problem-map-core.test.mjs",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/problem-map-core.test.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/problem-map-core.test.mjs"
+    },
+    {
+      "id": "tests/problem-map.spec.ts",
+      "label": "בדיקת מפת השאלה",
+      "path": "tests/problem-map.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/problem-map.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/problem-map.spec.ts"
+    },
+    {
+      "id": "tests/question_import_test.py",
+      "label": "question_import_test.py",
+      "path": "tests/question_import_test.py",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/question_import_test.py",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/question_import_test.py"
+    },
+    {
+      "id": "tests/shared-graph-mobile.spec.ts",
+      "label": "shared-graph-mobile.spec.ts",
+      "path": "tests/shared-graph-mobile.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/shared-graph-mobile.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/shared-graph-mobile.spec.ts"
+    },
+    {
+      "id": "tests/skill-lab.spec.ts",
+      "label": "skill-lab.spec.ts",
+      "path": "tests/skill-lab.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/skill-lab.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/skill-lab.spec.ts"
+    },
+    {
+      "id": "tests/student-buddy-mobile.spec.ts",
+      "label": "student-buddy-mobile.spec.ts",
+      "path": "tests/student-buddy-mobile.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/student-buddy-mobile.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/student-buddy-mobile.spec.ts"
+    },
+    {
+      "id": "tests/student-next-step.spec.ts",
+      "label": "student-next-step.spec.ts",
+      "path": "tests/student-next-step.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/student-next-step.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/student-next-step.spec.ts"
+    },
+    {
+      "id": "tests/unified-mobile.spec.ts",
+      "label": "unified-mobile.spec.ts",
+      "path": "tests/unified-mobile.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/unified-mobile.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/unified-mobile.spec.ts"
+    },
+    {
+      "id": "vite.config.ts",
+      "label": "הגדרת בנייה",
+      "path": "vite.config.ts",
+      "group": "build",
+      "status": "main",
+      "detail": "vite.config.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/vite.config.ts"
+    },
+    {
+      "id": "aggregate:android",
+      "label": "גרסת Android",
+      "group": "build",
+      "status": "main",
+      "detail": "קבוצת קבצים",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/tree/main/android"
+    },
+    {
+      "id": "aggregate:assets",
+      "label": "תמונות, קול, סרטים ואייקונים",
+      "group": "data",
+      "status": "main",
+      "detail": "קבוצת קבצים",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/tree/main/public"
+    },
+    {
+      "id": "aggregate:docs",
+      "label": "מפרטים ותוכניות",
+      "group": "build",
+      "status": "main",
+      "detail": "קבוצת קבצים",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/tree/main/docs"
+    },
+    {
+      "id": "concept:identify",
+      "label": "זיהוי",
+      "role": "student",
+      "group": "concept",
+      "status": "design",
+      "detail": "יעד פדגוגי מתוך v3; אינו בהכרח ממומש ב-main",
+      "url": null
+    },
+    {
+      "id": "concept:represent",
+      "label": "ייצוג",
+      "role": "student",
+      "group": "concept",
+      "status": "design",
+      "detail": "יעד פדגוגי מתוך v3; אינו בהכרח ממומש ב-main",
+      "url": null
+    },
+    {
+      "id": "concept:infer",
+      "label": "הסקה",
+      "role": "student",
+      "group": "concept",
+      "status": "design",
+      "detail": "יעד פדגוגי מתוך v3; אינו בהכרח ממומש ב-main",
+      "url": null
+    },
+    {
+      "id": "concept:given",
+      "label": "נתון",
+      "role": "source",
+      "group": "concept",
+      "status": "design",
+      "detail": "יעד פדגוגי מתוך v3; אינו בהכרח ממומש ב-main",
+      "url": null
+    },
+    {
+      "id": "concept:asked",
+      "label": "מבוקש",
+      "role": "source",
+      "group": "concept",
+      "status": "design",
+      "detail": "יעד פדגוגי מתוך v3; אינו בהכרח ממומש ב-main",
+      "url": null
+    },
+    {
+      "id": "concept:principle",
+      "label": "עיקרון ידוע",
+      "role": "source",
+      "group": "concept",
+      "status": "design",
+      "detail": "יעד פדגוגי מתוך v3; אינו בהכרח ממומש ב-main",
+      "url": null
+    },
+    {
+      "id": "concept:derived",
+      "label": "מסקנה מוסקת",
+      "role": "source",
+      "group": "concept",
+      "status": "design",
+      "detail": "יעד פדגוגי מתוך v3; אינו בהכרח ממומש ב-main",
+      "url": null
+    },
+    {
+      "id": "concept:words",
+      "label": "מילים",
+      "role": "representation",
+      "group": "concept",
+      "status": "design",
+      "detail": "יעד פדגוגי מתוך v3; אינו בהכרח ממומש ב-main",
+      "url": null
+    },
+    {
+      "id": "concept:picture",
+      "label": "ציור",
+      "role": "representation",
+      "group": "concept",
+      "status": "design",
+      "detail": "יעד פדגוגי מתוך v3; אינו בהכרח ממומש ב-main",
+      "url": null
+    },
+    {
+      "id": "concept:algebra",
+      "label": "אלגברה",
+      "role": "representation",
+      "group": "concept",
+      "status": "design",
+      "detail": "יעד פדגוגי מתוך v3; אינו בהכרח ממומש ב-main",
+      "url": null
+    },
+    {
+      "id": "concept:mathdetermination",
+      "label": "מה נקבע מתמטית",
+      "role": "knowledge",
+      "group": "concept",
+      "status": "design",
+      "detail": "יעד פדגוגי מתוך v3; אינו בהכרח ממומש ב-main",
+      "url": null
+    },
+    {
+      "id": "concept:studentderived",
+      "label": "מה הוסק בפועל",
+      "role": "knowledge",
+      "group": "concept",
+      "status": "design",
+      "detail": "יעד פדגוגי מתוך v3; אינו בהכרח ממומש ב-main",
+      "url": null
+    },
+    {
+      "id": "concept:x",
+      "label": "x",
+      "role": "knowledge",
+      "group": "concept",
+      "status": "design",
+      "detail": "יעד פדגוגי מתוך v3; אינו בהכרח ממומש ב-main",
+      "url": null
+    },
+    {
+      "id": "concept:y",
+      "label": "y",
+      "role": "knowledge",
+      "group": "concept",
+      "status": "design",
+      "detail": "יעד פדגוגי מתוך v3; אינו בהכרח ממומש ב-main",
+      "url": null
+    },
+    {
+      "id": "concept:derivative",
+      "label": "f′(x)",
+      "role": "knowledge",
+      "group": "concept",
+      "status": "design",
+      "detail": "יעד פדגוגי מתוך v3; אינו בהכרח ממומש ב-main",
+      "url": null
+    },
+    {
+      "id": "concept:type",
+      "label": "סוג הנקודה",
+      "role": "knowledge",
+      "group": "concept",
+      "status": "design",
+      "detail": "יעד פדגוגי מתוך v3; אינו בהכרח ממומש ב-main",
+      "url": null
+    },
+    {
+      "id": "concept:parameter",
+      "label": "f(x)=x²+ax; קיצון ב-x=2",
+      "role": "example",
+      "group": "concept",
+      "status": "design",
+      "detail": "יעד פדגוגי מתוך v3; אינו בהכרח ממומש ב-main",
+      "url": null
+    }
+  ],
+  "edges": [
+    {
+      "from": "index.html",
+      "to": "public/manifest.json",
+      "type": "loads"
+    },
+    {
+      "from": "index.html",
+      "to": "public/coach_feedback.css",
+      "type": "loads"
+    },
+    {
+      "from": "index.html",
+      "to": "public/coach_feedback.js",
+      "type": "loads"
+    },
+    {
+      "from": "index.html",
+      "to": "public/help-video-registry.js",
+      "type": "loads"
+    },
+    {
+      "from": "index.html",
+      "to": "public/privacy.html",
+      "type": "navigates"
+    },
+    {
+      "from": "index.html",
+      "to": "public/skill-lab.html",
+      "type": "navigates"
+    },
+    {
+      "from": "index.html",
+      "to": "public/classroom-practice.html",
+      "type": "navigates"
+    },
+    {
+      "from": "index.html",
+      "to": "public/learn.html",
+      "type": "navigates"
+    },
+    {
+      "from": "offline.html",
+      "to": "index.html",
+      "type": "loads"
+    },
+    {
+      "from": "privacy.html",
+      "to": "public/learning.css",
+      "type": "loads"
+    },
+    {
+      "from": "privacy.html",
+      "to": "public/learn.html",
+      "type": "navigates"
+    },
+    {
+      "from": "public/ability-picker.js",
+      "to": "public/skill-lab.html",
+      "type": "references"
+    },
+    {
+      "from": "public/classroom-practice.html",
+      "to": "public/classroom-practice.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/classroom-practice.html",
+      "to": "public/inequality-discovery.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/classroom-practice.html",
+      "to": "public/learning-core.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/classroom-practice.html",
+      "to": "public/learning-visuals.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/classroom-practice.html",
+      "to": "public/classroom-shared-model.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/classroom-practice.html",
+      "to": "public/classroom-activities.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/classroom-practice.html",
+      "to": "public/classroom-math.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/classroom-practice.html",
+      "to": "public/classroom-visuals.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/classroom-practice.html",
+      "to": "public/inequality-discovery.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/classroom-practice.html",
+      "to": "public/classroom-flow.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/classroom-practice.html",
+      "to": "public/student-buddy.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/classroom-practice.html",
+      "to": "public/student-buddy.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/classroom-practice.html",
+      "to": "public/learn.html",
+      "type": "navigates"
+    },
+    {
+      "from": "public/classroom-practice.html",
+      "to": "public/skill-lab.html",
+      "type": "navigates"
+    },
+    {
+      "from": "public/classroom-practice.html",
+      "to": "index.html",
+      "type": "navigates"
+    },
+    {
+      "from": "public/graphify.html",
+      "to": "public/graphify-map.json",
+      "type": "loads"
+    },
+    {
+      "from": "public/graphify.html",
+      "to": "public/graphify-data.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/manifest.json",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/learning.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/mobile-polish.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/student-buddy.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/ability-picker.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/ability-picker.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/student-buddy.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/learning-core.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/learning-service.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/learning-visuals.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/learning-audio.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/learning-app.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/learning-app.js",
+      "to": "public/learning-bank.json",
+      "type": "requests"
+    },
+    {
+      "from": "public/learning-app.js",
+      "to": "public/skill-lab.html",
+      "type": "references"
+    },
+    {
+      "from": "public/learning-app.js",
+      "to": "public/classroom-practice.html",
+      "type": "references"
+    },
+    {
+      "from": "public/learning-audio.js",
+      "to": "public/learning-voices.json",
+      "type": "requests"
+    },
+    {
+      "from": "public/offline.html",
+      "to": "index.html",
+      "type": "loads"
+    },
+    {
+      "from": "public/privacy.html",
+      "to": "public/learning.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/privacy.html",
+      "to": "public/learn.html",
+      "type": "navigates"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/problem-map.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/problem-map-data.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/problem-map-core.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/problem-map.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/learn.html",
+      "type": "navigates"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/classroom-practice.html",
+      "type": "navigates"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/skill-lab.html",
+      "type": "navigates"
+    },
+    {
+      "from": "public/review.html",
+      "to": "public/learning.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/review.html",
+      "to": "public/learn.html",
+      "type": "navigates"
+    },
+    {
+      "from": "public/review.html",
+      "to": "public/learning-core.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/review.html",
+      "to": "public/learning-service.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/review.html",
+      "to": "public/learning-review.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/service-worker.js",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
+      "from": "public/service-worker.js",
+      "to": "public/classroom-practice.html",
+      "type": "references"
+    },
+    {
+      "from": "public/service-worker.js",
+      "to": "public/skill-lab.html",
+      "type": "references"
+    },
+    {
+      "from": "public/skill-lab.html",
+      "to": "public/skill-lab.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/skill-lab.html",
+      "to": "public/skill-lab-data.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/skill-lab.html",
+      "to": "public/skill-lab.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/skill-lab.html",
+      "to": "public/student-buddy.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/skill-lab.html",
+      "to": "public/student-buddy.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/skill-lab.html",
+      "to": "public/learn.html",
+      "type": "navigates"
+    },
+    {
+      "from": "public/skill-lab.html",
+      "to": "public/classroom-practice.html",
+      "type": "navigates"
+    },
+    {
+      "from": "public/skill-lab.html",
+      "to": "index.html",
+      "type": "navigates"
+    },
+    {
+      "from": "scripts/seed-learning-bank.mjs",
+      "to": "public/learning-core.js",
+      "type": "imports"
+    },
+    {
+      "from": "service-worker.js",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/ability-picker.spec.ts",
+      "to": "public/learn.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/ability-picker.spec.ts",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/classroom-flow.spec.ts",
+      "to": "public/classroom-practice.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/classroom-math.test.mjs",
+      "to": "public/classroom-math.js",
+      "type": "imports"
+    },
+    {
+      "from": "tests/grade-next-mobile.spec.ts",
+      "to": "public/learn.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/grade-next-mobile.spec.ts",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/learning-core.test.mjs",
+      "to": "public/learning-core.js",
+      "type": "imports"
+    },
+    {
+      "from": "tests/learning-flow.spec.ts",
+      "to": "public/learn.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/learning-flow.spec.ts",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/learning-service.test.mjs",
+      "to": "public/learning-service.js",
+      "type": "imports"
+    },
+    {
+      "from": "tests/mobile-navigation.spec.ts",
+      "to": "public/learn.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/mobile-navigation.spec.ts",
+      "to": "public/skill-lab.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/mobile-navigation.spec.ts",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/mobile-navigation.spec.ts",
+      "to": "public/skill-lab.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/mobile-polish.spec.ts",
+      "to": "public/learn.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/mobile-polish.spec.ts",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/problem-map-core.test.mjs",
+      "to": "public/problem-map-core.js",
+      "type": "imports"
+    },
+    {
+      "from": "tests/problem-map.spec.ts",
+      "to": "public/problem-map.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/problem-map.spec.ts",
+      "to": "public/problem-map.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/shared-graph-mobile.spec.ts",
+      "to": "public/classroom-practice.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/skill-lab.spec.ts",
+      "to": "public/skill-lab.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/skill-lab.spec.ts",
+      "to": "public/skill-lab.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/student-buddy-mobile.spec.ts",
+      "to": "public/classroom-practice.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/student-buddy-mobile.spec.ts",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/student-buddy-mobile.spec.ts",
+      "to": "public/skill-lab.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/student-buddy-mobile.spec.ts",
+      "to": "public/classroom-practice.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/student-next-step.spec.ts",
+      "to": "public/learn.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/student-next-step.spec.ts",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/unified-mobile.spec.ts",
+      "to": "index.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/unified-mobile.spec.ts",
+      "to": "public/skill-lab.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/unified-mobile.spec.ts",
+      "to": "public/classroom-practice.html",
+      "type": "references"
+    },
+    {
+      "from": "package.json",
+      "to": "scripts/build-web.mjs",
+      "type": "builds"
+    },
+    {
+      "from": "scripts/build-web.mjs",
+      "to": "vite.config.ts",
+      "type": "builds"
+    },
+    {
+      "from": "vite.config.ts",
+      "to": "index.html",
+      "type": "builds"
+    },
+    {
+      "from": "package.json",
+      "to": "aggregate:android",
+      "type": "builds"
+    },
+    {
+      "from": "public/learning-app.js",
+      "to": "public/learning-core.js",
+      "type": "uses"
+    },
+    {
+      "from": "public/learning-app.js",
+      "to": "public/learning-visuals.js",
+      "type": "uses"
+    },
+    {
+      "from": "public/learning-app.js",
+      "to": "public/learning-service.js",
+      "type": "uses"
+    },
+    {
+      "from": "public/classroom-flow.js",
+      "to": "public/classroom-math.js",
+      "type": "uses"
+    },
+    {
+      "from": "public/classroom-flow.js",
+      "to": "public/classroom-activities.js",
+      "type": "uses"
+    },
+    {
+      "from": "public/classroom-flow.js",
+      "to": "public/classroom-visuals.js",
+      "type": "uses"
+    },
+    {
+      "from": "public/skill-lab.js",
+      "to": "public/skill-lab-data.js",
+      "type": "uses"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/problem-map.html",
+      "type": "planned"
+    },
+    {
+      "from": "concept:given",
+      "to": "concept:identify",
+      "type": "classifies"
+    },
+    {
+      "from": "concept:asked",
+      "to": "concept:identify",
+      "type": "classifies"
+    },
+    {
+      "from": "concept:principle",
+      "to": "concept:identify",
+      "type": "classifies"
+    },
+    {
+      "from": "concept:derived",
+      "to": "concept:identify",
+      "type": "classifies"
+    },
+    {
+      "from": "concept:represent",
+      "to": "concept:words",
+      "type": "translates"
+    },
+    {
+      "from": "concept:represent",
+      "to": "concept:picture",
+      "type": "translates"
+    },
+    {
+      "from": "concept:represent",
+      "to": "concept:algebra",
+      "type": "translates"
+    },
+    {
+      "from": "concept:given",
+      "to": "concept:infer",
+      "type": "supports"
+    },
+    {
+      "from": "concept:principle",
+      "to": "concept:infer",
+      "type": "supports"
+    },
+    {
+      "from": "concept:infer",
+      "to": "concept:derived",
+      "type": "produces"
+    },
+    {
+      "from": "concept:derived",
+      "to": "concept:x",
+      "type": "updates"
+    },
+    {
+      "from": "concept:derived",
+      "to": "concept:y",
+      "type": "updates"
+    },
+    {
+      "from": "concept:derived",
+      "to": "concept:derivative",
+      "type": "updates"
+    },
+    {
+      "from": "concept:derived",
+      "to": "concept:type",
+      "type": "updates"
+    },
+    {
+      "from": "concept:given",
+      "to": "concept:mathdetermination",
+      "type": "constrains"
+    },
+    {
+      "from": "concept:derived",
+      "to": "concept:studentderived",
+      "type": "establishes"
+    },
+    {
+      "from": "concept:parameter",
+      "to": "concept:given",
+      "type": "example"
+    },
+    {
+      "from": "concept:mathdetermination",
+      "to": "concept:studentderived",
+      "type": "distinct"
+    },
+    {
+      "from": "concept:identify",
+      "to": "concept:represent",
+      "type": "shared state"
+    },
+    {
+      "from": "concept:represent",
+      "to": "concept:infer",
+      "type": "shared state"
+    }
+  ],
+  "counts": {
+    "build": 24,
+    "service": 4,
+    "other": 2,
+    "data": 11,
+    "page": 12,
+    "style": 10,
+    "logic": 30,
+    "test": 22
+  },
+  "findings": [
+    {
+      "severity": "medium",
+      "title": "מפת השאלה שולבה ב-main",
+      "detail": "בקומיטים של 10 בנובמבר נוספו שלוש לשוניות זיהוי, ייצוג והסקה, מקרה פרמטר, ומבחני מובייל. זו התקדמות ממשית בקוד, לא רק במוקאפ."
+    },
+    {
+      "severity": "medium",
+      "title": "לוגיקת מקור הידע עדיין אינה ארבע קטגוריות אחידות",
+      "detail": "problem-map-core.js מאמת מקור ביטוי כנתון, מבוקש או none; עיקרון ידוע מוצג בטקסט, ומסקנה מזוהה דרך claim. המושגים מובחנים אך עדיין לא כולם מיוצגים באותו מודל נתונים."
+    },
+    {
+      "severity": "medium",
+      "title": "הבחנה בין תפקיד מילה לבין מקור מידע",
+      "detail": "המימוש מכיל object/relation/instruction ובנפרד given/asked/none. שווה לוודא שמקרא הצבעים והמשוב אינם מערבבים תפקיד תחבירי עם מקור ידיעה."
+    },
+    {
+      "severity": "medium",
+      "title": "קביעה מתמטית לעומת היסק תלמיד",
+      "detail": "המסך החדש כבר מפריד בין 'הנתונים קובעים' לבין 'הסקנו עד כה'. חשוב לשמר הפרדה זו גם בבעיות נוספות, לא רק בדוגמת הפרמטר."
+    },
+    {
+      "severity": "medium",
+      "title": "בדיקת הבנה מעבר לדוגמת פרמטר",
+      "detail": "כרגע המידע שנבדק מציג דוגמה אחת עם f(x)=x²+ax וקיצון ב-x=2. כדאי לבחון עקרונות וייצוגים גם עם שרטוט חסר סולם, תנאי עודף ותנאי סותר."
+    },
+    {
+      "severity": "medium",
+      "title": "סנכרון Graphify",
+      "detail": "המפה נגזרת מהקבצים שנמצאו ב-main בקומיט c124249, ונוצרה בענף Graphify נפרד. נדרש לבנות אותה מחדש אחרי שינויים נוספים באתר."
+    }
+  ]
+}
