@@ -1,80 +1,11 @@
-<!doctype html>
-<html lang="he" dir="rtl">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#111b32">
-<title>Vizy | מפת השאלה</title><link rel="icon" href="icons/icon-192.png"><link rel="stylesheet" href="problem-map.css">
-<script src="problem-map-data.js" defer></script><script src="problem-map-core.js" defer></script><script src="problem-map.js" defer></script>
-</head>
-<body>
-<header class="topbar"><a class="brand" href="learn.html"><span class="logo">V</span> VIZY</a><span class="toplabel">חושבים לפני שפותרים</span><a href="learn.html" class="back">בחזרה לבית</a></header>
-<main id="main">
-<section class="problem-switcher" aria-label="מעבר בין שאלות"><button type="button" id="previousProblem">השאלה הקודמת</button><strong id="problemPosition">בעיה 1 מתוך 3</strong><button type="button" id="nextProblem">השאלה הבאה</button></section>
-<section class="heading">
-  <div class="eyebrow">כיתה י״א · להבין מה השאלה נותנת</div>
-  <h1>מפת השאלה</h1><p>לא מתחילים בחישוב. מוצאים את המידע שהשאלה כבר נותנת.</p>
-  <div class="clarity-head"><span>מה אנחנו יודעים?</span><strong id="clarityText">0 מתוך 8</strong></div>
-  <div class="clarity-track" role="progressbar" aria-label="בהירות המפה" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" id="clarityTrack"><div id="clarityFill"></div></div>
-  <p id="clarityLimit" class="quiet hidden"></p>
-</section>
-<section class="question card" aria-labelledby="questionTitle">
-  <div class="card-cap">01 · קוראים ומזהים</div>
-  <h2 id="questionTitle">מה אפשר ללמוד מתוך השאלה?</h2>
-  <div class="problem" id="problemText"></div>
-  <p>לחצו על ביטוי מסומן בשאלה, ובחרו מה הוא נותן.</p>
-  <div id="cluePanel" class="clue-panel hidden" aria-live="polite">
-    <h3 id="clueQuestion"></h3>
-    <div id="clueOptions" class="choice-column"></div>
-    <div id="clueCertainty" class="hidden"></div>
-    <p id="clueFeedback" role="status" class="feedback"></p>
-  </div>
-</section>
-<section class="card map-card" aria-labelledby="mapTitle">
- <div class="card-cap">02 · בונים את המפה</div><h2 id="mapTitle">המילים הופכות למפה</h2>
- <p class="quiet">רק מידע שזיהיתם נכון יופיע בתוך המפה.</p>
- <div class="trinity" aria-label="שלושה חלקים: נגזרת, x וערך הפונקציה">
-  <svg viewBox="0 0 340 245" role="presentation" aria-hidden="true">
-   <path id="edgeD" d="M170 50L66 200" fill="none" stroke="#5e85bb" stroke-width="2" stroke-dasharray="7 7"></path>
-   <path id="edgeX" d="M170 50L274 200" fill="none" stroke="#5e85bb" stroke-width="2" stroke-dasharray="7 7"></path>
-   <path id="edgeY" d="M66 200L274 200" fill="none" stroke="#5e85bb" stroke-width="2" stroke-dasharray="7 7"></path>
-  </svg>
-  <button type="button" class="map-node top" data-node="d"><span class="symbol">f′(x)</span><span class="node-value" id="nodeD">מה השיפוע?</span><span class="node-level" id="levelD">עוד לא</span></button>
-  <button type="button" class="map-node right" data-node="x"><span class="symbol">x</span><span class="node-value" id="nodeX">איפה?</span><span class="node-level" id="levelX">עוד לא</span></button>
-  <button type="button" class="map-node left" data-node="y"><span class="symbol">f(x)</span><span class="node-value" id="nodeY">כמה גבוה?</span><span class="node-level" id="levelY">עוד לא</span></button>
- </div>
- <div id="extraNode" class="extra-node hidden"><strong id="extraLabel"></strong><span id="extraValue"></span><span id="extraLevel"></span></div>
- <div id="mapLinks" class="map-links" aria-live="polite"></div>
- <div class="concept-note" id="conceptNote" role="status">בחרו ביטוי מהשאלה כדי למלא את המפה.</div>
-</section>
-<section class="card" id="localCard" aria-labelledby="localTitle">
- <div class="card-cap">03 · בונים תמונה קטנה</div><h2 id="localTitle">איך נראית התנהגות ליד נקודה?</h2>
- <p>הציור מקומי בלבד, לא הגרף המלא של הפונקציה.</p>
- <div class="builder">
-   <div class="builder-controls"><span>כיוון המשיק</span><div class="choice-row" id="tangentChoices"><button type="button" data-tangent="flat">אופקי</button><button type="button" data-tangent="up">עולה</button><button type="button" data-tangent="down">יורד</button></div></div>
-   <div class="builder-controls hidden" id="beforeControls"><span>לפני הנקודה</span><div class="choice-row"><button type="button" data-before="up">עולה</button><button type="button" data-before="down">יורדת</button></div></div>
-   <div class="builder-controls hidden" id="afterControls"><span>אחרי הנקודה</span><div class="choice-row"><button type="button" data-after="up">עולה</button><button type="button" data-after="down">יורדת</button></div></div>
-   <svg id="localGraph" viewBox="0 0 340 225" role="img" aria-label="סקיצה מקומית סביב נקודה">
-     <path d="M22 111H316" stroke="#58769f" stroke-dasharray="4 4"></path>
-     <path id="curve" d="" fill="none" stroke="#6ad6ee" stroke-width="5" stroke-linecap="round"></path>
-     <path id="tangent" d="" fill="none" stroke="#ffca8b" stroke-width="3" stroke-linecap="round"></path>
-     <circle cx="170" cy="111" r="7" fill="#a5ffc1" stroke="#0b1930" stroke-width="3"></circle>
-     <text x="170" y="209" fill="#b5c7e4" font-size="13" text-anchor="middle">רק ליד הנקודה, לא הגרף כולו</text>
-   </svg>
-   <div id="localVerdict" class="concept-note" role="status"></div>
-   <button type="button" class="primary" id="checkLocal">בדקו את הסקיצה</button><p id="localCheck" class="feedback" role="status"></p>
- </div>
-</section>
-<section class="card" aria-labelledby="checkpointTitle">
- <div class="card-cap">04 · נקודת עצירה</div><h2 id="checkpointTitle">איפה אנחנו עכשיו?</h2>
- <p>מה עוזר לנו להמשיך מכאן?</p>
- <div class="choice-column" id="checkpointChoices">
-   <button type="button" data-checkpoint="tangent">אנחנו יודעים איך נראה המשיק</button>
-   <button type="button" data-checkpoint="graph">אנחנו רואים רק חלק מהגרף</button>
-   <button type="button" data-checkpoint="algebra">אנחנו יודעים מה עוד צריך לחשב</button>
-   <button type="button" data-checkpoint="unsure">אנחנו עדיין לא בטוחים, וזה בסדר</button>
- </div>
- <div id="checkpointSummary" class="checkpoint-summary" role="status">בחרו נקודת עצירה. אפשר לשמור אותה לתרגול הבא.</div>
- <div class="share-actions"><button type="button" class="primary" id="shareCard">שתפו את כרטיס המפה</button><button type="button" id="resetAll">התחילו מחדש</button></div>
-</section>
-</main>
-<nav class="bottom-nav"><a href="learn.html">בית</a><a href="classroom-practice.html">תרגול</a><a href="skill-lab.html">יכולות</a><a aria-current="page" href="problem-map.html">מפת שאלה</a></nav>
-</body></html>
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#10213d"><title>Vizy | מפת השאלה</title><link rel="stylesheet" href="problem-map.css"><script defer src="problem-map-data.js"></script><script defer src="problem-map-core.js"></script><script defer src="problem-map.js"></script></head><body>
+<header><a href="learn.html" class="brand">VIZY</a><span>מפת השאלה</span><a href="learn.html">בית</a></header>
+<main><section class="summary" aria-label="מה הנתונים קובעים"><p class="eyebrow">י״א · קיצון עם פרמטר</p><h1>מבינים לפני שמחשבים</h1><p id="determined">הנתונים קובעים: פונקציה אחת מתוך אינסוף.</p><p>הסקנו עד כה: <strong id="inferredSummary" aria-live="polite">עדיין לא הסקנו מסקנות.</strong></p>
+<div id="fields" class="fields"><div class="field" data-field="x"><strong>x</strong><span id="value-x">?</span><small id="label-x">לא זוהה</small></div><div class="field" data-field="y"><strong>y</strong><span id="value-y">?</span><small id="label-y">לא זוהה</small></div><div class="field" data-field="d"><strong>f′(x)</strong><span id="value-d">?</span><small id="label-d">לא הוסק</small></div><div class="field" data-field="a"><strong>a</strong><span id="value-a">?</span><small id="label-a">לא זוהה</small></div></div>
+<div class="legend" aria-label="מקרא"><span><i class="given-dot"></i>נתון ●</span><span><i class="relation-dot"></i>קשר ∿</span><span><i class="ask-dot"></i>מבוקש ○</span></div></section>
+<nav class="tabs" role="tablist" aria-label="כלי החשיבה"><button data-tab="identify" role="tab" aria-selected="true">זיהוי</button><button data-tab="represent" role="tab" aria-selected="false">ייצוג</button><button data-tab="infer" role="tab" aria-selected="false">הסקה</button></nav>
+<section class="panel" id="identifyView" role="tabpanel"><h2>מה המשפט נותן?</h2><p class="muted">געו במילה מסומנת. מה התפקיד שלה במשפט?</p><div class="problem" id="problemText"></div><div class="question-box hidden" id="rolePanel"><h3 id="roleQuestion">איזה תפקיד יש לביטוי?</h3><div class="role-options" id="roleOptions"></div><button id="roleHint" type="button" class="subtle">רמז קטן</button><p id="roleFeedback" role="status" aria-live="polite"></p></div><p class="muted">● נתון · ○ מה שמחפשים · ∿ יחס בין דברים. לחיצה לבדה אינה ממלאת דבר.</p></section>
+<section class="panel hidden" id="representView" role="tabpanel"><h2>איך הנתונים נראים?</h2><p id="representIntro"></p><div id="familyGraph" class="family-graph" role="img" aria-label="משפחה של פרבולות הפונות כלפי מעלה, עם קודקודים במקומות שונים. אין סולם ולכן לא ניתן לקרוא ערכים מספריים."></div><h3>איזה ציור מתאים לנקודת קיצון ב־x = 2?</h3><div id="pictureChoices" class="picture-options"></div><p id="pictureFeedback" role="status" aria-live="polite"></p><h3>איזה קשר אלגברי מייצג אותה?</h3><div id="algebraChoices" class="answer-options"></div><p id="algebraFeedback" role="status" aria-live="polite"></p></section>
+<section class="panel hidden" id="inferView" role="tabpanel"><h2>מה נובע בלי לחשב?</h2><p class="muted">לכל טענה בחרו: נובע בלי חישוב, לא נכון, או נקבע אבל דורש חישוב.</p><p class="principle" id="principle"></p><div id="claims"></div><p id="inferEnding" class="muted"></p></section>
+<section class="checkpoint"><h2>נקודת עצירה</h2><p>את מה שכבר גילינו נשמור. את האלגברה נשאיר לכיתה.</p><div id="checkpointChoices" class="answer-options"><button data-checkpoint="tangent">אנחנו יודעים איך נראה המשיק</button><button data-checkpoint="graph">אנחנו רואים רק חלק מהגרף</button><button data-checkpoint="algebra">אנחנו יודעים מה עוד צריך לחשב</button><button data-checkpoint="unsure">אנחנו עדיין לא בטוחים, וזה בסדר</button></div><p id="checkpointSummary" role="status"></p><div class="actions"><button id="shareCard">שיתוף כרטיס המפה</button><button id="resetAll" class="subtle">איפוס השאלה</button></div></section>
+</main><nav class="dock"><a href="learn.html">בית</a><a href="classroom-practice.html">תרגול</a><a href="skill-lab.html">יכולות</a><a aria-current="page" href="problem-map.html">מפה</a></nav></body></html>
