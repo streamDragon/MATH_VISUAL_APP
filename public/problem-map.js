@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const core=window.VizyProblemMapCore;
 const problems=window.VizyProblemMaps;
 let problem=problems[0],found={},chosenClue=null,chosenOption=null,tries={},firstTry={},certainty={},checkpoint=null;
-let tangent='flat',before='up',after='down',localChecked=false;
+let tangent=null,before=null,after=null,localChecked=false;
 const placeholders={d:'מה השיפוע?',x:'איפה?',y:'כמה גבוה?',kind:'איזה סוג?'};
 function save(){}
 function updateMeter(){
@@ -122,15 +122,20 @@ function finishAttempt(confidence){
 }
 function draw(){
   const t=tangent,b=before,a=after;let curve='',line='',label='';
+  const ready=Boolean(t&&(t!=='flat'||(b&&a)));
   if(t==='up'){curve='M35 185 C85 156 126 127 170 111 S266 64 310 24';line='M90 147 L250 75';label='המשיק עולה. אין כאן קיצון עם משיק אופקי.';}
   else if(t==='down'){curve='M35 25 C85 52 126 87 170 111 S266 156 310 185';line='M90 75 L250 147';label='המשיק יורד. אין כאן קיצון עם משיק אופקי.';}
-  else{
+  else if(t==='flat'){
     line='M90 111 L250 111';
-    const left=b==='up'?195:25,right=a==='up'?25:195;
-    curve=b===a?(b==='up'?'M35 194 C90 158 140 111 170 111 C200 111 250 66 310 28':'M35 28 C90 66 140 111 170 111 C200 111 250 158 310 194'):'M35 '+left+' Q108 111 170 111 Q232 111 310 '+right;
-    label=b==='up'&&a==='down'?'מקסימום מקומי: קודם עולה ואחר כך יורדת.':b==='down'&&a==='up'?'מינימום מקומי: קודם יורדת ואחר כך עולה.':'משיק אופקי אינו מבטיח קיצון: הכיוון לא התחלף.';
+    if(b&&a){
+      const left=b==='up'?195:25,right=a==='up'?25:195;
+      curve=b===a?(b==='up'?'M35 194 C90 158 140 111 170 111 C200 111 250 66 310 28':'M35 28 C90 66 140 111 170 111 C200 111 250 158 310 194'):'M35 '+left+' Q108 111 170 111 Q232 111 310 '+right;
+      label=b==='up'&&a==='down'?'מקסימום מקומי: קודם עולה ואחר כך יורדת.':b==='down'&&a==='up'?'מינימום מקומי: קודם יורדת ואחר כך עולה.':'משיק אופקי אינו מבטיח קיצון: הכיוון לא התחלף.';
+    }
   }
-  $('curve').setAttribute('d',curve);$('tangent').setAttribute('d',line);$('localVerdict').textContent=label;
+  $('curve').setAttribute('d',curve);$('tangent').setAttribute('d',line);
+  $('localVerdict').textContent=ready?label:t==='flat'?'בחרו מה קורה לפני הנקודה ואחריה.':'בחרו קודם את כיוון המשיק.';
+  $('checkLocal').disabled=!ready;
   $('beforeControls').classList.toggle('hidden',t!=='flat');$('afterControls').classList.toggle('hidden',t!=='flat');
   for(const [group,value] of [['tangent',t],['before',b],['after',a]]){
     document.querySelectorAll('[data-'+group+']').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset[group]===value)));
