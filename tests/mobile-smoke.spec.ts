@@ -3,6 +3,7 @@ import { expect, test } from './browser-fixtures';
 
 const ENTRY_PATH = '/?splash=0';
 const FIRST_SCREEN_SELECTORS = [
+  '#student-start-ability',
   '#continue-challenge',
   '#btn-age-gate-eligible',
   '#btn-splash-enter-app',
@@ -11,6 +12,7 @@ const FIRST_SCREEN_SELECTORS = [
   '#home-landing'
 ];
 const POST_GATE_SELECTORS = [
+  '#student-start-ability',
   '#btn-splash-enter-app',
   '#btn-hero-start',
   '#home-paths-section',

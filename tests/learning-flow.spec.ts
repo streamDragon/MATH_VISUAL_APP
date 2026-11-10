@@ -124,12 +124,10 @@ test("phone enters a useful bank directly and filters grade", async ({
   page,
 }) => {
   await page.goto("/learn.html");
-  await expect(
-    page.getByRole("heading", { name: "רואים. מבינים. מצליחים." }),
-  ).toBeVisible();
-  await expect(page.locator("#continue-challenge")).toBeInViewport();
+  await expect(page.getByRole("heading", { name: "בואו ננסה משהו קטן" })).toBeVisible();
+  await expect(page.locator("#student-start-ability")).toBeInViewport();
   await noOverflow(page);
-  await page.getByRole("button", { name: "י״א", exact: true }).click();
+  await page.locator('[data-grade="11"]').click();
   await expect(page.locator(".activity-card")).toHaveCount(4);
   await expect(page.locator(".activity-card").first()).toContainText(
     "קוראים את הכיוון",
@@ -212,10 +210,8 @@ test("English switches both interface and activity content", async ({
 }) => {
   await page.goto("/learn.html");
   await page.getByRole("button", { name: "English", exact: true }).click();
-  await expect(
-    page.getByRole("heading", { name: "See it. Get it. Solve it." }),
-  ).toBeVisible();
-  await page.locator("#continue-challenge").click();
+  await expect(page.getByRole("heading", { name: "One small challenge" })).toBeVisible();
+  await page.locator(".ability-extra").click();
   await expect(page.locator("#prediction-question")).toContainText("one step");
   await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
 });
