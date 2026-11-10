@@ -80,13 +80,36 @@ test('mockup legend is optional and role plus knowledge source remain distinct a
  await page.locator('[data-tab="represent"]').click();
  await expect(page.locator('#familyGraph svg')).toBeVisible();
  await expect(page.locator('#pictureChoices button')).toHaveCount(3);
- await page.locator('.interactive-family summary').click();
  await expect(page.locator('#liveGraph')).toBeVisible();
+ await expect(page.locator('[data-representation]')).toHaveCount(3);
+ await expect(page.locator('#liveCurves .curve')).toHaveCount(3);
  await page.locator('[data-visual-curve="center"]').click();
  await expect(page.locator('#visualFeedback')).toContainText('השפל של הירוקה');
  await page.reload();
- await page.locator('.interactive-family summary').click();
+ await expect(page.locator('#liveGraph')).toBeVisible();
  await expect(page.locator('[data-visual-curve="center"]')).toHaveAttribute('aria-pressed','true');
  expect(await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth)).toBeLessThanOrEqual(4);
  await page.screenshot({path:'test-results/problem-map-mockup-320.png',fullPage:true});
+});
+
+test('visible mathematical graph, linked representations and aligned coordinates',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('/problem-map.html');
+ await expect(page.locator('#liveGraph')).toBeVisible();
+ await expect(page.locator('#liveCurves .curve')).toHaveCount(3);
+ const geometry=await page.locator('#liveCurves .vertex').evaluateAll(nodes=>nodes.map(n=>({
+  x:Number(n.getAttribute('cx')),y:Number(n.getAttribute('cy'))
+ })));
+ expect(geometry).toEqual([{x:250,y:200},{x:350,y:280},{x:300,y:220}]);
+ await page.locator('[data-visual-curve="center"]').click();
+ await expect(page.locator('#visualFeedback')).toContainText('השפל של הירוקה');
+ await page.locator('[data-representation="algebra"]').click();
+ await expect(page.locator('#liveTangent path')).toHaveCount(1);
+ await expect(page.locator('#representationNote')).toContainText('f′(2) = 0');
+ await expect(page.locator('#value-a')).toHaveText('?');
+ await page.locator('[data-tab="infer"]').click();
+ await expect(page.locator('#liveGraph')).toBeVisible();
+ await page.locator('[data-claim="c1"] [data-answer-index="0"]').click();
+ await expect(page.locator('#value-d')).toHaveText('f′(2) = 0');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(4);
 });
