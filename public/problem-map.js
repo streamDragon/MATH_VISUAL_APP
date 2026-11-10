@@ -8,10 +8,13 @@ let tangent='flat',before='up',after='down',localChecked=false;
 const placeholders={d:'מה השיפוע?',x:'איפה?',y:'כמה גבוה?',kind:'איזה סוג?'};
 function save(){}
 function updateMeter(){
-  const count=Object.values(found).filter(Boolean).length;
-  $('clarityText').textContent=count+' מתוך 4 קשרים';
-  $('clarityTrack').setAttribute('aria-valuenow',String(count));
-  $('clarityFill').style.width=(count/4*100)+'%';
+  const {now,max,reachable}=core.clarity(problem,found);
+  $('clarityText').textContent=now+' מתוך '+max;
+  $('clarityTrack').setAttribute('aria-valuemax',String(max));
+  $('clarityTrack').setAttribute('aria-valuenow',String(now));
+  $('clarityFill').style.width=(100*now/max)+'%';
+  $('clarityLimit').classList.toggle('hidden',now!==reachable);
+  $('clarityLimit').textContent='זה כל מה שאפשר לדעת לפני החישוב. השאר באלגברה, בכיתה.';
 }
 function node(id){const computed=core.nodeState(problem,found);return computed[id]||{level:0,value:'',from:null};}
 function updateNodes(){
