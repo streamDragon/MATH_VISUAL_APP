@@ -23,7 +23,7 @@ function paint(){
 }
 function roleFeedback(text){$('roleFeedback').textContent=text}
 function openPhrase(id){
- currentPhrase=id;$('rolePanel').classList.remove('hidden');
+ currentPhrase=id;window.dispatchEvent(new CustomEvent('vizy:focus',{detail:{id}}));$('rolePanel').classList.remove('hidden');
  $('roleQuestion').textContent='מה התפקיד של "'+(p.text.find(x=>x.phrase===id)?.t||id)+'"?';
  $('roleOptions').replaceChildren();
  for(const [role,label] of Object.entries(roles)){
@@ -47,21 +47,20 @@ function sketchSvg(id){
  const ns='http://www.w3.org/2000/svg';
  const svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox','0 0 180 126');
  svg.setAttribute('role','img');svg.setAttribute('aria-label',p.represent.pictures.find(x=>x.id===id).aria);
- const make=(tag,attrs,value)=>{const n=document.createElementNS(ns,tag);for(const [k,v]of Object.entries(attrs))n.setAttribute(k,String(v));if(value!=null)n.textContent=value;svg.append(n);return n};
- make('path',{d:'M13 100 H166 M35 10 V111',stroke:'#aebacf','stroke-width':1.4,fill:'none'});
- make('path',{d:'M106 99 V104',stroke:'#33476d','stroke-width':2});
- make('text',{x:106,y:118,'font-size':12,'text-anchor':'middle',fill:'#32466b'},'2');
+ const make=(tag,attrs,text)=>{const node=document.createElementNS(ns,tag);for(const [k,v]of Object.entries(attrs))node.setAttribute(k,String(v));if(text!=null)node.textContent=text;svg.append(node);return node;};
+ make('path',{d:'M12 93H168 M36 12V115',stroke:'#9ab2c6','stroke-width':1.5,fill:'none'});
+ make('path',{d:'M108 13V106',stroke:'#e49e43','stroke-dasharray':'4 4','stroke-width':1.5});
+ make('text',{x:108,y:118,'font-size':12,'text-anchor':'middle',fill:'#9c601b'},'2');
  if(id==='flat'){
-  make('path',{d:'M57 83 Q106 22 156 83',stroke:'#8b77c6','stroke-width':3,fill:'none','stroke-dasharray':'5 4'});
-  make('path',{d:'M57 31 Q106 94 156 31',stroke:'#377fba','stroke-width':3,fill:'none','stroke-dasharray':'5 4'});
-  make('path',{d:'M69 62.5 H145',stroke:'#d48c56','stroke-width':2.8,fill:'none'});
-  make('circle',{cx:106,cy:62.5,r:4,fill:'#317cbd'});
+  make('path',{d:'M48 18 Q108 123 167 18',stroke:'#178c9b','stroke-width':3.4,fill:'none'});
+  make('path',{d:'M72 70H145',stroke:'#e49e43','stroke-width':2.7});
+  make('circle',{cx:108,cy:70.5,r:4.5,fill:'#178c9b',stroke:'#fff','stroke-width':1.5});
  }else if(id==='rising'){
-  make('path',{d:'M53 91 Q97 72 157 18',stroke:'#317cbd','stroke-width':3,fill:'none'});
-  make('path',{d:'M73 77 L143 36',stroke:'#d48c56','stroke-width':2.8});
+  make('path',{d:'M47 113 Q74 69 167 15',stroke:'#5386dd','stroke-width':3.4,fill:'none'});
+  make('path',{d:'M84 65L137 35',stroke:'#e49e43','stroke-width':2.7});
  }else{
-  make('path',{d:'M53 91 Q106 58 158 30',stroke:'#317cbd','stroke-width':3,fill:'none'});
-  make('circle',{cx:106,cy:60,r:4,fill:'#317cbd'});
+  make('path',{d:'M17 15 Q66 123 115 15',stroke:'#a47cde','stroke-width':3.4,fill:'none'});
+  make('circle',{cx:66,cy:69,r:4,fill:'#a47cde'});
  }
  return svg;
 }
@@ -94,7 +93,7 @@ function renderRepresentation(){
  $('algebraChoices').replaceChildren();
  for(const option of p.represent.algebra){
   const b=el('button','algebra-option',option.text);b.type='button';b.dir='ltr';b.setAttribute('aria-pressed',String(state.algebra===option.text));
-  b.onclick=()=>{if(option.right){state.algebra=option.text;$('algebraFeedback').textContent=p.represent.algebraRight;}else{$('algebraFeedback').textContent=p.represent.algebraWrong;}save();renderRepresentation();};
+  b.onclick=()=>{if(option.right){window.dispatchEvent(new CustomEvent('vizy:focus',{detail:{id:'derivative'}}));state.algebra=option.text;$('algebraFeedback').textContent=p.represent.algebraRight;}else{$('algebraFeedback').textContent=p.represent.algebraWrong;}save();renderRepresentation();};
   $('algebraChoices').append(b);
  }
  if(state.picture)$('pictureFeedback').textContent=p.represent.pictureRight;
@@ -110,7 +109,7 @@ function renderInference(){
    const b=el('button','claim-answer',label);b.type='button';b.dataset.answerIndex=String(index);b.setAttribute('aria-pressed',String(state.answers[claim.id]===true&&claim.right===index));
    b.onclick=()=>{
     const correct=core.isClaimCorrect(p,claim.id,index);
-    if(correct)state.answers[claim.id]=true;
+    if(correct){state.answers[claim.id]=true;if(claim.id==='c1')window.dispatchEvent(new CustomEvent('vizy:focus',{detail:{id:'derivative'}}));}
     save();paint();renderInference();
     const note=$('claims').querySelector('[data-claim="'+claim.id+'"] .claim-result');
     note.textContent=correct?claim.reason:p.inferenceWrong;
