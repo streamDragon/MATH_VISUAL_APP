@@ -85,20 +85,37 @@ function openClue(id){
     $('clueFeedback').textContent='חפשו במפה: לאיזה מושג המילים האלה קשורות?';
   });$('clueOptions').append(unknown);
 }
+const calibrationText={
+  'sure-right':'בטוחים, וצדקתם.',
+  'maybe-right':'צדקתם גם בלי ביטחון.',
+  'sure-wrong':'הייתם בטוחים, אבל זה לא נכון. בואו נבדוק עוד פעם.',
+  'maybe-wrong':'טוב שלא הייתם בטוחים. זה חלק מלמידה.'
+};
 function evaluateOption(option){
   if(!chosenClue||found[chosenClue])return;
-  tries[chosenClue]=(tries[chosenClue]||0)+1;
-  const ok=Boolean(option.right);
-  if(!(chosenClue in firstTry))firstTry[chosenClue]=ok;
-  if(ok){
-    found[chosenClue]=true;
-    $('clueFeedback').textContent=problem.clues[chosenClue].why;
-    $('clueFeedback').className='feedback success';
-    $('clueOptions').replaceChildren();renderQuestion();updateNodes();save();
-  }else{
-    $('clueFeedback').textContent=option.feedback||'עוד ניסיון. חפשו מה המילים נותנות.';
-    $('clueFeedback').className='feedback error';save();
+  chosenOption=option;
+  const section=$('clueCertainty');section.replaceChildren();section.classList.remove('hidden');
+  const label=document.createElement('p');label.textContent='כמה בטוחים?';section.append(label);
+  for(const [value,title] of [['maybe','חושבים שכן'],['sure','בטוחים']]){
+    const btn=document.createElement('button');btn.type='button';btn.textContent=title;
+    btn.dataset.certaintyChoice=value;btn.addEventListener('click',()=>finishAttempt(value));section.append(btn);
   }
+  $('clueFeedback').textContent='';
+}
+function finishAttempt(confidence){
+  if(!chosenOption||!chosenClue)return;
+  const id=chosenClue,option=chosenOption,ok=Boolean(option.right);
+  tries[id]=(tries[id]||0)+1;
+  if(!(id in firstTry)){firstTry[id]=ok;certainty[id]=confidence;}
+  const compare=core.calibration(confidence,ok);
+  const result=ok?problem.clues[id].why:(option.feedback||'עוד ניסיון. חפשו מה המילים נותנות.');
+  $('clueFeedback').textContent=result+'\n'+calibrationText[compare];
+  $('clueFeedback').className='feedback '+(ok?'success':'error');
+  $('clueCertainty').classList.add('hidden');chosenOption=null;
+  if(ok){
+    found[id]=true;$('clueOptions').replaceChildren();renderQuestion();updateNodes();
+  }
+  save();
 }
 function draw(){
   const t=tangent,b=before,a=after;let curve='',line='',label='';
