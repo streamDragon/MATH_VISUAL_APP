@@ -170,7 +170,7 @@
     $('nextStep').textContent=i===l.steps.length-1?'סיום והערכת ההתקדמות':'לשלב הבא';
     visibleHint(s,r,i);renderChoices(s,solved);
     setFeedback(solved?'כבר פתרתם את השלב הזה. '+s.why:'',solved);
-    revealVisual(false);
+    revealVisual(l.id === 'g11-inequality' ? false : i !== l.steps.length - 1);
     updateProgress();renderTrail();
     window.VizyInequalityDiscovery?.sync(l);
   }

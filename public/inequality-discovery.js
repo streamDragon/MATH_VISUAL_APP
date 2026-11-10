@@ -12,7 +12,7 @@
     {level:3, a:3,b:-4,c:-1,d:8,op:"<"},
     {level:4, a:-3,b:7,c:2,d:-8,op:"≥"}
   ];
-  let host, lessonId=null, difficulty=1, questionNumber=0, current=null, visualCount=0, timer=null, revealed=false, transformed=false;
+  let host, lessonId=null, difficulty=1, questionNumber=0, current=null, visualCount=0, timer=null, revealed=false, transformed=false, selectedValue=null;
   function makeQuestion() {
     const template=templates[difficulty-1], n=Math.floor(questionNumber/4);
     const offset=n===0?0:(n%5)-2;
@@ -100,12 +100,12 @@
     $("discoveryLevel").textContent=["קל","בינוני","מאתגר","מאתגר מאוד"][difficulty-1];
     $("discoveryExpression").textContent=current.text;
     $("discoveryVisual").textContent="לדמיין 1";
-    $("discoveryAnswer").value="";
+    selectedValue=null;
     $("discoveryFeedback").textContent="";
     $("discoveryFeedback").className="discovery-feedback";
     $("discoveryChoices").replaceChildren();
     const options=current.alternatives;
-    options.forEach((v,i)=>{const btn=document.createElement("button");btn.type="button";btn.textContent=v;btn.dir="ltr";btn.onclick=()=>{$("discoveryAnswer").value=v;[...$("discoveryChoices").children].forEach(x=>x.setAttribute("aria-pressed",String(x===btn)));};btn.setAttribute("aria-pressed","false");$("discoveryChoices").append(btn);});
+    options.forEach((v,i)=>{const btn=document.createElement("button");btn.type="button";btn.textContent=v;btn.dir="ltr";btn.onclick=()=>{selectedValue=v;[...$("discoveryChoices").children].forEach(x=>x.setAttribute("aria-pressed",String(x===btn)));};btn.setAttribute("aria-pressed","false");$("discoveryChoices").append(btn);});
   }
   function cycleQuestion(){
     questionNumber++;
@@ -113,10 +113,10 @@
     renderQuestion();
   }
   function check(){
-    let entered=$("discoveryAnswer").value.trim().replace(/\s/g,"").replace(/</g,"<").replace(/≥/g,">=").replace(/≤/g,"<=").replace(/−/g,"-");
+    let entered=(selectedValue||"").trim().replace(/\s/g,"").replace(/≥/g,">=").replace(/≤/g,"<=").replace(/−/g,"-");
     let expected=current.correct.replace(/≥/g,">=").replace(/≤/g,"<=").replace(/−/g,"-");
     let ok=entered===expected;
-    $("discoveryFeedback").textContent=ok?"✓ נכון. באילו ערכי x הגרף הראשון גבוה מהשני?":entered?"עדיין לא. אפשר לבדוק ערכי x או ללחוץ על לדמיין.":"בחרו תחום אמת או כתבו תשובה.";
+    $("discoveryFeedback").textContent=ok?"✓ נכון. באילו ערכי x הגרף הראשון גבוה מהשני?":entered?"עדיין לא. אפשר לבדוק ערכי x או ללחוץ על לדמיין.":"בחרו תחום אמת מהאפשרויות.";
     $("discoveryFeedback").className="discovery-feedback "+(ok?"correct":"wrong");
   }
   function buildHost(){
@@ -125,14 +125,14 @@
       <div class="discovery-problem" dir="ltr" id="discoveryExpression"></div>
       <div class="discovery-question">באילו ערכי x האי־שוויון נכון?</div>
       <div id="discoveryChoices" class="discovery-choices" role="group" aria-label="תחומי פתרון"></div>
-      <div class="discovery-answer-row"><input type="text" id="discoveryAnswer" aria-label="תחום הפתרון שלי" placeholder="או כתבו תשובה" dir="ltr"><button type="button" id="discoveryCheck">בדיקה</button></div>
+      <div class="discovery-answer-row"><button type="button" id="discoveryCheck">בדיקה</button></div>
       <div id="discoveryFeedback" class="discovery-feedback" role="status"></div>
       <div class="discovery-bottom"><button type="button" id="discoveryVisual" class="discovery-imagine" aria-expanded="false">לדמיין 1</button><button type="button" id="discoveryGuided">תרגול מדורג</button></div>
       <div class="discovery-overlay hidden" id="discoveryOverlay" role="region" aria-label="המחשה זמנית"><div class="discovery-overlay-top"><span id="discoveryDuration">שנייה אחת</span><button type="button" id="discoveryClose" aria-label="סגירת ההמחשה">✕</button></div><div id="discoveryGraph"></div><button type="button" id="discoveryMore" class="discovery-imagine">לדמיין 2</button></div>`;
     const challenge=document.querySelector(".challenge");challenge.prepend(host);
     $("discoveryNext").onclick=cycleQuestion;
     $("discoveryCheck").onclick=check;
-    $("discoveryAnswer").addEventListener("keydown",e=>{if(e.key==="Enter")check();});
+
     $("discoveryVisual").onclick=openVisual;
     $("discoveryClose").onclick=closeVisual;
     $("discoveryMore").onclick=openVisual;
