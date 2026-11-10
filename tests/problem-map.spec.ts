@@ -61,3 +61,32 @@ test('three freely navigable tabs and reset removes local state',async({page})=>
  await expect(page.locator('#value-a')).toHaveText('?');
  await expect(page.locator('#label-a')).not.toContainText('נקבע');
 });
+
+test('mockup legend is optional and role plus knowledge source remain distinct at 320px',async({page})=>{
+ await page.setViewportSize({width:320,height:740});
+ await page.goto('/problem-map.html');
+ await expect(page.locator('.legend-help')).toBeVisible();
+ await expect(page.locator('.legend-help .legend')).toBeHidden();
+ await expect(page.locator('#value-a')).toHaveText('?');
+ await page.locator('[data-phrase="a"]').click();
+ await expect(page.locator('#value-a')).toHaveText('?');
+ await page.locator('[data-role-choice="object"]').click();
+ await expect(page.locator('[data-phrase="a"]')).toHaveAttribute('data-role','object');
+ await expect(page.locator('[data-phrase="a"]')).toHaveAttribute('data-source','asked');
+ await expect(page.locator('[data-phrase="a"]')).toHaveAttribute('data-marker','○');
+ await expect(page.locator('[data-field="a"]')).toHaveAttribute('data-source','מבוקש');
+ await page.locator('.legend-help summary').click();
+ await expect(page.locator('.legend-role')).toHaveCount(3);
+ await page.locator('[data-tab="represent"]').click();
+ await expect(page.locator('#familyGraph svg')).toBeVisible();
+ await expect(page.locator('#pictureChoices button')).toHaveCount(3);
+ await page.locator('.interactive-family summary').click();
+ await expect(page.locator('#liveGraph')).toBeVisible();
+ await page.locator('[data-visual-curve="center"]').click();
+ await expect(page.locator('#visualFeedback')).toContainText('השפל של הירוקה');
+ await page.reload();
+ await page.locator('.interactive-family summary').click();
+ await expect(page.locator('[data-visual-curve="center"]')).toHaveAttribute('aria-pressed','true');
+ expect(await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth)).toBeLessThanOrEqual(4);
+ await page.screenshot({path:'test-results/problem-map-mockup-320.png',fullPage:true});
+});

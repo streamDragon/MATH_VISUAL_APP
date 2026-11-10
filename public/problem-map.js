@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const $=id=>document.getElementById(id),core=window.VizyProblemMapCore,p=window.VizyProblemMaps[0],KEY='vizy_problem_map_v2';
-const roles={object:'עצם',relation:'יחס',instruction:'הוראה'},state={tab:'identify',roles:{},picture:null,algebra:null,answers:{},checkpoint:null};
-try{const stored=JSON.parse(localStorage.getItem(KEY)||'null');if(stored&&stored.problemId===p.id){Object.assign(state,{tab:stored.tab||'identify',roles:stored.roles||{},picture:stored.picture??null,algebra:stored.algebra??null,answers:stored.answers||{},checkpoint:stored.checkpoint||null});}}catch{}
+const roles={object:'עצם',relation:'יחס',instruction:'הוראה'},state={tab:'identify',roles:{},picture:null,algebra:null,visualCurve:null,answers:{},checkpoint:null};
+try{const stored=JSON.parse(localStorage.getItem(KEY)||'null');if(stored&&stored.problemId===p.id){Object.assign(state,{tab:stored.tab||'identify',roles:stored.roles||{},picture:stored.picture??null,algebra:stored.algebra??null,visualCurve:stored.visualCurve??null,answers:stored.answers||{},checkpoint:stored.checkpoint||null});}}catch{}
 let currentPhrase=null;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({problemId:p.id,...state}))}catch{}};
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n};
@@ -9,10 +9,12 @@ function paint(){
  const fields=core.fieldState(p,state);
  fields.forEach(f=>{const target=document.querySelector('[data-field="'+f.id+'"]');$('value-'+f.id).textContent=f.value;$('label-'+f.id).textContent=f.label;target.dataset.source=f.source||'unknown';});
  const statements=core.inferredSummary(p,state);
- $('inferredSummary').textContent=statements.length?statements.join(' · '):'עדיין לא הסקנו מסקנות.';
+ $('inferredSummary').textContent=statements.length?statements.join(' · '):'עוד כלום.';
  document.querySelectorAll('[data-phrase]').forEach(b=>{
   const id=b.dataset.phrase,done=state.roles[id]===true,source=p.phrases[id].source;
-  b.classList.toggle('done',done);b.dataset.source=done?source:'unknown';b.setAttribute('aria-pressed',String(done));
+  b.classList.toggle('done',done);b.dataset.source=done?source:'unknown';b.dataset.role=done?p.phrases[id].role:'unknown';
+  b.setAttribute('aria-pressed',String(done));
+  b.dataset.marker=done&&p.phrases[id].role==='object'?(source==='given'?'●':source==='asked'?'○':''):'';
  });
  document.querySelectorAll('[data-tab]').forEach(b=>{const active=b.dataset.tab===state.tab;b.setAttribute('aria-selected',String(active));});
  for(const [tab,id] of [['identify','identifyView'],['represent','representView'],['infer','inferView']]){$(id).classList.toggle('hidden',state.tab!==tab);}
@@ -42,19 +44,24 @@ function drawText(){
  }
 }
 function sketchSvg(id){
- const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
- svg.setAttribute('viewBox','0 0 180 126');svg.setAttribute('role','img');svg.setAttribute('aria-label',p.represent.pictures.find(x=>x.id===id).aria);
- const make=(tag,attrs)=>{const n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v]of Object.entries(attrs))n.setAttribute(k,String(v));svg.append(n);return n};
- make('path',{d:'M14 103H166 M90 12V113',stroke:'#7595bf','stroke-width':1.5,'stroke-dasharray':'4 5',fill:'none'});
+ const ns='http://www.w3.org/2000/svg';
+ const svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox','0 0 180 126');
+ svg.setAttribute('role','img');svg.setAttribute('aria-label',p.represent.pictures.find(x=>x.id===id).aria);
+ const make=(tag,attrs,value)=>{const n=document.createElementNS(ns,tag);for(const [k,v]of Object.entries(attrs))n.setAttribute(k,String(v));if(value!=null)n.textContent=value;svg.append(n);return n};
+ make('path',{d:'M13 100 H166 M35 10 V111',stroke:'#aebacf','stroke-width':1.4,fill:'none'});
+ make('path',{d:'M106 99 V104',stroke:'#33476d','stroke-width':2});
+ make('text',{x:106,y:118,'font-size':12,'text-anchor':'middle',fill:'#32466b'},'2');
  if(id==='flat'){
-  for(const [offset,color] of [[-23,'#668ab7'],[0,'#71dcbb'],[22,'#9b8fe5']])make('path',{d:'M20 '+(104+offset)+' Q65 '+(18+offset)+' 96 '+(42+offset)+' Q130 '+(66+offset)+' 162 '+(108+offset),stroke:color,'stroke-width':2.7,fill:'none',opacity:.7});
-  make('path',{d:'M67 61H129',stroke:'#eec07d','stroke-width':3,fill:'none'});make('circle',{cx:98,cy:61,r:4,fill:'#d4ffd0'});
+  make('path',{d:'M57 83 Q106 22 156 83',stroke:'#8b77c6','stroke-width':3,fill:'none','stroke-dasharray':'5 4'});
+  make('path',{d:'M57 31 Q106 94 156 31',stroke:'#377fba','stroke-width':3,fill:'none','stroke-dasharray':'5 4'});
+  make('path',{d:'M69 62.5 H145',stroke:'#d48c56','stroke-width':2.8,fill:'none'});
+  make('circle',{cx:106,cy:62.5,r:4,fill:'#317cbd'});
  }else if(id==='rising'){
-  make('path',{d:'M16 112Q70 104 110 57T167 11',stroke:'#71dcbb','stroke-width':3,fill:'none'});
-  make('path',{d:'M70 87L141 34',stroke:'#f1b77c','stroke-width':2.8});
+  make('path',{d:'M53 91 Q97 72 157 18',stroke:'#317cbd','stroke-width':3,fill:'none'});
+  make('path',{d:'M73 77 L143 36',stroke:'#d48c56','stroke-width':2.8});
  }else{
-  make('path',{d:'M14 110Q75 80 165 20',stroke:'#71dcbb','stroke-width':3,fill:'none'});
-  make('path',{d:'M98 13V114',stroke:'#eebc80','stroke-width':2,'stroke-dasharray':'4 3'});
+  make('path',{d:'M53 91 Q106 58 158 30',stroke:'#317cbd','stroke-width':3,fill:'none'});
+  make('circle',{cx:106,cy:60,r:4,fill:'#317cbd'});
  }
  return svg;
 }
@@ -122,12 +129,13 @@ function shareText(){
 }
 function setup(){
  $('determined').textContent=p.summaryDetermined;drawText();
- $('roleHint').onclick=()=>roleFeedback('עצם = דבר מתמטי; יחס = מה שמחבר; הוראה = מה שמבקשים לעשות.');
+ $('roleHint').onclick=()=>roleFeedback('רמז: זו מילה מסוג '+roles[p.phrases[currentPhrase]?.role||'object']+'.');
+ window.addEventListener('vizy:visual-choice',e=>{state.visualCurve=e.detail?.id||null;save();});
  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;save();paint()});
  document.querySelectorAll('[data-checkpoint]').forEach(b=>b.onclick=()=>{state.checkpoint=b.dataset.checkpoint;save();paint()});
  $('shareCard').onclick=async()=>{const text=shareText();try{if(navigator.share){await navigator.share({title:'Vizy | מפת השאלה',text});return;}}catch(e){if(e.name==='AbortError')return;}
  try{await navigator.clipboard.writeText(text);$('checkpointSummary').textContent='כרטיס המפה הועתק.';}catch{$('checkpointSummary').textContent=text;}};
- $('resetAll').onclick=()=>{state.roles={};state.picture=null;state.algebra=null;state.answers={};state.checkpoint=null;state.tab='identify';save();$('rolePanel').classList.add('hidden');$('pictureFeedback').textContent='';$('algebraFeedback').textContent='';paint();renderRepresentation();renderInference()};
+ $('resetAll').onclick=()=>{state.roles={};state.picture=null;state.algebra=null;state.visualCurve=null;state.answers={};state.checkpoint=null;state.tab='identify';save();$('rolePanel').classList.add('hidden');$('pictureFeedback').textContent='';$('algebraFeedback').textContent='';paint();renderRepresentation();renderInference()};
  renderRepresentation();renderInference();paint();
 }
 document.addEventListener('DOMContentLoaded',setup);

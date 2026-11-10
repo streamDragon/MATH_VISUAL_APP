@@ -1,154 +1,28 @@
-<!doctype html>
-<html lang="he" dir="rtl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#102b42">
-<meta name="description" content="Vizy: מתחילים מציור. מזהים מה נתון, מה מחפשים ומה אפשר להסיק לפני החישוב.">
-<title>Vizy | רואים את השאלה</title>
-<link rel="stylesheet" href="problem-map.css">
-<script defer src="problem-map-data.js"></script>
-<script defer src="problem-map-core.js"></script>
-<script defer src="problem-map.js"></script>
-<script defer src="problem-map-visual.js"></script>
-</head>
-<body>
-<header class="site-bar"><div class="site-bar-inner">
-<a class="brand" href="learn.html">VIZY</a>
-<span class="site-name">רואים את השאלה</span>
-<a class="home" href="learn.html">חזרה לבית</a>
-</div></header>
-<main>
-<section class="hero" aria-label="השאלה שלנו">
-<p class="eyebrow">כיתה י״א · פונקציות עם פרמטר</p>
-<h1>קודם רואים. אחר כך מחשבים.</h1>
-<p class="intro">יש לנו משפחה של פרבולות. איזה ציור מתאים למה שכתוב בשאלה?</p>
-<div class="problem-givens">
-<div class="given-tile"><span class="label">נתון</span><span class="formula" dir="ltr">f(x) = x² + ax</span></div>
-<div class="given-tile"><span class="label">נתון</span><strong>יש נקודת קיצון כאשר</strong> <span class="formula" dir="ltr">x = 2</span></div>
-<div class="given-tile wanted"><span class="label">מחפשים</span><strong>איזה מספר הוא</strong><span class="formula" dir="ltr">a ?</span></div>
-</div>
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#10213d"><title>Vizy | מפת השאלה</title><link rel="stylesheet" href="problem-map.css"><script defer src="problem-map-data.js"></script><script defer src="problem-map-core.js"></script><script defer src="problem-map.js"></script><script defer src="problem-map-visual.js"></script></head><body>
+<header><a href="learn.html" class="brand">VIZY</a><span>מפת השאלה</span><a href="learn.html">בית</a></header>
+<main><section class="summary" aria-label="מה הנתונים קובעים"><p class="eyebrow">י״א · קיצון עם פרמטר</p><h1>מבינים לפני שמחשבים</h1><p id="determined">הנתונים קובעים: פונקציה אחת מתוך אינסוף.</p><p>הסקנו עד כה: <strong id="inferredSummary" aria-live="polite">עדיין לא הסקנו מסקנות.</strong></p>
+<div id="fields" class="fields"><div class="field" data-field="x"><strong>x</strong><span id="value-x">?</span><small id="label-x">לא זוהה</small></div><div class="field" data-field="y"><strong>y</strong><span id="value-y">?</span><small id="label-y">לא זוהה</small></div><div class="field" data-field="d"><strong>f′(x)</strong><span id="value-d">?</span><small id="label-d">לא הוסק</small></div><div class="field" data-field="a"><strong>a</strong><span id="value-a">?</span><small id="label-a">לא זוהה</small></div></div>
 </section>
-
-<div class="workspace">
-<div class="visual-column">
-<section class="visual-card" aria-label="ציור אינטראקטיבי של הפרבולות">
-<div class="visual-head">
-<div class="mini">הציור שלכם</div>
-<h2>מה קורה כשהפרבולה זזה?</h2>
-<p>כל קו מציג אפשרות אחרת לאותה משפחת פונקציות.</p>
-</div>
-<div class="graph-shell">
-<svg id="liveGraph" viewBox="0 0 500 310" role="img" aria-label="שלוש פרבולות בצבעים שונים, קו אנכי כתום במקום x שווה 2, והאפשרות המתאימה נבחרת בלחיצה" xmlns="http://www.w3.org/2000/svg">
+<nav class="tabs" role="tablist" aria-label="כלי החשיבה"><button data-tab="identify" role="tab" aria-selected="true">זיהוי</button><button data-tab="represent" role="tab" aria-selected="false">ייצוג</button><button data-tab="infer" role="tab" aria-selected="false">הסקה</button></nav>
+<section class="panel" id="identifyView" role="tabpanel"><h2>מה המשפט נותן?</h2><p class="muted">נזהה מה נתון, מה מבוקש ואילו קשרים מופיעים. נגעו במילה כדי לסווג אותה.</p><div class="problem" id="problemText"></div><details class="legend-help"><summary>איך קוראים את הסימונים?</summary><div class="legend" aria-label="מקרא התפקידים"><span class="legend-role" data-role="object">עצם <small>דבר מתמטי</small></span><span class="legend-role" data-role="relation">יחס <small>קשר בין דברים</small></span><span class="legend-role" data-role="instruction">הוראה <small>מה צריך לעשות</small></span></div><p class="source-legend">ליד עצם: ● נתון בשאלה · ○ מבוקש. עיקרון ידוע ומסקנה מוצגים בנפרד.</p></details><div class="question-box hidden" id="rolePanel"><h3 id="roleQuestion">איזה תפקיד יש לביטוי?</h3><div class="role-options" id="roleOptions"></div><button id="roleHint" type="button" class="subtle">רמז קטן</button><p id="roleFeedback" role="status" aria-live="polite"></p></div><p class="muted">סיווג נכון מוסיף סימון למילים. ● נתון · ○ מבוקש. נגיעה במילה בלבד אינה מוסיפה מידע.</p></section>
+<section class="panel hidden" id="representView" role="tabpanel"><h2>איך הנתונים נראים?</h2><p id="representIntro"></p><details class="interactive-family">
+<summary>התנסות נוספת: איזו פרבולה מתאימה ל־x = 2?</summary>
+<div class="interactive-family-content">
+<p>הקו הכתום מסמן את המקום הנתון. בחרו את הפרבולה שנקודת השפל שלה על הקו.</p>
+<svg id="liveGraph" viewBox="0 0 500 310" role="img" aria-label="משפחת פרבולות אינטראקטיבית והקו הכתום x שווה 2" xmlns="http://www.w3.org/2000/svg">
 <rect width="500" height="310" fill="#f7fbff" rx="13"/>
 <path d="M22 255H480 M144 18V290" stroke="#9db6c9" stroke-width="1.4"/>
-<text x="465" y="273" font-size="13" fill="#526f83">x</text>
-<text x="157" y="25" font-size="13" fill="#526f83">y</text>
 <path d="M334 17V289" stroke="#e88e32" stroke-width="2.5" stroke-dasharray="7 6"/>
 <rect x="295" y="6" width="77" height="28" rx="10" fill="#fff1df" stroke="#e6a754"/>
 <text x="333" y="25" font-size="15" fill="#a9641f" text-anchor="middle" font-weight="800">x = 2</text>
 <g id="liveCurves"></g>
 </svg>
-</div>
-<div class="graph-controls">
-<p class="question">בחרו את הפרבולה שנקודת הקיצון שלה נמצאת על הקו הכתום.</p>
 <div class="curve-buttons" role="group" aria-label="בחירת פרבולה">
 <button type="button" data-visual-curve="left" aria-pressed="false"><i class="curve-dot" style="background:#5386dd"></i>כחולה</button>
 <button type="button" data-visual-curve="center" aria-pressed="false"><i class="curve-dot" style="background:#058b8f"></i>ירוקה</button>
 <button type="button" data-visual-curve="right" aria-pressed="false"><i class="curve-dot" style="background:#a47cde"></i>סגולה</button>
-</div>
-</div>
-<p id="visualFeedback" role="status" aria-live="polite">אין צורך לחשב. הסתכלו רק על מקום הקיצון.</p>
-<div class="representation-strip" aria-label="שלוש שפות של אותו רעיון">
-<div><strong>מילים</strong><span>קיצון ב־x = 2</span></div>
-<div><strong>ציור</strong><span>נקודת השפל על הקו</span></div>
-<div><strong>אלגברה</strong><span class="formula" dir="ltr">f′(2) = 0</span></div>
-</div>
-</section>
-<section class="summary" aria-label="מה ידוע ומה כבר הסקנו">
-<h2>מה אנחנו יודעים?</h2>
-<div class="summary-states">
-<div class="state-tile"><span>מה הנתונים קובעים</span><strong id="determined">הנתונים קובעים פונקציה אחת.</strong></div>
-<div class="state-tile earned"><span>מה כבר הצלחנו להסיק</span><strong id="inferredSummary" aria-live="polite">עוד לא בחרנו מסקנה.</strong></div>
-</div>
-<details class="math-status">
-<summary>פרטי המפה: x, y, נגזרת ופרמטר</summary>
-<div id="fields" class="fields">
-<div class="field" data-field="x"><strong>x</strong><span id="value-x">?</span><small id="label-x">לא זוהה</small></div>
-<div class="field" data-field="y"><strong>y</strong><span id="value-y">?</span><small id="label-y">לא זוהה</small></div>
-<div class="field" data-field="d"><strong>f′(x)</strong><span id="value-d">?</span><small id="label-d">לא הוסק</small></div>
-<div class="field" data-field="a"><strong>a</strong><span id="value-a">?</span><small id="label-a">לא זוהה</small></div>
-</div>
-</details>
-</section>
-</div>
-
-<div class="workspace-main">
-<nav class="tabs" role="tablist" aria-label="שלושה כלי חשיבה">
-<button data-tab="identify" role="tab" aria-selected="true">1 · מזהים</button>
-<button data-tab="represent" role="tab" aria-selected="false">2 · מציירים</button>
-<button data-tab="infer" role="tab" aria-selected="false">3 · מסיקים</button>
-</nav>
-<section class="panel" id="identifyView" role="tabpanel">
-<h2>מה נתון, ומה צריך למצוא?</h2>
-<p class="muted">געו במילה כחולה ובחרו: דבר מתמטי, קשר או הוראה.</p>
-<div class="problem" id="problemText"></div>
-<div class="question-box hidden" id="rolePanel">
-<h3 id="roleQuestion">מה התפקיד של הביטוי?</h3>
-<div class="role-options" id="roleOptions"></div>
-<button id="roleHint" type="button" class="subtle">תנו לי רמז</button>
-<p id="roleFeedback" role="status" aria-live="polite"></p>
-</div>
-<div class="legend" aria-label="סוגי מידע">
-<span><i class="given-dot"></i> נתון</span>
-<span><i class="relation-dot"></i> קשר</span>
-<span><i class="ask-dot"></i> מבוקש</span>
-</div>
-</section>
-<section class="panel hidden" id="representView" role="tabpanel">
-<h2>אותו רעיון בשלוש שפות</h2>
-<p id="representIntro"></p>
-<details class="extra-graphs">
-<summary>רוצים לראות עוד דוגמאות לפרבולות?</summary>
-<div id="familyGraph" class="family-graph" role="img" aria-label="משפחה של פרבולות הפונות כלפי מעלה"></div>
-</details>
-<h3>איזה ציור מתאים לקיצון ב־x = 2?</h3>
-<div id="pictureChoices" class="picture-options"></div>
-<p id="pictureFeedback" role="status" aria-live="polite"></p>
-<h3>איזו נוסחה מתאימה לתמונה?</h3>
-<div id="algebraChoices" class="answer-options"></div>
-<p id="algebraFeedback" role="status" aria-live="polite"></p>
-</section>
-<section class="panel hidden" id="inferView" role="tabpanel">
-<h2>מה כבר אפשר לדעת?</h2>
-<p class="muted">בלי לפתור. בחרו מה נכון לפי הנתונים.</p>
-<p class="principle" id="principle"></p>
-<div id="claims"></div>
-<p id="inferEnding" class="muted"></p>
-</section>
-<details class="checkpoint">
-<summary>שומרים נקודת עצירה</summary>
-<h2>מה יעזור להמשיך בכיתה?</h2>
-<p>אפשר לשמור מה שהבנתם ולחזור אחר כך.</p>
-<div id="checkpointChoices" class="answer-options">
-<button data-checkpoint="tangent">אני מבין את המשיק</button>
-<button data-checkpoint="graph">אני רואה את הגרף</button>
-<button data-checkpoint="algebra">אני יודע מה לחשב</button>
-<button data-checkpoint="unsure">צריך עוד דוגמה</button>
-</div>
-<p id="checkpointSummary" role="status"></p>
-<div class="actions">
-<button id="shareCard">שיתוף כרטיס</button>
-<button id="resetAll" class="subtle">התחלה מחדש</button>
-</div>
-</details>
-</div>
-</div>
-</main>
-<nav class="dock" aria-label="ניווט ראשי">
-<a href="learn.html">בית</a>
-<a href="classroom-practice.html">תרגול</a>
-<a href="skill-lab.html">יכולות</a>
-<a aria-current="page" href="problem-map.html">מפה</a>
-</nav>
-</body></html>
+</div><p id="visualFeedback" role="status" aria-live="polite">הסתכלו על מיקום הקיצון בלי לחשב.</p>
+</div></details><div id="familyGraph" class="family-graph" role="img" aria-label="משפחה של פרבולות הפונות כלפי מעלה, עם קודקודים במקומות שונים. אין סולם ולכן לא ניתן לקרוא ערכים מספריים."></div><h3>איזה ציור מתאים לנקודת קיצון ב־x = 2?</h3><div id="pictureChoices" class="picture-options"></div><p id="pictureFeedback" role="status" aria-live="polite"></p><h3>איזה קשר אלגברי מייצג אותה?</h3><div id="algebraChoices" class="answer-options"></div><p id="algebraFeedback" role="status" aria-live="polite"></p></section>
+<section class="panel hidden" id="inferView" role="tabpanel"><h2>מה נובע בלי לחשב?</h2><p class="muted">לכל טענה בחרו: נובע בלי חישוב, לא נכון, או נקבע אבל דורש חישוב.</p><p class="principle"><strong>עיקרון ידוע</strong><span id="principle"></span></p><div id="claims"></div><p id="inferEnding" class="muted"></p></section>
+<section class="checkpoint"><h2>נקודת עצירה</h2><p>את מה שכבר גילינו נשמור. את האלגברה נשאיר לכיתה.</p><div id="checkpointChoices" class="answer-options"><button data-checkpoint="tangent">אנחנו יודעים איך נראה המשיק</button><button data-checkpoint="graph">אנחנו רואים רק חלק מהגרף</button><button data-checkpoint="algebra">אנחנו יודעים מה עוד צריך לחשב</button><button data-checkpoint="unsure">אנחנו עדיין לא בטוחים, וזה בסדר</button></div><p id="checkpointSummary" role="status"></p><div class="actions"><button id="shareCard">שיתוף כרטיס המפה</button><button id="resetAll" class="subtle">איפוס השאלה</button></div></section>
+</main><nav class="dock"><a href="learn.html">בית</a><a href="classroom-practice.html">תרגול</a><a href="skill-lab.html">יכולות</a><a aria-current="page" href="problem-map.html">מפה</a></nav></body></html>

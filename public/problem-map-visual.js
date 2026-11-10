@@ -11,9 +11,8 @@ const items=[
  {id:'center',a:-4,color:'#058b8f',label:'הירוקה',vertex:2},
  {id:'right',a:-2,color:'#a47cde',label:'הסגולה',vertex:1}
 ];
-const key='vizy_problem_visual_choice';
 let selected=null;
-try{selected=sessionStorage.getItem(key)||null;}catch{}
+try{const stored=JSON.parse(localStorage.getItem('vizy_problem_map_v2')||'null');selected=stored?.problemId==='parameter-extremum'?stored?.visualCurve||null:null;}catch{}
 function make(tag,attributes){
  const element=document.createElementNS(ns,tag);
  Object.entries(attributes||{}).forEach(([k,v])=>element.setAttribute(k,String(v)));
@@ -52,13 +51,13 @@ function draw(){
 }
 buttons.forEach(button=>button.addEventListener('click',()=>{
  selected=button.dataset.visualCurve;
- try{sessionStorage.setItem(key,selected);}catch{}
+ window.dispatchEvent(new CustomEvent('vizy:visual-choice',{detail:{id:selected}}));
  draw();
 }));
 const reset=document.getElementById('resetAll');
 if(reset)reset.addEventListener('click',()=>{
  selected=null;
- try{sessionStorage.removeItem(key);}catch{}
+ window.dispatchEvent(new CustomEvent('vizy:visual-choice',{detail:{id:null}}));
  draw();
 });
 draw();

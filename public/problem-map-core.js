@@ -32,7 +32,11 @@ function satisfied(from,state){return from.phrase?state?.roles?.[from.phrase]===
 function fieldState(p,state={}){
  return (p.fields||[]).map(f=>{
   let value='?',label=f.id==='d'?'לא הוסק':'לא זוהה',source=null;
-  if(satisfied(f.from,state)){value=f.value;label=f.label;source=f.from.phrase?'נתון':'מסקנה';}
+  if(satisfied(f.from,state)){
+   value=f.value;label=f.label;
+   const phraseSource=f.from.phrase&&p.phrases?.[f.from.phrase]?.source;
+   source=f.from.claim?'מסקנה':phraseSource==='asked'?'מבוקש':phraseSource==='given'?'נתון':null;
+  }
   for(const other of f.overrides||[])if(satisfied(other.from,state)){value=other.value;label=other.label;source='מסקנה';}
   return {id:f.id,symbol:f.symbol,value,label,source};
  });
