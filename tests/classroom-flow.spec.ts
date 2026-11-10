@@ -13,6 +13,7 @@ async function noHorizontalOverflow(page:any){
 for(const path of paths){
   test('classroom full flow: '+path.id,async({page})=>{
     await page.goto('/classroom-practice.html?topic='+path.id);
+    if(path.id==='g11-inequality')await page.locator('#discoveryGuided').click();
     await expect(page.locator('#questionHeading')).toBeVisible();
     for(let i=0;i<path.answers.length;i++){
       await expect(page.locator('#stageNumber')).toHaveText(String(i+1));

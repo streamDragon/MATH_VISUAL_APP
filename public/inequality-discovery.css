@@ -1,0 +1,39 @@
+
+/* Question first: imagery appears only after the learner requests it. */
+.challenge.discovery-mode > :not(#inequalityDiscovery){display:none!important}
+.inequality-discovery{display:grid;gap:14px;min-width:0;position:relative}
+.discovery-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.discovery-eyebrow{font-size:.85rem;font-weight:700;color:#9be6cf}
+#discoveryNext{background:#2c486a;border:1px solid #6584ab;min-height:44px}
+#discoveryLevel{color:#b7ffcf}
+.discovery-problem{font-size:clamp(1.65rem,6vw,2.4rem);font-weight:800;text-align:center;background:#101f39;border:1px solid #56749d;border-radius:16px;padding:23px 8px;white-space:nowrap;overflow-x:auto}
+.discovery-question{font-size:1.18rem;font-weight:750;text-align:center}
+.discovery-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.discovery-choices button{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#192b4b}
+.discovery-choices button[aria-pressed=true]{background:#166886;border-color:#70deee}
+.discovery-answer-row{display:flex;gap:8px}
+.discovery-answer-row input{min-width:0;flex:1;background:#0e1e37;border:1px solid #7291bc;border-radius:12px;color:#fff;padding:10px}
+.discovery-answer-row button{background:#166eae;font-weight:700}
+.discovery-feedback{min-height:1em;color:#d2e6fb;font-size:.88rem}
+.discovery-feedback.correct{color:#9df6b9}
+.discovery-feedback.wrong{color:#ffcfaa}
+.discovery-bottom{display:flex;gap:9px;justify-content:space-between}
+.discovery-bottom button{flex:1;min-width:0}
+.discovery-imagine{background:linear-gradient(130deg,#147fbc,#247c70);border:1px solid #80f2df;font-weight:800}
+.discovery-overlay{position:relative;border:1px solid #75b5dd;background:#10233c;border-radius:17px;padding:12px 8px;display:grid;gap:8px}
+.discovery-overlay-top{display:flex;justify-content:space-between;align-items:center;color:#bdf4df;padding:0 7px;font-weight:700}
+#discoveryClose{min-height:40px;min-width:44px;border-radius:11px}
+#discoveryGraph svg{display:block;width:100%;max-width:520px;margin:0 auto;overflow:visible}
+.discovery-equations{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;font-weight:700;direction:ltr}
+.discovery-function-readout{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;font-size:.82rem;color:#d4e9ff}
+.discovery-slider-label{display:flex;gap:10px;align-items:center;justify-content:center;padding:0 8px;font-size:.83rem}
+.discovery-slider-label input{min-width:0;flex:1;accent-color:#7ce7df}
+.discovery-graph-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;align-items:center;font-size:.81rem;color:#d2e4f7}
+#discoveryTransform{background:#24466b;border-color:#79c9d5}
+@media(max-width:760px){.challenge:has(.inequality-discovery:not(.hidden)){padding:12px}.discovery-problem{font-size:clamp(1.55rem,6.3vw,2rem);padding:18px 6px}.discovery-choices button{font-size:.94rem;padding:9px 6px}.discovery-bottom button{padding:9px 6px;font-size:.92rem}.discovery-overlay{padding:9px 5px}}
+
+/* The imagination is intentionally a temporary full-screen reveal, not a permanently exposed explanation. */
+.discovery-overlay:not(.hidden){position:fixed;z-index:90;inset:max(20px,env(safe-area-inset-top)) 3vw max(18px,env(safe-area-inset-bottom));overflow-y:auto;max-width:620px;margin:auto;box-shadow:0 0 0 100vmax rgba(5,10,24,.8),0 20px 70px #000b;padding:16px;border:2px solid #8bc9e7;align-content:start}
+#discoveryMore{width:100%;position:sticky;bottom:0;min-height:52px}
+.workspace-grid:has(.challenge.discovery-mode){grid-template-columns:minmax(0,1fr)}
+.workspace-grid:has(.challenge.discovery-mode) .guide{display:none}

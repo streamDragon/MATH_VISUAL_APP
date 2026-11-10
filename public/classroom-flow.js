@@ -50,6 +50,7 @@
   }
   function renderCourses(){
     activeId=null;persist();
+    document.querySelector(".challenge")?.classList.remove("discovery-mode");
     $('courses').classList.remove('hidden');$('workspace').classList.add('hidden');$('completion').classList.add('hidden');
     const visible=lessons.filter(l=>grade==='all'||String(l.grade)===grade);
     const done=visible.filter(l=>record(l.id).completed).length;
@@ -169,8 +170,9 @@
     $('nextStep').textContent=i===l.steps.length-1?'סיום והערכת ההתקדמות':'לשלב הבא';
     visibleHint(s,r,i);renderChoices(s,solved);
     setFeedback(solved?'כבר פתרתם את השלב הזה. '+s.why:'',solved);
-    revealVisual(i!==l.steps.length-1);
+    revealVisual(false);
     updateProgress();renderTrail();
+    window.VizyInequalityDiscovery?.sync(l);
   }
   function checkAnswer(){
     if(!activeId)return;

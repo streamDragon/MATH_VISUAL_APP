@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#111b32">
+<title>Vizy | מפת השאלה</title><link rel="icon" href="icons/icon-192.png"><link rel="stylesheet" href="problem-map.css">
+<script src="problem-map.js" defer></script>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="learn.html"><span class="logo">V</span> VIZY</a><span class="toplabel">לראות לפני שפותרים</span><a href="learn.html" class="back">חזרה לבית</a></header>
+<main id="main">
+<section class="heading">
+  <div class="eyebrow">כיתה י׳–י״א · פונקציות ונגזרת</div>
+  <h1>מפת השאלה</h1><p>לא פותרים עדיין. בונים בראש תמונה ממה שכבר יודעים.</p>
+  <div class="clarity-head"><span>כמה כבר מבוסס?</span><strong id="clarityText">0 מתוך 4 קשרים</strong></div>
+  <div class="clarity-track" role="progressbar" aria-label="קשרים שנבדקו" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0" id="clarityTrack"><div id="clarityFill"></div></div>
+</section>
+<section class="question card" aria-labelledby="questionTitle">
+  <div class="card-cap">01 · השאלה</div><h2 id="questionTitle">מה אפשר לראות לפני שמחשבים?</h2>
+  <div class="problem" dir="ltr">f(x) = x³ − 12x</div>
+  <p>מצאו את נקודות הקיצון וקבעו את סוגן.</p>
+  <small>לחצו על נתון כדי להוסיף אותו למפה. לא צריך לדעת את התשובה.</small>
+  <div class="clue-actions">
+    <button data-clue="function" aria-pressed="false">הפונקציה ממעלה 3</button>
+    <button data-clue="extrema" aria-pressed="false">מחפשים נקודות קיצון</button>
+    <button data-clue="kind" aria-pressed="false">מחפשים גם את הסוג</button>
+  </div>
+</section>
+<section class="card" aria-labelledby="mapTitle">
+ <div class="card-cap">02 · מחברים בין המושגים</div><h2 id="mapTitle">שלישיית הפונקציה</h2>
+ <p class="quiet">אפשר להתחיל מכל צד. לחצו על קשר, חשבו עליו ובחרו כמה הוא בטוח.</p>
+ <div class="trinity" aria-label="מפת הקשרים בין x, ערך הפונקציה והנגזרת">
+  <svg viewBox="0 0 340 245" role="presentation" aria-hidden="true">
+   <path d="M170 50L66 200L274 200Z" fill="none" stroke="#5e85bb" stroke-width="2" stroke-dasharray="7 7"></path>
+   <path d="M170 50L170 200" fill="none" stroke="#4b6c9a" stroke-width="1.5"></path>
+  </svg>
+  <button class="map-node top" data-node="derivative" aria-pressed="false"><span class="symbol">f′(x)</span><span class="node-desc" id="nodeDerivative">מה השיפוע?</span></button>
+  <button class="map-node right" data-node="x" aria-pressed="false"><span class="symbol">x</span><span class="node-desc" id="nodeX">איפה?</span></button>
+  <button class="map-node left" data-node="y" aria-pressed="false"><span class="symbol">f(x)</span><span class="node-desc" id="nodeY">כמה גבוה?</span></button>
+ </div>
+ <div class="concept-note" id="conceptNote" role="status">בחרו מושג במפה. מה אפשר לומר עליו כבר עכשיו?</div>
+ <div class="certainty"><span>על הקשר שבחרתם:</span><div class="certainty-actions"><button data-certainty="unknown" aria-pressed="true">עוד לא</button><button data-certainty="maybe" aria-pressed="false">כנראה</button><button data-certainty="sure" aria-pressed="false">בטוח</button></div></div>
+ <p class="quiet" id="confidenceNote">סימון הביטחון אינו מוכיח שהקשר נכון. הבדיקה נעשית בנפרד.</p>
+ <button id="checkMap" class="primary">בדקו את מה שבניתם</button>
+ <p id="mapResult" class="feedback" role="status"></p>
+</section>
+<section class="card" aria-labelledby="localTitle">
+ <div class="card-cap">03 · לראות רק חלק קטן</div><h2 id="localTitle">מה קורה ליד נקודת קיצון?</h2>
+ <p>לא צריך לצייר את כל הפונקציה. בנו תמונה קטנה מסביב לנקודה.</p>
+ <div class="builder">
+   <div class="builder-controls"><span>המשיק בנקודה</span><div class="choice-row" id="tangentChoices"><button data-tangent="flat" aria-pressed="true">אופקי</button><button data-tangent="up" aria-pressed="false">עולה</button><button data-tangent="down" aria-pressed="false">יורד</button></div></div>
+   <div class="builder-controls" id="beforeControls"><span>לפני הנקודה</span><div class="choice-row"><button data-before="up" aria-pressed="true">עולה</button><button data-before="down" aria-pressed="false">יורדת</button></div></div>
+   <div class="builder-controls" id="afterControls"><span>אחרי הנקודה</span><div class="choice-row"><button data-after="up" aria-pressed="false">עולה</button><button data-after="down" aria-pressed="true">יורדת</button></div></div>
+   <svg id="localGraph" viewBox="0 0 340 225" role="img" aria-label="סקיצה מקומית של פונקציה והמשיק בנקודה">
+     <path d="M22 111H316" stroke="#58769f" stroke-dasharray="4 4"></path>
+     <path id="curve" d="" fill="none" stroke="#6ad6ee" stroke-width="5" stroke-linecap="round"></path>
+     <path id="tangent" d="" fill="none" stroke="#ffca8b" stroke-width="3" stroke-linecap="round"></path>
+     <circle cx="170" cy="111" r="7" fill="#a5ffc1" stroke="#0b1930" stroke-width="3"></circle>
+     <text x="170" y="209" fill="#b5c7e4" font-size="13" text-anchor="middle">רק ליד הנקודה, בלי קנה מידה</text>
+   </svg>
+   <div id="localVerdict" class="concept-note" role="status"></div>
+   <button class="primary" id="checkLocal">בדקו את הסקיצה</button><p id="localCheck" class="feedback" role="status"></p>
+ </div>
+</section>
+<section class="card" aria-labelledby="checkpointTitle">
+ <div class="card-cap">04 · נקודת עצירה</div><h2 id="checkpointTitle">איפה אני עכשיו?</h2>
+ <p>איזה חלק יעזור לכם להמשיך לחשוב?</p>
+ <div class="choice-column" id="checkpointChoices"><button data-checkpoint="tangent" aria-pressed="false">אני יודע איך נראה המשיק</button><button data-checkpoint="graph" aria-pressed="false">אני רואה רק חלק מהגרף</button><button data-checkpoint="algebra" aria-pressed="false">אני יודע מה עדיין צריך לחשב</button><button data-checkpoint="unsure" aria-pressed="false">אני עדיין לא בטוח, וזה בסדר</button></div>
+ <div id="checkpointSummary" class="checkpoint-summary" role="status">בחרו נקודת עצירה. אפשר לשמור אותה לתרגול הבא.</div>
+ <div class="share-actions"><button class="primary" id="shareCard">שתפו את מפת השאלה</button><button id="resetAll">התחילו מחדש</button></div>
+</section>
+</main><nav class="bottom-nav"><a href="learn.html">בית</a><a href="classroom-practice.html">תרגול</a><a href="skill-lab.html">מיומנויות</a><a aria-current="page" href="problem-map.html">מפת השאלה</a></nav>
+</body></html>
