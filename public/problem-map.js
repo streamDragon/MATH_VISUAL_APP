@@ -1,59 +1,151 @@
 (function(){
-"use strict";
-const key="vizy_problem_map_v1";
+'use strict';
 const $=id=>document.getElementById(id);
-const relationInfo={
- derivative:{text:"בנקודת קיצון שבה הפונקציה גזירה, המשיק אופקי ולכן f′(x)=0. זה תנאי הכרחי, לא מספיק.",value:"f′(x)=0"},
- x:{text:"x מציין איפה אנחנו על הציר האופקי. בפונקציה ממעלה שלישית ייתכנו לכל היותר שתי נקודות קיצון.",value:"מיקום הנקודה"},
- y:{text:"y=f(x) נותן את גובה הנקודה אחרי שבוחרים x. עדיין לא צריך לחשב אותו.",value:"גובה הפונקציה"}
-};
-const statusLabels={unknown:"עוד לא",maybe:"כנראה",sure:"בטוח"};
-const state={clues:{function:false,extrema:false,kind:false},node:null,marks:{derivative:"unknown",x:"unknown",y:"unknown"},tangent:"flat",before:"up",after:"down",checkpoint:null,checked:false,localChecked:false};
-function load(){try{let s=JSON.parse(localStorage.getItem(key)||"null");if(s&&typeof s==="object"){for(let k of ["clues","marks"]){if(s[k]&&typeof s[k]==="object")Object.assign(state[k],s[k]);}for(let k of ["tangent","before","after","checkpoint"]){if(typeof s[k]==="string")state[k]=s[k];}}}catch{}}
-function save(){try{localStorage.setItem(key,JSON.stringify({clues:state.clues,marks:state.marks,tangent:state.tangent,before:state.before,after:state.after,checkpoint:state.checkpoint}));}catch{}}
-function truthCount(){return Number(state.clues.function)+Number(state.clues.extrema)+Number(state.clues.kind)+Number(state.checked&&state.clues.extrema&&state.clues.kind);}
-function updateProgress(){const count=truthCount();$("clarityText").textContent=count+" מתוך 4 קשרים";$("clarityFill").style.width=(count/4*100)+"%";$("clarityTrack").setAttribute("aria-valuenow",String(count));}
-function selectNode(node){state.node=node;document.querySelectorAll("[data-node]").forEach(b=>{let selected=b.dataset.node===node;b.setAttribute("aria-pressed",String(selected));let desc=b.querySelector(".node-desc");desc.textContent=state.marks[b.dataset.node]!=="unknown"?statusLabels[state.marks[b.dataset.node]]:({x:"איפה?",y:"כמה גבוה?",derivative:"מה השיפוע?"})[b.dataset.node];});
- $("conceptNote").textContent=relationInfo[node].text;
- document.querySelectorAll("[data-certainty]").forEach(b=>b.setAttribute("aria-pressed",String(state.marks[node]===b.dataset.certainty)));
- $("confidenceNote").textContent="הביטחון הוא ההערכה שלכם. נכון או לא נבדק לפי הנתונים, לא לפי העוצמה שבחרתם."; }
-function updateClues(){document.querySelectorAll("[data-clue]").forEach(b=>b.setAttribute("aria-pressed",String(state.clues[b.dataset.clue])));updateProgress();}
-function setChoice(group,value){state[group]=value;document.querySelectorAll("[data-"+group+"]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset[group]===value)));draw();save();}
+const core=window.VizyProblemMapCore;
+const problems=window.VizyProblemMaps;
+let problem=problems[0],found={},chosenClue=null,chosenOption=null,tries={},firstTry={},certainty={},checkpoint=null;
+let tangent='flat',before='up',after='down',localChecked=false;
+const placeholders={d:'מה השיפוע?',x:'איפה?',y:'כמה גבוה?',kind:'איזה סוג?'};
+function save(){}
+function updateMeter(){
+  const count=Object.values(found).filter(Boolean).length;
+  $('clarityText').textContent=count+' מתוך 4 קשרים';
+  $('clarityTrack').setAttribute('aria-valuenow',String(count));
+  $('clarityFill').style.width=(count/4*100)+'%';
+}
+function node(id){const computed=core.nodeState(problem,found);return computed[id]||{level:0,value:'',from:null};}
+function updateNodes(){
+  const nodes=core.nodeState(problem,found);
+  const map={d:'D',x:'X',y:'Y'};
+  for(const [id,suffix] of Object.entries(map)){
+    const s=nodes[id],button=document.querySelector('[data-node="'+id+'"]');
+    button.classList.toggle('filled',s.level>0);
+    $('node'+suffix).textContent=s.value||placeholders[id];
+    $('level'+suffix).textContent=core.levels[s.level];
+  }
+  $('extraNode').classList.toggle('hidden',!problem.extra);
+  if(problem.extra){
+    const e=nodes[problem.extra.id];$('extraLabel').textContent=problem.extra.label;
+    $('extraValue').textContent=e.value||placeholders.kind;$('extraLevel').textContent=core.levels[e.level];
+  }
+  for(const id of ['D','X','Y'])$('edge'+id).classList.toggle('linked',id==='D'?nodes.d.level>0:id==='X'?nodes.x.level>0:nodes.y.level>0);
+  const links=(problem.links||[]).filter(link=>link.needs.every(id=>found[id]));
+  $('mapLinks').replaceChildren();
+  for(const link of links){
+    const line=document.createElement('p');line.textContent=link.text+' · '+link.note;
+    line.setAttribute('dir','auto');$('mapLinks').append(line);
+  }
+  updateMeter();
+}
+function describeNode(id){
+  const s=node(id);
+  if(!s.level){$('conceptNote').textContent=placeholders[id]+' חפשו בשאלה חלק שמדבר על זה.';return;}
+  const clue=problem.clues[s.from];
+  $('conceptNote').textContent=s.value+' · '+core.levels[s.level]+' · '+(clue?.why||'');
+}
+function renderQuestion(){
+  $('questionTitle').textContent='מה אפשר ללמוד מתוך השאלה?';
+  $('problemText').replaceChildren();
+  for(const part of problem.text){
+    if(!part.clue){const span=document.createElement('span');span.textContent=part.t;if(part.ltr)span.dir='ltr';$('problemText').append(span);continue;}
+    const b=document.createElement('button');
+    b.type='button';b.className='phrase'+(found[part.clue]?' found':'');
+    b.dataset.phrase=part.clue;b.textContent=part.t;
+    b.setAttribute('aria-expanded',String(chosenClue===part.clue));
+    if(part.ltr)b.dir='ltr';
+    b.addEventListener('click',()=>openClue(part.clue));
+    $('problemText').append(b);
+  }
+}
+function optionsFor(clueId){
+  const values=problem.clues[clueId].options.slice();
+  const shift=Object.keys(problem.clues).indexOf(clueId)%values.length;
+  return values.slice(shift).concat(values.slice(0,shift));
+}
+function openClue(id){
+  chosenClue=id;chosenOption=null;
+  renderQuestion();
+  $('cluePanel').classList.remove('hidden');
+  $('clueQuestion').textContent=problem.clues[id].question;
+  $('clueOptions').replaceChildren();
+  $('clueCertainty').classList.add('hidden');
+  if(found[id]){
+    $('clueFeedback').textContent=problem.clues[id].why;
+    $('clueFeedback').className='feedback success';return;
+  }
+  $('clueFeedback').textContent='';
+  for(const option of optionsFor(id)){
+    const button=document.createElement('button');button.type='button';button.textContent=option.label;
+    if(/[=′²³]/.test(option.label))button.dir='auto';
+    button.addEventListener('click',()=>evaluateOption(option));
+    $('clueOptions').append(button);
+  }
+  const unknown=document.createElement('button');unknown.type='button';unknown.textContent='עוד לא יודעים';
+  unknown.addEventListener('click',()=>{
+    $('clueFeedback').textContent='חפשו במפה: לאיזה מושג המילים האלה קשורות?';
+  });$('clueOptions').append(unknown);
+}
+function evaluateOption(option){
+  if(!chosenClue||found[chosenClue])return;
+  tries[chosenClue]=(tries[chosenClue]||0)+1;
+  const ok=Boolean(option.right);
+  if(!(chosenClue in firstTry))firstTry[chosenClue]=ok;
+  if(ok){
+    found[chosenClue]=true;
+    $('clueFeedback').textContent=problem.clues[chosenClue].why;
+    $('clueFeedback').className='feedback success';
+    $('clueOptions').replaceChildren();renderQuestion();updateNodes();save();
+  }else{
+    $('clueFeedback').textContent=option.feedback||'עוד ניסיון. חפשו מה המילים נותנות.';
+    $('clueFeedback').className='feedback error';save();
+  }
+}
 function draw(){
- const {tangent:t,before:b,after:a}=state;let curve="",line="",label="";
- if(t==="up"){curve="M35 185 C85 156 126 127 170 111 S266 64 310 24";line="M90 147 L250 75";label="המשיק עולה. אין כאן קיצון עם משיק אופקי.";}
- else if(t==="down"){curve="M35 25 C85 52 126 87 170 111 S266 156 310 185";line="M90 75 L250 147";label="המשיק יורד. אין כאן קיצון עם משיק אופקי.";}
- else{
-  line="M90 111 L250 111";
-  const left=b==="up"?195:25,right=a==="up"?25:195;
-  curve=b===a?(b==="up"?"M35 194 C90 158 140 111 170 111 C200 111 250 66 310 28":"M35 28 C90 66 140 111 170 111 C200 111 250 158 310 194"):"M35 "+left+" Q108 111 170 111 Q232 111 310 "+right;
-  if(b==="up"&&a==="down")label="מקסימום מקומי: קודם עולה ואחר כך יורדת.";
-  else if(b==="down"&&a==="up")label="מינימום מקומי: קודם יורדת ואחר כך עולה.";
-  else label="משיק אופקי אינו מבטיח קיצון: הכיוון לא התחלף.";
- }
- $("curve").setAttribute("d",curve);$("tangent").setAttribute("d",line);$("localVerdict").textContent=label;
- const flat=t==="flat";$("beforeControls").hidden=!flat;$("afterControls").hidden=!flat;
- document.querySelectorAll("[data-tangent]").forEach(e=>e.setAttribute("aria-pressed",String(e.dataset.tangent===t)));
- document.querySelectorAll("[data-before]").forEach(e=>e.setAttribute("aria-pressed",String(e.dataset.before===b)));
- document.querySelectorAll("[data-after]").forEach(e=>e.setAttribute("aria-pressed",String(e.dataset.after===a)));
+  const t=tangent,b=before,a=after;let curve='',line='',label='';
+  if(t==='up'){curve='M35 185 C85 156 126 127 170 111 S266 64 310 24';line='M90 147 L250 75';label='המשיק עולה. אין כאן קיצון עם משיק אופקי.';}
+  else if(t==='down'){curve='M35 25 C85 52 126 87 170 111 S266 156 310 185';line='M90 75 L250 147';label='המשיק יורד. אין כאן קיצון עם משיק אופקי.';}
+  else{
+    line='M90 111 L250 111';
+    const left=b==='up'?195:25,right=a==='up'?25:195;
+    curve=b===a?(b==='up'?'M35 194 C90 158 140 111 170 111 C200 111 250 66 310 28':'M35 28 C90 66 140 111 170 111 C200 111 250 158 310 194'):'M35 '+left+' Q108 111 170 111 Q232 111 310 '+right;
+    label=b==='up'&&a==='down'?'מקסימום מקומי: קודם עולה ואחר כך יורדת.':b==='down'&&a==='up'?'מינימום מקומי: קודם יורדת ואחר כך עולה.':'משיק אופקי אינו מבטיח קיצון: הכיוון לא התחלף.';
+  }
+  $('curve').setAttribute('d',curve);$('tangent').setAttribute('d',line);$('localVerdict').textContent=label;
+  $('beforeControls').classList.toggle('hidden',t!=='flat');$('afterControls').classList.toggle('hidden',t!=='flat');
+  for(const [group,value] of [['tangent',t],['before',b],['after',a]]){
+    document.querySelectorAll('[data-'+group+']').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset[group]===value)));
+  }
 }
-function checkMap(){state.checked=true;let things=[];if(!state.clues.function)things.push("סמנו את דרגת הפונקציה");if(!state.clues.extrema)things.push("זהו שמבקשים נקודות קיצון");if(!state.clues.kind)things.push("זהו שמבקשים את סוג הקיצון");if(state.marks.derivative==="unknown")things.push("בחרו את f′(x) וסמנו את מידת הביטחון שלכם");$("mapResult").textContent=things.length?"נשאר לבדוק: "+things.join(" · "):"זיהיתם את המבנה הכללי. עדיין צריך לחשב היכן הקיצון ולקבוע את הסוג לפי שינוי הסימן של f′.";updateProgress();}
-function summary(){const parts=[];if(state.clues.function)parts.push("פונקציה ממעלה 3");if(state.clues.extrema)parts.push("מחפשים קיצון");if(state.clues.kind)parts.push("נדרש לקבוע סוג");const checkpoint=({tangent:"אני יודע איך נראה המשיק",graph:"אני רואה רק חלק מהגרף",algebra:"אני יודע מה עוד צריך לחשב",unsure:"אני עדיין לא בטוח"})[state.checkpoint]||"טרם בחרתי";
-return "Vizy | מפת השאלה\nf(x)=x³−12x, נקודות קיצון\nמה זיהיתי: "+(parts.join(", ")||"עוד לא")+"\nמה רואים ליד הנקודה: "+$("localVerdict").textContent+"\nאיפה אני עכשיו: "+checkpoint+"\nנשאר לבדוק: מיקום הקיצון וסוגו באלגברה בכיתה.";}
-async function share(){const text=summary();if(navigator.share){try{await navigator.share({title:"Vizy | מפת השאלה",text});return;}catch(err){if(err.name==="AbortError")return;}}
- try{await navigator.clipboard.writeText(text);$("checkpointSummary").textContent="כרטיס המפה הועתק. אפשר להדביק אותו בהודעה למורה.";}catch{$("checkpointSummary").textContent=text;}}
-function updateCheckpoint(){document.querySelectorAll("[data-checkpoint]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.checkpoint===state.checkpoint)));const label=({tangent:"המשיק נותן לנו מידע מקומי, לא את כל הגרף.",graph:"חלק קטן יכול להספיק כדי להבין התנהגות ליד נקודה.",algebra:"המפה מבהירה מה רוצים לחשב; הפתרון המלא ממשיך בכיתה.",unsure:"זה בסדר לא לדעת עדיין. בחרו קשר אחד שאפשר לבדוק."})[state.checkpoint];$("checkpointSummary").textContent=label||"בחרו נקודת עצירה. אפשר לשמור אותה לתרגול הבא.";}
-function init(){load();
- document.querySelectorAll("[data-clue]").forEach(b=>b.onclick=()=>{state.clues[b.dataset.clue]=!state.clues[b.dataset.clue];updateClues();save();});
- document.querySelectorAll("[data-node]").forEach(b=>b.onclick=()=>selectNode(b.dataset.node));
- document.querySelectorAll("[data-certainty]").forEach(b=>b.onclick=()=>{if(!state.node)selectNode("derivative");state.marks[state.node]=b.dataset.certainty;selectNode(state.node);updateProgress();save();});
- document.querySelectorAll("[data-tangent]").forEach(b=>b.onclick=()=>setChoice("tangent",b.dataset.tangent));
- document.querySelectorAll("[data-before]").forEach(b=>b.onclick=()=>setChoice("before",b.dataset.before));
- document.querySelectorAll("[data-after]").forEach(b=>b.onclick=()=>setChoice("after",b.dataset.after));
- document.querySelectorAll("[data-checkpoint]").forEach(b=>b.onclick=()=>{state.checkpoint=b.dataset.checkpoint;updateCheckpoint();save();});
- $("checkMap").onclick=checkMap;$("checkLocal").onclick=()=>{$("localCheck").textContent=state.tangent!=="flat"?"כדי לזהות קיצון גזיר בחרו משיק אופקי, ואז בדקו את שני הצדדים.":state.before===state.after?"המשיק אופקי, אבל אין החלפת כיוון. ייתכן שזו נקודת פיתול.":"נכון כסוג של התנהגות מקומית. כדי לדעת איזו נקודה זו בפונקציה הנתונה נצטרך לחשב ולבדוק סימנים.";};
- $("shareCard").onclick=share;$("resetAll").onclick=()=>{try{localStorage.removeItem(key)}catch{}location.reload();};
- updateClues();draw();updateCheckpoint();if(state.node)selectNode(state.node);
+function localChoice(group,value){if(group==='tangent')tangent=value;if(group==='before')before=value;if(group==='after')after=value;draw();save();}
+function updateCheckpoint(){
+  document.querySelectorAll('[data-checkpoint]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.checkpoint===checkpoint)));
+  const labels={tangent:'המשיק נותן לנו מידע מקומי, לא את כל הגרף.',graph:'חלק קטן יכול להספיק כדי להבין התנהגות ליד נקודה.',algebra:'המפה מבהירה מה רוצים לחשב; הפתרון המלא ממשיך בכיתה.',unsure:'זה בסדר לא לדעת עדיין. בחרו קשר אחד שאפשר לבדוק.'};
+  $('checkpointSummary').textContent=labels[checkpoint]||'בחרו נקודת עצירה. אפשר לשמור אותה לתרגול הבא.';
 }
-document.addEventListener("DOMContentLoaded",init);
+function summary(){
+  const states=core.nodeState(problem,found);
+  const bits=Object.entries(states).map(([id,s])=>id+': '+(s.value||'עוד לא')+' ('+core.levels[s.level]+')');
+  return 'Vizy | מפת השאלה\n'+problem.text.map(part=>part.t).join('')+'\n'+bits.join('\n')+'\nמה נשאר לכיתה: '+problem.openForClass;
+}
+async function share(){const text=summary();if(navigator.share){try{await navigator.share({title:'Vizy | מפת השאלה',text});return;}catch(e){if(e.name==='AbortError')return;}}
+ try{await navigator.clipboard.writeText(text);$('checkpointSummary').textContent='הכרטיס הועתק. אפשר להדביק אותו למורה.';}catch{$('checkpointSummary').textContent=text;}}
+function renderAll(){
+  renderQuestion();updateNodes();draw();updateCheckpoint();$('localCard').classList.toggle('hidden',problem.local!=='extremum');
+}
+function init(){
+  document.querySelectorAll('[data-node]').forEach(b=>b.addEventListener('click',()=>describeNode(b.dataset.node)));
+  document.querySelectorAll('[data-tangent]').forEach(b=>b.addEventListener('click',()=>localChoice('tangent',b.dataset.tangent)));
+  document.querySelectorAll('[data-before]').forEach(b=>b.addEventListener('click',()=>localChoice('before',b.dataset.before)));
+  document.querySelectorAll('[data-after]').forEach(b=>b.addEventListener('click',()=>localChoice('after',b.dataset.after)));
+  document.querySelectorAll('[data-checkpoint]').forEach(b=>b.addEventListener('click',()=>{checkpoint=b.dataset.checkpoint;updateCheckpoint();save();}));
+  $('checkLocal').addEventListener('click',()=>{
+    localChecked=true;
+    $('localCheck').textContent=tangent!=='flat'?'כדי לזהות קיצון גזיר בחרו משיק אופקי, ואז בדקו את שני הצדדים.':before===after?'המשיק אופקי, אבל אין החלפת כיוון. ייתכן שזו נקודת פיתול.':'נכון כסוג של התנהגות מקומית. כדי לדעת איזו נקודה זו בפונקציה הנתונה נצטרך לחשב ולבדוק סימנים.';
+    save();
+  });
+  $('shareCard').addEventListener('click',share);
+  $('resetAll').addEventListener('click',()=>location.reload());
+  renderAll();
+}
+document.addEventListener('DOMContentLoaded',init);
 })();
