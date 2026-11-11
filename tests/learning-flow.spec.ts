@@ -127,6 +127,7 @@ test("phone enters a useful bank directly and filters grade", async ({
   await expect(page.getByRole("heading", { name: "בואו ננסה משהו קטן" })).toBeVisible();
   await expect(page.locator("#student-start-ability")).toBeInViewport();
   await noOverflow(page);
+  await page.locator('#library-toggle').click();
   await page.locator('[data-grade="11"]').click();
   await expect(page.locator(".activity-card")).toHaveCount(4);
   await expect(page.locator(".activity-card").first()).toContainText(

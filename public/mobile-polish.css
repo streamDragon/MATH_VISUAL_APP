@@ -35,3 +35,27 @@
 .student-next-step{border:1px solid #8ba777;background:linear-gradient(145deg,#233d39,#20314f);border-radius:18px;padding:16px;margin:0 0 14px}.student-next-step h2{font-size:clamp(1.15rem,4vw,1.5rem);margin:8px 0 4px}.student-next-step p{margin:0 0 12px;font-size:.94rem}.student-next-step .primary{min-height:48px;width:100%}@media(max-width:760px){.student-next-step{padding:13px;margin-bottom:10px}.unified-tools h2{font-size:1.07rem}.unified-tools~.hero{display:none}}
 
 .student-grade-picker{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.student-grade-picker button{min-height:40px;min-width:60px;padding:7px 13px;border-radius:14px;border:1px solid #6f86a7;background:#263956;color:#fff}.student-grade-picker button[aria-pressed="true"]{background:#ceef85;color:#192536;border-color:#ceef85;font-weight:800}
+
+/* Focused student home: one primary action, optional exploration below. */
+.home-legacy-actions{display:none!important}
+.student-next-step{background:linear-gradient(145deg,#eaf9f4,#eef3ff);border:1px solid #a9c9d7;color:#142a43;box-shadow:0 12px 32px #030d1b26;padding:22px}
+.student-next-step h2{font-size:clamp(1.5rem,5vw,2rem);line-height:1.25}
+.student-next-step p{color:#29415a}
+.student-next-step .pill{background:#d9f0df;color:#18553a}
+.student-next-step .primary{background:#163f70;color:white;min-height:54px;font-size:1.08rem}
+.student-next-step .ability-button{background:#fff;color:#213b54;border-color:#a5bdca}
+.student-next-step .ability-button[aria-pressed="true"]{background:#163f70;color:#fff;border-color:#163f70}
+.student-next-step .student-grade-picker button{background:#fff;color:#213b54;border-color:#a5bdca}
+.student-next-step .student-grade-picker button[aria-pressed="true"]{background:#163f70;color:#fff;border-color:#163f70}
+.student-next-step .ability-extra{background:transparent;color:#244e75;border:0;text-decoration:underline;font-size:.88rem;padding:6px 10px;min-height:36px}
+.problem-map-promo{background:#e9f5ff!important;color:#15344d!important;border:1px solid #a8d1e4!important}
+.problem-map-promo h2,.problem-map-promo p{color:#15344d!important}
+.problem-map-promo .secondary{background:#164b76;color:white;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px;border-radius:12px;padding:10px 15px}
+.unified-tools{margin-top:26px}
+.unified-tools .unified-tool{min-height:80px}
+.unified-tools .unified-tool small{display:none}
+.challenge-library{margin-top:26px}
+.library-toggle{width:100%;min-height:50px;border:1px solid #6c89aa;background:#203957;color:#fff;text-align:center}
+#library-content[hidden]{display:none!important}
+.challenge-library .section-head{margin-bottom:8px}
+@media(max-width:760px){.student-next-step{padding:18px 14px}.student-next-step h2{font-size:1.5rem}.unified-tools .unified-tool{min-height:76px;padding:12px}.problem-map-promo{margin:12px 0}.challenge-library{margin-top:20px}}
