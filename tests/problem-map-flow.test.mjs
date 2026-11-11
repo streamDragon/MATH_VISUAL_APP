@@ -1,0 +1,77 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url);
+const core=require('../public/problem-map-flow-core.js');
+const context={window:{}};
+vm.runInNewContext(readFileSync(new URL('../public/problem-map-flow-data.js',import.meta.url),'utf8'),context);
+const lessons=context.window.VizyLayeredLessons;
+const [parameter,shared]=lessons;
+test('two assessed main lessons and authentic extrema constraints',()=>{
+ assert.equal(lessons.length,2);
+ assert.equal(core.validate(parameter).length,0);
+ assert.equal(core.validate(shared).length,0);
+ assert.equal(parameter.steps.length,8);
+ assert.equal(shared.steps.length,9);
+ assert.equal(shared.math.includes('−x² + 4x'),true);
+ assert.equal(parameter.steps.find(x=>x.id==='substitution').layer.value.includes('2·2 + a = 0'),true);
+});
+test('a wrong shortcut never creates a layer or advances',()=>{
+ const initial=core.createState(parameter);
+ const incorrect=core.submit(parameter,initial,0);
+ assert.equal(incorrect.correct,false);
+ assert.equal(incorrect.state.entries.length,0);
+ assert.equal(core.next(parameter,incorrect.state).step,0);
+ const correct=core.submit(parameter,incorrect.state,1);
+ assert.equal(correct.state.entries.length,1);
+ assert.equal(correct.state.attempts['x-meaning'],2);
+ const next=core.next(parameter,correct.state);
+ assert.equal(next.step,1);
+ assert.equal(next.entries.length,1);
+ assert.equal(next.entries[0].value,'x₀ = 2');
+});
+test('the shared point needs both y-coordinates, not only a common tangent',()=>{
+ const first=shared.steps[0];
+ assert.equal(first.options.filter(x=>x.correct).length,1);
+ assert.match(first.options.find(x=>x.correct).label,/אותו x ואותו y/);
+ assert.equal(shared.steps.find(x=>x.id==='slopes').layer.value,'f′(x₀)=0 ; g′(x₀)=0');
+ assert.equal(shared.steps.find(x=>x.id==='two-equations').layer.also,'(2) −2x + 4 = 0');
+ assert.match(shared.steps.find(x=>x.id==='same-height').layer.value,/f\(2\) = g\(2\)/);
+});
+test('all layers remain when returning; x is not conflated with a or y',()=>{
+ let state=core.createState(shared);
+ for(let index=0;index<shared.steps.length;index++){
+  const answerIndex=shared.steps[index].options.findIndex(o=>o.correct);
+  const result=core.submit(shared,state,answerIndex);
+  assert.equal(result.correct,true);
+  state=result.state;
+  assert.equal(state.entries.length,index+1);
+  if(index<shared.steps.length-1)state=core.next(shared,state);
+ }
+ assert.equal(state.entries.length,9);
+ const x=state.entries.find(x=>x.id==='x-meaning');
+ assert.equal(x.value,'x₀ = 2');
+ assert.equal(x.label,'מיקום משותף');
+ assert.equal(state.entries.find(x=>x.id==='same-height').value,'f(2) = g(2)');
+ assert.equal(JSON.stringify(shared).includes('a = 4'),false);
+ const back=core.previous(shared,state);
+ assert.equal(back.step,7);
+ assert.equal(back.entries.length,9);
+ const again=core.next(shared,back);
+ assert.equal(again.entries.length,9);
+});
+test('feedback identifies support needs without treating hints as mastery',()=>{
+ let s=core.createState(parameter);
+ s=core.help(parameter,s);
+ s=core.submit(parameter,s,0).state;
+ s=core.submit(parameter,s,1).state;
+ const need=core.needsSupport(parameter,s);
+ assert.equal(need.length,1);
+ assert.equal(need[0].id,'x-meaning');
+ const normalized=core.normalize(parameter,JSON.parse(JSON.stringify(s)));
+ assert.equal(normalized.entries.length,1);
+ const malformed={...parameter,steps:[{...parameter.steps[0],options:[{correct:true},{correct:true},{correct:false}]}]};
+ assert.ok(core.validate(malformed).length>0);
+});

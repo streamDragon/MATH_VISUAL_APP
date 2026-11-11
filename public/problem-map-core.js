@@ -24,6 +24,39 @@ function validateProblem(p){
   for(const item of field.overrides||[])if(!valid(item.from))e.push('invalid field override '+field.id);
  }
  if((p.fields||[]).length!==4)e.push('expected four fields');
+ if(p.foundations){
+  const used=new Set();
+  for(const skill of p.foundations){
+   if(!skill.id||used.has(skill.id))e.push('duplicate foundation skill');
+   used.add(skill.id);
+   if(!skill.title||!skill.initial||!skill.rows?.length)e.push('incomplete foundation skill');
+   for(const row of skill.rows||[]){
+    if(!row.prompt||!row.right||!row.wrong||!row.earned)e.push('incomplete foundation row');
+    if(!Array.isArray(row.options)||row.options.length!==3||row.options.filter(o=>o.right===true).length!==1)e.push('foundation row needs exactly one answer');
+   }
+  }
+ }
+ if(p.equationLab){
+  const lab=p.equationLab;
+  if(!Array.isArray(lab.definitions)||lab.definitions.length!==2||!Array.isArray(lab.steps)||lab.steps.length<3)e.push('invalid equation lab');
+  const ids=new Set();
+  for(const step of lab.steps||[]){
+   if(!step.id||ids.has(step.id))e.push('duplicate equation lab step');
+   ids.add(step.id);
+   if(!step.title||!step.right||!step.wrong||!step.earned)e.push('incomplete equation lab step');
+   if(!Array.isArray(step.options)||step.options.length!==3||step.options.filter(o=>o.right===true).length!==1)e.push('equation lab needs one right answer');
+  }
+ }
+ if((p.bridgeChecks||[]).length){
+  if(p.bridgeChecks.length!==3)e.push('bridge must have three links');
+  const used=new Set();
+  for(const check of p.bridgeChecks){
+   if(!check.id||used.has(check.id))e.push('duplicate bridge check');
+   used.add(check.id);
+   if(!check.title||!check.right||!check.wrong)e.push('missing bridge feedback');
+   if(!Array.isArray(check.options)||check.options.length!==3||check.options.filter(o=>o.right===true).length!==1)e.push('bridge check requires exactly one true answer');
+  }
+ }
  return e;
 }
 function isRoleCorrect(p,id,role){return p.phrases?.[id]?.role===role;}
@@ -42,5 +75,8 @@ function fieldState(p,state={}){
  });
 }
 function inferredSummary(p,state={}){return (p.claims||[]).filter(c=>state?.answers?.[c.id]===true).map(c=>c.summary);}
-return {validateProblem,isRoleCorrect,isClaimCorrect,fieldState,inferredSummary,aFromLowPoint:x=>-2*x,isOnLine:(x,target,tolerance=0.08)=>Number.isFinite(x)&&Math.abs(x-target)<=tolerance};
+function isBridgeCorrect(p,id,optionIndex){const check=p.bridgeChecks?.find(c=>c.id===id);return Number.isInteger(optionIndex)&&Boolean(check?.options?.[optionIndex]?.right);}
+function isEquationCorrect(p,id,index){const s=p.equationLab?.steps?.find(x=>x.id===id);return Number.isInteger(index)&&Boolean(s?.options?.[index]?.right);}
+function isFoundationCorrect(p,skillId,rowIndex,optionIndex){const row=p.foundations?.find(s=>s.id===skillId)?.rows?.[rowIndex];return Number.isInteger(optionIndex)&&Boolean(row?.options?.[optionIndex]?.right);}
+return {validateProblem,isRoleCorrect,isClaimCorrect,isBridgeCorrect,isEquationCorrect,isFoundationCorrect,fieldState,inferredSummary,aFromLowPoint:x=>-2*x,isOnLine:(x,target,tolerance=0.08)=>Number.isFinite(x)&&Math.abs(x-target)<=tolerance};
 });

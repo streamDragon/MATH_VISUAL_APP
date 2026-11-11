@@ -174,3 +174,123 @@ body{padding-bottom:0}
 .phrase.done[data-role="object"],.role-choice[data-role-choice="object"]{border-bottom:4px solid #26976f}
 .phrase.done[data-role="relation"],.role-choice[data-role-choice="relation"]{border-bottom:4px dotted #865ed4}
 .phrase.done[data-role="instruction"],.role-choice[data-role-choice="instruction"]{border-bottom:4px dashed #d05b96}
+
+/* Skill chunks: meaning -> condition -> shared point; algebra is optional. */
+.bridge-drill,.equation-lab{margin:12px 0;border:1px solid #ccdced;border-radius:14px;background:#f8fbff;overflow:hidden}
+.bridge-drill{padding:13px}
+.bridge-heading{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bridge-heading strong{font-size:.98rem;color:#193f71}
+.bridge-heading span,.micro-progress{font-size:.76rem;color:#647b97;white-space:nowrap;font-weight:650}
+.bridge-caption,.micro-note{margin:7px 0 12px!important;color:#5a6d83;font-size:.82rem;line-height:1.5}
+#bridgeQuestion,#equationQuestion{font-size:1rem;line-height:1.48;margin:12px 0}
+.bridge-options,.micro-options{display:grid;grid-template-columns:1fr;gap:8px}
+.micro-choice{min-height:50px;text-align:right;background:#fff;color:#193b63;border-radius:10px;padding:10px 12px;white-space:normal;font-size:.91rem;line-height:1.45}
+.micro-choice[aria-pressed=true]{background:#d8f3e7;color:#155740;border-color:#66ba98}
+.micro-choice:disabled{cursor:default}
+.micro-feedback,.bridge-feedback{font-size:.83rem;line-height:1.5;min-height:25px;padding:6px 0;margin:5px 0!important}
+.micro-feedback[data-status=correct],.bridge-feedback[data-status=correct]{color:#1e6d4d}
+.micro-feedback[data-status=retry],.bridge-feedback[data-status=retry]{color:#875536}
+.bridge-actions,.micro-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:10px}
+.bridge-actions button,.micro-actions button{min-width:0;flex:1;min-height:46px;font-size:.81rem;white-space:normal}
+.bridge-sketch{display:grid;gap:7px;background:#fff;border:1px solid #d8e7ef;border-radius:10px;padding:10px;margin-top:11px;color:#536c82;font-size:.79rem}
+.bridge-sketch svg{display:block;width:100%;max-width:265px;height:auto;max-height:140px;margin:auto}
+.equation-lab summary{display:flex;flex-direction:column;gap:2px;cursor:pointer;min-height:58px;padding:11px 14px;color:#244c84;list-style-position:inside}
+.equation-lab summary strong{font-size:.95rem}
+.equation-lab summary span{font-size:.78rem;color:#607690}
+.equation-lab[open] summary{border-bottom:1px solid #d7e4f2}
+.equation-body{padding:12px}
+.equation-definitions{display:grid;grid-template-columns:1fr;gap:7px;margin-bottom:10px}
+.function-definition{direction:ltr;text-align:center;background:#fff;border:1px solid #deebf7;border-radius:10px;padding:10px;font-size:1rem;font-weight:700;color:#274b76;overflow-wrap:anywhere}
+.equation-scratch{background:#eaf3fb;border:1px solid #d4e5f3;border-radius:11px;padding:10px 12px;margin:10px 0}
+.equation-scratch strong{font-size:.8rem;color:#385a78}
+.earned-equation{text-align:center;font-size:.9rem;line-height:1.5;font-weight:700;padding:6px 1px;border-bottom:1px solid #d4e5f3;overflow-wrap:anywhere}
+.earned-equation:last-child{border-bottom:0}
+.micro-hint{background:#fff8e8;border:1px solid #f1dfb5;color:#6b572d;font-size:.81rem;padding:10px;border-radius:9px;line-height:1.5}
+@media(min-width:600px){.equation-definitions{grid-template-columns:1fr 1fr}.bridge-options,.micro-options{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:360px){.bridge-drill,.equation-body{padding:10px}.micro-choice{font-size:.84rem;padding:9px 8px}}
+
+.foundation-lab{margin:12px 0;border:1px solid #d1dff2;border-radius:13px;background:#f8fbff;overflow:hidden}
+.foundation-lab summary{display:flex;flex-direction:column;gap:2px;padding:12px 14px;min-height:56px;cursor:pointer;color:#26558a}
+.foundation-lab summary strong{font-size:.93rem}
+.foundation-lab summary span{font-size:.76rem;color:#61788e}
+.foundation-lab[open] summary{border-bottom:1px solid #d8e5f3}
+.foundation-body{padding:12px}
+.foundation-pickers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.foundation-picker{font-size:.82rem;line-height:1.4;min-width:0;padding:8px 7px}
+.foundation-picker[aria-pressed=true]{background:#dcecfb;border-color:#5b96c9;font-weight:800}
+.foundation-rows{background:#fff;border:1px solid #d5e4f3;border-radius:10px;overflow:hidden;margin:8px 0 12px}
+.foundation-line{font-weight:750;font-size:.98rem;color:#1a4e7c;padding:12px;text-align:center;border-bottom:1px dashed #c1d5e6}
+.foundation-line:last-child{border-bottom:0}
+.foundation-line:first-child{background:#edf3f9}
+.foundation-body>h3{font-size:.93rem;line-height:1.5;margin:12px 0}
+.foundation-body .micro-hint{display:block;margin-top:8px}
+@media(max-width:360px){.foundation-body{padding:10px}.foundation-picker{font-size:.75rem}}
+
+/* Primary Vizy lesson: assess each representation and persist every step.
+   The former tools remain available below as optional explorations. */
+.flow-card{grid-column:1/-1;background:linear-gradient(155deg,#fff 55%,#f2f8ff);border:1px solid #bfd8ed;border-radius:19px;padding:15px;box-shadow:0 5px 19px #28527c16;min-width:0;overflow:hidden}
+.flow-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.flow-kicker{display:block;color:#2a7a9d;font-size:.72rem;font-weight:850;letter-spacing:.01em}
+.flow-heading h2{font-size:1.28rem;color:#183b6a;line-height:1.22;margin:4px 0}
+.flow-intro{font-size:.85rem;color:#516d89;margin:5px 0;line-height:1.46}
+.flow-stamp{background:#e1f5e9;color:#247554;border-radius:18px;padding:6px 9px;font-size:.69rem;white-space:nowrap}
+.flow-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:13px 0}
+.flow-lesson{font-size:.81rem;min-width:0;min-height:49px;line-height:1.35;background:#eef3fc;border:1px solid #c9d9ed;border-radius:12px;padding:7px 8px}
+.flow-lesson[aria-pressed=true]{background:#215fa8;color:white;border-color:#215fa8;font-weight:800}
+.flow-problem{border-right:3px solid #81b3d9;background:#f5f9ff;padding:11px;border-radius:10px;font-size:.88rem;line-height:1.52;overflow-wrap:anywhere;margin:6px 0 12px;color:#274763}
+.flow-graph-shell{background:#fbfdff;border-radius:13px;padding:9px;border:1px solid #dce8f4;margin:10px 0}
+.flow-graph-head{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#1f4f7e;font-size:.83rem}
+.flow-graph-head small{font-size:.7rem;color:#6b7f93;line-height:1.35;max-width:55%}
+#flowPlot{margin:7px auto 1px;display:flex;justify-content:center;max-height:230px}
+#flowPlot svg{width:100%;max-width:460px;height:auto;max-height:220px}
+.flow-interaction{background:#fff;padding:12px;border:1px solid #ccddef;border-radius:13px;scroll-margin-top:12px}
+.flow-phase{display:flex;justify-content:space-between;gap:8px;align-items:center;color:#2e709a;font-size:.72rem;font-weight:800}
+.flow-phase span:last-child{font-variant-numeric:tabular-nums;color:#667f99}
+#flowQuestion{font-size:1.02rem;line-height:1.45;margin:12px 0 9px;color:#15395d}
+.flow-options{display:grid;grid-template-columns:1fr;gap:7px}
+.flow-choice{background:#f6f9ff;border:1px solid #cbd8e9;min-height:51px;text-align:right;line-height:1.45;font-size:.91rem;color:#244460;border-radius:10px;padding:9px 11px;white-space:normal;min-width:0}
+.flow-choice[aria-pressed=true]{background:#d8f4e8;color:#1b684e;border-color:#52b08e;font-weight:800}
+.flow-choice:disabled{cursor:default}
+.flow-feedback{margin:9px 0;min-height:30px;color:#47637d;font-size:.81rem;line-height:1.52}
+.flow-feedback[data-status=correct]{color:#237250}
+.flow-feedback[data-status=retry]{color:#a05b34}
+.flow-actions{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:6px}
+.flow-actions button,.flow-footer button{min-width:0;min-height:47px;font-size:.79rem;line-height:1.3;padding:8px 5px}
+.flow-actions #flowNext{background:#225eaf;color:#fff;border-color:#225eaf;font-weight:800}
+.flow-actions #flowNext:disabled{background:#e8edf3;color:#8ba0b6;border-color:#d6e1ea}
+.flow-secondary{background:#f7f9fc;color:#37618b;border-color:#d5e2ed}
+.flow-history{margin-top:10px;border:1px solid #c5dfd4;border-radius:12px;background:#f7fcfa}
+.flow-history summary{min-height:47px;display:flex;justify-content:space-between;align-items:center;gap:6px;padding:10px 12px;color:#23674f;cursor:pointer;font-size:.84rem}
+.flow-history summary span{font-size:.7rem;font-weight:500}
+.flow-rows{padding:2px 10px 10px;display:grid;gap:5px}
+.flow-layer{background:#fff;border:1px solid #dae5e8;border-radius:9px;padding:9px;display:grid;grid-template-columns:minmax(0,1fr);gap:4px}
+.flow-layer strong{font-size:.75rem;color:#315f79}
+.flow-layer-value{font-size:.94rem;font-weight:750;color:#203d61;direction:ltr;text-align:center;overflow-wrap:anywhere}
+.flow-layer[data-layer-kind=given]{background:#ebf8f0;border-color:#aad7bc}
+.flow-layer[data-layer-kind=picture]{background:#eaf4fe;border-color:#bad9f2}
+.flow-layer[data-layer-kind=principle]{background:#f4ecfb;border-color:#dfc7f0}
+.flow-layer[data-layer-kind=derivative]{background:#f1f2ff;border-color:#c9d1f4}
+.flow-layer[data-layer-kind=equation]{background:#fff6e8;border-color:#f1d4a7}
+.flow-layer[data-layer-kind=meaning]{background:#e9f5f8;border-color:#b6dce7}
+.flow-placeholder{margin:4px 0;font-size:.8rem;color:#6a8293}
+.flow-finish{padding:13px;background:#edf8f1;border:1px solid #b9dbcb;border-radius:12px;margin-top:10px;color:#24644c;font-size:.84rem;line-height:1.55}
+.flow-finish p{margin:7px 0 0}
+.flow-footer{display:flex;justify-content:center;margin-top:12px}
+.flow-footer button{width:100%;max-width:340px}
+.flow-older-note{grid-column:1/-1;display:block;margin:11px 2px 2px;padding:9px 0;border-top:1px solid #cdd9e5;color:#667f96;font-size:.79rem}
+@media(min-width:610px){.flow-card{padding:20px}.flow-rows{grid-template-columns:repeat(2,minmax(0,1fr))}.flow-options{grid-template-columns:repeat(3,minmax(0,1fr))}.flow-choice{font-size:.82rem;min-height:69px}}
+@media(max-width:360px){.flow-card{padding:10px}.flow-stamp{display:none}.flow-switch{gap:4px}.flow-actions{gap:4px}.flow-actions button{font-size:.73rem}.flow-problem{font-size:.82rem}.flow-layer-value{font-size:.85rem}}
+
+/* Compact retained history on small screens: preserve every row without a wall of cards. */
+@media(max-width:609px){
+ .flow-layer{display:flex;align-items:center;justify-content:space-between;gap:7px;padding:6px 8px;min-height:40px}
+ .flow-layer strong{flex:0 0 39%;font-size:.73rem;line-height:1.35}
+ .flow-layer-value{flex:1;text-align:left;font-size:.82rem;line-height:1.3;min-width:0}
+ .flow-layer:has(.flow-layer-value:nth-of-type(2)){display:grid;grid-template-columns:1fr}
+ .flow-layer:has(.flow-layer-value:nth-of-type(2)) .flow-layer-value{text-align:center}
+ .flow-graph-head{display:block}
+ .flow-graph-head small{display:block;max-width:100%}
+ #flowPlot{max-height:190px}
+ #flowPlot svg{max-height:190px}
+}
+.flow-support-button{display:block;width:100%;margin-top:9px;min-height:46px;border:1px solid #86bca8;background:#fff;color:#256a53;font-size:.82rem;font-weight:800;border-radius:10px}
