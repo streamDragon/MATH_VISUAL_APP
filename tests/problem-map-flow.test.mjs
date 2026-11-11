@@ -75,3 +75,47 @@ test('feedback identifies support needs without treating hints as mastery',()=>{
  const malformed={...parameter,steps:[{...parameter.steps[0],options:[{correct:true},{correct:true},{correct:false}]}]};
  assert.ok(core.validate(malformed).length>0);
 });
+
+test('original error bank includes wrong, incomplete and correct work',()=>{
+ const cards=context.window.VizyErrorCards;
+ assert.equal(cards.length,4);
+ assert.ok(cards.some(x=>x.kind==='wrong'));
+ assert.ok(cards.some(x=>x.kind==='incomplete'));
+ assert.ok(cards.some(x=>x.kind==='correct'));
+ for(const card of cards)assert.deepEqual(core.validateErrorCard(card),[]);
+ const imperfect=cards.find(x=>x.kind==='incomplete');
+ assert.match(imperfect.why,/שווה לאפס/);
+ const correct=cards.find(x=>x.kind==='correct');
+ assert.equal(correct.targetLine,null);
+});
+test('error recognition requires verdict, location, diagnosis, repair and transfer',()=>{
+ const card=context.window.VizyErrorCards[0];
+ let s=core.createErrorState(card);
+ let r=core.submitError(card,s,'correct');
+ assert.equal(r.correct,false);assert.equal(r.state.completed.verdict,undefined);
+ s=core.submitError(card,r.state,'wrong').state;
+ assert.equal(s.completed.verdict,true);
+ s=core.nextError(card,s);assert.equal(s.stage,'locate');
+ s=core.submitError(card,s,1).state;assert.equal(s.completed.locate,true);
+ s=core.nextError(card,s);
+ s=core.submitError(card,s,0).state;
+ s=core.nextError(card,s);
+ s=core.submitError(card,s,0).state;
+ s=core.nextError(card,s);assert.equal(s.stage,'transfer');
+ s=core.submitError(card,s,1).state;
+ s=core.nextError(card,s);
+ assert.equal(s.stage,'done');
+ assert.equal(Object.keys(s.completed).length,5);
+ assert.equal(core.normalizeErrorState(card,JSON.parse(JSON.stringify(s))).stage,'done');
+});
+test('correct work skips erroneous-line selection and hints are logged separately',()=>{
+ const card=context.window.VizyErrorCards.find(x=>x.kind==='correct');
+ let s=core.createErrorState(card);
+ s=core.hintError(card,s);
+ assert.equal(s.hints.verdict,true);
+ s=core.submitError(card,s,'correct').state;
+ s=core.nextError(card,s);
+ assert.equal(s.stage,'diagnose');
+ assert.equal(s.completed.locate,true);
+ assert.equal(core.errorSupport(card,s).length,1);
+});

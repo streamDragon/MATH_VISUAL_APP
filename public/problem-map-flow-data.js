@@ -89,3 +89,70 @@
     }
   ];
 })(typeof window!=='undefined'?window:globalThis);
+
+/* Original fictional student work. Nothing is transcribed from classroom photos. */
+(function(root){
+ const option=(text,correct=false)=>({text,correct});
+ root.VizyErrorCards=[
+  {
+   id:'height-vs-slope',skill:'derivative-meaning',title:'מה קורה בנקודת קיצון?',kind:'wrong',
+   context:'לפונקציה גזירה יש נקודת קיצון פנימית ב־x = 3.',
+   lines:['נתון: קיצון ב־x = 3','לכן f(3) = 0'],
+   targetLine:1,
+   diagnoses:[option('החליפו בין גובה לשיפוע',true),option('הנגזרת נחשבה עם מינוס שגוי'),option('אסור להציב x = 3')],
+   repairs:[option('f′(3) = 0',true),option('f(3) = 0'),option('a = 3')],
+   why:'בקיצון פנימי של פונקציה גזירה המשיק אופקי: f′(3)=0. הערך f(3) הוא הגובה ואינו חייב להיות אפס.',
+   transfer:{
+    question:'בקיצון פנימי של פונקציה גזירה ב־x = −2, מה נובע?',
+    options:[option('f(−2)=0'),option('f′(−2)=0',true),option('f′(0)=−2')],
+    feedback:'ה־x של הקיצון מוכנס לנגזרת כדי לקבל שיפוע 0; הגובה עדיין אינו ידוע.'
+   },
+   support:'derivative-meaning'
+  },
+  {
+   id:'minus-derivative',skill:'negative-derivative',title:'מה קרה למינוס?',kind:'wrong',
+   context:'תלמידה גזרה את הפונקציה הבאה.',
+   lines:['g(x) = −x² + 5x','g′(x) = 2x + 5'],
+   targetLine:1,
+   diagnoses:[option('שכחו את המינוס של האיבר הראשון',true),option('הנגזרת חייבת להיות שווה לאפס'),option('ל־5x אין נגזרת')],
+   repairs:[option('g′(x) = −2x + 5',true),option('g′(x) = −x + 5'),option('g′(x) = 2x − 5')],
+   why:'בגזירת −x² מקבלים −2x. חישוב הנגזרת והצבת תנאי הקיצון הן שתי פעולות נפרדות.',
+   transfer:{
+    question:'כעת גוזרים h(x) = −3x² + 2x. מה הנגזרת?',
+    options:[option('−6x + 2',true),option('6x + 2'),option('−3x + 2')],
+    feedback:'המינוס והמקדם נשמרים בעת גזירת האיבר הריבועי.'
+   },
+   support:'differentiate'
+  },
+  {
+   id:'lost-equation',skill:'two-equations',title:'לא איבדנו משוואה?',kind:'incomplete',
+   context:'יש שתי פונקציות עם קיצון באותה נקודה. התלמיד כתב:',
+   lines:['f′(x) = 0   וגם   g′(x) = 0','לכן f′(x) = g′(x)'],
+   targetLine:1,
+   diagnoses:[option('המסקנה נכונה, אבל אינה שקולה לשני התנאים',true),option('צריך למחוק את כל הנגזרות'),option('הנגזרות חייבות להיות שונות')],
+   repairs:[option('שומרים f′(x)=0 וגם g′(x)=0',true),option('משאירים רק f′(x)=g′(x)'),option('קובעים f(x)=g(x)=0')],
+   why:'השוויון בין הנגזרות נובע מהנתונים, אך אם משאירים רק אותו כבר לא דורשים שכל נגזרת שווה לאפס.',
+   transfer:{
+    question:'נתון A=0 וגם B=0. מה שומר את כל המידע?',
+    options:[option('A=B בלבד'),option('A=0 וגם B=0',true),option('A+B=1')],
+    feedback:'שני תנאים נפרדים נשמרים. A=B הוא מסקנה נכונה אך חלשה יותר.'
+   },
+   support:'two-equations'
+  },
+  {
+   id:'right-but-unfinished',skill:'general-to-particular',title:'נכון, שגוי או רק לא גמור?',kind:'correct',
+   context:'הפונקציה גזירה ויש לה קיצון פנימי ב־x = 2.',
+   lines:['f′(2) = 0'],
+   targetLine:null,
+   diagnoses:[option('זו שורה נכונה, גם אם עוד לא גזרנו',true),option('זו טעות כי חסר ערך y'),option('זו טעות כי a עדיין לא ידוע')],
+   repairs:[option('מחשבים f′(x) לפי נוסחת הפונקציה ואז מציבים 2',true),option('מוחקים f′(2)=0'),option('מחליפים את השורה ב־f(2)=0')],
+   why:'זה תנאי נכון. הוא עדיין לא פותר את השאלה: צריך לחשב נגזרת מפורשת ולהציב. אל תסמן כל שלב חסר כשגיאה.',
+   transfer:{
+    question:'נתון קיצון פנימי ב־x = 4, ומישהו כתב f′(4)=0 בלבד. מה דעתך?',
+    options:[option('נכון, אך אינו פתרון מלא',true),option('שגוי בהכרח'),option('מוכיח שגובה הקיצון 0')],
+    feedback:'אפשר לזהות שורה נכונה גם אם הפתרון עוד לא הסתיים.'
+   },
+   support:'differentiate'
+  }
+ ];
+})(typeof window!=='undefined'?window:globalThis);

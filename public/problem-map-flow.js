@@ -46,7 +46,8 @@ host.innerHTML='<div class="flow-heading"><div><span class="flow-kicker">VIZY ·
  '<p class="flow-feedback" id="flowFeedback" role="status" aria-live="polite"></p>'+
  '<div class="flow-actions"><button id="flowHint" type="button" class="flow-secondary">רמז קטן</button><button id="flowBack" type="button" class="flow-secondary">הקשר הקודם</button><button id="flowNext" type="button">ממשיכים</button></div></div>'+
  '<details open class="flow-history" id="flowHistory"><summary><strong>השכבות ששמרנו</strong><span>לא מוחקים את הדרך</span></summary><div class="flow-rows" id="flowRows"></div></details>'+
- '<div id="flowFinish" class="flow-finish" hidden></div><div class="flow-footer"><button type="button" id="flowReset" class="flow-secondary">התחילו משימה זו מחדש</button></div>';
+ '<div id="flowFinish" class="flow-finish" hidden></div><div class="flow-footer"><button type="button" id="flowReset" class="flow-secondary">התחילו משימה זו מחדש</button></div>'+
+ '<section class="flow-errors" id="flowErrors" aria-labelledby="errorTitle"><div class="error-head"><span class="flow-kicker">יכולת חדשה · זיהוי טעויות</span><h2 id="errorTitle">מה הטעות שאתה רואה?</h2><p>קטעי פתרון מומצאים. בודקים אם הטענה נכונה, מסבירים ומתקנים, ואז מנסים דוגמה חדשה.</p></div><div id="errorCardChooser" class="error-card-chooser" role="group" aria-label="בחירת טעות לתרגול"></div><div class="error-sheet" id="errorSheet"><strong id="errorContext"></strong><div id="errorLines"></div></div><div class="error-task"><div class="flow-phase"><span id="errorStage"></span><span id="errorProgress"></span></div><h3 id="errorQuestion"></h3><div id="errorChoices" class="flow-options" role="group" aria-label="בחירת אבחון"></div><p id="errorFeedback" class="flow-feedback" role="status" aria-live="polite"></p><div class="flow-actions"><button id="errorHint" type="button" class="flow-secondary">רמז</button><button id="errorReset" type="button" class="flow-secondary">התחל מחדש</button><button id="errorNext" type="button">לשלב הבא</button></div></div><div id="errorCompare" class="error-compare" hidden></div></section>';
 function repaint(){
  document.body.classList.toggle('lesson-shared',selected.id==='shared');
  const currentStep=selected.steps[current.step],done=current.entries.some(e=>e.id===currentStep.id);
@@ -131,4 +132,89 @@ $('flowReset').onclick=()=>{
  $('flowInteraction').scrollIntoView({behavior:'smooth',block:'start'});
 };
 repaint();
+
+const errorCards=window.VizyErrorCards||[];
+const ERROR_KEY='vizy_error_card_v1_';
+let errorCard=errorCards[0];
+function loadError(card){try{return core.normalizeErrorState(card,JSON.parse(localStorage.getItem(ERROR_KEY+card.id)||'null'));}catch{return core.createErrorState(card);}}
+let errorState=errorCard?loadError(errorCard):null;
+function saveError(){try{localStorage.setItem(ERROR_KEY+errorCard.id,JSON.stringify(errorState));}catch{}}
+function errorHintMessage(card,stage){
+ if(stage==='verdict')return 'בדקו אם השורות עצמן שגויות, נכונות אך לא מספיקות, או תקינות.';
+ if(stage==='locate')return 'געו בשורה שממנה מתחילה הבעיה, ולא בהכרח בשורה הראשונה.';
+ if(stage==='transfer')return 'זה מקרה אחר. האם אותו עיקרון עדיין נכון?';
+ if(stage==='repair')return 'חפשו שורה שמתקנת רק את הטעות שזיהיתם.';
+ return 'מה המשמעות של הסימן או של התנאי?';
+}
+function renderError(){
+ if(!errorCard){$('flowErrors').hidden=true;return;}
+ const card=errorCard,s=errorState,stage=s.stage,finished=stage==='done';
+ const stages=['verdict','locate','diagnose','repair','transfer'];
+ const index=stages.indexOf(stage);
+ $('errorCardChooser').replaceChildren();
+ for(const c of errorCards){
+  const b=item('button','error-card-picker',c.title);b.type='button';b.dataset.errorCard=c.id;
+  b.setAttribute('aria-pressed',String(c.id===card.id));
+  try{const t=core.normalizeErrorState(c,JSON.parse(localStorage.getItem(ERROR_KEY+c.id)||'null'));if(t.stage==='done')b.textContent+=' ✓';}catch{}
+  b.onclick=()=>{errorCard=c;errorState=loadError(c);renderError();};
+  $('errorCardChooser').append(b);
+ }
+ $('errorContext').textContent=card.context;
+ $('errorLines').replaceChildren();
+ card.lines.forEach((text,index)=>{
+  const line=item('div','error-line',text);line.dir='ltr';line.dataset.errorLine=String(index);
+  if(stage==='locate')line.classList.add('error-line-clickable');
+  if(s.completed.locate&&index===card.targetLine)line.dataset.errorLocated='true';
+  $('errorLines').append(line);
+ });
+ $('errorStage').textContent=finished?'סיום':'שלב '+(index+1)+' · '+({verdict:'בדיקה',locate:'איתור',diagnose:'הסבר',repair:'תיקון',transfer:'מקרה חדש'}[stage]||'');
+ $('errorProgress').textContent=finished?'הושלם':(index+1)+' מתוך 5';
+ const prompts={verdict:'מה מצב הפתרון הזה?',locate:'על איזו שורה כדאי להצביע?',diagnose:'מה ההסבר המתמטי?',repair:'איך מתקנים או ממשיכים?',transfer:card.transfer.question,done:'הצלחתם גם במקרה חדש'};
+ $('errorQuestion').textContent=prompts[stage];
+ const choices=[];
+ if(stage==='verdict')choices.push(...[
+   {text:'יש כאן טעות',value:'wrong'},
+   {text:'נכון, אבל חסר תנאי או שלב',value:'incomplete'},
+   {text:'נכון כפי שנכתב',value:'correct'}
+ ]);
+ if(stage==='locate')card.lines.forEach((t,i)=>choices.push({text:'שורה '+(i+1),value:i}));
+ if(stage==='diagnose')card.diagnoses.forEach((o,i)=>choices.push({text:o.text,value:i}));
+ if(stage==='repair')card.repairs.forEach((o,i)=>choices.push({text:o.text,value:i}));
+ if(stage==='transfer')card.transfer.options.forEach((o,i)=>choices.push({text:o.text,value:i}));
+ $('errorChoices').replaceChildren();
+ choices.forEach(({text,value})=>{
+   const b=item('button','flow-choice',text);b.type='button';b.dataset.errorAnswer=String(value);b.disabled=Boolean(s.completed[stage]);
+   b.onclick=()=>{
+    const out=core.submitError(card,errorState,value);errorState=out.state;saveError();renderError();
+    if(out.correct)$('errorNext').focus();
+   };
+   $('errorChoices').append(b);
+ });
+ $('errorFeedback').textContent=finished
+  ?'השלמתם אבחון, תיקון והעברה. זו ראיה חזקה יותר מהיכולת לנחש את השורה הנכונה.'
+  :s.completed[stage]?(stage==='diagnose'||stage==='repair'||stage==='transfer'?card.why:'נכון. ממשיכים להוכיח את ההבנה.'):s.feedback||'בחרו אפשרות אחת. לא כל קטע מכיל טעות.';
+ $('errorFeedback').dataset.status=finished||s.completed[stage]?'correct':s.feedback?'retry':'neutral';
+ $('errorHint').disabled=finished||Boolean(s.completed[stage]);
+ $('errorNext').disabled=finished||!s.completed[stage];
+ $('errorNext').textContent=stage==='transfer'?'סיום':'המשך';
+ const compare=$('errorCompare');compare.replaceChildren();compare.hidden=!finished&&!s.completed.repair;
+ if(!compare.hidden){
+  compare.append(item('strong','', 'שומרים את השורה המקורית לצד התיקון'));
+  for(const line of card.lines)compare.append(item('div','error-before',line));
+  compare.append(item('div','error-after',card.repairs.find(x=>x.correct).text));
+  compare.append(item('p','',card.why));
+  if(finished){
+   const help=core.errorSupport(card,s);
+   compare.append(item('p','',help.length?'נדרשה עזרה ב־'+help.map(x=>x.stage).join(', ')+'. מומלץ עוד ניסיון בהמשך.':'זיהוי ותיקון עצמאיים. כדאי לחזור בהמשך כדי לבדוק שהידע נשמר.'));
+  }
+ }
+}
+$('errorHint').onclick=()=>{
+ errorState=core.hintError(errorCard,errorState);
+ errorState.feedback=errorHintMessage(errorCard,errorState.stage);
+ saveError();renderError();
+};
+$('errorNext').onclick=()=>{errorState=core.nextError(errorCard,errorState);saveError();renderError();};
+$('errorReset').onclick=()=>{errorState=core.createErrorState(errorCard);saveError();renderError();};
+renderError();
 })();

@@ -67,5 +67,77 @@
   const state=normalize(lesson,input);
   return lesson.steps.filter(s=>state.entries.some(e=>e.id===s.id)&&(state.attempts[s.id]>1||state.help[s.id])).map(s=>({id:s.id,phase:s.phase}));
  }
- return {validate,createState,normalize,submit,next,previous,help,needsSupport};
+ function validateErrorCard(card){
+  const errors=[];
+  if(!card?.id||!card?.skill||!card?.context||!Array.isArray(card.lines)||card.lines.length<1||card.lines.length>4)errors.push('invalid card');
+  if(!['wrong','incomplete','correct'].includes(card?.kind))errors.push('invalid verdict');
+  if(card?.kind==='correct'&&card.targetLine!==null)errors.push('correct card must have no target line');
+  if(card?.kind!=='correct'&&(!Number.isInteger(card.targetLine)||card.targetLine<0||card.targetLine>=card.lines.length))errors.push('invalid target line');
+  for(const choices of [card?.diagnoses,card?.repairs,card?.transfer?.options]){
+   if(!Array.isArray(choices)||choices.length!==3||choices.filter(x=>x.correct).length!==1)errors.push('invalid options');
+  }
+  return errors;
+ }
+ function createErrorState(card){
+  return {id:card.id,stage:'verdict',attempts:{},hints:{},completed:{},feedback:'',selectedLine:null};
+ }
+ const stages=['verdict','locate','diagnose','repair','transfer','done'];
+ function normalizeErrorState(card,input){
+  const state=createErrorState(card);
+  if(!input||input.id!==card.id)return state;
+  const stage=stages.includes(input.stage)?input.stage:'verdict';
+  const completed={};
+  for(const s of stages.slice(0,-1)){
+   if(input.completed?.[s]===true)completed[s]=true; else break;
+  }
+  const stageIndex=stages.indexOf(stage);
+  const firstIncomplete=stages.findIndex(s=>s!=='done'&&!completed[s]);
+  state.stage=stageIndex>firstIncomplete&&firstIncomplete!==-1?stages[firstIncomplete]:stage;
+  if(firstIncomplete===-1)state.stage='done';
+  state.completed=completed;
+  state.attempts={...(input.attempts||{})};
+  state.hints={...(input.hints||{})};
+  state.selectedLine=Number.isInteger(input.selectedLine)?input.selectedLine:null;
+  state.feedback=typeof input.feedback==='string'?input.feedback:'';
+  return state;
+ }
+ function submitError(card,input,value){
+  const state=normalizeErrorState(card,input);
+  const stage=state.stage;
+  if(stage==='done'||state.completed[stage])return {state,correct:false};
+  state.attempts[stage]=(state.attempts[stage]||0)+1;
+  let correct=false;
+  if(stage==='verdict')correct=value===card.kind;
+  if(stage==='locate')correct=value===card.targetLine;
+  if(stage==='diagnose'||stage==='repair'){
+   const item=(stage==='diagnose'?card.diagnoses:card.repairs)?.[value];
+   correct=Number.isInteger(value)&&Boolean(item?.correct);
+  }
+  if(stage==='transfer')correct=Number.isInteger(value)&&Boolean(card.transfer?.options?.[value]?.correct);
+  if(correct)state.completed[stage]=true;
+  if(stage==='locate'&&Number.isInteger(value))state.selectedLine=value;
+  state.feedback=correct?'נכון. אפשר להמשיך לשלב הבא.':stage==='verdict'?'בדקו שוב: האם זו שגיאה, שלב נכון אך לא שקול, או פתרון תקין?':stage==='locate'?'נסו לזהות איזו שורה מחייבת בדיקה.':'נסו שוב. כדאי להשוות בין המשמעות המתמטית לבין השורה שנכתבה.';
+  return {state,correct};
+ }
+ function nextError(card,input){
+  const state=normalizeErrorState(card,input);
+  if(!state.completed[state.stage])return state;
+  const idx=stages.indexOf(state.stage);
+  state.stage=stages[Math.min(idx+1,stages.length-1)];
+  if(state.stage==='locate'&&card.kind==='correct'){
+   state.completed.locate=true;state.stage='diagnose';
+  }
+  state.feedback='';
+  return state;
+ }
+ function hintError(card,input){
+  const state=normalizeErrorState(card,input);
+  if(state.stage!=='done')state.hints[state.stage]=true;
+  return state;
+ }
+ function errorSupport(card,input){
+  const s=normalizeErrorState(card,input);
+  return Object.keys(s.attempts).filter(stage=>s.attempts[stage]>1||s.hints[stage]).map(stage=>({stage,skill:card.skill}));
+ }
+ return {validate,createState,normalize,submit,next,previous,help,needsSupport,validateErrorCard,createErrorState,normalizeErrorState,submitError,nextError,hintError,errorSupport};
 });
