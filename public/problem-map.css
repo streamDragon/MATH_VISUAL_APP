@@ -160,3 +160,17 @@ body{padding-bottom:0}
  .representation-links button span{font-size:.7rem}
  .fields{gap:4px}
 }
+
+/* One mathematical family, one draggable curve, accessible arrows. */
+#liveGraph{touch-action:none;cursor:grab;user-select:none}
+#liveGraph:active{cursor:grabbing}
+#liveGraph .ghost-curve{stroke:#9bb9ca;stroke-width:2;stroke-dasharray:5 7;opacity:.38;fill:none;pointer-events:none}
+#liveGraph .curve{stroke:#078b94;stroke-width:5;opacity:1;fill:none;pointer-events:none}
+#liveGraph .vertex{fill:#078b94;stroke:#fff;stroke-width:2}
+.motion-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.motion-controls button{font-size:1.3rem;font-weight:900;min-height:48px;background:#eef8fb}
+.mixed-phrase{display:inline-flex;flex-wrap:wrap;align-items:center;gap:5px;direction:rtl;vertical-align:middle}
+.mixed-phrase .math-term{direction:ltr;unicode-bidi:isolate;white-space:nowrap}
+.phrase.done[data-role="object"],.role-choice[data-role-choice="object"]{border-bottom:4px solid #26976f}
+.phrase.done[data-role="relation"],.role-choice[data-role-choice="relation"]{border-bottom:4px dotted #865ed4}
+.phrase.done[data-role="instruction"],.role-choice[data-role-choice="instruction"]{border-bottom:4px dashed #d05b96}

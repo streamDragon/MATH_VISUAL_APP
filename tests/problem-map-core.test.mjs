@@ -22,3 +22,5 @@ test('inferred summary preserves claim order and does not solve for a',()=>{
  assert(!JSON.stringify(p).includes('a = -4'));assert(!JSON.stringify(p).includes('a=-4'));
 });
 test('rejects bad metadata and references',()=>{const broken={...p,fields:[{id:'x',from:{phrase:'missing'}}]};assert(core.validateProblem(broken).length>0);});
+
+test('movable parabola functions',()=>{assert.equal(core.aFromLowPoint(2),-4);assert(core.isOnLine(2,2));assert(!core.isOnLine(1.8,2));});

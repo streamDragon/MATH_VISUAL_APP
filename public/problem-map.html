@@ -1,31 +1,27 @@
-<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#10213d"><title>Vizy | מפת השאלה</title><link rel="stylesheet" href="problem-map.css"><script defer src="problem-map-data.js"></script><script defer src="problem-map-core.js"></script><script defer src="problem-map.js"></script><script defer src="problem-map-visual.js"></script></head><body>
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#10213d"><title>Vizy | מפת השאלה</title><link rel="stylesheet" href="problem-map.css?v=20261111r3"><script defer src="problem-map-data.js?v=20261111r3"></script><script defer src="problem-map-core.js?v=20261111r3"></script><script defer src="problem-map.js?v=20261111r3"></script><script defer src="problem-map-visual.js?v=20261111r3"></script></head><body>
 <header><a href="learn.html" class="brand">VIZY</a><span>מפת השאלה</span><a href="learn.html">בית</a></header>
 <main><section class="summary" aria-label="מה הנתונים קובעים"><p class="eyebrow">י״א · קיצון עם פרמטר</p><h1>מבינים לפני שמחשבים</h1><p id="determined">הנתונים קובעים: פונקציה אחת מתוך אינסוף.</p><p>הסקנו עד כה: <strong id="inferredSummary" aria-live="polite">עדיין לא הסקנו מסקנות.</strong></p>
 <div id="fields" class="fields"><div class="field" data-field="x"><strong>x</strong><span id="value-x">?</span><small id="label-x">לא זוהה</small></div><div class="field" data-field="y"><strong>y</strong><span id="value-y">?</span><small id="label-y">לא זוהה</small></div><div class="field" data-field="d"><strong>f′(x)</strong><span id="value-d">?</span><small id="label-d">לא הוסק</small></div><div class="field" data-field="a"><strong>a</strong><span id="value-a">?</span><small id="label-a">לא זוהה</small></div></div>
 </section>
 <section class="live-stage" aria-label="המחשה מתמטית">
-<div class="stage-heading"><strong>רואים את המתמטיקה</strong><p>איזו פרבולה מגיעה לנקודת השפל ב־x = 2?</p></div>
+<div class="stage-heading"><strong>רואים את המתמטיקה</strong><p>גררו את הפרבולה עד שנקודת השפל תגיע לקו הכתום.</p></div>
 <div class="interactive-family-content">
 
-<svg id="liveGraph" viewBox="0 0 500 310" role="img" aria-label="שלוש פרבולות כלפי מעלה; קו כתום מסמן x שווה 2" xmlns="http://www.w3.org/2000/svg">
+<svg id="liveGraph" viewBox="0 0 500 310" role="img" aria-label="פרבולה אחת שניתן לגרור על משפחת פרבולות; קו כתום מסמן x שווה 2" xmlns="http://www.w3.org/2000/svg">
 <rect width="500" height="310" rx="12" fill="#f7fbff"/>
 <path d="M18 200H482 M250 14V293" class="graph-axis" fill="none"/>
 <text x="473" y="219" font-size="15" fill="#48657c">x</text><text x="258" y="25" font-size="15" fill="#48657c">y</text>
 <path d="M350 15V288" class="graph-guide" fill="none"/>
 <rect x="310" y="6" width="80" height="27" rx="9" fill="#fff2dc" stroke="#e6a754"/>
 <text x="350" y="24" text-anchor="middle" font-size="15" font-weight="800" fill="#995816">x = 2</text>
-<text x="244" y="220" font-size="13" fill="#547088" text-anchor="end">0</text>
+
 <g id="liveCurves"></g><g id="liveTangent"></g>
 </svg>
-<div class="curve-buttons" role="group" aria-label="בחירת פרבולה">
-<button type="button" data-visual-curve="left" aria-pressed="false"><i class="curve-dot" style="background:#5386dd"></i>כחולה</button>
-<button type="button" data-visual-curve="center" aria-pressed="false"><i class="curve-dot" style="background:#058b8f"></i>ירוקה</button>
-<button type="button" data-visual-curve="right" aria-pressed="false"><i class="curve-dot" style="background:#a47cde"></i>סגולה</button>
-</div><p id="visualFeedback" role="status" aria-live="polite">בחרו צבע. לא צריך לחשב.</p>
+<div class="curve-buttons motion-controls" role="group" aria-label="הזזת פרבולה"><button type="button" data-move="left" aria-label="להזיז שמאלה">◀</button><button type="button" data-move="right" aria-label="להזיז ימינה">▶</button></div><p id="visualFeedback" role="status" aria-live="polite">גררו את הפרבולה לצדדים. איפה צריכה להיות נקודת השפל?</p>
 <div class="representation-links" aria-label="שלוש השפות המתמטיות">
 <button type="button" data-representation="words"><strong>מילים</strong><span>קיצון ב־x = 2</span></button>
 <button type="button" data-representation="picture"><strong>ציור</strong><span>נקודת שפל ומשיק אופקי</span></button>
-<button type="button" data-representation="algebra"><strong>אלגברה</strong><span dir="ltr">f′(2) = 0</span></button>
+<button type="button" data-representation="algebra"><strong>אלגברה</strong><span>מה אומרת הנגזרת?</span></button>
 </div>
 <p id="representationNote" class="representation-note" role="status">אפשר ללחוץ על אחת השפות ולראות מה היא אומרת בציור.</p>
 </div></section>

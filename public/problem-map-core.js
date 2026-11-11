@@ -42,5 +42,5 @@ function fieldState(p,state={}){
  });
 }
 function inferredSummary(p,state={}){return (p.claims||[]).filter(c=>state?.answers?.[c.id]===true).map(c=>c.summary);}
-return {validateProblem,isRoleCorrect,isClaimCorrect,fieldState,inferredSummary};
+return {validateProblem,isRoleCorrect,isClaimCorrect,fieldState,inferredSummary,aFromLowPoint:x=>-2*x,isOnLine:(x,target,tolerance=0.08)=>Number.isFinite(x)&&Math.abs(x-target)<=tolerance};
 });

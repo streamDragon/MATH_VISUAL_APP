@@ -19,12 +19,12 @@ test('parameter problem: identify, represent and infer share one persisted mobil
  await page.locator('[data-picture="rising"]').click();
  await expect(page.locator('#pictureFeedback')).toContainText('עוד לא');
  await page.locator('[data-picture="flat"]').click();
- await expect(page.locator('#pictureFeedback')).toContainText('משיק אופקי');
+ await expect(page.locator('#pictureFeedback')).toContainText('המשיק שם אופקי');
  await page.locator('.algebra-option').filter({hasText:'f′(2) = 0'}).click();
- await expect(page.locator('#algebraFeedback')).toContainText('קשר מדויק');
+ await expect(page.locator('#algebraFeedback')).toContainText('הנגזרת היא אפס');
  await page.locator('[data-tab="infer"]').click();
  await page.locator('[data-claim="c1"] [data-answer-index="1"]').click();
- await expect(page.locator('[data-claim="c1"] .claim-result')).toContainText('עוד לא');
+ await expect(page.locator('[data-claim="c1"] .claim-result')).toContainText('לא בדיוק');
  await expect(page.locator('#value-d')).toHaveText('?');
  await page.locator('[data-claim="c1"] [data-answer-index="0"]').click();
  await expect(page.locator('#value-d')).toHaveText('f′(2) = 0');
@@ -82,34 +82,49 @@ test('mockup legend is optional and role plus knowledge source remain distinct a
  await expect(page.locator('#pictureChoices button')).toHaveCount(3);
  await expect(page.locator('#liveGraph')).toBeVisible();
  await expect(page.locator('[data-representation]')).toHaveCount(3);
- await expect(page.locator('#liveCurves .curve')).toHaveCount(3);
- await page.locator('[data-visual-curve="center"]').click();
- await expect(page.locator('#visualFeedback')).toContainText('השפל של הירוקה');
+ await expect(page.locator('#liveCurves .curve')).toHaveCount(1);
+ for(let i=0;i<8;i++)await page.locator('[data-move="right"]').click();
+ await expect(page.locator('#visualFeedback')).toContainText('נשארה פרבולה אחת');
  await page.reload();
  await expect(page.locator('#liveGraph')).toBeVisible();
- await expect(page.locator('[data-visual-curve="center"]')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#visualFeedback')).toContainText('נשארה פרבולה אחת');
  expect(await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth)).toBeLessThanOrEqual(4);
  await page.screenshot({path:'test-results/problem-map-mockup-320.png',fullPage:true});
 });
 
-test('visible mathematical graph, linked representations and aligned coordinates',async({page})=>{
+
+test('draggable parabola and persisted low point',async({page})=>{
  await page.setViewportSize({width:390,height:844});
  await page.goto('/problem-map.html');
+ await page.evaluate(()=>localStorage.removeItem('vizy_problem_map_v2'));
+ await page.reload();
  await expect(page.locator('#liveGraph')).toBeVisible();
- await expect(page.locator('#liveCurves .curve')).toHaveCount(3);
- const geometry=await page.locator('#liveCurves .vertex').evaluateAll(nodes=>nodes.map(n=>({
-  x:Number(n.getAttribute('cx')),y:Number(n.getAttribute('cy'))
- })));
- expect(geometry).toEqual([{x:250,y:200},{x:350,y:280},{x:300,y:220}]);
- await page.locator('[data-visual-curve="center"]').click();
- await expect(page.locator('#visualFeedback')).toContainText('השפל של הירוקה');
- await page.locator('[data-representation="algebra"]').click();
- await expect(page.locator('#liveTangent path')).toHaveCount(1);
- await expect(page.locator('#representationNote')).toContainText('f′(2) = 0');
+ await expect(page.locator('#liveCurves .curve')).toHaveCount(1);
+ await expect(page.locator('#liveCurves .ghost-curve')).toHaveCount(3);
+ const before=await page.locator('#liveCurves .curve').getAttribute('d');
+ const rect=await page.locator('#liveGraph').boundingBox();if(!rect)throw Error('graph missing');
+ const atX=(x:number)=>rect.x+rect.width*x/500;
+ const atY=(y:number)=>rect.y+rect.height*y/310;
+ await page.mouse.move(atX(250),atY(185));await page.mouse.down();
+ await page.mouse.move(atX(350),atY(185),{steps:16});await page.mouse.up();
+ await expect(page.locator('#visualFeedback')).toContainText('נשארה פרבולה אחת');
+ await expect(page.locator('#inferredSummary')).toContainText('בציור: נשארה פרבולה אחת');
+ expect(await page.locator('#liveCurves .curve').getAttribute('d')).not.toBe(before);
+ await page.reload();await expect(page.locator('#visualFeedback')).toContainText('נשארה פרבולה אחת');
+ await page.locator('#resetAll').click();
+ await expect(page.locator('#visualFeedback')).toContainText('גררו את הפרבולה');
  await expect(page.locator('#value-a')).toHaveText('?');
- await page.locator('[data-tab="infer"]').click();
- await expect(page.locator('#liveGraph')).toBeVisible();
- await page.locator('[data-claim="c1"] [data-answer-index="0"]').click();
- await expect(page.locator('#value-d')).toHaveText('f′(2) = 0');
- expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(4);
+ expect((await page.locator('body').innerText())).not.toMatch(/a\s*=\s*-?4/);
+});
+test('Hebrew mixed formula and role styles',async({page})=>{
+ await page.setViewportSize({width:390,height:844});await page.goto('/problem-map.html');
+ const h=await page.locator('[data-phrase="fn"] .hebrew-term').boundingBox();
+ const f=await page.locator('[data-phrase="fn"] .math-term').boundingBox();
+ expect(h&&f).toBeTruthy();expect(h!.x).toBeGreaterThan(f!.x);
+ for(const [id,role] of [['fn','object'],['has','relation'],['find','instruction']]){
+  await page.locator('[data-phrase="'+id+'"]').click();
+  await page.locator('[data-role-choice="'+role+'"]').click();
+ }
+ const styles=await page.locator('[data-phrase="fn"],[data-phrase="has"],[data-phrase="find"]').evaluateAll(els=>els.map(e=>getComputedStyle(e).borderBottomStyle));
+ expect(styles).toEqual(['solid','dotted','dashed']);
 });

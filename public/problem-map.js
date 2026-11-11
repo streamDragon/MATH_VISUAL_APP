@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const $=id=>document.getElementById(id),core=window.VizyProblemMapCore,p=window.VizyProblemMaps[0],KEY='vizy_problem_map_v2';
-const roles={object:'עצם',relation:'יחס',instruction:'הוראה'},state={tab:'identify',roles:{},picture:null,algebra:null,visualCurve:null,answers:{},checkpoint:null};
-try{const stored=JSON.parse(localStorage.getItem(KEY)||'null');if(stored&&stored.problemId===p.id){Object.assign(state,{tab:stored.tab||'identify',roles:stored.roles||{},picture:stored.picture??null,algebra:stored.algebra??null,visualCurve:stored.visualCurve??null,answers:stored.answers||{},checkpoint:stored.checkpoint||null});}}catch{}
+const roles={object:'עצם',relation:'יחס',instruction:'הוראה'},state={tab:'identify',roles:{},picture:null,algebra:null,visualCurve:null,lowPoint:0,answers:{},checkpoint:null};
+try{const stored=JSON.parse(localStorage.getItem(KEY)||'null');if(stored&&stored.problemId===p.id){Object.assign(state,{tab:stored.tab||'identify',roles:stored.roles||{},picture:stored.picture??null,algebra:stored.algebra??null,visualCurve:stored.visualCurve??null,lowPoint:Number.isFinite(stored.lowPoint)?stored.lowPoint:0,answers:stored.answers||{},checkpoint:stored.checkpoint||null});}}catch{}
 let currentPhrase=null;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({problemId:p.id,...state}))}catch{}};
 const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n};
@@ -9,6 +9,7 @@ function paint(){
  const fields=core.fieldState(p,state);
  fields.forEach(f=>{const target=document.querySelector('[data-field="'+f.id+'"]');$('value-'+f.id).textContent=f.value;$('label-'+f.id).textContent=f.label;target.dataset.source=f.source||'unknown';});
  const statements=core.inferredSummary(p,state);
+ if(core.isOnLine(state.lowPoint,2,0.08))statements.unshift('בציור: נשארה פרבולה אחת');
  $('inferredSummary').textContent=statements.length?statements.join(' · '):'עוד כלום.';
  document.querySelectorAll('[data-phrase]').forEach(b=>{
   const id=b.dataset.phrase,done=state.roles[id]===true,source=p.phrases[id].source;
@@ -40,7 +41,7 @@ function drawText(){
  const host=$('problemText');host.replaceChildren();
  for(const part of p.text){if(!part.phrase){const s=el('span','',part.t);host.append(s);continue;}
   const b=el('button','phrase',part.t);b.type='button';b.dataset.phrase=part.phrase;
-  if(part.ltr)b.dir='ltr';b.onclick=()=>openPhrase(part.phrase);host.append(b);
+  if(part.phrase==='fn'){b.dir='rtl';b.classList.add('mixed-phrase');const h=el('span','hebrew-term','הפונקציה');const math=el('span','math-term','f(x) = x² + ax');math.dir='ltr';b.replaceChildren(h,math);}else if(part.ltr)b.dir='ltr';b.onclick=()=>openPhrase(part.phrase);host.append(b);
  }
 }
 function sketchSvg(id){
@@ -122,6 +123,7 @@ function renderInference(){
 }
 function shareText(){
  const fields=core.fieldState(p,state),done=core.inferredSummary(p,state);
+ if(core.isOnLine(state.lowPoint,2,0.08))done.unshift('בציור: נשארה פרבולה אחת');
  return 'Vizy | מפת השאלה\n'+p.text.map(x=>x.t).join('')+
  '\n'+fields.map(f=>f.symbol+': '+f.value+' ('+f.label+')').join('\n')+
  '\nהסקנו עד כה: '+(done.join(' · ')||'עדיין לא')+'\n'+p.inferenceClosing;
@@ -129,12 +131,12 @@ function shareText(){
 function setup(){
  $('determined').textContent=p.summaryDetermined;drawText();
  $('roleHint').onclick=()=>roleFeedback('רמז: זו מילה מסוג '+roles[p.phrases[currentPhrase]?.role||'object']+'.');
- window.addEventListener('vizy:visual-choice',e=>{state.visualCurve=e.detail?.id||null;save();});
+ window.addEventListener('vizy:visual-position',e=>{state.lowPoint=Number.isFinite(e.detail?.x)?e.detail.x:0;save();paint();});
  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;save();paint()});
  document.querySelectorAll('[data-checkpoint]').forEach(b=>b.onclick=()=>{state.checkpoint=b.dataset.checkpoint;save();paint()});
  $('shareCard').onclick=async()=>{const text=shareText();try{if(navigator.share){await navigator.share({title:'Vizy | מפת השאלה',text});return;}}catch(e){if(e.name==='AbortError')return;}
  try{await navigator.clipboard.writeText(text);$('checkpointSummary').textContent='כרטיס המפה הועתק.';}catch{$('checkpointSummary').textContent=text;}};
- $('resetAll').onclick=()=>{state.roles={};state.picture=null;state.algebra=null;state.visualCurve=null;state.answers={};state.checkpoint=null;state.tab='identify';save();$('rolePanel').classList.add('hidden');$('pictureFeedback').textContent='';$('algebraFeedback').textContent='';paint();renderRepresentation();renderInference()};
+ $('resetAll').onclick=()=>{state.roles={};state.picture=null;state.algebra=null;state.visualCurve=null;state.lowPoint=0;state.answers={};state.checkpoint=null;state.tab='identify';save();$('rolePanel').classList.add('hidden');$('pictureFeedback').textContent='';$('algebraFeedback').textContent='';paint();renderRepresentation();renderInference()};
  renderRepresentation();renderInference();paint();
 }
 document.addEventListener('DOMContentLoaded',setup);

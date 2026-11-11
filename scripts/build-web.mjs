@@ -102,6 +102,12 @@ await Promise.all([
   copyFileIfExists(path.join(rootDir, 'public', 'offline.html'), path.join(distDir, 'offline.html'))
 ]);
 
+// Stamp each deployed problem-map asset URL with the actual build ID.
+// This avoids mixing markup and scripts from different releases on student devices.
+await replaceInFile(path.join(distDir, 'problem-map.html'), [
+  ['?v=20261111r3', `?v=${buildId}`]
+]);
+
 await replaceInFile(path.join(distDir, 'index.html'), [
   ['__BUILD_ID__', buildId],
   ['__BUILD_ENV__', buildEnv],

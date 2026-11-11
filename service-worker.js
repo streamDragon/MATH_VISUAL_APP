@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mathviz-learning-v2.0';
+const CACHE_NAME = 'mathviz-learning-v2.1';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",
@@ -123,6 +123,11 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (!isCacheableSameOriginRequest(request)) return;
+
+  if (/^\/problem-map(?:[-.]|$)/.test(new URL(request.url).pathname)) {
+    event.respondWith(networkFirst(request,event));
+    return;
+  }
 
   if (request.mode === 'navigate') {
     event.respondWith(networkFirst(request, event));
