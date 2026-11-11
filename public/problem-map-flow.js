@@ -217,4 +217,5 @@ $('errorHint').onclick=()=>{
 $('errorNext').onclick=()=>{errorState=core.nextError(errorCard,errorState);saveError();renderError();};
 $('errorReset').onclick=()=>{errorState=core.createErrorState(errorCard);saveError();renderError();};
 renderError();
+if(location.hash==='#flowErrors')requestAnimationFrame(()=>$('flowErrors').scrollIntoView({block:'start'}));
 })();

@@ -140,3 +140,11 @@ test('right but unfinished is not marked as error; two zero equations stay separ
  await page.locator('[data-error-answer="0"]').click();
  await expect(page.locator('#errorFeedback')).toContainText('השוויון בין הנגזרות');
 });
+
+test('deep link to error recognition opens at the new section on a phone',async({page})=>{
+ await page.setViewportSize({width:320,height:740});
+ await page.goto('/problem-map.html#flowErrors');
+ await expect(page.locator('#flowErrors')).toBeInViewport();
+ await expect(page.locator('#errorCardChooser .error-card-picker')).toHaveCount(4);
+ await expect(page.locator('.header-errors-link')).toBeVisible();
+});
