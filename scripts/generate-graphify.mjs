@@ -32,11 +32,7 @@ const aliases = {
  "package.json": "הגדרות הפרויקט",
  "vite.config.ts": "הגדרת בנייה"
 };
-const featureList = [
- "public/problem-map.html", "public/problem-map.js", "public/problem-map.css",
- "tests/problem-map.spec.ts", "public/inequality-discovery.js",
- "public/inequality-discovery.css"
-];
+const featureList = []; // Everything listed from main is current; no stale feature nodes.
 function group(p) {
  if (p === "package.json" || p === "vite.config.ts" || p.includes("/workflows/") || p.startsWith("scripts/") || p === "service-worker.js") return "build";
  if (p.startsWith("tests/")) return "test";
@@ -126,7 +122,12 @@ add("public/classroom-flow.js","public/classroom-math.js","uses");
 add("public/classroom-flow.js","public/classroom-activities.js","uses");
 add("public/classroom-flow.js","public/classroom-visuals.js","uses");
 add("public/skill-lab.js","public/skill-lab-data.js","uses");
-add("public/learn.html","public/problem-map.html","planned");
+add("public/learn.html","public/problem-map.html","navigates");
+add("public/problem-map.html","public/meaning-weave-data.js","loads");
+add("public/problem-map.html","public/meaning-weave-core.js","loads");
+add("public/problem-map.html","public/meaning-weave.js","loads");
+add("public/meaning-weave.js","public/meaning-weave-core.js","uses");
+add("public/learning-app.js","public/ability-picker.js","routing");
 add("public/problem-map.html","public/problem-map.js","loads");
 add("public/problem-map.html","public/problem-map.css","loads");
 add("tests/problem-map.spec.ts","public/problem-map.html","tests");
@@ -156,19 +157,21 @@ cadd("concept:identify","concept:represent","shared state");
 cadd("concept:represent","concept:infer","shared state");
 
 const byGroup=Object.fromEntries([...new Set(nodes.filter(n=>n.group!=="concept").map(n=>n.group))].map(g=>[g,nodes.filter(n=>n.group===g).length]));
+const sourceSha=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
+const sourceBranch=execFileSync('git',['branch','--show-current'],{cwd:root,encoding:'utf8'}).trim()||'detached';
 const data={
  meta:{title:"Vizy Graphify",generatedAt:new Date().toISOString(),
- repository:"streamDragon/MATH_VISUAL_APP",mainSha:"c1242490fcfa3918f864819a898361919006728b",
- trackedFiles:tracked.length,scannedFiles:nodes.filter(n=>n.path&&n.status==="main").length,branch:"feature/vizy-graphify-20261110",
- note:"מפת קוד המבוססת על main בקומיט c124249 ומונגשת דרך ענף Graphify. מודל הלמידה מסומן design כדי להפריד בין מבנה פדגוגי לבין מימוש בפועל."},
+ repository:"streamDragon/MATH_VISUAL_APP",mainSha:sourceSha,
+ trackedFiles:tracked.length,scannedFiles:nodes.filter(n=>n.path&&n.status==="main").length,branch:sourceBranch,
+ note:"מפת קבצים מסריקת git ls-files בענף "+sourceBranch+" בקומיט "+sourceSha.slice(0,7)+". מקור: סביבת העבודה המקומית. פריטי design הם כיווני תכנון, לא קוד ממומש."},
  nodes,edges:edges.concat(cEdges),counts:byGroup,
  findings:[
   {severity:"medium",title:"מפת השאלה שולבה ב-main",detail:"בקומיטים של 10 בנובמבר נוספו שלוש לשוניות זיהוי, ייצוג והסקה, מקרה פרמטר, ומבחני מובייל. זו התקדמות ממשית בקוד, לא רק במוקאפ."},
   {severity:"medium",title:"לוגיקת מקור הידע עדיין אינה ארבע קטגוריות אחידות",detail:"problem-map-core.js מאמת מקור ביטוי כנתון, מבוקש או none; עיקרון ידוע מוצג בטקסט, ומסקנה מזוהה דרך claim. המושגים מובחנים אך עדיין לא כולם מיוצגים באותו מודל נתונים."},
   {severity:"medium",title:"הבחנה בין תפקיד מילה לבין מקור מידע",detail:"המימוש מכיל object/relation/instruction ובנפרד given/asked/none. שווה לוודא שמקרא הצבעים והמשוב אינם מערבבים תפקיד תחבירי עם מקור ידיעה."},
   {severity:"medium",title:"קביעה מתמטית לעומת היסק תלמיד",detail:"המסך החדש כבר מפריד בין 'הנתונים קובעים' לבין 'הסקנו עד כה'. חשוב לשמר הפרדה זו גם בבעיות נוספות, לא רק בדוגמת הפרמטר."},
-  {severity:"medium",title:"בדיקת הבנה מעבר לדוגמת פרמטר",detail:"כרגע המידע שנבדק מציג דוגמה אחת עם f(x)=x²+ax וקיצון ב-x=2. כדאי לבחון עקרונות וייצוגים גם עם שרטוט חסר סולם, תנאי עודף ותנאי סותר."},
-  {severity:"medium",title:"סנכרון Graphify",detail:"המפה נגזרת מהקבצים שנמצאו ב-main בקומיט c124249, ונוצרה בענף Graphify נפרד. נדרש לבנות אותה מחדש אחרי שינויים נוספים באתר."}
+  {severity:"medium",title:"מארג משמעויות נבדק כפעילות",detail:"נוספו שלושה מסלולי מארג לכיתות ט ויא: עלייה, שיפוע, הפרש ריבועים. הבחירה הרב-נכונה, מיון סוג קשר והעברה נבדקים מקומית; הצלחה של תלמידים אמיתיים עדיין לא נמדדה."},
+  {severity:"medium",title:"צילום שאלות: חיבור חי טרם אומת",detail:"הלקוח דורש העלאת תמונה מוצלחת ומזהה בקשה מהשרת; אין עדיין אישור לבדיקת חשבון תלמיד, מודרטור ושירות אחסון חי מקצה לקצה."}
  ]
 };
 const out = path.join(root,"public");

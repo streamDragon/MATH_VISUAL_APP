@@ -89,15 +89,15 @@
       predNo: "נבדוק יחד בציור ונראה מה משתנה.",
       requestTitle: "שאלה שחסרה לכם?",
       requestIntro:
-        "כתבו או צרפו תמונה. חגי יבדוק ויכין המחשה — המענה נבנה על ידי אדם.",
+        "כתבו שאלה או צלמו אותה. חגי יבחר שאלות ויכין מהן פעילויות. אין מענה אוטומטי.",
       text: "נוסח השאלה",
       source: "קישור למקור (אפשר להשאיר ריק)",
       image: "תמונה (עד 5MB)",
       draft: "שמירת טיוטה",
       send: "שליחת בקשה לחגי",
       notSent: "הטיוטה נשמרה במכשיר. לא נשלחה לחגי.",
-      received: "הבקשה התקבלה. יעד המענה הוא 24 שעות; אפשר לעקוב כאן.",
-      requestGoal: "יעד המענה לבקשה שהתקבלה: 24 שעות. עד אז אפשר ללמוד מהבנק.",
+      received: "הבקשה התקבלה בשרת עם מזהה. חגי יבחר אם ומתי להכין ממנה פעילות.",
+      requestGoal: "אפשר לצלם שאלה מהטלפון ולשלוח לבדיקה אנושית. אין התחייבות לזמן מענה או לפרסום.",
       myRequests: "הבקשות שלי",
       loginNeeded:
         "כדי לשלוח בקשה או להצטרף לקבוצה, התחברו. האתגרים החינמיים פתוחים גם בלי חשבון.",
@@ -235,7 +235,7 @@
       predNo: "Let’s check together and see what changes.",
       requestTitle: "Missing a question?",
       requestIntro:
-        "Type it or attach a picture. Hagai will review it and prepare a visual explanation.",
+        "Type a question or take a photo. Hagai may select questions to develop into learning activities; no automatic answers.",
       text: "Question text",
       source: "Source link (optional)",
       image: "Picture (up to 5MB)",
@@ -243,9 +243,9 @@
       send: "Send request to Hagai",
       notSent: "Draft saved on this device. It has not been sent to Hagai.",
       received:
-        "Request received. The response target is 24 hours; check its status here.",
+        "Request received by the server. Hagai will choose whether and when to create an activity.",
       requestGoal:
-        "For a received request, the response target is 24 hours. Keep learning from the bank meanwhile.",
+        "Send a photo for human review. There is no guaranteed response time or publication.",
       myRequests: "My requests",
       loginNeeded:
         "Sign in to send a request or join a group. Free challenges work without an account.",
@@ -750,7 +750,7 @@
       id: crypto.randomUUID(),
     });
     shell(
-      `<h1 class="page-title">${esc(t("requestTitle"))}</h1><p class="page-subtitle">${esc(t("requestIntro"))}</p><div class="two-columns"><section class="panel"><form id="request-form" class="form-stack"><label>${esc(t("text"))}<textarea id="request-text" maxlength="5000">${esc(draft.text)}</textarea></label><label>${esc(t("grade"))}<select id="request-grade">${[9, 10, 11].map((g) => `<option ${Number(draft.grade) === g ? "selected" : ""}>${g}</option>`).join("")}</select></label><label>${esc(t("source"))}<input id="request-source" type="url" value="${esc(draft.sourceUrl)}" dir="ltr"></label><label>${esc(t("image"))}<input id="request-image" type="file" accept="image/jpeg,image/png,image/webp"></label><div class="form-actions"><button type="button" class="ghost" id="save-draft">${esc(t("draft"))}</button><button type="submit" class="primary" id="send-request">${esc(t("send"))}</button></div><div id="request-status" class="feedback" role="status">${draft.text ? esc(t("notSent")) : ""}</div></form><p class="text-small">${esc(t("requestGoal"))}</p>${!S.session ? `<p class="connection-note">${esc(t("loginNeeded"))}</p><button id="request-login">${esc(t("login"))}</button>` : ""}</section><section class="panel"><h2>${esc(t("myRequests"))}</h2><div id="request-list" class="request-list"><p>${esc(t("emptyRequests"))}</p></div></section></div>`,
+      `<h1 class="page-title">${esc(t("requestTitle"))}</h1><p class="page-subtitle">${esc(t("requestIntro"))}</p><div class="two-columns"><section class="panel"><form id="request-form" class="form-stack"><label>${esc(t("text"))}<textarea id="request-text" maxlength="5000">${esc(draft.text)}</textarea></label><label>${esc(t("grade"))}<select id="request-grade">${[9, 10, 11].map((g) => `<option ${Number(draft.grade) === g ? "selected" : ""}>${g}</option>`).join("")}</select></label><label>${esc(t("source"))}<input id="request-source" type="url" value="${esc(draft.sourceUrl)}" dir="ltr"></label><label>${esc(t("image"))}<input id="request-image" type="file" accept="image/jpeg,image/png,image/webp"></label><label>${lang === "he" ? "או צילום חדש במצלמה" : "Or take a new photo"}<input id="request-camera" type="file" accept="image/jpeg,image/png,image/webp" capture="environment"></label><div class="form-actions"><button type="button" class="ghost" id="save-draft">${esc(t("draft"))}</button><button type="submit" class="primary" id="send-request">${esc(t("send"))}</button></div><div id="request-status" class="feedback" role="status">${draft.text ? esc(t("notSent")) : ""}</div></form><p class="text-small">${esc(t("requestGoal"))}</p>${!S.session ? `<p class="connection-note">${esc(t("loginNeeded"))}</p><button id="request-login">${esc(t("login"))}</button>` : ""}</section><section class="panel"><h2>${esc(t("myRequests"))}</h2><div id="request-list" class="request-list"><p>${esc(t("emptyRequests"))}</p></div></section></div>`,
       "requests",
     );
     const data = () => ({
@@ -779,15 +779,16 @@
       }
       button.disabled = true;
       try {
-        const file = document.getElementById("request-image").files[0];
+        const file = document.getElementById("request-camera").files[0] || document.getElementById("request-image").files[0];
         if (file) d.imagePath = await S.uploadImage(file);
         const result = await S.submitRequest(d);
-        if (!result?.id) throw Error("network_failed");
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(result?.id||""))) throw Error("network_failed");
         save("vizy_request_draft", null);
         draft.id = crypto.randomUUID();
         document.getElementById("request-text").value = "";
         document.getElementById("request-image").value = "";
-        status.textContent = t("received");
+        document.getElementById("request-camera").value = "";
+        status.textContent = t("received") + " #" + result.id;
         loadRequests();
       } catch (err) {
         status.textContent = errorText(err) + " " + t("notSent");

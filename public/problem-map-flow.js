@@ -2,6 +2,7 @@
 const host=document.getElementById('coreFlow');
 const lessons=window.VizyLayeredLessons,core=window.VizyLayerFlowCore;
 if(!host||!lessons||!core)return;
+lessons.push(...(window.VizyWeaveLessons||[]));
 const $=id=>host.querySelector('#'+id);
 const item=(tag,cls,value)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(value!=null)e.textContent=value;return e};
 const KEY='vizy_layered_flow_v1_',SELECTOR='vizy_layered_flow_selected';
@@ -49,6 +50,12 @@ host.innerHTML='<div class="flow-heading"><div><span class="flow-kicker">VIZY ·
  '<div id="flowFinish" class="flow-finish" hidden></div><div class="flow-footer"><button type="button" id="flowReset" class="flow-secondary">התחילו משימה זו מחדש</button></div>'+
  '<section class="flow-errors" id="flowErrors" aria-labelledby="errorTitle"><div class="error-head"><span class="flow-kicker">יכולת חדשה · זיהוי טעויות</span><h2 id="errorTitle">מה הטעות שאתה רואה?</h2><p>קטעי פתרון מומצאים. בודקים אם הטענה נכונה, מסבירים ומתקנים, ואז מנסים דוגמה חדשה.</p></div><div id="errorCardChooser" class="error-card-chooser" role="group" aria-label="בחירת טעות לתרגול"></div><div class="error-sheet" id="errorSheet"><strong id="errorContext"></strong><div id="errorLines"></div></div><div class="error-task"><div class="flow-phase"><span id="errorStage"></span><span id="errorProgress"></span></div><h3 id="errorQuestion"></h3><div id="errorChoices" class="flow-options" role="group" aria-label="בחירת אבחון"></div><p id="errorFeedback" class="flow-feedback" role="status" aria-live="polite"></p><div class="flow-actions"><button id="errorHint" type="button" class="flow-secondary">רמז</button><button id="errorReset" type="button" class="flow-secondary">התחל מחדש</button><button id="errorNext" type="button">לשלב הבא</button></div></div><div id="errorCompare" class="error-compare" hidden></div></section>';
 function repaint(){
+ document.body.classList.toggle('lesson-weave',selected.type==='weave');
+ if(selected.type==='weave'){
+  document.body.classList.remove('lesson-shared');
+  window.VizyWeave.render(host,selected,lessons);
+  return;
+ }
  document.body.classList.toggle('lesson-shared',selected.id==='shared');
  const currentStep=selected.steps[current.step],done=current.entries.some(e=>e.id===currentStep.id);
  const allDone=current.entries.length===selected.steps.length;
@@ -147,6 +154,7 @@ function errorHintMessage(card,stage){
  return 'מה המשמעות של הסימן או של התנאי?';
 }
 function renderError(){
+ if(selected.type==='weave')return;
  if(!errorCard){$('flowErrors').hidden=true;return;}
  const card=errorCard,s=errorState,stage=s.stage,finished=stage==='done';
  const stages=['verdict','locate','diagnose','repair','transfer'];

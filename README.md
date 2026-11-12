@@ -4,6 +4,10 @@
 
 Read [the 12 November 2026 app audit and teaching handoff](docs/APP_AUDIT_AND_TEACHING_HANDOFF_2026-11-12.md) before continuing product work. Current focus: an individual mobile learner, Haggai's meaning-first teaching, and student photo submissions to his editorial inbox so the repertoire grows gradually. Full algebraic solutions are not required; an optional student notebook is acceptable. Classes/groups are a later phase. The report records current code, Graphify gaps, test evidence and concrete continuation criteria; it supersedes older roadmap priorities where they conflict.
 
+## Meaning-first activities (12 November 2026)
+
+The main mobile CTA chooses grade-appropriate meaning-first lessons in the **existing** problem-map flow: grade 11 increasing versus positive and tangent slope -4, grade 9 whole-expression difference of squares. Each supports multiple correct examples, explicit relationship sorting and unseen transfer; the grade-9 activity additionally builds factors without typed algebra. The original graph lab remains accessible at `/?workspace=1&splash=0`. Detailed state, testing scope and remaining photo/teacher backend verification: [implementation handoff](docs/VIZY_MEANING_IMPLEMENTATION_2026-11-12.md).
+
 ## Vizy mobile learning
 
 The default entry opens `learn.html`: a Hebrew/English, mobile-first prepared learning bank. Students predict, manipulate a local SVG model, answer, then transfer the idea to a changed question without a diagram. No runtime generative AI or external visualization SDK is needed.

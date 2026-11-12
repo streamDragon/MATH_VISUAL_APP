@@ -7328,7 +7328,15 @@
             showStepToast('נכנסתם ישר למסך העבודה. אפשר להמשיך מהמקום הנכון לכם.');
         }
 
-        function startLevelPracticeFromLanding() {
+        function startLevelPracticeFromLanding(retryCount = 0) {
+            if ((!appInitialized || !board || !p || typeof p.X !== 'function') && retryCount < 20) {
+                setTimeout(() => startLevelPracticeFromLanding(retryCount + 1), 80);
+                return;
+            }
+            if (!board || !p || typeof p.X !== 'function') {
+                showStepToast('הגרף עדיין נטען. נסו שוב בעוד רגע.');
+                return;
+            }
             let startIdx = getFirstPracticeQuestionIndex();
             markStartGuideSeen('start:practice_path');
             closeStartGuideModal({ skipOverlay: true });

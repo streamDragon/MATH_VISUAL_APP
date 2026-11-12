@@ -127,6 +127,15 @@
         const text = document.createElement("p");
         text.textContent = r.question_text;
         card.append(head, text);
+        const requestId = document.createElement('small');
+        requestId.textContent = 'מזהה בקשה: ' + r.id;
+        card.append(requestId);
+        if(r.response_activity_id){
+          const activityLink=document.createElement('a');
+          activityLink.href='learn.html?activity='+encodeURIComponent(r.response_activity_id);
+          activityLink.textContent='פתיחת הפעילות המקושרת';
+          card.append(activityLink);
+        }
         if (r.source_url) {
           const link = document.createElement("a");
           link.textContent = "מקור השאלה";
@@ -144,10 +153,11 @@
               const url = data.signedURL || data.signedUrl;
               if (url)
                 window.open(
-                  service.url + "/storage/v1" + url,
+                  new URL(url.startsWith('http') ? url : service.url + '/storage/v1' + (url.startsWith('/') ? url : '/' + url)).href,
                   "_blank",
                   "noopener",
                 );
+              else status.textContent = 'השרת לא החזיר קישור לתמונה.';
             } catch (e) {
               status.textContent = msg(e);
             }

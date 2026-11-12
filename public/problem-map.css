@@ -316,3 +316,39 @@ body{padding-bottom:0}
 .error-compare p{font-size:.8rem;line-height:1.5;margin:8px 0 0}
 @media(max-width:360px){.flow-errors{padding:9px}.error-card-picker{font-size:.73rem}.error-line{font-size:.88rem}}
 .header-errors-link{background:#dff1ec;border-radius:10px;padding:7px 8px;color:#25674f;font-size:.78rem;font-weight:750;white-space:nowrap}#flowErrors{scroll-margin-top:12px}@media(max-width:360px){header{gap:5px;padding:7px 8px}header span{font-size:.7rem}.header-errors-link{padding:6px;font-size:.72rem}}
+
+
+/* Meaning weave, hosted in the existing problem map. Hide the old fixed
+   grade-11 problem when a grade-9 or alternate grade-11 activity is in focus. */
+body.lesson-weave .flow-older-note,
+body.lesson-weave main>.summary,
+body.lesson-weave main>.live-stage,
+body.lesson-weave main>.learning-column,
+body.lesson-weave main>.checkpoint{display:none}
+body.lesson-weave main{max-width:740px}
+.weave-task{display:grid;gap:12px;background:#fff;border:1px solid #d8e4f2;border-radius:17px;padding:16px}
+.weave-task h3{font-size:clamp(1.05rem,2.4vw,1.25rem);line-height:1.55;margin:0}
+.weave-options{display:grid;gap:9px}
+.weave-option{display:flex;flex-direction:column;gap:8px;align-items:stretch;text-align:start;min-height:56px;font-weight:650;padding:11px 13px;overflow-wrap:anywhere}
+.weave-option[aria-pressed=true]{border:2px solid #287d71;background:#d9f5e9;color:#123f42}
+.weave-option[disabled]{opacity:1}
+.weave-option svg{width:min(100%,320px);height:auto;max-height:170px;align-self:center}
+.weave-math{unicode-bidi:isolate;direction:ltr;display:inline-block;text-align:start}
+.weave-sort-row{border:1px solid #d6e2f0;background:#f7fafe;border-radius:13px;padding:11px;min-width:0}
+.weave-sort-statement{margin:0 0 8px;font-size:.99rem;overflow-wrap:anywhere}
+.weave-relation-select{width:100%;min-width:0;max-width:100%;font:inherit;min-height:48px;padding:8px;border-radius:9px;color:#19395d;background:white;border:1px solid #8ca9c4}
+.weave-relation-answer{display:block;border:1px solid #7ebbb0;border-radius:9px;background:#e0f5ed;padding:8px;color:#19594c}
+.weave-actions{flex-wrap:wrap}
+.weave-actions button{flex:1 1 130px}
+.weave-reset{margin-top:10px}
+.weave-more{margin:12px 0 5px;font-size:.88rem}
+.weave-more a{color:#145890}
+body.lesson-weave .flow-history{margin-top:15px}
+body.lesson-weave .flow-layer-value{direction:auto;unicode-bidi:plaintext}
+body.lesson-weave #flowOptions .weave-option span{max-width:100%}
+@media(max-width:390px){
+ .weave-task{padding:12px}
+ .weave-option{font-size:.92rem}
+ .weave-sort-row{padding:9px}
+ body.lesson-weave main{padding-inline:9px}
+}
