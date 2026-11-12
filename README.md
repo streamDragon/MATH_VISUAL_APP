@@ -1,5 +1,9 @@
 # MATH_VISUAL_APP
 
+## Current teaching direction and agent handoff
+
+Read [the 12 November 2026 app audit and teaching handoff](docs/APP_AUDIT_AND_TEACHING_HANDOFF_2026-11-12.md) before continuing product work. Current focus: an individual mobile learner, Haggai's meaning-first teaching, and student photo submissions to his editorial inbox so the repertoire grows gradually. Full algebraic solutions are not required; an optional student notebook is acceptable. Classes/groups are a later phase. The report records current code, Graphify gaps, test evidence and concrete continuation criteria; it supersedes older roadmap priorities where they conflict.
+
 ## Vizy mobile learning
 
 The default entry opens `learn.html`: a Hebrew/English, mobile-first prepared learning bank. Students predict, manipulate a local SVG model, answer, then transfer the idea to a changed question without a diagram. No runtime generative AI or external visualization SDK is needed.
