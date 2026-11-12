@@ -1,13 +1,13 @@
 {
   "meta": {
     "title": "Vizy Graphify",
-    "generatedAt": "2026-11-10T17:22:42.193Z",
+    "generatedAt": "2026-11-12T18:52:21.694Z",
     "repository": "streamDragon/MATH_VISUAL_APP",
-    "mainSha": "c1242490fcfa3918f864819a898361919006728b",
-    "trackedFiles": 251,
-    "scannedFiles": 112,
-    "branch": "feature/vizy-graphify-20261110",
-    "note": "מפת קוד המבוססת על main בקומיט c124249 ומונגשת דרך ענף Graphify. מודל הלמידה מסומן design כדי להפריד בין מבנה פדגוגי לבין מימוש בפועל."
+    "mainSha": "6ed5d06a9e58ee0ee5437048679593007e3f3b9d",
+    "trackedFiles": 266,
+    "scannedFiles": 125,
+    "branch": "main",
+    "note": "מפת קבצים מסריקת git ls-files בענף main בקומיט 6ed5d06. מקור: סביבת העבודה המקומית. פריטי design הם כיווני תכנון, לא קוד ממומש."
   },
   "nodes": [
     {
@@ -452,6 +452,33 @@
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/manifest.json"
     },
     {
+      "id": "public/meaning-weave-core.js",
+      "label": "meaning-weave-core.js",
+      "path": "public/meaning-weave-core.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/meaning-weave-core.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/meaning-weave-core.js"
+    },
+    {
+      "id": "public/meaning-weave-data.js",
+      "label": "meaning-weave-data.js",
+      "path": "public/meaning-weave-data.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/meaning-weave-data.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/meaning-weave-data.js"
+    },
+    {
+      "id": "public/meaning-weave.js",
+      "label": "meaning-weave.js",
+      "path": "public/meaning-weave.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/meaning-weave.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/meaning-weave.js"
+    },
+    {
       "id": "public/mobile-polish.css",
       "label": "mobile-polish.css",
       "path": "public/mobile-polish.css",
@@ -513,6 +540,42 @@
       "status": "main",
       "detail": "public/problem-map-data.js",
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/problem-map-data.js"
+    },
+    {
+      "id": "public/problem-map-flow-core.js",
+      "label": "problem-map-flow-core.js",
+      "path": "public/problem-map-flow-core.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/problem-map-flow-core.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/problem-map-flow-core.js"
+    },
+    {
+      "id": "public/problem-map-flow-data.js",
+      "label": "problem-map-flow-data.js",
+      "path": "public/problem-map-flow-data.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/problem-map-flow-data.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/problem-map-flow-data.js"
+    },
+    {
+      "id": "public/problem-map-flow.js",
+      "label": "problem-map-flow.js",
+      "path": "public/problem-map-flow.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/problem-map-flow.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/problem-map-flow.js"
+    },
+    {
+      "id": "public/problem-map-visual.js",
+      "label": "problem-map-visual.js",
+      "path": "public/problem-map-visual.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/problem-map-visual.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/problem-map-visual.js"
     },
     {
       "id": "public/problem-map.css",
@@ -857,6 +920,15 @@
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/classroom-math.test.mjs"
     },
     {
+      "id": "tests/focused-home.spec.ts",
+      "label": "focused-home.spec.ts",
+      "path": "tests/focused-home.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/focused-home.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/focused-home.spec.ts"
+    },
+    {
       "id": "tests/grade-next-mobile.spec.ts",
       "label": "grade-next-mobile.spec.ts",
       "path": "tests/grade-next-mobile.spec.ts",
@@ -902,6 +974,24 @@
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/learning-service.test.mjs"
     },
     {
+      "id": "tests/meaning-weave.spec.ts",
+      "label": "meaning-weave.spec.ts",
+      "path": "tests/meaning-weave.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/meaning-weave.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/meaning-weave.spec.ts"
+    },
+    {
+      "id": "tests/meaning-weave.test.mjs",
+      "label": "meaning-weave.test.mjs",
+      "path": "tests/meaning-weave.test.mjs",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/meaning-weave.test.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/meaning-weave.test.mjs"
+    },
+    {
       "id": "tests/mobile-navigation.spec.ts",
       "label": "mobile-navigation.spec.ts",
       "path": "tests/mobile-navigation.spec.ts",
@@ -938,6 +1028,15 @@
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/no-ai.test.mjs"
     },
     {
+      "id": "tests/photo-intake-mocked.spec.ts",
+      "label": "photo-intake-mocked.spec.ts",
+      "path": "tests/photo-intake-mocked.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/photo-intake-mocked.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/photo-intake-mocked.spec.ts"
+    },
+    {
       "id": "tests/problem-map-core.test.mjs",
       "label": "problem-map-core.test.mjs",
       "path": "tests/problem-map-core.test.mjs",
@@ -945,6 +1044,24 @@
       "status": "main",
       "detail": "tests/problem-map-core.test.mjs",
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/problem-map-core.test.mjs"
+    },
+    {
+      "id": "tests/problem-map-flow.spec.ts",
+      "label": "problem-map-flow.spec.ts",
+      "path": "tests/problem-map-flow.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/problem-map-flow.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/problem-map-flow.spec.ts"
+    },
+    {
+      "id": "tests/problem-map-flow.test.mjs",
+      "label": "problem-map-flow.test.mjs",
+      "path": "tests/problem-map-flow.test.mjs",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/problem-map-flow.test.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/problem-map-flow.test.mjs"
     },
     {
       "id": "tests/problem-map.spec.ts",
@@ -1253,11 +1370,6 @@
       "type": "navigates"
     },
     {
-      "from": "public/ability-picker.js",
-      "to": "public/skill-lab.html",
-      "type": "references"
-    },
-    {
       "from": "public/classroom-practice.html",
       "to": "public/classroom-practice.css",
       "type": "loads"
@@ -1459,6 +1571,41 @@
     },
     {
       "from": "public/problem-map.html",
+      "to": "public/problem-map-visual.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/problem-map-flow-data.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/problem-map-flow-core.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/meaning-weave-data.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/meaning-weave-core.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/meaning-weave.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/problem-map-flow.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
       "to": "public/learn.html",
       "type": "navigates"
     },
@@ -1583,6 +1730,16 @@
       "type": "imports"
     },
     {
+      "from": "tests/focused-home.spec.ts",
+      "to": "public/learn.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/focused-home.spec.ts",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
       "from": "tests/grade-next-mobile.spec.ts",
       "to": "public/learn.html",
       "type": "tests"
@@ -1613,6 +1770,26 @@
       "type": "imports"
     },
     {
+      "from": "tests/meaning-weave.spec.ts",
+      "to": "public/problem-map.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/meaning-weave.spec.ts",
+      "to": "public/learn.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/meaning-weave.spec.ts",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/meaning-weave.test.mjs",
+      "to": "public/meaning-weave-core.js",
+      "type": "imports"
+    },
+    {
       "from": "tests/mobile-navigation.spec.ts",
       "to": "public/learn.html",
       "type": "tests"
@@ -1641,10 +1818,30 @@
       "from": "tests/mobile-polish.spec.ts",
       "to": "public/learn.html",
       "type": "references"
+    },
+    {
+      "from": "tests/photo-intake-mocked.spec.ts",
+      "to": "public/learn.html",
+      "type": "tests"
     },
     {
       "from": "tests/problem-map-core.test.mjs",
       "to": "public/problem-map-core.js",
+      "type": "imports"
+    },
+    {
+      "from": "tests/problem-map-flow.spec.ts",
+      "to": "public/problem-map.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/problem-map-flow.spec.ts",
+      "to": "public/problem-map.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/problem-map-flow.test.mjs",
+      "to": "public/problem-map-flow-core.js",
       "type": "imports"
     },
     {
@@ -1775,7 +1972,17 @@
     {
       "from": "public/learn.html",
       "to": "public/problem-map.html",
-      "type": "planned"
+      "type": "navigates"
+    },
+    {
+      "from": "public/meaning-weave.js",
+      "to": "public/meaning-weave-core.js",
+      "type": "uses"
+    },
+    {
+      "from": "public/learning-app.js",
+      "to": "public/ability-picker.js",
+      "type": "routing"
     },
     {
       "from": "concept:given",
@@ -1885,8 +2092,8 @@
     "data": 11,
     "page": 12,
     "style": 10,
-    "logic": 30,
-    "test": 22
+    "logic": 37,
+    "test": 28
   },
   "findings": [
     {
@@ -1911,13 +2118,13 @@
     },
     {
       "severity": "medium",
-      "title": "בדיקת הבנה מעבר לדוגמת פרמטר",
-      "detail": "כרגע המידע שנבדק מציג דוגמה אחת עם f(x)=x²+ax וקיצון ב-x=2. כדאי לבחון עקרונות וייצוגים גם עם שרטוט חסר סולם, תנאי עודף ותנאי סותר."
+      "title": "מארג משמעויות נבדק כפעילות",
+      "detail": "נוספו שלושה מסלולי מארג לכיתות ט ויא: עלייה, שיפוע, הפרש ריבועים. הבחירה הרב-נכונה, מיון סוג קשר והעברה נבדקים מקומית; הצלחה של תלמידים אמיתיים עדיין לא נמדדה."
     },
     {
       "severity": "medium",
-      "title": "סנכרון Graphify",
-      "detail": "המפה נגזרת מהקבצים שנמצאו ב-main בקומיט c124249, ונוצרה בענף Graphify נפרד. נדרש לבנות אותה מחדש אחרי שינויים נוספים באתר."
+      "title": "צילום שאלות: חיבור חי טרם אומת",
+      "detail": "הלקוח דורש העלאת תמונה מוצלחת ומזהה בקשה מהשרת; אין עדיין אישור לבדיקת חשבון תלמיד, מודרטור ושירות אחסון חי מקצה לקצה."
     }
   ]
 }
