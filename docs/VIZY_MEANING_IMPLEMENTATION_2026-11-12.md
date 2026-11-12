@@ -21,6 +21,10 @@ Haggai's classroom observation is that students confused an increasing graph wit
 ## Verification
 Tests: `npm test`, `npm run check:questions`, `py -3 tests/question_import_test.py`, `npm run build` and selected desktop/mobile Chromium Playwright routes. Check actual results recorded in the latest commit report, rather than assuming local browser emulation equals a real iPhone or Android camera. Chrome iPhone13 viewport emulation is not WebKit.
 
+### Production browser regression
+
+The first production smoke test found a JavaScript exception on all three new routes: the legacy error-card controller attempted to attach handlers after the weave renderer had replaced its buttons. Fixed by guarding legacy-only bindings, added a Playwright no-page-errors regression, and bumped the service-worker cache namespace so phones do not retain the obsolete code. Recheck production after redeploy.
+
 ## Graphify
 `scripts/generate-graphify.mjs` now derives the branch/SHA rather than embedding an obsolete fixed SHA. Legacy fake feature nodes are removed. New meanings are labeled as implemented in the findings, while the Supabase production validation gap remains explicit. Regenerate after staging files with `node scripts/generate-graphify.mjs`.
 

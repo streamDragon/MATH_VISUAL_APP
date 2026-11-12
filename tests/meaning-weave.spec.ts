@@ -70,3 +70,13 @@ test('photo form never claims receipt on local draft',async({page})=>{
  await expect(page.locator('#request-status')).toContainText('לא נשלחה');
  await expect(page.locator('body')).not.toContainText('24 שעות');
 });
+
+test('meaning routes load with no JavaScript exceptions',async({page})=>{
+ const exceptions:string[]=[];
+ page.on('pageerror',error=>exceptions.push(error.message));
+ for(const lesson of ['increasing','slope-minus-four','difference-squares']){
+  await page.goto('/problem-map.html?lesson='+lesson);
+  await expect(page.locator('#flowQuestion')).toBeVisible();
+ }
+ expect(exceptions).toEqual([]);
+});

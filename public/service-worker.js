@@ -1,9 +1,21 @@
-const CACHE_NAME = 'mathviz-learning-v2.8-ability-chooser';
+const CACHE_NAME = 'mathviz-learning-v2.9-meaning-weave';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",
   "/learn.html",
   "/classroom-practice.html",
+  "/problem-map.html",
+  "/problem-map.css",
+  "/problem-map-data.js",
+  "/problem-map-core.js",
+  "/problem-map.js",
+  "/problem-map-visual.js",
+  "/problem-map-flow-data.js",
+  "/problem-map-flow-core.js",
+  "/problem-map-flow.js",
+  "/meaning-weave-data.js",
+  "/meaning-weave-core.js",
+  "/meaning-weave.js",
   "/skill-lab.html",
   "/skill-lab.css",
   "/skill-lab-data.js",
