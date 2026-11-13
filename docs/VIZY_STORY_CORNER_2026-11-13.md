@@ -18,8 +18,12 @@ Gauss: https://epubs.siam.org/doi/10.1137/1.9780898717624.appc
 Germain: https://mathshistory.st-andrews.ac.uk/Biographies/Germain/
 Wiles: https://abelprize.no/abel-prize-laureates/2016
 
-## Interface design
-One native dialog, closable by button/Escape with focus restoration. Stories appear as three short scenes, followed by a decision and feedback; revealing a mathematical bridge is optional. A compact mathematical path is the central representation for the kettle story: specific → general → known identity → specific. There is also an expandable derivation by opening parentheses and collecting like terms. The geometric area model is secondary, not the main diagram.
+## Interface design (revised 13 Nov 03:45, spec rule 2a.4)
+One native dialog, closable by button/Escape with focus restoration. Each story is **three short lines**, then **one connecting question** in which the student makes the connection, then a link straight into the activity. The link appears after the best answer, or after two tries; the student is never blocked.
+- No boxes explaining the method, no takeaway text, no eyebrow line.
+- **A story never shows the solved path of the activity's own problem.** Connecting questions use different expressions from the activity (kettle: `(y+2)² − 16`; Germain: `(y−4)² − 16`), and the test checks that `(x+1)` and `(x−2)(x+4)` never appear in the story.
+- Each option has a verdict: `best` (the connection), `works` (valid but not the connection, e.g. expanding is the physicist's way), or `no`. Feedback is one line.
+- Math inside Hebrew text is wrapped in Unicode isolates (LRI…PDI) by the renderer, so expressions read left to right.
 The overlay supports Hebrew and English, has touch-sized controls, and changes no session, XP or stored learning answers. It requires neither login nor AI.
 
 ## Files and validation

@@ -149,3 +149,11 @@
 .vizy-story-dialog .story-familiar-path strong{font-size:.9rem;color:#72531b}
 .vizy-story-dialog .story-familiar-path p{font-size:.87rem;line-height:1.55;margin:0}
 .vizy-story-dialog .story-proof-label{font-size:.84rem;margin:8px 2px;line-height:1.5}
+/* Spec rule 2a.4: three short lines, one connecting question, then into the activity. */
+.vizy-story-dialog .story-scenes{display:grid;gap:6px;margin:6px 0 14px}
+.vizy-story-dialog p.story-scene{margin:0;font-size:1.02rem;line-height:1.55}
+.vizy-story-dialog .story-question h4{font-size:1.08rem;line-height:1.45}
+.vizy-story-dialog .story-choice[data-verdict=best]{border-color:#2f8f5b;background:#eaf7ef}
+.vizy-story-dialog .story-choice[data-verdict=no]{border-color:#c98a2c;background:#fff6e8}
+.vizy-story-dialog .story-next{margin-top:12px}
+.vizy-story-dialog .story-next .story-link{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:14px;background:#1d5e86;color:#fff;font-weight:800;text-decoration:none}
