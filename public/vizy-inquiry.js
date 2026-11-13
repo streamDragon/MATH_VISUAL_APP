@@ -20,6 +20,7 @@
  const host=document.createElement('section');
  host.id='vizyInquiry';host.className='vizy-inquiry';host.setAttribute('aria-label','סביבת חקירה מתמטית');
  container.prepend(host);
+ const entry=root.VizyInquiryEntry?.create({kind,host,core:C});
  document.body.classList.add('vizy-investigation-active');
  document.title='Vizy | '+adapter.title;
  const h=(tag,cls,txt)=>{
@@ -110,7 +111,6 @@
   const prompt=h('section','iq-prompt');prompt.id='iqPrompt';
   prompt.dataset.iqPhase=phase;
   if(kind==='graph'&&phase==='verdict')prompt.append(h('p','iq-given','נתון קבוע: f עולה ממש בכל הישר'));
-  prompt.append(h('p','iq-phase-label','המהלך הנוכחי'));
   host.append(prompt);
   const ctx=stageContext();
   try{
@@ -159,6 +159,7 @@
    };
    host.append(restart);
   }
+  entry?.update({state,stage,prompt});
  }
  persist();paint();
  root.VizyInvestigation={getState:()=>JSON.parse(JSON.stringify(state)),kind};

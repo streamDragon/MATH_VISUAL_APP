@@ -7,7 +7,9 @@ async function openFresh(page:Page,lesson:string){
  await expect(page.locator('#vizyInquiry')).toBeVisible();
 }
 async function choose(page:Page,id:string){
- await page.locator('#vizyInquiry [data-iq-answer="'+id+'"]').last().click();
+ const entry=page.locator('#iqEntryOverlay[data-mode="decision"] [data-iq-answer="'+id+'"]');
+ if(await entry.isVisible())await entry.click();
+ else await page.locator('#vizyInquiry [data-iq-answer="'+id+'"]').last().click();
 }
 async function next(page:Page){
  await expect(page.locator('#iqNext')).toBeVisible();
@@ -26,15 +28,26 @@ test('diagnosis asks without leading cues and works on phone sizes',async({page}
  const headerBg=await page.locator('body>header').evaluate(el=>getComputedStyle(el).backgroundColor);
  expect(headerBg).not.toBe('rgb(255, 255, 255)');
  await expect(page.locator('#vizyInquiry .iq-graph')).toBeVisible();
- await expect(page.locator('[data-iq-answer]')).toHaveCount(3);
+ await expect(page.locator('#iqEntryOverlay [data-iq-answer]')).toHaveCount(3);
+ await expect(page.locator('#iqEntryTitle')).toHaveText('איזו פונקציה עולה?');
+ await expect(page.locator('#iqEntryOverlay .iq-entry-graph')).toBeVisible();
  await expect(page.locator('#iqGraphSlider')).toHaveCount(0);
  for(const width of [320,390,412]){
   await page.setViewportSize({width,height:790});
-  await expect(page.locator('#iqQuestion')).toBeVisible();
+  await expect(page.locator('#iqEntryTitle')).toBeVisible();
+  const button=await page.locator('#iqEntryOverlay [data-iq-answer="A"]').boundingBox();
+  expect(button).not.toBeNull();
+  expect(button!.y+button!.height).toBeLessThanOrEqual(791);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(4);
   await page.screenshot({path:'test-results/vizy-investigation-first-'+width+'.png',fullPage:false});
  }
- await choose(page,'B');await next(page);
+ await choose(page,'B');
+ await expect(page.locator('#iqEntryOverlay')).toHaveCount(0);
+ await expect(page.locator('#iqGivenStrip')).toBeVisible();
+ await page.locator('#iqGivenStrip').click();
+ await expect(page.locator('#iqEntryOverlay[data-mode="recap"]')).toBeVisible();
+ await page.locator('#iqEntryOverlay .iq-entry-close').click();
+ await next(page);
  await expect(page.locator('#iqQuestion')).toHaveText('מה גרם לך לבחור?');
  await choose(page,'height');await next(page);
  await expect(page.locator('#iqPrompt')).toHaveAttribute('data-iq-phase','shift-predict');
@@ -73,6 +86,8 @@ test('fast path demands two counterexamples and reaches picture-free transfer',a
 test('general-to-particular U map keeps the case on stage and accepts B = -3',async({page})=>{
  await openFresh(page,'difference-squares');
  await expect(page.locator('.iq-map-path')).toBeVisible();
+ await expect(page.locator('#iqEntryTitle')).toContainText('איזה מבנה');
+ await expect(page.locator('#iqEntryOverlay .iq-entry-expression')).toHaveText('(x+1)² − 9');
  await choose(page,'diff');await next(page);
  await choose(page,'two');await next(page);
  await choose(page,'whole');await next(page);

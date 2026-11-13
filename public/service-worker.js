@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mathviz-learning-v2.12-inquiry';
+const CACHE_NAME = 'mathviz-learning-v2.13-inquiry-entry';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",
@@ -25,6 +25,7 @@ const APP_SHELL = [
   "/vizy-inquiry-core.js",
   "/vizy-inquiry-graph.js",
   "/vizy-inquiry-map.js",
+  "/vizy-inquiry-entry.js",
   "/vizy-inquiry.js",
   "/skill-lab.html",
   "/skill-lab.css",

@@ -154,3 +154,98 @@ body.vizy-investigation-active>header .brand,
 body.vizy-investigation-active>header span{color:#f2f8ff!important}
 body.vizy-investigation-active>header .story-corner-trigger{display:none!important}
 body.vizy-investigation-active>header .header-errors-link{display:none!important}
+
+
+/* The question is the first focal point. It animates into the permanent given strip. */
+.iq-given-strip{
+ width:100%;min-height:54px;text-align:right;direction:rtl;
+ padding:10px 13px 10px 37px;margin:0 0 8px;
+ border:2px solid #82baa7;background:#def5e9;color:#164c45;
+ border-radius:12px;font-weight:850;font-size:clamp(1rem,1.9vw,1.22rem);
+ line-height:1.42;position:relative;white-space:normal;overflow-wrap:anywhere;
+}
+.iq-given-strip:after{content:"⌄";position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:1.2rem}
+.iq-given-strip:focus-visible,.iq-entry-overlay button:focus-visible,.iq-entry-overlay a:focus-visible{
+ outline:3px solid #80d3c9;outline-offset:3px;
+}
+body.iq-entry-visible{overflow:hidden!important}
+.iq-entry-overlay{
+ position:fixed;inset:0;z-index:6000;overflow-y:auto;overscroll-behavior:contain;
+ display:flex;justify-content:center;align-items:flex-start;
+ background:rgba(9,20,36,.96);padding:0;
+ transition:background .48s ease;
+}
+.iq-entry-sheet{
+ box-sizing:border-box;flex:0 1 960px;min-height:100dvh;
+ display:flex;flex-direction:column;gap:clamp(12px,2.2vh,24px);
+ padding:clamp(18px,3.3vw,42px) clamp(16px,4vw,48px)
+ calc(20px + env(safe-area-inset-bottom));
+ border:1px solid #526b80;border-radius:0;
+ background:linear-gradient(155deg,#142844 0%,#18314a 62%,#1b393b 100%);
+ color:#f6f9ff;direction:rtl;
+ transform-origin:center center;box-shadow:0 0 40px #050c15a8;
+}
+.iq-entry-top{display:flex;justify-content:space-between;align-items:center;gap:15px;min-height:35px}
+.iq-entry-kicker{color:#c3dbe3;font-weight:750;font-size:clamp(.88rem,1.5vw,1.1rem)}
+.iq-entry-close{background:#284456;color:#e6f8f9;border:1px solid #8fb8b8;border-radius:12px;padding:8px 14px;min-height:46px}
+.iq-entry-title{
+ margin:0!important;font-weight:850;line-height:1.16;color:#fff;
+ font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.025em;
+ text-wrap:balance;
+}
+.iq-entry-content{display:grid;flex:1 1 auto;place-items:center;min-height:0}
+.iq-entry-visual{width:min(630px,100%);display:grid;place-items:center;min-height:0}
+.iq-entry-visual svg{width:100%;height:auto;max-height:min(42dvh,380px);background:#f7fbff;border:2px solid #bbd0dc;border-radius:14px}
+.iq-entry-expression{
+ padding:22px 18px;border:2px solid #aac7de;border-radius:20px;
+ font-size:clamp(2.05rem,7vw,4.4rem);font-weight:850;direction:ltr;text-align:center;
+ background:#f6fbff;color:#173f60;max-width:100%;overflow-wrap:anywhere;
+ box-shadow:0 12px 33px #08152470;
+}
+.iq-entry-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:stretch}
+.iq-entry-answer{
+ min-width:0;min-height:70px;padding:12px 9px;
+ border-radius:15px;border:2px solid #a1beca;background:#eaf6fc;
+ color:#153f55;font-weight:850;line-height:1.25;font-size:clamp(1rem,2vw,1.32rem);
+ box-shadow:0 5px 16px #0b1b2e66;
+}
+.iq-entry-answer:hover{background:#d9fa78;color:#163621;border-color:#d9fa78}
+.iq-entry-help,.iq-entry-home,.iq-entry-feedback{grid-column:1/-1;text-align:center}
+.iq-entry-help{justify-self:center;min-height:44px;padding:8px 12px;border:0;background:transparent;
+ text-decoration:underline;text-underline-offset:4px;color:#d5e9ef;font-size:.94rem;font-weight:700}
+.iq-entry-home{justify-self:center;color:#c3d6e4;font-size:.83rem;padding:7px 11px}
+.iq-entry-feedback{font-weight:650;color:#fff0ad;min-height:15px;margin:0;font-size:.9rem}
+.iq-entry-closing{pointer-events:none;background:transparent}
+.iq-entry-closing .iq-entry-sheet{pointer-events:none}
+@media(min-width:850px){
+ body.vizy-investigation-active main{max-width:980px}
+ .vizy-inquiry{gap:16px}
+ .iq-header{padding:17px 20px}
+ .iq-header h1{font-size:1.65rem}
+ .iq-prompt{padding:20px 23px;gap:14px}
+ .iq-prompt h3{font-size:clamp(1.35rem,2vw,1.75rem);line-height:1.35}
+ .iq-choice{min-height:57px;font-size:clamp(1.04rem,1.6vw,1.2rem);padding:12px 15px}
+ .iq-stage{padding:15px 19px}
+ .iq-graph{max-height:39dvh}
+ .iq-map-formula{font-size:1.14rem}
+ .iq-map-active .iq-map-formula{font-size:1.35rem}
+ .iq-map-node-label{font-size:.85rem}
+ .iq-stage-note{font-size:.95rem}
+ .iq-entry-overlay{padding:2.5dvh 30px}
+ .iq-entry-sheet{min-height:95dvh;border-radius:22px}
+}
+@media(max-width:440px){
+ .iq-entry-sheet{padding:14px 12px calc(14px + env(safe-area-inset-bottom));gap:11px}
+ .iq-entry-title{font-size:clamp(1.78rem,8vw,2.4rem)}
+ .iq-entry-visual svg{max-height:34dvh}
+ .iq-entry-expression{padding:15px 10px}
+ .iq-entry-choices{gap:7px}
+ .iq-entry-answer{font-size:.95rem;min-height:65px;padding:9px 5px}
+ .iq-entry-help{font-size:.84rem}
+ .iq-given-strip{min-height:49px}
+ .iq-prompt h3{font-size:1.18rem}
+ .iq-choice{font-size:.97rem}
+}
+@media(prefers-reduced-motion:reduce){
+ .iq-entry-overlay{transition:none!important}
+}

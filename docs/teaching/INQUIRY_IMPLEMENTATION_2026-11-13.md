@@ -24,3 +24,10 @@ Source of truth: `AGREED_SPEC_2026-11-13.md`. This pass follows consolidation an
 
 The U is a **path of action**, not the same as Haggai's hierarchy triangle of knowledge. The triangle remains an open design decision and is not silently substituted by the U.
 The app reports *likely* decision criteria, inferred from taps, not the child's thoughts.
+
+
+## Second pass: task-first entry (13 November, later continuation)
+
+Presentation rule 2a is now implemented using `public/vizy-inquiry-entry.js`. The first activity decision is offered in a large, accessible modal with the graph or mathematical expression. It reuses the existing answer event handlers rather than duplicating the lesson engine. On the first decision, the modal animates into a sticky given strip at the top of the stage, and that strip can reopen the given. The modal traps keyboard focus, Escape closes a reopened given, and reduced-motion preference avoids the transition. Resuming past the first decision skips the initial modal. Desktop question and answer typography is enlarged without changing the maths engine.
+
+Checks: 58 unit tests, 21 authored questions, production build, 29 Playwright Chromium/Edge tests at iPhone-13 profile, including 320/390/412 CSS px and 1366px desktop, all passing. WebKit and a physical phone are not covered. Keep the triangle knowledge view separate from this path-of-action work.
