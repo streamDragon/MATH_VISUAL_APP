@@ -1,13 +1,13 @@
 {
   "meta": {
     "title": "Vizy Graphify",
-    "generatedAt": "2026-11-12T18:58:02.971Z",
+    "generatedAt": "2026-11-13T00:32:49.013Z",
     "repository": "streamDragon/MATH_VISUAL_APP",
-    "mainSha": "a611f2da6ece7c4fc3e390cfc7a7f9d55a544827",
-    "trackedFiles": 266,
-    "scannedFiles": 125,
+    "mainSha": "ca0dd0a51cdabe638ae0779b43a9b536bf54a416",
+    "trackedFiles": 271,
+    "scannedFiles": 129,
     "branch": "main",
-    "note": "מפת קבצים מסריקת git ls-files בענף main בקומיט a611f2d. מקור: סביבת העבודה המקומית. פריטי design הם כיווני תכנון, לא קוד ממומש."
+    "note": "מפת קבצים מסריקת git ls-files בענף main בקומיט ca0dd0a. מקור: סביבת העבודה המקומית. פריטי design הם כיווני תכנון, לא קוד ממומש."
   },
   "nodes": [
     {
@@ -686,6 +686,33 @@
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/sound.js"
     },
     {
+      "id": "public/story-corner-data.js",
+      "label": "סיפורי מתמטיקאים ותיעוד מקורות",
+      "path": "public/story-corner-data.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/story-corner-data.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/story-corner-data.js"
+    },
+    {
+      "id": "public/story-corner.css",
+      "label": "עיצוב פינת הסיפורים",
+      "path": "public/story-corner.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/story-corner.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/story-corner.css"
+    },
+    {
+      "id": "public/story-corner.js",
+      "label": "Overlay סיפורים ללא ניווט",
+      "path": "public/story-corner.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/story-corner.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/story-corner.js"
+    },
+    {
       "id": "public/student-buddy.css",
       "label": "student-buddy.css",
       "path": "public/student-buddy.css",
@@ -1100,6 +1127,15 @@
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/skill-lab.spec.ts"
     },
     {
+      "id": "tests/story-corner.spec.ts",
+      "label": "בדיקות פינת הסיפורים",
+      "path": "tests/story-corner.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/story-corner.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/story-corner.spec.ts"
+    },
+    {
       "id": "tests/student-buddy-mobile.spec.ts",
       "label": "student-buddy-mobile.spec.ts",
       "path": "tests/student-buddy-mobile.spec.ts",
@@ -1481,6 +1517,11 @@
     },
     {
       "from": "public/learn.html",
+      "to": "public/story-corner.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
       "to": "public/ability-picker.js",
       "type": "loads"
     },
@@ -1512,6 +1553,16 @@
     {
       "from": "public/learn.html",
       "to": "public/learning-app.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/story-corner-data.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/story-corner.js",
       "type": "loads"
     },
     {
@@ -1552,6 +1603,11 @@
     {
       "from": "public/problem-map.html",
       "to": "public/problem-map.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/story-corner.css",
       "type": "loads"
     },
     {
@@ -1602,6 +1658,16 @@
     {
       "from": "public/problem-map.html",
       "to": "public/problem-map-flow.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/story-corner-data.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/story-corner.js",
       "type": "loads"
     },
     {
@@ -1875,6 +1941,21 @@
       "type": "references"
     },
     {
+      "from": "tests/story-corner.spec.ts",
+      "to": "public/problem-map.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/story-corner.spec.ts",
+      "to": "public/learn.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/story-corner.spec.ts",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
       "from": "tests/student-buddy-mobile.spec.ts",
       "to": "public/classroom-practice.html",
       "type": "tests"
@@ -1990,6 +2071,26 @@
       "type": "routing"
     },
     {
+      "from": "public/learning-app.js",
+      "to": "public/story-corner.js",
+      "type": "offers optional overlay"
+    },
+    {
+      "from": "public/meaning-weave.js",
+      "to": "public/story-corner.js",
+      "type": "opens optional overlay"
+    },
+    {
+      "from": "public/story-corner.js",
+      "to": "public/story-corner-data.js",
+      "type": "displays stories"
+    },
+    {
+      "from": "tests/story-corner.spec.ts",
+      "to": "public/story-corner.js",
+      "type": "tests"
+    },
+    {
       "from": "concept:given",
       "to": "concept:identify",
       "type": "classifies"
@@ -2096,9 +2197,9 @@
     "other": 2,
     "data": 11,
     "page": 12,
-    "style": 10,
-    "logic": 37,
-    "test": 28
+    "style": 11,
+    "logic": 39,
+    "test": 29
   },
   "findings": [
     {
