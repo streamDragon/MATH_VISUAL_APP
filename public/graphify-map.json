@@ -1,13 +1,13 @@
 {
   "meta": {
     "title": "Vizy Graphify",
-    "generatedAt": "2026-11-13T00:56:10.817Z",
+    "generatedAt": "2026-11-13T00:56:35.232Z",
     "repository": "streamDragon/MATH_VISUAL_APP",
-    "mainSha": "3fd58d56e53c032a3d34246944b48e743d94bdcc",
+    "mainSha": "0f98574e4036500a26ea8197cfc20465c7a43744",
     "trackedFiles": 279,
     "scannedFiles": 133,
     "branch": "main",
-    "note": "מפת קבצים מסריקת git ls-files בענף main בקומיט 3fd58d5. מקור: סביבת העבודה המקומית. פריטי design הם כיווני תכנון, לא קוד ממומש."
+    "note": "מפת קבצים מסריקת git ls-files בענף main בקומיט 0f98574. מקור: סביבת העבודה המקומית. פריטי design הם כיווני תכנון, לא קוד ממומש."
   },
   "nodes": [
     {
