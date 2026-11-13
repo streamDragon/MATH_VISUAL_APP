@@ -96,7 +96,9 @@
   heading.append(h('small','iq-kicker','VIZY · '+adapter.grade+' · חקירת משמעות'),
     h('h1','',adapter.title));
   const track=h('div','iq-progress');
-  track.append(h('span','',phase==='done'?'סיימנו':String(state.index+1)+' / '+String(state.route.length-1)));
+  const stepCount=kind==='graph'&&!state.data.lane?14:state.route.length;
+  const progress=kind==='graph'&&!state.data.lane?state.index+1:Math.min(state.index+1,stepCount);
+  track.append(h('span','',phase==='done'?'סיימנו':String(progress)+' / '+String(stepCount)));
   top.append(heading,track);host.append(top);
   const stage=h('section','iq-stage');
   stage.dataset.iqStage=kind;
