@@ -33,11 +33,13 @@ A progress hint ("שלב 2 מתוך 4") is fine, but steps are prompts inside th
 ## 3. Verdicts and help
 
 - Three verdicts plus one help button. Help is never a verdict and is never scored as wrong.
-- Two wordings to test in class:
-  - Set A: ״חד־משמעית!״ / ״תלוי...״ / ״אין מצב!״
-  - Set B: ״חייב להיות נכון״ / ״תלוי״ / ״לא יכול להיות נכון״ (more precise)
+- **Default wording (build this):** each button has a short label and a small subline:
+  - ״חייב להיות״ — נובע מהנתונים
+  - ״תלוי״ — אפשר כך ואפשר אחרת
+  - ״לא יכול להיות״ — סותר את הנתונים
+- Alternative to test in class later: ״חד־משמעית!״ / ״תלוי...״ / ״אין מצב!״. Not the default: ״חד־משמעית״ is ambiguous, since a claim that cannot hold is also decided unambiguously.
 - The three verdicts mean: the given forces the claim / the given does not settle it / the given rules it out. "Equivalent" and "sufficient" are not verdict buttons.
-- After "תלוי", the app asks ״תלוי במה?״ and the student shows one case where it holds and one where it fails.
+- After "תלוי", the app asks ״תלוי במה?״ and the student **builds** two cases with the stage controls: one where the claim holds and one where it fails (for example, an increasing function that is positive and an increasing function that is negative). Building both is the evidence that the given does not decide the claim. Picking from a gallery is only a fallback after one failed attempt.
 - Help: ״עוד לא יודע/ת — בוא נבדוק״. It must look and sit apart from the answer options (for example, a text link under them), so it does not read as a fourth answer. "I can't tell yet" is the student's state, not a mathematical verdict: a claim can be already determined by the data but not yet worked out.
 - The given is pinned on screen while the student judges.
 - Not used: "שטויות במיץ" (it mocks plausible student beliefs).
@@ -58,11 +60,11 @@ Controls on the stage, revealed when needed:
 |---|---|---|
 | 1 | ״איזו פונקציה עולה?״ A / B / אף אחת | **Do not** add "כשמתקדמים ימינה" to the question, and **do not** caption the curves "מעל ציר x" / "מתחת לציר x". Both give away a criterion and destroy the diagnosis |
 | 2 | ״מה גרם לך לבחור?״ (only on this first decision) | Taps in student language, shuffled: ״היא מעל ציר x״ / ״כשזזים ימינה, היא עולה״ / ״היא נראית כמו עלייה״ / ״לא בטוח/ה״; optional free text to Haggai's inbox |
-| 3 | Predict, then move | ״אם נוריד את B אל מתחת לציר, היא תהפוך לעולה?״ The student predicts **before** the slider unlocks. Then moves it and watches the moving point. Then the same with reflecting |
+| 3 | Predict, then act | Three actions, each with a prediction **before** the control unlocks: (a) moving the whole graph up or down (״אם נוריד את B אל מתחת לציר, היא תהפוך לעולה?״); (b) reflecting the graph; (c) running the moving point along the curve, left to right, with its y-value shown changing. Predict, act, compare |
 | 4 | What changed, what stayed | 2×2 taps: position / direction × moving / reflecting |
 | 5 | Say the principle | Choose all phrasings that say "increasing" (words, a < b ⇒ f(a) < f(b), the moving-point sentence) and reject "the graph is above the axis". One tap: position tells us about sign, not direction |
 | 6 | Build | ״צרו פונקציה שעולה ממש וכולה מתחת לציר x״ with the same controls |
-| 7 | Verdicts | Given pinned: ״f עולה בכל הישר״. Claims: ״f חיובית״ (תלוי), ״a < b ⇒ f(a) < f(b)״ (must be true), ״f(1) < f(0)״ (cannot be true) |
+| 7 | Verdicts | Given pinned: ״f עולה בכל הישר״. Claims: ״f חיובית״ (תלוי — the student builds one increasing positive function and one increasing negative function), ״a < b ⇒ f(a) < f(b)״ (חייב להיות), ״f(1) < f(0)״ (לא יכול להיות) |
 | 8 | Transfer, no picture | Temperature from −8 to −3 (rose? positive?); f(x) = x − 10 on 0 ≤ x ≤ 5 (increasing? positive?) |
 
 ### Lanes
@@ -124,11 +126,21 @@ The existing layered lessons and weave lessons move onto this engine afterwards,
 ## 7. Build order
 
 1. Consolidation from `PHONE_REVIEW_2026-11-13.md` (one home, one nav, one theme; park the drill; fix the wrong graph in guided practice).
-2. Activity 1, complete: both lanes, criterion record, prediction-before-slider, transfer.
+2. Activity 1 as a full interactive prototype **built on the general engine of section 6, not as a one-off page**: first diagnosis, investigation, response to errors, demonstration, transfer, and the student's saved thinking path. No new stations or explanation screens until it is checked that students understand what they are doing.
 3. Activity 2 on the same engine.
 4. Classroom trial with both activities; settle button wording (set A vs set B) and the moving point vs figure.
 5. Then: photo intake end to end; moving the older lessons onto the engine.
 
-## 8. Still open
+## 8. Triangle and U: two different pictures, keep both
 
-- Whether the general–particular map matches the "משולש כלל ופרט" Haggai draws on the board. Same movement of thought, not necessarily the same drawing; Haggai to confirm.
+The "משולש כלל ופרט" Haggai draws in class and the U-shaped map are **not** the same thing, and the map must not replace the triangle.
+
+- **The triangle is the map of knowledge.** The rule is at the top; the classes, cases and examples sit beneath it. Levels nest: what is a rule at one level can be a case at a higher level. It answers: *where am I in the mathematical world?*
+- **The U is the path of action.** Specific → recognize the general structure → use the rule → back to the specific. It answers: *what is my next move?*
+
+They complement each other. In the app, the U is the stage of activity 2; the triangle is a separate view the student can open to see where this case sits among others (for example, `(x+1)² − 9` and `x² − 16` as two cases under `A² − B²`, which is itself one case of "special products"). Build the U first; design the triangle view with Haggai before building it.
+
+## 9. Still open
+
+- The exact form of the triangle view (section 8), to be designed with Haggai.
+- Final verdict wording after the classroom trial.
