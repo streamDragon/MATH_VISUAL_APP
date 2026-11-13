@@ -1,13 +1,13 @@
 {
   "meta": {
     "title": "Vizy Graphify",
-    "generatedAt": "2026-11-13T00:32:49.013Z",
+    "generatedAt": "2026-11-13T00:56:10.817Z",
     "repository": "streamDragon/MATH_VISUAL_APP",
-    "mainSha": "ca0dd0a51cdabe638ae0779b43a9b536bf54a416",
-    "trackedFiles": 271,
-    "scannedFiles": 129,
+    "mainSha": "3fd58d56e53c032a3d34246944b48e743d94bdcc",
+    "trackedFiles": 279,
+    "scannedFiles": 133,
     "branch": "main",
-    "note": "מפת קבצים מסריקת git ls-files בענף main בקומיט ca0dd0a. מקור: סביבת העבודה המקומית. פריטי design הם כיווני תכנון, לא קוד ממומש."
+    "note": "מפת קבצים מסריקת git ls-files בענף main בקומיט 3fd58d5. מקור: סביבת העבודה המקומית. פריטי design הם כיווני תכנון, לא קוד ממומש."
   },
   "nodes": [
     {
@@ -219,7 +219,7 @@
     },
     {
       "id": "public/classroom-shared-model.js",
-      "label": "classroom-shared-model.js",
+      "label": "גרף מדויק לשאלה",
       "path": "public/classroom-shared-model.js",
       "group": "logic",
       "status": "main",
@@ -740,6 +740,24 @@
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/version.json"
     },
     {
+      "id": "public/vizy-unified-shell.css",
+      "label": "עיצוב משותף למובייל",
+      "path": "public/vizy-unified-shell.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/vizy-unified-shell.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-unified-shell.css"
+    },
+    {
+      "id": "public/vizy-unified-shell.js",
+      "label": "ניווט אחיד לכל המסכים",
+      "path": "public/vizy-unified-shell.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/vizy-unified-shell.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-unified-shell.js"
+    },
+    {
       "id": "scripts/build-web.mjs",
       "label": "צינור בניית האתר",
       "path": "scripts/build-web.mjs",
@@ -927,6 +945,15 @@
       "status": "main",
       "detail": "tests/classroom-bank.test.mjs",
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/classroom-bank.test.mjs"
+    },
+    {
+      "id": "tests/classroom-exact-graph.spec.ts",
+      "label": "בדיקות פונקציה מדויקת",
+      "path": "tests/classroom-exact-graph.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/classroom-exact-graph.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/classroom-exact-graph.spec.ts"
     },
     {
       "id": "tests/classroom-flow.spec.ts",
@@ -1152,6 +1179,15 @@
       "status": "main",
       "detail": "tests/student-next-step.spec.ts",
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/student-next-step.spec.ts"
+    },
+    {
+      "id": "tests/unified-home.spec.ts",
+      "label": "בדיקות בית מאוחד",
+      "path": "tests/unified-home.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/unified-home.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/unified-home.spec.ts"
     },
     {
       "id": "tests/unified-mobile.spec.ts",
@@ -1412,6 +1448,16 @@
     },
     {
       "from": "public/classroom-practice.html",
+      "to": "public/vizy-unified-shell.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/classroom-practice.html",
+      "to": "public/vizy-unified-shell.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/classroom-practice.html",
       "to": "public/inequality-discovery.css",
       "type": "loads"
     },
@@ -1517,6 +1563,16 @@
     },
     {
       "from": "public/learn.html",
+      "to": "public/vizy-unified-shell.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/vizy-unified-shell.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
       "to": "public/story-corner.css",
       "type": "loads"
     },
@@ -1608,6 +1664,16 @@
     {
       "from": "public/problem-map.html",
       "to": "public/story-corner.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/vizy-unified-shell.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/vizy-unified-shell.js",
       "type": "loads"
     },
     {
@@ -1737,6 +1803,16 @@
     },
     {
       "from": "public/skill-lab.html",
+      "to": "public/vizy-unified-shell.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/skill-lab.html",
+      "to": "public/vizy-unified-shell.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/skill-lab.html",
       "to": "public/skill-lab-data.js",
       "type": "loads"
     },
@@ -1771,6 +1847,16 @@
       "type": "navigates"
     },
     {
+      "from": "public/vizy-unified-shell.js",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
+      "from": "public/vizy-unified-shell.js",
+      "to": "public/problem-map.html",
+      "type": "references"
+    },
+    {
       "from": "scripts/seed-learning-bank.mjs",
       "to": "public/learning-core.js",
       "type": "imports"
@@ -1789,6 +1875,11 @@
       "from": "tests/ability-picker.spec.ts",
       "to": "public/learn.html",
       "type": "references"
+    },
+    {
+      "from": "tests/classroom-exact-graph.spec.ts",
+      "to": "public/classroom-practice.html",
+      "type": "tests"
     },
     {
       "from": "tests/classroom-flow.spec.ts",
@@ -1906,11 +1997,6 @@
       "type": "tests"
     },
     {
-      "from": "tests/problem-map-flow.spec.ts",
-      "to": "public/problem-map.html",
-      "type": "references"
-    },
-    {
       "from": "tests/problem-map-flow.test.mjs",
       "to": "public/problem-map-flow-core.js",
       "type": "imports"
@@ -1983,6 +2069,31 @@
     {
       "from": "tests/student-next-step.spec.ts",
       "to": "public/learn.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/unified-home.spec.ts",
+      "to": "public/learn.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/unified-home.spec.ts",
+      "to": "public/classroom-practice.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/unified-home.spec.ts",
+      "to": "public/problem-map.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/unified-home.spec.ts",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/unified-home.spec.ts",
+      "to": "public/classroom-practice.html",
       "type": "references"
     },
     {
@@ -2074,6 +2185,21 @@
       "from": "public/learning-app.js",
       "to": "public/story-corner.js",
       "type": "offers optional overlay"
+    },
+    {
+      "from": "public/learning-app.js",
+      "to": "public/ability-picker.js",
+      "type": "home routing"
+    },
+    {
+      "from": "tests/unified-home.spec.ts",
+      "to": "public/vizy-unified-shell.js",
+      "type": "tests"
+    },
+    {
+      "from": "tests/classroom-exact-graph.spec.ts",
+      "to": "public/classroom-shared-model.js",
+      "type": "tests"
     },
     {
       "from": "public/meaning-weave.js",
@@ -2197,9 +2323,9 @@
     "other": 2,
     "data": 11,
     "page": 12,
-    "style": 11,
-    "logic": 39,
-    "test": 29
+    "style": 12,
+    "logic": 40,
+    "test": 31
   },
   "findings": [
     {
