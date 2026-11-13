@@ -38,7 +38,8 @@ for(const width of sizes){
 test('home story corner does not replace app or navigate away',async({page})=>{
  await page.goto('/learn.html');
  await expect(page.locator('.story-corner-trigger[data-story="kettle"]')).not.toHaveCount(0);
- await page.locator('.app-header .story-corner-trigger').click();
+ await page.locator('#vizy-tools-drawer summary').click();
+ await page.locator('#vizy-tools-drawer .story-corner-trigger').click();
  await expect(page.locator('#vizy-story-dialog')).toBeVisible();
  await expect(page).toHaveURL(/learn\.html/);
  await page.locator('#story-close').click();
@@ -48,7 +49,8 @@ test('home story corner does not replace app or navigate away',async({page})=>{
 });
 test('stories have four distinct topics and do not require account',async({page})=>{
  await page.goto('/learn.html');
- await page.locator('.app-header .story-corner-trigger').click();
+ await page.locator('#vizy-tools-drawer summary').click();
+ await page.locator('#vizy-tools-drawer .story-corner-trigger').click();
  const dialog=page.locator('#vizy-story-dialog');
  await expect(dialog.locator('.story-tab')).toHaveCount(4);
  await dialog.locator('[data-story-id="gauss"]').click();
@@ -69,7 +71,8 @@ test('stories have four distinct topics and do not require account',async({page}
 test('story overlay follows English setting',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('vizy_language',JSON.stringify('en')));
  await page.goto('/learn.html');
- await page.locator('.app-header .story-corner-trigger').click();
+ await page.locator('#vizy-tools-drawer summary').click();
+ await page.locator('#vizy-tools-drawer .story-corner-trigger').click();
  const dialog=page.locator('#vizy-story-dialog');
  await expect(dialog).toHaveAttribute('lang','en');
  await expect(dialog.locator('.story-title')).toContainText('kettle');
@@ -80,9 +83,10 @@ test('story overlay follows English setting',async({page})=>{
 test('home entry remains readable without horizontal scrolling at 320px',async({page})=>{
  await page.setViewportSize({width:320,height:720});
  await page.goto('/learn.html');
- await expect(page.locator('.app-header .story-corner-trigger')).toBeVisible();
+ await expect(page.locator('#vizy-tools-drawer summary')).toBeVisible();
  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
  expect(overflow).toBeLessThanOrEqual(4);
- await page.locator('.app-header .story-corner-trigger').click();
+ await page.locator('#vizy-tools-drawer summary').click();
+ await page.locator('#vizy-tools-drawer .story-corner-trigger').click();
  await expect(page.locator('#vizy-story-dialog')).toBeVisible();
 });

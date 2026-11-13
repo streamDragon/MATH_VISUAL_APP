@@ -43,7 +43,6 @@ test('relation sorting and transfer do not credit guesses',async({page})=>{
 test('grade nine meaning route is not derivatives and original map remains',async({page})=>{
  await page.goto('/learn.html');
  await page.locator('[data-home-grade="9"]').click();
- await page.locator('[data-ability="structure"]').click();
  await page.locator('#student-start-ability').click();
  await expect(page).toHaveURL(/lesson=difference-squares/);
  await expect(page.locator('#flowQuestion')).toContainText('A²−B²');
@@ -55,11 +54,10 @@ test('grade nine meaning route is not derivatives and original map remains',asyn
 test('grade eleven homepage offers increase and slope meaning',async({page})=>{
  await page.goto('/learn.html');
  await page.locator('[data-home-grade="11"]').click();
- await expect(page.locator('[data-ability="increasing"]')).toBeVisible();
- await page.locator('[data-ability="slope"]').click();
+ await expect(page.locator('#student-start-ability')).toHaveAttribute('href',/lesson=increasing/);
  await page.locator('#student-start-ability').click();
- await expect(page).toHaveURL(/lesson=slope-minus-four/);
- await expect(page.locator('#flowQuestion')).toContainText('נובעות');
+ await expect(page).toHaveURL(/lesson=increasing/);
+ await expect(page.locator('#flowQuestion')).toContainText('שקולים');
 });
 test('photo form never claims receipt on local draft',async({page})=>{
  await page.goto('/learn.html#requests');

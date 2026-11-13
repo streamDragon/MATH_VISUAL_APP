@@ -68,6 +68,7 @@ test('two functions: derivative zeros alone are insufficient for same point; ret
  await page.locator('#flowBack').click();
  await expect(page.locator('#flowRows .flow-layer')).toHaveCount(9);
  await page.locator('#flowNext').click();
+ await page.locator('#vizy-legacy-toggle').click();
  await page.locator('[data-flow-lesson="parameter"]').click();
  await expect(page.locator('#flowTitle')).toContainText('מהנקודה');
  await page.locator('[data-flow-lesson="shared"]').click();
@@ -89,7 +90,7 @@ test('hint and wrong attempt are not silently counted as understanding',async({p
 
 test('error detection: mobile verdict, location, diagnosis, repair, transfer and persistence',async({page})=>{
  await page.setViewportSize({width:320,height:740});
- await page.goto('/problem-map.html?lesson=parameter');
+ await page.goto('/problem-map.html?lesson=parameter#flowErrors');
  await page.evaluate(()=>localStorage.removeItem('vizy_error_card_v1_height-vs-slope'));
  await page.reload();
  await expect(page.locator('#flowErrors')).toBeVisible();
@@ -118,7 +119,7 @@ test('error detection: mobile verdict, location, diagnosis, repair, transfer and
  await page.screenshot({path:'test-results/vizy-error-recognition-320.png',fullPage:true});
 });
 test('right but unfinished is not marked as error; two zero equations stay separate',async({page})=>{
- await page.goto('/problem-map.html');
+ await page.goto('/problem-map.html#flowErrors');
  await page.evaluate(()=>{localStorage.removeItem('vizy_error_card_v1_right-but-unfinished');localStorage.removeItem('vizy_error_card_v1_lost-equation');});
  await page.reload();
  await page.locator('[data-error-card="right-but-unfinished"]').click();

@@ -1,0 +1,142 @@
+/* Shared chrome for mobile learner and secondary tools. Keep mathematical canvases intact. */
+:root{--vizy-shell:#10182e;--vizy-shell-border:#354862;--vizy-accent:#d9fa78;--vizy-shell-text:#f1f5ff}
+html{scroll-padding-bottom:82px}
+body.vizy-consolidated{padding-bottom:72px!important;overflow-x:clip;background:#10182e;color:#f1f5ff}
+body.vizy-consolidated .bottom-nav,
+body.vizy-consolidated .vizy-mobile-dock,
+body.vizy-consolidated nav.dock,
+body.vizy-consolidated .home-legacy-actions{display:none!important}
+body.vizy-consolidated #vizy-unified-nav{
+ position:fixed;z-index:1000;bottom:0;left:0;right:0;
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;
+ padding:8px max(12px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
+ color:#f4f7ff;background:#152541;border-top:1px solid #465c74;
+ box-shadow:0 -6px 25px #07132666;direction:rtl;
+}
+body.vizy-consolidated #vizy-unified-nav a{
+ text-align:center;text-decoration:none;color:#dceaf7;display:grid;place-items:center;
+ font-weight:750;font-size:.84rem;border:1px solid transparent;border-radius:12px;
+ min-height:47px;padding:5px;white-space:normal;line-height:1.25
+}
+body.vizy-consolidated #vizy-unified-nav a[aria-current=page]{color:#132c28;background:#dbf6de}
+body.vizy-consolidated #vizy-unified-nav a:focus-visible{outline:3px solid #f5ae36}
+body.vizy-consolidated .app-header,
+body.vizy-consolidated header.topbar,
+body.vizy-consolidated header.top,
+body.vizy-consolidated body>header:not(.story-head){
+ background:#152541;color:#f4f7ff;border-bottom:1px solid #465c74;
+}
+body.vizy-consolidated .brand{color:#f6f9ff}
+body.vizy-consolidated header .brand span{color:#d9fa78}
+body.vizy-consolidated header a:not(.brand){color:#d9eafd}
+body.vizy-consolidated main{min-width:0}
+body.vizy-consolidated .student-next-step{max-width:710px;margin:10px auto 12px}
+body.vizy-consolidated .student-next-step-content{min-width:0}
+body.vizy-consolidated .vizy-single-cta{
+ display:flex;align-items:center;justify-content:center;
+ padding:12px 18px;min-height:52px;border-radius:15px;
+ text-decoration:none;font-size:1.08rem;font-weight:850;
+ background:#d9fa78;color:#142a1c;max-width:100%;
+}
+body.vizy-consolidated [hidden]{display:none!important}
+body.vizy-consolidated .vizy-tools-drawer{
+ max-width:710px;margin:10px auto 20px;background:#172840;
+ border:1px solid #4a647e;border-radius:15px;color:#f0f7ff;overflow:hidden;
+}
+body.vizy-consolidated .vizy-tools-drawer summary{
+ min-height:51px;padding:12px 16px;cursor:pointer;font-weight:800;
+ background:#203451;color:#e8f8fa;
+}
+body.vizy-consolidated .vizy-tools-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:13px}
+body.vizy-consolidated .vizy-tools-links a,
+body.vizy-consolidated .vizy-tools-links button{
+ display:flex;align-items:center;justify-content:center;min-height:48px;
+ padding:10px;border:1px solid #617d98;border-radius:11px;
+ background:#263d58;color:#f0f5ff;text-align:center;text-decoration:none;
+ font:inherit;font-size:.87rem;font-weight:700;white-space:normal
+}
+body.vizy-consolidated .vizy-tools-links a:focus-visible,
+body.vizy-consolidated .vizy-tools-links button:focus-visible{outline:3px solid #f4ae34}
+body.vizy-consolidated .student-grade-picker{gap:8px}
+body.vizy-consolidated .student-grade-picker button{min-height:46px}
+body.vizy-consolidated .problem-map-promo,
+body.vizy-consolidated .unified-tools,
+body.vizy-consolidated .challenge-library,
+body.vizy-consolidated .home-legacy-actions{display:none}
+body.vizy-consolidated .challenge-library:not([hidden]){display:block}
+body.vizy-consolidated .story-corner-trigger{color:#174d66}
+body.vizy-consolidated .app-header>.header-actions .story-corner-trigger{display:none!important}
+body.vizy-consolidated .flow-card{max-width:780px;margin:0 auto}
+body.vizy-consolidated.lesson-weave .story-context-trigger{color:#174d66}
+body.vizy-consolidated .flow-older-note{display:none}
+body.vizy-consolidated:not(.show-legacy-tools) main>.summary,
+body.vizy-consolidated:not(.show-legacy-tools) main>.live-stage,
+body.vizy-consolidated:not(.show-legacy-tools) main>.learning-column,
+body.vizy-consolidated:not(.show-legacy-tools) main>.checkpoint{display:none}
+body.vizy-consolidated:not(.show-error-practice) #flowErrors{display:none}
+body.vizy-consolidated.show-error-practice #flowInteraction,
+body.vizy-consolidated.show-error-practice #flowHistory,
+body.vizy-consolidated.show-error-practice #flowFinish,
+body.vizy-consolidated.show-error-practice #flowPlot,
+body.vizy-consolidated.show-error-practice .flow-graph-shell{display:none!important}
+body.vizy-consolidated.show-error-practice #flowErrors{display:block}
+body.vizy-consolidated .vizy-legacy-toggle{
+ display:block;margin:10px auto;padding:10px 15px;
+ min-height:44px;border:1px solid #627d9d;border-radius:11px;
+ background:#203452;color:#f3f8ff;font-weight:750;cursor:pointer
+}
+body.vizy-consolidated #coreFlow .flow-switch{flex-wrap:wrap}
+body.vizy-consolidated .exact-classroom-graph{width:100%;max-width:100%;margin-inline:auto}
+body.vizy-consolidated .exact-classroom-graph svg{display:block;width:100%;max-height:270px}
+body.vizy-consolidated .exact-classroom-graph .visual-controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center;padding:12px 0}
+body.vizy-consolidated .exact-classroom-graph input{flex:1 1 130px;min-width:70px}
+body.vizy-consolidated .exact-classroom-graph output{color:#d9fa78;font-weight:800}
+body.vizy-consolidated .hero>p,
+body.vizy-consolidated .guide>p,
+body.vizy-consolidated footer{font-size:.83rem}
+@media(max-width:420px){
+ body.vizy-consolidated .vizy-tools-links{grid-template-columns:1fr}
+ body.vizy-consolidated header .top-actions a:not(.brand){display:none}
+ body.vizy-consolidated .header-actions .xp-chip{display:none}
+ body.vizy-consolidated .header-actions #mute{display:none}
+ body.vizy-consolidated #vizy-unified-nav a{font-size:.79rem}
+}
+
+/* The map's old extra systems are accessible from tools, not piled below its lesson. */
+body.vizy-consolidated:not(.show-legacy-tools) #coreFlow .flow-switch{display:none!important}
+body.vizy-consolidated:not(.show-legacy-tools):not(.show-error-practice) .header-errors-link{display:none!important}
+body.vizy-consolidated .flow-older-note{display:none!important}
+body.vizy-consolidated #coreFlow{background:#fff;color:#213b56;border:1px solid #dbe5f1;border-radius:18px;box-shadow:0 10px 28px #08142733;padding:clamp(12px,3vw,20px)}
+body.vizy-consolidated #coreFlow button{min-height:44px}
+body.vizy-consolidated #coreFlow #flowHistory{margin-top:10px}
+body.vizy-consolidated #vizy-legacy-toggle[aria-expanded=false]{font-size:.85rem}
+body.vizy-consolidated .hero>p,
+body.vizy-consolidated .hero>.eyebrow,
+body.vizy-consolidated .guide>.muted,
+body.vizy-consolidated .guide>.principle{display:none}
+body.vizy-consolidated .student-next-step #student-start-next[hidden]{display:none!important}
+body.vizy-consolidated .student-next-step .ability-picker,
+body.vizy-consolidated .student-next-step .ability-extra{display:none!important}
+@media(max-width:480px){
+ body.vizy-consolidated #coreFlow{padding:11px}
+ body.vizy-consolidated .student-next-step{margin-top:0}
+ body.vizy-consolidated .student-next-step-content h2{font-size:1.35rem}
+ body.vizy-consolidated .app-header{padding:11px 12px}
+ body.vizy-consolidated .app-header #language{padding:7px 8px;min-width:58px}
+ body.vizy-consolidated .app-header #account-button{padding:7px}
+ body.vizy-consolidated .app-header .story-corner-trigger{display:none}
+ body.vizy-consolidated header.topbar .top-actions,
+ body.vizy-consolidated header.top nav{display:none}
+}
+
+/* One primary navigation: legacy cross-links stay in the secondary drawer. */
+body.vizy-consolidated header.topbar .top-actions a:not(.brand),
+body.vizy-consolidated header.top nav{display:none!important}
+body.vizy-consolidated:not(.show-error-practice) header>.header-errors-link{display:none!important}
+body.vizy-consolidated .student-next-step-content>p{font-size:1rem;line-height:1.5}
+
+/* Retire the competing floating coach and verbose footers from the student screen.
+   Privacy, advanced lab and teacher review stay reachable under Tools. */
+body.vizy-consolidated .vizy-buddy,
+body.vizy-consolidated main>footer,
+body.vizy-consolidated body>footer{display:none!important}

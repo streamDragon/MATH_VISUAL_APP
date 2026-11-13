@@ -14,6 +14,11 @@ const aliases = {
  "public/skill-lab.html": "מעבדת מיומנויות",
  "public/problem-map.html": "מפת השאלה",
  "public/learning-app.js": "ניהול חוויית הלמידה",
+ "public/vizy-unified-shell.js": "ניווט אחיד לכל המסכים",
+ "public/vizy-unified-shell.css": "עיצוב משותף למובייל",
+ "public/classroom-shared-model.js": "גרף מדויק לשאלה",
+ "tests/unified-home.spec.ts": "בדיקות בית מאוחד",
+ "tests/classroom-exact-graph.spec.ts": "בדיקות פונקציה מדויקת",
  "public/story-corner-data.js": "סיפורי מתמטיקאים ותיעוד מקורות",
  "public/story-corner.js": "Overlay סיפורים ללא ניווט",
  "public/story-corner.css": "עיצוב פינת הסיפורים",
@@ -133,6 +138,14 @@ add("public/problem-map.html","public/meaning-weave.js","loads");
 add("public/meaning-weave.js","public/meaning-weave-core.js","uses");
 add("public/learning-app.js","public/ability-picker.js","routing");
 add("public/learning-app.js","public/story-corner.js","offers optional overlay");
+add("public/learn.html","public/vizy-unified-shell.js","loads");
+add("public/problem-map.html","public/vizy-unified-shell.js","loads");
+add("public/classroom-practice.html","public/classroom-shared-model.js","loads");
+add("public/classroom-practice.html","public/vizy-unified-shell.js","loads");
+add("public/skill-lab.html","public/vizy-unified-shell.js","loads");
+add("public/learning-app.js","public/ability-picker.js","home routing");
+add("tests/unified-home.spec.ts","public/vizy-unified-shell.js","tests");
+add("tests/classroom-exact-graph.spec.ts","public/classroom-shared-model.js","tests");
 add("public/meaning-weave.js","public/story-corner.js","opens optional overlay");
 add("public/story-corner.js","public/story-corner-data.js","displays stories");
 add("tests/story-corner.spec.ts","public/story-corner.js","tests");

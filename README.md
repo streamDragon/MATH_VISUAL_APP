@@ -4,6 +4,10 @@
 
 Read [the 12 November 2026 app audit and teaching handoff](docs/APP_AUDIT_AND_TEACHING_HANDOFF_2026-11-12.md) before continuing product work. Current focus: an individual mobile learner, Haggai's meaning-first teaching, and student photo submissions to his editorial inbox so the repertoire grows gradually. Full algebraic solutions are not required; an optional student notebook is acceptable. Classes/groups are a later phase. The report records current code, Graphify gaps, test evidence and concrete continuation criteria; it supersedes older roadmap priorities where they conflict.
 
+## One mobile home and navigation (13 November 2026)
+
+The agreed 13 November specification is the source of truth in [docs/teaching/AGREED_SPEC_2026-11-13.md](docs/teaching/AGREED_SPEC_2026-11-13.md). The 13 November consolidation keeps one visible next meaning activity per grade and one three-action navigation, with optional earlier tools in a single drawer. The guided-practice parabola for `f(x)=x²−4` is fixed to the actual given function instead of a draggable, misleading different function. See [implementation and verification](docs/teaching/CONSOLIDATION_IMPLEMENTATION_2026-11-13.md). The new full interactive increasing lesson and general–particular map are next and are not yet claimed as implemented.
+
 ## Meaning-first activities (12 November 2026)
 
 The main mobile CTA chooses grade-appropriate meaning-first lessons in the **existing** problem-map flow: grade 11 increasing versus positive and tangent slope -4, grade 9 whole-expression difference of squares. Each supports multiple correct examples, explicit relationship sorting and unseen transfer; the grade-9 activity additionally builds factors without typed algebra. The original graph lab remains accessible at `/?workspace=1&splash=0`. Detailed state, testing scope and remaining photo/teacher backend verification: [implementation handoff](docs/VIZY_MEANING_IMPLEMENTATION_2026-11-12.md).
