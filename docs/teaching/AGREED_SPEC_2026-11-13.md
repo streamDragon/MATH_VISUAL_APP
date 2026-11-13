@@ -30,6 +30,19 @@ Each activity is one environment on the phone, with three layers:
 
 A progress hint ("שלב 2 מתוך 4") is fine, but steps are prompts inside the same environment, not separate pages.
 
+## 2a. Presentation rules (Haggai's feedback on the live app, 13 Nov 03:27)
+
+Haggai's observation: the eye goes first to the graph in the middle, and only later finds the problem in small text at the top. The page explains the method instead of letting the student move inside it.
+
+1. **Enter through an overlay.** Each activity opens with a full-screen overlay showing the problem (or the opening question) in large text. The student's first action happens there: read the given, tap what is given and what is asked, or make the first decision. Then the overlay **shrinks, with visible motion, into a pinned strip** at the top of the stage, so the eye follows where the problem went. Tapping the strip opens it again.
+2. **One focal point at a time.** At any moment the most important thing is the largest thing on screen: the problem in the overlay, then the current prompt. The given is never smaller than the controls around it.
+3. **Do not explain the method. Use it.** No subtitles or boxes that describe how Vizy works or why ("משימה אחת בכל פעם. כל שכבה נשמרת...", "לא מוחקים את הדרך", "הקיצור אינו פסק..."). At most one short line telling the student what to do now. The method is experienced through the sequence of actions, not described.
+4. **Stories lead into the activity; they never solve it first.**
+   - A story is at most three short lines, then **one question** that makes the student make the connection themselves (for example: ״איזו בעיה כבר פתרנו שהבעיה הזאת חוזרת אליה?״), then straight into the activity.
+   - Never show the solved path of the same problem before the student does it. The current story corner shows the full U for `(x+1)² − 9` with the result `(x−2)(x+4)` before the activity starts: remove that.
+   - Remove the explanation boxes in the story ("קודם כול: השביל שכבר מכירים...", the closing note about shortcuts).
+5. **Font sizes on desktop too.** Prompts and options must be readable without zooming; the current desktop card uses very small text inside a narrow column.
+
 ## 3. Verdicts and help
 
 - Three verdicts plus one help button. Help is never a verdict and is never scored as wrong.
