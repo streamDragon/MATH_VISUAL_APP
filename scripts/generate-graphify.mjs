@@ -14,6 +14,10 @@ const aliases = {
  "public/skill-lab.html": "מעבדת מיומנויות",
  "public/problem-map.html": "מפת השאלה",
  "public/learning-app.js": "ניהול חוויית הלמידה",
+ "public/story-corner-data.js": "סיפורי מתמטיקאים ותיעוד מקורות",
+ "public/story-corner.js": "Overlay סיפורים ללא ניווט",
+ "public/story-corner.css": "עיצוב פינת הסיפורים",
+ "tests/story-corner.spec.ts": "בדיקות פינת הסיפורים",
  "public/classroom-flow.js": "מנוע מסלול הכיתה",
  "public/classroom-visuals.js": "המחשות כיתתיות",
  "public/classroom-activities.js": "תוכן שיעורים",
@@ -128,6 +132,10 @@ add("public/problem-map.html","public/meaning-weave-core.js","loads");
 add("public/problem-map.html","public/meaning-weave.js","loads");
 add("public/meaning-weave.js","public/meaning-weave-core.js","uses");
 add("public/learning-app.js","public/ability-picker.js","routing");
+add("public/learning-app.js","public/story-corner.js","offers optional overlay");
+add("public/meaning-weave.js","public/story-corner.js","opens optional overlay");
+add("public/story-corner.js","public/story-corner-data.js","displays stories");
+add("tests/story-corner.spec.ts","public/story-corner.js","tests");
 add("public/problem-map.html","public/problem-map.js","loads");
 add("public/problem-map.html","public/problem-map.css","loads");
 add("tests/problem-map.spec.ts","public/problem-map.html","tests");

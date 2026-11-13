@@ -63,6 +63,8 @@
    host.append(nav);
    const prompt=el('p','flow-problem',lesson.prompt);
    host.append(prompt);
+   const story=el('button','story-corner-trigger story-context-trigger',lesson.id==='difference-squares'?'☕ איך מתחברים לדרך שכבר מכירים?':'☕ פינת הסיפור · איך מתמטיקאים חושבים?');
+   story.type='button';story.dataset.story='kettle';host.append(story);
    const current=el('section','weave-task');
    current.id='flowInteraction';
    const phase=el('div','flow-phase');

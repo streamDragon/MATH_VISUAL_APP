@@ -8,6 +8,10 @@ Read [the 12 November 2026 app audit and teaching handoff](docs/APP_AUDIT_AND_TE
 
 The main mobile CTA chooses grade-appropriate meaning-first lessons in the **existing** problem-map flow: grade 11 increasing versus positive and tangent slope -4, grade 9 whole-expression difference of squares. Each supports multiple correct examples, explicit relationship sorting and unseen transfer; the grade-9 activity additionally builds factors without typed algebra. The original graph lab remains accessible at `/?workspace=1&splash=0`. Detailed state, testing scope and remaining photo/teacher backend verification: [implementation handoff](docs/VIZY_MEANING_IMPLEMENTATION_2026-11-12.md).
 
+## Story Corner (13 November 2026)
+
+An optional in-app story overlay about mathematical thinking: the traditional mathematician's kettle joke (explicitly not a verified Robert Aumann quotation), Gauss's sum legend, Sophie Germain's correspondence with Gauss, and Andrew Wiles's path to Fermat. The first bridge links the **familiar path** of expanding parentheses and collecting like terms to the general difference-of-squares identity and back to the specific expression. Students can read it without losing their place. Details and historical sources: [Story Corner implementation and editorial policy](docs/VIZY_STORY_CORNER_2026-11-13.md).
+
 ## Vizy mobile learning
 
 The default entry opens `learn.html`: a Hebrew/English, mobile-first prepared learning bank. Students predict, manipulate a local SVG model, answer, then transfer the idea to a changed question without a diagram. No runtime generative AI or external visualization SDK is needed.

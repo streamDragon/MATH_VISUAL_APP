@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mathviz-learning-v2.9-meaning-weave';
+const CACHE_NAME = 'mathviz-learning-v2.10-story-corner';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",
@@ -16,6 +16,9 @@ const APP_SHELL = [
   "/meaning-weave-data.js",
   "/meaning-weave-core.js",
   "/meaning-weave.js",
+  "/story-corner.css",
+  "/story-corner-data.js",
+  "/story-corner.js",
   "/skill-lab.html",
   "/skill-lab.css",
   "/skill-lab-data.js",

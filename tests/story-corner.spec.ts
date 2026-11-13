@@ -1,0 +1,88 @@
+import {test,expect} from '@playwright/test';
+const sizes=[320,390,412];
+for(const width of sizes){
+ test('story corner is a usable mobile overlay at '+width,async({page})=>{
+  await page.setViewportSize({width,height:720});
+  const exceptions:string[]=[];
+  page.on('pageerror',err=>exceptions.push(err.message));
+  await page.goto('/problem-map.html?lesson=difference-squares');
+  await expect(page.locator('#flowQuestion')).toContainText('A²−B²');
+  await page.locator('.story-context-trigger').click();
+  const dialog=page.locator('#vizy-story-dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator('.story-title')).toContainText('הקומקום');
+  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+  expect(overflow).toBeLessThanOrEqual(4);
+  const dialogOverflow=await dialog.evaluate(e=>e.scrollWidth-e.clientWidth);
+  expect(dialogOverflow).toBeLessThanOrEqual(4);
+  await expect(dialog.locator('#story-bridge')).toBeHidden();
+  await dialog.locator('[data-story-choice="reduce"]').click();
+  await expect(dialog.locator('#story-bridge')).toBeVisible();
+  await expect(dialog.locator('.story-math-path')).toContainText('A² − B²');
+  await dialog.locator('.story-proof summary').click();
+  await expect(dialog.locator('.story-proof')).toContainText('x² + 2x − 8');
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(page.locator('#flowQuestion')).toContainText('A²−B²');
+  await page.locator('[data-weave-answer="0"]').click();
+  await page.locator('[data-weave-answer="1"]').click();
+  await page.locator('[data-weave-answer="3"]').click();
+  await page.locator('#weaveCheck').click();
+  await expect(page.locator('#flowRows .flow-layer')).toHaveCount(1);
+  await page.locator('.story-context-trigger').click();
+  await page.locator('#story-close').click();
+  await expect(page.locator('#flowRows .flow-layer')).toHaveCount(1);
+  expect(exceptions).toEqual([]);
+ });
+}
+test('home story corner does not replace app or navigate away',async({page})=>{
+ await page.goto('/learn.html');
+ await expect(page.locator('.story-corner-trigger[data-story="kettle"]')).not.toHaveCount(0);
+ await page.locator('.app-header .story-corner-trigger').click();
+ await expect(page.locator('#vizy-story-dialog')).toBeVisible();
+ await expect(page).toHaveURL(/learn\.html/);
+ await page.locator('#story-close').click();
+ await expect(page.locator('#vizy-story-dialog')).toBeHidden();
+ await expect(page.locator('.student-grade-picker')).toBeVisible();
+ await expect(page.locator('.app-header')).toBeVisible();
+});
+test('stories have four distinct topics and do not require account',async({page})=>{
+ await page.goto('/learn.html');
+ await page.locator('.app-header .story-corner-trigger').click();
+ const dialog=page.locator('#vizy-story-dialog');
+ await expect(dialog.locator('.story-tab')).toHaveCount(4);
+ await dialog.locator('[data-story-id="gauss"]').click();
+ await expect(dialog.locator('.story-title')).toContainText('גאוס');
+ await dialog.locator('[data-story-choice="pattern"]').click();
+ await expect(dialog.locator('#story-bridge')).toBeVisible();
+ await dialog.locator('[data-story-id="germain"]').click();
+ await expect(dialog.locator('.story-title')).toContainText('ז׳רמן');
+ await dialog.locator('[data-story-choice="reason"]').click();
+ await expect(dialog.locator('#story-bridge')).toBeVisible();
+ await dialog.locator('[data-story-id="wiles"]').click();
+ await expect(dialog.locator('.story-title')).toContainText('ויילס');
+ await dialog.locator('[data-story-choice="bridge"]').click();
+ await expect(dialog.locator('#story-bridge')).toBeVisible();
+ await dialog.locator('.story-sources summary').click();
+ await expect(dialog.locator('.story-sources a')).toHaveAttribute('target','_blank');
+});
+test('story overlay follows English setting',async({page})=>{
+ await page.addInitScript(()=>localStorage.setItem('vizy_language',JSON.stringify('en')));
+ await page.goto('/learn.html');
+ await page.locator('.app-header .story-corner-trigger').click();
+ const dialog=page.locator('#vizy-story-dialog');
+ await expect(dialog).toHaveAttribute('lang','en');
+ await expect(dialog.locator('.story-title')).toContainText('kettle');
+ await dialog.locator('[data-story-choice="reduce"]').click();
+ await expect(dialog.locator('#story-bridge')).toContainText('general case');
+});
+
+test('home entry remains readable without horizontal scrolling at 320px',async({page})=>{
+ await page.setViewportSize({width:320,height:720});
+ await page.goto('/learn.html');
+ await expect(page.locator('.app-header .story-corner-trigger')).toBeVisible();
+ const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+ expect(overflow).toBeLessThanOrEqual(4);
+ await page.locator('.app-header .story-corner-trigger').click();
+ await expect(page.locator('#vizy-story-dialog')).toBeVisible();
+});
