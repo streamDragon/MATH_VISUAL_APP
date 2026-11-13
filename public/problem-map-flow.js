@@ -1,4 +1,7 @@
 (()=>{'use strict';
+// The inquiry engine owns the new routes; the legacy lesson remains available on demand.
+const inquiryParams=new URLSearchParams(location.search);
+if(['increasing','difference-squares'].includes(inquiryParams.get('lesson'))&&inquiryParams.get('legacy')!=='1')return;
 const host=document.getElementById('coreFlow');
 const lessons=window.VizyLayeredLessons,core=window.VizyLayerFlowCore;
 if(!host||!lessons||!core)return;

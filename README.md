@@ -6,7 +6,7 @@ Read [the 12 November 2026 app audit and teaching handoff](docs/APP_AUDIT_AND_TE
 
 ## One mobile home and navigation (13 November 2026)
 
-The agreed 13 November specification is the source of truth in [docs/teaching/AGREED_SPEC_2026-11-13.md](docs/teaching/AGREED_SPEC_2026-11-13.md). The 13 November consolidation keeps one visible next meaning activity per grade and one three-action navigation, with optional earlier tools in a single drawer. The guided-practice parabola for `f(x)=x²−4` is fixed to the actual given function instead of a draggable, misleading different function. See [implementation and verification](docs/teaching/CONSOLIDATION_IMPLEMENTATION_2026-11-13.md). The new full interactive increasing lesson and general–particular map are next and are not yet claimed as implemented.
+The agreed 13 November specification is the source of truth in [docs/teaching/AGREED_SPEC_2026-11-13.md](docs/teaching/AGREED_SPEC_2026-11-13.md). The 13 November consolidation keeps one visible next meaning activity per grade and one three-action navigation, with optional earlier tools in a single drawer. The guided-practice parabola for `f(x)=x²−4` is fixed to the actual given function instead of a draggable, misleading different function. See [implementation and verification](docs/teaching/CONSOLIDATION_IMPLEMENTATION_2026-11-13.md). The new single-stage interactive increasing lesson and general–particular U map are implemented on one inquiry engine. See [implementation and verification](docs/teaching/INQUIRY_IMPLEMENTATION_2026-11-13.md); the separate knowledge triangle remains a later design task.
 
 ## Meaning-first activities (12 November 2026)
 

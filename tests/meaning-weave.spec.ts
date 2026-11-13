@@ -3,7 +3,7 @@ const pageSizes=[320,390,412];
 for(const width of pageSizes){
  test('meaning weave mobile width '+width,async({page})=>{
   await page.setViewportSize({width,height:844});
-  await page.goto('/problem-map.html?lesson=increasing');
+  await page.goto('/problem-map.html?lesson=increasing&legacy=1');
   await expect(page.locator('#flowQuestion')).toContainText('שקולים');
   await expect(page.locator('#weaveCheck')).toBeVisible();
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
@@ -22,7 +22,7 @@ for(const width of pageSizes){
  });
 }
 test('relation sorting and transfer do not credit guesses',async({page})=>{
- await page.goto('/problem-map.html?lesson=increasing');
+ await page.goto('/problem-map.html?lesson=increasing&legacy=1');
  await page.evaluate(()=>localStorage.removeItem('vizy_weave_v1_increasing'));
  await page.reload();
  const choose=async(indexes:number[])=>{
@@ -45,7 +45,7 @@ test('grade nine meaning route is not derivatives and original map remains',asyn
  await page.locator('[data-home-grade="9"]').click();
  await page.locator('#student-start-ability').click();
  await expect(page).toHaveURL(/lesson=difference-squares/);
- await expect(page.locator('#flowQuestion')).toContainText('A²−B²');
+ await expect(page.locator('#iqQuestion')).toContainText('מבנה');
  await expect(page.locator('main>.summary')).toBeHidden();
  await expect(page.locator('[data-flow-lesson="parameter"]')).toHaveCount(0);
  await page.goto('/problem-map.html?lesson=parameter');
@@ -57,7 +57,7 @@ test('grade eleven homepage offers increase and slope meaning',async({page})=>{
  await expect(page.locator('#student-start-ability')).toHaveAttribute('href',/lesson=increasing/);
  await page.locator('#student-start-ability').click();
  await expect(page).toHaveURL(/lesson=increasing/);
- await expect(page.locator('#flowQuestion')).toContainText('שקולים');
+ await expect(page.locator('#iqQuestion')).toContainText('איזו פונקציה עולה?');
 });
 test('photo form never claims receipt on local draft',async({page})=>{
  await page.goto('/learn.html#requests');
@@ -74,7 +74,7 @@ test('meaning routes load with no JavaScript exceptions',async({page})=>{
  page.on('pageerror',error=>exceptions.push(error.message));
  for(const lesson of ['increasing','slope-minus-four','difference-squares']){
   await page.goto('/problem-map.html?lesson='+lesson);
-  await expect(page.locator('#flowQuestion')).toBeVisible();
+  await expect(page.locator(lesson==='slope-minus-four'?'#flowQuestion':'#iqQuestion')).toBeVisible();
  }
  expect(exceptions).toEqual([]);
 });

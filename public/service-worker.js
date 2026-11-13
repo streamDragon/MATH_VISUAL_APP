@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mathviz-learning-v2.11-unified-mobile';
+const CACHE_NAME = 'mathviz-learning-v2.12-inquiry';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",
@@ -21,6 +21,11 @@ const APP_SHELL = [
   "/story-corner.js",
   "/vizy-unified-shell.css",
   "/vizy-unified-shell.js",
+  "/vizy-inquiry.css",
+  "/vizy-inquiry-core.js",
+  "/vizy-inquiry-graph.js",
+  "/vizy-inquiry-map.js",
+  "/vizy-inquiry.js",
   "/skill-lab.html",
   "/skill-lab.css",
   "/skill-lab-data.js",
