@@ -249,3 +249,12 @@ body.iq-entry-visible{overflow:hidden!important}
 @media(prefers-reduced-motion:reduce){
  .iq-entry-overlay{transition:none!important}
 }
+
+/* Shortcut is an alternative to the long route, not a fourth mathematical verdict. */
+.iq-entry-shortcut{
+ grid-column:1/-1;justify-self:stretch;min-height:48px;
+ border-radius:12px;border:1px dashed #bbd4e2;
+ padding:10px 14px;background:#23445a;color:#f4fcff;
+ font-size:clamp(.9rem,1.5vw,1.1rem);font-weight:750;
+}
+.iq-entry-shortcut:focus-visible{outline:3px solid #80d3c9;outline-offset:3px}

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mathviz-learning-v2.13-inquiry-entry';
+const CACHE_NAME = 'mathviz-learning-v2.14-inquiry-shortcut';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",

@@ -111,6 +111,16 @@
      option.onclick=()=>{if(!closing&&typeof onSelect==='function')onSelect();};
      choices.append(option);
     }
+    // Preserve the expert route: the shortcut button is outside .iq-choices.
+    // It still invokes the existing map handler and requires the student to show evidence.
+    const shortcutSource=prompt.querySelector('[data-iq-shortcut]');
+    if(shortcutSource){
+     const shortcut=h('button','iq-entry-shortcut',shortcutSource.textContent.trim());
+     shortcut.type='button';shortcut.dataset.iqShortcut='true';
+     const onShortcut=shortcutSource.onclick;
+     shortcut.onclick=()=>{if(!closing&&typeof onShortcut==='function')onShortcut();};
+     choices.append(shortcut);
+    }
     const helpSource=prompt.querySelector('#iqHelp');
     if(helpSource){
      const help=h('button','iq-entry-help',helpSource.textContent);
