@@ -146,3 +146,11 @@ body.vizy-investigation-active header>a:nth-last-child(1){display:none}
 @media(prefers-reduced-motion:reduce){
  .vizy-inquiry *{scroll-behavior:auto!important;transition:none!important}
 }
+
+/* The inherited map header is white; restore contrast on investigation pages. */
+body.vizy-investigation-active>header{background:#152541!important;color:#f2f8ff!important;border-bottom:1px solid #47647e!important}
+body.vizy-investigation-active>header a,
+body.vizy-investigation-active>header .brand,
+body.vizy-investigation-active>header span{color:#f2f8ff!important}
+body.vizy-investigation-active>header .story-corner-trigger{display:none!important}
+body.vizy-investigation-active>header .header-errors-link{display:none!important}

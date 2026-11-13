@@ -22,6 +22,9 @@ test('diagnosis asks without leading cues and works on phone sizes',async({page}
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await openFresh(page,'increasing');
  await expect(page.locator('#iqQuestion')).toHaveText('איזו פונקציה עולה?');
+ await expect(page.locator('.iq-progress')).not.toContainText('1 / 1');
+ const headerBg=await page.locator('body>header').evaluate(el=>getComputedStyle(el).backgroundColor);
+ expect(headerBg).not.toBe('rgb(255, 255, 255)');
  await expect(page.locator('#vizyInquiry .iq-graph')).toBeVisible();
  await expect(page.locator('[data-iq-answer]')).toHaveCount(3);
  await expect(page.locator('#iqGraphSlider')).toHaveCount(0);
