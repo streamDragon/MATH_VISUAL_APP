@@ -35,6 +35,12 @@
     if(!drawer)return;
     event.preventDefault();
     drawer.open=!drawer.open;
+    // Keep the URL and selected dock item in sync with the only tools drawer.
+    // This is a view state, not a second home or a navigation to another page.
+    const current=new URL(location.href);
+    current.hash=drawer.open?'tools':'';
+    history.replaceState(history.state,'',current.pathname+current.search+current.hash);
+    renderNav();
     if(drawer.open)drawer.scrollIntoView({block:'nearest',behavior:'smooth'});
    });
    return a;
@@ -125,10 +131,13 @@
    toggle.addEventListener('click',()=>{document.body.classList.toggle('show-legacy-tools');toggle.setAttribute('aria-expanded',String(document.body.classList.contains('show-legacy-tools')));update();});
    update();main.append(toggle);
   }
-  const strip=document.querySelector('#iqGivenStrip');
-  if(strip&&!strip.parentNode.querySelector('.vizy-given-tools')){
+  const inquiry=document.getElementById('vizyInquiry');
+  const anchor=inquiry?.querySelector('#iqGivenStrip')||inquiry?.querySelector('.iq-header');
+  // Keep playtime inside the lesson, never floating above the answer buttons.
+  // The given strip does not exist at the initial decision; the header does.
+  if(anchor&&!inquiry.querySelector('.vizy-given-tools')){
    const slot=els('div','vizy-given-tools');slot.dataset.vizySlot='playtime';
-   strip.insertAdjacentElement('afterend',slot);
+   anchor.insertAdjacentElement('afterend',slot);
    root.VizyPlaytime?.render?.();
   }
   const finished=document.querySelector('.iq-prompt #iqReset');
@@ -174,5 +183,8 @@
    new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;decorateInquiry();});}).observe(inquiry,{childList:true,subtree:false});
   }
  }
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+ // Deferred scripts run while readyState is 'interactive'. Wait for every
+ // deferred lesson script before looking for its stage and wiring observers.
+ if(document.readyState==='complete')start();
+ else document.addEventListener('DOMContentLoaded',start,{once:true});
 })(window);

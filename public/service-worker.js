@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mathviz-learning-v2.15-visual-theme';
+const CACHE_NAME = 'mathviz-learning-v2.16-main-integration';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",
@@ -36,6 +36,14 @@ const APP_SHELL = [
   "/vizy-inquiry-map.js",
   "/vizy-inquiry-entry.js",
   "/vizy-inquiry.js",
+  "/vizy-progress-bridge.js",
+  "/play.html",
+  "/vizy-game-return.js",
+  "/vizy-glide.css",
+  "/vizy-glide.js",
+  "/vizy-glide-core.js",
+  "/vizy-playtime.js",
+  "/vizy-playtime-core.js",
   "/skill-lab.html",
   "/skill-lab.css",
   "/skill-lab-data.js",

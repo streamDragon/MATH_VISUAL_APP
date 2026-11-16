@@ -1,4 +1,9 @@
 import {test,expect} from '@playwright/test';
+// This test checks the local learning shell. A production Supabase catalog is
+// not a prerequisite for a usable first screen; isolate it deterministically.
+test.beforeEach(async ({page})=>{
+ await page.route('**/rest/v1/rpc/learning_catalog',route=>route.fulfill({status:200,contentType:'application/json',body:'[]'}));
+});
 for(const width of [320,390,412]){
  test('one next step and one menu on phone '+width,async({page})=>{
   await page.setViewportSize({width,height:780});
