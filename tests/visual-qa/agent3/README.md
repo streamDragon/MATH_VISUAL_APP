@@ -20,7 +20,7 @@ Direct browser QA found no horizontal page overflow in those sizes, Rubik loaded
 - `npm run check:questions`: 21 validated
 - `npm run build`: passed
 - `npx playwright test tests/vizy-visual.spec.ts --project=mobile-iphone13`: 5 / 5 pass
-- Entire mobile suite: attempted; unrelated legacy screens and deprecated expectations still fail. Do not publish until baseline reviewed.
+- Entire mobile suite: **72 passed / 37 failed** across 109 tests. The 5 Agent 3 visual tests all passed in this same full run. Most failures concern legacy screens and deprecated expectations. Do not publish until these are triaged.
 - No runtime AI, tracking, new npm dependencies or text input added.
 
 ## Known external blockers
