@@ -26,7 +26,7 @@ for(const width of [320,390]){
   await page.setViewportSize({width,height:width===320?568:844});
   const externalFonts:string[]=[];
   page.on('request',request=>{
-   if(/\.(?:woff2?|ttf)/.test(request.url())&&!request.url().startsWith('http://127.0.0.1:4173/'))
+   if(/\.(?:woff2?|ttf)/.test(request.url())&&!request.url().startsWith('http://127.0.0.1:'))
     externalFonts.push(request.url());
   });
   await page.goto('/learn.html');
@@ -73,5 +73,24 @@ for(const lesson of ['increasing','difference-squares']){
   }));
   expect(data.overflow).toBe(false);
   expect(data.font).toContain('Rubik');
+ });
+}
+
+for(const width of [320,390]){
+ test('tools announce expanded state and challenge bank takes focus at '+width,async({page})=>{
+  await page.setViewportSize({width,height:width===320?568:844});
+  await page.goto('/learn.html');
+  const tools=page.locator('#vizy-unified-nav [data-nav="tools"]');
+  await expect(tools).toHaveAttribute('aria-controls','vizy-tools-drawer');
+  await expect(tools).toHaveAttribute('aria-expanded','false');
+  await tools.click();
+  await expect(tools).toHaveAttribute('aria-expanded','true');
+  await expect(page.locator('#vizy-tools-drawer')).toHaveAttribute('open','');
+  await page.locator('#vizy-open-bank').click();
+  await expect(page.locator('#challenges')).toBeVisible();
+  await expect(page.locator('#library-toggle')).toBeFocused();
+  await tools.click();
+  await expect(tools).toHaveAttribute('aria-expanded','false');
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
  });
 }

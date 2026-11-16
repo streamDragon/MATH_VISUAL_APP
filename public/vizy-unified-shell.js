@@ -26,6 +26,10 @@
    const a=els('a');a.href=choice.href;a.dataset.nav=choice.id;
    a.append(icon(choice.name),document.createTextNode(' '+txt(choice.he,choice.en)));
    if(choice.id===activePage())a.setAttribute('aria-current','page');
+   if(choice.id==='tools'&&isHome()){
+    a.setAttribute('aria-controls','vizy-tools-drawer');
+    a.setAttribute('aria-expanded',String(Boolean(document.getElementById('vizy-tools-drawer')?.open)));
+   }
    if(choice.id==='tools'&&isHome())a.addEventListener('click',event=>{
     const drawer=document.getElementById('vizy-tools-drawer');
     if(!drawer)return;
@@ -73,6 +77,16 @@
   if(drawer&&journey.parentElement===drawer.parentElement&&
      (journey.compareDocumentPosition(drawer)&Node.DOCUMENT_POSITION_PRECEDING)){
     drawer.before(journey);
+  }
+  const bankButton=document.getElementById('vizy-open-bank');
+  if(bankButton&&!bankButton.dataset.vizyFocusReady){
+   bankButton.dataset.vizyFocusReady='1';
+   bankButton.addEventListener('click',()=>{
+    requestAnimationFrame(()=>{
+     const toggle=document.getElementById('library-toggle');
+     if(toggle&&toggle.getBoundingClientRect().height>0)toggle.focus({preventScroll:true});
+    });
+   });
   }
   const cards=Array.from(document.querySelectorAll('#bank-cards .activity-card:not(.locked)'));
   const stops=journey.querySelector('.vizy-journey-stops');
