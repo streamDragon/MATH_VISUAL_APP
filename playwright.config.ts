@@ -1,7 +1,11 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const HOST = "127.0.0.1";
-const PORT = 4173;
+// Parallel agents can run isolated browsers without sharing a Vite port.
+const PORT = Number(process.env.VIZY_TEST_PORT || 4173);
+if (!Number.isInteger(PORT) || PORT < 1024 || PORT > 65535) {
+  throw new Error("VIZY_TEST_PORT must be an available TCP port between 1024 and 65535");
+}
 const baseURL = `http://${HOST}:${PORT}`;
 
 export default defineConfig({

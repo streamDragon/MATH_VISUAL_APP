@@ -65,6 +65,18 @@ export default defineConfig({
   define: Object.fromEntries(
     Object.entries(buildTokens).map(([token, value]) => [token, JSON.stringify(value)])
   ),
+  server: {
+    // On Windows, Playwright's .webm videos can remain locked while being
+    // written. Vite should watch source, not agent QA output directories.
+    watch: {
+      ignored: [
+        '**/test-results/**',
+        '**/test-results-*/**',
+        '**/playwright-report/**',
+        '**/qa/**'
+      ]
+    }
+  },
   plugins: [
     {
       name: 'inject-build-stamp',
