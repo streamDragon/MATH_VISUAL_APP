@@ -157,3 +157,11 @@
 .vizy-story-dialog .story-choice[data-verdict=no]{border-color:#c98a2c;background:#fff6e8}
 .vizy-story-dialog .story-next{margin-top:12px}
 .vizy-story-dialog .story-next .story-link{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:14px;background:#1d5e86;color:#fff;font-weight:800;text-decoration:none}
+
+/* Story Corner inherits the same visual language without changing its teaching content. */
+.vizy-story-dialog .story-panel{font-family:"Rubik",Arial,sans-serif}
+.vizy-story-dialog .story-head{background:var(--vizy-surface,#192b45)}
+.vizy-story-dialog .story-question{border-radius:var(--vizy-radius-md,20px)}
+.vizy-story-dialog .story-choice{border-radius:var(--vizy-radius-sm,14px);transition:transform .2s ease-out,box-shadow .2s ease-out}
+.vizy-story-dialog .story-choice:active{transform:translateY(2px)}
+@media(prefers-reduced-motion:reduce){.vizy-story-dialog .story-choice{transition:none}}

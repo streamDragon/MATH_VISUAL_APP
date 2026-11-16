@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mathviz-learning-v2.14-inquiry-shortcut';
+const CACHE_NAME = 'mathviz-learning-v2.15-visual-theme';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",
@@ -19,6 +19,15 @@ const APP_SHELL = [
   "/story-corner.css",
   "/story-corner-data.js",
   "/story-corner.js",
+  "/vizy-theme.css",
+  "/vizy-icons.js",
+  "/vizy-mascot.js",
+  "/fonts/rubik-hebrew-400.woff2",
+  "/fonts/rubik-hebrew-500.woff2",
+  "/fonts/rubik-hebrew-700.woff2",
+  "/fonts/rubik-latin-400.woff2",
+  "/fonts/rubik-latin-500.woff2",
+  "/fonts/rubik-latin-700.woff2",
   "/vizy-unified-shell.css",
   "/vizy-unified-shell.js",
   "/vizy-inquiry.css",

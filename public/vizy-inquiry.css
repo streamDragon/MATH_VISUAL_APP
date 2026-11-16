@@ -258,3 +258,39 @@ body.iq-entry-visible{overflow:hidden!important}
  font-size:clamp(.9rem,1.5vw,1.1rem);font-weight:750;
 }
 .iq-entry-shortcut:focus-visible{outline:3px solid #80d3c9;outline-offset:3px}
+
+/* Shared inquiry controls: an emphasized question, not a decorative distraction. */
+.vizy-inquiry{font-family:"Rubik",Arial,sans-serif}
+.vizy-inquiry :where(button){font-family:"Rubik",Arial,sans-serif;cursor:pointer}
+.vizy-inquiry .iq-choice,.vizy-inquiry .iq-entry-answer,.vizy-inquiry .iq-control-button{
+ border-radius:14px;box-shadow:0 3px 0 #10274020;
+ transition:background .2s ease-out,border-color .2s ease-out,transform .2s ease-out,box-shadow .2s ease-out;
+}
+.vizy-inquiry .iq-choice:active,.vizy-inquiry .iq-entry-answer:active,.vizy-inquiry .iq-control-button:active{
+ transform:translateY(2px);box-shadow:0 1px 0 #10274020;
+}
+.vizy-inquiry .iq-choice[aria-pressed=true],.vizy-inquiry .iq-entry-answer[aria-pressed=true]{
+ border-color:#267e74;box-shadow:0 0 0 2px #267e7442;background:#d9f4e5
+}
+.vizy-inquiry .iq-choice{min-height:52px}
+.vizy-inquiry .iq-stage{border-radius:20px}
+.vizy-inquiry .iq-prompt{border-radius:20px;box-shadow:0 12px 24px #061a2a18}
+.vizy-inquiry .iq-prompt h3{font-size:clamp(1.17rem,3vw,1.65rem)}
+.vizy-inquiry .iq-graph{border-radius:17px}
+.vizy-inquiry .iq-graph path[stroke]:not([stroke="none"]){stroke-linecap:round;stroke-linejoin:round}
+.vizy-inquiry .iq-graph .curve-a,.vizy-inquiry .iq-graph .curve-b{stroke-width:5}
+.vizy-inquiry .iq-graph .moving-point{filter:drop-shadow(0 0 4px #102b374a)}
+.vizy-inquiry .iq-map-formula{font-family:"Rubik",Arial,sans-serif}
+.vizy-given-tools{position:relative;display:flex;justify-content:flex-end;margin:-4px 2px 9px}
+.vizy-given-tools:empty{display:none}
+.vizy-given-tools .vizy-playtime-chip{font-family:"Rubik",Arial,sans-serif;font-size:.76rem}
+.vizy-finish-mascot{display:flex;width:72px;height:72px;margin:10px auto}
+.vizy-next-activity{display:flex;align-items:center;justify-content:center;background:#d9fa78;color:#162d1e;min-height:50px;text-decoration:none;border-radius:14px;font-weight:700}
+.iq-entry-title:focus{outline:none;box-shadow:none}
+@media(prefers-reduced-motion:reduce){
+ .vizy-inquiry .iq-choice,.vizy-inquiry .iq-entry-answer,.vizy-inquiry .iq-control-button{transition:none!important}
+}
+
+/* Engine paths use presentation attributes; CSS provides the shared stroke polish. */
+.vizy-inquiry .iq-graph path[stroke-width="4"]{stroke-width:5;stroke-linecap:round}
+.vizy-inquiry .iq-graph circle[stroke="white"]{stroke-width:3;filter:drop-shadow(0 0 3px #16364966)}

@@ -140,3 +140,102 @@ body.vizy-consolidated .student-next-step-content>p{font-size:1rem;line-height:1
 body.vizy-consolidated .vizy-buddy,
 body.vizy-consolidated main>footer,
 body.vizy-consolidated body>footer{display:none!important}
+
+/* Agent 3: visual polish, without changing the learning engine. */
+body.vizy-consolidated{background:radial-gradient(ellipse at 8% 8%,#284363 0,transparent 43%),var(--vizy-ground);color:var(--vizy-text)}
+body.vizy-consolidated .app-header{background:#152541;color:#f4f7ff;border-bottom:1px solid #425a76}
+body.vizy-consolidated #vizy-unified-nav{background:rgba(21,37,65,.97);backdrop-filter:blur(14px);border-color:#526f89}
+body.vizy-consolidated #vizy-unified-nav a{font-family:"Rubik",Arial,sans-serif;display:flex;flex-direction:column;gap:4px;justify-content:center;font-weight:700;font-size:.86rem}
+body.vizy-consolidated #vizy-unified-nav .vizy-icon{height:20px;width:20px}
+body.vizy-consolidated #vizy-unified-nav a[aria-current=page]{background:var(--vizy-accent);color:#142c22}
+body.vizy-consolidated .student-next-step{
+ border-radius:var(--vizy-radius-lg);border:1px solid #6786a1;
+ background:linear-gradient(135deg,#254665 0%,#193354 56%,#253c4f 100%);
+ box-shadow:var(--vizy-shadow);position:relative;overflow:hidden;padding:clamp(14px,3vw,27px);min-height:248px;
+}
+body.vizy-consolidated .student-next-step:before{
+ content:"";position:absolute;left:-48px;top:-62px;width:205px;height:205px;
+ border-radius:50%;background:radial-gradient(circle,#7cc8ff24 0%,transparent 68%);pointer-events:none
+}
+body.vizy-consolidated .student-next-step-content{position:relative;z-index:1;padding-inline-end:clamp(88px,24vw,165px)}
+body.vizy-consolidated .student-next-step-content .pill.lime{
+ background:#37546a;color:#f4ffd2;font-size:.72rem;font-weight:700;
+}
+body.vizy-consolidated .student-next-step-content>h2{font:700 clamp(1.25rem,4.5vw,1.85rem)/1.28 "Rubik",Arial,sans-serif;color:#fff;margin:12px 0 6px}
+body.vizy-consolidated .student-next-step-content>p{color:#d8e8f6;font-size:.99rem;line-height:1.45;margin:5px 0 12px}
+body.vizy-consolidated .student-grade-picker{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 3px}
+body.vizy-consolidated .student-grade-picker button{
+ border:1px solid #718ca3;background:#243c58;color:#f0f7ff;border-radius:999px;
+ min-height:44px;padding:7px 13px;font:700 .86rem "Rubik",Arial,sans-serif;
+}
+body.vizy-consolidated .student-grade-picker button[aria-pressed=true]{
+ background:var(--vizy-accent);border-color:var(--vizy-accent);color:#143023
+}
+body.vizy-consolidated #student-start-next{
+ display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;
+ min-height:52px;border:0;border-radius:14px;padding:11px 14px;
+ background:var(--vizy-accent);color:#172c20;font:700 1.03rem "Rubik",Arial,sans-serif;
+ box-shadow:0 5px 0 #759f38;transition:transform .2s ease-out,box-shadow .2s ease-out;
+}
+body.vizy-consolidated #student-start-next:active{transform:translateY(3px);box-shadow:0 2px 0 #759f38}
+body.vizy-consolidated .vizy-home-avatar{width:clamp(78px,23vw,152px);height:clamp(78px,23vw,152px);
+ position:absolute;inset-inline-end:0;top:32px;transform:rotate(-6deg);pointer-events:none}
+body.vizy-consolidated .vizy-journey{
+ max-width:710px;margin:10px auto 10px;padding:11px 14px 12px;
+ border-radius:20px;background:#1c314b;border:1px solid #59758f;box-shadow:var(--vizy-shadow)
+}
+body.vizy-consolidated .vizy-journey h3{margin:0 0 9px;font:700 1.05rem "Rubik",Arial,sans-serif;color:#f4f8ff}
+body.vizy-consolidated .vizy-journey-stops{display:flex;gap:9px;align-items:center;overflow:hidden;direction:rtl}
+body.vizy-consolidated .vizy-journey-stop{
+ width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;
+ background:transparent;border:2px solid #91a4b7;color:#d5e2f0;border-radius:50%;
+ padding:0;line-height:1;font:700 .83rem "Rubik",Arial,sans-serif;
+}
+body.vizy-consolidated button.vizy-journey-stop{cursor:pointer;background:#d9fa78;border-color:#d9fa78;color:#163525}
+body.vizy-consolidated .vizy-journey-stop.is-next{
+ border-color:#d9fa78;color:#f3ffce;box-shadow:0 0 0 4px #d9fa781b;
+ animation:vizy-stop-pulse 3s ease-in-out infinite
+}
+body.vizy-consolidated .vizy-journey-stop .vizy-icon{width:16px;height:16px}
+body.vizy-consolidated .vizy-journey-playtime:empty{display:none}
+body.vizy-consolidated .vizy-journey-playtime{margin-top:9px;display:flex;justify-content:flex-start}
+body.vizy-consolidated .vizy-tools-drawer{margin:10px auto 20px}
+body.vizy-consolidated .vizy-tools-drawer summary{font-size:.97rem;font-weight:700;min-height:48px}
+body.vizy-consolidated .vizy-sound-slot{display:inline-flex;align-items:center;justify-content:center}
+body.vizy-consolidated .vizy-sound-slot:empty{display:none}
+body.vizy-consolidated .vizy-sound-slot button{min-height:44px;min-width:44px}
+body.vizy-consolidated .header-actions #account-button .vizy-icon{height:17px;width:17px}
+body.vizy-consolidated .vizy-journey .vizy-playtime-chip{font-family:"Rubik",Arial,sans-serif}
+@keyframes vizy-stop-pulse{0%,100%{box-shadow:0 0 0 2px #d9fa781b}50%{box-shadow:0 0 0 6px #d9fa7838}}
+@media(max-width:380px){
+ body.vizy-consolidated .student-next-step{padding:12px}
+ body.vizy-consolidated .student-next-step-content{padding-inline-end:73px}
+ body.vizy-consolidated .vizy-home-avatar{width:76px;height:76px;top:50px}
+ body.vizy-consolidated .student-next-step-content>h2{font-size:1.2rem}
+ body.vizy-consolidated .student-grade-picker button{padding-inline:10px}
+ body.vizy-consolidated .vizy-journey-stop{width:30px;height:30px;flex-basis:30px}
+}
+@media(prefers-reduced-motion:reduce){
+ body.vizy-consolidated .vizy-journey-stop.is-next{animation:none}
+ body.vizy-consolidated #student-start-next{transition:none}
+}
+
+/* All available stops remain scrollable inside their own row, never the whole page. */
+body.vizy-consolidated .vizy-journey-stops{overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;padding-block:2px;scroll-snap-type:x proximity}
+body.vizy-consolidated .vizy-journey-stop{min-width:44px;width:44px;height:44px;flex-basis:44px;scroll-snap-align:start}
+body.vizy-consolidated .vizy-journey-stop:not(button){cursor:default}
+body.vizy-consolidated .vizy-journey-stop.is-next{animation:vizy-stop-pulse 3.2s ease-in-out infinite;box-shadow:0 0 0 3px #d9fa7836}
+@media(max-width:380px){
+ body.vizy-consolidated .student-next-step{min-height:218px;padding:10px 12px}
+ body.vizy-consolidated .student-next-step-content>h2{margin:6px 0 2px;font-size:1.17rem}
+ body.vizy-consolidated .student-next-step-content>p{margin:2px 0 7px;font-size:.88rem}
+ body.vizy-consolidated .student-grade-picker{margin:4px 0 2px}
+ body.vizy-consolidated #student-start-next,body.vizy-consolidated .vizy-single-cta{min-height:46px;padding:8px 12px;font-size:.96rem}
+ body.vizy-consolidated .vizy-journey{margin:7px auto;padding:8px 12px}
+ body.vizy-consolidated .vizy-journey h3{margin:0 0 5px;font-size:.94rem}
+ body.vizy-consolidated .vizy-journey-playtime{margin-top:3px}
+ body.vizy-consolidated .vizy-tools-drawer{margin:7px auto 10px}
+ body.vizy-consolidated .vizy-tools-drawer summary{min-height:44px;padding:9px 12px}
+}
+
+@media(prefers-reduced-motion:reduce){body.vizy-consolidated .vizy-journey-stop.is-next{animation:none!important}}
