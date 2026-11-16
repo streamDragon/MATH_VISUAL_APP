@@ -50,3 +50,17 @@ test('game canvas fits a narrow 320px phone',async({page})=>{
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
   expect(overflow).toBe(false);
 });
+
+test('leaving mid-second saves time already spent',async({page})=>{
+  await page.goto('/learn.html');
+  await page.evaluate(()=>{
+    localStorage.setItem('vizy_playtime_v1',JSON.stringify({seconds:3,earned:{}}));
+    localStorage.removeItem('vizy_glide_v1');
+  });
+  await page.goto('/play.html');
+  await page.waitForTimeout(2800);
+  await page.goto('/learn.html');
+  const left=await page.evaluate(()=>JSON.parse(localStorage.getItem('vizy_playtime_v1')||'{}').seconds);
+  expect(left).toBeLessThan(3);
+  expect(left).toBeGreaterThanOrEqual(0);
+});
