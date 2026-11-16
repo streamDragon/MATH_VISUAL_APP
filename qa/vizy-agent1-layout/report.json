@@ -1,0 +1,1342 @@
+{
+  "at": "2026-11-16T19:25:04.419Z",
+  "commit": "",
+  "screens": [
+    {
+      "kind": "home",
+      "size": {
+        "width": 320,
+        "height": 568
+      },
+      "file": "home-320x568.png",
+      "title": "Vizy — רואים מתמטיקה",
+      "bodyClasses": "vizy-consolidated",
+      "viewport": {
+        "width": 320,
+        "height": 568
+      },
+      "documentWidth": 320,
+      "documentHeight": 663,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": {
+          "visible": true,
+          "x": 100,
+          "y": 218,
+          "width": 193,
+          "height": 46,
+          "inView": true,
+          "clickable": true
+        },
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 498,
+          "width": 320,
+          "height": 70,
+          "inView": true,
+          "clickable": true
+        },
+        "#vizy-tools-drawer": {
+          "visible": true,
+          "x": 14,
+          "y": 435,
+          "width": 292,
+          "height": 46,
+          "inView": true,
+          "clickable": true
+        },
+        ".vizy-journey-stops": {
+          "visible": true,
+          "x": 27,
+          "y": 333,
+          "width": 266,
+          "height": 48,
+          "inView": true,
+          "clickable": true
+        },
+        "#iqEntryOverlay": null,
+        ".iq-entry-answer": null,
+        "#request-image": null,
+        ".student-grade-picker": {
+          "visible": true,
+          "x": 100,
+          "y": 114,
+          "width": 193,
+          "height": 44,
+          "inView": true,
+          "clickable": true
+        }
+      },
+      "smallTouchTargets": [
+        {
+          "tag": "A",
+          "text": "VVIZY",
+          "x": 232,
+          "y": 17,
+          "w": 76,
+          "h": 29
+        }
+      ],
+      "mainText": "האימון הבא\nט׳\nי״א\nרעיון אחד שמגלים\n\nמזהים מבנה: הפרש ריבועים\n\nבואו נבדוק\nהמסע שלי\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n◷ 0:00\nכלים ועוד"
+    },
+    {
+      "kind": "tools",
+      "size": {
+        "width": 320,
+        "height": 568
+      },
+      "file": "tools-320x568.png",
+      "title": "Vizy — רואים מתמטיקה",
+      "bodyClasses": "vizy-consolidated",
+      "viewport": {
+        "width": 320,
+        "height": 568
+      },
+      "documentWidth": 320,
+      "documentHeight": 1250,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": {
+          "visible": true,
+          "x": 100,
+          "y": -203,
+          "width": 193,
+          "height": 46,
+          "inView": false,
+          "clickable": false
+        },
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 498,
+          "width": 320,
+          "height": 70,
+          "inView": true,
+          "clickable": true
+        },
+        "#vizy-tools-drawer": {
+          "visible": true,
+          "x": 14,
+          "y": 14,
+          "width": 292,
+          "height": 633,
+          "inView": true,
+          "clickable": false
+        },
+        ".vizy-journey-stops": {
+          "visible": true,
+          "x": 27,
+          "y": -88,
+          "width": 266,
+          "height": 48,
+          "inView": false,
+          "clickable": false
+        },
+        "#iqEntryOverlay": null,
+        ".iq-entry-answer": null,
+        "#request-image": null,
+        ".student-grade-picker": {
+          "visible": true,
+          "x": 100,
+          "y": -307,
+          "width": 193,
+          "height": 44,
+          "inView": false,
+          "clickable": false
+        }
+      },
+      "smallTouchTargets": [],
+      "mainText": "האימון הבא\nט׳\nי״א\nרעיון אחד שמגלים\n\nמזהים מבנה: הפרש ריבועים\n\nבואו נבדוק\nהמסע שלי\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n◷ 0:00\nכלים ועוד\nשיפוע ‎−4\nמפת קיצון\nשני גרפים ונקודה משותפת\nתרגול מודרך\nמעבדת מיומנויות\nמעבדת הגרפים\nפרטיות\nתור המורה\n☕ פינת הסיפו"
+    },
+    {
+      "kind": "classroom",
+      "size": {
+        "width": 320,
+        "height": 568
+      },
+      "file": "classroom-320x568.png",
+      "title": "Vizy | מהשיעור לפתרון עצמאי",
+      "bodyClasses": "vizy-consolidated",
+      "viewport": {
+        "width": 320,
+        "height": 568
+      },
+      "documentWidth": 320,
+      "documentHeight": 1103,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": null,
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 504,
+          "width": 320,
+          "height": 64,
+          "inView": true,
+          "clickable": true
+        },
+        "#vizy-tools-drawer": null,
+        ".vizy-journey-stops": null,
+        "#iqEntryOverlay": null,
+        ".iq-entry-answer": null,
+        "#request-image": null,
+        ".student-grade-picker": null
+      },
+      "smallTouchTargets": [
+        {
+          "tag": "A",
+          "text": "VIZY רואים מתמטיקה",
+          "x": 252,
+          "y": 10,
+          "w": 54,
+          "h": 33
+        }
+      ],
+      "mainText": "מתקדמים צעד אחר צעד\nבוחרים את השיעור\n0 מתוך 2 מסלולים שהושלמו\nכיתה ט׳\nכיתה י״א\nכל המסלולים\nכיתה ט׳\nמסלול חדש\nפונקציות\n\nנקודות חיתוך, ערכי פונקציה, פרבולה ואי־שוויון מתוך גרף.\n\nמתחילים ללמוד\nכיתה ט׳\nמסלול חדש\nמעגלים\n\nרדיוס, קוטר, משיק וזווית"
+    },
+    {
+      "kind": "increasing-overlay",
+      "size": {
+        "width": 320,
+        "height": 568
+      },
+      "file": "increasing-overlay-320x568.png",
+      "title": "Vizy | עלייה או חיוביות?",
+      "bodyClasses": "vizy-consolidated vizy-investigation-active iq-entry-visible",
+      "viewport": {
+        "width": 320,
+        "height": 568
+      },
+      "documentWidth": 320,
+      "documentHeight": 997,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": null,
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 498,
+          "width": 320,
+          "height": 70,
+          "inView": true,
+          "clickable": false
+        },
+        "#vizy-tools-drawer": null,
+        ".vizy-journey-stops": null,
+        "#iqEntryOverlay": {
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "width": 320,
+          "height": 568,
+          "inView": true,
+          "clickable": true
+        },
+        ".iq-entry-answer": {
+          "visible": true,
+          "x": 214,
+          "y": 374,
+          "width": 93,
+          "height": 65,
+          "inView": true,
+          "clickable": true
+        },
+        "#request-image": null,
+        ".student-grade-picker": null
+      },
+      "smallTouchTargets": [
+        {
+          "tag": "A",
+          "text": "VIZY",
+          "x": 267,
+          "y": 12,
+          "w": 45,
+          "h": 25
+        },
+        {
+          "tag": "A",
+          "text": "חזרה לבית",
+          "x": 120,
+          "y": 519,
+          "w": 79,
+          "h": 34
+        }
+      ],
+      "mainText": "VIZY · י״א · חקירת משמעות\nעלייה או חיוביות?\n1 / 14\nאיזו פונקציה עולה? · A או B\nx\ny\nA\nB\n\nהנקודות והצירים נשארים במקומם. בחרו לפי מה שאתם רואים.\n\nאיזו פונקציה עולה?\nגרף A\nגרף B\nאף אחת\n\nעוד לא יודע/ת — בוא נבדוק\nמה גילינו עד עכשיו?\n0\nהתחילו את"
+    },
+    {
+      "kind": "difference-overlay",
+      "size": {
+        "width": 320,
+        "height": 568
+      },
+      "file": "difference-overlay-320x568.png",
+      "title": "Vizy | הפרש ריבועים · כלל ופרט",
+      "bodyClasses": "vizy-consolidated vizy-investigation-active iq-entry-visible",
+      "viewport": {
+        "width": 320,
+        "height": 568
+      },
+      "documentWidth": 320,
+      "documentHeight": 1122,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": null,
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 498,
+          "width": 320,
+          "height": 70,
+          "inView": true,
+          "clickable": false
+        },
+        "#vizy-tools-drawer": null,
+        ".vizy-journey-stops": null,
+        "#iqEntryOverlay": {
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "width": 320,
+          "height": 568,
+          "inView": true,
+          "clickable": true
+        },
+        ".iq-entry-answer": {
+          "visible": true,
+          "x": 214,
+          "y": 319,
+          "width": 93,
+          "height": 65,
+          "inView": true,
+          "clickable": true
+        },
+        "#request-image": null,
+        ".student-grade-picker": null
+      },
+      "smallTouchTargets": [
+        {
+          "tag": "A",
+          "text": "VIZY",
+          "x": 267,
+          "y": 12,
+          "w": 45,
+          "h": 25
+        },
+        {
+          "tag": "A",
+          "text": "חזרה לבית",
+          "x": 120,
+          "y": 519,
+          "w": 79,
+          "h": 34
+        }
+      ],
+      "mainText": "VIZY · ט׳ · חקירת משמעות\nהפרש ריבועים · כלל ופרט\n1 / 10\nהמקרה שלנו: (x+1)² − 9\nהתבנית הכללית\n⋯\n→\nהזהות הכללית\n⋯\n↑ מזהים מבנה\n↓ חוזרים לפרט\nהמקרה שלנו\n(x+1)² − 9\nמציבים במקרה שלנו\n⋯\n↓ בודקים\n↓ מפשטים\nהגענו לאותו מקום?\nהתוצאה\n⋯\nעוד דרך לראות ",
+      "pageErrors": []
+    },
+    {
+      "kind": "home",
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "home-390x844.png",
+      "title": "Vizy — רואים מתמטיקה",
+      "bodyClasses": "vizy-consolidated",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "documentHeight": 844,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": {
+          "visible": true,
+          "x": 123,
+          "y": 245,
+          "width": 238,
+          "height": 52,
+          "inView": true,
+          "clickable": true
+        },
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 774,
+          "width": 390,
+          "height": 70,
+          "inView": true,
+          "clickable": true
+        },
+        "#vizy-tools-drawer": {
+          "visible": true,
+          "x": 14,
+          "y": 487,
+          "width": 362,
+          "height": 51,
+          "inView": true,
+          "clickable": true
+        },
+        ".vizy-journey-stops": {
+          "visible": true,
+          "x": 29,
+          "y": 372,
+          "width": 332,
+          "height": 48,
+          "inView": true,
+          "clickable": true
+        },
+        "#iqEntryOverlay": null,
+        ".iq-entry-answer": null,
+        "#request-image": null,
+        ".student-grade-picker": {
+          "visible": true,
+          "x": 123,
+          "y": 122,
+          "width": 238,
+          "height": 44,
+          "inView": true,
+          "clickable": true
+        }
+      },
+      "smallTouchTargets": [
+        {
+          "tag": "A",
+          "text": "VVIZY",
+          "x": 287,
+          "y": 15,
+          "w": 91,
+          "h": 32
+        }
+      ],
+      "mainText": "האימון הבא\nט׳\nי״א\nרעיון אחד שמגלים\n\nמזהים מבנה: הפרש ריבועים\n\nבואו נבדוק\nהמסע שלי\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n◷ 0:00\nכלים ועוד"
+    },
+    {
+      "kind": "tools",
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "tools-390x844.png",
+      "title": "Vizy — רואים מתמטיקה",
+      "bodyClasses": "vizy-consolidated",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "documentHeight": 1317,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": {
+          "visible": true,
+          "x": 123,
+          "y": -111,
+          "width": 238,
+          "height": 52,
+          "inView": false,
+          "clickable": false
+        },
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 774,
+          "width": 390,
+          "height": 70,
+          "inView": true,
+          "clickable": true
+        },
+        "#vizy-tools-drawer": {
+          "visible": true,
+          "x": 14,
+          "y": 131,
+          "width": 362,
+          "height": 638,
+          "inView": true,
+          "clickable": true
+        },
+        ".vizy-journey-stops": {
+          "visible": true,
+          "x": 29,
+          "y": 16,
+          "width": 332,
+          "height": 48,
+          "inView": true,
+          "clickable": true
+        },
+        "#iqEntryOverlay": null,
+        ".iq-entry-answer": null,
+        "#request-image": null,
+        ".student-grade-picker": {
+          "visible": true,
+          "x": 123,
+          "y": -234,
+          "width": 238,
+          "height": 44,
+          "inView": false,
+          "clickable": false
+        }
+      },
+      "smallTouchTargets": [],
+      "mainText": "האימון הבא\nט׳\nי״א\nרעיון אחד שמגלים\n\nמזהים מבנה: הפרש ריבועים\n\nבואו נבדוק\nהמסע שלי\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n◷ 0:00\nכלים ועוד\nשיפוע ‎−4\nמפת קיצון\nשני גרפים ונקודה משותפת\nתרגול מודרך\nמעבדת מיומנויות\nמעבדת הגרפים\nפרטיות\nתור המורה\n☕ פינת הסיפו"
+    },
+    {
+      "kind": "classroom",
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "classroom-390x844.png",
+      "title": "Vizy | מהשיעור לפתרון עצמאי",
+      "bodyClasses": "vizy-consolidated",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "documentHeight": 1084,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": null,
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 780,
+          "width": 390,
+          "height": 64,
+          "inView": true,
+          "clickable": true
+        },
+        "#vizy-tools-drawer": null,
+        ".vizy-journey-stops": null,
+        "#iqEntryOverlay": null,
+        ".iq-entry-answer": null,
+        "#request-image": null,
+        ".student-grade-picker": null
+      },
+      "smallTouchTargets": [
+        {
+          "tag": "A",
+          "text": "VIZY רואים מתמטיקה",
+          "x": 322,
+          "y": 10,
+          "w": 54,
+          "h": 33
+        }
+      ],
+      "mainText": "מתקדמים צעד אחר צעד\nבוחרים את השיעור\n0 מתוך 2 מסלולים שהושלמו\nכיתה ט׳\nכיתה י״א\nכל המסלולים\nכיתה ט׳\nמסלול חדש\nפונקציות\n\nנקודות חיתוך, ערכי פונקציה, פרבולה ואי־שוויון מתוך גרף.\n\nמתחילים ללמוד\nכיתה ט׳\nמסלול חדש\nמעגלים\n\nרדיוס, קוטר, משיק וזווית"
+    },
+    {
+      "kind": "increasing-overlay",
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "increasing-overlay-390x844.png",
+      "title": "Vizy | עלייה או חיוביות?",
+      "bodyClasses": "vizy-consolidated vizy-investigation-active iq-entry-visible",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "documentHeight": 1138,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": null,
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 774,
+          "width": 390,
+          "height": 70,
+          "inView": true,
+          "clickable": false
+        },
+        "#vizy-tools-drawer": null,
+        ".vizy-journey-stops": null,
+        "#iqEntryOverlay": {
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844,
+          "inView": true,
+          "clickable": true
+        },
+        ".iq-entry-answer": {
+          "visible": true,
+          "x": 260,
+          "y": 650,
+          "width": 117,
+          "height": 65,
+          "inView": true,
+          "clickable": true
+        },
+        "#request-image": null,
+        ".student-grade-picker": null
+      },
+      "smallTouchTargets": [
+        {
+          "tag": "A",
+          "text": "VIZY",
+          "x": 330,
+          "y": 12,
+          "w": 45,
+          "h": 25
+        },
+        {
+          "tag": "A",
+          "text": "חזרה לבית",
+          "x": 155,
+          "y": 795,
+          "w": 79,
+          "h": 34
+        }
+      ],
+      "mainText": "VIZY · י״א · חקירת משמעות\nעלייה או חיוביות?\n1 / 14\nאיזו פונקציה עולה? · A או B\nx\ny\nA\nB\n\nהנקודות והצירים נשארים במקומם. בחרו לפי מה שאתם רואים.\n\nאיזו פונקציה עולה?\nגרף A\nגרף B\nאף אחת\n\nעוד לא יודע/ת — בוא נבדוק\nמה גילינו עד עכשיו?\n0\nהתחילו את"
+    },
+    {
+      "kind": "difference-overlay",
+      "size": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "difference-overlay-390x844.png",
+      "title": "Vizy | הפרש ריבועים · כלל ופרט",
+      "bodyClasses": "vizy-consolidated vizy-investigation-active iq-entry-visible",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "documentHeight": 1201,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": null,
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 774,
+          "width": 390,
+          "height": 70,
+          "inView": true,
+          "clickable": false
+        },
+        "#vizy-tools-drawer": null,
+        ".vizy-journey-stops": null,
+        "#iqEntryOverlay": {
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844,
+          "inView": true,
+          "clickable": true
+        },
+        ".iq-entry-answer": {
+          "visible": true,
+          "x": 260,
+          "y": 595,
+          "width": 117,
+          "height": 65,
+          "inView": true,
+          "clickable": true
+        },
+        "#request-image": null,
+        ".student-grade-picker": null
+      },
+      "smallTouchTargets": [
+        {
+          "tag": "A",
+          "text": "VIZY",
+          "x": 330,
+          "y": 12,
+          "w": 45,
+          "h": 25
+        },
+        {
+          "tag": "A",
+          "text": "חזרה לבית",
+          "x": 155,
+          "y": 795,
+          "w": 79,
+          "h": 34
+        }
+      ],
+      "mainText": "VIZY · ט׳ · חקירת משמעות\nהפרש ריבועים · כלל ופרט\n1 / 10\nהמקרה שלנו: (x+1)² − 9\nהתבנית הכללית\n⋯\n→\nהזהות הכללית\n⋯\n↑ מזהים מבנה\n↓ חוזרים לפרט\nהמקרה שלנו\n(x+1)² − 9\nמציבים במקרה שלנו\n⋯\n↓ בודקים\n↓ מפשטים\nהגענו לאותו מקום?\nהתוצאה\n⋯\nעוד דרך לראות ",
+      "pageErrors": []
+    },
+    {
+      "kind": "home",
+      "size": {
+        "width": 412,
+        "height": 915
+      },
+      "file": "home-412x915.png",
+      "title": "Vizy — רואים מתמטיקה",
+      "bodyClasses": "vizy-consolidated",
+      "viewport": {
+        "width": 412,
+        "height": 915
+      },
+      "documentWidth": 412,
+      "documentHeight": 915,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": {
+          "visible": true,
+          "x": 128,
+          "y": 245,
+          "width": 255,
+          "height": 52,
+          "inView": true,
+          "clickable": true
+        },
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 845,
+          "width": 412,
+          "height": 70,
+          "inView": true,
+          "clickable": true
+        },
+        "#vizy-tools-drawer": {
+          "visible": true,
+          "x": 14,
+          "y": 487,
+          "width": 384,
+          "height": 51,
+          "inView": true,
+          "clickable": true
+        },
+        ".vizy-journey-stops": {
+          "visible": true,
+          "x": 29,
+          "y": 372,
+          "width": 354,
+          "height": 48,
+          "inView": true,
+          "clickable": true
+        },
+        "#iqEntryOverlay": null,
+        ".iq-entry-answer": null,
+        "#request-image": null,
+        ".student-grade-picker": {
+          "visible": true,
+          "x": 128,
+          "y": 122,
+          "width": 255,
+          "height": 44,
+          "inView": true,
+          "clickable": true
+        }
+      },
+      "smallTouchTargets": [
+        {
+          "tag": "A",
+          "text": "VVIZY",
+          "x": 309,
+          "y": 15,
+          "w": 91,
+          "h": 32
+        }
+      ],
+      "mainText": "האימון הבא\nט׳\nי״א\nרעיון אחד שמגלים\n\nמזהים מבנה: הפרש ריבועים\n\nבואו נבדוק\nהמסע שלי\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n◷ 0:00\nכלים ועוד"
+    },
+    {
+      "kind": "tools",
+      "size": {
+        "width": 412,
+        "height": 915
+      },
+      "file": "tools-412x915.png",
+      "title": "Vizy — רואים מתמטיקה",
+      "bodyClasses": "vizy-consolidated",
+      "viewport": {
+        "width": 412,
+        "height": 915
+      },
+      "documentWidth": 412,
+      "documentHeight": 1317,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": {
+          "visible": true,
+          "x": 128,
+          "y": -45,
+          "width": 255,
+          "height": 52,
+          "inView": true,
+          "clickable": false
+        },
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 845,
+          "width": 412,
+          "height": 70,
+          "inView": true,
+          "clickable": true
+        },
+        "#vizy-tools-drawer": {
+          "visible": true,
+          "x": 14,
+          "y": 197,
+          "width": 384,
+          "height": 638,
+          "inView": true,
+          "clickable": true
+        },
+        ".vizy-journey-stops": {
+          "visible": true,
+          "x": 29,
+          "y": 82,
+          "width": 354,
+          "height": 48,
+          "inView": true,
+          "clickable": true
+        },
+        "#iqEntryOverlay": null,
+        ".iq-entry-answer": null,
+        "#request-image": null,
+        ".student-grade-picker": {
+          "visible": true,
+          "x": 128,
+          "y": -168,
+          "width": 255,
+          "height": 44,
+          "inView": false,
+          "clickable": false
+        }
+      },
+      "smallTouchTargets": [],
+      "mainText": "האימון הבא\nט׳\nי״א\nרעיון אחד שמגלים\n\nמזהים מבנה: הפרש ריבועים\n\nבואו נבדוק\nהמסע שלי\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n◷ 0:00\nכלים ועוד\nשיפוע ‎−4\nמפת קיצון\nשני גרפים ונקודה משותפת\nתרגול מודרך\nמעבדת מיומנויות\nמעבדת הגרפים\nפרטיות\nתור המורה\n☕ פינת הסיפו"
+    },
+    {
+      "kind": "classroom",
+      "size": {
+        "width": 412,
+        "height": 915
+      },
+      "file": "classroom-412x915.png",
+      "title": "Vizy | מהשיעור לפתרון עצמאי",
+      "bodyClasses": "vizy-consolidated",
+      "viewport": {
+        "width": 412,
+        "height": 915
+      },
+      "documentWidth": 412,
+      "documentHeight": 1063,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": null,
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 851,
+          "width": 412,
+          "height": 64,
+          "inView": true,
+          "clickable": true
+        },
+        "#vizy-tools-drawer": null,
+        ".vizy-journey-stops": null,
+        "#iqEntryOverlay": null,
+        ".iq-entry-answer": null,
+        "#request-image": null,
+        ".student-grade-picker": null
+      },
+      "smallTouchTargets": [
+        {
+          "tag": "A",
+          "text": "VIZY רואים מתמטיקה",
+          "x": 344,
+          "y": 10,
+          "w": 54,
+          "h": 33
+        }
+      ],
+      "mainText": "מתקדמים צעד אחר צעד\nבוחרים את השיעור\n0 מתוך 2 מסלולים שהושלמו\nכיתה ט׳\nכיתה י״א\nכל המסלולים\nכיתה ט׳\nמסלול חדש\nפונקציות\n\nנקודות חיתוך, ערכי פונקציה, פרבולה ואי־שוויון מתוך גרף.\n\nמתחילים ללמוד\nכיתה ט׳\nמסלול חדש\nמעגלים\n\nרדיוס, קוטר, משיק וזווית"
+    },
+    {
+      "kind": "increasing-overlay",
+      "size": {
+        "width": 412,
+        "height": 915
+      },
+      "file": "increasing-overlay-412x915.png",
+      "title": "Vizy | עלייה או חיוביות?",
+      "bodyClasses": "vizy-consolidated vizy-investigation-active iq-entry-visible",
+      "viewport": {
+        "width": 412,
+        "height": 915
+      },
+      "documentWidth": 412,
+      "documentHeight": 1159,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": null,
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 845,
+          "width": 412,
+          "height": 70,
+          "inView": true,
+          "clickable": false
+        },
+        "#vizy-tools-drawer": null,
+        ".vizy-journey-stops": null,
+        "#iqEntryOverlay": {
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "width": 412,
+          "height": 915,
+          "inView": true,
+          "clickable": true
+        },
+        ".iq-entry-answer": {
+          "visible": true,
+          "x": 275,
+          "y": 721,
+          "width": 124,
+          "height": 65,
+          "inView": true,
+          "clickable": true
+        },
+        "#request-image": null,
+        ".student-grade-picker": null
+      },
+      "smallTouchTargets": [
+        {
+          "tag": "A",
+          "text": "VIZY",
+          "x": 352,
+          "y": 12,
+          "w": 45,
+          "h": 25
+        },
+        {
+          "tag": "A",
+          "text": "חזרה לבית",
+          "x": 166,
+          "y": 866,
+          "w": 79,
+          "h": 34
+        }
+      ],
+      "mainText": "VIZY · י״א · חקירת משמעות\nעלייה או חיוביות?\n1 / 14\nאיזו פונקציה עולה? · A או B\nx\ny\nA\nB\n\nהנקודות והצירים נשארים במקומם. בחרו לפי מה שאתם רואים.\n\nאיזו פונקציה עולה?\nגרף A\nגרף B\nאף אחת\n\nעוד לא יודע/ת — בוא נבדוק\nמה גילינו עד עכשיו?\n0\nהתחילו את"
+    },
+    {
+      "kind": "difference-overlay",
+      "size": {
+        "width": 412,
+        "height": 915
+      },
+      "file": "difference-overlay-412x915.png",
+      "title": "Vizy | הפרש ריבועים · כלל ופרט",
+      "bodyClasses": "vizy-consolidated vizy-investigation-active iq-entry-visible",
+      "viewport": {
+        "width": 412,
+        "height": 915
+      },
+      "documentWidth": 412,
+      "documentHeight": 1201,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": null,
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 845,
+          "width": 412,
+          "height": 70,
+          "inView": true,
+          "clickable": false
+        },
+        "#vizy-tools-drawer": null,
+        ".vizy-journey-stops": null,
+        "#iqEntryOverlay": {
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "width": 412,
+          "height": 915,
+          "inView": true,
+          "clickable": true
+        },
+        ".iq-entry-answer": {
+          "visible": true,
+          "x": 275,
+          "y": 666,
+          "width": 124,
+          "height": 65,
+          "inView": true,
+          "clickable": true
+        },
+        "#request-image": null,
+        ".student-grade-picker": null
+      },
+      "smallTouchTargets": [
+        {
+          "tag": "A",
+          "text": "VIZY",
+          "x": 352,
+          "y": 12,
+          "w": 45,
+          "h": 25
+        },
+        {
+          "tag": "A",
+          "text": "חזרה לבית",
+          "x": 166,
+          "y": 866,
+          "w": 79,
+          "h": 34
+        }
+      ],
+      "mainText": "VIZY · ט׳ · חקירת משמעות\nהפרש ריבועים · כלל ופרט\n1 / 10\nהמקרה שלנו: (x+1)² − 9\nהתבנית הכללית\n⋯\n→\nהזהות הכללית\n⋯\n↑ מזהים מבנה\n↓ חוזרים לפרט\nהמקרה שלנו\n(x+1)² − 9\nמציבים במקרה שלנו\n⋯\n↓ בודקים\n↓ מפשטים\nהגענו לאותו מקום?\nהתוצאה\n⋯\nעוד דרך לראות ",
+      "pageErrors": []
+    },
+    {
+      "kind": "home",
+      "size": {
+        "width": 1366,
+        "height": 768
+      },
+      "file": "home-1366x768.png",
+      "title": "Vizy — רואים מתמטיקה",
+      "bodyClasses": "vizy-consolidated",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "documentWidth": 1366,
+      "documentHeight": 805,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": {
+          "visible": true,
+          "x": 521,
+          "y": 304,
+          "width": 489,
+          "height": 52,
+          "inView": true,
+          "clickable": true
+        },
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 698,
+          "width": 1366,
+          "height": 70,
+          "inView": true,
+          "clickable": true
+        },
+        "#vizy-tools-drawer": {
+          "visible": true,
+          "x": 328,
+          "y": 552,
+          "width": 710,
+          "height": 51,
+          "inView": true,
+          "clickable": true
+        },
+        ".vizy-journey-stops": {
+          "visible": true,
+          "x": 343,
+          "y": 437,
+          "width": 680,
+          "height": 48,
+          "inView": true,
+          "clickable": true
+        },
+        "#iqEntryOverlay": null,
+        ".iq-entry-answer": null,
+        "#request-image": null,
+        ".student-grade-picker": {
+          "visible": true,
+          "x": 521,
+          "y": 169,
+          "width": 489,
+          "height": 44,
+          "inView": true,
+          "clickable": true
+        }
+      },
+      "smallTouchTargets": [
+        {
+          "tag": "A",
+          "text": "VVIZY",
+          "x": 1114,
+          "y": 22,
+          "w": 105,
+          "h": 37
+        }
+      ],
+      "mainText": "האימון הבא\nט׳\nי״א\nרעיון אחד שמגלים\n\nמזהים מבנה: הפרש ריבועים\n\nבואו נבדוק\nהמסע שלי\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n◷ 0:00\nכלים ועוד"
+    },
+    {
+      "kind": "tools",
+      "size": {
+        "width": 1366,
+        "height": 768
+      },
+      "file": "tools-1366x768.png",
+      "title": "Vizy — רואים מתמטיקה",
+      "bodyClasses": "vizy-consolidated",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "documentWidth": 1366,
+      "documentHeight": 1107,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": {
+          "visible": true,
+          "x": 521,
+          "y": 85,
+          "width": 489,
+          "height": 52,
+          "inView": true,
+          "clickable": true
+        },
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 698,
+          "width": 1366,
+          "height": 70,
+          "inView": true,
+          "clickable": true
+        },
+        "#vizy-tools-drawer": {
+          "visible": true,
+          "x": 328,
+          "y": 333,
+          "width": 710,
+          "height": 353,
+          "inView": true,
+          "clickable": true
+        },
+        ".vizy-journey-stops": {
+          "visible": true,
+          "x": 343,
+          "y": 218,
+          "width": 680,
+          "height": 48,
+          "inView": true,
+          "clickable": true
+        },
+        "#iqEntryOverlay": null,
+        ".iq-entry-answer": null,
+        "#request-image": null,
+        ".student-grade-picker": {
+          "visible": true,
+          "x": 521,
+          "y": -50,
+          "width": 489,
+          "height": 44,
+          "inView": false,
+          "clickable": false
+        }
+      },
+      "smallTouchTargets": [],
+      "mainText": "האימון הבא\nט׳\nי״א\nרעיון אחד שמגלים\n\nמזהים מבנה: הפרש ריבועים\n\nבואו נבדוק\nהמסע שלי\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n◷ 0:00\nכלים ועוד\nשיפוע ‎−4\nמפת קיצון\nשני גרפים ונקודה משותפת\nתרגול מודרך\nמעבדת מיומנויות\nמעבדת הגרפים\nפרטיות\nתור המורה\n☕ פינת הסיפו"
+    },
+    {
+      "kind": "classroom",
+      "size": {
+        "width": 1366,
+        "height": 768
+      },
+      "file": "classroom-1366x768.png",
+      "title": "Vizy | מהשיעור לפתרון עצמאי",
+      "bodyClasses": "vizy-consolidated",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "documentWidth": 1366,
+      "documentHeight": 770,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": null,
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 704,
+          "width": 1366,
+          "height": 64,
+          "inView": true,
+          "clickable": true
+        },
+        "#vizy-tools-drawer": null,
+        ".vizy-journey-stops": null,
+        "#iqEntryOverlay": null,
+        ".iq-entry-answer": null,
+        "#request-image": null,
+        ".student-grade-picker": null
+      },
+      "smallTouchTargets": [
+        {
+          "tag": "A",
+          "text": "VIZY רואים מתמטיקה",
+          "x": 1091,
+          "y": 20,
+          "w": 152,
+          "h": 33
+        }
+      ],
+      "mainText": "מתקדמים צעד אחר צעד\nבוחרים את השיעור\n0 מתוך 2 מסלולים שהושלמו\nכיתה ט׳\nכיתה י״א\nכל המסלולים\nכיתה ט׳\nמסלול חדש\nפונקציות\n\nנקודות חיתוך, ערכי פונקציה, פרבולה ואי־שוויון מתוך גרף.\n\nמתחילים ללמוד\nכיתה ט׳\nמסלול חדש\nמעגלים\n\nרדיוס, קוטר, משיק וזווית"
+    },
+    {
+      "kind": "increasing-overlay",
+      "size": {
+        "width": 1366,
+        "height": 768
+      },
+      "file": "increasing-overlay-1366x768.png",
+      "title": "Vizy | עלייה או חיוביות?",
+      "bodyClasses": "vizy-consolidated vizy-investigation-active iq-entry-visible",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "documentWidth": 1366,
+      "documentHeight": 1272,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": null,
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 698,
+          "width": 1366,
+          "height": 70,
+          "inView": true,
+          "clickable": false
+        },
+        "#vizy-tools-drawer": null,
+        ".vizy-journey-stops": null,
+        "#iqEntryOverlay": {
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "width": 1366,
+          "height": 768,
+          "inView": true,
+          "clickable": true
+        },
+        ".iq-entry-answer": {
+          "visible": true,
+          "x": 833,
+          "y": 539,
+          "width": 281,
+          "height": 70,
+          "inView": true,
+          "clickable": true
+        },
+        "#request-image": null,
+        ".student-grade-picker": null
+      },
+      "smallTouchTargets": [
+        {
+          "tag": "A",
+          "text": "VIZY",
+          "x": 1306,
+          "y": 12,
+          "w": 45,
+          "h": 25
+        },
+        {
+          "tag": "A",
+          "text": "חזרה לבית",
+          "x": 643,
+          "y": 698,
+          "w": 79,
+          "h": 34
+        }
+      ],
+      "mainText": "VIZY · י״א · חקירת משמעות\nעלייה או חיוביות?\n1 / 14\nאיזו פונקציה עולה? · A או B\nx\ny\nA\nB\n\nהנקודות והצירים נשארים במקומם. בחרו לפי מה שאתם רואים.\n\nאיזו פונקציה עולה?\nגרף A\nגרף B\nאף אחת\n\nעוד לא יודע/ת — בוא נבדוק\nמה גילינו עד עכשיו?\n0\nהתחילו את"
+    },
+    {
+      "kind": "difference-overlay",
+      "size": {
+        "width": 1366,
+        "height": 768
+      },
+      "file": "difference-overlay-1366x768.png",
+      "title": "Vizy | הפרש ריבועים · כלל ופרט",
+      "bodyClasses": "vizy-consolidated vizy-investigation-active iq-entry-visible",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "documentWidth": 1366,
+      "documentHeight": 1324,
+      "horizontalOverflow": 0,
+      "elements": {
+        "#student-start-ability": null,
+        "#vizy-unified-nav": {
+          "visible": true,
+          "x": 0,
+          "y": 698,
+          "width": 1366,
+          "height": 70,
+          "inView": true,
+          "clickable": false
+        },
+        "#vizy-tools-drawer": null,
+        ".vizy-journey-stops": null,
+        "#iqEntryOverlay": {
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "width": 1366,
+          "height": 768,
+          "inView": true,
+          "clickable": true
+        },
+        ".iq-entry-answer": {
+          "visible": true,
+          "x": 833,
+          "y": 476,
+          "width": 281,
+          "height": 70,
+          "inView": true,
+          "clickable": true
+        },
+        "#request-image": null,
+        ".student-grade-picker": null
+      },
+      "smallTouchTargets": [
+        {
+          "tag": "A",
+          "text": "VIZY",
+          "x": 1306,
+          "y": 12,
+          "w": 45,
+          "h": 25
+        },
+        {
+          "tag": "A",
+          "text": "חזרה לבית",
+          "x": 643,
+          "y": 694,
+          "w": 79,
+          "h": 34
+        }
+      ],
+      "mainText": "VIZY · ט׳ · חקירת משמעות\nהפרש ריבועים · כלל ופרט\n1 / 10\nהמקרה שלנו: (x+1)² − 9\nהתבנית הכללית\n⋯\n→\nהזהות הכללית\n⋯\n↑ מזהים מבנה\n↓ חוזרים לפרט\nהמקרה שלנו\n(x+1)² − 9\nמציבים במקרה שלנו\n⋯\n↓ בודקים\n↓ מפשטים\nהגענו לאותו מקום?\nהתוצאה\n⋯\nעוד דרך לראות ",
+      "pageErrors": []
+    }
+  ]
+}

@@ -48,6 +48,21 @@
       history.replaceState({},'',u.toString());
     }catch{}
   }
+  // Decorative previews establish a different visual identity for each topic.
+  // They are not worked solutions and stay outside the actual lesson stage.
+  const coursePreview = Object.freeze({
+    'g9-functions': '<path class="preview-grid" d="M14 50H114 M64 12V88"/><path class="preview-mark" d="M11 28Q64 142 117 28"/>',
+    'g9-circles': '<circle class="preview-mark" cx="64" cy="50" r="34"/><path class="preview-grid" d="M64 50L92 30 M64 50L98 50"/><path class="preview-detail" d="M64 50L43 76L92 30"/>',
+    'g11-fractions': '<text class="preview-label" x="64" y="40" text-anchor="middle">a + b</text><path class="preview-mark" d="M23 50H105"/><text class="preview-label" x="64" y="75" text-anchor="middle">c</text>',
+    'g11-inequality': '<path class="preview-grid" d="M12 55H116 M27 47V63 M57 47V63 M87 47V63"/><circle class="preview-mark" cx="57" cy="55" r="8"/><path class="preview-mark" d="M67 55H107 M98 47L107 55L98 63"/>'
+  });
+  function previewForCourse(id){
+    const holder=document.createElement('span');
+    holder.className='course-card-art';
+    holder.setAttribute('aria-hidden','true');
+    holder.innerHTML='<svg viewBox="0 0 128 100" focusable="false" aria-hidden="true">'+(coursePreview[id]||coursePreview['g9-functions'])+'</svg>';
+    return holder;
+  }
   function renderCourses(){
     activeId=null;persist();
     document.querySelector(".challenge")?.classList.remove("discovery-mode");
@@ -60,6 +75,7 @@
     visible.forEach(l=>{
       const r=record(l.id),num=countDone(r),el=document.createElement('article');
       el.className='course-card';
+      el.dataset.course=l.id;
       const meta=document.createElement('div');meta.className='course-meta';
       const label=document.createElement('span');label.textContent='כיתה '+(l.grade===9?'ט׳':'י״א');
       const status=document.createElement('span');status.textContent=r.completed?'הושלם ✓':num?'שלב '+(r.index+1)+' מתוך '+l.steps.length:r.everCompleted?'חזרה על החומר':'מסלול חדש';
@@ -71,7 +87,7 @@
       const launch=document.createElement('button');launch.type='button';launch.className='primary';
       launch.textContent=r.completed?'צפייה בסיכום':num?'להמשיך מאיפה שהפסקתי':'מתחילים ללמוד';
       launch.addEventListener('click',()=>openCourse(l.id));
-      el.append(meta,head,info,track,launch);$('courseCards').append(el);
+      el.append(meta,head,info,previewForCourse(l.id),track,launch);$('courseCards').append(el);
     });
   }
   function showCourses() {renderCourses();updateRoute(null);$('courses').scrollIntoView({block:'start'});}

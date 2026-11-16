@@ -1,0 +1,51 @@
+/* Classroom card polish. Isolated to classroom-practice.html. */
+:root{--classroom-lime:#d9fa78;--classroom-ink:#14243a}
+#main{max-width:1060px}
+.hero{max-width:none;padding:16px 0 8px}
+.hero .eyebrow{font-size:.81rem;color:#d9fa78;letter-spacing:0}
+.hero h1{font-size:clamp(1.45rem,3.6vw,2.2rem);letter-spacing:-.02em;margin:0}
+#courses .section-head{margin:6px 0 10px}
+#courses .section-head h2{font-size:1.04rem;font-weight:700;color:#d5e4f5}
+#courses .section-head .muted{font-size:.8rem}
+.grade-tabs{display:inline-flex;max-width:100%;flex-wrap:wrap;gap:4px;padding:5px;border:1px solid #455e78;background:#172944;border-radius:15px;margin:6px 0 17px}
+.grade-tabs button{border-color:transparent;background:transparent;border-radius:10px;min-height:45px;color:#e7f0ff;font-weight:700;padding:9px 15px}
+.grade-tabs button[aria-pressed=true]{background:var(--classroom-lime);border-color:var(--classroom-lime);color:#173027;box-shadow:0 3px 12px #070f1c44}
+.course-cards{gap:13px;align-items:stretch}
+.course-card{--course-tone:#7cc8ff;position:relative;display:grid;grid-template-columns:minmax(0,1fr) 112px;grid-template-rows:auto auto minmax(0,1fr) auto auto;align-items:start;gap:6px 12px;padding:17px;border:1px solid #536b8a;border-radius:20px;background:linear-gradient(135deg,#263d5b 0%,#192a43 95%);box-shadow:0 12px 24px #0713244d;overflow:hidden}
+.course-card::before{content:"";position:absolute;inset-inline-start:0;inset-block:0;width:4px;background:var(--course-tone)}
+.course-card[data-course="g9-circles"]{--course-tone:#b99afa}
+.course-card[data-course="g11-fractions"]{--course-tone:#9cddba}
+.course-card[data-course="g11-inequality"]{--course-tone:#ffbb85}
+.course-meta{grid-row:1;grid-column:1/-1;align-items:center;font-size:.79rem;font-weight:700;color:#d1e8ec}
+.course-meta span:last-child{background:#ffffff12;border:1px solid #ffffff1e;border-radius:999px;padding:4px 9px;color:#e5f1ff}
+.course-card h3{grid-row:2;grid-column:1;margin:4px 0 0;font-size:clamp(1.12rem,2.5vw,1.32rem);color:#f7fbff}
+.course-card p{grid-row:3;grid-column:1;font-size:.94rem;line-height:1.5;color:#d6e0f2}
+.course-card-art{grid-row:2/span 2;grid-column:2;display:flex;justify-content:center;align-items:center;width:112px;height:94px;border:1px solid #6684a05e;border-radius:15px;background:radial-gradient(circle at 30% 20%,#ffffff19,#ffffff06 68%);color:var(--course-tone)}
+.course-card-art svg{width:100%;height:100%;overflow:visible}
+.course-card-art .preview-grid{fill:none;stroke:#7c9bb0;stroke-width:2;stroke-linecap:round;opacity:.7}
+.course-card-art .preview-mark{fill:none;stroke:currentColor;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.course-card-art .preview-detail{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round}
+.course-card-art .preview-label{font:700 21px Rubik,Arial,sans-serif;fill:currentColor;direction:ltr;unicode-bidi:isolate}
+.course-card .mini-progress{grid-row:4;grid-column:1/-1;height:6px;margin-top:5px;background:#475a72}
+.course-card .mini-progress span{background:var(--course-tone)}
+.course-card button.primary{grid-row:5;grid-column:1/-1;width:100%;margin-top:7px;min-height:48px;border:1px solid #678fbc;border-radius:13px;background:#265f93;font-size:1rem;font-weight:700;text-shadow:none;letter-spacing:normal;box-shadow:0 2px 0 #122e52}
+.course-card button.primary:hover{background:#2874ae}
+.course-card button.primary:focus-visible{outline-color:var(--classroom-lime)}
+#courses .note{margin:17px 0;color:#b7c8dc}
+@media(max-width:760px){
+ #main{padding:12px 14px 25px}
+ .hero{padding:7px 0 3px}
+ #courses .section-head{align-items:baseline;gap:7px}
+ .grade-tabs{display:flex;width:100%;justify-content:stretch}
+ .grade-tabs button{flex:1;min-width:0;padding-inline:5px}
+ .course-card{grid-template-columns:minmax(0,1fr) 100px;padding:15px;gap:6px 11px}
+ .course-card-art{width:100px;height:89px}
+ .course-card h3{font-size:1.22rem}
+}
+@media(max-width:350px){
+ .course-card{grid-template-columns:minmax(0,1fr) 83px;padding:13px}
+ .course-card-art{width:83px;height:79px}
+ .course-card p{font-size:.94rem}
+ .course-card h3{font-size:1.1rem}
+ #courses .section-head .muted{font-size:.75rem}
+}

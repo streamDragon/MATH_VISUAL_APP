@@ -1,0 +1,114 @@
+[
+  {
+    "viewport": {
+      "width": 320,
+      "height": 568
+    },
+    "h1": "איזה נושא נחקור היום?",
+    "cardCount": 2,
+    "previewCount": 2,
+    "courseIds": [
+      "g9-functions",
+      "g9-circles"
+    ],
+    "overflow": 0,
+    "cards": [
+      {
+        "width": 292,
+        "artWithin": true,
+        "artHeight": 79
+      },
+      {
+        "width": 292,
+        "artWithin": true,
+        "artHeight": 79
+      }
+    ],
+    "stageOverflow": 0,
+    "errors": []
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "h1": "איזה נושא נחקור היום?",
+    "cardCount": 2,
+    "previewCount": 2,
+    "courseIds": [
+      "g9-functions",
+      "g9-circles"
+    ],
+    "overflow": 0,
+    "cards": [
+      {
+        "width": 362,
+        "artWithin": true,
+        "artHeight": 89
+      },
+      {
+        "width": 362,
+        "artWithin": true,
+        "artHeight": 89
+      }
+    ],
+    "stageOverflow": 0,
+    "errors": []
+  },
+  {
+    "viewport": {
+      "width": 412,
+      "height": 915
+    },
+    "h1": "איזה נושא נחקור היום?",
+    "cardCount": 2,
+    "previewCount": 2,
+    "courseIds": [
+      "g9-functions",
+      "g9-circles"
+    ],
+    "overflow": 0,
+    "cards": [
+      {
+        "width": 384,
+        "artWithin": true,
+        "artHeight": 89
+      },
+      {
+        "width": 384,
+        "artWithin": true,
+        "artHeight": 89
+      }
+    ],
+    "stageOverflow": 0,
+    "errors": []
+  },
+  {
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "h1": "איזה נושא נחקור היום?",
+    "cardCount": 2,
+    "previewCount": 2,
+    "courseIds": [
+      "g9-functions",
+      "g9-circles"
+    ],
+    "overflow": 0,
+    "cards": [
+      {
+        "width": 503.5,
+        "artWithin": true,
+        "artHeight": 94
+      },
+      {
+        "width": 503.5,
+        "artWithin": true,
+        "artHeight": 94
+      }
+    ],
+    "stageOverflow": 0,
+    "errors": []
+  }
+]
