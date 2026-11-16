@@ -94,22 +94,46 @@
     });
    });
   }
-  const cards=Array.from(document.querySelectorAll('#bank-cards .activity-card:not(.locked)'));
+  // The home CTA leads to an inquiry lesson, not to the first challenge-bank card.
+  // Show that actual lesson first; optional bank tasks are later steps, never invented completions.
+  const action=document.getElementById('student-start-ability');
+  const lessonHref=action?.getAttribute('href')||'';
+  const lessonKind=new URL(lessonHref,location.href).searchParams.get('lesson');
+  const inquiryKind=lessonKind==='difference-squares'?'map':lessonKind==='increasing'?'graph':null;
+  let inquiryDone=false;
+  if(inquiryKind){
+   try{
+    const stored=JSON.parse(localStorage.getItem('vizy_inquiry_v1_'+inquiryKind)||'null');
+    inquiryDone=Boolean(stored&&Array.isArray(stored.route)&&stored.route[stored.index]==='done');
+   }catch{}
+  }
+  const primaryTitle=document.querySelector('.student-next-step-content>p')?.textContent?.trim()||
+    txt('הפעילות הבאה','Next lesson');
+  const bankCards=Array.from(document.querySelectorAll('#bank-cards .activity-card:not(.locked)'));
   const stops=journey.querySelector('.vizy-journey-stops');
-  const selection=cards;
-  const firstOpen=selection.findIndex(c=>!c.classList.contains('mastered'));
-  const next=firstOpen===-1?selection.length:firstOpen;
-  const signature=selection.map(c=>c.classList.contains('mastered')?'1':'0').join('')+'/'+selection.map(c=>c.querySelector('h3')?.textContent).join('|')+'/'+lang();
+  const items=[
+   {title:primaryTitle,done:inquiryDone,href:lessonHref,primary:true},
+   ...bankCards.map(card=>({title:card.querySelector('h3')?.textContent||txt('אתגר','Challenge'),
+    done:card.classList.contains('mastered'),card,primary:false}))
+  ];
+  const signature=items.map(x=>x.title+'|'+x.done).join('::')+'/'+lang();
   if(stops.dataset.signature!==signature){
    stops.dataset.signature=signature;
-   stops.replaceChildren(...selection.map((card,i)=>{
-    const done=card.classList.contains('mastered');
-    const marker=els(done?'button':'span','vizy-journey-stop');
-    marker.classList.toggle('is-done',done);marker.classList.toggle('is-next',i===next);
-    marker.setAttribute('aria-label',txt('שלב','Step')+' '+(i+1)+': '+(card.querySelector('h3')?.textContent||''));
-    if(done){marker.type='button';marker.title=card.querySelector('h3')?.textContent||'';marker.addEventListener('click',()=>card.querySelector('button')?.click());}
-    else marker.setAttribute('aria-hidden','true');
-    marker.append(done?icon('star'):document.createTextNode(String(i+1)));
+   stops.replaceChildren(...items.map((item,i)=>{
+    const isNext=i===0&&!item.done;
+    const marker=els(item.done?'button':'span','vizy-journey-stop');
+    marker.classList.toggle('is-done',item.done);
+    marker.classList.toggle('is-next',isNext);
+    marker.dataset.vizyLesson=item.primary?'primary':'bank';
+    marker.setAttribute('aria-label',txt('שלב','Step')+' '+(i+1)+': '+item.title);
+    if(item.done){
+     marker.type='button';
+     marker.title=item.title;
+     marker.addEventListener('click',()=>item.primary?location.assign(item.href):item.card?.querySelector('button')?.click());
+    }else{
+     marker.setAttribute('aria-hidden','true');
+    }
+    marker.append(item.done?icon('star'):document.createTextNode(String(i+1)));
     return marker;
    }));
   }

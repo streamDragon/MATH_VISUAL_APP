@@ -94,3 +94,36 @@ for(const width of [320,390]){
   expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
  });
 }
+
+
+for(const [grade,kind,lesson] of [
+ ['9','map','difference-squares'],['11','graph','increasing']
+] as const){
+ test('journey starts with the actual home lesson for grade '+grade,async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto('/learn.html');
+  await page.locator('[data-home-grade="'+grade+'"]').click();
+  const primary=page.locator('#vizy-journey-stops .vizy-journey-stop').first();
+  const actual=await page.locator('.student-next-step-content>p').textContent();
+  await expect(primary).toHaveAttribute('data-vizy-lesson','primary');
+  expect(await primary.getAttribute('aria-label')).toContain(actual!.trim());
+  await expect(primary).toHaveClass(/is-next/);
+  await expect(page.locator('#student-start-ability')).toHaveAttribute('href','problem-map.html?lesson='+lesson);
+  const remaining=page.locator('#vizy-journey-stops .vizy-journey-stop:not([data-vizy-lesson=primary])');
+  expect(await remaining.count()).toBeGreaterThan(0);
+  for(const marker of await remaining.all())await expect(marker).not.toHaveClass(/is-next/);
+ });
+ test('saved completed inquiry marks real primary lesson finished for grade '+grade,async({page})=>{
+  await page.addInitScript(({grade,kind})=>{
+   localStorage.setItem('vizy_home_grade',JSON.stringify(grade));
+   localStorage.setItem('vizy_inquiry_v1_'+kind,JSON.stringify({kind,route:['choose','done'],index:1}));
+  },{grade,kind});
+  await page.goto('/learn.html');
+  const stop=page.locator('#vizy-journey-stops .vizy-journey-stop').first();
+  await expect(stop).toHaveClass(/is-done/);
+  await expect(stop).toHaveAttribute('data-vizy-lesson','primary');
+  await expect(stop).toHaveAttribute('title',/.+/);
+  await expect(stop).not.toHaveClass(/is-next/);
+  await expect(page.locator('#vizy-journey-stops .vizy-journey-stop.is-done')).toHaveCount(1);
+ });
+}

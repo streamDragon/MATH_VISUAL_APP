@@ -41,3 +41,13 @@ The 37 failures must not all be called product defects or all be waived as obsol
 In particular, `tests/focused-home.spec.ts` tries to click `.library-toggle` while `#challenges` is intentionally hidden and accessible only from `#vizy-open-bank`. `tests/grade-next-mobile.spec.ts` tries to click `.ability-extra`, explicitly removed by the unified first-screen design. Such test failures do not by themselves prove the newer interaction is broken. The independent WebKit run confirmed that the actual Tools → Challenge bank path works, and the new regression test protects it.
 
 Release gate remains **on hold** pending full cross-agent QA; no deployment or remote Git push was performed by Agent 3 in this follow-up.
+
+## Journey correction: 16 November 2026
+- Identified an actual UX mismatch: grade 9 home opened the difference-of-squares inquiry but the journey started with an unrelated challenge-bank card; grade 11 had the analogous increasing-functions mismatch.
+- The first stop is now the exact lesson and label of the main CTA. Available challenge-bank tasks appear afterwards, filtered by the selected grade. Locked items are not represented as playable tasks.
+- Completion of the primary stop reads the existing saved inquiry state, checking that the saved route is at `done`. No new learning state or fabricated completion events.
+- Completed primary and completed optional tasks can be revisited; unfinished future tasks remain decorative, not clickable.
+- Verified in WebKit screenshots: [Grade 9 / 390](journey-grade9-390.png) and [Grade 11 / 390](journey-grade11-390.png).
+- Isolated visual tests: **11 / 11 passed**. Unit tests: **67 / 67 passed**. Question bank: **21 validated**. Production build: **passed**.
+- Only `public/vizy-unified-shell.js`, `tests/vizy-visual.spec.ts` and QA evidence were changed. No teaching prompt, grading verdict or activity sequence changed.
+- Whole-app release hold remains in effect until cross-agent QA failures are reconciled.
