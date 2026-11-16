@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 test('parameter problem: identify, represent and infer share one persisted mobile map',async({page})=>{
- await page.goto('/problem-map.html');
+ await page.goto('/problem-map.html?legacy=1&tools=1');
  await expect(page.locator('[data-field]')).toHaveCount(4);
  await expect(page.locator('#value-a')).toHaveText('?');
  await expect(page.locator('#determined')).toContainText('פונקציה אחת מתוך אינסוף');
@@ -47,7 +47,7 @@ test('parameter problem: identify, represent and infer share one persisted mobil
  await page.screenshot({path:'test-results/problem-map-mobile.png',fullPage:true});
 });
 test('three freely navigable tabs and reset removes local state',async({page})=>{
- await page.goto('/problem-map.html');
+ await page.goto('/problem-map.html?legacy=1&tools=1');
  await page.locator('[data-tab="infer"]').click();
  await page.locator('[data-claim="c4"] [data-answer-index="2"]').click();
  await expect(page.locator('#label-a')).toContainText('נקבע');
@@ -64,7 +64,7 @@ test('three freely navigable tabs and reset removes local state',async({page})=>
 
 test('mockup legend is optional and role plus knowledge source remain distinct at 320px',async({page})=>{
  await page.setViewportSize({width:320,height:740});
- await page.goto('/problem-map.html');
+ await page.goto('/problem-map.html?legacy=1&tools=1');
  await expect(page.locator('.legend-help')).toBeVisible();
  await expect(page.locator('.legend-help .legend')).toBeHidden();
  await expect(page.locator('#value-a')).toHaveText('?');
@@ -95,7 +95,7 @@ test('mockup legend is optional and role plus knowledge source remain distinct a
 
 test('draggable parabola and persisted low point',async({page})=>{
  await page.setViewportSize({width:390,height:844});
- await page.goto('/problem-map.html');
+ await page.goto('/problem-map.html?legacy=1&tools=1');
  await page.evaluate(()=>localStorage.removeItem('vizy_problem_map_v2'));
  await page.reload();
  await expect(page.locator('#liveGraph')).toBeVisible();
@@ -118,7 +118,7 @@ test('draggable parabola and persisted low point',async({page})=>{
  expect((await page.locator('body').innerText())).not.toMatch(/a\s*=\s*-?4/);
 });
 test('Hebrew mixed formula and role styles',async({page})=>{
- await page.setViewportSize({width:390,height:844});await page.goto('/problem-map.html');
+ await page.setViewportSize({width:390,height:844});await page.goto('/problem-map.html?legacy=1&tools=1');
  const h=await page.locator('[data-phrase="fn"] .hebrew-term').boundingBox();
  const f=await page.locator('[data-phrase="fn"] .math-term').boundingBox();
  expect(h&&f).toBeTruthy();expect(h!.x).toBeGreaterThan(f!.x);
@@ -131,7 +131,7 @@ test('Hebrew mixed formula and role styles',async({page})=>{
 });
 
 test('micro-skills on a phone: visual meaning is optional, algebra is a separate path',async({page})=>{
- await page.goto('/problem-map.html');
+ await page.goto('/problem-map.html?legacy=1&tools=1');
  await page.evaluate(()=>localStorage.removeItem('vizy_problem_map_v2'));await page.reload();
  await page.locator('[data-tab="infer"]').click();
  await expect(page.locator('#bridgeQuestion')).toContainText('המשמעות של');
@@ -186,7 +186,7 @@ test('micro-skills on a phone: visual meaning is optional, algebra is a separate
  await page.screenshot({path:'test-results/vizy-bridge-equations-mobile.png',fullPage:true});
 });
 test('optional picture never blocks a correct mathematical meaning',async({page})=>{
- await page.goto('/problem-map.html');
+ await page.goto('/problem-map.html?legacy=1&tools=1');
  await page.evaluate(()=>localStorage.removeItem('vizy_problem_map_v2'));await page.reload();
  await page.locator('[data-tab="infer"]').click();
  await page.locator('[data-bridge-answer="1"]').click();
