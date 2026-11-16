@@ -13,7 +13,7 @@
     "test": "node --test tests/*.test.mjs",
     "test:e2e": "playwright test",
     "bank:build": "node scripts/create-learning-bank.mjs && node scripts/localize-learning-bank.mjs && node scripts/seed-learning-bank.mjs",
-    "test:import": "python3 tests/question_import_test.py"
+    "test:import": "node scripts/run-python-tests.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.0.0",
