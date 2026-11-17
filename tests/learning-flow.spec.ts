@@ -120,14 +120,21 @@ test("teacher can choose assignments for the selected grade", async ({
   await expect(page.locator("#class-activities input")).toHaveCount(4);
   await expect(page.locator("#class-activities input:checked")).toHaveCount(2);
 });
-test("phone enters a useful bank directly and filters grade", async ({
+test("phone prioritizes the meaning activity and keeps the optional bank accessible", async ({
   page,
 }) => {
   await page.goto("/learn.html");
-  await expect(page.getByRole("heading", { name: "בואו ננסה משהו קטן" })).toBeVisible();
   await expect(page.locator("#student-start-ability")).toBeInViewport();
+  await expect(page.locator("#student-start-ability")).toHaveAttribute(
+    "href",
+    /problem-map\.html\?lesson=/,
+  );
+  await expect(page.locator("#library-content")).toBeHidden();
   await noOverflow(page);
-  await page.locator('#library-toggle').click();
+  await page.locator('#vizy-unified-nav [data-nav="tools"]').click();
+  await expect(page.locator('#vizy-tools-drawer')).toHaveAttribute('open','');
+  await page.locator('#vizy-open-bank').click();
+  await expect(page.locator('#bank-cards .activity-card').first()).toBeVisible();
   await page.locator('[data-grade="11"]').click();
   await expect(page.locator(".activity-card")).toHaveCount(4);
   await expect(page.locator(".activity-card").first()).toContainText(
@@ -206,13 +213,16 @@ test("competition has own avatar and no invented peers", async ({ page }) => {
   await expect(page.locator("#race-state")).toContainText("לומדים");
   await noOverflow(page);
 });
-test("English switches both interface and activity content", async ({
+test("English switches the home and a named challenge without using hidden legacy controls", async ({
   page,
 }) => {
   await page.goto("/learn.html");
   await page.getByRole("button", { name: "English", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "One small challenge" })).toBeVisible();
-  await page.locator(".ability-extra").click();
+  await expect(page.getByRole("heading", { name: "One idea to explore" })).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+  // The single-home CTA now opens an inquiry. The legacy challenge bank is
+  // optional; use a named activity URL to verify its English question content.
+  await page.goto("/learn.html?activity=linear-01");
   await expect(page.locator("#prediction-question")).toContainText("one step");
   await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
 });
