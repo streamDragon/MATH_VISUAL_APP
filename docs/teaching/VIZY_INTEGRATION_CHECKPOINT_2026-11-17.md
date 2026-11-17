@@ -40,3 +40,15 @@
 4. Validate real authenticated photo submission, educator receipt and queue, plus physical Android before any release.
 
 Status is **PARTIAL** for the full app, even if the focused bridge flows pass.
+
+## Additional consolidation QA (2026-11-17, afternoon)
+
+**VERIFIED COMPLETE (targeted tests):** `tests/grade-next-mobile.spec.ts` now checks the approved grade-to-inquiry contract, with grade 9 → `difference-squares` and grade 11 → `increasing`, one visible CTA, and preservation across reload. 2/2 passed under the iPhone 13 browser-emulation project.
+
+**VERIFIED COMPLETE (targeted tests):** `tests/mobile-navigation.spec.ts` now checks the single three-action dock, optional tools drawer, bank, classroom and original graph lab through their actual current routes, rather than obsolete four-button dock and home shortcuts. Initial run found two test-assumption problems (multi-element locator used as a singular visibility assertion, and graph lab 10s cold-load expectation); corrected and re-ran: 3/3 passed on isolated Vite port 4202. Combined updated navigation checks: **5/5 passed**.
+
+**VERIFIED COMPLETE:** `npm run check:questions` 21 validated; `npm run test:import` 4 passed; `npm run build` succeeded after the test revisions. Test-only edits, no changed teaching engine, design assets or real services.
+
+**PARTIAL:** Broad single-worker Playwright run started with `VIZY_TEST_PORT=4199`, `--output=test-results-full-20261117`; results not yet certified in this checkpoint. Its earlier test file snapshot precedes these test-assumption repairs. No physical Android or Supabase teacher intake was claimed.
+
+**Coordination:** A concurrent agent added commit `21e8cad` for a Wi-Fi phone preview workflow and made separate test changes. Do not stage that agent's files or other untracked QA artifacts with this test-only commit.
