@@ -52,3 +52,10 @@ Status is **PARTIAL** for the full app, even if the focused bridge flows pass.
 **PARTIAL:** Broad single-worker Playwright run started with `VIZY_TEST_PORT=4199`, `--output=test-results-full-20261117`; results not yet certified in this checkpoint. Its earlier test file snapshot precedes these test-assumption repairs. No physical Android or Supabase teacher intake was claimed.
 
 **Coordination:** A concurrent agent added commit `21e8cad` for a Wi-Fi phone preview workflow and made separate test changes. Do not stage that agent's files or other untracked QA artifacts with this test-only commit.
+
+## Desktop cross-check and broad-suite coordination (2026-11-17)
+
+- **VERIFIED COMPLETE:** Microsoft Edge desktop browser (installed on development machine) ran `npx playwright test vizy-cross-module-integration.spec.ts unified-home.spec.ts --project=desktop-chromium --workers=1` with `PLAYWRIGHT_CHROMIUM_PATH` pointing to `msedge.exe` and isolated port 4207: **8/8 passed**.
+- **PARTIAL:** A broad single-worker run on port 4199 exposed failures in legacy `learning-flow` and `mobile-polish` journeys and was deliberately stopped before completion to avoid competing with another active broad QA agent. Its results MUST NOT be represented as a completed suite. That agent is maintaining a separate `docs/teaching/VIZY_BROAD_QA_TRIAGE_2026-11-17.md`; leave ownership and its untracked outputs untouched.
+- The five remediated navigation tests passed on emulated iPhone 13 (2 grade mapping + 3 navigation). New `tests/grade-next-mobile.spec.ts` and `tests/mobile-navigation.spec.ts` assertions reflect the approved single-home, one-CTA, single-tools-drawer design, rather than forcing deprecated shortcuts into view.
+- No production deployment, remote push, physical Android verification or authenticated Supabase photo submission is implied by these browser runs.
