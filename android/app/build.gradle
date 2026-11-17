@@ -9,6 +9,7 @@ apply plugin: 'com.android.application'
 android {
     namespace = "com.nlpis.mathvisualapp"
     compileSdk = rootProject.ext.compileSdkVersion
+    buildToolsVersion = "36.0.0"
     signingConfigs {
         release {
             if (keystorePropertiesFile.exists()) {

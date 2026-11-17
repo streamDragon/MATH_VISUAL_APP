@@ -24,6 +24,14 @@ allprojects {
     }
 }
 
+// Capacitor's Android library modules can otherwise request Build Tools 35,
+// which is absent from the installed Unity Android SDK. Use the available 36.
+subprojects { subproject ->
+    subproject.plugins.withId('com.android.library') {
+        subproject.android.buildToolsVersion = '36.0.0'
+    }
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
