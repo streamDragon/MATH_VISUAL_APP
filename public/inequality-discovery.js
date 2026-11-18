@@ -26,7 +26,9 @@
     const wrong=[(right?"x<":"x>")+format(boundary),"x"+(right?">":"<")+format(boundary+2),
       (right?"x>":"x<")+format(-boundary)];
     const alternatives=[correct,...wrong].filter((v,i,a)=>a.indexOf(v)===i).slice(0,4);
-    return {a,b,c,d,m,k,op,boundary,inclusive,right,correct,alternatives,text:statement(a,b,op,c,d)};
+    const correctIndex=questionNumber % alternatives.length;
+    const orderedAlternatives=alternatives.slice(correctIndex).concat(alternatives.slice(0,correctIndex));
+    return {a,b,c,d,m,k,op,boundary,inclusive,right,correct,alternatives:orderedAlternatives,text:statement(a,b,op,c,d)};
   }
   function clearTimer(){if(timer){clearTimeout(timer);timer=null;}}
   function graph() {

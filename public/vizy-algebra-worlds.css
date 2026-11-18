@@ -1,0 +1,98 @@
+.aw-lesson {
+  --aw-bg: #101a39;
+  --aw-panel: #162348;
+  --aw-text: #edf5ff;
+  --aw-cyan: #85e8ff;
+  --aw-lime: #d9fa78;
+  color: var(--aw-text);
+  background: radial-gradient(ellipse at 10% 5%, #243971, var(--aw-bg) 52%);
+  border: 1px solid #5478bf;
+  border-radius: 24px;
+  max-width: 760px;
+  margin-inline: auto;
+  padding: clamp(12px, 3vw, 24px);
+  box-shadow: 0 12px 30px #08112b66;
+}
+.aw-lesson[hidden] { display: none; }
+.aw-lesson [dir=ltr] { unicode-bidi: isolate; }
+.aw-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.aw-head h1 { margin: 4px 0 0; font-size: clamp(1.23rem, 4.8vw, 1.9rem); }
+.aw-kicker { color: var(--aw-cyan); font-weight: 800; font-size: .82rem; }
+.aw-insight { border: 1px solid var(--aw-cyan); border-radius: 99px; background: #1c3567; color: var(--aw-text); white-space: nowrap; padding-inline: .75em; }
+.aw-lesson :is(button, .aw-choices a) { min-height: 44px; font-family: inherit; }
+.aw-lesson :is(button, a):focus-visible { outline: 2px solid var(--aw-lime); outline-offset: 3px; }
+.aw-steps { display: grid; grid-template-columns: repeat(7,1fr); gap: 5px; margin-block: 15px; }
+.aw-steps span { height: 5px; border-radius: 10px; background: #40557f; }
+.aw-steps .aw-done { background: var(--aw-lime); }
+.aw-worlds { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.aw-worlds span { border: 1px solid #526da0; border-radius: 14px; padding: 8px; background: #1c2a50; }
+.aw-worlds b, .aw-worlds small { display: block; }
+.aw-worlds small { font-size: .76rem; margin-block-start: 4px; color: #dce7fe; line-height: 1.3; }
+.aw-worlds .aw-selected { border-color: var(--aw-lime); color: var(--aw-lime); box-shadow: 0 0 16px #d9fa7833; }
+.aw-stage { text-align: center; margin-block: 12px; padding: 10px 5px; background: #101b39; border: 1px solid #5476af; border-radius: 16px; }
+.aw-stage > strong { color: var(--aw-cyan); }
+.aw-expression { display: flex; align-items: center; justify-content: center; gap: clamp(4px, 2vw, 15px); margin-block-start: 8px; }
+.aw-frac { display: inline-grid; grid-template-columns: minmax(0,1fr); text-align: center; min-width: 0; }
+.aw-frac > span:first-child { border-bottom: 2px solid var(--aw-cyan); padding-bottom: 4px; }
+.aw-frac > span:last-child { padding-top: 4px; }
+.aw-math { font-family: system-ui, sans-serif; font-weight: 700; display: inline-block; white-space: nowrap; }
+.aw-expression .aw-math { font-size: clamp(.75rem, 3.55vw, 1.22rem); }
+.aw-op { font-size: 1.35rem; color: var(--aw-cyan); }
+.aw-piece { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding-inline: 4px; white-space: nowrap; color: inherit; }
+.aw-current { border-radius: 8px; border: 1px solid var(--aw-cyan); background: #234575; box-shadow: 0 0 12px #85e8ff4d; }
+button.aw-current { cursor: pointer; }
+.aw-solid { color: var(--aw-lime); }
+.aw-domain { margin: 6px 0 0; color: #d6e3fc; font-size: .83rem; }
+.aw-prompt { background: var(--aw-panel); border-radius: 16px; padding: clamp(10px, 2.4vw, 19px); }
+.aw-prompt h2 { font-size: clamp(1.05rem, 4.5vw, 1.35rem); margin: 0; }
+.aw-prompt p { line-height: 1.55; margin-block: 6px 10px; }
+.aw-choices { display: grid; gap: 8px; }
+.aw-tools { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.aw-choices :is(button, a) {
+  display: grid; gap: 4px; place-content: center; text-align: center; text-decoration: none;
+  background: #203665; border: 1px solid #829fd7; color: var(--aw-text); border-radius: 12px; padding: 8px 5px;
+  font-size: .94rem; cursor: pointer; overflow-wrap: anywhere;
+}
+.aw-tools button:last-child { grid-column: 1 / -1; }
+.aw-choices button small { font-size: .76rem; line-height: 1.35; }
+.aw-choices button .aw-math { color: var(--aw-cyan); font-size: clamp(.7rem, 3.15vw, .95rem); }
+.aw-tools button:nth-child(3) { background: #392d68; }
+.aw-tools button:nth-child(n+4) { background: #284458; }
+.aw-feedback { color: #ffdf9a; }
+.aw-feedback:empty { display: none; }
+.aw-dialog { background: #18294d; color: var(--aw-text); border: 1px solid var(--aw-cyan); border-radius: 18px; width: min(90vw,420px); max-width: 100%; padding: 18px; }
+.aw-dialog::backdrop { background: #060d24b8; }
+.aw-dialog form { float: left; }
+.aw-dialog button { background: #263c67; color: var(--aw-text); border: 1px solid #8da6df; border-radius: 9px; min-width: 44px; }
+.aw-dialog p { line-height: 1.55; }
+.aw-entry-link { display: inline-flex; align-items: center; min-height: 44px; color: #152949; text-decoration: underline; font-weight: 800; }
+.aw-route #vizy-legacy-toggle, .aw-route .story-corner-trigger { display: none; }
+.aw-trail { margin-block-start: 12px; color: var(--aw-text); }
+.aw-trail summary { min-height: 44px; display: list-item; padding-block: 11px; cursor: pointer; }
+.aw-trail ul { padding-inline-start: 1.4rem; }
+.aw-trail li { margin-block: 5px; }
+.aw-trail .aw-math { font-size: .82em; }
+
+/* Learner sees a workspace, not the instructional design underneath. */
+.aw-tools {grid-template-columns:repeat(2,minmax(0,1fr));}
+.aw-tools button {min-height:112px;gap:10px;border-radius:20px;box-shadow:inset 0 1px #ffffff35,0 8px 16px #07112b3b;}
+.aw-tools button:nth-child(1) {background:linear-gradient(145deg,#0b728e,#143e67);}
+.aw-tools button:nth-child(2) {background:linear-gradient(145deg,#17835f,#1a4b64);}
+.aw-tools button:nth-child(3) {background:linear-gradient(145deg,#8751bd,#343f81);}
+.aw-tools button:nth-child(4) {background:linear-gradient(145deg,#bf7a17,#754095);}
+.aw-tools button:last-child {grid-column:auto;}
+.aw-tools button strong {font-size:clamp(.92rem,3.9vw,1.2rem);}
+.aw-tools .aw-math {font-size:clamp(.86rem,3.7vw,1.1rem);color:white;}
+.aw-cloud {background:radial-gradient(ellipse at 50% 10%,#4c5ec5bb,#1d285bcc 75%);border:1px solid #a39cff;border-radius:26px;padding:16px 10px;box-shadow:0 0 24px #818bff45;}
+.aw-cloud h2 {text-align:center;margin:0 0 12px;}
+.aw-formulas {grid-template-columns:1fr;gap:9px;}
+.aw-formulas button {min-height:68px;border-color:#b9b5ff;background:#252d68;}
+.aw-formulas .aw-math {font-size:clamp(.88rem,3.5vw,1.2rem);color:#f6f8ff;}
+.aw-magic {display:flex;justify-content:center;align-items:center;gap:8px;direction:ltr;padding:20px 8px;font-size:clamp(1.55rem,6vw,2.3rem);font-weight:800;}
+.aw-magic-number {display:grid;place-items:center;width:72px;min-height:72px;border-radius:50%;border:2px solid #fbeb86;background:radial-gradient(circle,#fff7a7,#f5bc28 65%,#dd8c12);color:#173467;font-size:2rem;font-weight:900;box-shadow:0 0 0 7px #f7d44b28,0 0 26px #f5d64ba0;cursor:pointer;}
+.aw-magic-number:focus-visible {outline:3px solid #8deeff;outline-offset:8px;}
+.aw-transformed {text-align:center;font-size:clamp(1.4rem,5.1vw,2rem);background:#304a80;border:1px solid #b4d9ff;border-radius:16px;padding:12px 5px;}
+@media(prefers-reduced-motion:no-preference){
+.aw-magic-number {animation:aw-pulse 1.9s ease-in-out infinite;}
+@keyframes aw-pulse{50%{box-shadow:0 0 0 11px #f7d44b12,0 0 34px #f5d64bcc;}}
+}

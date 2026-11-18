@@ -23,7 +23,7 @@ body.vizy-consolidated #vizy-unified-nav a:focus-visible{outline:3px solid #f5ae
 body.vizy-consolidated .app-header,
 body.vizy-consolidated header.topbar,
 body.vizy-consolidated header.top,
-body.vizy-consolidated body>header:not(.story-head){
+body.vizy-consolidated>header:not(.story-head){
  background:#152541;color:#f4f7ff;border-bottom:1px solid #465c74;
 }
 body.vizy-consolidated .brand{color:#f6f9ff}
@@ -98,7 +98,6 @@ body.vizy-consolidated footer{font-size:.83rem}
  body.vizy-consolidated .vizy-tools-links{grid-template-columns:1fr}
  body.vizy-consolidated header .top-actions a:not(.brand){display:none}
  body.vizy-consolidated .header-actions .xp-chip{display:none}
- body.vizy-consolidated .header-actions #mute{display:none}
  body.vizy-consolidated #vizy-unified-nav a{font-size:.79rem}
 }
 
@@ -239,3 +238,7 @@ body.vizy-consolidated .vizy-journey-stop.is-next{animation:vizy-stop-pulse 3.2s
 }
 
 @media(prefers-reduced-motion:reduce){body.vizy-consolidated .vizy-journey-stop.is-next{animation:none!important}}
+
+/* Retire the old page-family heading on active student lessons. */
+body.vizy-consolidated:is(.vizy-investigation-active,.aw-route) > header > span:not([data-vizy-slot]){display:none!important}
+body.vizy-consolidated:is(.vizy-investigation-active,.aw-route) #vizy-legacy-toggle{display:none!important}

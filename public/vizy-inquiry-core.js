@@ -40,10 +40,11 @@
  function attempt(s,key,correct){
   const r=s.records[key]||{attempts:0,helped:false,completed:false,firstTry:false};
   r.attempts++;
+  const parentHelped=key.startsWith('transfer:')&&s.records.transfer?.helped;
   if(correct&&!r.completed){
    r.completed=true;
-   r.firstTry=r.attempts===1&&!r.helped;
-   r.assisted=r.helped||r.attempts>1;
+   r.firstTry=r.attempts===1&&!r.helped&&!parentHelped;
+   r.assisted=r.helped||parentHelped||r.attempts>1;
   }
   s.records[key]=r;
   return r;
@@ -70,7 +71,7 @@
  }
  function summary(s){
   const entries=Object.entries(s.records).filter(([,r])=>r.completed);
-  const transfer=entries.filter(([name])=>name==='temperature'||name==='linear'||name==='transfer');
+  const transfer=entries.filter(([name])=>name==='temperature'||name==='linear'||name==='transfer'||name==='transfer:parts'||name==='transfer:result');
   return {
    independent:entries.filter(([,r])=>r.firstTry).length,
    assisted:entries.filter(([,r])=>r.assisted).length,

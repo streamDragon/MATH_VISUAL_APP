@@ -59,8 +59,12 @@ test("quadratic derivative includes nonzero linear coefficient", () => {
     5,
   );
 });
-test("answers accept decimal comma fractions and Unicode minus, reject blanks and expressions", () => {
+test("answers require exact values by default and allow authored approximation tolerance", () => {
   assert.equal(typeof core.checkAnswer, "function");
+  assert.equal(core.checkAnswer(0.25, "1/4"), true);
+  assert.equal(core.checkAnswer(0.25, "1/5"), false);
+  assert.equal(core.checkAnswer(0.25, "0.24"), false);
+  assert.equal(core.checkAnswer(Math.PI, "3.14", 0.01), true);
   for (const [want, input] of [
     [0.5, "1/2"],
     [1.5, "1,5"],

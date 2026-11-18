@@ -11,6 +11,21 @@
   try{const v=JSON.parse(localStorage.getItem('vizy_home_grade')||'"9"');return String(v)==='11'?11:9;}catch{return 9;}
  }
  function english(){return document.documentElement.lang==='en'}
+ function savedStep(grade){
+  const kind=grade===11?'graph':'map';
+  try{
+   const state=JSON.parse(localStorage.getItem('vizy_inquiry_v1_'+kind)||'null');
+   if(!state||!Array.isArray(state.route)||!Number.isInteger(state.index)||state.index<0)return null;
+   const phase=state.route[state.index];
+   if(phase==='done')return 'done';
+   if(!phase||phase==='choose'||(state.index===0&&phase==='shape'))return null;
+   const names={
+    he:{criterion:'מזהים מה הנתונים קובעים',shape:'מזהים את המבנה',reason:'בודקים למה המבנה מתאים',partA:'בודקים את החלק הראשון',partB:'בודקים את החלק השני',rule:'מנסחים את הכלל',return:'מחברים לשאלה המקורית',tidy:'מסדרים את הביטוי',check:'בודקים את המבנה',transfer:'מעבירים את הרעיון לשאלה חדשה',done:'החקירה הושלמה'},
+    en:{criterion:'identify what the given determines',shape:'recognize the structure',reason:'check why the structure fits',partA:'explore the first part',partB:'explore the second part',rule:'state the rule',return:'connect it to the original question',tidy:'tidy the expression',check:'check the structure',transfer:'apply the idea to a new question',done:'the investigation is complete'}
+   };
+   return names[english()?'en':'he'][phase]||(english()?'continue the current step':'ממשיכים לשלב הנוכחי');
+  }catch{return null}
+ }
  function link(href,he,en){const a=document.createElement('a');a.href=href;a.textContent=english()?en:he;return a;}
  function apply(){
   const card=document.querySelector('.student-next-step');
@@ -20,30 +35,14 @@
   card.dataset.vizyUnified=token;
   const content=card.querySelector('.student-next-step-content');
   if(!content)return;
-  const heading=content.querySelector('h2');
-  if(heading)heading.textContent=english()?'One idea to explore':'רעיון אחד שמגלים';
-  const description=content.querySelector('p');
-  if(description)description.textContent=steps[grade][lang];
-  const extra=content.querySelector('.ability-picker');
-  extra?.remove();
-  content.querySelector('.ability-extra')?.remove();
-  const old=content.querySelector('#student-start-next');
-  if(old)old.hidden=true;
-  let action=content.querySelector('#student-start-ability');
-  if(!action){
-   action=document.createElement('a');
-   action.id='student-start-ability';action.className='primary vizy-single-cta';
-   content.append(action);
-  }
-  action.href=steps[grade].url;
-  action.textContent=english()?'Explore this idea':'בואו נבדוק';
-  action.setAttribute('aria-label',(english()?'Start: ':'מתחילים: ')+steps[grade][lang]);
-  const all=content.querySelector('[data-home-grade="all"]');
-  if(all)all.hidden=true;
-  content.querySelectorAll('[data-home-grade]').forEach(button=>{if(!button.hidden)button.setAttribute('aria-pressed',String(button.dataset.homeGrade===String(grade)));});
-  for(const section of document.querySelectorAll('.problem-map-promo,.unified-tools,.challenge-library,.home-legacy-actions')){
-   section.hidden=true;section.setAttribute('aria-hidden','true');
-  }
+  const action=content.querySelector('#student-start-ability');
+  if(!action)return;
+  const resume=savedStep(grade);
+  const completed=resume==='done';
+  action.textContent=completed?(english()?'Review the summary':'צופים בסיכום'):resume?(english()?'Continue: ':'ממשיכים: ')+resume:(english()?'Explore this idea':'בואו נבדוק');
+  action.setAttribute('aria-label',completed?(english()?'Review the summary':'צופים בסיכום'):resume?(english()?'Continue: ':'ממשיכים: ')+resume:(english()?'Start: ':'מתחילים: ')+steps[grade][lang]);
+  const library=document.querySelector('.challenge-library');
+  if(library){library.hidden=true;library.setAttribute('aria-hidden','true');}
   let drawer=document.querySelector('#vizy-tools-drawer');
   if(!drawer){
    drawer=document.createElement('details');drawer.id='vizy-tools-drawer';drawer.className='vizy-tools-drawer';
@@ -51,6 +50,7 @@
    drawer.append(summary);
    const links=document.createElement('div');links.className='vizy-tools-links';
    links.append(
+    link('problem-map.html?lesson=algebra-worlds','מפרקים כדי לצמצם · כיתה ט׳','Factor to simplify · grade 9'),
     link('problem-map.html?lesson=slope-minus-four','שיפוע ‎−4','Slope −4'),
     link('problem-map.html?lesson=parameter','מפת קיצון','Extremum meaning map'),
     link('problem-map.html?lesson=shared','שני גרפים ונקודה משותפת','Two functions and a shared point'),
@@ -88,6 +88,11 @@
    const drawer=document.getElementById('vizy-tools-drawer');
    if(drawer){drawer.open=true;drawer.scrollIntoView({block:'nearest'});}
   }
+ });
+ window.addEventListener('pageshow',()=>{
+  const card=document.querySelector('.student-next-step');
+  if(card)delete card.dataset.vizyUnified;
+  apply();
  });
  apply();
 })();

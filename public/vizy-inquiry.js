@@ -11,11 +11,41 @@
  const container=document.querySelector('main');
  if(!C||!adapter||!container)return;
  const storageKey='vizy_inquiry_v1_'+kind;
- let state;
- try{state=C.restore(kind,JSON.parse(localStorage.getItem(storageKey)||'null'));}
+ let state, saved;
+ try{saved=JSON.parse(localStorage.getItem(storageKey)||'null');state=C.restore(kind,saved);}
  catch{state=C.start(kind);}
+ const progressIds=kind==='graph'
+  ?new Set(['contrast','shift-act','reflect-act','point-act','compare','phrases','build',
+    'verdict:0','verdict:1','verdict:2','criterion-end','temperature','linear'])
+  :new Set(['reason','partA','partB','rule','return','tidy','check','transfer:result']);
+ const announced=saved?.progressAnnounced&&typeof saved.progressAnnounced==='object'
+  ?saved.progressAnnounced:{};
+ // Existing snapshots already represent work from earlier visits. Mark it so
+ // upgrading the producer never replays historical rewards.
+ for(const id of progressIds)if(state.records?.[id]?.completed)announced['prompt:'+id]=true;
+ if(state.route?.[state.index]==='done')announced['activity:done']=true;
  function persist(){
-  try{localStorage.setItem(storageKey,JSON.stringify(state));}catch{}
+  // This allowlist intentionally excludes predictions, guesses and opening help.
+  for(const id of progressIds){
+   const record=state.records?.[id];
+   if(!record?.completed||announced['prompt:'+id])continue;
+   if(kind==='graph'&&id==='verdict:0'&&
+      !(state.data?.examples?.positive&&state.data?.examples?.negative))continue;
+   announced['prompt:'+id]=true;
+   root.dispatchEvent(new CustomEvent('vizy:progress',{detail:{
+    type:'prompt',lesson,id,helped:Boolean(record.helped||record.assisted||
+      (id.startsWith('transfer:')&&state.records.transfer?.helped)),
+    firstTry:Boolean(record.firstTry)
+   }}));
+  }
+  const completed=kind==='graph'
+   ?state.records?.temperature?.completed&&state.records?.linear?.completed
+   :state.records?.['transfer:parts']?.completed&&state.records?.['transfer:result']?.completed;
+  if(state.route?.[state.index]==='done'&&completed&&!announced['activity:done']){
+   announced['activity:done']=true;
+   root.dispatchEvent(new CustomEvent('vizy:progress',{detail:{type:'activity',lesson,id:'done',helped:false}}));
+  }
+  try{localStorage.setItem(storageKey,JSON.stringify({...state,progressAnnounced:announced}));}catch{}
  }
  const host=document.createElement('section');
  host.id='vizyInquiry';host.className='vizy-inquiry';host.setAttribute('aria-label','סביבת חקירה מתמטית');

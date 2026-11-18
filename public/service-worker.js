@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mathviz-learning-v2.16-main-integration';
+const CACHE_NAME = 'mathviz-learning-v2.18-algebra-worlds';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",
@@ -13,6 +13,8 @@ const APP_SHELL = [
   "/problem-map-flow-data.js",
   "/problem-map-flow-core.js",
   "/problem-map-flow.js",
+  "/vizy-algebra-worlds.js",
+  "/vizy-algebra-worlds.css",
   "/meaning-weave-data.js",
   "/meaning-weave-core.js",
   "/meaning-weave.js",
@@ -36,7 +38,8 @@ const APP_SHELL = [
   "/vizy-inquiry-map.js",
   "/vizy-inquiry-entry.js",
   "/vizy-inquiry.js",
-  "/vizy-progress-bridge.js",
+  "/vizy-sound.js",
+  "/vizy-sound.css",
   "/play.html",
   "/vizy-game-return.js",
   "/vizy-glide.css",
@@ -63,9 +66,7 @@ const APP_SHELL = [
   "/learning-app.js",
   "/learning-core.js",
   "/learning-service.js",
-  "/learning-visuals.js",
-  "/learning-audio.js",
-  "/learning-bank.json",
+  "/learning-visuals.js",  "/learning-bank.json",
   "/learning-voices.json",
   "/manifest.json",
   "/offline.html",

@@ -19,6 +19,13 @@ test('opening, help, wrong criteria and reload do not mint playtime',async({page
 });
 
 test('correct evidence grants once, not again after a restored pending step',async({page})=>{
+  await page.addInitScript(() => {
+    const events: unknown[] = [];
+    Object.assign(window, { observedProgress: events });
+    window.addEventListener('vizy:progress', (event) => {
+      events.push((event as CustomEvent).detail);
+    });
+  });
   await page.goto('/problem-map.html?lesson=increasing');
   await page.evaluate(()=>{
     localStorage.removeItem('vizy_inquiry_v1_graph');
@@ -33,7 +40,11 @@ test('correct evidence grants once, not again after a restored pending step',asy
   await expect(page.locator('.vizy-playtime-chip')).toContainText('0:00');
   await page.locator('#vizyInquiry [data-iq-answer="no"]').last().click();
   await expect(page.locator('.vizy-playtime-chip')).toContainText('0:20');
+  expect(await page.evaluate(() => (window as any).observedProgress)).toMatchObject([
+    { type: 'prompt', lesson: 'increasing', id: 'contrast' }
+  ]);
   await page.reload();
+  expect(await page.evaluate(() => (window as any).observedProgress)).toEqual([]);
   await expect(page.locator('.vizy-playtime-chip')).toContainText('0:20');
   await page.locator('#iqNext').click();
   await expect(page.locator('.vizy-playtime-chip')).toContainText('0:20');

@@ -1,0 +1,4 @@
+.vizy-sound-slot { display: inline-flex; align-items: center; }
+.vizy-sound-toggle { min-height: 44px; padding: 0.45rem 0.7rem; border: 1px solid rgba(255,255,255,.24); border-radius: 999px; background: transparent; color: inherit; font: inherit; font-size: .82rem; font-weight: 700; cursor: pointer; }
+.vizy-sound-toggle:focus-visible { outline: 3px solid #d9fa78; outline-offset: 2px; }
+.vizy-sound-toggle:disabled { opacity: .72; cursor: not-allowed; }

@@ -408,47 +408,22 @@
     clearInterval(pollTimer);
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
-    app.innerHTML = `<header class="app-header"><a class="brand" href="learn.html"><span class="brand-mark">V</span>VIZY</a><div class="header-actions"><button type="button" class="story-corner-trigger" data-story="kettle">${lang === "he" ? "☕ סיפור" : "☕ Story"}</button><span class="xp-chip">✦ <b id="xp-value">${Number(progress.xp) || 0}</b></span><button id="language" class="ghost">${lang === "he" ? "English" : "עברית"}</button><button id="mute" class="ghost" aria-label="${lang === "he" ? "צליל" : "Sound"}" aria-pressed="${A.isMuted()}">${A.isMuted() ? "♪ ×" : "♪"}</button><button id="account-button" class="ghost" aria-label="${esc(t("account"))}">◉</button></div></header><main id="main" tabindex="-1"><p id="server-score" class="text-small" ${serverXP === null ? "hidden" : ""}>${esc(t("serverPoints"))}: <b id="server-xp">${Number(serverXP) || 0}</b></p>${content}${footer()}</main><nav class="bottom-nav" aria-label="${lang === "he" ? "ניווט" : "Navigation"}">${[
-      ["home", "◇"],
-      ["race", "△"],
-      ["requests", "＋"],
-      ["plans", "✦"],
-    ]
-      .map(
-        ([key, icon]) =>
-          `<a href="#${key}" ${active === key ? 'aria-current="page"' : ""}><span class="nav-icon" aria-hidden="true">${icon}</span>${esc(t(key))}</a>`,
-      )
-      .join(
-        "",
-      )}</nav><dialog id="account-dialog" class="dialog"><button class="close ghost" id="close-account" aria-label="${esc(t("back"))}">×</button><h2>${esc(t("account"))}</h2><div id="account-content"></div></dialog>`;
+    app.innerHTML = `<header class="app-header"><a class="brand" href="learn.html"><span class="brand-mark">V</span>VIZY</a><div class="header-actions"><button type="button" class="story-corner-trigger" data-story="kettle">${lang === "he" ? "☕ סיפור" : "☕ Story"}</button><span class="xp-chip">✦ <b id="xp-value">${Number(progress.xp) || 0}</b></span><button id="language" class="ghost">${lang === "he" ? "English" : "עברית"}</button><button id="account-button" ${["requests", "plans", "race"].includes(active) ? "" : "hidden"} class="ghost" aria-label="${esc(t("account"))}">◉</button></div></header><main id="main" tabindex="-1"><p id="server-score" class="text-small" ${serverXP === null ? "hidden" : ""}>${esc(t("serverPoints"))}: <b id="server-xp">${Number(serverXP) || 0}</b></p>${content}${footer()}</main><dialog id="account-dialog" class="dialog"><button class="close ghost" id="close-account" aria-label="${esc(t("back"))}">×</button><h2>${esc(t("account"))}</h2><div id="account-content"></div></dialog>`;
     document.getElementById("language").onclick = () => {
       lang = lang === "he" ? "en" : "he";
       save("vizy_language", lang);
       if (current) lesson();
       else route();
     };
-    document.getElementById("mute").onclick = () => {
-      A.setMuted(!A.isMuted());
-      const b = document.getElementById("mute");
-      b.textContent = A.isMuted() ? "♪ ×" : "♪";
-      b.setAttribute("aria-pressed", String(A.isMuted()));
-    };
     document.getElementById("account-button").onclick = openAccount;
     document.getElementById("close-account").onclick = () =>
       document.getElementById("account-dialog").close();
   }
-  function heroArt() {
-    return `<div class="hero-art"><div class="hero-art-label"><span>${lang === "he" ? "רעיון קטן. שינוי גדול." : "Small idea. Big change."}</span><span class="pill lime">${esc(t("free"))}</span></div><svg viewBox="0 0 400 190" role="img" aria-label="${lang === "he" ? "שתי פרבולות בהזזה" : "Two shifted parabolas"}"><defs><pattern id="hero-grid" width="26" height="26" patternUnits="userSpaceOnUse"><path d="M26 0H0V26" fill="none" stroke="#424461" stroke-width=".7"/></pattern></defs><rect width="400" height="190" fill="url(#hero-grid)"/><path d="M0 130H400M200 0V190" stroke="#737693"/><path d="M40 20Q155 245 270 20" fill="none" stroke="#a394ff" stroke-width="4"/><path d="M140 20Q255 245 370 20" fill="none" stroke="#d9fa78" stroke-width="4"/><path d="M160 130H245" stroke="#ff93c3" stroke-width="2" stroke-dasharray="5 5"/><circle cx="155" cy="132" r="6" fill="#a394ff"/><circle cx="255" cy="132" r="7" fill="#d9fa78"/><text x="206" y="114" fill="#ffbadb" font-size="15" text-anchor="middle">+ h</text></svg></div>`;
-  }
   function home() {
     current = null;
-    const available = C.filterBank(bank, { grade, topic, search }),
-      next =
-        bank.find(
-          (a) => a.tier === "free" && (String(grade) === "all" || String(a.grade) === String(grade)) && !progress.mastered?.includes(a.id),
-        ) || bank.find((a) => a.tier === "free" && (String(grade) === "all" || String(a.grade) === String(grade))) || bank.find((a) => a.tier === "free");
+    const available = C.filterBank(bank, { grade, topic, search });
     shell(
-      `<section class="student-next-step"><div class="student-next-step-content"><span class="pill lime">${lang === "he" ? "האימון הבא" : "Your next challenge"}</span><div class="student-grade-picker" role="group" aria-label="${lang === "he" ? "כיתה" : "Grade"}"><button data-home-grade="9" aria-pressed="${String(grade)==="9"}">${lang === "he" ? "ט׳" : "9"}</button><button data-home-grade="11" aria-pressed="${String(grade)==="11"}">${lang === "he" ? "י״א" : "11"}</button><button data-home-grade="all" aria-pressed="${String(grade)==="all"}">${lang === "he" ? "הכול" : "All"}</button></div><h2>${lang === "he" ? "בואו ננסה משהו קטן" : "One small challenge"}</h2><p>${esc(localized(next).title)} · ${esc(t("grade"))} ${next.grade}</p><button class="primary" id="student-start-next">${lang === "he" ? "מתחילים עכשיו" : "Start now"} ↗</button></div></section><section class="problem-map-promo"><div><span class="pill lime">חדש · לראות לפני שפותרים</span><h2>מפת השאלה</h2><p>מה אפשר לדעת מהשאלה עוד לפני החישוב? מחברים בין מילים, x, y ונגזרת ובונים תמונה קטנה.</p></div><a class="secondary" href="problem-map.html">${lang === "he" ? "למפת השאלה" : "Open question map"}</a></section><section class="unified-tools" aria-label="${lang === "he" ? "כל כלי המתמטיקה במקום אחד" : "All math tools in one place"}"><h2>${lang === "he" ? "במה מתאמנים היום?" : "What would you like to practice?"}</h2><div class="unified-tool-grid"><button type="button" class="unified-tool story-corner-trigger" data-story="kettle"><span class="unified-tool-symbol" aria-hidden="true">☕</span><span><strong>${lang === "he" ? "פינת הסיפורים" : "Story corner"}</strong><small>${lang === "he" ? "סיפור קצר שמגלה דרך חשיבה מתמטית" : "Short stories about mathematical thinking"}</small></span></button><a class="unified-tool" href="/?workspace=1&amp;splash=0"><span class="unified-tool-symbol" aria-hidden="true">ƒ</span><strong>${lang === "he" ? "מעבדת גרפים" : "Graph lab"}</strong><small>${lang === "he" ? "הכלים החזותיים המקוריים · גרפים ופונקציות" : "Interactive functions and graphs"}</small></a><a class="unified-tool" href="/skill-lab.html"><span class="unified-tool-symbol" aria-hidden="true">◇</span><strong>${lang === "he" ? "אימון יכולת" : "Train a skill"}</strong><small>${lang === "he" ? "לזהות מבנה ולבחור כלי" : "Recognize the structure"}</small></a><a class="unified-tool" href="/classroom-practice.html"><span class="unified-tool-symbol" aria-hidden="true">∑</span><strong>${lang === "he" ? "תרגול מודרך" : "Guided practice"}</strong><small>${lang === "he" ? "כיתות ט׳ וי״א, צעד אחר צעד" : "Grades 9 and 11"}</small></a><a class="unified-tool" href="#challenges" data-scroll-challenges="true"><span class="unified-tool-symbol" aria-hidden="true">✦</span><strong>${lang === "he" ? "אתגרי Vizy" : "Vizy challenges"}</strong><small>${lang === "he" ? "חיזוי, משחק, פתרון והעברה" : "Predict, explore and transfer"}</small></a></div></section><div class="home-legacy-actions" aria-hidden="true"><button id="continue-challenge" tabindex="-1">${esc(t("continue"))}</button><button id="go-race" tabindex="-1">${esc(t("journeyBtn"))}</button></div><section id="challenges" class="challenge-library"><div class="section-head"><h2>${esc(t("bank"))}</h2><span>${available.length} ${esc(t("count"))}</span></div><button type="button" class="library-toggle" id="library-toggle" aria-controls="library-content" aria-expanded="false">${lang === "he" ? "הצגת כל האתגרים" : "Show all challenges"} <span aria-hidden="true">⌄</span></button><div id="library-content" hidden><div class="filters" aria-label="${lang === "he" ? "סינון אתגרים" : "Challenge filters"}">${[
+      `<section class="student-next-step"><div class="student-next-step-content"><span class="pill lime">${lang === "he" ? "הפעילות הבאה" : "Next activity"}</span><div class="student-grade-picker" role="group" aria-label="${lang === "he" ? "כיתה" : "Grade"}"><button data-home-grade="9" aria-pressed="${String(grade) !== "11"}">${lang === "he" ? "ט׳" : "9"}</button><button data-home-grade="11" aria-pressed="${String(grade) === "11"}">${lang === "he" ? "י״א" : "11"}</button></div><h2>${lang === "he" ? "רעיון אחד שמגלים" : "One idea to explore"}</h2><p>${lang === "he" ? (String(grade) === "11" ? "פונקציה עולה או חיובית?" : "מזהים מבנה: הפרש ריבועים") : (String(grade) === "11" ? "Increasing or positive?" : "Recognize structure: difference of squares")}</p><a class="primary vizy-single-cta" id="student-start-ability" href="problem-map.html?lesson=${String(grade) === "11" ? "increasing" : "difference-squares"}">${lang === "he" ? "בואו נבדוק" : "Explore this idea"}</a></div></section><section id="challenges" class="challenge-library"><div class="section-head"><h2>${esc(t("bank"))}</h2><span>${available.length} ${esc(t("count"))}</span></div><button type="button" class="library-toggle" id="library-toggle" aria-controls="library-content" aria-expanded="false">${lang === "he" ? "הצגת כל האתגרים" : "Show all challenges"} <span aria-hidden="true">⌄</span></button><div id="library-content" hidden><div class="filters" aria-label="${lang === "he" ? "סינון אתגרים" : "Challenge filters"}">${[
         ["all", t("all")],
         [9, lang === "he" ? "ט׳" : "9"],
         [10, lang === "he" ? "י׳" : "10"],
@@ -461,10 +436,10 @@
         .join(
           "",
         )}<select id="topic-filter" aria-label="${lang === "he" ? "נושא" : "Topic"}"><option value="all">${esc(t("all"))}</option>${[...new Set(bank.map((a) => a.topic))].map((k) => `<option value="${k}" ${topic === k ? "selected" : ""}>${esc(localized(bank.find((a) => a.topic === k)).topicLabel)}</option>`).join("")}</select><input id="bank-search" type="search" placeholder="${esc(t("search"))}" aria-label="${esc(t("search"))}" value="${esc(search)}"></div><div class="activities" id="bank-cards"></div></div></section>`,
+
       "home",
     );
     document.querySelectorAll('[data-home-grade]').forEach(b => b.onclick = () => { grade = b.dataset.homeGrade; save('vizy_home_grade', grade); home(); });
-    document.getElementById('student-start-next').onclick = () => openActivity(next.id);
     const libraryToggle = document.getElementById('library-toggle');
     const libraryContent = document.getElementById('library-content');
     const setLibraryOpen = (open) => {
@@ -475,14 +450,6 @@
     };
     libraryToggle.onclick = () => setLibraryOpen(libraryContent.hidden);
     setLibraryOpen(libraryOpen);
-    document.querySelector('[data-scroll-challenges]').addEventListener('click', (event) => {
-      setLibraryOpen(true);
-      event.preventDefault();
-      document.getElementById('challenges')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-    document.getElementById("continue-challenge").onclick = () =>
-      openActivity(next.id);
-    document.getElementById("go-race").onclick = () => (location.hash = "race");
     document.querySelectorAll("[data-grade]").forEach(
       (b) =>
         (b.onclick = () => {
@@ -527,6 +494,8 @@
     let a = bank.find((q) => q.id === id);
     if (!a?.params) {
       try {
+        await prepareService();
+        if (sequence !== openSequence) return;
         const full = await S.activity(id);
         if (sequence !== openSequence) return;
         if (!full) {
@@ -607,7 +576,7 @@
         const good = C.checkAnswer(
             a.answer,
             document.getElementById("answer").value,
-            0.05,
+            a.answerTolerance ?? 1e-9,
           ),
           f = document.getElementById("answer-feedback");
         f.textContent = good ? t("correct") : t("wrong");
@@ -644,7 +613,7 @@
           !C.checkAnswer(
             a.transfer.answer,
             document.getElementById("transfer-answer").value,
-            0.05,
+            a.transfer.answerTolerance ?? a.answerTolerance ?? 1e-9,
           )
         ) {
           const f = document.getElementById("transfer-feedback");
@@ -659,7 +628,7 @@
         lesson();
         A.celebrate();
         A.playVoice(lang + "_success");
-        if (S.session) {
+        if (cohort && S.session) {
           try {
             const result = await S.submitMastery(
               a.id,
@@ -827,6 +796,7 @@
       root.innerHTML = `<p>${esc(profile.nickname || t("me"))}</p><button class="ghost" id="logout">${esc(t("logout"))}</button>`;
       document.getElementById("logout").onclick = async () => {
         await S.signOut();
+        serviceReady = null;
         cohort = null;
         serverXP = null;
         plan = "free";
@@ -1124,21 +1094,44 @@
       if (root) root.textContent = errorText(e);
     }
   }
-  function route() {
-    ++openSequence;
+  let serviceReady;
+  function prepareService() {
+    serviceReady ??= S.init().catch(() => { serviceReady = null; });
+    return serviceReady;
+  }
+  async function loadAccountDetails() {
+    await prepareService();
+    if (!S.session) return;
+    await Promise.allSettled([
+      S.plan().then((value) => { plan = value; }),
+      S.progress().then((value) => setServerXP(value.xp)),
+    ]);
+  }
+  async function route() {
+    const sequence = ++openSequence;
     const key = location.hash.slice(1);
+    const id = new URL(location.href).searchParams.get("activity");
     current = null;
-    if (key === "race") race();
-    else if (key === "requests") requests();
-    else if (key === "plans") plans();
-    else if (key === "account") {
-      home();
-      openAccount();
-    } else {
-      const id = new URL(location.href).searchParams.get("activity");
-      if (id) openActivity(id);
-      else home();
+    if (new URLSearchParams(key).has("access_token")) {
+      serviceReady = null;
+      await prepareService();
+      if (sequence === openSequence && location.hash.slice(1) !== key) route();
+      return;
     }
+    if (key === "requests") {
+      if (S.session) await prepareService();
+      if (sequence === openSequence) requests();
+    } else if (key === "race" || key === "plans" || key === "account") {
+      await prepareService();
+      if (sequence !== openSequence) return;
+      if (key === "race") race();
+      else if (key === "plans") plans();
+      else { home(); openAccount(); }
+      if (key === "race") loadAccountDetails();
+    } else if (id) {
+      if (cohort && S.session) loadAccountDetails();
+      openActivity(id);
+    } else home();
   }
   window.addEventListener("hashchange", () => {
     const u = new URL(location.href);
@@ -1155,15 +1148,6 @@
     if (b) b.textContent = String(value);
     if (p) p.hidden = false;
   }
-  async function refreshCatalog() {
-    try {
-      const catalog = await S.catalog();
-      for (const meta of catalog || [])
-        if (!bank.some((a) => a.id === meta.id)) bank.push(meta);
-      if (!current && document.getElementById("bank-cards"))
-        cards(C.filterBank(bank, { grade, topic, search }));
-    } catch {}
-  }
   async function init() {
     try {
       const r = await fetch("learning-bank.json");
@@ -1173,23 +1157,6 @@
       if ("serviceWorker" in navigator)
         navigator.serviceWorker.register("service-worker.js").catch(() => {});
       window.addEventListener("offline", () => notify(t("offline")));
-      try {
-        await S.init();
-        if (S.session) {
-          try {
-            plan = await S.plan();
-          } catch {}
-          try {
-            const p = await S.progress();
-            setServerXP(p.xp);
-          } catch {}
-          if (location.hash === "#account" && !current) {
-            home();
-            openAccount();
-          }
-        }
-      } catch {}
-      refreshCatalog();
     } catch {
       app.innerHTML =
         '<main><h1>Vizy</h1><p>לא ניתן לטעון את הבנק. נסו לרענן עם חיבור לרשת.<br>The bank could not load. Reconnect and refresh.</p><button onclick="location.reload()">↻</button></main>';

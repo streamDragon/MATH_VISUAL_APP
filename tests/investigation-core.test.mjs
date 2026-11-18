@@ -43,6 +43,17 @@ test('help is recorded separately from wrong answers, and assessment distinguish
  assert.equal(summary.transferIndependent,2);
  assert.equal(summary.transferTotal,2);
 });
+test('map transfer counts both parts and inherits help as assisted evidence',()=>{
+ const s=core.start('map');
+ core.help(s,'transfer');
+ core.attempt(s,'transfer:parts',true);
+ core.attempt(s,'transfer:result',true);
+ const summary=core.summary(s);
+ assert.equal(summary.transferTotal,2);
+ assert.equal(summary.transferIndependent,0);
+ assert.equal(summary.assisted,2);
+ assert.equal(summary.helped,1);
+});
 test('recorded discoveries are unique and advancement needs evidence',()=>{
  const s=core.start('map');
  assert.equal(core.advance(s),false);

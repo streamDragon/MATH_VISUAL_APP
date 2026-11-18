@@ -114,6 +114,7 @@ window.VizyClassroomLessons = [
       {
         "heading": "זווית היקפית",
         "problem": "זווית מרכזית הנשענת על קשת מסוימת היא 100°. מה גודל הזווית ההיקפית הנשענת על אותה קשת?",
+        "diagram": {"type": "circle-angles", "central": 100, "inscribed": 50},
         "prompt": "כתבו מספר מעלות.",
         "answers": [
           "50"
@@ -140,6 +141,7 @@ window.VizyClassroomLessons = [
       {
         "heading": "העברה לבגרות",
         "problem": "זווית היקפית הנשענת על קשת היא 35°. מה גודל הזווית המרכזית הנשענת על אותה קשת?",
+        "diagram": {"type": "circle-angles", "central": 70, "inscribed": 35},
         "prompt": "כתבו מספר מעלות.",
         "answers": [
           "70"

@@ -294,3 +294,8 @@ body.iq-entry-visible{overflow:hidden!important}
 /* Engine paths use presentation attributes; CSS provides the shared stroke polish. */
 .vizy-inquiry .iq-graph path[stroke-width="4"]{stroke-width:5;stroke-linecap:round}
 .vizy-inquiry .iq-graph circle[stroke="white"]{stroke-width:3;filter:drop-shadow(0 0 3px #16364966)}
+
+/* Four places in the general/specific map; solution appears separately after work. */
+.iq-map-finished{direction:rtl;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#ddf8e7;border:2px solid #43ab82;border-radius:14px;padding:10px 13px;margin-top:8px;color:#114c41}
+.iq-map-finished small{font-size:.77rem;font-weight:700}
+.iq-map-finished strong{font-size:clamp(.95rem,3.8vw,1.3rem);direction:ltr;unicode-bidi:isolate;white-space:nowrap}

@@ -102,12 +102,15 @@ test('general-to-particular U map keeps the case on stage and accepts B = -3',as
  await page.locator('[data-iq-factor="left-x+4"]').click();
  await page.locator('[data-iq-factor="right-x−2"]').click();
  await choose(page,'tidy');await next(page);
+ await expect(page.locator('.iq-check-strip')).not.toContainText('בדיקה אינה הוכחה');
+ await choose(page,'check');
  await expect(page.locator('.iq-check-strip')).toContainText('בדיקה אינה הוכחה');
- await choose(page,'check');await next(page);
+ await next(page);
  await expect(page.locator('#iqPrompt')).toHaveAttribute('data-iq-phase','transfer');
  await choose(page,'a');
  await choose(page,'correct');await next(page);
  await expect(page.locator('#iqPrompt')).toHaveAttribute('data-iq-phase','done');
+ await expect(page.locator('.iq-result-row').last()).toContainText('2 מתוך 2');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(4);
 });
 test('unified navigation and old optional lesson both remain available',async({page})=>{

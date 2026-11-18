@@ -73,15 +73,18 @@
   const b=Number(d.B||3);
   const substituted=b===-3?'((x+1)+3)((x+1)−3)':'((x+1)−3)((x+1)+3)';
   middle.append(from,node('s2','מציבים במקרה שלנו',substituted));
-  const lowers=e('div','iq-map-lowers');
-  lowers.append(e('span','','↓ בודקים'),e('span','','↓ מפשטים'));
-  const bottom=e('div','iq-map-bottom');
-  bottom.append(e('div','iq-map-check',d.checkDone?'x=0 : −8 = −8 ✓':'הגענו לאותו מקום?'),node('s3','התוצאה',b===-3?'(x+4)(x−2)':'(x−2)(x+4)'));
-  wrapper.append(top,arrows,middle,lowers,bottom);
+  // Four visual places, not a second lecture or a fifth place in the map.
+  // Show the final factorization only after the learner has constructed it.
+  wrapper.append(top,arrows,middle);
   host.append(wrapper);
+  if(d.tidyDone && !transfer){
+   const result=e('div','iq-map-finished');
+   result.append(e('small','','התוצאה שלנו'),e('strong','',b===-3?'(x+4)(x−2)':'(x−2)(x+4)'));
+   host.append(result);
+  }
   if(ready('g1')&&!transfer){
-   host.append(e('p','iq-stage-note','A = '+(d.A||'?')+' · B = '+(d.B==null?'?':pretty(d.B))+
-    ' · החץ העליון הוא שוויון (=), לא מסקנה חד־כיוונית.'));
+   if(d.A||d.B!=null)host.append(e('p','iq-stage-note',
+    (d.A?'A = '+d.A:'')+(d.A&&d.B!=null?'  ·  ':'')+(d.B!=null?'B = '+pretty(d.B):'')));
   }
   if(p==='return'&&!s.pending){
    const work=e('div','iq-slot-work');
@@ -117,7 +120,10 @@
    host.append(work);
   }
   if(p==='check'||p==='done'){
-   host.append(e('div','iq-check-strip','בדיקה: x=0 → (0+1)²−9=−8; (0−2)(0+4)=−8. בדיקה אינה הוכחה.'));
+   const checkText=d.checkDone
+    ?'בדיקה: x=0 → (0+1)²−9=−8; (0−2)(0+4)=−8. בדיקה אינה הוכחה.'
+    :'בדיקה לדוגמה: הציבו x=0 בשני הביטויים והשוו.';
+   host.append(e('div','iq-check-strip',checkText));
   }
   if(!transfer){
    const extras=e('details','iq-map-extras');extras.append(e('summary','','עוד דרך לראות את זה (לא חובה)'));
@@ -156,18 +162,18 @@
      ['diff','A² − B²',true],['square','(A−B)²',false],['sum','A² + B²',false]
     ])choice(lab,id,()=>answer('shape',correct,'השוו את הסימן בין שני ריבועים. זה אינו ריבוע של הפרש.',
       'זיהוי מבנה','זיהינו הפרש של שני ריבועים בלי לפתוח סוגריים.',()=>{d.shape='diff';}));
-    const quick=e('button','iq-subtle','אני כבר רואה את הקיצור · אציג ראיה');
+    const quick=e('button','iq-subtle','כבר זיהיתי, ממשיכים');
     quick.type='button';quick.dataset.iqShortcut='true';quick.onclick=()=>{
      d.quick=true;d.shortcut=true;d.shape='diff';
      s.route=['shape','partA','partB','check','transfer','done'];
      C.attempt(s,'shape',true);
      ctx.complete('קיצור דרך','זיהיתי הפרש ריבועים. עכשיו אראה מה A ומה B.',
-       'לא חייבים לעבור בכל תחנה. מוכיחים שהזיהוי מתאים למקרה.');
+       'בואו נמצא מה הם A ו־B.');
     };
     host.append(quick);
    }else{
     host.append(e('p','iq-help-line','הכרתם את התבנית. עכשיו נראה מה החלקים שלה.'));
-    if(!s.pending)choice('מזהים את החלקים','continue',()=>ctx.complete('זיהוי מבנה','הפרש שני ריבועים','ממשיכים להוכיח את הזיהוי.'));
+    if(!s.pending)choice('מזהים את החלקים','continue',()=>ctx.complete('זיהוי מבנה','הפרש שני ריבועים','ממשיכים לחלקים של הביטוי.'));
    }
   }else if(p==='reason'){
    for(const [id,label,correct] of [

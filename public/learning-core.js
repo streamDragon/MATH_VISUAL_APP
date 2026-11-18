@@ -85,7 +85,7 @@
     }
     return NaN;
   }
-  function checkAnswer(expected, input, tolerance = 0.05) {
+  function checkAnswer(expected, input, tolerance = 1e-9) {
     const n = parseNumber(input);
     return (
       Number.isFinite(n) &&

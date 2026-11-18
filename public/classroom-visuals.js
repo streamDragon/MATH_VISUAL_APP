@@ -41,8 +41,8 @@
         '<p class="visual-caption">חפשו איזה סוג זווית נוצרת בנקודת המפגש.</p>'; return;
     }
     if (/זווית/.test(step.problem)) {
-      const m = step.problem.match(/(\d+)°/), given = m ? Number(m[1]) : 100;
-      const central = /היקפית הנשענת/.test(step.problem) ? 2 * given : given;
+      const angles = step.diagram?.type === 'circle-angles' ? step.diagram : null;
+      const central = angles?.central ?? Number(step.problem.match(/(\d+)°/)?.[1] ?? 100);
       const a = central / 2 * Math.PI / 180, cx = 176, cy = 122, r = 88;
       const bx = cx + r * Math.cos(a), by = cy - r * Math.sin(a), dx = bx, dy = cy + r * Math.sin(a), ax = cx - r;
       host.innerHTML = svg('<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="#84dafa" stroke-width="3"/>' +

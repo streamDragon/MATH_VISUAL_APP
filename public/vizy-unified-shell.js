@@ -48,12 +48,23 @@
  }
  function refreshHeader(){
   const header=document.querySelector('.app-header');
-  if(!header)return;
-  const actions=header.querySelector('.header-actions');if(!actions)return;
-  let sound=actions.querySelector('[data-vizy-slot="sound"]');
-  if(!sound){sound=els('span','vizy-sound-slot');sound.dataset.vizySlot='sound';actions.prepend(sound);}
-  const account=header.querySelector('#account-button');
-  if(account&&!account.querySelector('svg')){account.replaceChildren(icon('user'));account.setAttribute('aria-label',txt('חשבון','Account'));}
+  if(header){
+   const actions=header.querySelector('.header-actions');
+   if(actions){
+    let sound=actions.querySelector('[data-vizy-slot="sound"]');
+    if(!sound){sound=els('span','vizy-sound-slot');sound.dataset.vizySlot='sound';actions.prepend(sound);}
+   }
+   const account=header.querySelector('#account-button');
+   if(account&&!account.querySelector('svg')){account.replaceChildren(icon('user'));account.setAttribute('aria-label',txt('חשבון','Account'));}
+  }
+  if(location.pathname.endsWith('/problem-map.html')){
+   const pageHeader=document.querySelector('body>header');
+   if(pageHeader&&!pageHeader.querySelector('[data-vizy-slot="sound"]')){
+    const sound=els('span','vizy-sound-slot');sound.dataset.vizySlot='sound';
+    const brand=pageHeader.querySelector('.brand');
+    if(brand)brand.after(sound);else pageHeader.prepend(sound);
+   }
+  }
  }
  function decorateHome(){
   if(!isHome())return;
@@ -62,12 +73,6 @@
   if(!card.querySelector('.vizy-home-avatar')){
    const holder=els('div','vizy-home-avatar');holder.setAttribute('aria-hidden','true');
    card.prepend(holder);root.VizyMascot?.render(holder,'idle');
-  }
-  const start=card.querySelector('#student-start-next');
-  if(start&&!start.dataset.vizyDecorated){
-   start.dataset.vizyDecorated='1';
-   const text=start.textContent.replace(/[?►➜→]+\s*$/,'').trim();
-   start.replaceChildren(document.createTextNode(text+' '),icon('back'));
   }
   let journey=document.getElementById('vizy-journey');
   if(!journey){
@@ -110,11 +115,12 @@
   const primaryTitle=document.querySelector('.student-next-step-content>p')?.textContent?.trim()||
     txt('הפעילות הבאה','Next lesson');
   const bankCards=Array.from(document.querySelectorAll('#bank-cards .activity-card:not(.locked)'));
+  const masteredBank=bankCards.filter(card=>card.classList.contains('mastered')).slice(-4);
   const stops=journey.querySelector('.vizy-journey-stops');
   const items=[
    {title:primaryTitle,done:inquiryDone,href:lessonHref,primary:true},
-   ...bankCards.map(card=>({title:card.querySelector('h3')?.textContent||txt('אתגר','Challenge'),
-    done:card.classList.contains('mastered'),card,primary:false}))
+   ...masteredBank.map(card=>({title:card.querySelector('h3')?.textContent||txt('אתגר','Challenge'),
+    done:true,card,primary:false}))
   ];
   const signature=items.map(x=>x.title+'|'+x.done).join('::')+'/'+lang();
   if(stops.dataset.signature!==signature){
@@ -148,7 +154,8 @@
   document.body.classList.toggle('show-error-practice',location.hash==='#flowErrors');
   document.body.classList.toggle('show-legacy-tools',new URLSearchParams(location.search).get('tools')==='1');
   const main=document.querySelector('main');
-  if(main&&!document.getElementById('vizy-legacy-toggle')){
+  const modernLesson=document.body.classList.contains('vizy-investigation-active')||document.body.classList.contains('aw-route');
+  if(main&&!modernLesson&&!document.getElementById('vizy-legacy-toggle')){
    const toggle=els('button','vizy-legacy-toggle');toggle.type='button';toggle.id='vizy-legacy-toggle';
    toggle.setAttribute('aria-expanded',String(document.body.classList.contains('show-legacy-tools')));
    function update(){toggle.textContent=document.body.classList.contains('show-legacy-tools')?txt('סגירת כלים מתקדמים','Close advanced tools'):txt('פתיחת כלים מתקדמים','Advanced tools');}
@@ -169,7 +176,7 @@
    const figure=els('span','vizy-finish-mascot');figure.setAttribute('aria-hidden','true');
    finished.parentNode.insertBefore(figure,finished);
    root.VizyMascot?.render(figure,'happy');
-   const next=els('a','vizy-next-activity');next.href='problem-map.html?lesson='+(new URLSearchParams(location.search).get('lesson')==='increasing'?'difference-squares':'increasing');
+   const next=els('a','vizy-next-activity');next.href='problem-map.html?lesson='+(new URLSearchParams(location.search).get('lesson')==='increasing'?'difference-squares':'algebra-worlds');
    next.textContent=txt('לפעילות הבאה','Next activity');
    finished.parentNode.insertBefore(next,finished);
   }

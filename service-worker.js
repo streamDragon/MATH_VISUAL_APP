@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mathviz-learning-v2.1';
+const CACHE_NAME = 'mathviz-learning-v2.2';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",
@@ -8,7 +8,8 @@ const APP_SHELL = [
   "/learning-core.js",
   "/learning-service.js",
   "/learning-visuals.js",
-  "/learning-audio.js",
+  "/vizy-sound.js",
+  "/vizy-sound.css",
   "/learning-bank.json",
   "/learning-voices.json",
   "/manifest.json",
