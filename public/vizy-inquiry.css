@@ -299,3 +299,7 @@ body.iq-entry-visible{overflow:hidden!important}
 .iq-map-finished{direction:rtl;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#ddf8e7;border:2px solid #43ab82;border-radius:14px;padding:10px 13px;margin-top:8px;color:#114c41}
 .iq-map-finished small{font-size:.77rem;font-weight:700}
 .iq-map-finished strong{font-size:clamp(.95rem,3.8vw,1.3rem);direction:ltr;unicode-bidi:isolate;white-space:nowrap}
+
+/* Formulas: a tight sans with no wide bracket spacing, always left to right. Rubik stays for Hebrew. */
+.vizy-math,.iq-entry-expression,.iq-map-formula,.iq-map-path{font-family:var(--vizy-math-font,"Segoe UI",Roboto,Arial,sans-serif);font-variant-numeric:lining-nums}
+.vizy-math{unicode-bidi:isolate}

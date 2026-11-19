@@ -67,12 +67,20 @@ for(const lesson of ['increasing','difference-squares']){
   await expect(page.locator('#iqEntryOverlay')).toBeVisible();
   await expect(page.locator('#vizy-unified-nav .vizy-icon')).toHaveCount(3);
   await expect(page.locator('.iq-entry-answer').first()).toBeVisible();
-  const data=await page.evaluate(()=>({
-   overflow:document.documentElement.scrollWidth>innerWidth,
-   font:getComputedStyle(document.querySelector('.iq-entry-answer')!).fontFamily
-  }));
+  const data=await page.evaluate(()=>{
+   const answer=document.querySelector('.iq-entry-answer')!;
+   return {
+    overflow:document.documentElement.scrollWidth>innerWidth,
+    title:getComputedStyle(document.querySelector('.iq-entry-title')!).fontFamily,
+    answer:getComputedStyle(answer).fontFamily,
+    formula:answer.classList.contains('vizy-math')
+   };
+  });
   expect(data.overflow).toBe(false);
-  expect(data.font).toContain('Rubik');
+  // Hebrew is set in Rubik. A formula answer uses the tight maths stack, so brackets do not gape.
+  expect(data.title).toContain('Rubik');
+  if(data.formula)expect(data.answer).toContain('Roboto');
+  else expect(data.answer).toContain('Rubik');
  });
 }
 

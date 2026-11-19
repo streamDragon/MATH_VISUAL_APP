@@ -149,7 +149,7 @@
   host.append(e('h3','',phases[p]));const q=host.querySelector('h3');q.id='iqQuestion';
   const buttons=e('div','iq-choices');host.append(buttons);
   function choice(label,id,action,selected){
-   const btn=e('button','iq-choice',label);btn.type='button';btn.dataset.iqAnswer=id;
+   const btn=e('button','iq-choice',label);btn.type='button';btn.dataset.iqAnswer=id;root.VizyLtr?.apply(btn);
    if(selected!==undefined)btn.setAttribute('aria-pressed',String(selected));
    btn.onclick=action;buttons.append(btn);return btn;
   }
@@ -218,7 +218,7 @@
     const options=name==='left'?['x−2','x−4','x+4']:['x+4','x+2','x−2'];
     const selected=d['tidy'+name]||'';
     for(const opt of options){
-     const b=e('button','iq-choice',opt);b.type='button';b.dataset.iqFactor=name+'-'+opt;
+     const b=e('button','iq-choice',opt);b.type='button';b.dataset.iqFactor=name+'-'+opt;root.VizyLtr?.apply(b);
      b.setAttribute('aria-pressed',String(selected===opt));
      b.onclick=()=>{d['tidy'+name]=opt;ctx.save();ctx.render();};section.append(b);
     }

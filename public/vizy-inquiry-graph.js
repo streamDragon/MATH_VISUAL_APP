@@ -22,7 +22,7 @@
   if(txt!=null)node.textContent=txt;return node;
  };
  const button=(host,label,id,onClick,selected)=>{
-  const b=e('button','iq-choice',label);b.type='button';b.dataset.iqAnswer=id;
+  const b=e('button','iq-choice',label);b.type='button';b.dataset.iqAnswer=id;root.VizyLtr?.apply(b);
   if(selected!==undefined)b.setAttribute('aria-pressed',String(selected));
   b.onclick=onClick;host.append(b);return b;
  };

@@ -13,6 +13,17 @@
    if(text!==undefined)node.textContent=text;
    return node;
   };
+  /* "label: formula" keeps the Hebrew label right to left and the formula left to right,
+     so "(x+1)² − 9" is never reordered into "² − 9(x+1)". */
+  function setGiven(node,text){
+   const cut=text.lastIndexOf(': ');
+   const tail=cut>=0?text.slice(cut+2):'';
+   if(cut>=0&&root.VizyLtr?.isFormula(tail)){
+    node.textContent=text.slice(0,cut+2);
+    node.append(root.VizyLtr.span(tail));
+   }else node.textContent=text;
+   return node;
+  }
   function given(state){
    const phase=core.phase(state);
    if(kind==='map'){
@@ -87,7 +98,7 @@
     close.type='button';close.onclick=()=>removeOverlay(strip);
     top.append(close);
    }
-   const heading=h('h1','iq-entry-title',title);
+   const heading=setGiven(h('h1','iq-entry-title'),title);
    heading.id='iqEntryTitle';heading.tabIndex=-1;
    const content=h('div','iq-entry-content');
    if(kind==='graph'&&phase!=='temperature'&&phase!=='linear'){
@@ -107,6 +118,7 @@
     for(const original of buttons){
      const option=h('button','iq-entry-answer',original.textContent.trim());
      option.type='button';option.dataset.iqAnswer=original.dataset.iqAnswer;
+     root.VizyLtr?.apply(option);
      const onSelect=original.onclick;
      option.onclick=()=>{if(!closing&&typeof onSelect==='function')onSelect();};
      choices.append(option);
@@ -154,7 +166,7 @@
   function update({state,stage,prompt}){
    const oldHead=stage.querySelector('.iq-stage-head');
    oldHead?.remove();
-   const strip=h('button','iq-given-strip',given(state));
+   const strip=setGiven(h('button','iq-given-strip'),given(state));
    strip.id='iqGivenStrip';strip.type='button';
    strip.setAttribute('aria-label','פתחו שוב את הנתון: '+given(state));
    strip.setAttribute('aria-expanded',String(mode==='recap'));

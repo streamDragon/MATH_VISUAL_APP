@@ -2,12 +2,13 @@
 @font-face{font-family:"Rubik";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/rubik-hebrew-400.woff2") format("woff2");unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
 @font-face{font-family:"Rubik";font-style:normal;font-weight:500;font-display:swap;src:url("fonts/rubik-hebrew-500.woff2") format("woff2");unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
 @font-face{font-family:"Rubik";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/rubik-hebrew-700.woff2") format("woff2");unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
-@font-face{font-family:"Rubik";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/rubik-latin-400.woff2") format("woff2");unicode-range:U+0000-024F,U+1E00-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4}
-@font-face{font-family:"Rubik";font-style:normal;font-weight:500;font-display:swap;src:url("fonts/rubik-latin-500.woff2") format("woff2");unicode-range:U+0000-024F,U+1E00-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4}
-@font-face{font-family:"Rubik";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/rubik-latin-700.woff2") format("woff2");unicode-range:U+0000-024F,U+1E00-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4}
+@font-face{font-family:"Rubik";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/rubik-latin-400.woff2") format("woff2");unicode-range:U+0000-024F,U+1E00-1EFF,U+2212,U+2020,U+20A0-20AB,U+20AD-20C4}
+@font-face{font-family:"Rubik";font-style:normal;font-weight:500;font-display:swap;src:url("fonts/rubik-latin-500.woff2") format("woff2");unicode-range:U+0000-024F,U+1E00-1EFF,U+2212,U+2020,U+20A0-20AB,U+20AD-20C4}
+@font-face{font-family:"Rubik";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/rubik-latin-700.woff2") format("woff2");unicode-range:U+0000-024F,U+1E00-1EFF,U+2212,U+2020,U+20A0-20AB,U+20AD-20C4}
 :root{
  --vizy-ground:#10182e;--vizy-surface:#192b45;--vizy-surface-raised:#243953;
  --vizy-text:#f2f7ff;--vizy-muted:#c6d5e9;--vizy-line:#54718a;
+ --vizy-math-font:"Segoe UI",Roboto,"Noto Sans","Helvetica Neue",Arial,sans-serif;
  --vizy-accent:#d9fa78;--vizy-joy-1:#ff8fa3;--vizy-joy-2:#7cc8ff;--vizy-joy-3:#b79cff;
  --vizy-curve-a:#138b83;--vizy-curve-b:#c36d15;
  --vizy-radius-sm:14px;--vizy-radius-md:20px;--vizy-radius-lg:28px;

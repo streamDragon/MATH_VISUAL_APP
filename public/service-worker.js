@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mathviz-learning-v2.18-algebra-worlds';
+const CACHE_NAME = 'mathviz-learning-v2.19-math-ltr';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",
@@ -36,6 +36,7 @@ const APP_SHELL = [
   "/vizy-inquiry-core.js",
   "/vizy-inquiry-graph.js",
   "/vizy-inquiry-map.js",
+  "/vizy-ltr.js",
   "/vizy-inquiry-entry.js",
   "/vizy-inquiry.js",
   "/vizy-sound.js",
@@ -66,7 +67,8 @@ const APP_SHELL = [
   "/learning-app.js",
   "/learning-core.js",
   "/learning-service.js",
-  "/learning-visuals.js",  "/learning-bank.json",
+  "/learning-visuals.js",
+  "/learning-bank.json",
   "/learning-voices.json",
   "/manifest.json",
   "/offline.html",
