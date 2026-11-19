@@ -135,3 +135,25 @@ for(const [grade,kind,lesson] of [
   await expect(page.locator('#vizy-journey-stops .vizy-journey-stop.is-done')).toHaveCount(1);
  });
 }
+
+test('the journey says in words what the stops and the clock are',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('/learn.html');
+ const stops=page.locator('#vizy-journey-stops .vizy-journey-stop');
+ const total=await stops.count();
+ expect(total).toBeGreaterThan(1);
+ await expect(page.locator('.vizy-journey-caption')).toHaveText('הושלמו 0 מתוך '+total);
+ await expect(page.locator('.vizy-journey-time-label')).toHaveText('זמן משחק');
+ await expect(page.locator('#vizy-journey-stops .is-next')).toHaveCount(1);
+});
+
+test('teacher pages are not in the student drawer unless teacher mode is on',async({page})=>{
+ await page.goto('/learn.html');
+ await page.evaluate(()=>localStorage.removeItem('vizy_teacher_v1'));
+ await page.reload();
+ await expect(page.locator('#vizy-tools-drawer a[href="review.html"]')).toHaveCount(0);
+ await page.goto('/learn.html?teacher=1');
+ await expect(page.locator('#vizy-tools-drawer a[href="review.html"]')).toHaveCount(1);
+ await page.goto('/learn.html');
+ await expect(page.locator('#vizy-tools-drawer a[href="review.html"]')).toHaveCount(1);
+});

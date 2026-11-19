@@ -242,3 +242,14 @@ body.vizy-consolidated .vizy-journey-stop.is-next{animation:vizy-stop-pulse 3.2s
 /* Retire the old page-family heading on active student lessons. */
 body.vizy-consolidated:is(.vizy-investigation-active,.aw-route) > header > span:not([data-vizy-slot]){display:none!important}
 body.vizy-consolidated:is(.vizy-investigation-active,.aw-route) #vizy-legacy-toggle{display:none!important}
+
+/* Journey captions: the dots and the clock say what they are. */
+body.vizy-consolidated .vizy-journey-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+body.vizy-consolidated .vizy-journey-head h3{margin-bottom:0}
+body.vizy-consolidated .vizy-journey-caption{font:500 .86rem "Rubik",Arial,sans-serif;color:#c6d5e9}
+body.vizy-consolidated .vizy-journey-head{margin-bottom:8px}
+body.vizy-consolidated .vizy-journey-time{display:flex;align-items:center;gap:10px;margin-top:9px;flex-wrap:wrap}
+body.vizy-consolidated .vizy-journey-time .vizy-journey-playtime{margin-top:0}
+body.vizy-consolidated .vizy-journey-time-label{font:500 .86rem "Rubik",Arial,sans-serif;color:#c6d5e9}
+body.vizy-consolidated .vizy-journey-stop:not(button):not(.is-next){background:transparent;border-color:#6b84a6;color:#c6d5e9}
+body.vizy-consolidated .vizy-journey-stops{padding-inline:8px;margin-inline:-8px}

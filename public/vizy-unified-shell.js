@@ -114,19 +114,21 @@
   }
   const primaryTitle=document.querySelector('.student-next-step-content>p')?.textContent?.trim()||
     txt('הפעילות הבאה','Next lesson');
-  const bankCards=Array.from(document.querySelectorAll('#bank-cards .activity-card:not(.locked)'));
-  const masteredBank=bankCards.filter(card=>card.classList.contains('mastered')).slice(-4);
+  // The journey is the real path for the chosen grade: the home lesson, then the grade's next
+  // open challenges in bank order. Finished stops get a star; later ones are outlines, not links.
+  const bankCards=Array.from(document.querySelectorAll('#bank-cards .activity-card:not(.locked)')).slice(0,3);
   const stops=journey.querySelector('.vizy-journey-stops');
   const items=[
    {title:primaryTitle,done:inquiryDone,href:lessonHref,primary:true},
-   ...masteredBank.map(card=>({title:card.querySelector('h3')?.textContent||txt('אתגר','Challenge'),
-    done:true,card,primary:false}))
+   ...bankCards.map(card=>({title:card.querySelector('h3')?.textContent||txt('אתגר','Challenge'),
+    done:card.classList.contains('mastered'),card,primary:false}))
   ];
   const signature=items.map(x=>x.title+'|'+x.done).join('::')+'/'+lang();
   if(stops.dataset.signature!==signature){
    stops.dataset.signature=signature;
+   const nextIndex=items.findIndex(item=>!item.done);
    stops.replaceChildren(...items.map((item,i)=>{
-    const isNext=i===0&&!item.done;
+    const isNext=i===nextIndex;
     const marker=els(item.done?'button':'span','vizy-journey-stop');
     marker.classList.toggle('is-done',item.done);
     marker.classList.toggle('is-next',isNext);
@@ -143,9 +145,20 @@
     return marker;
    }));
   }
+  // Say in words what the dots and the clock are.
+  let caption=journey.querySelector('.vizy-journey-caption');
+  if(!caption){
+   // Caption shares the heading's row, so the home still fits a 320x568 screen.
+   const head=els('div','vizy-journey-head');const heading=journey.querySelector('h3');
+   heading.before(head);caption=els('span','vizy-journey-caption');head.append(heading,caption);
+  }
+  const doneCount=items.filter(item=>item.done).length;
+  caption.textContent=txt('הושלמו '+doneCount+' מתוך '+items.length,doneCount+' of '+items.length+' done');
   if(!journey.querySelector('[data-vizy-slot="playtime"]')){
+   const row=els('div','vizy-journey-time');
+   const label=els('span','vizy-journey-time-label');label.textContent=txt('זמן משחק','Play time');
    const slot=els('div','vizy-journey-playtime');slot.dataset.vizySlot='playtime';
-   journey.append(slot);
+   row.append(label,slot);journey.append(row);
    root.VizyPlaytime?.render?.();
   }
  }

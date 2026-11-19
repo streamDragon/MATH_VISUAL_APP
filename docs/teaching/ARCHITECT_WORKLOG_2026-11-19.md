@@ -32,6 +32,14 @@ Problem 2 of the status review.
 - `tests/vizy-algebra-worlds.spec.ts`: the walkthrough test already failed on `main`, because it followed the module's order before 18 November. Rewritten to the current order; two new tests for contrast and badge placement. 3/3 pass.
 - Not changed: the module still opens with the big compound exercise and a domain question. The review says this is the opposite of "experience, decision, why". That is a redesign, not a fix; listed under open items.
 
+## 4. Home: the journey says what it is; teacher link out of the student drawer (pushed)
+
+Problems 3 and 5 of the status review.
+- "המסע שלי" showed a lone "1" and a "0:00" with no words. It now shows the real path for the chosen grade: the home lesson, then the grade's next three open challenges. The next stop glows, later stops are outlines, finished ones get a star. A caption beside the heading says "הושלמו X מתוך Y", and the clock is labelled "זמן משחק".
+- "תור המורה" is no longer in the student's tools drawer. Opening `learn.html?teacher=1` once shows it on that device from then on.
+- Fits the smallest phone (320×568): the drawer stays above the bottom navigation (tested).
+- Tests fixed that already failed on `main`: both journey tests in `vizy-visual.spec.ts`; `student-next-step.spec.ts` and `unified-mobile.spec.ts`, which looked for the "buddy" figure and four tool cards removed on 16 November (now the mascot and the drawer). `unified-home.spec.ts` drawer count 9 → 8 (teacher link moved). New tests for the captions and teacher mode.
+
 ## Open items found while working
 
 - The algebra module opens with a large compound exercise and the domain question. Rebuilding it on the inquiry engine, starting from one small experience, is a design task for an agent.

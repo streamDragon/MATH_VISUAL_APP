@@ -57,9 +57,16 @@
     link('classroom-practice.html','תרגול מודרך','Guided practice'),
     link('skill-lab.html','מעבדת מיומנויות','Skill lab'),
     link('/?workspace=1&splash=0','מעבדת הגרפים','Graph lab'),
-    link('privacy.html','פרטיות','Privacy'),
-    link('review.html','תור המורה','Teacher review queue')
+    link('privacy.html','פרטיות','Privacy')
    );
+   // Teacher pages stay out of the student's drawer. Opening the home once with ?teacher=1
+   // shows the teacher link on that device from then on.
+   let teacher=false;
+   try{
+    if(new URLSearchParams(location.search).get('teacher')==='1')localStorage.setItem('vizy_teacher_v1','1');
+    teacher=localStorage.getItem('vizy_teacher_v1')==='1';
+   }catch{}
+   if(teacher)links.append(link('review.html','תור המורה','Teacher review queue'));
    const stories=document.createElement('button');stories.type='button';stories.className='story-corner-trigger';
    stories.dataset.story='kettle';stories.textContent=english()?'☕ Story corner':'☕ פינת הסיפורים';
    links.append(stories);
