@@ -1,13 +1,13 @@
 {
   "meta": {
     "title": "Vizy Graphify",
-    "generatedAt": "2026-11-13T00:56:35.232Z",
+    "generatedAt": "2026-11-19T19:13:21.199Z",
     "repository": "streamDragon/MATH_VISUAL_APP",
-    "mainSha": "0f98574e4036500a26ea8197cfc20465c7a43744",
-    "trackedFiles": 279,
-    "scannedFiles": 133,
+    "mainSha": "039223fe3593fcae0023eb6c7a18e59eaa7d0a9c",
+    "trackedFiles": 356,
+    "scannedFiles": 176,
     "branch": "main",
-    "note": "מפת קבצים מסריקת git ls-files בענף main בקומיט 0f98574. מקור: סביבת העבודה המקומית. פריטי design הם כיווני תכנון, לא קוד ממומש."
+    "note": "מפת קבצים מסריקת git ls-files בענף main בקומיט 039223f. מקור: סביבת העבודה המקומית. פריטי design הם כיווני תכנון, לא קוד ממומש."
   },
   "nodes": [
     {
@@ -117,6 +117,15 @@
       "status": "main",
       "detail": "package.json",
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/package.json"
+    },
+    {
+      "id": "playwright.agent2.config.ts",
+      "label": "playwright.agent2.config.ts",
+      "path": "playwright.agent2.config.ts",
+      "group": "other",
+      "status": "main",
+      "detail": "playwright.agent2.config.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/playwright.agent2.config.ts"
     },
     {
       "id": "playwright.config.ts",
@@ -371,15 +380,6 @@
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/learning-app.js"
     },
     {
-      "id": "public/learning-audio.js",
-      "label": "learning-audio.js",
-      "path": "public/learning-audio.js",
-      "group": "logic",
-      "status": "main",
-      "detail": "public/learning-audio.js",
-      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/learning-audio.js"
-    },
-    {
       "id": "public/learning-bank.json",
       "label": "בנק הפעילויות",
       "path": "public/learning-bank.json",
@@ -504,6 +504,15 @@
       "status": "main",
       "detail": "public/offline.html",
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/offline.html"
+    },
+    {
+      "id": "public/play.html",
+      "label": "play.html",
+      "path": "public/play.html",
+      "group": "page",
+      "status": "main",
+      "detail": "public/play.html",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/play.html"
     },
     {
       "id": "public/presets.js",
@@ -713,24 +722,6 @@
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/story-corner.js"
     },
     {
-      "id": "public/student-buddy.css",
-      "label": "student-buddy.css",
-      "path": "public/student-buddy.css",
-      "group": "style",
-      "status": "main",
-      "detail": "public/student-buddy.css",
-      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/student-buddy.css"
-    },
-    {
-      "id": "public/student-buddy.js",
-      "label": "ליווי התלמיד",
-      "path": "public/student-buddy.js",
-      "group": "logic",
-      "status": "main",
-      "detail": "public/student-buddy.js",
-      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/student-buddy.js"
-    },
-    {
       "id": "public/version.json",
       "label": "version.json",
       "path": "public/version.json",
@@ -738,6 +729,195 @@
       "status": "main",
       "detail": "public/version.json",
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/version.json"
+    },
+    {
+      "id": "public/vizy-algebra-worlds.css",
+      "label": "vizy-algebra-worlds.css",
+      "path": "public/vizy-algebra-worlds.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/vizy-algebra-worlds.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-algebra-worlds.css"
+    },
+    {
+      "id": "public/vizy-algebra-worlds.js",
+      "label": "vizy-algebra-worlds.js",
+      "path": "public/vizy-algebra-worlds.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/vizy-algebra-worlds.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-algebra-worlds.js"
+    },
+    {
+      "id": "public/vizy-classroom-polish.css",
+      "label": "vizy-classroom-polish.css",
+      "path": "public/vizy-classroom-polish.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/vizy-classroom-polish.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-classroom-polish.css"
+    },
+    {
+      "id": "public/vizy-game-return.js",
+      "label": "vizy-game-return.js",
+      "path": "public/vizy-game-return.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/vizy-game-return.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-game-return.js"
+    },
+    {
+      "id": "public/vizy-glide-core.js",
+      "label": "vizy-glide-core.js",
+      "path": "public/vizy-glide-core.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/vizy-glide-core.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-glide-core.js"
+    },
+    {
+      "id": "public/vizy-glide.css",
+      "label": "vizy-glide.css",
+      "path": "public/vizy-glide.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/vizy-glide.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-glide.css"
+    },
+    {
+      "id": "public/vizy-glide.js",
+      "label": "vizy-glide.js",
+      "path": "public/vizy-glide.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/vizy-glide.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-glide.js"
+    },
+    {
+      "id": "public/vizy-icons.js",
+      "label": "vizy-icons.js",
+      "path": "public/vizy-icons.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/vizy-icons.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-icons.js"
+    },
+    {
+      "id": "public/vizy-inquiry-core.js",
+      "label": "vizy-inquiry-core.js",
+      "path": "public/vizy-inquiry-core.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/vizy-inquiry-core.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-inquiry-core.js"
+    },
+    {
+      "id": "public/vizy-inquiry-entry.js",
+      "label": "vizy-inquiry-entry.js",
+      "path": "public/vizy-inquiry-entry.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/vizy-inquiry-entry.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-inquiry-entry.js"
+    },
+    {
+      "id": "public/vizy-inquiry-graph.js",
+      "label": "vizy-inquiry-graph.js",
+      "path": "public/vizy-inquiry-graph.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/vizy-inquiry-graph.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-inquiry-graph.js"
+    },
+    {
+      "id": "public/vizy-inquiry-map.js",
+      "label": "vizy-inquiry-map.js",
+      "path": "public/vizy-inquiry-map.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/vizy-inquiry-map.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-inquiry-map.js"
+    },
+    {
+      "id": "public/vizy-inquiry.css",
+      "label": "vizy-inquiry.css",
+      "path": "public/vizy-inquiry.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/vizy-inquiry.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-inquiry.css"
+    },
+    {
+      "id": "public/vizy-inquiry.js",
+      "label": "vizy-inquiry.js",
+      "path": "public/vizy-inquiry.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/vizy-inquiry.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-inquiry.js"
+    },
+    {
+      "id": "public/vizy-ltr.js",
+      "label": "vizy-ltr.js",
+      "path": "public/vizy-ltr.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/vizy-ltr.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-ltr.js"
+    },
+    {
+      "id": "public/vizy-mascot.js",
+      "label": "vizy-mascot.js",
+      "path": "public/vizy-mascot.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/vizy-mascot.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-mascot.js"
+    },
+    {
+      "id": "public/vizy-playtime-core.js",
+      "label": "vizy-playtime-core.js",
+      "path": "public/vizy-playtime-core.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/vizy-playtime-core.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-playtime-core.js"
+    },
+    {
+      "id": "public/vizy-playtime.js",
+      "label": "vizy-playtime.js",
+      "path": "public/vizy-playtime.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/vizy-playtime.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-playtime.js"
+    },
+    {
+      "id": "public/vizy-sound.css",
+      "label": "vizy-sound.css",
+      "path": "public/vizy-sound.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/vizy-sound.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-sound.css"
+    },
+    {
+      "id": "public/vizy-sound.js",
+      "label": "vizy-sound.js",
+      "path": "public/vizy-sound.js",
+      "group": "logic",
+      "status": "main",
+      "detail": "public/vizy-sound.js",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-sound.js"
+    },
+    {
+      "id": "public/vizy-theme.css",
+      "label": "vizy-theme.css",
+      "path": "public/vizy-theme.css",
+      "group": "style",
+      "status": "main",
+      "detail": "public/vizy-theme.css",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-theme.css"
     },
     {
       "id": "public/vizy-unified-shell.css",
@@ -756,6 +936,24 @@
       "status": "main",
       "detail": "public/vizy-unified-shell.js",
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/public/vizy-unified-shell.js"
+    },
+    {
+      "id": "qa/vizy-agent1-classroom/report.json",
+      "label": "report.json",
+      "path": "qa/vizy-agent1-classroom/report.json",
+      "group": "data",
+      "status": "main",
+      "detail": "qa/vizy-agent1-classroom/report.json",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/qa/vizy-agent1-classroom/report.json"
+    },
+    {
+      "id": "qa/vizy-agent1-layout/report.json",
+      "label": "report.json",
+      "path": "qa/vizy-agent1-layout/report.json",
+      "group": "data",
+      "status": "main",
+      "detail": "qa/vizy-agent1-layout/report.json",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/qa/vizy-agent1-layout/report.json"
     },
     {
       "id": "scripts/build-web.mjs",
@@ -848,6 +1046,15 @@
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/localize-learning-bank.mjs"
     },
     {
+      "id": "scripts/run-python-tests.mjs",
+      "label": "run-python-tests.mjs",
+      "path": "scripts/run-python-tests.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/run-python-tests.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/run-python-tests.mjs"
+    },
+    {
       "id": "scripts/seed-learning-bank.mjs",
       "label": "seed-learning-bank.mjs",
       "path": "scripts/seed-learning-bank.mjs",
@@ -909,6 +1116,42 @@
       "status": "main",
       "detail": "scripts/verify-classroom.cjs",
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/verify-classroom.cjs"
+    },
+    {
+      "id": "scripts/vizy-agent1-classroom-qa.mjs",
+      "label": "vizy-agent1-classroom-qa.mjs",
+      "path": "scripts/vizy-agent1-classroom-qa.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/vizy-agent1-classroom-qa.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/vizy-agent1-classroom-qa.mjs"
+    },
+    {
+      "id": "scripts/vizy-agent1-layout-audit.mjs",
+      "label": "vizy-agent1-layout-audit.mjs",
+      "path": "scripts/vizy-agent1-layout-audit.mjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/vizy-agent1-layout-audit.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/vizy-agent1-layout-audit.mjs"
+    },
+    {
+      "id": "scripts/vizy-agent1-playwright.config.ts",
+      "label": "vizy-agent1-playwright.config.ts",
+      "path": "scripts/vizy-agent1-playwright.config.ts",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/vizy-agent1-playwright.config.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/vizy-agent1-playwright.config.ts"
+    },
+    {
+      "id": "scripts/vizy-lan-qa.cjs",
+      "label": "vizy-lan-qa.cjs",
+      "path": "scripts/vizy-lan-qa.cjs",
+      "group": "build",
+      "status": "main",
+      "detail": "scripts/vizy-lan-qa.cjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/scripts/vizy-lan-qa.cjs"
     },
     {
       "id": "service-worker.js",
@@ -990,6 +1233,42 @@
       "status": "main",
       "detail": "tests/grade-next-mobile.spec.ts",
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/grade-next-mobile.spec.ts"
+    },
+    {
+      "id": "tests/investigation-core.test.mjs",
+      "label": "investigation-core.test.mjs",
+      "path": "tests/investigation-core.test.mjs",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/investigation-core.test.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/investigation-core.test.mjs"
+    },
+    {
+      "id": "tests/investigation-entry.spec.ts",
+      "label": "investigation-entry.spec.ts",
+      "path": "tests/investigation-entry.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/investigation-entry.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/investigation-entry.spec.ts"
+    },
+    {
+      "id": "tests/investigation-mobile.spec.ts",
+      "label": "investigation-mobile.spec.ts",
+      "path": "tests/investigation-mobile.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/investigation-mobile.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/investigation-mobile.spec.ts"
+    },
+    {
+      "id": "tests/learner-local-start.spec.ts",
+      "label": "learner-local-start.spec.ts",
+      "path": "tests/learner-local-start.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/learner-local-start.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/learner-local-start.spec.ts"
     },
     {
       "id": "tests/learning-core.test.mjs",
@@ -1197,6 +1476,114 @@
       "status": "main",
       "detail": "tests/unified-mobile.spec.ts",
       "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/unified-mobile.spec.ts"
+    },
+    {
+      "id": "tests/vizy-algebra-structure.spec.ts",
+      "label": "vizy-algebra-structure.spec.ts",
+      "path": "tests/vizy-algebra-structure.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/vizy-algebra-structure.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/vizy-algebra-structure.spec.ts"
+    },
+    {
+      "id": "tests/vizy-algebra-worlds.spec.ts",
+      "label": "vizy-algebra-worlds.spec.ts",
+      "path": "tests/vizy-algebra-worlds.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/vizy-algebra-worlds.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/vizy-algebra-worlds.spec.ts"
+    },
+    {
+      "id": "tests/vizy-cross-module-integration.spec.ts",
+      "label": "vizy-cross-module-integration.spec.ts",
+      "path": "tests/vizy-cross-module-integration.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/vizy-cross-module-integration.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/vizy-cross-module-integration.spec.ts"
+    },
+    {
+      "id": "tests/vizy-glide.test.mjs",
+      "label": "vizy-glide.test.mjs",
+      "path": "tests/vizy-glide.test.mjs",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/vizy-glide.test.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/vizy-glide.test.mjs"
+    },
+    {
+      "id": "tests/vizy-main-integration.spec.ts",
+      "label": "vizy-main-integration.spec.ts",
+      "path": "tests/vizy-main-integration.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/vizy-main-integration.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/vizy-main-integration.spec.ts"
+    },
+    {
+      "id": "tests/vizy-math-ltr.spec.ts",
+      "label": "vizy-math-ltr.spec.ts",
+      "path": "tests/vizy-math-ltr.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/vizy-math-ltr.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/vizy-math-ltr.spec.ts"
+    },
+    {
+      "id": "tests/vizy-math-ltr.test.mjs",
+      "label": "vizy-math-ltr.test.mjs",
+      "path": "tests/vizy-math-ltr.test.mjs",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/vizy-math-ltr.test.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/vizy-math-ltr.test.mjs"
+    },
+    {
+      "id": "tests/vizy-playtime.spec.ts",
+      "label": "vizy-playtime.spec.ts",
+      "path": "tests/vizy-playtime.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/vizy-playtime.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/vizy-playtime.spec.ts"
+    },
+    {
+      "id": "tests/vizy-playtime.test.mjs",
+      "label": "vizy-playtime.test.mjs",
+      "path": "tests/vizy-playtime.test.mjs",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/vizy-playtime.test.mjs",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/vizy-playtime.test.mjs"
+    },
+    {
+      "id": "tests/vizy-real-journeys.spec.ts",
+      "label": "vizy-real-journeys.spec.ts",
+      "path": "tests/vizy-real-journeys.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/vizy-real-journeys.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/vizy-real-journeys.spec.ts"
+    },
+    {
+      "id": "tests/vizy-reward-integrity.spec.ts",
+      "label": "vizy-reward-integrity.spec.ts",
+      "path": "tests/vizy-reward-integrity.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/vizy-reward-integrity.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/vizy-reward-integrity.spec.ts"
+    },
+    {
+      "id": "tests/vizy-visual.spec.ts",
+      "label": "vizy-visual.spec.ts",
+      "path": "tests/vizy-visual.spec.ts",
+      "group": "test",
+      "status": "main",
+      "detail": "tests/vizy-visual.spec.ts",
+      "url": "https://github.com/streamDragon/MATH_VISUAL_APP/blob/main/tests/vizy-visual.spec.ts"
     },
     {
       "id": "vite.config.ts",
@@ -1503,12 +1890,7 @@
     },
     {
       "from": "public/classroom-practice.html",
-      "to": "public/student-buddy.css",
-      "type": "loads"
-    },
-    {
-      "from": "public/classroom-practice.html",
-      "to": "public/student-buddy.js",
+      "to": "public/vizy-classroom-polish.css",
       "type": "loads"
     },
     {
@@ -1553,17 +1935,32 @@
     },
     {
       "from": "public/learn.html",
-      "to": "public/student-buddy.css",
-      "type": "loads"
-    },
-    {
-      "from": "public/learn.html",
       "to": "public/ability-picker.css",
       "type": "loads"
     },
     {
       "from": "public/learn.html",
+      "to": "public/vizy-theme.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
       "to": "public/vizy-unified-shell.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/vizy-sound.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/vizy-icons.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/vizy-mascot.js",
       "type": "loads"
     },
     {
@@ -1583,7 +1980,12 @@
     },
     {
       "from": "public/learn.html",
-      "to": "public/student-buddy.js",
+      "to": "public/vizy-playtime-core.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/learn.html",
+      "to": "public/vizy-playtime.js",
       "type": "loads"
     },
     {
@@ -1603,7 +2005,7 @@
     },
     {
       "from": "public/learn.html",
-      "to": "public/learning-audio.js",
+      "to": "public/vizy-sound.js",
       "type": "loads"
     },
     {
@@ -1627,24 +2029,44 @@
       "type": "requests"
     },
     {
-      "from": "public/learning-app.js",
-      "to": "public/skill-lab.html",
-      "type": "references"
-    },
-    {
-      "from": "public/learning-app.js",
-      "to": "public/classroom-practice.html",
-      "type": "references"
-    },
-    {
-      "from": "public/learning-audio.js",
-      "to": "public/learning-voices.json",
-      "type": "requests"
-    },
-    {
       "from": "public/offline.html",
       "to": "index.html",
       "type": "loads"
+    },
+    {
+      "from": "public/play.html",
+      "to": "public/vizy-glide.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/play.html",
+      "to": "public/vizy-playtime-core.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/play.html",
+      "to": "public/vizy-playtime.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/play.html",
+      "to": "public/vizy-glide-core.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/play.html",
+      "to": "public/vizy-glide.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/play.html",
+      "to": "public/vizy-game-return.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/play.html",
+      "to": "public/learn.html",
+      "type": "navigates"
     },
     {
       "from": "public/privacy.html",
@@ -1668,7 +2090,32 @@
     },
     {
       "from": "public/problem-map.html",
+      "to": "public/vizy-theme.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
       "to": "public/vizy-unified-shell.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/vizy-inquiry.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/vizy-sound.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/vizy-icons.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/vizy-mascot.js",
       "type": "loads"
     },
     {
@@ -1734,6 +2181,61 @@
     {
       "from": "public/problem-map.html",
       "to": "public/story-corner.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/vizy-ltr.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/vizy-inquiry-core.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/vizy-inquiry-graph.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/vizy-inquiry-map.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/vizy-inquiry-entry.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/vizy-sound.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/vizy-inquiry.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/vizy-playtime-core.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/vizy-playtime.js",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/vizy-algebra-worlds.css",
+      "type": "loads"
+    },
+    {
+      "from": "public/problem-map.html",
+      "to": "public/vizy-algebra-worlds.js",
       "type": "loads"
     },
     {
@@ -1823,16 +2325,6 @@
     },
     {
       "from": "public/skill-lab.html",
-      "to": "public/student-buddy.css",
-      "type": "loads"
-    },
-    {
-      "from": "public/skill-lab.html",
-      "to": "public/student-buddy.js",
-      "type": "loads"
-    },
-    {
-      "from": "public/skill-lab.html",
       "to": "public/learn.html",
       "type": "navigates"
     },
@@ -1845,6 +2337,11 @@
       "from": "public/skill-lab.html",
       "to": "index.html",
       "type": "navigates"
+    },
+    {
+      "from": "public/vizy-sound.js",
+      "to": "public/learning-voices.json",
+      "type": "requests"
     },
     {
       "from": "public/vizy-unified-shell.js",
@@ -1860,6 +2357,26 @@
       "from": "scripts/seed-learning-bank.mjs",
       "to": "public/learning-core.js",
       "type": "imports"
+    },
+    {
+      "from": "scripts/vizy-agent1-classroom-qa.mjs",
+      "to": "public/classroom-practice.html",
+      "type": "references"
+    },
+    {
+      "from": "scripts/vizy-agent1-layout-audit.mjs",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
+      "from": "scripts/vizy-agent1-layout-audit.mjs",
+      "to": "public/classroom-practice.html",
+      "type": "references"
+    },
+    {
+      "from": "scripts/vizy-lan-qa.cjs",
+      "to": "public/learn.html",
+      "type": "references"
     },
     {
       "from": "service-worker.js",
@@ -1908,6 +2425,36 @@
     },
     {
       "from": "tests/grade-next-mobile.spec.ts",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/investigation-core.test.mjs",
+      "to": "public/vizy-inquiry-core.js",
+      "type": "imports"
+    },
+    {
+      "from": "tests/investigation-entry.spec.ts",
+      "to": "public/problem-map.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/investigation-mobile.spec.ts",
+      "to": "public/problem-map.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/learner-local-start.spec.ts",
+      "to": "public/learn.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/learner-local-start.spec.ts",
+      "to": "public/problem-map.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/learner-local-start.spec.ts",
       "to": "public/learn.html",
       "type": "references"
     },
@@ -2007,11 +2554,6 @@
       "type": "tests"
     },
     {
-      "from": "tests/problem-map.spec.ts",
-      "to": "public/problem-map.html",
-      "type": "references"
-    },
-    {
       "from": "tests/shared-graph-mobile.spec.ts",
       "to": "public/classroom-practice.html",
       "type": "tests"
@@ -2028,11 +2570,6 @@
     },
     {
       "from": "tests/story-corner.spec.ts",
-      "to": "public/problem-map.html",
-      "type": "tests"
-    },
-    {
-      "from": "tests/story-corner.spec.ts",
       "to": "public/learn.html",
       "type": "tests"
     },
@@ -2040,11 +2577,6 @@
       "from": "tests/story-corner.spec.ts",
       "to": "public/learn.html",
       "type": "references"
-    },
-    {
-      "from": "tests/student-buddy-mobile.spec.ts",
-      "to": "public/classroom-practice.html",
-      "type": "tests"
     },
     {
       "from": "tests/student-buddy-mobile.spec.ts",
@@ -2102,13 +2634,103 @@
       "type": "tests"
     },
     {
-      "from": "tests/unified-mobile.spec.ts",
-      "to": "public/skill-lab.html",
+      "from": "tests/vizy-algebra-structure.spec.ts",
+      "to": "public/problem-map.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/vizy-algebra-worlds.spec.ts",
+      "to": "public/learn.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/vizy-algebra-worlds.spec.ts",
+      "to": "public/problem-map.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/vizy-cross-module-integration.spec.ts",
+      "to": "public/learn.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/vizy-cross-module-integration.spec.ts",
+      "to": "public/learn.html",
       "type": "references"
     },
     {
-      "from": "tests/unified-mobile.spec.ts",
-      "to": "public/classroom-practice.html",
+      "from": "tests/vizy-glide.test.mjs",
+      "to": "public/vizy-glide-core.js",
+      "type": "imports"
+    },
+    {
+      "from": "tests/vizy-main-integration.spec.ts",
+      "to": "public/problem-map.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/vizy-main-integration.spec.ts",
+      "to": "public/learn.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/vizy-main-integration.spec.ts",
+      "to": "public/play.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/vizy-main-integration.spec.ts",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/vizy-math-ltr.spec.ts",
+      "to": "public/problem-map.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/vizy-math-ltr.test.mjs",
+      "to": "public/vizy-ltr.js",
+      "type": "imports"
+    },
+    {
+      "from": "tests/vizy-playtime.spec.ts",
+      "to": "public/learn.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/vizy-playtime.spec.ts",
+      "to": "public/play.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/vizy-playtime.spec.ts",
+      "to": "public/learn.html",
+      "type": "references"
+    },
+    {
+      "from": "tests/vizy-playtime.test.mjs",
+      "to": "public/vizy-playtime-core.js",
+      "type": "imports"
+    },
+    {
+      "from": "tests/vizy-reward-integrity.spec.ts",
+      "to": "public/problem-map.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/vizy-visual.spec.ts",
+      "to": "public/learn.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/vizy-visual.spec.ts",
+      "to": "public/problem-map.html",
+      "type": "tests"
+    },
+    {
+      "from": "tests/vizy-visual.spec.ts",
+      "to": "public/learn.html",
       "type": "references"
     },
     {
@@ -2318,14 +2940,14 @@
     }
   ],
   "counts": {
-    "build": 24,
+    "build": 29,
     "service": 4,
-    "other": 2,
-    "data": 11,
-    "page": 12,
-    "style": 12,
-    "logic": 40,
-    "test": 31
+    "other": 3,
+    "data": 13,
+    "page": 13,
+    "style": 17,
+    "logic": 53,
+    "test": 47
   },
   "findings": [
     {

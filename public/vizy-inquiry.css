@@ -38,7 +38,7 @@ body.vizy-investigation-active header>a:nth-last-child(1){display:none}
 .iq-prompt{background:#fff;border:1px solid #d3e1ee;border-radius:17px;
  padding:14px 15px 15px;display:grid;gap:10px;min-width:0}
 .iq-phase-label{font-size:.73rem;color:#638098;font-weight:800;margin:0}
-.iq-prompt h3{margin:0;font-size:1.05rem;color:#15395b;line-height:1.45}
+.iq-prompt :is(h2,h3){margin:0;font-size:1.05rem;color:#15395b;line-height:1.45}
 .iq-choices{display:grid;gap:8px;min-width:0}
 .iq-choice{display:block;background:#f2f6fc;border:1.5px solid #b5cadd;
  border-radius:12px;min-height:48px;padding:10px 12px;color:#183955;font-weight:760;
@@ -223,7 +223,7 @@ body.iq-entry-visible{overflow:hidden!important}
  .iq-header{padding:17px 20px}
  .iq-header h1{font-size:1.65rem}
  .iq-prompt{padding:20px 23px;gap:14px}
- .iq-prompt h3{font-size:clamp(1.35rem,2vw,1.75rem);line-height:1.35}
+ .iq-prompt :is(h2,h3){font-size:clamp(1.35rem,2vw,1.75rem);line-height:1.35}
  .iq-choice{min-height:57px;font-size:clamp(1.04rem,1.6vw,1.2rem);padding:12px 15px}
  .iq-stage{padding:15px 19px}
  .iq-graph{max-height:39dvh}
@@ -243,7 +243,7 @@ body.iq-entry-visible{overflow:hidden!important}
  .iq-entry-answer{font-size:.95rem;min-height:65px;padding:9px 5px}
  .iq-entry-help{font-size:.84rem}
  .iq-given-strip{min-height:49px}
- .iq-prompt h3{font-size:1.18rem}
+ .iq-prompt :is(h2,h3){font-size:1.18rem}
  .iq-choice{font-size:.97rem}
 }
 @media(prefers-reduced-motion:reduce){
@@ -275,7 +275,7 @@ body.iq-entry-visible{overflow:hidden!important}
 .vizy-inquiry .iq-choice{min-height:52px}
 .vizy-inquiry .iq-stage{border-radius:20px}
 .vizy-inquiry .iq-prompt{border-radius:20px;box-shadow:0 12px 24px #061a2a18}
-.vizy-inquiry .iq-prompt h3{font-size:clamp(1.17rem,3vw,1.65rem)}
+.vizy-inquiry .iq-prompt :is(h2,h3){font-size:clamp(1.17rem,3vw,1.65rem)}
 .vizy-inquiry .iq-graph{border-radius:17px}
 .vizy-inquiry .iq-graph path[stroke]:not([stroke="none"]){stroke-linecap:round;stroke-linejoin:round}
 .vizy-inquiry .iq-graph .curve-a,.vizy-inquiry .iq-graph .curve-b{stroke-width:5}

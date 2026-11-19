@@ -93,7 +93,7 @@
  }
  function finish(target){
   const summary=C.summary(state);
-  const title=h('h3','','מה הבנתי?');
+  const title=h('h2','','מה הבנתי?');
   target.append(title);
   const box=h('div','iq-results');
   const entries=[

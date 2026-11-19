@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mathviz-learning-v2.21-home-journey';
+const CACHE_NAME = 'mathviz-learning-v2.22-heading-order';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",
@@ -58,8 +58,6 @@ const APP_SHELL = [
   "/classroom-visuals.js",
   "/classroom-shared-model.js",
   "/classroom-flow.js",
-  "/student-buddy.css",
-  "/student-buddy.js",
   "/ability-picker.css",
   "/ability-picker.js",
   "/learning.css",

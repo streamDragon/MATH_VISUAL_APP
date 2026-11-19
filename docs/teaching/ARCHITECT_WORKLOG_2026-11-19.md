@@ -40,8 +40,18 @@ Problems 3 and 5 of the status review.
 - Fits the smallest phone (320×568): the drawer stays above the bottom navigation (tested).
 - Tests fixed that already failed on `main`: both journey tests in `vizy-visual.spec.ts`; `student-next-step.spec.ts` and `unified-mobile.spec.ts`, which looked for the "buddy" figure and four tool cards removed on 16 November (now the mascot and the drawer). `unified-home.spec.ts` drawer count 9 → 8 (teacher link moved). New tests for the captions and teacher mode.
 
+## 5. Clean-up: heading order, retired buddy, green test suite (pushed)
+
+- Problem 4 of the status review (hidden old lesson read by screen readers) was already fixed on `main`. The one leftover: headings jumped from h1 to h3. The prompt and "מה הבנתי?" headings are now h2, with the same look.
+- The purple talking "buddy" (`student-buddy.js`) was still loaded on the skill lab and guided practice, hidden by CSS. It speaks tips, which the agreed spec and design rule 8 rule out, and the lime mascot replaced it on 16 November. Removed from both pages and from the offline cache; its test now guards that no talking buddy comes back.
+- `mobile-polish.spec.ts` looked for the four tool cards removed on 16 November; now checks the drawer.
+- Graphify code map regenerated (last refresh was 13 November): 196 files, 213 links.
+- **Full mobile browser suite: 139 of 139 pass** (two tests needed a re-run because the test browser failed to start; both pass alone). Unit tests 70/70, question check and build pass. On 16 November about 27 tests failed.
+
 ## Open items found while working
 
 - The algebra module opens with a large compound exercise and the domain question. Rebuilding it on the inquiry engine, starting from one small experience, is a design task for an agent.
 
-- `tests/vizy-visual.spec.ts` "journey starts with the actual home lesson" fails on `main` before any change: the journey row shows only one stop.
+- Guided practice still has a typed answer box (`#answerInput` in `classroom-practice.html`), against the no-typing rule. `practice-page-agent-instructions-4.md` has the full plan to replace it with a draggable point.
+- Haggai's decisions still open from the status review: sound on by default; whether earned play time and the game stay; the grade of the algebra module (now grade 11).
+- Not checked from here: a real phone, Android, the real photo backend and teacher inbox.

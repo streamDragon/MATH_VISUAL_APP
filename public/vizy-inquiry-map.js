@@ -146,7 +146,7 @@
  function prompt(host,ctx){
   const s=ctx.state,d=s.data,p=C.phase(s);
   if(p==='done'){ctx.finish(host);return;}
-  host.append(e('h3','',phases[p]));const q=host.querySelector('h3');q.id='iqQuestion';
+  host.append(e('h2','',phases[p]));const q=host.querySelector('h2');q.id='iqQuestion';
   const buttons=e('div','iq-choices');host.append(buttons);
   function choice(label,id,action,selected){
    const btn=e('button','iq-choice',label);btn.type='button';btn.dataset.iqAnswer=id;root.VizyLtr?.apply(btn);

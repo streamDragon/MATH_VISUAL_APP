@@ -1,15 +1,19 @@
 import { test, expect } from '@playwright/test';
+// Since 16 Nov the home has one main action and one tools drawer instead of four tool cards.
 for (const width of [320, 375, 390, 430]) {
  test('mobile home is reachable and usable at '+width+'px', async ({ page }) => {
   await page.setViewportSize({width,height:740});
   await page.goto('/learn.html');
-  await expect(page.locator('.unified-tool')).toHaveCount(4);
-  await expect(page.locator('.unified-tool[href*="workspace=1"]')).toBeVisible();
-  await expect(page.locator('.bottom-nav')).toBeVisible();
-  const metrics=await page.evaluate(()=>({width:innerWidth, scroll:document.documentElement.scrollWidth, css:!!document.querySelector('link[href="mobile-polish.css"]')}));
-  expect(metrics.css).toBeTruthy();
+  await expect(page.locator('#student-start-ability')).toBeVisible();
+  await expect(page.locator('#vizy-unified-nav')).toBeVisible();
+  const metrics=await page.evaluate(()=>({width:innerWidth, scroll:document.documentElement.scrollWidth}));
   expect(metrics.scroll).toBeLessThanOrEqual(metrics.width+4);
-  const links=page.locator('.unified-tool');
-  for(let i=0;i<4;i++){const r=await links.nth(i).boundingBox();expect(r).not.toBeNull();expect(r!.width).toBeGreaterThan(90);}
+  await page.locator('#vizy-tools-drawer summary').click();
+  const links=page.locator('#vizy-tools-drawer .vizy-tools-links > a');
+  expect(await links.count()).toBeGreaterThanOrEqual(6);
+  await expect(page.locator('#vizy-tools-drawer a[href*="workspace=1"]')).toBeVisible();
+  for(const link of await links.all()){
+   const r=await link.boundingBox();expect(r).not.toBeNull();expect(r!.height).toBeGreaterThanOrEqual(44);
+  }
  });
 }

@@ -197,7 +197,7 @@
  function prompt(host,ctx){
   const s=ctx.state,d=s.data,p=C.phase(s);
   if(p==='done'){ctx.finish(host);return;}
-  const question=e('h3','',phases[p]);question.id='iqQuestion';host.append(question);
+  const question=e('h2','',phases[p]);question.id='iqQuestion';host.append(question);
   const choices=e('div','iq-choices');host.append(choices);
   const submit=(key,correct,wrong,label,detail,onCorrect)=>{
    ctx.submit({key,correct,wrong,label,detail,onCorrect});
