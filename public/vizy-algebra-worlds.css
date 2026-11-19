@@ -96,3 +96,22 @@ button.aw-current { cursor: pointer; }
 .aw-magic-number {animation:aw-pulse 1.9s ease-in-out infinite;}
 @keyframes aw-pulse{50%{box-shadow:0 0 0 11px #f7d44b12,0 0 34px #f5d64bcc;}}
 }
+
+/* The shared shell paints #coreFlow white with dark text (body.vizy-consolidated #coreFlow), which
+   beat .aw-lesson and left dark text on this module's dark panels. Restate the module's own surface
+   with enough specificity, and let every heading and formula inherit the light text. */
+body.vizy-consolidated #coreFlow.aw-lesson{
+  color:var(--aw-text);
+  background:radial-gradient(ellipse at 10% 5%,#243971,var(--aw-bg) 52%);
+  border:1px solid #5478bf;
+}
+.aw-lesson :is(h1,h2,h3,b,strong,.aw-piece,.aw-math,p,li,summary){color:inherit}
+.aw-lesson .aw-kicker,.aw-stage>strong{color:var(--aw-cyan)}
+.aw-lesson .aw-worlds .aw-selected{color:var(--aw-lime)}
+.aw-lesson .aw-solid{color:var(--aw-lime)}
+.aw-lesson .aw-expression .aw-math{font-family:var(--vizy-math-font,"Segoe UI",Roboto,Arial,sans-serif)}
+/* Play time sits in the lesson header, never floating over the answers. */
+.aw-head-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.aw-head-tools .vizy-playtime-chip{font-size:.8rem;padding:6px 10px}
+/* One home link: the bottom navigation. */
+body.aw-route>header>a:nth-last-child(1){display:none}

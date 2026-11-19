@@ -11,16 +11,12 @@
   const storageKey = 'vizy_algebra_worlds_v1';
   const steps = [
     { label: 'מונה ראשון', raw: 'x²+2x−8', factor: '(x−2)(x+4)', tool: 'monic',
-      clue: 'מחפשים שני מספרים שמכפלתם −8 וסכומם 2. אלה 4 ו־−2.',
       traps: ['(x−4)(x+2)', '(x−2)(x−4)'] },
     { label: 'מכנה ראשון', raw: 'x²+6x+8', factor: '(x+2)(x+4)', tool: 'monic',
-      clue: 'מחפשים מכפלה 8 וסכום 6. המספרים 2 ו־4 מתאימים לשני התנאים.',
       traps: ['(x+1)(x+8)', '(x−2)(x−4)'] },
     { label: 'מונה שני', raw: '2x²+7x+6', factor: '(2x+3)(x+2)', tool: 'nonmonic',
-      clue: 'כאן a=2. מפרקים את 7x ל־4x+3x, כי 4·3=2·6. מקבצים: 2x(x+2)+3(x+2).',
       traps: ['(2x+2)(x+3)', '(2x−3)(x−2)'] },
     { label: 'מכנה שני', raw: '(x+1)²−9', factor: '(x−2)(x+4)', tool: 'identity',
-      clue: '9 הוא 3². מזהים A=x+1 ו־B=3, ואז (A−B)(A+B) נותן (x+1−3)(x+1+3).',
       traps: ['(x+1−3)²', '(x−3)(x+3)'] },
   ];
   // Recognition is a separate choice. Do not disclose the trinomial subtype
@@ -123,8 +119,9 @@
       ? fraction(m('(x−2)²(x+4)'), m('(x+2)²(2x+3)'))
       : fraction(exp(0),exp(1)) + '<b class="aw-op">' + (flipped ? '·' : '÷') + '</b>'
         + (flipped ? fraction(exp(3),exp(2)) : fraction(exp(2),exp(3)));
-    host.innerHTML = '<div class="aw-head"><div><span class="aw-kicker">VIZY · כיתה ט׳</span><h1>מפרקים כדי לצמצם</h1></div>'
-      + '<button type="button" class="aw-insight" data-insight>✦ תובנה</button></div>'
+    host.innerHTML = '<div class="aw-head"><div><span class="aw-kicker">VIZY · כיתה י״א</span><h1>מפרקים כדי לצמצם</h1></div>'
+      + '<div class="aw-head-tools"><span data-vizy-slot="playtime"></span>'
+      + '<button type="button" class="aw-insight" data-insight>✦ תובנה</button></div></div>'
       + '<div class="aw-steps" role="progressbar" aria-label="התקדמות בתרגיל" aria-valuemin="0" aria-valuemax="7" aria-valuenow="' + state.step + '">'
       + Array.from({length:7},(_,i)=>'<span class="'+(i<state.step?'aw-done':'')+'"></span>').join('') + '</div>'
       + '<div class="aw-worlds"><span class="' + (state.step<5?'aw-selected':'') + '"><b>עולם הועודים</b><small>חיבור וחיסור · מפשטים ומזהים מבנה</small></span>'
@@ -138,6 +135,7 @@
       + '<dialog class="aw-dialog"><form method="dialog"><button aria-label="סגירת תובנה">✕</button></form><h2>תובנה · קו השבר הוא סוגריים</h2>'
       + '<p>קו השבר מחלק את כל המונה בכל המכנה. לפני צמצום, שאלו: האם מה שמסומן הוא איבר בתוך סכום, או גורם של המכפלה כולה?</p>'
       + '<p>בשבר ' + m('(u+v)/u') + ' המונה הוא סכום. בשבר ' + m('u(v+1)/u') + ' המונה הוא מכפלה, ולכן אפשר לצמצם ב־' + m('u') + ' כשהוא שונה מאפס.</p></dialog>';
+    window.VizyPlaytime?.render?.();
     if (focus) {
       const heading = host.querySelector('.aw-prompt h2');
       heading.tabIndex = -1;

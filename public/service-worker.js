@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mathviz-learning-v2.19-math-ltr';
+const CACHE_NAME = 'mathviz-learning-v2.20-algebra-readable';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",
