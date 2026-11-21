@@ -31,7 +31,30 @@
   node.textContent=String(text);
   return node;
  }
- const api={num,point,isFormula,apply,span,MINUS};
+ /* Hebrew sentences that carry formulas ("קיבלנו (x−2)(x+4).") need each formula isolated,
+    or "(x−2)(x+4)" shows as "(x+4)(x−2)" and "(x−2)²" as "²(x−2)". Wraps each formula run in place. */
+ const RUN=/[A-Za-z0-9(−][A-Za-z0-9()+\-−=²³·×;,. ]*[A-Za-z0-9)²³]|[A-Za-z0-9]/g;
+ function mixed(rootElement){
+  if(!rootElement||typeof document==='undefined')return rootElement;
+  const walker=document.createTreeWalker(rootElement,NodeFilter.SHOW_TEXT);
+  const nodes=[];
+  for(let n=walker.nextNode();n;n=walker.nextNode()){
+   if(n.parentElement?.closest('[dir=ltr],.vizy-math,svg,script,style'))continue;
+   if(HEBREW.test(n.nodeValue)||isFormula(n.nodeValue))nodes.push(n);
+  }
+  for(const n of nodes){
+   if(!HEBREW.test(n.nodeValue)){n.replaceWith(span(n.nodeValue));continue;}
+   const text=n.nodeValue,frag=document.createDocumentFragment();let last=0;
+   for(const m of text.matchAll(RUN)){
+    if(!/[A-Za-z0-9]/.test(m[0])||!/[A-Za-z()=+−²]|\d.*\D\d/.test(m[0]))continue;
+    frag.append(text.slice(last,m.index),span(m[0]));last=m.index+m[0].length;
+   }
+   if(last===0)continue;
+   frag.append(text.slice(last));n.replaceWith(frag);
+  }
+  return rootElement;
+ }
+ const api={num,point,isFormula,apply,span,mixed,MINUS};
  root.VizyLtr=api;
  if(typeof module==='object'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

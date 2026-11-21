@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mathviz-learning-v2.22-heading-order';
+const CACHE_NAME = 'mathviz-learning-v2.23-phone-stage';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",

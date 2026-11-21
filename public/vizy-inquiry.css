@@ -110,7 +110,10 @@ body.vizy-investigation-active header>a:nth-last-child(1){display:none}
 .iq-slot-work{display:grid;gap:7px;background:#f1f6fc;border:1px solid #d7e5ef;
  padding:9px;border-radius:11px}
 .iq-slot-work p{font-size:.77rem;margin:0;color:#47627d}
-.iq-slot-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;direction:ltr}
+.iq-slot-row{display:flex;align-items:center;justify-content:center;gap:3px;direction:ltr;min-width:0}
+.iq-slot-row .iq-map-slot{flex:1 1 0;min-width:0;font-weight:800;font-size:.85rem}
+.iq-slot-row .iq-slot-empty{color:#7d9bb3;font-weight:700}
+.iq-slot-sign{flex:0 0 auto;font-weight:850;font-size:1.05rem;color:#1d4f6c;font-family:var(--vizy-math-font,"Segoe UI",Roboto,Arial,sans-serif)}
 .iq-map-slot,.iq-token{min-width:0;min-height:44px;padding:5px;border-radius:10px;
  background:#fff;color:#2e5777;border:1px dashed #8bb0ca;font-size:.77rem;overflow-wrap:anywhere}
 .iq-token-bank{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
@@ -209,7 +212,8 @@ body.iq-entry-visible{overflow:hidden!important}
  color:#153f55;font-weight:850;line-height:1.25;font-size:clamp(1rem,2vw,1.32rem);
  box-shadow:0 5px 16px #0b1b2e66;
 }
-.iq-entry-answer:hover{background:#d9fa78;color:#163621;border-color:#d9fa78}
+/* Touch screens keep :hover after a tap, which lit a wrong answer like a right one. */
+@media(hover:hover){.iq-entry-answer:hover{background:#d9fa78;color:#163621;border-color:#d9fa78}}
 .iq-entry-help,.iq-entry-home,.iq-entry-feedback{grid-column:1/-1;text-align:center}
 .iq-entry-help{justify-self:center;min-height:44px;padding:8px 12px;border:0;background:transparent;
  text-decoration:underline;text-underline-offset:4px;color:#d5e9ef;font-size:.94rem;font-weight:700}
@@ -303,3 +307,20 @@ body.iq-entry-visible{overflow:hidden!important}
 /* Formulas: a tight sans with no wide bracket spacing, always left to right. Rubik stays for Hebrew. */
 .vizy-math,.iq-entry-expression,.iq-map-formula,.iq-map-path{font-family:var(--vizy-math-font,"Segoe UI",Roboto,Arial,sans-serif);font-variant-numeric:lining-nums}
 .vizy-math{unicode-bidi:isolate}
+
+/* Phones: a pinned picture plus the bottom bar left no room for the question on short screens
+   (360×640, 390×664), and the capped stage hid the slot work inside its own scroller. On phones the
+   picture stays in the page, nothing scrolls inside it, and each new step is scrolled into view
+   by revealWork() in vizy-inquiry.js. Tablets and desktop keep the pinned stage. */
+.vizy-given-tools{margin:0 2px}
+@media (max-width:700px){
+ .iq-stage{position:relative;top:auto;max-height:none;overflow:visible;padding:8px 10px}
+ .iq-given-strip{min-height:42px;padding:7px 11px 7px 32px;margin-bottom:6px;font-size:1rem}
+ .iq-graph{max-height:26dvh}
+ .iq-map-node{min-height:42px;padding:4px 3px}
+ .iq-map-node.iq-map-active{min-height:50px}
+ .iq-map-arrows>span,.iq-map-lowers>span{min-height:18px}
+ .iq-map-extras{margin-top:4px;padding-top:2px}
+ .iq-map-extras summary{min-height:38px;padding:5px}
+ .iq-prompt{padding:12px 13px 13px;gap:8px}
+}

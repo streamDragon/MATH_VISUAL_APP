@@ -119,8 +119,33 @@
   again.onclick=()=>{state=C.start(kind);adapter.onEnter?.(state,C.phase(state));persist();paint();};
   target.append(again);
  }
+ // On phones the picture is not pinned, so each new step must bring its work into view:
+ // the whole prompt (or, after an answer, the feedback and "continue") above the bottom bar,
+ // never pushing the question itself off the top. Runs after the shell re-decorates the lesson.
+ let lastStepKey=null;
+ const shortPhone=()=>root.matchMedia?.('(max-width:700px)').matches;
+ function revealWork(tries=0){
+  if(!shortPhone())return;
+  // The first answer is given on the entry overlay; wait until it has folded into the strip.
+  if(document.getElementById('iqEntryOverlay')){if(tries<6)setTimeout(()=>revealWork(tries+1),350);return;}
+  const prompt=document.getElementById('iqPrompt');if(!prompt)return;
+  const next=document.getElementById('iqNext'),feedback=document.getElementById('iqFeedback');
+  const top=(state.pending&&feedback?.textContent?feedback:prompt).getBoundingClientRect().top;
+  const bottom=(state.pending&&next?next:prompt).getBoundingClientRect().bottom;
+  const nav=document.querySelector('#vizy-unified-nav,.bottom-nav');
+  const navH=nav&&getComputedStyle(nav).position==='fixed'?nav.getBoundingClientRect().height:0;
+  let delta=bottom-(innerHeight-navH-10);
+  if(top-delta<10)delta=top-10;
+  if(Math.abs(delta)<6)return;
+  const reduce=root.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  root.scrollBy({top:delta,behavior:reduce?'auto':'smooth'});
+ }
  function paint(){
   const phase=C.phase(state);
+  const stepKey=phase+'|'+state.index+'|'+Boolean(state.pending);
+  if(lastStepKey!==null&&stepKey!==lastStepKey)
+   requestAnimationFrame(()=>requestAnimationFrame(()=>revealWork()));
+  lastStepKey=stepKey;
   host.replaceChildren();
   const top=h('div','iq-header');
   const heading=h('div','');
@@ -189,6 +214,8 @@
    };
    host.append(restart);
   }
+  // Formulas inside Hebrew sentences (feedback, givens, the trail) keep their left-to-right order.
+  root.VizyLtr?.mixed?.(host);
   entry?.update({state,stage,prompt});
  }
  persist();paint();

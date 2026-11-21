@@ -176,9 +176,9 @@
    update();main.append(toggle);
   }
   const inquiry=document.getElementById('vizyInquiry');
-  const anchor=inquiry?.querySelector('#iqGivenStrip')||inquiry?.querySelector('.iq-header');
-  // Keep playtime inside the lesson, never floating above the answer buttons.
-  // The given strip does not exist at the initial decision; the header does.
+  const anchor=inquiry?.querySelector('.iq-header');
+  // Keep playtime inside the lesson, never floating above the answer buttons,
+  // and outside the picture: on short phones every line inside the stage costs the question room.
   if(anchor&&!inquiry.querySelector('.vizy-given-tools')){
    const slot=els('div','vizy-given-tools');slot.dataset.vizySlot='playtime';
    anchor.insertAdjacentElement('afterend',slot);
