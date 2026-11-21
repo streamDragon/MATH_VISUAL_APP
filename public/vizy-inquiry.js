@@ -4,6 +4,10 @@
  'use strict';
  const params=new URLSearchParams(location.search);
  const lesson=params.get('lesson');
+ if(lesson==='concept-lenses'&&params.get('legacy')!=='1'){
+  const container=document.querySelector('main');
+  root.VizyConceptLens?.mount(container);return;
+ }
  if(params.get('legacy')==='1'||!['increasing','difference-squares'].includes(lesson))return;
  const C=root.VizyInvestigationCore;
  const kind=lesson==='increasing'?'graph':'map';

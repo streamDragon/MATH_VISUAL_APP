@@ -24,7 +24,8 @@ for(const width of [320,390,412]){
   await page.locator('#vizy-unified-nav [data-nav="tools"]').click();
   await expect(page.locator('#vizy-tools-drawer')).toHaveAttribute('open','');
   // Teacher pages are not in the student drawer (see vizy-visual.spec.ts for teacher mode).
-  await expect(page.locator('#vizy-tools-drawer a')).toHaveCount(8);
+  await expect(page.locator('#vizy-tools-drawer a')).toHaveCount(9);
+  await expect(page.locator('#vizy-tools-drawer a[href="problem-map.html?lesson=concept-lenses"]')).toHaveCount(1);
   await expect(page.locator('#vizy-tools-drawer a[href="review.html"]')).toHaveCount(0);
   await page.screenshot({path:'test-results/vizy-unified-home-'+width+'.png',fullPage:true});
   expect(errors).toEqual([]);

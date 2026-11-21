@@ -50,6 +50,7 @@
    drawer.append(summary);
    const links=document.createElement('div');links.className='vizy-tools-links';
    links.append(
+    link('problem-map.html?lesson=concept-lenses','עדשות על אותו דבר','Concept lenses'),
     link('problem-map.html?lesson=algebra-worlds','מפרקים כדי לצמצם · כיתה י״א','Factor to simplify · grade 11'),
     link('problem-map.html?lesson=slope-minus-four','שיפוע ‎−4','Slope −4'),
     link('problem-map.html?lesson=parameter','מפת קיצון','Extremum meaning map'),

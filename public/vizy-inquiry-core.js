@@ -9,9 +9,10 @@
  ];
  const GRAPH_FAST=['contrast','verdict','criterion-end','temperature','linear','done'];
  const MAP_ROUTE=['shape','reason','partA','partB','rule','return','tidy','check','transfer','done'];
+ const LENS_ROUTE=['discover','predict','manipulate','reflect','done'];
  function start(kind){
-  if(kind!=='graph'&&kind!=='map')throw Error('Unknown investigation '+kind);
-  return {version:VERSION,kind,route:kind==='graph'?['choose','criterion']:MAP_ROUTE.slice(),
+  if(!['graph','map','lens'].includes(kind))throw Error('Unknown investigation '+kind);
+  return {version:VERSION,kind,route:kind==='graph'?['choose','criterion']:kind==='lens'?LENS_ROUTE.slice():MAP_ROUTE.slice(),
    index:0,pending:false,feedback:'',records:{},trail:[],data:{},startedAt:Date.now()};
  }
  function restore(kind,raw){
@@ -83,7 +84,7 @@
    criterionAfter:s.data.criterionAfter||''
   };
  }
- const api={VERSION,GRAPH_EXPLORE,GRAPH_FAST,MAP_ROUTE,start,restore,phase,selectLane,fallBack,
+ const api={VERSION,GRAPH_EXPLORE,GRAPH_FAST,MAP_ROUTE,LENS_ROUTE,start,restore,phase,selectLane,fallBack,
    attempt,help,trail,complete,advance,summary};
  root.VizyInvestigationCore=api;
  if(typeof module==='object'&&module.exports)module.exports=api;

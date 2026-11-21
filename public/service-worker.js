@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mathviz-learning-v2.22-heading-order';
+const CACHE_NAME = 'mathviz-learning-v2.23-concept-lenses';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",
@@ -38,6 +38,8 @@ const APP_SHELL = [
   "/vizy-inquiry-map.js",
   "/vizy-ltr.js",
   "/vizy-inquiry-entry.js",
+  "/vizy-concept-lens.js",
+  "/vizy-concept-lens.css",
   "/vizy-inquiry.js",
   "/vizy-sound.js",
   "/vizy-sound.css",
