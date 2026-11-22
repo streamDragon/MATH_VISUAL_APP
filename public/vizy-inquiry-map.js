@@ -23,14 +23,15 @@
   partB:'אם B=9, אז B²=81. אפשר לבחור גם 3 וגם −3, כי לשניהם ריבוע 9.',
   rule:'זהות הפרש ריבועים: A²−B²=(A−B)(A+B). זה שוויון לשני הכיוונים.',
   return:'הכניסו את אותו A לשני הסוגריים ואת אותו B לשניהם. הקישו על החלקים או גררו אותם לשיבוצים.',
-  tidy:'בדקו בנפרד: (x+1)−3=x−2, ו־(x+1)+3=x+4.',
+  tidy:'בדקו כל סוגר בנפרד: x+1 ועוד B, ו־x+1 פחות B. כמה יוצא בכל אחד?',
   check:'השוואה ב־x=0 עשויה לתפוס שגיאה, אבל אינה מוכיחה זהות לכל x. השוויון הכללי הוא ההוכחה.',
   transfer:'בביטוי החדש A=x−2, B=5 או −5. השתמשו בכלל בלי לפתוח את הריבוע.'
  };
  const pretty=val=>val===-3?'−3':val===3?'3':String(val||'');
  function slotFormula(d){
-  const b=Number(d.B||3),v=pretty(b),a='(x+1)';
-  return '(('+a+') − ('+v+'))(('+a+') + ('+v+'))';
+  // The learner placed A=(x+1) and B into (A−B)(A+B); a negative B keeps its own brackets.
+  const b=Number(d.B||3),v=b<0?'('+pretty(b)+')':pretty(b);
+  return '((x+1)−'+v+')((x+1)+'+v+')';
  }
  function stage(host,ctx){
   const s=ctx.state,d=s.data,p=C.phase(s);
@@ -71,7 +72,7 @@
    from.append(chip);
   }
   const b=Number(d.B||3);
-  const substituted=b===-3?'((x+1)+3)((x+1)−3)':'((x+1)−3)((x+1)+3)';
+  const substituted=slotFormula(d);
   middle.append(from,node('s2','מציבים במקרה שלנו',substituted));
   // Four visual places, not a second lecture or a fifth place in the map.
   // Show the final factorization only after the learner has constructed it.
@@ -90,8 +91,14 @@
    const work=e('div','iq-slot-work');
    work.append(e('p','', 'געו בחלקים. אותה אות ממלאת את שני המקומות המתאימים.'));
    const slots=e('div','iq-slot-row');
-   for(const name of ['A','B','A','B']){
-    const token=e('button','iq-map-slot',d.slots?.[name]?(name==='A'?'(x+1)':pretty(d.B)):'__');
+   // The rule's own shape stays visible: ( A − B )( A + B ). An empty place shows its letter.
+   const sign=t=>{const x=e('span','iq-slot-sign',t);x.setAttribute('aria-hidden','true');return x;};
+   const layout=['(','A','−','B',')(','A','+','B',')'];
+   for(const name of layout){
+    if(name!=='A'&&name!=='B'){slots.append(sign(name));continue;}
+    const filled=Boolean(d.slots?.[name]);
+    const value=name==='A'?'(x+1)':Number(d.B)<0?'('+pretty(d.B)+')':pretty(d.B);
+    const token=e('button','iq-map-slot'+(filled?'':' iq-slot-empty'),filled?value:name);
     token.dataset.iqSlot=name;token.type='button';
     token.setAttribute('aria-label','שיבוץ '+name);
     token.onclick=()=>{
@@ -121,7 +128,7 @@
   }
   if(p==='check'||p==='done'){
    const checkText=d.checkDone
-    ?'בדיקה: x=0 → (0+1)²−9=−8; (0−2)(0+4)=−8. בדיקה אינה הוכחה.'
+    ?'בדיקה ב־x=0: (0+1)²−9=−8, וגם (0−2)(0+4)=−8. בדיקה אינה הוכחה.'
     :'בדיקה לדוגמה: הציבו x=0 בשני הביטויים והשוו.';
    host.append(e('div','iq-check-strip',checkText));
   }
@@ -226,7 +233,7 @@
    }
    choice('בדקתי את שני הסוגריים','tidy',()=>answer('tidy',
     d.tidyleft===expected[0]&&d.tidyright===expected[1],
-    'פתחו רק את החיבור/חיסור בתוך כל סוגר: (x+1)−3=x−2, (x+1)+3=x+4.',
+    'פשטו כל סוגר לבד: כמה זה '+slotFormula(d).slice(1).split(')(')[0]+'? ומה בסוגר השני?',
     'פישוט נפרד','קיבלנו '+(d.B===-3?'(x+4)(x−2)':'(x−2)(x+4)')+'.',
     ()=>{d.tidyDone=true;}));
   }else if(p==='check'){

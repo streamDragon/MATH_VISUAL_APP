@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mathviz-learning-v2.23-concept-lenses';
+const CACHE_NAME = 'mathviz-learning-v2.24-phone-stage-and-concept-lenses';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
   "/",

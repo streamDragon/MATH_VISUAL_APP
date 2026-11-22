@@ -25,7 +25,8 @@ test('main Vizy home reaches skill, classroom, and graph lab and returns', async
   await page.locator('#vizy-unified-nav [data-nav="tools"]').click();
   await page.locator('#vizy-tools-drawer').getByRole('link',{name:'מעבדת הגרפים'}).click();
   await expect(page).toHaveURL(/workspace=1/);
-  await expect(page.locator('#graph-area-wrapper')).toBeAttached();
+  await page.locator('#btn-age-gate-eligible').click();
+  await expect(page.locator('#graph-area-wrapper')).toBeVisible();
 });
 
 test('main Vizy presents one inquiry for each grade and preserves the photo route', async ({ page }) => {
