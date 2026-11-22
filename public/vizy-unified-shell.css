@@ -253,3 +253,19 @@ body.vizy-consolidated .vizy-journey-time .vizy-journey-playtime{margin-top:0}
 body.vizy-consolidated .vizy-journey-time-label{font:500 .86rem "Rubik",Arial,sans-serif;color:#c6d5e9}
 body.vizy-consolidated .vizy-journey-stop:not(button):not(.is-next){background:transparent;border-color:#6b84a6;color:#c6d5e9}
 body.vizy-consolidated .vizy-journey-stops{padding-inline:8px;margin-inline:-8px}
+/* Computers and tablets in landscape (23 Nov): one centred frame instead of a phone strip.
+   Header content lines up with the page column; the navigation is a centred bar, not a full-width strip. */
+@media(min-width:900px){
+ body.vizy-consolidated{padding-bottom:104px!important}
+ body.vizy-consolidated header.app-header{max-width:none;margin:0;padding-inline:max(24px,calc((100vw - 880px)/2))}
+ body.vizy-consolidated .student-next-step,
+ body.vizy-consolidated .vizy-journey,
+ body.vizy-consolidated .vizy-tools-drawer{max-width:880px}
+ body.vizy-consolidated .student-next-step{margin-top:28px}
+ body.vizy-consolidated #vizy-unified-nav{
+  left:50%;right:auto;bottom:16px;transform:translateX(-50%);
+  width:min(520px,calc(100vw - 48px));padding:6px;
+  border:1px solid #465c74;border-radius:20px;box-shadow:0 12px 36px #050b1899
+ }
+ body.vizy-consolidated #vizy-unified-nav a{min-height:44px}
+}
